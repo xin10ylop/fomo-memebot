@@ -1,0 +1,785 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FOMO API",
+    "version": "2.0.0",
+    "description": "The social trading data API for fomo.family. Resolve any trader handle to both on-chain wallets (Solana + EVM), and get PnL, live holdings, full trade history, the written theses behind trades, ranked leaderboards, token boards, a who-holds-what ownership graph, and a realtime trade feed. PnL and trade history are passed through as fomo.family reports them; the wallet behind each handle is what is resolved on-chain here. Independent and unofficial - not affiliated with fomo.family.",
+    "contact": {
+      "name": "FOMO API",
+      "url": "https://fomoapi.io"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.fomoapi.io"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "meta"
+    },
+    {
+      "name": "traders"
+    },
+    {
+      "name": "leaderboards"
+    },
+    {
+      "name": "theses"
+    },
+    {
+      "name": "tokens"
+    },
+    {
+      "name": "search"
+    },
+    {
+      "name": "activity"
+    }
+  ],
+  "paths": {
+    "/v1": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "API info + self-describing endpoint list",
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "version, tier, rate limit, dataset size, endpoints{} (keyless-open)"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Liveness",
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ ok, traders, uptime } (keyless-open)"
+          }
+        }
+      }
+    },
+    "/v2/users/{handle}": {
+      "get": {
+        "tags": [
+          "traders"
+        ],
+        "summary": "Resolve a trader: wallets, PnL, stats, account age",
+        "description": "Case-insensitive handle, optional leading @. Returns both-chain wallets and full stats.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/handle"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trader object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "handle": {
+                      "type": "string"
+                    },
+                    "displayName": {
+                      "type": "string"
+                    },
+                    "verified": {
+                      "type": "boolean"
+                    },
+                    "wallets": {
+                      "type": "object",
+                      "properties": {
+                        "solana": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "evm": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "pnl": {
+                      "type": "object",
+                      "description": "PnL per window",
+                      "properties": {
+                        "24h": {
+                          "type": "number"
+                        },
+                        "7d": {
+                          "type": "number"
+                        },
+                        "30d": {
+                          "type": "number"
+                        },
+                        "all": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "pnlUsd": {
+                      "type": "number",
+                      "description": "all-time PnL"
+                    },
+                    "volumeUsd": {
+                      "type": "number"
+                    },
+                    "trades": {
+                      "type": "integer"
+                    },
+                    "followers": {
+                      "type": "integer"
+                    },
+                    "fomoCreatedAt": {
+                      "type": "string"
+                    },
+                    "accountAgeDays": {
+                      "type": "integer"
+                    },
+                    "averageHoldTimeSeconds": {
+                      "type": "number"
+                    },
+                    "holdings": {
+                      "type": "array"
+                    },
+                    "topTokens": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "trader not found"
+          }
+        }
+      }
+    },
+    "/v2/users/{handle}/trades": {
+      "get": {
+        "tags": [
+          "traders"
+        ],
+        "summary": "A trader's trade history (for copy-trading)",
+        "description": "Each trade: token{symbol,address}, side, sizeUsd, realizedPnlUsd, chainId, chain (friendly name, e.g. 'robinhood' for 4663), ts, source. source='captured' adds tradeId, status, amount, avgEntryPrice, avgExitPrice, unrealizedPnlUsd, createdAt, closedAt; source='feed' = live recent trades for any active trader. Returns available:false until captured.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/handle"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ trades: [...] } or available:false"
+          }
+        }
+      }
+    },
+    "/v2/users/{handle}/balances": {
+      "get": {
+        "tags": [
+          "traders"
+        ],
+        "summary": "A trader's live portfolio (for mirroring positions)",
+        "description": "holdings[]: {token{symbol,address}, amount, priceUsd, valueUsd, change24h}, plus totalValueUsd and (when present) otherPnl / livePerpPnl / hyperliquidPerps.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/handle"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ holdings: [...], totalValueUsd } or available:false"
+          }
+        }
+      }
+    },
+    "/v2/trades/{tradeId}": {
+      "get": {
+        "tags": [
+          "traders"
+        ],
+        "summary": "One trade in full detail",
+        "description": "Swaps, transfers, avg entry/exit, realized PnL, isDev, timestamps. Get a tradeId from /v2/users/{handle}/trades.",
+        "parameters": [
+          {
+            "name": "tradeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "trade detail"
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/v2/leaderboard/{window}": {
+      "get": {
+        "tags": [
+          "leaderboards"
+        ],
+        "summary": "Ranked traders by PnL",
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "window",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "24h",
+                "7d",
+                "30d",
+                "all"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ traders: [{rank, handle, displayName, pnlUsd, volumeUsd, trades, followers, holdings, wallets{solana,evm}, topTokens[], verified}] }"
+          },
+          "400": {
+            "description": "invalid window"
+          }
+        }
+      }
+    },
+    "/v2/leaderboard/tokens/trending": {
+      "get": {
+        "tags": [
+          "leaderboards",
+          "tokens"
+        ],
+        "summary": "Token board: what fomo users are trading now (honeypot-filtered)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ board, capturedAt, count, tokens: [{rank, image, token{name,symbol,address}, holders, network, priceUsd, change24h, marketCapUsd, volume24hUsd, fomoBuyers}] }. rank is the token's CURRENT position on FOMO's board (1 = top); FOMO's ordering is mirrored exactly, so a hidden honeypot leaves a gap in the numbering rather than resequencing."
+          }
+        }
+      }
+    },
+    "/v2/leaderboard/tokens/most-held": {
+      "get": {
+        "tags": [
+          "leaderboards",
+          "tokens"
+        ],
+        "summary": "Token board: most-held tokens right now (honeypot-filtered)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "same shape as trending"
+          }
+        }
+      }
+    },
+    "/v2/leaderboard/tokens/graduated": {
+      "get": {
+        "tags": [
+          "leaderboards",
+          "tokens"
+        ],
+        "summary": "Token board: graduated tokens (honeypot-filtered)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "same shape as trending"
+          }
+        }
+      }
+    },
+    "/v2/thesis": {
+      "get": {
+        "tags": [
+          "theses"
+        ],
+        "summary": "Recent theses across all coins (global feed)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "name": "chain",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Return only theses on one chain: robinhood|solana|base|bsc|eth (aliases hood/rh) or a raw chainId. robinhood = 4663, the largest share of FOMO thesis volume."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ theses: [{text, handle, name, userId, equity, tradeUsd, isDev, ts, likes, replies, links, token{symbol,address}, networkId, chain}] }"
+          }
+        }
+      }
+    },
+    "/v2/thesis/token/{mint}": {
+      "get": {
+        "tags": [
+          "theses",
+          "tokens"
+        ],
+        "summary": "Theses written about one coin (the why behind trades)",
+        "parameters": [
+          {
+            "name": "mint",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "token contract address"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "name": "network",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "sol",
+                "bnb",
+                "base",
+                "eth"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ theses: [...] } or available:false"
+          }
+        }
+      }
+    },
+    "/v2/thesis/user/{id}": {
+      "get": {
+        "tags": [
+          "theses"
+        ],
+        "summary": "Every thesis by one trader",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "handle or fomo userId"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "name": "chain",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Return only this trader's theses on one chain: robinhood|solana|base|bsc|eth or a raw chainId."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "likes",
+                "recent"
+              ]
+            },
+            "description": "likes = most-liked; recent = newest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ theses: [...] }"
+          }
+        }
+      }
+    },
+    "/v2/thesis/user/{id}/token/{address}": {
+      "get": {
+        "tags": [
+          "theses"
+        ],
+        "summary": "One trader's theses about one specific token",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ theses: [...] }"
+          }
+        }
+      }
+    },
+    "/token/{address}/holders": {
+      "get": {
+        "tags": [
+          "tokens"
+        ],
+        "summary": "Which tracked traders hold a token (smart-money signal)",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ holders: [{handle, amount, valueUsd, priceUsd}] } or available:false"
+          }
+        }
+      }
+    },
+    "/v2/search": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "summary": "Unified search over traders AND tokens",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/q"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "traders",
+                "tokens",
+                "all"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ results: [{type:'trader'|'token', ...}] }"
+          }
+        }
+      }
+    },
+    "/v2/tokens/search": {
+      "get": {
+        "tags": [
+          "search",
+          "tokens"
+        ],
+        "summary": "Token-only search by symbol or name",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/q"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ tokens: [{symbol, address, name, image, marketCapUsd, networkId}] }"
+          }
+        }
+      }
+    },
+    "/v2/alerts": {
+      "get": {
+        "tags": [
+          "activity"
+        ],
+        "summary": "Activity firehose (buys, sells, theses) - REST fallback for the WebSocket",
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "buy|sell|thesis|..."
+          },
+          {
+            "name": "chain",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by chain: friendly name (robinhood|solana|base|bsc|eth, aliases hood/rh) or raw chainId. robinhood = 4663 (FOMO's most active chain)."
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "ISO timestamp or unix (seconds or millis)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ alerts: [{...,token,tokenAddress,chainId,chain,source:'feed'|'push',ts}] } - chain is the friendly name (e.g. 'robinhood' for chainId 4663)"
+          }
+        }
+      }
+    },
+    "/v2/notifications": {
+      "get": {
+        "tags": [
+          "activity"
+        ],
+        "summary": "FOMO mobile PUSH notifications only (distinct from /v2/alerts)",
+        "description": "Everything FOMO pushes to a phone: price alerts (e.g. 'TOKEN up 2x since verification'), trade opens/closes, whale buys/sells, milestones, follows. Many carry fomo's own notification_type; some pushes have none and are still returned. ?notificationType= narrows to the typed ones.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "name": "notificationType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "narrow to one FOMO notification_type (e.g. PRICE_SINCE_LISTED, LARGE_BUY); pushes without a type are excluded when this is set"
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ notifications: [...] }"
+          }
+        }
+      }
+    },
+    "/ws/alerts": {
+      "get": {
+        "tags": [
+          "activity"
+        ],
+        "summary": "App feed stream, one of TWO WebSockets (wss://api.fomoapi.io/ws/alerts)",
+        "description": "Not HTTP - open a WebSocket to wss://api.fomoapi.io/ws/alerts. This is the APP FEED STREAM: it mirrors the FOMO app, delivering each trade when the app shows it. It is NOT the same as /ws/trades, the on-chain stream, which reads the chain directly and lands about 15s earlier and requires Growth or Scale. Available on EVERY plan: REALTIME on any paid plan (pass ?key=YOUR_API_KEY); a free key gets 7 days of realtime from creation then a 15s-delayed feed; a keyless connection is delayed 60s (demo only). Every tier receives every event with identical fields - a plan only buys freshness. Receive {type:'welcome',realtime,delaySeconds} then live {type:'alert',...,token,tokenAddress,chainId,chain,source}. Scope to one trader with ?trader=<handle>; filter with ?chain=robinhood|solana|base|bsc|eth (robinhood = chainId 4663, FOMO's most active chain), ?type=buy|sell|thesis, ?token=<symbol|address>, ?source=feed|push.",
+        "parameters": [
+          {
+            "name": "trader",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chain",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "robinhood|solana|base|bsc|eth or raw chainId; robinhood = 4663"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "101": {
+            "description": "WebSocket upgrade"
+          }
+        }
+      }
+    },
+    "/ws/trades": {
+      "get": {
+        "tags": [
+          "activity"
+        ],
+        "summary": "On-chain stream, the second WebSocket (wss://api.fomoapi.io/ws/trades)",
+        "description": "Not HTTP - open a WebSocket to wss://api.fomoapi.io/ws/trades?key=YOUR_API_KEY. This is the ON-CHAIN STREAM and it is a DIFFERENT stream from /ws/alerts. It carries the same FOMO trades, but read straight off the chain rather than from the app's feed, so each trade arrives about 15 SECONDS BEFORE it appears in the app. That head start is what it is for. Requires a GROWTH or SCALE key; Starter and Free keys are refused here and should use /ws/alerts, which is realtime but only as early as the app itself. Filter with ?chain=robinhood|solana.",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Growth or Scale API key"
+          },
+          {
+            "name": "chain",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "robinhood|solana"
+          }
+        ],
+        "responses": {
+          "101": {
+            "description": "WebSocket upgrade; trades stream as JSON messages"
+          },
+          "403": {
+            "description": "Key's plan does not include the on-chain stream (needs growth or scale). Use /ws/alerts instead."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "API key as a Bearer token. REQUIRED for all data endpoints (trader resolution, trades, balances, holders, theses, search, notifications) - they return 401 without one. Keyless works only for /v1, /health, /v2/leaderboard/{window} and /v2/alerts (the public showcase). The WebSocket is realtime on paid plans (?key=...); a free key gets 7 days of realtime then 15s-delayed; keyless is 60s-delayed. Get a free key (10,000 req/month) at https://fomoapi.io/dashboard."
+      }
+    },
+    "parameters": {
+      "handle": {
+        "name": "handle",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "trader handle, case-insensitive, optional leading @"
+      },
+      "limit": {
+        "name": "limit",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 50
+        }
+      },
+      "q": {
+        "name": "q",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "search query"
+      }
+    }
+  }
+}
