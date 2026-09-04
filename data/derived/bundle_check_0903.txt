@@ -1,0 +1,23 @@
+launches with first-buyer data 5600; distinct first-buyer wallets 5028; bundle (creator,wallet) pairs 804; bot wallets (first buyer on >=10 creators' launches) 185
+  serial >=10/day  launches  2836 | first-5 buyers by class: bundle 55%, other 27%, bot 18%, creator 1% | launches with a bundle wallet among first buyers 77%
+  2-9/day          launches  1051 | first-5 buyers by class: other 49%, bot 39%, bundle 11%, creator 1% | launches with a bundle wallet among first buyers 22%
+  one-off          launches  1713 | first-5 buyers by class: other 61%, bot 38%, creator 0% | launches with a bundle wallet among first buyers 0%
+
+top sniper-bot wallets (launches, creators): [('0xd91abf0e', 953, 254), ('0xd4b453fb', 697, 215), ('0x6198a074', 518, 139), ('0x9eed092b', 267, 135), ('0xbc46a7f0', 208, 169), ('0xddf8cbf8', 193, 183), ('0xa601f6fe', 163, 66), ('0x03c32391', 157, 157)]
+  creator 0x7b444d22 launches  158 bundle wallets  22 launches with bundle first-buyer 94%
+  creator 0x7de5b9c8 launches  158 bundle wallets  24 launches with bundle first-buyer 92%
+  creator 0xa60e892a launches  116 bundle wallets  28 launches with bundle first-buyer 95%
+  creator 0xf38ce55f launches  104 bundle wallets  21 launches with bundle first-buyer 91%
+  creator 0xa0a565d9 launches   94 bundle wallets   9 launches with bundle first-buyer 88%
+  creator 0x51e005b4 launches   90 bundle wallets  11 launches with bundle first-buyer 80%
+  creator 0x1d0e439a launches   71 bundle wallets  25 launches with bundle first-buyer 97%
+  creator 0x4c27c9f6 launches   64 bundle wallets   8 launches with bundle first-buyer 80%
+
+## creator expectancy by first-buyer composition
+  first buyers include a bundle wallet (own cluster)   n= 2422 pooled fees+sale   +13% of stake (fees   +5, sale   +8) | per-launch median   +4% | stake/launch 7.238
+  no bundle wallet; first buyers include a sniper bot  n= 2235 pooled fees+sale   +55% of stake (fees  +14, sale  +40) | per-launch median  +10% | stake/launch 1.469
+  no bundle, no known bot (organic/unknown buyers)     n=  943 pooled fees+sale   +37% of stake (fees  +26, sale  +11) | per-launch median  +22% | stake/launch 1.690
+  one-off creator, no bundle                           n= 1713 pooled fees+sale  +109% of stake (fees  +52, sale  +57) | per-launch median  +19% | stake/launch 0.363
+  serial creator, no bundle                            n=  650 pooled fees+sale   +44% of stake (fees  +10, sale  +34) | per-launch median   +6% | stake/launch 4.557
+  serial creator, bundle present                       n= 2186 pooled fees+sale   +13% of stake (fees   +5, sale   +8) | per-launch median   +3% | stake/launch 7.869
+  nobody else bought (creator only)                    n=  508 pooled fees+sale    +0% of stake

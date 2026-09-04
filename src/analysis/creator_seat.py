@@ -61,7 +61,7 @@ for curve,meta in creates.items():
     if val_60m is None: val_60m=val_end
     if realized is None: realized=val_end   # never sold: mark at the end-of-window curve exit
     fees=0.007*vol
-    rows.append({'creator':meta['creator'],'serial':serial[meta['creator']],'q0':q0,'tk0':tk0,'n':len(tr),'fees':fees,
+    rows.append({'curve':curve,'creator':meta['creator'],'serial':serial[meta['creator']],'q0':q0,'tk0':tk0,'n':len(tr),'fees':fees,
                  'pnl_best':best-q0,'pnl_10m':val_10m-q0,'pnl_60m':val_60m-q0,'pnl_end':val_end-q0,
                  'pnl_tp15':(tp15[0]-q0) if tp15 else val_end-q0,'pnl_tp2':(tp2[0]-q0) if tp2 else val_end-q0,'hit_tp15':tp15 is not None,'hit_tp2':tp2 is not None,'pnl_realized':realized-q0,'sold':realized_t is not None,'sold_t':realized_t})
 print('launches',len(rows))
