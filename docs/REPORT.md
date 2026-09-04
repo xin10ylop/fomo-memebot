@@ -12,6 +12,7 @@ Everything below was computed from data collected in this session; scripts are i
 5. **Bottom line: no big, sustainable, retail-executable trading edge was found in the fomo leaderboards in this session, and every positive-looking result was falsified on audit.** The report states this plainly rather than shipping silver as gold. What was learned is still valuable: what the boards measure, who the top names actually are, which mechanisms make the money (early bags, allocations, audiences, creator fees), and a frozen, hindsight-free forward test (section 7) that is the only way to turn the surviving overreaction lead into evidence.
 6. **Where the "big edge" actually sits on Robinhood Chain is structural, not a trade**: Pons creators receive 70% of a 1% fee on every trade forever (creators were paid ~$20.9M in 47 days); insiders/whitelisted wallets own the first seconds of every launch; audiences of 100k–500k followers move thin pools 60–140% in seconds. None of these is available to a retail trader with no special access, and the report says so rather than dressing them up as a strategy.
 7. **Memecoin fundamentals at entry were checked for every priced entry (docs/TOKEN_METRICS.md, section 3b).** By count, half of the leaders' app positions are opened below $1M FDV; by dollars, 76% of their priced meme capital goes in above $10M FDV and 82% into tokens older than a week. No entry-market-cap, age, launchpad or holder-count bucket has a significantly positive realized (bag-at-zero) return; the only clear result is that late entries above $100M FDV lost money (−29%, CI −49% to −14%), and pump.fun / Solana entries lose on a realized basis (−10% and −21%). Dev involvement is rare: fomoapi's `isDev` flag is false on every tracked holder and marks a dev on 3 tokens' theses (none a leaderboard handle); on-chain, exactly one traded meme was deployed by a leaderboard wallet (SANDIH by LehmanFarters).
+8. **Round 2 (the viral "95% lose, buy the revenue protocols" clip) was tested and does not change the verdict.** The 6.16%-profitable figure is DWF Ventures' realized-PnL count over 292k wallets and matches this data. Following leaderboard traders into fresh launches and holding for the runner had a real positive expectancy only in the July launch wave (+326% mean at 24h with dead tokens at −100%, four tokens carrying it); since mid-August it is −41% to −75%, and for big-audience posters it is −55% throughout. The "revenue protocol" trade is PONS: real fee cash flow, but the buyback that reaches holders is about 45% of protocol revenue (not 80%), lumpy, and roughly 7% of gross fees; on actual burns PONS is priced like pump.fun's PUMP (≈13% trailing buyback yield), its price is a same-day function of the fee cycle (correlation 0.32, no lead), the buyback flow is too small to front-run, and the gas subsidy that made the fee cycle ends in early October. Section 10 has the numbers; it is a beta bet on the casino staying open, not an edge.
 
 ## 1. Data access and what was analysed
 
@@ -194,3 +195,66 @@ Corrected expectancy for an automated $500 clip with 60 s reaction on the (still
 
 * Right: reverse-engineering the leaderboard PnL, separating realized from paper PnL on-chain, exact swap-level event studies with placebos, and submitting the only positive result to independent refutation before recommending it.
 * Wrong (caught by the audit): using a current-liquidity snapshot as a filter, pulling candles only for the tokens today's winners traded, reporting medians of a take-profit rule, dropping missing returns, and quoting 24 h figures from a survivor set. These are exactly the traps the research phase had listed; the checklist in `docs/ANALYSIS_GUIDE.md` now carries them explicitly.
+
+## 10. Round 2: the "95% lose, buy the revenue protocols" clip
+
+The clip's claims: most fomo traders lose; the top P&Ls come from big-audience traders buying microscopic market caps and letting the rare runner pay for the rest; the intelligent play is revenue-generating infrastructure on Robinhood Chain. Each was tested.
+
+### 10.1 Do 95% lose? Yes, on realized PnL
+
+DWF Ventures counted 292,531 fomo wallets over 90 days: 6.16% in profit on realized gains, an estimated $1.26B lost, 25 wallets above $10k net profit ([yellow.com](https://yellow.com/phoenix.html/news/fomo-copy-trading-94-percent-wallet-losses), original post by @MidCurveMortal). This report's own numbers agree: 63% of the 147 leaderboard traders have a negative realized sum in their last-25 closed trades, and the pooled realized ROI of fully priced (trader, token) positions is negative in every venue bucket except the stock-paired LONG tokens (section 3b). DWF's structural explanation is the same as section 4's: public call posters get follower buying pressure before they sell.
+
+### 10.2 The lottery: follow leaders into fresh launches and hold for the runner
+
+`src/analysis/lottery_bound.py`, output `data/derived/lottery_rh.json`. Universe: every Robinhood token where a leaderboard wallet made its first on-chain buy within 24 hours of the mint (155 tokens; supply is 1B for every launchpad token, so FDV = price × 1e9). Follower entry = open of the first candle after the leader's buy; dead tokens (no candles, no pool) = −100%; returns at 1h…30d on closes; token-clustered bootstrap CI on the mean.
+
+| Cohort (leader buy ≤ 24h after mint) | n / dead | mean 24h return, dead = −100% [95% CI] | ≥10× share (all) | mean after 25% round-trip cost |
+|---|---|---|---|---|
+| all, Jul 13 → Sep 3 | 155 / 74 | +61% [−34%, +190%] | 3.5% | +21% |
+| events in July | 48 / 19 | +326% [−83%, +838%] | 12% | +220% |
+| events Aug 1–15 | 27 / 14 | +11% [−74%, +120%] | 0% | −17% |
+| events Aug 16–31 | 52 / 22 | +11% [−54%, +97%] | 2.4% | −17% |
+| events Sep 1–3 | 28 / 19 | −75% [−97%, −35%] | 0% | −81% |
+| buyer has ≥30k followers (the clip's KOLs) | 94 / 65 | −55% [−91%, −3%] | 1.3% | −67% |
+| buyer has <30k followers | 61 / 9 | +310% [+33%, +681%] | 8.3% | +207% |
+| all-time-board buyer, events after Aug 15 | 65 / 39 | −41% [−79%, +15%] | 1.8% | −56% |
+| 7-day hold, events after Aug 15 | 80 / 41 | −45% [−78%, +6%] | 1.6% | −59% |
+
+Reading: the clip is right about the mechanism and right that following the big audiences loses (−55%, CI excludes zero). The positive expectancy is entirely the July launch wave (BRODIE 432×, worth 99×, CHILL 95×, GME 28× from $7k–$50k FDV) and the small-audience cohort, which is survivorship: those wallets are on today's board *because* those buys ran. Restricted to events after Aug 15, every cohort is negative before costs. The 25% cost line is the realistic round trip on a Pons V2 curve in the first hour (1% pool fee, 0.5% app fee, launch-window taxes, $500 into $2–30k depth). This is not a strategy; it was a regime.
+
+### 10.3 The "revenue protocols": PONS, INDEX, and what actually reaches holders
+
+Revenue-generating tokens on Robinhood Chain are few: PONS (launchpad; 1% pool fee split 70% creator / 30% protocol on V1 launches; docs say 80% of the protocol share funds TWAP buybacks that go to the burn address) and The Index (INDEX, "converts trading fees into tokenized assets", $0.37M protocol revenue in 30 days, ~$31–65M market cap). GMGN, LONG, Uniswap's Pools and the fomo app itself earn the rest of the chain's app revenue and have no Robinhood-Chain token. The leaderboard's live balances are 20% PONS and 28% AI (a LONG stock-paired meme), so "I made top 50 by holding infrastructure" is consistent with this data.
+
+**The fee cycle** (DefiLlama, `data/raw/defillama/`): Pons fees $1.5M/day on Jul 21 → $0.25M on Aug 20 → $6.4M on Sep 3 (25× in two weeks); protocol revenue $9.1M in 30 days, $1.26M on Sep 3; chain fees $1.4M/day on Aug 16 → $21M on Sep 4. PONS repriced with it: $0.039 on Aug 22 → $0.62 on Sep 3 (FDV $424M, circulating market cap ≈ $302M after burns), +17% more on Sep 4 when Uniswap Labs disclosed an undisclosed-size PONS purchase ([crypto.news](https://crypto.news/uniswap-labs-buys-pons-as-robinhood-chain-launchpad-fees-surge/)).
+
+**What actually reaches PONS holders** (`src/analysis/pons_burns.py`, every PONS transfer to the dead address since mint, priced at the candle at burn time; `data/derived/pons_burns_daily.csv`): 294.8M PONS burned in total, of which 171M on Jul 13–14 were launch-time supply burns, not fee buybacks. Since Jul 15, $6.1M of burns against $13.5M of protocol revenue = 45% (the docs say 80%; a community tracker reports 60% and notes that V2 launches, now most of the volume, buy back the launched token rather than PONS). Burns are lumpy: 2–8% of revenue on Aug 29–30 and Sep 2–3, 92% on Sep 1, $832k on Sep 4. Aug 5 → Sep 3: $3.2M burned on $9.1M revenue and $46.8M fees, i.e. about 7% of gross fees reach the token.
+
+| Valuation | PONS | PUMP (pump.fun, benchmark) |
+|---|---|---|
+| Market cap | ≈ $302M circulating ($424M FDV) | $1.73B |
+| Protocol revenue, trailing 30d | $9.1M | ≈ $33M |
+| Actual buyback, trailing 30d | $3.2M (annualized 13% of market cap) | 50% of revenue ≈ $16M (annualized ≈ 12%) |
+| Market cap / annualized 30d revenue | 2.8× | ≈ 4.4× |
+
+So PONS is priced roughly like PUMP on what it actually returns to holders. The apparent cheapness (0.7× on Sep 3's revenue run-rate) is the market discounting the spike, which is the right thing to do: the fee series is memecoin volume, the volume is subsidised (90-day gas subsidy from Jul 1, ending in early October; [crypto.news](https://crypto.news/robinhood-chain-vs-solana-flippening-math/)), and the previous fee peak (Jul 21) was followed by an 84% fee decline in a month.
+
+**Is there a tradable rule in it?** `src/analysis/house_token_fees.py`: hold the house token while 7-day fees exceed 30-day fees, else cash.
+
+| Token | Window | Rule | Buy-and-hold | Next week after a fee-up week vs fee-down week |
+|---|---|---|---|---|
+| PUMP (pump.fun fees) | Oct 2025 → Sep 2026, 334 d | ×1.26, max DD −51%, in market 42% | ×0.61, max DD −82% | +5.2% (n=23) vs −1.3% (n=23) |
+| BONK (letsbonk fees; weak link) | same | ×0.63 | ×0.16 | −1.2% vs −3.3% |
+| PONS (3d > 14d, only 33 usable days) | Aug 1 → Sep 3 | ×6.9, in market 52% | ×24.7 | not testable (n=1 cycle) |
+
+On PONS the price and the fees move the same day (log-change correlation 0.32; fees leading price by a day 0.32, price leading fees 0.26): the fee print is not a signal you get ahead of the market. On PUMP the rule beats holding over one 11-month sample and still drew down 51%. That is a plausible risk-management overlay for someone who wants this beta, not a proven edge, and it says nothing about the first half of October.
+
+**Front-running the buyback**: not viable. On Sep 3 the PONS/USDG v4 pool did 23,092 swaps, $14.9M bought and $13.5M sold (`data/derived/pons_swaps_2026-09-03.json`); the day's burns were $70k (0.5% of buy volume) and the largest actual burner clips (Sep 1, Sep 4) come in a few large lumps at unannounced times. Even the largest steady buy-only router on the day (fomo's own swap path, $1.0M in 141 clips of ~$1.3k) moved price 0.03% per clip, below one side of the fees.
+
+### 10.4 Verdict on round 2
+
+* "95% lose": true on realized PnL, and this dataset's leaderboard is not the exception on a realized basis.
+* "Buy the tiny caps the KOLs buy and let the runner pay": worked in the July launch wave, has lost money since, and loses on every horizon for the big-audience posters. Survivorship explains the rest.
+* "Buy the revenue protocols": PONS is a real fee business priced like its Solana peer, with a discretionary, under-delivered buyback and a subsidy cliff four weeks out. Holding it is a directional bet on Robinhood Chain memecoin volume. That may be a fine bet; it is not the treasure, because nothing here gives a retail trader an expectancy the market has not already priced.
+
+No angle in either round produced a strategy that is simultaneously profitable after costs, sustainable across regimes, and executable at retail. The one item still worth money is the hindsight-free forward test of the 15-minute overreaction bounce (section 7), and the one item worth watching is what Pons fees do in the two weeks after the gas subsidy ends.
