@@ -35,6 +35,17 @@ artifacts are copied into `data/derived/` in this repo).
 | `dossiers.json` | per-trader merged metrics |
 | `docs/research_round1.json` | external research findings with sources |
 
+## Backtest traps found by the adversarial audit (check every one before quoting a number)
+
+1. Never filter or cost on a *current* liquidity snapshot (`gt/pools_v3.json` `liq`, DexScreener liquidity today). Use depth at the event time: on-chain reserves / `sqrtPrice` and `L` at the signal block, or $ per 1% move from the last swaps.
+2. Never build the token universe from what today's leaderboard traders traded, or pull candles only for the most-traded tokens; freeze the universe and wallet set as of each event date, and pull prices for every eligible token including the ones that died.
+3. Reject candle artifacts: pools where the token is the quote (`base=False`), single-print wicks, |return| implausible for the candle volume vs depth; confirm crashes on swap logs.
+4. Fees are 2 × (0.5% app + the pool's actual fee) plus stock-token hops and Pons V2 hook/creator taxes read on-chain; impact is size / measured depth, both legs. GeckoTerminal reserve USD overstates depth 3–10× on concentrated pools.
+5. Do not report medians of a take-profit rule (they reproduce under random entries); report the mean and sum of P&L with token-clustered confidence intervals, one observation per token per horizon window.
+6. Fill take-profits only on closes or the next observable price, never on candle highs; model stop fills 3–10 points worse than the level.
+7. Count missing forward returns (dead token, censoring) as −100% in a conservative variant and report both.
+8. Every filter combination examined is a multiple-testing draw; pre-register one rule and hold out the last period.
+
 ## Metrics conventions
 
 * Entry price for event studies = **open of the first candle that starts after the event**

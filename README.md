@@ -2,7 +2,7 @@
 
 Research repository: is there a big, sustainable, retail-executable edge behind the fomo (fomo.family) memecoin leaderboards?
 
-**Read `docs/REPORT.md` first.** Short version: the leaderboards rank unrealized bags, following the leaders has no edge after costs, and the one repeatable regularity found (buying sharp dips in liquid, leaderboard-active tokens) is promising but still small-sample and regime-dependent; it is specified, backtested, audited and running as a paper trade.
+**Read `docs/REPORT.md` first.** Short version: the leaderboards rank unrealized bags, following the leaders has no edge after costs, and the one candidate that looked like an edge (buying sharp dips in liquid, leaderboard-active tokens) was refuted by an adversarial audit (look-ahead liquidity filter, survivor universe, candle artifacts, understated costs). What survives is a small, capacity-limited 15-minute overreaction bounce that still has to be proven on a hindsight-free forward test. No big, sustainable, retail-executable edge was found; the report says so and documents why.
 
 ## Layout
 
