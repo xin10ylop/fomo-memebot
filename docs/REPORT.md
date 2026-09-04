@@ -11,6 +11,7 @@ Everything below was computed from data collected in this session; scripts are i
 4. **The one candidate that looked like an edge, buying sharp dips in liquid leaderboard-active tokens, did not survive the adversarial audit.** The first-pass numbers (+7.8% median at 1 h, +27.7% at 24 h, 83% hit rate on a take-profit/stop rule) came from a liquidity filter that used September liquidity to select July trades, a token universe made of the survivors that today's winners traded, two candle artifacts that happened to be the two biggest wins, and a cost model that understated price impact 4–6× and fees by a point. Corrected, what remains is a generic 15-minute overreaction bounce of about +2–4% after any −15% candle (symmetric with pumps, unrelated to leaderboard activity), worth roughly +1% to +3% mean per trade for an automated $500 clip with a confidence interval that includes zero; larger clips, slower reaction, or a universe chosen without hindsight are flat to negative. Section 5 keeps the full record, section 8 the audit.
 5. **Bottom line: no big, sustainable, retail-executable trading edge was found in the fomo leaderboards in this session, and every positive-looking result was falsified on audit.** The report states this plainly rather than shipping silver as gold. What was learned is still valuable: what the boards measure, who the top names actually are, which mechanisms make the money (early bags, allocations, audiences, creator fees), and a frozen, hindsight-free forward test (section 7) that is the only way to turn the surviving overreaction lead into evidence.
 6. **Where the "big edge" actually sits on Robinhood Chain is structural, not a trade**: Pons creators receive 70% of a 1% fee on every trade forever (creators were paid ~$20.9M in 47 days); insiders/whitelisted wallets own the first seconds of every launch; audiences of 100k–500k followers move thin pools 60–140% in seconds. None of these is available to a retail trader with no special access, and the report says so rather than dressing them up as a strategy.
+7. **Memecoin fundamentals at entry were checked for every priced entry (docs/TOKEN_METRICS.md, section 3b).** By count, half of the leaders' app positions are opened below $1M FDV; by dollars, 76% of their priced meme capital goes in above $10M FDV and 82% into tokens older than a week. No entry-market-cap, age, launchpad or holder-count bucket has a significantly positive realized (bag-at-zero) return; the only clear result is that late entries above $100M FDV lost money (−29%, CI −49% to −14%), and pump.fun / Solana entries lose on a realized basis (−10% and −21%). Dev involvement is rare: fomoapi's `isDev` flag is false on every tracked holder and marks a dev on 3 tokens' theses (none a leaderboard handle); on-chain, exactly one traded meme was deployed by a leaderboard wallet (SANDIH by LehmanFarters).
 
 ## 1. Data access and what was analysed
 
@@ -50,6 +51,50 @@ Top of the boards, in one line each:
 * **Visi235, Quanterty, The__Solstice, bluntz_capital** — sold $0.4–1.1M of tokens they never bought on-chain (allocations/airdrops), the clearest "insider or allocation" fingerprint in the data.
 
 Common thread of the few skill candidates: they never buy in the launch window, they buy liquidity (survivors), they size small relative to pool depth, and they sell in fixed small clips into strength. Their edge is discipline and selection, not information, and it is modest.
+
+## 3b. Memecoin fundamentals at entry: market cap, age, launchpad, holders, dev
+
+The trader-by-trader work above was done on prices and fills; this section adds the memecoin-native metrics per entry. Method, per-token and per-trader tables are in `docs/TOKEN_METRICS.md`; the columns `entry_fdv_usd`, `age_at_entry_min`, `launchpad`, `token_created`, `trader_is_dev`, `fdv_now` are on every row of `data/derived/positions_all.csv.gz`.
+
+**Where the leaders enter (11,765 priced meme entries across 145 traders; 2,219 memes)**
+
+| Metric | Result |
+|---|---|
+| fomo app positions with an entry price (3,276): entry FDV p10 / p25 / median / p75 / p90 | $77k / $228k / $1.0M / $5.1M / $30M; 50% opened below $1M |
+| Priced on-chain capital by entry FDV ($48.9M with known supply) | <$100k 0%, $100k–1M 3%, $1M–10M 21%, $10M–100M 41%, >$100M 35% |
+| Priced on-chain capital by token age at first buy | <1h 1%, 1h–24h 7%, 1–7d 8%, >7d 82% |
+| Per-trader median entry FDV (145 traders) | p10 $458k, median $4.6M, p90 $43M; share of entries <$1M: median 22%, p90 62%; share within 1h of creation: median 6%, p90 28% |
+| Dead-token bucket (no supply/pool anywhere; entry FDV unknowable) | 1,073 of 1,826 fully priced (trader, token) positions, $8.9M invested, realized −26% [−40%, −16%]; almost all Solana |
+
+So the picture is bimodal. By count the leaders take many small, early shots (half of app positions below $1M FDV, and the sub-$1M / sub-24h entries are where the dead tokens are); by dollars they are size buyers of established tokens that are a week or more old and already above $10M. The money on the boards is the second kind of position marked to market, not the first kind realized.
+
+**Does any of it predict the realized result?** One row per (trader, token) with every buy and sell priced, remaining bags at zero (`cons`) or at today's price (`mtm`), token-clustered bootstrap CI on the pooled conservative ROI (full tables in `docs/TOKEN_METRICS.md`):
+
+| Bucket | positions / tokens | win % (mtm) | pooled ROI cons [95% CI] | pooled ROI mtm |
+|---|---|---|---|---|
+| entry FDV <$100k | 11 / 7 | 64% | +27% [−52%, +181%] | +875% |
+| entry FDV $100k–1M | 141 / 53 | 67% | +9% [−17%, +43%] | +277% |
+| entry FDV $1M–10M | 326 / 73 | 64% | +29% [−11%, +67%] | +1147% |
+| entry FDV $10M–100M | 197 / 31 | 70% | −5% [−29%, +12%] | +630% |
+| entry FDV >$100M | 78 / 10 | 72% | **−29% [−49%, −14%]** | +270% |
+| age <1h | 46 / 21 | 59% | +84% [−3%, +148%] | +218% |
+| age 1h–24h | 111 / 34 | 56% | −14% [−39%, −1%] | +22% |
+| age >7d | 422 / 65 | 73% | −7% [−22%, +16%] | +628% |
+| pump.fun | 841 / 320 | 30% | **−10% [−21%, −3%]** | +11% |
+| Solana, other venues | 540 / 169 | 31% | **−21% [−37%, −7%]** | −1% |
+| pre-Pons v3 factory (Robinhood; CASHCAT, TENDIES…) | 146 / 10 | 92% | −14% [−44%, +14%] | +407% |
+| Pons V1 (Robinhood, v3 pool) | 93 / 7 | 98% | −8% [−33%, +8%] | +1193% |
+| Pons V2 (Robinhood, v4 curve) | 56 / 16 | 70% | −33% [−73%, +23%] | +155% |
+| LONG stock-paired (Robinhood) | 90 / 14 | 84% | +45% [−84%, +54%] | +2054% |
+| fomo holder count ≥10k today (hindsight) | 252 / 10 | 87% | +1% [−12%, +38%] | +818% |
+
+Reading: no bucket is significantly positive once unsold bags are counted at zero; the sub-$1M and sub-1h buckets that look best are small, survivor-biased (their dead siblings are in the "unknown" row) and have CIs through zero; the mega-cap late entries are the one clearly negative bucket; every large green number is in the mark-to-market column, i.e. the same bag-holding effect as section 2. Entry market cap and age are descriptors of *how* the leaders got their paper PnL, not a filter that produces realized edge.
+
+**Holders.** fomo's token boards give a total holder count only for the ~60 tokens that make the trending / most-held / graduated boards (PONS 61k, CASHCAT 102k, ANSEM 136k, AI 29k, BONER, MarsCoin…); the ≥10k-holder tokens are the crowd tokens whose realized ROI is +1%. fomoapi's tracked top-holder endpoint returned data for 18 of the 160 most-traded memes (top-50 fomo-tracked holders hold 8–27% of supply in AI, BONER, CASHCAT, DELTA; leaderboard handles are 43 of AI's 50 tracked top holders). The long tail has no cheap holder count on Robinhood Chain (Blockscout gated), so holder count could not be used as an entry feature without hindsight; it is reported, not tested.
+
+**Dev / creator.** Mint transactions were resolved for all 2,865 Robinhood tokens the leaderboard touched (deployer = `from` of the mint tx, or the ERC-4337 userOp sender for the 38 tokens launched from the fomo app; factories mapped to launchpads in `docs/TOKEN_METRICS.md`). Exactly one traded meme was deployed by a leaderboard wallet (SANDIH, LehmanFarters). Serial deployers exist: one wallet deployed 17 of the memes the leaderboard traded and seven wallets deployed 30–54 Robinhood tokens each. The Pons locker `feeRedirects` read is zero for every token; fomoapi's `isDev` flag is false on every tracked holder row and true for the thesis author on 3 of 116 tokens with theses (FIRE, STONKBROKER, NASDANQ; none a leaderboard handle). So "the trader is the dev" is answered: almost never, for the handles on the boards; the creator-fee income documented in section 0.6 accrues to Pons creators as a group, not to the leaderboard handles. Solana creators were not resolved (pump.fun creator sits in the bonding-curve account; not worth the Helius credits for a feature that could not be tested forward).
+
+**Bundling / insiders / snipers.** Not measured per position: it needs holder snapshots at launch (first-block buyers, same-funder clusters), which the public Robinhood RPC can provide only by replaying every token's first blocks. The audit's earlier finding stands: whitelisted / first-second wallets own Pons launches, and none of the leaderboard handles is in that group by their fill timing (median first fill many hours after mint).
 
 ## 4. Hypotheses tested
 
