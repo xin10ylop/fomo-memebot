@@ -72,5 +72,6 @@ while True:
             if r15<=-0.15 and r1h<=0:
                 imp=2*SIZE/(liq/2); pos={"token":a,"chain":chain,"t":now,"entry":p,"liq":liq,"r15":r15,"r1h":r1h,"lb_buyers_24h":n,"imp":imp}
                 open_pos[a]=pos; log({"event":"open",**pos}); print(datetime.datetime.utcnow().strftime('%H:%M:%S'),"OPEN",a[:8],chain,f"r15={r15:+.3f} liq={liq:,.0f}",file=sys.stderr,flush=True)
-    if int(now)%600<30: print(datetime.datetime.utcnow().strftime('%H:%M:%S'),"universe",len(uni),"tracked",len(addrs),"open",len(open_pos),"closed",len(closed),"net sum",round(sum(c['net'] for c in closed),3),file=sys.stderr,flush=True)
+    loop=globals().get('_loop',0)+1; globals()['_loop']=loop
+    if loop%20==1: print(datetime.datetime.utcnow().strftime('%H:%M:%S'),"universe",len(uni),"tracked",len(addrs),"priced",sum(1 for a in addrs if hist.get(a)),"open",len(open_pos),"closed",len(closed),"net sum",round(sum(c['net'] for c in closed),3),file=sys.stderr,flush=True)
     time.sleep(30)
