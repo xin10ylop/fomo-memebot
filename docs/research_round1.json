@@ -945,6 +945,444 @@
     "Whether 'clans' membership for these handles can be pulled (browser_probe.py references fomo.family/clan/Fantom%20Troupe) \u2014 no clan affiliations were found for any of the 20 via web sources.",
     "The cryptoticker.io Robinhood Chain guide and CoinDesk Pons fee article returned 429/403 repeatedly; they may contain named-trader or sniper-dynamics details not captured here."
    ]
+  },
+  {
+   "key": "",
+   "findings": [
+    {
+     "claim": "fomo's follow/alert system is manual notification-based (no auto-copy). Six notification classes exist: Price alerts, Friends' activity (buys/sells of followed accounts, filterable by minimum trade size e.g. $1,000), Trending activity (fires when 'a certain coin is being bought by a lot of traders'), Top traders' activity ('large trades made by the top traders'), Announcements, New followers. Push-notification types visible via fomoapi include LARGE_BUY, LARGE_SELL, NEW_LISTING, PRICE_SINCE_LISTED, TRADE_COMMENT_ADDED, FOLLOWED.",
+     "evidence": "fomo's own blog 'Leveraging fomo's Social Features' enumerates the six notification categories and the trade-size filter; fomobyte guide describes 'Trade Alerts' feed and manual copy flow; Datawallet: 'Fomo should not be confused with automated copy trading... you still decide manually whether to act on it'; fomoapi.io docs list the /v2/notifications notificationType values and alert types buy/sell/thesis/whale/price/trade/follow with source=feed|push.",
+     "source_urls": [
+      "https://fomo.family/blog/learn/leveraging-fomos-social-features",
+      "https://fomobyte.com/how-to-use-fomo-app/",
+      "https://www.datawallet.com/crypto/fomo-app-explained",
+      "https://fomoapi.io/docs"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Defines exactly which events reach the crowd and when: a strategy can target the moment a 'Trending activity'/'multi-user trade' or 'Top trader large buy' push fires, and size trades above the followers' common $-filters to be visible (or below them to stay invisible)."
+    },
+    {
+     "claim": "The 'follower flow pushes price, caller sells into it' mechanism is widely asserted by credible observers and implicitly acknowledged by fomo itself, but no one has published a quantified event study (price impact in the minutes after a KOL buy on fomo).",
+     "evidence": "DWF Ventures study (reported 28 Aug 2026): 'If a prominent account buys a relatively illiquid token before its followers, subsequent purchases can push the price higher, giving the original trader a better entry price than the people trying to replicate the trade'; 'followers may effectively provide the liquidity needed for the exit'; 'the flywheel growth effect is a double-edged sword'; but 'the data does not establish that popular traders intentionally trade against followers.' fomoscan: 'By the time a trade is visible, posted and copied, the person you are copying may already be selling into the flow your copy created.' fomo's own help page lists as a red flag traders who 'promote tokens after buying and sell as followers buy in.' Bankless: traders can 'dump on followers', 'build a position before calling it' (bundling), buy through one wallet and sell through another. X post by Solo Top (24 Aug 2026, ~6.8k views): 'KOLs buy small market cap memes -> FOMO followers buy too -> price spikes immediately -> KOLs take profits -> FOMO followers buy at the peak.'",
+     "source_urls": [
+      "https://yellow.com/phoenix.html/news/fomo-copy-trading-94-percent-wallet-losses",
+      "https://alexablockchain.com/only-6-percent-of-fomo-copy-traders-made-money-dwf-study-finds/",
+      "https://www.fomoscan.sh/copy-trading",
+      "https://fomo.family/answers/how-to-find-profitable-crypto-traders",
+      "https://www.bankless.com/read/the-pump-vs-fomo-rivalry",
+      "https://x.com/solotop999/status/2091873660101615742"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "Core thesis of the 'social signal' edge is consistent with what practitioners and DWF describe, but the magnitude/duration of the follower-driven spike is unmeasured; must be estimated from our own on-chain data (KOL buy timestamp vs subsequent fomo-relayed buys and pool price)."
+    },
+    {
+     "claim": "Base rates for fomo copy-followers are dismal: DWF Ventures found only 6.16% of ~292,000 fomo wallets had positive realized PnL over 90 days; only 25 wallets netted >$10k realized. DWF attributes this to execution asymmetry ('followers receive signals seconds or minutes after original traders') and the exit-liquidity structure, not chance.",
+     "evidence": "Yellow.com (author Murtuza Merchant, 28 Aug 2026) and AlexaBlockchain summaries of DWF Ventures research; an X post surfaced in search cites the same 292,531-wallet figure with an estimated $1.26B buyer loss (that number was only seen in a search snippet, not verified).",
+     "source_urls": [
+      "https://yellow.com/phoenix.html/news/fomo-copy-trading-94-percent-wallet-losses",
+      "https://alexablockchain.com/only-6-percent-of-fomo-copy-traders-made-money-dwf-study-finds/"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Confirms that naively 'buying what X buys' after the app alert is negative-EV at scale; any edge must come from being earlier than the alert (on-chain detection) or from exiting into the follower wave rather than joining it."
+    },
+    {
+     "claim": "fomoapi.io sells two WebSocket feeds: /ws/alerts (app feed, 'the same moment the app shows it'; free tier 15s delayed, keyless 60s delayed) and /ws/trades (Growth $499/mo+), an on-chain stream it advertises as 'about 15 seconds before the app shows it \u2014 the window to act before the crowd sees the alert'. Messages carry txHash, block, blockTs, seenAt, latencyMs (example 1100 ms after block timestamp), trader wallet+handle, token mcap, side, usdValue, and a 'verified' field (db=resolved fomo trader, relay=routing layer, code=pending) with possible retractions. Only Robinhood Chain and Solana are covered by /ws/trades.",
+     "evidence": "fomoapi.io/docs schema and plan table (Free 10k req/mo; Starter $49; Growth $499 with /ws/trades; Scale custom). The ~15 s lead is a vendor claim; no independent measurement of the fomo app's indexer lag was found. Related: fomoscope.xyz advertises '15 sec refresh' of fomo data ($20-35/mo).",
+     "source_urls": [
+      "https://fomoapi.io/docs",
+      "https://fomoapi.io/",
+      "https://www.fomoscope.xyz/"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "If the ~15 s app lag is real, an on-chain watcher (own node/sequencer feed or fomoapi Growth) can enter after a KOL's block and before the crowd's push notification; the 'verified' field and retractions imply wallet-to-handle resolution is probabilistic, so false positives must be handled."
+    },
+    {
+     "claim": "On Robinhood Chain (chain id 4663) trades are relayed: users do not submit their own transactions. Five relayer addresses submit 70.2% of all trades; the largest (0xcaf681a6\u20265cb2) submitted 18.4M trades on behalf of 469,815 distinct traders and one address alone submits 25% of trades. Bitquery found genuine sandwich/arb extraction is negligible (~$599k over 13 days, ~1 dollar per 20,000 traded); apparent front-running patterns were router order-splitting artifacts. Memecoins are 93.5% of chain volume with a 51.1% round-trip win rate.",
+     "evidence": "Bitquery investigation 'What 63 million trades reveal about Robinhood Chain'. Combined with fomo's disclosure that 'one in every two active wallets' on Robinhood Chain comes from fomo (ChainCatcher) and fomo's ~64k daily active addresses / ~$101M daily volume (36% of terminal volume), the dominant relayer is plausibly fomo's, but that attribution is not stated by Bitquery (speculation, low confidence).",
+     "source_urls": [
+      "https://bitquery.io/investigations/robinhood-chain-tokenized-stocks",
+      "https://www.chaincatcher.com/en/article/2286704"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "Filtering on the fomo relayer's from-address (or the relay contract) gives a chain-speed, app-independent view of ALL fomo user flow into a Pons pool\u2014i.e., a direct measure of the follower wave in real time, and a cheap way to detect KOL entries before the app alert. Sandwich risk to our own entries is low."
+    },
+    {
+     "claim": "On Solana every fomo trade is co-signed by a single infrastructure wallet tagged 'Fomo Co-signer' on Solscan (AgmLJBMDCqWynYnQiPCuj9ewsNNsBJXyzoUhD9LJzN51), which 'shows up on almost every token'; routing goes through DFlow. fomo charges a $0.95 minimum per transaction on top of 0.5%, so a $20 copy trade pays ~4.75% one way (~9.5% round trip).",
+     "evidence": "X thread by Geta-b\u014dshi (16 Jun 2026) on the co-signer; MASTR post (9 Aug 2026) documenting co-signer + fee vault with visible $0.95 transfers and DFlow /order and /intent routing; insights4vc confirms '$0.95 minimum per transaction'.",
+     "source_urls": [
+      "https://x.com/0x0kisuke/status/2066889367616889181",
+      "https://x.com/MastrXYZ/status/2086359477985427539",
+      "https://insights4vc.substack.com/p/fomo-behind-the-75m-series-b-from"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Solana analogue of the relayer signal: subscribe to the co-signer's transactions to see fomo flow at chain speed. The $0.95 minimum means small followers are heavily fee-taxed and their 'trending' waves are fee-inefficient; it also caps how small a fomo-executed scalp can be."
+    },
+    {
+     "claim": "Robinhood Chain infrastructure timing: ~100 ms (sub-second, irregular) blocks; first-come-first-served sequencer with no public mempool; a public sequencer feed (wss://feed.mainnet.chain.robinhood.com) broadcasts ordered transactions before RPC nodes re-execute blocks, and Chainstack explicitly lists 'copy-trading signal detection' as a use case while noting 'there is nothing to front-run\u2026 the feed reports what the sequencer has already decided.' Glassnode measured submission latency of 3 ms from AWS Ohio vs 200 ms from Sydney (~2 blocks).",
+     "evidence": "chainstacklabs/robinhood-chain-sequencer-feed README; QuickNode Robinhood Chain guide (feed URLs, FCFS, sub-second irregular blocks); Kucoin flash on 100 ms blocks; CryptoTimes summary of Glassnode latency probes (13 Jul 2026); Robinhood docs on FCFS ordering.",
+     "source_urls": [
+      "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed",
+      "https://www.quicknode.com/guides/robinhood/what-is-robinhood-chain",
+      "https://www.kucoin.com/news/flash/robinhood-chain-hits-10m-daily-transactions-block-times-drop-to-100ms",
+      "https://www.cryptotimes.io/2026/07/13/us-traders-could-front-run-robinhood-chain-users-by-two-blocks/",
+      "https://docs.robinhood.com/chain/"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "A retail-executable bot can read the free sequencer feed from a US-East box and react to a KOL's fomo buy within ~1 block, well ahead of a ~15 s app alert; running from Ohio/Virginia matters. Pons' 2-block launch protection is irrelevant here since the signal is post-launch."
+    },
+    {
+     "claim": "Practitioner playbooks emphasize the delay and 'buy flat, not vertical': an Odaily guide advises filtering alerts to 'Trades, Theses, Multi-user trades, New traders', checking a trader's last 20 trades, and 'FOMO's signals reach you with a delay. First compare their entry price with the current price; if it's already pumped 10%-20%, this is essentially not the same trade anymore.' Bankless describes following friends to 'tail or counter-trade'. App Store reviewers report 3-5 s execution delays that worsen average entry.",
+     "evidence": "Odaily 'FOMO Practical Guide: From Finding People to Finding Coins'; Bankless 'Trading in Public with FOMO'; Apple App Store review 'Delays' (3-5 second buy/sell delay). No X thread by a fomo KOL explicitly describing 'sell into the followers' as their own playbook was found; the closest are third-party warnings (Solo Top, fomoscan, Moby: traders may 'front-run their own followers').",
+     "source_urls": [
+      "https://www.odaily.news/en/post/5212791",
+      "https://www.bankless.com/read/trading-in-public-with-fomo",
+      "https://apps.apple.com/us/app/fomo-never-miss-out/id6741115427?see-all=reviews&platform=iphone",
+      "https://moby.win/vs/fomo/"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "Suggests the crowd's own heuristic (skip if +10-20% already) which bounds the follower wave: followers chase only the first ~10-20% move, so a fade/exit should target that band; the 3-5 s in-app execution lag is an additional handicap for app-executed copying versus direct on-chain execution."
+    },
+    {
+     "claim": "Copy signals can be spoofed: 'copy trading Fomo + Pumpfun app traders can get spoofed: fake tx on top, wrong buy, you follow bait, rekt'; Bloom Trading built detection of the real trader address behind fomo/pump app accounts. Independent wallet-resolution tools (fomoscan: >1M handle-to-wallet links plus follower graph; fomowalletfinder; fomotags; open-source YvesxDev/fomo-wallet-resolver which uses fomo's internal profile API + an unsigned USDC transfer to reveal the Solana wallet, and Relay bridge history to match EVM wallets) exist because fomo hides wallet addresses.",
+     "evidence": "Potion X post (26 Aug 2026, 15.9k views); fomoscan.sh and its copy-trading page (survivor bias, hidden wallets, 'concentrated, sudden follower growth' as a red flag); GitHub README of fomo-wallet-resolver.",
+     "source_urls": [
+      "https://x.com/potionalpha/status/2092621362850378055",
+      "https://www.fomoscan.sh/",
+      "https://www.fomoscan.sh/copy-trading",
+      "https://github.com/YvesxDev/fomo-wallet-resolver"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Any KOL-following signal must be built on resolved wallets (not app handles) and should discount traders with sudden follower spikes or multi-wallet behavior; the same resolver approach can be used to map the leaderboard to on-chain addresses for the backtest."
+    },
+    {
+     "claim": "KOLs on fomo are explicitly the contested asset, which incentivizes public 'calls': Pump.fun offered fomo's top traders/KOLs a $20k signing bonus + $30k/month (conditions: exclusive wallet, close fomo accounts, $25k/month minimum volume, link public X account); fomo responded with a 'Trader Rewards' program claiming $2M paid out in one week (mechanics undisclosed), a 25%-of-referred-fees referral scheme, and Clans (launched 10 Aug 2026; 50+ then 150+ clans ranked by team PnL). Solana Daily (25 Aug 2026) claims top fomo KOLs' 7-day PnL was 17x Axiom's and names @DumbCrayonEater, @theunipcs, @ether_monk, @PoorGoat_, @Salem1299534, @Aurelius0121, @changefomo, @MemeKingdom, @cryptolyxe, @Quanterty. Peer.family runs prediction markets on top fomo traders' 24h/7d PnL (leaderboard polled every 5 min).",
+     "evidence": "CryptoBriefing leaked-contract details; Coinfomania on Trader Rewards; fomo X post on Clans (310k views); Kucoin/Solana Daily KOL comparison; Peer.family site; Odaily calls Clans 'a tracker for foreign cabals'.",
+     "source_urls": [
+      "https://cryptobriefing.com/pumpfun-pays-traders-switch-from-fomo/",
+      "https://coinfomania.com/trader-rewards-unveiled-by-fomo-as-it-competes-with-pumpfun/",
+      "https://x.com/fomo/status/2086878259279450404",
+      "https://www.kucoin.com/news/insight/SOL/6a8d72a7c855da00076cd482",
+      "https://x.com/solana_daily/status/2092192734815883522",
+      "https://peer.family/",
+      "https://www.odaily.news/en/post/5212791"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "Reward programs tied to PnL/volume/audience plus clan rankings push KOLs to trade publicly and in coordinated groups, which should strengthen and make more predictable the follower wave; the named KOL list is a starting watchlist, and clan co-buys are a candidate 'multi-user' signal."
+    },
+    {
+     "claim": "Audience scale on fomo is large enough for follower flow to matter in thin Pons pools: ~50-60k DAU (June 2026 CEO interview), ~64k daily active addresses and ~$101M/day on Robinhood Chain (avg only ~$1,565 per address per day), 600k+ users, ~40k new App Store users/day claimed by the CEO, top creators with 'six-figure' audiences, and one stock-focused fomo trader (Serenity) exceeding 1M followers by Aug 2026 with documented follower-driven feedback loops in thin small caps. No public number exists for what fraction of followers act on a given alert.",
+     "evidence": "insights4vc Series B analysis; ChainCatcher; Yellow.com (Serenity case study, 'followers now influence prices... feedback loop'); Kucoin coverage of Serenity picks (SIVE 19.6x after 190 mentions).",
+     "source_urls": [
+      "https://insights4vc.substack.com/p/fomo-behind-the-75m-series-b-from",
+      "https://www.chaincatcher.com/en/article/2286704",
+      "https://yellow.com/phoenix.html/news/fomo-copy-trading-94-percent-wallet-losses"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "With median follower tickets in the low thousands of dollars and 1% Uniswap V3 Pons pools, a few hundred followers can move a sub-$1M mcap token materially; conversion rate per alert is the key unknown and must be measured from relayer flow after KOL buys."
+    },
+    {
+     "claim": "General (non-fomo) evidence on influencer calls: a study of ~36,000 tweets by 180 crypto influencers found +1.83% mean 1-day return (+3.86% for small caps) that reverses to -2.24% by day 10 and -6.53% by day 30; CoinWire's analysis of 1,567 memecoins promoted by 377 influencers found 80% lost 70% within one week and 86% lost 90% within three months, 65% went to zero.",
+     "evidence": "Benzinga summary of the Indiana/HBS/Texas A&M study (search snippet; page itself returned 403 on fetch); Bitget/BlockBeats summary of CoinWire research (Nov 2024).",
+     "source_urls": [
+      "https://benzinga.com/markets/cryptocurrency/24/05/38878472/before-you-trust-another-crypto-guru-read-this-studys-results",
+      "https://www.bitget.com/news/detail/12560604374049"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "Prior for the shape of the signal: a short positive burst (hours to 1 day) followed by strong reversal \u2014 supports a fast in-and-out around the alert and against holding KOL picks; fomo's in-app alerts likely compress the burst to minutes."
+    },
+    {
+     "claim": "Pons context for signal sizing: 124,016 tokens launched and 1,362 graduated on Pons, $4.54B volume in under two months, ~59% of Robinhood Chain launch activity; fomo has a Pons-based 'fomo-exclusive' launchpad (fomopad) where only fomo users can launch.",
+     "evidence": "Search snippets from cryptorank/airdropalert/trustswap on Pons stats; fomopad.family and blocmates article (paywalled on fetch) referenced a fomo-exclusive launchpad on Pons.",
+     "source_urls": [
+      "https://cryptorank.io/news/feed/66b20-pons-volume-record-robinhood-chain-launchpad",
+      "https://www.fomopad.family/",
+      "https://x.com/blocmates/article/2080636581644562724"
+     ],
+     "confidence": "low",
+     "relevance_to_strategy": "~1% graduation rate means most KOL buys are in tokens that will die; the signal strategy should be about the follower wave, not token quality. fomopad tokens are by construction fomo-native, so their flow is almost entirely visible via the fomo relayer."
+    }
+   ],
+   "open_questions": [
+    "No published event study quantifies the price move in the N minutes after a high-follower fomo trader's buy, nor the number/size of follower buys per alert; this must be measured from Robinhood Chain relayer flow (KOL tx block -> subsequent relayed buys into the same pool -> pool price path).",
+    "Is the dominant Robinhood Chain relayer (0xcaf681a6\u20265cb2, 18.4M trades for 469,815 traders per Bitquery) actually fomo's relay? Needs verification (compare to fomoapi 'verified: relay' wallets or resolved fomo handles).",
+    "Independent measurement of the fomo app feed/push latency vs block time (fomoapi's '~15 s ahead' is a vendor claim; Odaily says 'delayed', reviewers cite 3-5 s in-app execution delay).",
+    "Exact trigger thresholds for 'Top traders' large trade' and 'Trending activity (bought by a lot of traders)' pushes and the LARGE_BUY notification (dollar size, number of traders, time window) are undocumented.",
+    "What fraction of a trader's followers act on an alert, and how does this scale with follower count, trade size shown, thesis attached, and clan membership?",
+    "Mechanics of fomo's Trader Rewards ($2M/week claimed): if payouts depend on follower copy volume or fees generated, KOLs are directly paid to broadcast, which changes the signal's reliability.",
+    "No first-person X thread by a fomo KOL describing a 'sell into followers' playbook was located (X is paywalled/blocked for fetch; only third-party warnings found). Search X directly with logged-in access for handles like the Solana Daily top-10 list.",
+    "Whether the DWF Ventures 6.16% figure includes Robinhood Chain wallets or only Solana, and whether DWF published the underlying dataset or thread (original source not located).",
+    "Is DFlow's /intent routing on Solana (MASTR post) exposing fomo user orders to privileged fillers, i.e., could fomo flow be observable even earlier than the co-signer's on-chain signature?"
+   ]
+  },
+  {
+   "key": "",
+   "findings": [
+    {
+     "claim": "Robinhood Chain (chain id 4663) is an Arbitrum Nitro/Orbit L2 with ETH gas, ~100 ms blocks (measured 104.3 ms average since Jul 1), a single first-come-first-served sequencer in AWS us-east-2 (Ohio), and NO priority-fee ordering: paying more gas cannot move you ahead in the queue.",
+     "evidence": "Official docs: 'first-come, first-served sequencing model, where the order is determined strictly by the arrival time at the sequencer... no transaction can bypass others by paying higher fees.' Robinhood spec cites 100 ms blocks; Arbitrum Foundation blog says ~250 ms; my own RPC read (block 53,886,180 at ts 1788486553, chain launched Jul 1 00:00 UTC) gives 104.3 ms/block. Glassnode probes: sequencer at sequencer.mainnet.chain.robinhood.com in AWS Ohio.",
+     "source_urls": [
+      "https://docs.robinhood.com/chain",
+      "https://docs.robinhood.com/chain/connecting",
+      "https://www.cryptotimes.io/2026/07/13/us-traders-could-front-run-robinhood-chain-users-by-two-blocks/",
+      "https://latency.glassnode.com/robinhood/status",
+      "https://blog.arbitrum.foundation/build-your-first-dapp-on-robinhood-chain/"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Execution edge on Robinhood Chain is purely network latency to Ohio, not fee bidding. A retail bot on a us-east-2 VPS is structurally faster than any Telegram bot or app user elsewhere; fee-based sniping (Solana Jito tips) has no analogue here."
+    },
+    {
+     "claim": "Geographic latency to the sequencer ranges from 3 ms (Ohio) to 200 ms (Sydney), i.e. ~2 blocks of ordering edge for a colocated bot; the app-level fomo feed is reported to lag chain by ~15 s.",
+     "evidence": "Glassnode measurements reported Jul 13 2026: Ohio 3 ms, Virginia 18 ms, Chicago 27 ms, London 91 ms, Tokyo 140 ms, Sydney 200 ms; '197 ms difference... almost two blocks worth of edge'. fomoapi.io sells an on-chain WSS stream described as '~15s ahead of the app' (Growth tier $499+/mo).",
+     "source_urls": [
+      "https://www.cryptotimes.io/2026/07/13/us-traders-could-front-run-robinhood-chain-users-by-two-blocks/",
+      "https://fomoapi.io"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Copy-trading fomo leaderboard wallets via the app feed means entering ~15 s (\u2248150 blocks) after the leader; on a 1%-fee, thin-liquidity Pons pool that lag is usually fatal for scalps. Any copy strategy must source signals on-chain (sequencer feed or WSS logs), not from the app feed."
+    },
+    {
+     "claim": "Robinhood publishes a PUBLIC sequencer feed (wss://feed.mainnet.chain.robinhood.com) that broadcasts ordered transactions with calldata before RPC nodes finish executing them, giving ~50-130 ms of lead over standard RPC/WSS log subscriptions. Because ordering is already fixed when you see a tx, you can back-run/copy it but cannot sandwich or front-run it.",
+     "evidence": "Chainstack's open-source decoder README: 'the sequencer announces that decision on one WebSocket, carrying the ordering and the calldata but no result'; lead over nodes is 'their re-execution time\u2014typically 50-130 milliseconds'; decode cost ~4 \u00b5s basic / ~70 \u00b5s with sender recovery; examples include copy-trading signals. Docs confirm no public mempool and FCFS ordering.",
+     "source_urls": [
+      "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed",
+      "https://docs.robinhood.com/chain"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "This is the fastest legal retail signal source for copying a specific wallet on Robinhood Chain: decode the leader's buy from the feed, submit your own within one or two blocks. It also means sandwich MEV against your own trades is structurally impossible on this chain (unlike Solana/ETH), so 'anti-MEV' features of bots are marketing here."
+    },
+    {
+     "claim": "Gas on Robinhood Chain is negligible: live baseFee 0.33 gwei (read Sep 4 2026); a swap of 135k-250k gas costs ~0.00004-0.00008 ETH \u2248 $0.11-$0.21 at $2,500 ETH. A July 15 measured single-leg swap used 135,568 gas at 0.068 gwei \u2248 $0.02.",
+     "evidence": "eth_gasPrice = 0x136a7d50 (325,483,856 wei) and latest block baseFeePerGas = 329,960,000 wei from rpc.mainnet.chain.robinhood.com; Splitshot blog measured 135,568 gas @ ~0.068 gwei = ~0.0000092 ETH on Jul 15; Arbitrum Foundation cites median fee ~$0.00127/tx.",
+     "source_urls": [
+      "https://splitshot.finance/blog/robinhood-chain-gas-fees",
+      "https://blog.arbitrum.foundation/build-your-first-dapp-on-robinhood-chain/",
+      "https://trustswap.com/robinhood/gas-fees"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Gas is a rounding error (<0.1% of a $500 trade). Round-trip cost is dominated by the 1% Pons hook/pool fee per leg plus venue fee plus your own price impact; there is no economic reason to batch or hesitate on gas."
+    },
+    {
+     "claim": "Programmatic execution stack on Robinhood Chain: public RPC https://rpc.mainnet.chain.robinhood.com (rate-limited), Alchemy/QuickNode/dRPC/Dwellir/Chainstack/Validation Cloud for HTTPS+WSS (from ~$45-49/mo; Dwellir 20-5,000 RPS, QuickNode 15-500 RPS, dRPC up to 5,000 RPS). Uniswap contracts: V3 Factory 0x1f7d7550b1b028f7571e69a784071f0205fd2efa, SwapRouter02 0xcaf681a66d020601342297493863e78c959e5cb2, QuoterV2 0x33e885ed0ec9bf04ecfb19341582aadcb4c8a9e7, UniversalRouter 0x8876789976decbfcbbbe364623c63652db8c0904 (use v2.1.1), V4 PoolManager 0x8366a39cc670b4001a1121b8f6a443a643e40951, V4 Quoter 0x8dc178efb8111bb0973dd9d722ebeff267c98f94, StateView 0xf3334192d15450cdd385c8b70e03f9a6bd9e673b, Permit2 0x000000000022D473030F116dDEE9F6B43aC78BA3, WETH 0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73.",
+     "evidence": "Robinhood docs 'Connecting' page; Dwellir RPC provider comparison; Uniswap deployments pages for chain 4663 (v3 and v4); Pons v1 docs list WETH and the same SwapRouter/QuoterV2 addresses. I verified the public RPC answers eth_call/eth_getLogs without a key.",
+     "source_urls": [
+      "https://docs.robinhood.com/chain/connecting",
+      "https://www.dwellir.com/blog/best-robinhood-chain-rpc-providers",
+      "http://developers.uniswap.org/llms.mdx/docs/protocols/v3/deployments/v3-robinhood-chain-deployments",
+      "https://github.com/Uniswap/contracts/blob/main/deployments/4663.md",
+      "https://docs.ponsfamily.com/"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "A retail user can run a full bot with viem/ethers + one $49/mo RPC plan: subscribe to logs or the sequencer feed, quote via QuoterV2 (V1 tokens) or the V4 Quoter (graduated V2 tokens), and swap via SwapRouter02 / UniversalRouter. No permissioned relay is required."
+    },
+    {
+     "claim": "CORRECTION TO PREMISE: Pons V1 (fixed-supply straight-to-Uniswap-V3, 1% pool fee, 2-block protection) is DISABLED for new launches; all new Pons launches since ~Aug 3 use V2: a constant-product bonding curve (phantom quote 1.68 ETH, graduation at 4.2 ETH, 1B supply, 1% curve fee) that graduates into a Uniswap V4 full-range pool with 0 LP fee and a 1% hook fee. V1 tokens already launched still trade on their V3 1% pools.",
+     "evidence": "On-chain reads Sep 4 2026: V1 factory 0xA5aAb3F0\u2026351feB launchEnabled()=false (launchConfig: graduationThreshold 4.2 ETH, maxWalletBps 500, maxTxBps 550, restrictionBlocks 2; dex poolFee 10000=1%, tickSpacing 200). V2 factory 0x7eD598Bc\u20261EC7e launchEnabled()=true, launchFee 0.0005 ETH, launchConfig 0: supply 1e9, curveFeeBps 100, phantomQuote 1.68e18, graduationThreshold 4.2e18, poolFee 0, tickSpacing 200. Hook 0xE5e70264\u2026e044: hookFeeBps 100, protocolFeeShareBps 3000, buybackBurnBps 5000, maxInternalPriceImpactBps 300. Defiant: V2 contracts shipped Aug 3; V1 still collected $508k of Pons' $4.89M fees on Aug 31.",
+     "source_urls": [
+      "https://docs.ponsfamily.com/v2",
+      "https://docs.ponsfamily.com/",
+      "https://github.com/ponsdotdev/ponsfamily",
+      "https://thedefiant.io/news/blockchains/robinhood-chain-dex-volume-hits-usd1-49-billion-as-pons-takes-two-thirds-of-launchpad-fees",
+      "https://crypto.news/robinhood-chain-launchpad-pons-announces-v2-with-uniswap-v4-upgrade/"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Any backtest built on 'V3 pool from block 1, 2-block protection' only describes July-early-August tokens. Current flow is pump.fun-like: 99% of tokens die on the curve, and post-graduation liquidity is a hook-gated V4 pool that some external bots cannot trade until graduation. Strategy must be split into curve-phase and pool-phase regimes."
+    },
+    {
+     "claim": "Pons V2 launch protection is a time-based snipe tax, not a block window: buys in the first 3 seconds (on-chain snipeTaxSeconds=3; docs say 5 s) pay a 99% tax decaying exponentially to 0 (docs: ~25% at 1 s, ~3% at 2 s). Launcher/creator plus up to 32 named wallets are exempt, so dev bundles get the opening price while outsiders cannot.",
+     "evidence": "V2 factory snipeTaxStartBps()=9900, snipeTaxSeconds()=3 and identical values on 11 freshly deployed curve contracts (read Sep 4 2026). Docs: 'starts at 99% of a buy and decays exponentially to zero across the first 5 seconds... near 25% one second in and around 3% at two seconds'; exemptions immutable at creation. Bundler tools (Pons Bundler Bot) let launchers buy in the launch block across many wallets.",
+     "source_urls": [
+      "https://docs.ponsfamily.com/v2",
+      "https://smithii.io/en/pons-bundler-bot/",
+      "https://github.com/slightlyuseless/pons-sniper"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Block-0 sniping by outsiders is economically dead on Pons V2; the first seconds belong to the launcher's exempt wallets. A retail sniper's earliest sane entry is ~2-3 s post-launch, by which time bundled insiders hold the cheapest supply \u2014 a classic exit-liquidity setup that must be filtered on."
+    },
+    {
+     "claim": "Pons V2 launch economics (computed from on-chain params at $2,500 ETH): opening market cap 1.68 ETH (~$4.2k); graduation at 12.25x the opening price with market cap ~20.6 ETH (~$51k); the graduated V4 pool is seeded with 4.2 ETH (~$10.5k) plus ~204M tokens, i.e. ~$21k displayed liquidity at graduation. 71.4% of supply is sold on the curve. Curves also launch against a USD stable (phantom $3,236 / threshold $8,090) and other pair tokens.",
+     "evidence": "phantomQuote 1.68e18, graduationThreshold 4.2e18, supply 1e9, reserved = supply*phantom/(phantom+threshold) = 28.6%; sampled curves show pairToken variants with 6-decimal reserves 3,236,000,000/8,090,000,000 and other token thresholds (24.94, 42.35, 119.9, 369 units). Docs: 'Every launch on the same settings graduates into a pool of the same size, at the same price'; graduation liquidity permanently locked.",
+     "source_urls": [
+      "https://docs.ponsfamily.com/v2",
+      "https://www.kucoin.com/blog/pons-token-robinhood-chain-pump-fun-rival"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "A '$50k-$500k liquidity' Pons token is a post-graduation pool that has already re-rated 2.4x-24x above graduation (full-range CP: quote side = displayed liq/2). Position sizing must be keyed to quote-side reserve: $5k into a $50k pool is a 20% average-slippage entry."
+    },
+    {
+     "claim": "Realistic round-trip cost on a Pons token (constant-product full-range V4 pool; V1 V3 pools behave similarly): fee-only round trip is 1.99% via direct RPC (1% Pons per leg), 2.98% via fomo (0.5% app + 1% Pons per leg), 3.96% via GMGN/Maestro/NockBot (1% bot), 4.94% via a 1.5% snipe fee; gas adds ~$0.2-0.4. Adding your own price impact (entry slippage T/Q plus an equal exit impact): $500 in $50k liq \u2248 7.0% (fomo) / 8.0% (1% bot); $500 in $500k \u2248 3.4% / 4.4%; $2,000 in $100k \u2248 11.0% / 12.0%; $5,000 in $500k \u2248 7.0% / 8.0%; $5,000 in $50k \u2248 43% (uninvestable). Optional creator tax (up to 10%/leg) can add up to ~19% more; sampled launches mostly have 0%.",
+     "evidence": "Computed from on-chain hookFeeBps=100/curveFeeBps=100, sampled creatorTaxBps (10 of 11 recent curves = 0, one = 200 bps), maxCreatorTaxBps=1000, live gas 0.33 gwei, fomo fee ~0.5% (Datawallet), GMGN 1% on EVM (CoinCodeCap), Maestro 1% (CoinSpot/TelegramTrading), Banana Gun 0.5% manual / 1% snipe, NockBot 1%/1.5% (TradersDNA). CP math: avg execution price = spot*(1+T/Q); post-trade spot = spot*(1+T/Q)^2. Note fomo's mark-to-market PnL will show the (1+T/Q)^2 jump as unrealized gain immediately after a large buy.",
+     "source_urls": [
+      "https://www.datawallet.com/crypto/fomo-app-explained",
+      "https://coincodecap.com/gmgn-review",
+      "https://coinspot.io/en/telegram-trading-bots/maestro-trading-bot/",
+      "https://www.tradersdna.com/how-to-buy-meme-coins-on-robinhood-chain-before-they-move-the-complete-2026-playbook/",
+      "https://docs.ponsfamily.com/v2"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "A strategy needs >3% (fomo) to >4% (Telegram bot) gross edge per round trip just to break even on fees, before impact; on sub-$100k pools, $2k+ clips cost 10%+. This also explains how leaderboard 'PnL' inflates: a single $5k buy into a $50k pool marks the whole bag up 44%."
+    },
+    {
+     "claim": "Solana venue costs for comparison: pump.fun bonding curve 1.25%/leg (0.95% protocol + 0.30% creator), PumpSwap 0.25-0.30%/leg; bot/terminal fees 0.5% (Axiom, Photon, BullX, GMGN-on-Solana, Padre, MevX, Telemetry) or 1% (Trojan, BonkBot, Maestro, Banana Gun snipe); Jito tips/priority 0.005-0.01 SOL normal (~$0.5-1 at $103 SOL), 0.05-0.1 SOL for contested launches. Fee-only round trips: pump.fun curve + 0.5% bot \u2248 3.5%, PumpSwap + 0.5% bot \u2248 1.6%, +1% bot \u2248 2.6%.",
+     "evidence": "Pump.fun fee explainer (1.25% curve), PumpSwap 0.25% + 0.05% creator, solanatools fee table, Trojan/coinspot reviews on Jito tip ranges.",
+     "source_urls": [
+      "https://froglabs.io/blog/pump-fun-fees-explained/",
+      "https://www.blocmates.com/news-posts/pump-fun-s-dex-pumpswap-launches-0-05-creator-fee-on-transactions",
+      "https://solanatools.io/blog/solana-trading-bot-fees-compared",
+      "https://coinspot.io/en/telegram-trading-bots/trojan/"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "Post-graduation Solana (PumpSwap 0.25%) is roughly 2x cheaper per round trip than post-graduation Robinhood (Pons 1% hook), while Robinhood gas/tips are ~10x cheaper. Fee sensitivity favours high-turnover strategies on Solana and lower-turnover, larger-move strategies on Robinhood."
+    },
+    {
+     "claim": "Retail terminals/bots that explicitly support Robinhood Chain as of Sep 2026: Axiom (added Jul 11; MEV-protection toggle, wallet tracker, limit orders, perps; ~0.75-1% with referral discounts), GMGN (web+app+TG; 1% fee on EVM chains; copy trade, launchpad sniper, auto TP/SL, wallet P&L), Maestro (TG; 1% with up to 30% volume cashback; copy trade 3 wallets free / 10 wallets on ~$200/mo Premium; trades Uniswap v2/v3/v4 and lists Pons among launchpad integrations), Banana Gun (TG bot only, not Banana Pro; day-1 Jul 10; 0.5% manual / 1% snipe; market, limit, copy), MevX (Robinhood among 6 chains), NockBot/NockTerminal (chain-native; 1% swap / 1.5% snipe; free screener with hook-gated-pool flags), fomo app (0.5%), Robinhood Wallet, Uniswap app. Photon is Solana-only; BullX/Trojan/BonkBot/Bloom/Sigma have no confirmed Robinhood support.",
+     "evidence": "Axiom integration articles; GMGN blog 'Robinhood Chain is live on GMGN'; CryptoPotato Maestro article; Banana Gun blog (Jul 10) and TechBullion (Jul 27); TelegramTrading MevX list; TradersDNA Nock write-up; telegramtrading GMGN vs Photon vs Axiom notes Photon Solana-only.",
+     "source_urls": [
+      "https://solana-trading.com/blog/axiom-integrates-robinhood-chain-hood-trading-100k",
+      "https://gmgn.ai/blog/robinhood-chain-meme-coins-with-gmgn/",
+      "https://cryptopotato.com/maestro-supports-robinhood-chain-the-fastest-trading-bot-on-the-new-l2/",
+      "https://blog.bananagun.io/blog/banana-gun-robinhood-chain",
+      "https://techbullion.com/robinhood-chains-100ms-blocks-meet-a-bot-built-to-keep-up/",
+      "https://www.tradersdna.com/how-to-buy-meme-coins-on-robinhood-chain-before-they-move-the-complete-2026-playbook/",
+      "https://telegramtrading.net/gmgn-vs-photon-vs-axiom/"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Off-the-shelf copy-trade automation on Robinhood Chain exists (GMGN, Maestro, Banana Gun, Axiom) at 1%/leg, i.e. ~4% round trip with Pons fees. None publishes latency; all are slower than a self-hosted us-east-2 bot on a FCFS chain."
+    },
+    {
+     "claim": "No Robinhood-Chain trading bot publishes measured execution latency or an audited P&L track record. Banana Gun explicitly disclaims having a millisecond figure; Maestro/GMGN/Axiom make only qualitative 'fast' claims. Solana bots publish some numbers (Trojan 'sub-2-second' execution, 0.04 s price refresh; Photon ranked fastest in reviews) but likewise no audited returns.",
+     "evidence": "TechBullion on Banana Gun: 'It does not mean Banana Gun has published a matching millisecond figure of its own'; CryptoPotato Maestro piece: 'specific latency metrics aren't provided'; CoinCodeCap GMGN: 'no specific millisecond or latency guarantees'; parasol/rpcfast comparisons use star ratings only; Trojan reviews cite BOLT sub-2 s.",
+     "source_urls": [
+      "https://techbullion.com/robinhood-chains-100ms-blocks-meet-a-bot-built-to-keep-up/",
+      "https://cryptopotato.com/maestro-supports-robinhood-chain-the-fastest-trading-bot-on-the-new-l2/",
+      "https://coincodecap.com/gmgn-review",
+      "https://parasol.so/blog/best-solana-memecoin-bot-2026",
+      "https://coinspot.io/en/telegram-trading-bots/trojan/"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Vendor 'performance' cannot be used as an input; latency must be measured ourselves (sequencer-feed timestamp vs our tx inclusion block) and any copy-trade P&L must be simulated with explicit lag assumptions."
+    },
+    {
+     "claim": "The only peer-reviewed-style evidence on memecoin copy-trading profitability finds thin margins: an LLM multi-agent KOL-selection framework evaluated on 6,000+ meme coins reports ~14% average return on identified smart-money trades but only ~3% per trade for the copier 'under realistic market frictions', with adversarial bots that front-run copiers, hide positions and fabricate sentiment.",
+     "evidence": "arXiv 2601.08641 (v3 Feb 2026): 'an average copier return of 3% per meme coin investment under realistic market frictions'; adversaries 'front-run trades, conceal positions, and fabricate sentiment, systematically extracting value from na\u00efve copiers at scale'; EmergentMind summary cites 14% leader vs 3% copier.",
+     "source_urls": [
+      "https://arxiv.org/abs/2601.08641",
+      "https://www.emergentmind.com/topics/memecoin-copy-trading"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "A 3%-per-trade copier edge is roughly equal to the fomo+Pons round-trip fee on Robinhood, so naive leaderboard copying is expected to net ~0 after costs; edge must come from lag reduction (sequencer feed) and leader/token filtering, not from copying per se."
+    },
+    {
+     "claim": "Base rates: on Pons V2 I measured 636 launches vs 11 graduations in a 20,000-block (~35 min) window on Sep 4 2026 (\u224818 launches/min, ~1.7% graduation ratio); third-party figures cite 1.10% lifetime and 1.27% for Aug 25-31 (83,962 launches / 1,064 graduations). On Solana, CoinGecko finds 68.7% of 18.7M pump.fun tokens have their last trade on launch day and ~1% graduate; a survival study of 832,941 launches (May-Jun 2026) finds 0.2% fast-regime graduation, 8.9x higher with a Telegram link.",
+     "evidence": "Own eth_getLogs counts of TokenLaunched (factory) and PoolGraduated (hook) topics; CoinGecko research; arXiv 2607.02823. The 1.10%/1.27% Pons figures appeared in search-engine summaries but I could not pin the hosting article (not in the MEXC or Bitget pieces I checked), so treat them as unattributed.",
+     "source_urls": [
+      "https://www.coingecko.com/research/publications/average-lifespan-of-pumpfun-tokens",
+      "https://arxiv.org/abs/2607.02823",
+      "https://docs.ponsfamily.com/v2"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "Any curve-phase strategy faces a ~98-99% dud rate; expected value must be carried by the ~1-2% that graduate, which argues for post-graduation entries (verified locked V4 liquidity) or extremely strict launcher/social filters."
+    },
+    {
+     "claim": "Open-source retail tooling for Robinhood/Pons exists and is non-trivial: 'pons-sniper' (MIT, TypeScript; listens to V1+V2 factory events over WSS, V1 entries via exact-output V3 swaps in blocks N+1/N+2 within the 5%/5.5% caps, V2 entries on the curve with automatic snipe-tax verification, batch submission across many wallets, fixed or auto slippage 1-25%, TP/SL), 'pons-launch-engine' (launch+snipe your own token), 'robinhood-sniper-bot', 'robinhood-cli' (129 stars), 'robinhood-lp-bot', and Chainstack's sequencer-feed decoder.",
+     "evidence": "GitHub topic page lists repos and stars; pons-sniper README details detection/buy path/config; README warns 'Quotes and simulations reduce risk but cannot eliminate price movement, RPC failures, sequencer ordering, or contract risk.'",
+     "source_urls": [
+      "https://github.com/topics/robinhood-chain",
+      "https://github.com/slightlyuseless/pons-sniper",
+      "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "A retail user does not need to write a sniper from scratch; the bigger implication is that these tools (plus bundlers) are already in the hands of launchers, so the earliest curve blocks are populated by multi-wallet insiders \u2014 a signal to detect (many exempt wallets, same-second buys) and avoid."
+    },
+    {
+     "claim": "How to buy programmatically on Pons V2: pre-graduation call curve.buy(uint256 quoteIn, uint256 minTokensOut, address recipient) payable (send value = quoteIn for ETH pairs; approve the curve for ERC-20 pairs); quote off-chain from getReserves() (includes phantom quote) with fees applied on input for buys and on output for sells; call currentSnipeTaxBps(recipient) if within the first seconds; the final buy may be clamped to the reserved allocation so size minTokensOut from the rate. Post-graduation route through the Uniswap V4 PoolManager/UniversalRouter with the Pons hook (hook takes protocol fee + creator tax on the 'unspecified currency'). Index TokenLaunched (factory, indexed token/curve/deployer), CurveBuy/CurveSell (curve), PoolGraduated/PoolFeesSwept (hook). Public launching is currently whitelist-gated pending audits (three concurrent, none closed).",
+     "evidence": "Pons v2 docs integration sections; verified ABIs on Sourcify (factory: launchFee, pairTokenEconomics, canLaunch, snipeTax*; hook: hookFeeBps, protocolFeeShareBps, launches(bytes32)); curve selectors found in bytecode: buy(uint256,uint256,address), sell(uint256,uint256,address), getReserves(), realQuoteReserve(), currentSnipeTaxBps(address), creatorTaxBps(), feeBps(), graduated(), launchedAt(). Router 0xe33E9E479dF8802cb0866d5d05258bEc4cF62948 is a launch-and-buy router.",
+     "source_urls": [
+      "https://docs.ponsfamily.com/v2",
+      "https://sourcify.dev/server/v2/contract/4663/0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e?fields=abi",
+      "https://docs.mobula.io/almanac/robinhood-launchpads/pons"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Everything needed for a self-hosted executor is public and verified; the curve is deterministic so quotes can be computed locally in microseconds, which matters on a FCFS chain where round-trips to a quoter cost blocks."
+    },
+    {
+     "claim": "fomo.family execution and fees: ~0.5% per spot trade (0.45% base cited by one review; 10% referral discount; minimums on small sizes), gas sponsored via ERC-4337 account abstraction, self-custodial Privy embedded wallets with exportable keys, order handling via DFlow and cross-chain funding via Relay Protocol. Robinhood Chain support was announced ~Jul 10 2026. fomo's 'copy trading' is notification-based (you get an alert and choose to trade), not automatic mirroring.",
+     "evidence": "Datawallet: '~0.5% per trade... Network gas is sponsored by Fomo... DFlow for order handling... Relay's bridging infrastructure... keys can be exported'; coinspot/crowinvesting cite 0.45%-0.5%; fomo.family/answers: 'Copy trading gives you control\u2014you decide whether to execute each trade'; Bitget news Jul 10 on Robinhood Chain support. Note: docs.onfomo.com (automatic copy trading with slots/leverage) is a DIFFERENT product (a Hyperliquid perp app), not fomo.family.",
+     "source_urls": [
+      "https://www.datawallet.com/crypto/fomo-app-explained",
+      "https://fomo.family/answers/how-does-copy-trading-work",
+      "https://www.bitget.com/news/detail/12560605498709",
+      "https://coinspot.io/en/reviews/fomo-crypto-app/"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "Executing through fomo itself is the cheapest venue fee (0.5%) but is manual and app-lagged; a systematic strategy will run off-app with exported keys or a separate hot wallet, giving up the fee discount for latency and automation."
+    },
+    {
+     "claim": "Third-party fomo data feeds: fomoapi.io (unofficial) offers REST + WSS: /ws/alerts (app feed: buys, sells, theses) and /ws/trades (on-chain stream). Free tier: 10k calls/mo, app feed realtime for 7 days then 15 s delayed, no on-chain stream; paid from $49/mo (24/7 realtime app feed); on-chain stream '~15s ahead of the app' only on Growth ($499+/mo). It lists Solana/ETH/Base/BSC/'Ronin (RH)'/Monad. fomoscope.xyz: REST only, 15 s refresh, $0 / $20 / $35 per 30 days at 30/60/100 req/min.",
+     "evidence": "fomoapi.io landing page endpoint and pricing tables; fomoscope.xyz pricing and FAQ.",
+     "source_urls": [
+      "https://fomoapi.io",
+      "https://www.fomoscope.xyz/"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "For Robinhood Chain the $499 on-chain stream is redundant: the same 'ahead of app' data is free from the public sequencer feed or a $49 WSS RPC, once leader wallets are resolved via the free tier's /v2/users/{handle}. Pay only for wallet resolution, not for the stream."
+    },
+    {
+     "claim": "Wallet-tracking on Robinhood Chain: Arkham has an official partnership (labels, trader profiling, real-time alerts); Cielo (30+ chains), Nansen, GMGN and Axiom wallet trackers cover the chain; Nock Scout ranks wallets by realized profit with free chain-wide history; StalkChain publishes how-to guides. None discloses alert latency.",
+     "evidence": "Arkham research note on Robinhood Chain explorer/partnership; TronWeekly on Arkham tracking; Nock Scout page; Cielo/Nansen/Arkham comparison pieces.",
+     "source_urls": [
+      "https://info.arkm.com/research/arkham-is-a-robinhood-chain-explorer-and-transaction-scanner",
+      "https://www.tronweekly.com/robinhood-chain-arkham-tracking-and-analytics/",
+      "https://nockterminal.com/best/robinhood-chain-wallet-trackers",
+      "https://stalkchain.com/blog/how-to-track-wallets-on-robinhood-chain"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "Useful for discovering and labeling leader wallets (and for spotting bundler clusters), but as signal sources they are all downstream of the same RPC/feed we can subscribe to directly."
+    },
+    {
+     "claim": "Uniswap Labs' own launchpad pools.trade (live Aug 5) is a cheaper venue: zero launch fee, V4 pool with 0.25% LP fee (auto-compounded into non-withdrawable liquidity) plus optional 0.05% creator cut, versus ~1% on Pons/others; it out-launched Pons on day one (10,506 vs 7,210 tokens) but by Aug 31 earned only $38.6k in fees vs Pons' $4.89M (63.9% share), pump.fun-on-Robinhood $1.72M, NOXA $143k. NOXA (V3 single-sided, 1% style) paused launches Jul 11 after ~$12M fees.",
+     "evidence": "Defiant coverage of pools.trade and of Aug 31 launchpad fee shares; CoinDesk on Noxa halt.",
+     "source_urls": [
+      "https://thedefiant.io/news/defi/uniswaps-new-launchpad-out-launched-pons-on-its-first-day-on-robinhood-chain",
+      "https://thedefiant.io/news/blockchains/robinhood-chain-dex-volume-hits-usd1-49-billion-as-pons-takes-two-thirds-of-launchpad-fees",
+      "https://www.coindesk.com/business/2026/07/15/the-launchpad-that-fueled-robinhood-chain-s-memecoin-boom-just-gave-away-all-its-revenue"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Attention (and fomo flow) is concentrated on Pons despite its 4x higher fee; a fee-sensitive strategy could prefer pools.trade tokens (0.5% round trip) but liquidity/attention there is thin, so the trade-off is cost vs. crowd."
+    },
+    {
+     "claim": "Ecosystem scale (Sep 2026): Robinhood Chain 24h DEX volume $1.49B (#2 globally), 30-day $17.75B; $34.6B cumulative since Jul 1 with 576M txs and 12.3M addresses; Uniswap handles 85.8% of 30-day DEX volume; Pons cumulative volume $4.54B, $31M fees in 30 days. No published dataset breaks out bot vs human addresses, token survival, or wallet concentration.",
+     "evidence": "Defiant DEX-volume article (Aug 31 data); insights4vc two-month review explicitly notes 'No disclosed bot versus human address breakdown' and no survival/retention data.",
+     "source_urls": [
+      "https://thedefiant.io/news/blockchains/robinhood-chain-dex-volume-hits-usd1-49-billion-as-pons-takes-two-thirds-of-launchpad-fees",
+      "https://insights4vc.substack.com/p/robinhood-chain-two-months-in"
+     ],
+     "confidence": "high",
+     "relevance_to_strategy": "Liquidity and flow are large enough that a $500-$5k retail strategy is not capacity-constrained, but the absence of any survival/bot-share data means our own on-chain measurements (like the launch/graduation counts above) are the only reliable base rates."
+    },
+    {
+     "claim": "Creator tax on Pons V2 is rarely enabled in practice (sample: 10 of 11 curves launched within one minute on Sep 4 had creatorTaxBps=0, one had 200 bps), and buyback conversion is capped at 3% internal price impact; but the protocol cap allows 10% creator tax + 10% curve fee = 20% per leg, so per-token fee reads are mandatory before trading.",
+     "evidence": "On-chain reads of creatorTaxBps()/feeBps() on 11 fresh curve contracts; factory maxCreatorTaxBps()=1000; ponsfamily README: 'Total trade fee cap: 20%'; hook maxInternalPriceImpactBps=300.",
+     "source_urls": [
+      "https://github.com/ponsdotdev/ponsfamily",
+      "https://docs.ponsfamily.com/v2"
+     ],
+     "confidence": "medium",
+     "relevance_to_strategy": "A pre-trade guard (reject if creatorTaxBps > X) is cheap and avoids the worst fee traps; the low observed prevalence means the 1%+1% assumption holds for most tokens."
+    }
+   ],
+   "open_questions": [
+    "Which venue/router does the fomo app actually hit on Robinhood Chain (Pons curve directly, Uniswap UniversalRouter, Relay/DFlow routing)? Does fomo let users buy Pons V2 tokens pre-graduation on the bonding curve, or only graduated V4 pools? (Inspect a known fomo user's Robinhood tx via the leaderboard wallet data the parent already has.)",
+    "Is the ~15 s app-feed lag claimed by fomoapi.io measured or marketing? Directly time a leader wallet's on-chain tx vs its appearance in the fomo feed.",
+    "The snipe-tax window is 3 s on-chain vs 5 s in docs \u2014 confirm whether the factory value was changed recently and whether older curves use 5 s; also whether the tax curve shape in docs (25% at 1 s) matches the 3 s parameter.",
+    "My graduation ratio (1.7%, 636 launches / 11 graduations over ~35 min) is a tiny window and graduations lag launches; re-measure over several days of logs and compute time-to-graduation and post-graduation survival/liquidity distributions.",
+    "Creator-tax prevalence was sampled on 11 curves; run the same read over thousands of launches to get a real distribution, and check whether tokens that appear on the fomo leaderboard skew to taxed launches.",
+    "Do Telegram bots (Maestro, Banana Gun, GMGN) execute on Pons V2 bonding curves, or only after graduation? NockTerminal flags 'hook gated launchpad pools where external bots cannot trade until graduation' \u2014 need to determine which bots this affects.",
+    "Exact fomo fee on Robinhood Chain (0.45% vs 0.5%) and the minimum fee on small sizes, which materially changes the cost curve for $500 clips.",
+    "Whether Uniswap V4 hook fees on Pons pools are charged on the 'unspecified currency' means exact-input buys pay the 1% in tokens (affecting the sell-side quote); verify with a V4 Quoter call against a live Pons pool.",
+    "No independent latency measurements exist for any Robinhood Chain bot; we should measure our own feed-to-inclusion latency from a us-east-2 host versus a Telegram bot before assuming the colocation edge is real in practice.",
+    "The 1.10%/1.27% Pons graduation statistics surfaced in search summaries could not be attributed to a fetched page; find the originating source (possibly a Dune dashboard) before quoting them."
+   ]
   }
- ]
+ ],
+ "synthesis": "# The Big Treasure \u2014 Synthesis of Six Research Threads (as of 2026-09-03)\n\n## 0. Corrections to the premise (read first)\n\n1. **Pons is now V2, not V1.** The \"no bonding curve, Uniswap V3 pool from launch, 2-block protection\" description only covers Pons V1 tokens launched Jul 13 \u2013 ~Aug 3. On-chain reads (Sep 4): V1 factory `0xA5aAb3F0\u2026351feB` has `launchEnabled()=false`; V2 factory `0x7eD598Bc\u20261EC7e` is live with a constant-product curve (phantom quote 1.68 ETH, graduation 4.2 ETH, 1% curve fee), graduating into a locked full-range Uniswap **v4** pool with 0 LP fee + 1% hook fee (`hook 0xE5e70264\u2026`). Launch protection is a time-based **snipe tax** (99% decaying to 0 over 3 s on-chain / 5 s in docs), with creator + up to 32 whitelisted wallets exempt. Aug 31 fees: V2 $4.89M vs V1 $508K. Sources: docs.ponsfamily.com/v2, github.com/ponsdotdev/ponsfamily, thedefiant.io (Sep 1). Any backtest must branch on V1 (V3 pool, 1% fee) vs V2 (curve phase, then v4 hook pool).\n2. **The \"dominant relayer 0xcaf681a6\u20265cb2\" in Bitquery's report is Uniswap SwapRouter02** (address confirmed on developers.uniswap.org for chain 4663). It is not a fomo relayer; the social-signal thread's speculation that it identifies fomo flow is wrong. fomo flow must be tagged via resolved real wallets (fomoapi `/v2/users/{handle}`, fomoscan) or via fomo's ERC-4337 paymaster/bundler, which remains unidentified.\n3. **fomo \"copy trading\" is manual push-alerts**, not auto-mirroring (fomo.family/answers/how-does-copy-trading-work). docs.onfomo.com (auto-copy, 0.5x-5x, TP/SL) is a different product (Hyperliquid perps). Follower flow arrives spread over seconds-to-minutes after the leader's fill.\n4. **\"36% of Robinhood Chain volume is fomo\" is likely wrong.** Dune terminal data (Sep 2) puts fomo at $268M on a ~$1.6-1.9B day (~15%), with GMGN at $480M. fomo is the majority of small-ticket wallets (~64K DAA, ~$1.5K/address/day) but a minority of dollars; GMGN carries pro/bot flow (~$63K/address/day).\n\n---\n\n## 1. Ten most decision-relevant facts\n\n| # | Fact | Why it matters | Sources |\n|---|------|----------------|---------|\n| 1 | **Leaderboard PnL is mark-to-market on illiquid bags.** Several top-10 handles have PnL/cumulative-volume ratios of 5x-400x (Natan_benish $5.24M PnL on $12.6K volume; frogmanhaha $3.68M on $21.9K; DumbCrayonEater $9.35M on $1.0M, 91% in one token). Critic MidCurveMortal: unipcs' impact-adjusted PnL ~25% of displayed. | Rank is not skill; re-score on realized, impact-adjusted PnL from resolved wallets. | local `data/raw/fomoapi/leaderboards/*.json`; kucoin.com/news/insight/FOMO/6a951dc6dd2c0d0007d5a0db; fomo ToS \u00a79 |\n| 2 | **Only ~6.16% of ~292K fomo wallets were realized-profitable over 90 days; 25 wallets >$10K** (DWF Ventures, Aug 28). Attributed to execution asymmetry and exit-liquidity loops. | Base rate for naive following is ~94% losers; strategy must be structurally different from \"buy after the alert\". | yellow.com; alexablockchain.com; cointribune.com (sample definition differs slightly; original DWF post not retrieved) |\n| 3 | **App feed/push lags chain by ~15 s (vendor claim, >20 s sometimes); on-chain stream sees trades ~1-2 s after block.** Sequencer feed `wss://feed.mainnet.chain.robinhood.com` is public and leads RPC by 50-130 ms. | The only structural latency edge available to retail is entering before the ~15 s app wave, sourced from the free sequencer feed, not from the $499 fomoapi stream. | fomoapi.io/blog/onchain-stream-15-seconds-faster-than-fomo-feed; github.com/chainstacklabs/robinhood-chain-sequencer-feed |\n| 4 | **Robinhood Chain ordering is strict FCFS at a single sequencer (AWS us-east-2), no priority fees, no mempool, no Timeboost.** Ohio 3 ms vs Sydney 200 ms (~2 blocks). Sandwich MEV is structurally impossible; Bitquery found negligible arb extraction (~$599K/13 days). | Latency to Ohio is the whole ordering game; a $20 VPS in us-east-2 beats every phone app and Telegram bot; \"anti-MEV\" is irrelevant. | docs.robinhood.com/chain; cryptotimes.io (Glassnode probes); bitquery.io/investigations/robinhood-chain-tokenized-stocks |\n| 5 | **Round-trip fee floor on a Pons token: 1.99% direct RPC, 2.98% via fomo, 3.96% via GMGN/Maestro (1%/leg).** Plus own impact: $500 into $50K displayed liquidity \u2248 7-8% round trip; $5K into $50K \u2248 43%. Creator tax up to 10%/leg exists but ~0 in 10 of 11 sampled curves. Gas normally <$0.25 but spiked to ~$64/tx in the Sep 1-2 congestion. | Gross edge must exceed ~3-8% per round trip; sub-$100K pools are uninvestable above ~$1K clips; read `creatorTaxBps()` before every trade. | on-chain reads (hookFeeBps=100, curveFeeBps=100); datawallet.com; bitrue.com (gas spike) |\n| 6 | **Graduation base rate ~1-1.7%; 84% of launches never trade after day one; median token has 13 trades and 4 wallets; 73% of pump.fun graduates fall >60% within 20 min of migration.** | Curve-phase entries are lottery tickets; the tradeable universe is the ~150-300 graduates/day and the survivors at 48 h. | own eth_getLogs (636 launches/11 grads in 35 min); bitquery.io; arxiv 2602.13480 (MemeTrans); arxiv 2602.14860 |\n| 7 | **Insiders own the first seconds.** Pons V2 whitelists up to 32 tax-exempt wallets; bundler tools exist (smithii Pons Bundler, pons-sniper); PIPEDOG ~50% held by one entity via ~80 fresh wallets, ARROW 80% in ~200 wallets; pump.fun deployer-funded same-block snipes were 87% profitable with 85% exiting in <5 min. | Do not compete for block 0; instead detect bundled supply and avoid/fade it. | docs.ponsfamily.com/v2; blog.bubblemaps.io; Pine Analytics via bitget.com; github.com/slightlyuseless/pons-sniper |\n| 8 | **The biggest realized wins on Robinhood Chain were catalyst/venue plays, not sniping:** PONS ~181x on fee-buyback reflexivity (ogle $5K\u2192$5.7M), CASHCAT +100-120% on Robinhood brokerage listing with pre-listing fresh-wallet accumulation flagged, AI (NVDA-paired via LONG) +70%/24h on Aster perp listing. | A catalyst-anticipation book on liquid graduates (top-20 by liquidity) is retail-executable and repeatable; the July \"chain launch\" regime is not. | finbold.com; news.bitcoin.com; blog.bubblemaps.io; theblock.co (Aug 31) |\n| 9 | **Bot pollution of activity signals:** one address submitted 25% of all trades, top-5 70%; bot wallets 1.7% of addresses but 51% of volume; coordinated cohorts inflate first-30-min buyer counts (+16%) with zero measurable inflow lift. | Use net quote-asset inflow from uniquely-funded wallets, never trade counts or buyer counts. | bitquery.io; arxiv 2607.02795 |\n| 10 | **Regime risk is imminent:** Robinhood Wallet gas subsidy ends ~Sep 29; Visa/Chase/NY AG reviewing MCC-5815 card-funded memecoin buys (Crossmint ~7% of fomo inflows); fee revenue went $56K\u2192$4.45M/day in 10 days (blow-off); fomo had ~10 outage incidents in August. | Every backtest on Jul-Sep data is in-sample to a blow-off; require robustness to a 3-5x activity drop and never depend on card-funded flow. | kucoin.com (subsidy); theblock.co (Sep 1 card story); cryptonomist.ch; trustpilot |\n\n---\n\n## 2. Ranked strategy hypotheses\n\nRanking criteria: expected edge after ~3-5% round-trip cost, persistence, retail-executability (single VPS, $500-$5K clips, public data), and testability with our data.\n\n### H1. Front-run the follower wave (sequencer-feed KOL detector, exit into the app-lag crowd) \u2014 rank 1\n- **Mechanism.** Resolve real wallets of high-follower fomo traders (200K-500K followers: unipcs, PoorGoat_, change, ether_monk, 0xAvast, DumbCrayonEater, frankdegods). Decode their buys from the public sequencer feed (block N); submit our buy at N+1/N+2 from us-east-2; sell into the manual-copier wave that arrives ~15-90 s later once the push fires. Target the crowd's own heuristic band (Odaily: skip if already +10-20%), i.e. exit at +8-15% or on time-stop.\n- **Why it persists.** Structural: FCFS ordering + fomo's server-side feed lag + manual human copying. The lag cannot be arbitraged away by app users; fomo has no incentive to make the feed faster than its own indexer. Referral/Trader Rewards programs pay KOLs to broadcast, sustaining the wave.\n- **Test.** Event study on chain 4663 logs: for each leader buy (resolved wallet, Jul 15-Sep 3), measure pool price path and net quote inflow at 0-2 s, 2-15 s, 15-60 s, 1-5 min, 5-30 min; bucket by follower count, usdValue, pool quote-side reserve, whether a `LARGE_BUY`/push appeared in `/v2/notifications`. Simulate entry at N+2 with our size and 1%+impact, exit rules at +X% or T seconds. Cross-check timing with fomoapi `/ws/alerts` `seenAt` vs `blockTs`. Solana analogue via Helius on the \"Fomo Co-signer\" `AgmLJBM\u2026zN51`.\n- **Falsified if.** Median post-buy excess return at 60 s < round-trip cost for every bucket; leader sells arrive within the same window >50% of the time (we become exit liquidity for the KOL); wave is only detectable for leaders whose buys already dwarf pool depth (no room for us).\n- **Confidence.** Medium: mechanism is asserted by DWF, fomoscan, the fomo co-founder, but no public quantification exists.\n\n### H2. KOL-sell detector as a hard exit / short-horizon fade \u2014 rank 2\n- **Mechanism.** Same feed, opposite side: when a resolved KOL sells (visible on-chain ~15 s before followers see it), exit any position in that token immediately; optionally fade tokens whose price is >20% above the KOL's entry when the KOL's first sell prints.\n- **Why it persists.** Followers cannot see the sell for ~15 s; KOL disclaimers (\"can sell at any time\") and documented dump patterns (CATE 29 wallets, PIPEDOG) make sells informative.\n- **Test.** Conditional returns 15 s-10 min after first KOL sell, by size relative to their position and pool depth. Compare to unconditional drift.\n- **Falsified if.** Post-sell drift is not significantly negative or is fully priced within 2 blocks (bots already do this).\n\n### H3. Survivor selection at 48 h (\"Wood rule\") with narrative/holder-quality filters \u2014 rank 3\n- **Mechanism.** Ignore launches; buy graduated tokens still trading at 48 h with rising unique-funded-wallet inflow, top-10 holder share < ~35%, no deployer-funded early cluster, low creator tax, and a one-sentence narrative; sell incrementally into strength, keep a moon bag.\n- **Why it persists.** Survival is a hard filter that prunes >95% of tokens; the evidence (Marino et al., MemeTrans) shows holder concentration and non-bot share are predictive; retail attention on fomo lags survivorship, so survivors keep receiving flow.\n- **Test.** Universe = all Pons V1/V2 graduates Jul 13-Sep 3 (PoolGraduated logs). Compute 48 h survival, holder concentration, funding-source clustering, inflow velocity; forward returns at 1 d/3 d/7 d with 3% costs and depth-aware sizing. Notanicecat69's own trade history (fomoapi) as a sanity check of the rule.\n- **Falsified if.** Survivor forward returns are not better than a 3-5% cost hurdle after dropping the top 5 outliers (CASHCAT, PONS, AI, BONER, PIPEDOG).\n\n### H4. Catalyst anticipation on liquid graduates (listings, perps, brokerage) \u2014 rank 4\n- **Mechanism.** Watch the top-20 tokens by locked liquidity for pre-catalyst fresh-wallet accumulation (Bubblemaps-style), CEX/perp listing rumors, Robinhood brokerage listing patterns (CASHCAT precedent). Enter with depth-aware size; exit into the listing pump.\n- **Why it persists.** Robinhood is economically aligned with chain-native tokens (sequencer fees), has listed one, and listings leak through wallet behavior; catalysts recur (Gate, Binance Alpha, Hyperliquid/Aster perps).\n- **Test.** Collect all known catalysts (Jul-Sep: PONS Gate/Binance Alpha, CASHCAT RH listing, AI Aster, HOODRAT Furie) and measure T-72 h to T+24 h price and fresh-wallet inflow; check if a generic \"fresh-wallet accumulation in top-20 token\" trigger has positive expectancy. GeckoTerminal OHLCV suffices.\n- **Falsified if.** Fewer than ~10 events, or the pre-catalyst signal has no precision without hindsight knowledge of the catalyst.\n\n### H5. Bundle/insider-overhang filter as a universal overlay \u2014 rank 5 (modifier, not standalone)\n- **Mechanism.** On every candidate, compute share of supply held by tax-exempt/whitelisted wallets and by wallets funded from a common source in the first 60 s; avoid tokens above a threshold or size down.\n- **Why it persists.** V2's 32-wallet exemption list is on-chain and fixed at creation; bundling is a persistent behavior.\n- **Test.** For all graduates, regress 24 h/7 d drawdown-from-peak on bundle share; also test if PIPEDOG-style bundled runners have higher peak but faster collapse.\n- **Falsified if.** No relationship between bundle share and forward returns (bundled runners run just as far).\n\n### H6. Low-follower \"quiet skill\" copy (cosby, CardinalSaint2, pointfarmcap, Salem1299534) \u2014 rank 6\n- **Mechanism.** Copy on-chain (not via app) traders with high realized PnL, few holdings, modest volume, and <25K followers, so their buys are not self-fulfilling and copying does not front-run a crowd.\n- **Why it might persist.** These accounts cannot be exit-liquidity operators (too small an audience); if their edge is real it is information/selection.\n- **Test.** Pull full trade histories (`/v2/users/{handle}/trades`, realized vs unrealized), compute realized win rate, hold time, PnL concentration (Herfindahl across tokens), out-of-sample stability (split Jul/Aug/Sep). Simulate copy at N+2 with 2-3% cost.\n- **Falsified if.** PnL is one bag, or realized edge disappears out of sample or after the copier's 1%+impact penalty (arxiv 2601.08641's ~3%/trade ceiling).\n\n### H7. Venue-token thesis (buy the dominant launchpad's fee-burn token early) \u2014 rank 7, low frequency\n- **Mechanism.** PONS' 181x was driven by 80%-of-protocol-fees buyback/burn on record fees; the same reflexive structure could recur with the next dominant venue (e.g., a Pons V2 successor, LONG if it ever tokenizes, o1, NOXA re-launch).\n- **Test.** Backtest PONS vs daily Pons fee revenue (DefiLlama) to confirm the fee\u2192price link; define an entry rule (venue >30% of launch share for 5 days, buyback live) and check it would have fired on PONS at <$10M FDV.\n- **Falsified if.** Fee\u2192price relation is coincidental (buyback share is \"not yet immutable\") or no second instance appears for months.\n\n### H8. Pools.trade / low-fee venue arbitrage of attention \u2014 rank 8\n- **Mechanism.** 0.25% LP fee vs 1% on Pons: a fee-sensitive scalp strategy on Pools.trade graduates. Likely fails on attention/liquidity thinness ($38.6K fees on Aug 31).\n- **Falsified if.** Daily volume per token too low for $500 clips.\n\n### Rejected / low-confidence\n- **Launch sniping (block 0 / first 3 s).** 99% snipe tax, whitelisted insiders, ~1% graduation, negative-sum for non-insiders (Gigabots, Pine). Reject.\n- **Naive leaderboard copying via app.** 94% loser base rate, 15 s lag, ~3% cost. Reject.\n- **Stock-paired (LONG) pairs as a generic strategy.** Distinct microstructure (HIMS 4.6x premium, NYSE-hour mint gaps); park until modeled separately.\n\n---\n\n## 3. Traps and pitfalls to audit\n\n1. **Look-ahead via PnL fields.** fomoapi passes fomo's mark-to-market PnL; `unrealizedPnlUsd` at snapshot time embeds future prices. Recompute from trade prints and pool state at the time of each decision.\n2. **Wallet-resolution look-ahead.** fomoapi `verified: db|relay|code` with retractions means handle\u2192wallet mapping is probabilistic and may only be known after the fact. Backtest with the resolution state available at that timestamp.\n3. **Survivorship in the leaderboard.** Top-100 is conditioned on winning; traders like Aurelius0121 fell out of 7d/30d. Use the full historical roster (peer.family polls every 5 min; our snapshots) not the current one.\n4. **Regime in-sample.** Jul 1-Sep 3 is a launch + blow-off regime (volume 3x in the last week of August). Require the edge to survive July-only and August-only splits, and stress with 3-5x lower activity.\n5. **Fee model.** Per-token `creatorTaxBps()`/`feeBps()` reads; V1 (1% V3 pool) vs V2 curve (1% on input) vs V2 v4 pool (1% hook on \"unspecified currency\" \u2014 verify whether exact-input buys pay in tokens); fomo $0.95 min on Solana; gas spikes to $60+/tx under congestion (Sep 1-2) and FCFS congestion shows up as failed/delayed inclusion, not a fee.\n6. **Impact model.** Size to quote-side reserve, not market cap (liquidity/mcap of 2-5% is typical). Use constant-product for V2 v4 pools (full range) and tick-range math for V1 V3 pools. Our own buy marks up the bag by (1+T/Q)^2 \u2014 do not count that as PnL.\n7. **Bot-polluted activity.** Exclude the top-5 relayer/bot addresses; dedupe by funding source; use net inflow, not counts.\n8. **Ticker spoofing.** 361 contracts claimed \"GME\"; key everything by contract address.\n9. **Signal spoofing.** Fake \"fomo trader\" txs and bait buys exist (Potion, Bloom); require the resolved wallet AND a matching feed item before acting, or size down on `code`-verified events.\n10. **Latency assumptions.** All \"~15 s\" and \"3 ms\" figures are vendor/third-party; measure our own feed-to-inclusion latency from us-east-2 before trusting any timing-dependent PnL.\n11. **Data-vendor conflicts.** fomo volume share (15% Dune vs 36% Chaincatcher vs $27M DefiLlama); Pons graduation stats (1.10%/1.27%) unattributed; DWF sample definition (fomo vs all Solana wallets). Prefer our own on-chain counts.\n12. **Operational risk.** fomo app freezes during LP pulls, bridge-partner outage Aug 30, chain uptime ~98% in August with multi-hour state-update gaps. Execute on-chain with an exported key/separate hot wallet; keep positions small enough to survive a 2-3 h chain stall.\n\n---\n\n## 4. Top traders: skill vs luck vs insider (external evidence)\n\n| Handle | fomo rank / followers | PnL/volume | Classification | Basis |\n|---|---|---|---|---|\n| unipcs (Bonk Guy) | #1 all windows / 466K | ~5x | **KOL flow-mover; unrealized bag (PONS ~1%, MARSCOIN ~2%)**; impact-adjusted PnL ~25% per critic | tronweekly (Arkham $14.5M portfolio), kucoin MidCurveMortal post, his own \"don't blindly copytrade me\" |\n| DumbCrayonEater | #2 / 451K | ~9x | **Luck/one bag** (91% AI, $21K\u2192$8M unrealized, largest holder) | theblockbeats (Lookonchain), blockscout |\n| Salem1299534 | #3 / 179K | ~2.8x | **Unknown** \u2014 11 holdings, anonymous, no footprint | local JSON only |\n| Natan_benish | #4 / 77K | ~415x | **Insider** \u2014 LONG launchpad co-founder; $12.6K fomo volume | kucoin, mexc learn |\n| brrrgrrrz | #5 / 73K | ~1.15x | **Possible predator** \u2014 realized churn; \"immoral to let a sucker keep his money\"; SolBurgerz link inferred (low confidence) | x.com/brrrgrrrz |\n| AvgJoesCrypto | #6 / 92K | ~2.2x | **Plausible skill (early-mover)** \u2014 DeFi analyst, 810 trades, no dump allegations | substack, X |\n| frogmanhaha | #7 / 45K | ~168x | **Luck/one bag** \u2014 EVM-only, 227 trades, self-described \"0 or $3M\" | x.com/frogmanhaha |\n| change | #8 all / 337K | 0.12x | **Active KOL, mostly realized**; fomo-native audience 20x his X; referral income | x.com/changefomo |\n| notanicecat69 (Wood) | #8-9 / 50K | 0.47x | **Skill, rule-based** (48 h rule, narrative, incremental sells); stats match stated process | fomo.family/blog/learn/notanicecat69-memecoin-trading-strategy |\n| ogle | #8-10 / 23K | ~9x | **Thesis-driven single bet** (PONS $5K\u2192$5.7M); low followers so not self-fulfilling; not insider | finbold, coindesk profile |\n| econoar | #7-12 / 61K | ~2.1x | **One concentrated bag (BONER/HIMS)**; credible, reflexive LONG-pair dynamics | coinex feed analysis |\n| ether_monk | #9-12 / 319K | 0.29x | **Active KOL, diversified, \"roundtripper\"**; 7d collapse to #50 | x.com/ether_monk |\n| frankdegods | #15 / 219K | 0.05x | **Do not trust; flow signal only** \u2014 insider allegations, token launcher; FomoTop 65% of picks peak +50% in 48 h (followers do chase him) | theblock, protos, fomotop.money |\n| 0xAvast | #14 all / 260K | ~2.1x | **Insider-adjacent early mover who sells into followers** (realized $1M CASHCAT while telling followers to hold) | x.com/0xavast, coingape |\n| CardinalSaint2 | #13-14 / 19K | ~1.9x | **Unknown, best \"quiet skill\" candidate** | local JSON only |\n| cosby | #7 24h, #18 all / 19K | ~1.7x | **Unknown, 193 trades \u2014 quiet skill or one bag** | local JSON, peer.family |\n| Aurelius0121 | #40 all / 272K | 0.14x | **Referral-farming KOL**; faded from 7d/30d | twitterscore, X |\n| smol_intern | #56 all / 60K | 0.08x | **Skill (Solana scalper)** \u2014 FomoTop #2 pick quality, realized churn | fomotop.money |\n| PoorGoat_ | #25 all / 498K | ~1.4x | **Community-takeover KOL (CATE CTO)** \u2014 coordinated 29-wallet dump documented | blog.bubblemaps.io, catearmy.com |\n| pointfarmcap | #61 24h / 7.6K | \u2014 | **Systematic high-turnover unknown** (2,044 trades, 5 holdings) | local JSON |\n\n**Watchlists implied:** flow-mover set for H1/H2 = unipcs, PoorGoat_, change, ether_monk, 0xAvast, frankdegods, DumbCrayonEater; quiet-skill set for H6 = CardinalSaint2, cosby, pointfarmcap, Salem1299534, notanicecat69, smol_intern (Solana); exclude as signal = Natan_benish, frogmanhaha, Aurelius0121.\n\n---\n\n## 5. Highest-priority unresolved questions (blockers for the backtest)\n\n1. Identify fomo's ERC-4337 paymaster/bundler and router path on chain 4663 (needed to tag fomo flow; SwapRouter02 is not it). Inspect a resolved leaderboard wallet's recent tx on Blockscout.\n2. Measure the app-feed lag ourselves (block timestamp vs `/ws/alerts` `seenAt`) and our own feed-to-inclusion latency from us-east-2.\n3. Run the H1 event study (follower-wave magnitude by follower count and pool depth) \u2014 nothing public quantifies it.\n4. Pull per-token holdings and realized/unrealized splits for the top 20 (fomoapi) to confirm the one-bag classifications above.\n5. Re-measure Pons V2 graduation rate, time-to-graduation, and post-graduation survival/liquidity distributions over several days of logs; read `creatorTaxBps` across thousands of launches.\n6. Verify whether the snipe tax window is 3 s or 5 s across curve vintages, and whether Telegram bots can trade V2 curves pre-graduation (affects who is in the follower wave).\n7. Plan for the Sep 29 gas-subsidy end and the card-flow regulatory review as regime-change tests."
 }
