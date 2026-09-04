@@ -44,111 +44,42 @@ def tok_price(a,ts):
     return None
 ROUTERS={'0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f'}
 def rh_stats(h):
-    f=f'rh/receipts/{h}.json'
+    f=f'rh/logs/{h}.ledger.json'
     if not os.path.exists(f): return None
-    d=json.load(open(f)); w=d['wallet']; WETH="0x0bd7d308f8e1639fab988df18a8011f41eacad73"
-    rows=[]
-    for txh,rc in d['receipts'].items():
-        if rc['s']!='0x1': continue
-        tx=d['tx'].get(txh,{}); bn=rc['b']; ts=blocks.get(bn)
-        tok=collections.defaultdict(float); weth_in=0.0; weth_out=0.0
-        for lg in rc['l']:
-            if lg['e']!='T': continue
-            amt=int(lg['v'],16)/1e18 if lg['v'] and lg['v']!='0x' else 0
-            if lg['a']==WETH:
-                if lg['t']==w: weth_in+=amt
-                if lg['f']==w: weth_out+=amt
-                continue
-            if lg['t']==w: tok[lg['a']]+=amt
-            if lg['f']==w: tok[lg['a']]-=amt
-        eth_val=int(tx['value'],16)/1e18 if tx.get('value') and tx.get('from')==w else 0.0
-        # raw wallet token deltas in wei for matching against Swap events
-        raw=collections.defaultdict(int)
-        for lg in rc['l']:
-            if lg['e']=='T' and lg['a']!=WETH and lg['v'] and lg['v']!='0x':
-                amt=int(lg['v'],16)
-                if lg['t']==w: raw[lg['a']]+=amt
-                if lg['f']==w: raw[lg['a']]-=amt
-        eth_leg={}  # token -> signed ETH (positive = ETH paid by wallet)
-        def s256(x): return x-(1<<256) if x>=(1<<255) else x
-        def s128(x): 
-            x=x & ((1<<128)-1); return x-(1<<128) if x>=(1<<127) else x
-        for lg in rc['l']:
-            if lg['e'] not in ('S3','S4') or len(lg['d'])<130: continue
-            a0=int(lg['d'][2:66],16); a1=int(lg['d'][66:130],16)
-            a0,a1=(s256(a0),s256(a1)) if lg['e']=='S3' else (s128(a0),s128(a1))
-            for a,rv in raw.items():
-                if rv==0: continue
-                if abs(abs(a0)-abs(rv))<=abs(rv)*0.02+1: eth_leg[a]=eth_leg.get(a,0)+(a1 if lg['e']=='S3' else -a1)/1e18
-                elif abs(abs(a1)-abs(rv))<=abs(rv)*0.02+1: eth_leg[a]=eth_leg.get(a,0)+(a0 if lg['e']=='S3' else -a0)/1e18
-        # pool-based WETH matching (works for V2/V3/Ramses): token came from pool P -> WETH sent to P = ETH paid; token sent to P -> WETH from P = ETH received
-        tok_from={}; tok_to={}
-        for lg in rc['l']:
-            if lg['e']=='T' and lg['a']!=WETH:
-                if lg['t']==w: tok_from[lg['a']]=lg['f']
-                if lg['f']==w: tok_to[lg['a']]=lg['t']
-        weth_to=collections.defaultdict(float); weth_from=collections.defaultdict(float)
-        for lg in rc['l']:
-            if lg['e']=='T' and lg['a']==WETH and lg['v'] and lg['v']!='0x':
-                amt=int(lg['v'],16)/1e18; weth_to[lg['t']]+=amt; weth_from[lg['f']]+=amt
-        swap_addrs={lg['a'] for lg in rc['l'] if lg['e'] in ('S3','S4')}
-        for a in list(tok.keys()):
-            if a in eth_leg: continue
-            if tok[a]>0 and tok_from.get(a) in swap_addrs and tok_from.get(a) in weth_to: eth_leg[a]=weth_to[tok_from[a]]
-            elif tok[a]<0 and tok_to.get(a) in swap_addrs and tok_to.get(a) in weth_from: eth_leg[a]=-weth_from[tok_to[a]]
-        for a,v in tok.items():
-            if abs(v)<1e-9: continue
-            side="in" if v>0 else "out"; eth=None
-            el=eth_leg.get(a)
-            if v>0 and el is not None and el>0: side="buy"; eth=el
-            elif v<0 and el is not None and el<0: side="sell"; eth=-el
-            elif v>0 and (eth_val>0 or weth_out>0): side="buy"; eth=eth_val+weth_out
-            elif v<0 and weth_in>0: side="sell"; eth=weth_in
-            if side=="in" and (tx.get('to')==a or tx.get('sel') in ('0xc73a2d60','0x47eb6179','0x16b2290f')): side="airdrop"
-            cp=(tok_from.get(a) if v>0 else tok_to.get(a))
-            px=tok_price(a,ts); cand=abs(v)*px if px else None
-            usd=None; psrc=None
-            if eth and ts:
-                sw=eth*eth_usd(ts)
-                # accept swap-derived value only if consistent with candles (within 35%) or, lacking candles, with a WETH transfer of similar size in the tx
-                weth_amts=[int(lg['v'],16)/1e18 for lg in rc['l'] if lg['e']=='T' and lg['a']==WETH and lg['v'] and lg['v']!='0x']
-                ok_c=(cand is not None and cand>0 and 0.65<=sw/cand<=1.35)
-                ok_w=(cand is None and any(abs(x-eth)<=0.05*eth for x in weth_amts))
-                if ok_c or ok_w: usd=sw; psrc="swap"
-            if usd is None and cand is not None and (side in ("buy","sell") or cp in ROUTERS or swap_addrs):
-                usd=cand; psrc="candle"; eth=usd/eth_usd(ts) if ts else None
-                if side in ("in","out"): side="buy" if v>0 else "sell"
-            if usd is None and side in ("buy","sell"): side="in" if v>0 else "out"; eth=None
-            if side in ("buy","sell") and usd is not None and usd<5: side="dust"
-            rows.append({"ts":ts,"b":int(bn,16),"tx":txh,"token":a,"amt":v,"eth":eth,"usd":usd,"side":side,"n":len(tok),"mint":mints.get(a),"gas_eth":(int(rc['g'],16)*int(rc['gp'],16)/1e18) if rc.get('g') and rc.get('gp') else None,"swap_matched":a in eth_leg,"cp":cp,"psrc":psrc})
-    rows.sort(key=lambda r:r['b'])
-    buys=[r for r in rows if r['side']=='buy']; sells=[r for r in rows if r['side']=='sell']
-    outs=[r for r in rows if r['side']=='out']; ins=[r for r in rows if r['side']=='in']
-    # entry timing vs launch (blocks): for buys with known mint block
-    lag=[]
-    for r in buys:
-        if r['mint']: lag.append((r['b']-int(r['mint'],16))/9.9/60)  # ~9.9 blocks/s -> minutes
-    # per-token realized (avg cost) using ETH legs
-    pos=collections.defaultdict(lambda:{"q":0.0,"c":0.0,"r":0.0,"bu":0.0,"se":0.0})
-    for r in rows:
-        p=pos[r['token']]
-        if r['side']=='buy' and r['eth']: p['q']+=r['amt']; p['c']+=r['eth']; p['bu']+=r['eth']
-        elif r['side']=='sell' and r['eth']:
-            qty=-r['amt']; avg=p['c']/p['q'] if p['q']>0 else 0; used=min(qty,p['q']); p['r']+=r['eth']-avg*used; p['c']-=avg*used; p['q']-=used; p['se']+=r['eth']
-        elif r['side']=='in': p['q']+=r['amt']
-        elif r['side']=='out': p['q']=max(0.0,p['q']+r['amt'])
-    real_eth=sum(p['r'] for p in pos.values()); toks=[k for k,p in pos.items() if p['bu']>0]
-    wins=[k for k in toks if pos[k]['r']>0]
-    top=sorted(((k,p['r']) for k,p in pos.items()),key=lambda kv:-kv[1])[:5]
+    rows=json.load(open(f)); fills=[r for r in rows if r['side'] in ('buy','sell')]
+    buys=[r for r in fills if r['side']=='buy']; sells=[r for r in fills if r['side']=='sell']
+    pb=[r for r in buys if r['usd']]; ps=[r for r in sells if r['usd']]
+    lag=[((r['b']-int(r['mint'],16))/9.9/60) for r in buys if r.get('mint')]
+    pos=collections.defaultdict(lambda:{"q":0.0,"c":0.0,"r":0.0,"bu":0.0,"se":0.0,"nb":0,"ns":0,"first":None,"last":None,"unpriced":0,"sold_nobuy":0.0})
+    for r in sorted(fills,key=lambda r:r['b']):
+        p=pos[r['token']]; p['first']=p['first'] or r['ts']; p['last']=r['ts']
+        if r['usd'] is None: p['unpriced']+=1
+        if r['side']=='buy':
+            p['q']+=r['amt']; p['nb']+=1
+            if r['usd']: p['c']+=r['usd']; p['bu']+=r['usd']
+        else:
+            qty=-r['amt']; p['ns']+=1
+            if r['usd']:
+                if p['q']<=1e-9: p['sold_nobuy']+=r['usd']
+                avg=p['c']/p['q'] if p['q']>0 else 0; used=min(qty,p['q']); p['r']+=r['usd']-avg*used; p['c']-=avg*used; p['se']+=r['usd']
+            p['q']=max(0.0,p['q']-qty)
+    # realized only trusted for fully-priced tokens
+    full={k:p for k,p in pos.items() if p['unpriced']==0}
+    sold_nobuy=sum(p['sold_nobuy'] for p in pos.values())
+    pos_all=pos; pos={k:p for k,p in full.items()}
+    toks=[k for k,p in pos.items() if p['bu']>0]; wins=[k for k in toks if pos[k]['r']>0]
+    real=sum(p['r'] for p in pos.values()); top=sorted(((k,p['r']) for k,p in pos.items()),key=lambda kv:-kv[1])[:5]
+    gains=sum(v for _,v in top if v>0)
+    hold=[(p['last']-p['first'])/3600 for p in pos.values() if p['first'] and p['last'] and p['ns']>0]
     hours=collections.Counter(datetime.datetime.utcfromtimestamp(r['ts']).hour for r in buys if r['ts'])
-    return {"n_tx_total":d.get('n_tx_total'),"n_buys":len(buys),"n_sells":len(sells),"n_in_unpriced":len(ins),"n_out_unpriced":len(outs),
-            "buy_eth":sum(r['eth'] for r in buys),"sell_eth":sum(r['eth'] for r in sells),"buy_usd":sum(r['usd'] or 0 for r in buys),"sell_usd":sum(r['usd'] or 0 for r in sells),
-            "realized_eth_avgcost":real_eth,"tokens_bought":len(toks),"token_win_rate":(len(wins)/len(toks)) if toks else None,
-            "top5_tokens_realized_eth":[(k[:10],round(v,3)) for k,v in top],"top1_share_of_gains":(top[0][1]/sum(v for _,v in top if v>0)) if top and top[0][1]>0 else None,
-            "median_buy_usd":q([r['usd'] for r in buys if r['usd']],0.5),"p90_buy_usd":q([r['usd'] for r in buys if r['usd']],0.9),
-            "entry_lag_min_median":q(lag,0.5),"entry_lag_min_p25":q(lag,0.25),"share_buys_within_10min_of_launch":(sum(1 for x in lag if x<=10)/len(lag)) if lag else None,"share_buys_within_60min":(sum(1 for x in lag if x<=60)/len(lag)) if lag else None,
-            "first_ts":datetime.datetime.utcfromtimestamp(min(r['ts'] for r in rows if r['ts'])).isoformat() if any(r['ts'] for r in rows) else None,
-            "active_hours_utc_top4":[h for h,_ in hours.most_common(4)],"gas_eth_total":sum(r['gas_eth'] or 0 for r in rows),"rows":rows}
+    return {"n_fills":len(fills),"n_buys":len(buys),"n_sells":len(sells),"priced_share":(len(pb)+len(ps))/len(fills) if fills else None,"tokens_total":len(pos_all),"tokens_fully_priced":len(pos),"sold_without_buy_usd":sold_nobuy,
+            "buy_usd":sum(r['usd'] for r in pb),"sell_usd":sum(r['usd'] for r in ps),"realized_usd_avgcost":real,
+            "tokens_bought":len(toks),"token_win_rate":(len(wins)/len(toks)) if toks else None,"top5_tokens_realized_usd":[(k[:10],round(v)) for k,v in top],
+            "top1_share_of_gains":(top[0][1]/gains) if gains>0 else None,"median_buy_usd":q([r['usd'] for r in pb],0.5),"p90_buy_usd":q([r['usd'] for r in pb],0.9),
+            "entry_lag_min_median":q(lag,0.5),"entry_lag_min_p25":q(lag,0.25),"share_buys_within_10min_of_launch":(sum(1 for x in lag if x<=10)/len(lag)) if lag else None,
+            "share_buys_within_60min":(sum(1 for x in lag if x<=60)/len(lag)) if lag else None,"hold_h_median":q(hold,0.5),
+            "first_ts":datetime.datetime.utcfromtimestamp(min(r['ts'] for r in fills if r['ts'])).isoformat() if any(r['ts'] for r in fills) else None,
+            "active_hours_utc_top4":[h for h,_ in hours.most_common(4)],"airdrops_received":sum(1 for r in rows if r['side']=='airdrop'),"rows":None}
 out={}
 for h in handles:
     r={"handle":h,"ranks":{w:(lb[w][h]['rank'] if h in lb[w] else None) for w in lb},"pnl":{w:(lb[w][h]['pnlUsd'] if h in lb[w] else None) for w in lb}}
@@ -187,8 +118,7 @@ for h in handles:
         if h in sol_sum: r["solana_onchain"]["ledger"]=sol_sum[h]
     rh=rh_stats(h)
     if rh:
-        rows=rh.pop("rows"); r["robinhood_onchain"]=rh
-        json.dump(rows,open(f'rh/receipts/{h}.ledger.json','w'))
+        rh.pop("rows",None); r["robinhood_onchain"]=rh
     out[h]=r
 json.dump(out,open('dossiers.json','w'),indent=1)
 print("dossiers",len(out),"with balances",sum(1 for v in out.values() if 'portfolio' in v),"with trades",sum(1 for v in out.values() if 'fomo_trades' in v),"with rh",sum(1 for v in out.values() if 'robinhood_onchain' in v),"with sol ledger",sum(1 for v in out.values() if v.get('solana_onchain',{}).get('ledger')))

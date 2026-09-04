@@ -14,11 +14,13 @@ def load(f):
     except Exception: return {}
 def save(obj,f):
     json.dump(obj,open(f+".tmp","w")); os.replace(f+".tmp",f)
-blocks_f='rh/blocks/blocks.json'; mints_f='rh/mints/mints.json'
+SHARD=int(sys.argv[1]) if len(sys.argv)>1 else 0; NSH=int(sys.argv[2]) if len(sys.argv)>2 else 1
+blocks_f=f'rh/blocks/blocks_shard{SHARD}.json' if NSH>1 else 'rh/blocks/blocks.json'; mints_f='rh/mints/mints.json'
 blocks=load(blocks_f); mints=load(mints_f)
+known=load('rh/blocks/blocks.json'); blocks.update({}) 
 # collect needed blocks (all logs) and tokens (fills only: counterparty router or seen as both in/out counterparties)
 need_blocks=set(); toks=set(); cp_in={}; cp_out=set()
-files=glob.glob('rh/logs/*.json')
+files=[f for f in glob.glob('rh/logs/*.json') if not f.endswith('.ledger.json')]
 for f in files:
     d=json.load(open(f)); w=d['wallet'].lower()
     for l in d['in']+d['out']:
@@ -34,7 +36,8 @@ for f in files:
         frm="0x"+l['topics'][1][-40:]
         if frm in legit: toks.add(l['address'].lower())
     for l in d['out']: toks.add(l['address'].lower())
-need=sorted(b for b in need_blocks if b not in blocks); tk=sorted(t for t in toks if t not in mints and t!=WETH)
+need=sorted(b for b in need_blocks if b not in blocks and b not in known)
+need=[b for i,b in enumerate(need) if i%NSH==SHARD]; tk=sorted(t for t in toks if t not in mints and t!=WETH) if SHARD==NSH-1 else []
 print("blocks needed",len(need),"tokens needed",len(tk),file=sys.stderr,flush=True)
 for i in range(0,len(need),100):
     chunk=need[i:i+100]; r=call([{"jsonrpc":"2.0","id":j,"method":"eth_getBlockByNumber","params":[b,False]} for j,b in enumerate(chunk)])

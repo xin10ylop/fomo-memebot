@@ -3,9 +3,10 @@ import json,glob,os,bisect,collections,statistics as st,sys
 lb={}
 for w in ['24h','7d','30d','all']:
     for t in json.load(open(f'fapi/lb/{w}.json'))['traders']: lb[t['handle']]=t
+BAD=set(json.load(open('gt/ohlcv1m_bad.json'))) if os.path.exists('gt/ohlcv1m_bad.json') else set()
 def load(a):
     f=f'gt/ohlcv1m/{a}.json'
-    if not os.path.exists(f): return None
+    if a in BAD or not os.path.exists(f): return None
     c=sorted(json.load(open(f))['candles'],key=lambda x:x[0])
     return {"t":[x[0] for x in c],"o":[x[1] for x in c],"h":[x[2] for x in c],"l":[x[3] for x in c],"c":[x[4] for x in c],"v":[x[5] for x in c]}
 def fwd(o,ts,delay=60,hz=(300,900,1800,3600,14400)):

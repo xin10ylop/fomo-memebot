@@ -1,9 +1,21 @@
 import json,glob,collections,os,sys,bisect,datetime
 # Log-based Robinhood ledger: rows from ERC-20 Transfer logs to/from each trader wallet; counterparty classification; candle pricing.
 WETH="0x0bd7d308f8e1639fab988df18a8011f41eacad73"; ROUTER="0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f"
-blocks=json.load(open('rh/blocks/blocks.json')) if os.path.exists('rh/blocks/blocks.json') else {}
+blocks={}
+for _f in glob.glob('rh/blocks/blocks*.json'):
+    try: blocks.update(json.load(open(_f)))
+    except Exception: pass
+_pts=sorted((int(k,16),v) for k,v in blocks.items()); _xs=[p[0] for p in _pts]; _ys=[p[1] for p in _pts]
+def block_ts(bhex):
+    """exact timestamp if known, else linear interpolation between nearest anchors (median error <1s where anchors are dense)"""
+    if bhex in blocks: return blocks[bhex]
+    b=int(bhex,16); i=bisect.bisect_left(_xs,b)
+    if i<=0: return _ys[0]-(_xs[0]-b)/9.9 if _xs else None
+    if i>=len(_xs): return _ys[-1]+(b-_xs[-1])/9.9
+    x0,y0,x1,y1=_xs[i-1],_ys[i-1],_xs[i],_ys[i]
+    return y0+(y1-y0)*(b-x0)/(x1-x0) if x1>x0 else y0
 mints=json.load(open('rh/mints/mints.json')) if os.path.exists('rh/mints/mints.json') else {}
-files=sorted(glob.glob('rh/logs/*.json'))
+files=sorted(f for f in glob.glob('rh/logs/*.json') if not f.endswith('.ledger.json'))
 # counterparty stats across wallets
 cp_in=collections.defaultdict(set); cp_out=collections.defaultdict(set)
 for f in files:
@@ -40,7 +52,7 @@ def build(f):
         frm="0x"+l['topics'][1][-40:]; to="0x"+l['topics'][2][-40:]
         amt=int(l['data'],16)/1e18 if l['data'] and l['data']!='0x' else 0
         if amt<=0: continue
-        ts=blocks.get(l['blockNumber']); b=int(l['blockNumber'],16)
+        ts=block_ts(l['blockNumber']); b=int(l['blockNumber'],16)
         if to==w:
             v=amt; cp=frm
             kind="fill" if cp in legit else ("airdrop" if cp in airdroppers else ("mint" if cp=="0x"+"0"*40 else "transfer_in"))
@@ -52,7 +64,7 @@ def build(f):
         if kind=="fill" and usd is not None:
             if usd<5: kind="dust"
             elif liq and usd>5*float(liq)+1e6: kind="suspect"  # implausible vs pool liquidity
-        rows.append({"ts":ts,"b":b,"tx":l['transactionHash'],"token":a,"amt":v,"usd":usd,"px":px,"side":side if kind=="fill" else kind,"cp":cp,"mint":mints.get(a)})
+        rows.append({"ts":ts,"b":b,"tx":l['transactionHash'],"token":a,"amt":v,"usd":usd,"px":px,"side":side if kind=="fill" else kind,"cp":cp,"mint":mints.get(a),"ts_exact":l['blockNumber'] in blocks})
     rows.sort(key=lambda r:(r['b'],r['tx']))
     return w,rows
 if __name__=="__main__":

@@ -36,7 +36,13 @@ for f in glob.glob('rh/logs/*.ledger.json'):
     for r in json.load(open(f)):
         if r['side'] in ('buy','sell') and r['ts'] and (r['usd'] or 0)>=300:
             events.append({"h":h,"side":r['side'],"token":r['token'],"ts":r['ts'],"usd":r['usd'],"followers":lb.get(h,{}).get('followers') or 0,"age_min":((r['b']-int(r['mint'],16))/9.9/60) if r.get('mint') else None})
-print("events",len(events),collections.Counter(e['side'] for e in events))
+for f in glob.glob('helius/parsed/*.ledger.json'):
+    h=f.split('/')[-1][:-12]
+    for r in json.load(open(f)).get('rows',[]):
+        if r.get('side') in ('buy','sell') and r.get('usd') and r['usd']>=300:
+            events.append({"h":h,"side":r['side'],"token":r['mint'],"ts":r['ts'],"usd":r['usd'],"followers":lb.get(h,{}).get('followers') or 0,"age_min":None,"chain":"solana"})
+for e in events: e.setdefault("chain","robinhood")
+print("events",len(events),collections.Counter((e['chain'],e['side']) for e in events))
 res=[]
 for e in events:
     s=load(e['token'])
@@ -62,3 +68,5 @@ for side in ('buy','sell'):
         rep([r for r in rows if r['age_min'] is not None and r['age_min']<=60],"token age<=60min")
         rep([r for r in rows if r['age_min'] is not None and r['age_min']>1440],"token age>1d")
         rep([r for r in rows if r['tf']==60],"1m candles only")
+        rep([r for r in rows if r['chain']=='solana'],"solana")
+        rep([r for r in rows if r['chain']=='robinhood'],"robinhood")

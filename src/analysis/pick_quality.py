@@ -29,7 +29,7 @@ for f in glob.glob('fapi/trades/*.json'):
         a=(t.get('token') or {}).get('address')
         if a and t.get('createdAt'): events.append({"h":h,"token":a.lower() if a.startswith('0x') else a,"ts":iso(t['createdAt']),"src":"fomo_open","status":t['status']})
 # (2) on-chain RH buys (exact) where ledger exists: first buy per token per trader
-for f in glob.glob('rh/receipts/*.ledger.json'):
+for f in glob.glob('rh/logs/*.ledger.json'):
     h=f.split('/')[-1][:-12]; seen=set()
     for r in json.load(open(f)):
         if r['side']=='buy' and r['ts'] and r['token'] not in seen:
