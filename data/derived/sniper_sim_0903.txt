@@ -1,0 +1,39 @@
+## (1) actual sniper P&L, fit (12-15h) vs holdout (15-18h), per-launch ROI with bootstrap CI
+  0xbc46a7f0 fit      n= 77 pooled ROI   +6.9% net $780 | per-launch mean   +8.6% CI[-1,+21] median -8% win 38%
+  0xbc46a7f0 holdout  n= 98 pooled ROI  +31.3% net $30,051 | per-launch mean  +24.0% CI[+8,+47] median -5% win 40%
+  0x9eed092b fit      n=141 pooled ROI   +6.0% net $740 | per-launch mean   +4.4% CI[-2,+13] median -6% win 34%
+  0x9eed092b holdout  n= 84 pooled ROI  +14.8% net $6,268 | per-launch mean   -3.9% CI[-11,+3] median -9% win 26%
+  0xbbcea8b6 fit      n= 52 pooled ROI   +4.9% net $384 | per-launch mean   +4.4% CI[-3,+19] median -2% win 23%
+  0xbbcea8b6 holdout  n= 73 pooled ROI   +6.3% net $2,102 | per-launch mean   +3.2% CI[-4,+12] median -4% win 29%
+
+## (2) generic block-2 sniper on every launch: buy 3% of supply at the first non-creator price, sell 7 s later into whoever bought after (exact curve exits), fees 1%+1%
+  all launches (someone bought within 3 s)     fit      n=1760 pooled ROI   -3.9% net $-12,777 on $325,406 | per-launch mean  +10.6% CI[+7,+15] median -2% win 42%
+  all launches (someone bought within 3 s)     holdout  n=1413 pooled ROI  -42.0% net $-191,915 on $457,464 | per-launch mean  +15.3% CI[+10,+20] median -2% win 42%
+  no bundle wallet among first buyers          fit      n=1134 pooled ROI   -8.1% net $-17,496 on $215,089 | per-launch mean  +13.4% CI[+8,+19] median -2% win 42%
+  no bundle wallet among first buyers          holdout  n=1001 pooled ROI  -47.4% net $-184,872 on $389,898 | per-launch mean  +24.8% CI[+18,+31] median -2% win 45%
+  bundle present                               fit      n= 626 pooled ROI   +4.3% net $4,718 on $110,317 | per-launch mean   +5.5% CI[-2,+13] median -6% win 42%
+  bundle present                               holdout  n= 412 pooled ROI  -10.4% net $-7,044 on $67,567 | per-launch mean   -8.0% CI[-14,-1] median -12% win 36%
+  one-off creator, no bundle                   fit      n= 700 pooled ROI   -9.8% net $-13,730 on $139,665 | per-launch mean  +23.3% CI[+15,+32] median -2% win 47%
+  one-off creator, no bundle                   holdout  n= 657 pooled ROI  -46.4% net $-126,878 on $273,400 | per-launch mean  +33.0% CI[+26,+42] median -1% win 48%
+  serial creator, no bundle                    fit      n= 143 pooled ROI   -7.3% net $-1,593 on $21,824 | per-launch mean   -9.4% CI[-20,+2] median -11% win 33%
+  serial creator, no bundle                    holdout  n= 117 pooled ROI   -5.9% net $-1,180 on $19,901 | per-launch mean   -9.1% CI[-26,+10] median -22% win 31%
+  no bundle, hold 3 s                          fit      n=1134 pooled ROI   -6.2% net $-13,305 on $215,089 | per-launch mean  +16.6% CI[+12,+21] median -2% win 45%
+  no bundle, hold 3 s                          holdout  n=1001 pooled ROI  -48.7% net $-190,002 on $389,898 | per-launch mean  +24.9% CI[+20,+30] median -0% win 50%
+  no bundle, hold 20 s                         fit      n=1134 pooled ROI  -21.5% net $-46,149 on $215,089 | per-launch mean   -5.5% CI[-11,+0] median -7% win 32%
+  no bundle, hold 20 s                         holdout  n=1001 pooled ROI  -55.7% net $-217,238 on $389,898 | per-launch mean   +3.8% CI[-3,+11] median -4% win 34%
+  no bundle, TP 1.3x else 7 s                  fit      n=1134 pooled ROI  -16.6% net $-35,714 on $215,089 | per-launch mean   +2.7% CI[-0,+6] median -2% win 47%
+  no bundle, TP 1.3x else 7 s                  holdout  n=1001 pooled ROI  -54.0% net $-210,587 on $389,898 | per-launch mean   +7.9% CI[+4,+11] median +1% win 52%
+  no bundle, 1% of supply, hold 7 s            fit      n=1134 pooled ROI  -12.0% net $-8,620 on $71,696 | per-launch mean  +10.6% CI[+5,+17] median -2% win 44%
+  no bundle, 1% of supply, hold 7 s            holdout  n=1001 pooled ROI  -46.8% net $-60,774 on $129,966 | per-launch mean  +26.1% CI[+19,+33] median -2% win 47%
+  no bundle, 5% of supply, hold 7 s            fit      n=1134 pooled ROI   -7.2% net $-25,738 on $358,482 | per-launch mean  +14.5% CI[+10,+20] median -2% win 41%
+  no bundle, 5% of supply, hold 7 s            holdout  n=1001 pooled ROI  -47.3% net $-307,491 on $649,829 | per-launch mean  +23.5% CI[+17,+29] median -2% win 43%
+  creator initial buy <5% & no bundle          fit      n= 763 pooled ROI  -18.1% net $-28,299 on $156,198 | per-launch mean  +11.6% CI[+5,+17] median -2% win 40%
+  creator initial buy <5% & no bundle          holdout  n= 629 pooled ROI  -24.2% net $-39,659 on $163,994 | per-launch mean  +27.3% CI[+19,+35] median -2% win 45%
+  creator initial buy >=10% & no bundle        fit      n= 143 pooled ROI  +10.2% net $2,719 on $26,598 | per-launch mean  +10.2% CI[-4,+25] median -3% win 48%
+  creator initial buy >=10% & no bundle        holdout  n= 185 pooled ROI  -73.8% net $-125,572 on $170,100 | per-launch mean  +14.1% CI[+1,+27] median -2% win 48%
+  native-ETH quoted, no bundle                 fit      n= 763 pooled ROI   -9.3% net $-15,295 on $163,864 | per-launch mean  +22.4% CI[+15,+30] median -2% win 43%
+  native-ETH quoted, no bundle                 holdout  n= 738 pooled ROI  -53.0% net $-186,431 on $351,428 | per-launch mean  +32.0% CI[+24,+39] median -2% win 47%
+  NVDA-quoted, no bundle                       fit      n= 188 pooled ROI   +7.5% net $2,036 on $27,251 | per-launch mean   +5.4% CI[-3,+15] median -2% win 47%
+  NVDA-quoted, no bundle                       holdout  n=  44 pooled ROI  +29.8% net $1,812 on $6,074 | per-launch mean  +27.4% CI[+1,+63] median -2% win 48%
+  USDG-quoted, no bundle                       fit      n= 117 pooled ROI  -19.7% net $-2,953 on $15,025 | per-launch mean  -18.4% CI[-27,-8] median -14% win 32%
+  USDG-quoted, no bundle                       holdout  n= 130 pooled ROI   +4.8% net $893 on $18,459 | per-launch mean   +3.4% CI[-11,+22] median -7% win 37%
