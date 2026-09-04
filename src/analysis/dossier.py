@@ -26,6 +26,23 @@ def dexinfo(a):
     ps=sorted(ps,key=lambda p:-((p.get('liquidity') or {}).get('usd') or 0)); p=ps[0]
     return {"chain":p['chainId'],"liq":(p.get('liquidity') or {}).get('usd'),"fdv":p.get('fdv'),"price":float(p['priceUsd']) if p.get('priceUsd') else None,"created":p.get('pairCreatedAt'),"src":"dex"}
 TRANSFER="T"
+_cc={}
+def tok_price(a,ts):
+    """USD price at ts: 1m candles if they cover ts, else 15m candles; None if no candle within 6h before ts (or 6h after for pre-history)."""
+    if a not in _cc:
+        series=[]
+        for f in (f'gt/ohlcv1m/{a}.json',f'gt/ohlcv/{a}.json'):
+            if os.path.exists(f):
+                c=sorted(json.load(open(f))['candles'],key=lambda x:x[0])
+                if c: series.append({"t":[x[0] for x in c],"c":[x[4] for x in c],"o":[x[1] for x in c]})
+        _cc[a]=series
+    if not ts: return None
+    for o in _cc[a]:
+        i=bisect.bisect_right(o['t'],ts)-1
+        if i>=0 and ts-o['t'][i]<=3600*6: return o['c'][i]
+        if i<0 and o['t'][0]-ts<3600*6: return o['o'][0]
+    return None
+ROUTERS={'0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f'}
 def rh_stats(h):
     f=f'rh/receipts/{h}.json'
     if not os.path.exists(f): return None
@@ -45,20 +62,65 @@ def rh_stats(h):
             if lg['t']==w: tok[lg['a']]+=amt
             if lg['f']==w: tok[lg['a']]-=amt
         eth_val=int(tx['value'],16)/1e18 if tx.get('value') and tx.get('from')==w else 0.0
-        # ETH received on sells is native (not in logs); use swap events: sum WETH legs of S3 swaps in tx
-        swap_weth=0.0
+        # raw wallet token deltas in wei for matching against Swap events
+        raw=collections.defaultdict(int)
         for lg in rc['l']:
-            if lg['e']=='S3':
-                a0=int(lg['d'][2:66],16); a1=int(lg['d'][66:130],16)
-                a0=a0-(1<<256) if a0>=(1<<255) else a0; a1=a1-(1<<256) if a1>=(1<<255) else a1
-                # WETH is token0 if WETH addr < token addr; we don't know pool's token; approximate: the leg with smaller magnitude in 1e18 units that is 'WETH-like' — instead record both
-                swap_weth+=0
+            if lg['e']=='T' and lg['a']!=WETH and lg['v'] and lg['v']!='0x':
+                amt=int(lg['v'],16)
+                if lg['t']==w: raw[lg['a']]+=amt
+                if lg['f']==w: raw[lg['a']]-=amt
+        eth_leg={}  # token -> signed ETH (positive = ETH paid by wallet)
+        def s256(x): return x-(1<<256) if x>=(1<<255) else x
+        def s128(x): 
+            x=x & ((1<<128)-1); return x-(1<<128) if x>=(1<<127) else x
+        for lg in rc['l']:
+            if lg['e'] not in ('S3','S4') or len(lg['d'])<130: continue
+            a0=int(lg['d'][2:66],16); a1=int(lg['d'][66:130],16)
+            a0,a1=(s256(a0),s256(a1)) if lg['e']=='S3' else (s128(a0),s128(a1))
+            for a,rv in raw.items():
+                if rv==0: continue
+                if abs(abs(a0)-abs(rv))<=abs(rv)*0.02+1: eth_leg[a]=eth_leg.get(a,0)+(a1 if lg['e']=='S3' else -a1)/1e18
+                elif abs(abs(a1)-abs(rv))<=abs(rv)*0.02+1: eth_leg[a]=eth_leg.get(a,0)+(a0 if lg['e']=='S3' else -a0)/1e18
+        # pool-based WETH matching (works for V2/V3/Ramses): token came from pool P -> WETH sent to P = ETH paid; token sent to P -> WETH from P = ETH received
+        tok_from={}; tok_to={}
+        for lg in rc['l']:
+            if lg['e']=='T' and lg['a']!=WETH:
+                if lg['t']==w: tok_from[lg['a']]=lg['f']
+                if lg['f']==w: tok_to[lg['a']]=lg['t']
+        weth_to=collections.defaultdict(float); weth_from=collections.defaultdict(float)
+        for lg in rc['l']:
+            if lg['e']=='T' and lg['a']==WETH and lg['v'] and lg['v']!='0x':
+                amt=int(lg['v'],16)/1e18; weth_to[lg['t']]+=amt; weth_from[lg['f']]+=amt
+        swap_addrs={lg['a'] for lg in rc['l'] if lg['e'] in ('S3','S4')}
+        for a in list(tok.keys()):
+            if a in eth_leg: continue
+            if tok[a]>0 and tok_from.get(a) in swap_addrs and tok_from.get(a) in weth_to: eth_leg[a]=weth_to[tok_from[a]]
+            elif tok[a]<0 and tok_to.get(a) in swap_addrs and tok_to.get(a) in weth_from: eth_leg[a]=-weth_from[tok_to[a]]
         for a,v in tok.items():
             if abs(v)<1e-9: continue
             side="in" if v>0 else "out"; eth=None
-            if v>0 and (eth_val>0 or weth_out>0): side="buy"; eth=eth_val+weth_out
+            el=eth_leg.get(a)
+            if v>0 and el is not None and el>0: side="buy"; eth=el
+            elif v<0 and el is not None and el<0: side="sell"; eth=-el
+            elif v>0 and (eth_val>0 or weth_out>0): side="buy"; eth=eth_val+weth_out
             elif v<0 and weth_in>0: side="sell"; eth=weth_in
-            rows.append({"ts":ts,"b":int(bn,16),"tx":txh,"token":a,"amt":v,"eth":eth,"usd":(eth*eth_usd(ts) if (eth and ts) else None),"side":side,"n":len(tok),"mint":mints.get(a),"gas_eth":(int(rc['g'],16)*int(rc['gp'],16)/1e18) if rc.get('g') and rc.get('gp') else None})
+            if side=="in" and (tx.get('to')==a or tx.get('sel') in ('0xc73a2d60','0x47eb6179','0x16b2290f')): side="airdrop"
+            cp=(tok_from.get(a) if v>0 else tok_to.get(a))
+            px=tok_price(a,ts); cand=abs(v)*px if px else None
+            usd=None; psrc=None
+            if eth and ts:
+                sw=eth*eth_usd(ts)
+                # accept swap-derived value only if consistent with candles (within 35%) or, lacking candles, with a WETH transfer of similar size in the tx
+                weth_amts=[int(lg['v'],16)/1e18 for lg in rc['l'] if lg['e']=='T' and lg['a']==WETH and lg['v'] and lg['v']!='0x']
+                ok_c=(cand is not None and cand>0 and 0.65<=sw/cand<=1.35)
+                ok_w=(cand is None and any(abs(x-eth)<=0.05*eth for x in weth_amts))
+                if ok_c or ok_w: usd=sw; psrc="swap"
+            if usd is None and cand is not None and (side in ("buy","sell") or cp in ROUTERS or swap_addrs):
+                usd=cand; psrc="candle"; eth=usd/eth_usd(ts) if ts else None
+                if side in ("in","out"): side="buy" if v>0 else "sell"
+            if usd is None and side in ("buy","sell"): side="in" if v>0 else "out"; eth=None
+            if side in ("buy","sell") and usd is not None and usd<5: side="dust"
+            rows.append({"ts":ts,"b":int(bn,16),"tx":txh,"token":a,"amt":v,"eth":eth,"usd":usd,"side":side,"n":len(tok),"mint":mints.get(a),"gas_eth":(int(rc['g'],16)*int(rc['gp'],16)/1e18) if rc.get('g') and rc.get('gp') else None,"swap_matched":a in eth_leg,"cp":cp,"psrc":psrc})
     rows.sort(key=lambda r:r['b'])
     buys=[r for r in rows if r['side']=='buy']; sells=[r for r in rows if r['side']=='sell']
     outs=[r for r in rows if r['side']=='out']; ins=[r for r in rows if r['side']=='in']

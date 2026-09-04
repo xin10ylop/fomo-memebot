@@ -31,6 +31,9 @@ for l in open('fapi/ws_alerts.jsonl'):
     try: d=json.loads(l)
     except: continue
     add(d.get('tokenAddress'), (d.get('ts') or 0)/1000 or None, d.get('chain'), 1)
+for f in glob.glob('rh/receipts/*.ledger.json'):
+    for r in json.load(open(f)):
+        if r.get('side') in ('buy','sell','in','out') and r.get('ts'): add(r['token'], r['ts'], 'robinhood', 0)
 for f in glob.glob('fapi/balances/*.json'):
     for t in json.load(open(f)).get('holdings',[]) or []:
         a=(t.get('token') or {}).get('address'); add(a,None,t.get('chain'),3)
