@@ -1,0 +1,5246 @@
+{
+ "handle": "Dxranteth",
+ "ranks": {
+  "24h": null,
+  "7d": null,
+  "30d": 71,
+  "all": null
+ },
+ "followers": 54286,
+ "pnl_all": 828088,
+ "fomo_positions": {
+  "open": 19,
+  "closed_captured": 25,
+  "closed_total_reported": 122
+ },
+ "tokens_traded_fomo": [
+  "BGEX",
+  "BISCOTTI",
+  "BONER",
+  "Basecat",
+  "CBULLX",
+  "CEILINGCAT",
+  "CNM",
+  "Dinger",
+  "FOLD",
+  "FXIon",
+  "Fold",
+  "GATSBY",
+  "GrokBot",
+  "Hobbes",
+  "LOOKSMAX",
+  "LUCiC",
+  "Marketplier",
+  "PENGU",
+  "QQQB",
+  "SCFROGN",
+  "SCHIFFY",
+  "SLATE",
+  "SOL",
+  "STRAY",
+  "SpaceCat",
+  "TA",
+  "TIMELESS",
+  "TROOPET",
+  "UNITY",
+  "WETH",
+  "XCCXX",
+  "YT",
+  "butthole",
+  "glorp",
+  "iPHONE18",
+  "\u725b13",
+  "\u725b\u6765",
+  "\u725b\u6765\u6a21\u578b",
+  "\u7334\u5b50\u5e01"
+ ],
+ "n_tokens_fomo": 39,
+ "chains_fomo": {
+  "bsc": 13,
+  "robinhood": 12,
+  "base": 2,
+  "eth": 3,
+  "solana": 14
+ },
+ "by_token": {
+  "\u725b\u6765": {
+   "open": 1,
+   "closed": 0,
+   "realized": 372646.19,
+   "unrealized": 431362.03,
+   "first": "2026-08-14 18:46",
+   "last": "2026-08-14 18:46",
+   "entries": [
+    {
+     "time": "2026-08-14 18:46",
+     "status": "open",
+     "entry_price": 0.00889274,
+     "exit_price": 0.0259674,
+     "realized": 372646.19,
+     "unrealized": 431362.03,
+     "closed": "",
+     "thesis": "forgivable",
+     "chain": "bsc",
+     "address": "0xbeea1d618e533a387d941f58a7d4c9b7bd377777"
+    }
+   ]
+  },
+  "BONER": {
+   "open": 0,
+   "closed": 2,
+   "realized": 128844.14,
+   "unrealized": 0.0,
+   "first": "2026-08-31 20:23",
+   "last": "2026-09-01 15:19",
+   "entries": [
+    {
+     "time": "2026-09-01 15:19",
+     "status": "closed",
+     "entry_price": 0.0494746,
+     "exit_price": 0.0683362,
+     "realized": 21854.13,
+     "unrealized": null,
+     "closed": "2026-09-01 21:58",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18"
+    },
+    {
+     "time": "2026-08-31 20:23",
+     "status": "closed",
+     "entry_price": 0.0326378,
+     "exit_price": 0.0618538,
+     "realized": 106990.01,
+     "unrealized": null,
+     "closed": "2026-09-01 14:30",
+     "thesis": "see yall on the other side",
+     "chain": "robinhood",
+     "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18"
+    }
+   ]
+  },
+  "BISCOTTI": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 7371.33,
+   "first": "2026-08-26 20:44",
+   "last": "2026-08-26 20:44",
+   "entries": [
+    {
+     "time": "2026-08-26 20:44",
+     "status": "open",
+     "entry_price": 0.00271143,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 7371.33,
+     "closed": "",
+     "thesis": "the dog is robotic",
+     "chain": "robinhood",
+     "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1"
+    }
+   ]
+  },
+  "Dinger": {
+   "open": 0,
+   "closed": 1,
+   "realized": 1948.75,
+   "unrealized": 0.0,
+   "first": "2026-08-23 04:33",
+   "last": "2026-08-23 04:33",
+   "entries": [
+    {
+     "time": "2026-08-23 04:33",
+     "status": "closed",
+     "entry_price": null,
+     "exit_price": 0.0044357,
+     "realized": 1948.75,
+     "unrealized": null,
+     "closed": "2026-08-23 06:55",
+     "thesis": "",
+     "chain": "solana",
+     "address": "3kvZYBrBPEySFwQfXZGEvJSeMWRa6BkTS34suBEYpump"
+    }
+   ]
+  },
+  "GrokBot": {
+   "open": 0,
+   "closed": 1,
+   "realized": 242.8,
+   "unrealized": 0.0,
+   "first": "2026-08-24 05:43",
+   "last": "2026-08-24 05:43",
+   "entries": [
+    {
+     "time": "2026-08-24 05:43",
+     "status": "closed",
+     "entry_price": null,
+     "exit_price": 0.00182008,
+     "realized": 242.8,
+     "unrealized": null,
+     "closed": "2026-08-24 07:50",
+     "thesis": "",
+     "chain": "solana",
+     "address": "GeSfrQiscfsEv4Hx2TKaB9Nfid12qND1YYRYS1vSpump"
+    }
+   ]
+  },
+  "Basecat": {
+   "open": 0,
+   "closed": 1,
+   "realized": 158.274,
+   "unrealized": 0.0,
+   "first": "2026-08-26 08:49",
+   "last": "2026-08-26 08:49",
+   "entries": [
+    {
+     "time": "2026-08-26 08:49",
+     "status": "closed",
+     "entry_price": 0.0251334,
+     "exit_price": 0.0259429,
+     "realized": 158.274,
+     "unrealized": null,
+     "closed": "2026-08-26 21:39",
+     "thesis": "",
+     "chain": "base",
+     "address": "0xb2000000000000000000004c27f6523082f41d01"
+    }
+   ]
+  },
+  "BGEX": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 126.256,
+   "first": "2026-09-02 16:14",
+   "last": "2026-09-02 16:14",
+   "entries": [
+    {
+     "time": "2026-09-02 16:14",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 126.256,
+     "closed": "",
+     "thesis": "",
+     "chain": "solana",
+     "address": "GbBFQC34NhrfJz65uYw9udsy5TqGo1A3wVbiUkDxvdtB"
+    }
+   ]
+  },
+  "SCFROGN": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 49.2179,
+   "first": "2026-09-03 20:24",
+   "last": "2026-09-03 20:24",
+   "entries": [
+    {
+     "time": "2026-09-03 20:24",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 49.2179,
+     "closed": "",
+     "thesis": "",
+     "chain": "solana",
+     "address": "3WPLCMkXAJu37TdiptJTh7ikdvgTpEiU7hbKLtrMbFng"
+    }
+   ]
+  },
+  "SOL": {
+   "open": 1,
+   "closed": 0,
+   "realized": -5.34329,
+   "unrealized": 30.8161,
+   "first": "2026-08-11 03:18",
+   "last": "2026-08-11 03:18",
+   "entries": [
+    {
+     "time": "2026-08-11 03:18",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": -5.34329,
+     "unrealized": 30.8161,
+     "closed": "",
+     "thesis": "",
+     "chain": "solana",
+     "address": "So11111111111111111111111111111111111111112"
+    }
+   ]
+  },
+  "CBULLX": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 20.1743,
+   "first": "2026-09-02 04:55",
+   "last": "2026-09-02 04:55",
+   "entries": [
+    {
+     "time": "2026-09-02 04:55",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 20.1743,
+     "closed": "",
+     "thesis": "",
+     "chain": "solana",
+     "address": "HaPPXiYoqnG6o6e3z6wm9QnS6aQFKGCDLnLF9Q7G725x"
+    }
+   ]
+  },
+  "XCCXX": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 17.0123,
+   "first": "2026-09-04 02:05",
+   "last": "2026-09-04 02:05",
+   "entries": [
+    {
+     "time": "2026-09-04 02:05",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 17.0123,
+     "closed": "",
+     "thesis": "",
+     "chain": "solana",
+     "address": "24WCk1CmzheVgRbdRXQd1YLa8CTfhSjxeko3YeVqX8y7"
+    }
+   ]
+  },
+  "QQQB": {
+   "open": 1,
+   "closed": 2,
+   "realized": 6.300110000000001,
+   "unrealized": 5.04251,
+   "first": "2026-08-19 20:32",
+   "last": "2026-08-31 22:41",
+   "entries": [
+    {
+     "time": "2026-08-31 22:41",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 5.04251,
+     "closed": "",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x205812cdbed920aff76c6580abd681a46d11efc7"
+    },
+    {
+     "time": "2026-08-26 22:05",
+     "status": "closed",
+     "entry_price": null,
+     "exit_price": 717.052,
+     "realized": -4.13639,
+     "unrealized": null,
+     "closed": "2026-08-31 21:51",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x205812cdbed920aff76c6580abd681a46d11efc7"
+    },
+    {
+     "time": "2026-08-19 20:32",
+     "status": "closed",
+     "entry_price": null,
+     "exit_price": 716.129,
+     "realized": 10.4365,
+     "unrealized": null,
+     "closed": "2026-08-26 21:12",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x205812cdbed920aff76c6580abd681a46d11efc7"
+    }
+   ]
+  },
+  "iPHONE18": {
+   "open": 0,
+   "closed": 1,
+   "realized": 8.68822,
+   "unrealized": 0.0,
+   "first": "2026-08-17 17:32",
+   "last": "2026-08-17 17:32",
+   "entries": [
+    {
+     "time": "2026-08-17 17:32",
+     "status": "closed",
+     "entry_price": null,
+     "exit_price": 8.83391e-05,
+     "realized": 8.68822,
+     "unrealized": null,
+     "closed": "2026-08-19 19:33",
+     "thesis": "",
+     "chain": "solana",
+     "address": "BdP1WRm13fnjepywesbGhMAEpP3Age3RPjYkb93gpump"
+    }
+   ]
+  },
+  "Fold": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 8.14964,
+   "first": "2026-09-01 15:37",
+   "last": "2026-09-01 15:37",
+   "entries": [
+    {
+     "time": "2026-09-01 15:37",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 8.14964,
+     "closed": "",
+     "thesis": "",
+     "chain": "base",
+     "address": "0x4c3565954f58b5211aa56ef48e1eecc52f264466"
+    }
+   ]
+  },
+  "UNITY": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 4.49778,
+   "first": "2026-08-16 07:41",
+   "last": "2026-08-16 07:41",
+   "entries": [
+    {
+     "time": "2026-08-16 07:41",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 4.49778,
+     "closed": "",
+     "thesis": "",
+     "chain": "eth",
+     "address": "0xfd0bb211d479710dfa01d3d98751767f51edb2d9"
+    }
+   ]
+  },
+  "FXIon": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 0.431707,
+   "first": "2026-08-27 07:59",
+   "last": "2026-08-27 07:59",
+   "entries": [
+    {
+     "time": "2026-08-27 07:59",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 0.431707,
+     "closed": "",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x9b8e987e6fec8cf1380c4dca7071e2c7853aeea1"
+    }
+   ]
+  },
+  "TIMELESS": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 0.401535,
+   "first": "2026-08-22 01:38",
+   "last": "2026-08-22 01:38",
+   "entries": [
+    {
+     "time": "2026-08-22 01:38",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 0.401535,
+     "closed": "",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x63a26c936abdd4040c07306b120bc3235e3a7777"
+    }
+   ]
+  },
+  "WETH": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 0.188592,
+   "first": "2026-08-14 00:30",
+   "last": "2026-08-14 00:30",
+   "entries": [
+    {
+     "time": "2026-08-14 00:30",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 0.188592,
+     "closed": "",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x0bd7d308f8e1639fab988df18a8011f41eacad73"
+    }
+   ]
+  },
+  "PENGU": {
+   "open": 0,
+   "closed": 1,
+   "realized": 0.120166,
+   "unrealized": 0.0,
+   "first": "2026-08-16 17:42",
+   "last": "2026-08-16 17:42",
+   "entries": [
+    {
+     "time": "2026-08-16 17:42",
+     "status": "closed",
+     "entry_price": null,
+     "exit_price": 0.00630658,
+     "realized": 0.120166,
+     "unrealized": null,
+     "closed": "2026-08-19 19:33",
+     "thesis": "",
+     "chain": "solana",
+     "address": "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv"
+    }
+   ]
+  },
+  "YT": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 0.0695761,
+   "first": "2026-08-21 13:53",
+   "last": "2026-08-21 13:53",
+   "entries": [
+    {
+     "time": "2026-08-21 13:53",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 0.0695761,
+     "closed": "",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x49add5b12f8e8f26ed29b0416d927d7376db7777"
+    }
+   ]
+  },
+  "LUCiC": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 0.0606826,
+   "first": "2026-08-18 10:53",
+   "last": "2026-08-18 10:53",
+   "entries": [
+    {
+     "time": "2026-08-18 10:53",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 0.0606826,
+     "closed": "",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0xe054017a2f0ecfa294b08a74af319bce0b985a39"
+    }
+   ]
+  },
+  "STRAY": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": -8.38054,
+   "first": "2026-07-26 06:25",
+   "last": "2026-07-26 06:25",
+   "entries": [
+    {
+     "time": "2026-07-26 06:25",
+     "status": "open",
+     "entry_price": 0.000433631,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": -8.38054,
+     "closed": "",
+     "thesis": "run away from this one forgivable is in",
+     "chain": "robinhood",
+     "address": "0x807f574ba1a79c357bece49a6e9b5dca24f3eeac"
+    }
+   ]
+  },
+  "TA": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": -9.89905,
+   "first": "2026-07-25 21:09",
+   "last": "2026-07-25 21:09",
+   "entries": [
+    {
+     "time": "2026-07-25 21:09",
+     "status": "open",
+     "entry_price": 0.00212187,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": -9.89905,
+     "closed": "",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x30db03a051205ccbeb1b6524ddf87fbc6c0127bc"
+    }
+   ]
+  },
+  "\u725b13": {
+   "open": 0,
+   "closed": 1,
+   "realized": -9.93541,
+   "unrealized": 0.0,
+   "first": "2026-08-26 08:32",
+   "last": "2026-08-26 08:32",
+   "entries": [
+    {
+     "time": "2026-08-26 08:32",
+     "status": "closed",
+     "entry_price": null,
+     "exit_price": 0.00075516,
+     "realized": -9.93541,
+     "unrealized": null,
+     "closed": "2026-08-26 21:12",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0xeeeba02e275c598adc5aaf0726e6f33993897777"
+    }
+   ]
+  },
+  "Hobbes": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": -126.024,
+   "first": "2026-08-24 02:17",
+   "last": "2026-08-24 02:17",
+   "entries": [
+    {
+     "time": "2026-08-24 02:17",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": -126.024,
+     "closed": "",
+     "thesis": "",
+     "chain": "solana",
+     "address": "7UuqhWmoMXQfrwGLTK9Yf4My9ZPH3ZEyWCwNu8LNpump"
+    }
+   ]
+  },
+  "GATSBY": {
+   "open": 0,
+   "closed": 1,
+   "realized": -221.918,
+   "unrealized": 0.0,
+   "first": "2026-08-23 18:23",
+   "last": "2026-08-23 18:23",
+   "entries": [
+    {
+     "time": "2026-08-23 18:23",
+     "status": "closed",
+     "entry_price": 0.000257492,
+     "exit_price": 0.000251297,
+     "realized": -221.918,
+     "unrealized": null,
+     "closed": "2026-08-26 21:12",
+     "thesis": "what lizzerd said",
+     "chain": "bsc",
+     "address": "0x3a828e1ea6511e367d436c601e14cdb2b446896d"
+    }
+   ]
+  },
+  "\u7334\u5b50\u5e01": {
+   "open": 0,
+   "closed": 1,
+   "realized": -290.361,
+   "unrealized": 0.0,
+   "first": "2026-08-20 17:56",
+   "last": "2026-08-20 17:56",
+   "entries": [
+    {
+     "time": "2026-08-20 17:56",
+     "status": "closed",
+     "entry_price": 6.23277e-05,
+     "exit_price": 5.04545e-05,
+     "realized": -290.361,
+     "unrealized": null,
+     "closed": "2026-08-21 01:44",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x0d5de709615e645ada40dc2b20e67db873c27777"
+    }
+   ]
+  },
+  "SCHIFFY": {
+   "open": 0,
+   "closed": 1,
+   "realized": -304.974,
+   "unrealized": 0.0,
+   "first": "2026-09-01 00:25",
+   "last": "2026-09-01 00:25",
+   "entries": [
+    {
+     "time": "2026-09-01 00:25",
+     "status": "closed",
+     "entry_price": 0.00104673,
+     "exit_price": 0.0010178,
+     "realized": -304.974,
+     "unrealized": null,
+     "closed": "2026-09-02 05:58",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x42afa2124ca5a2b83898e46b2da9a190995b1e18"
+    }
+   ]
+  },
+  "butthole": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": -1079.0,
+   "first": "2026-09-03 08:21",
+   "last": "2026-09-03 08:21",
+   "entries": [
+    {
+     "time": "2026-09-03 08:21",
+     "status": "open",
+     "entry_price": 0.00041179,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": -1079,
+     "closed": "",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x06e64ed98daf37bf1c552baa77cecbcfe6c90d41"
+    }
+   ]
+  },
+  "CNM": {
+   "open": 0,
+   "closed": 1,
+   "realized": -1252.41,
+   "unrealized": 0.0,
+   "first": "2026-08-27 07:56",
+   "last": "2026-08-27 07:56",
+   "entries": [
+    {
+     "time": "2026-08-27 07:56",
+     "status": "closed",
+     "entry_price": 0.000214989,
+     "exit_price": 0.000125678,
+     "realized": -1252.41,
+     "unrealized": null,
+     "closed": "2026-08-27 08:01",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0xbd4d01295747b1121ae9ccbbf3dbbc3c02e37777"
+    }
+   ]
+  },
+  "SpaceCat": {
+   "open": 0,
+   "closed": 1,
+   "realized": -2283.75,
+   "unrealized": 0.0,
+   "first": "2026-08-25 21:38",
+   "last": "2026-08-25 21:38",
+   "entries": [
+    {
+     "time": "2026-08-25 21:38",
+     "status": "closed",
+     "entry_price": 0.00132419,
+     "exit_price": 0.00102163,
+     "realized": -2283.75,
+     "unrealized": null,
+     "closed": "2026-08-25 21:38",
+     "thesis": "",
+     "chain": "solana",
+     "address": "AY6dVdZ7DQUGnh3BBhpoXmTvaRGQgsppKkPkfucppump"
+    }
+   ]
+  },
+  "\u725b\u6765\u6a21\u578b": {
+   "open": 0,
+   "closed": 1,
+   "realized": -2843.26,
+   "unrealized": 0.0,
+   "first": "2026-08-21 05:02",
+   "last": "2026-08-21 05:02",
+   "entries": [
+    {
+     "time": "2026-08-21 05:02",
+     "status": "closed",
+     "entry_price": 0.000405706,
+     "exit_price": 7.62751e-05,
+     "realized": -2843.26,
+     "unrealized": null,
+     "closed": "2026-08-23 20:00",
+     "thesis": "https://x.com/zephyr_z9/status/2090660530512081374?s=20 study",
+     "chain": "bsc",
+     "address": "0xf463aa554ba28c7e3f674d3d0a0e62618f3b7777"
+    }
+   ]
+  },
+  "glorp": {
+   "open": 0,
+   "closed": 1,
+   "realized": -3711.61,
+   "unrealized": 0.0,
+   "first": "2026-08-25 21:49",
+   "last": "2026-08-25 21:49",
+   "entries": [
+    {
+     "time": "2026-08-25 21:49",
+     "status": "closed",
+     "entry_price": 0.000199062,
+     "exit_price": 3.47764e-05,
+     "realized": -3711.61,
+     "unrealized": null,
+     "closed": "2026-08-26 01:20",
+     "thesis": "",
+     "chain": "solana",
+     "address": "GLorPhfYWUQ6h8V63LEuhgaiRpyv4qKnDmhEnprLPwV4"
+    }
+   ]
+  },
+  "TROOPET": {
+   "open": 0,
+   "closed": 1,
+   "realized": -4784.05,
+   "unrealized": 0.0,
+   "first": "2026-08-19 20:01",
+   "last": "2026-08-19 20:01",
+   "entries": [
+    {
+     "time": "2026-08-19 20:01",
+     "status": "closed",
+     "entry_price": 0.00131226,
+     "exit_price": 0.000829086,
+     "realized": -4784.05,
+     "unrealized": null,
+     "closed": "2026-08-19 20:06",
+     "thesis": "",
+     "chain": "solana",
+     "address": "3bLw2fp44SGrAp19XAtaLmutCksRDRDvjLyTbWD7iEqV"
+    }
+   ]
+  },
+  "LOOKSMAX": {
+   "open": 0,
+   "closed": 1,
+   "realized": -6503.46,
+   "unrealized": 0.0,
+   "first": "2026-08-24 06:07",
+   "last": "2026-08-24 06:07",
+   "entries": [
+    {
+     "time": "2026-08-24 06:07",
+     "status": "closed",
+     "entry_price": 0.00275291,
+     "exit_price": 0.00215583,
+     "realized": -6503.46,
+     "unrealized": null,
+     "closed": "2026-08-26 03:54",
+     "thesis": "",
+     "chain": "solana",
+     "address": "GPzpoXpD74E2C4CJNayuoyBqPQJEsPtdse3nhntrpump"
+    }
+   ]
+  },
+  "SLATE": {
+   "open": 0,
+   "closed": 1,
+   "realized": -7377.88,
+   "unrealized": 0.0,
+   "first": "2026-08-31 21:41",
+   "last": "2026-08-31 21:41",
+   "entries": [
+    {
+     "time": "2026-08-31 21:41",
+     "status": "closed",
+     "entry_price": 0.000655926,
+     "exit_price": 1.0465e-05,
+     "realized": -7377.88,
+     "unrealized": null,
+     "closed": "2026-08-31 21:58",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x7bc7ad5724b17d6b5fab93b6966533838b4e96af"
+    }
+   ]
+  },
+  "FOLD": {
+   "open": 0,
+   "closed": 2,
+   "realized": -9865.560000000005,
+   "unrealized": 0.0,
+   "first": "2026-08-19 19:11",
+   "last": "2026-08-29 23:37",
+   "entries": [
+    {
+     "time": "2026-08-29 23:37",
+     "status": "closed",
+     "entry_price": 0.0926129,
+     "exit_price": 0.0715176,
+     "realized": -34191.16,
+     "unrealized": null,
+     "closed": "2026-09-02 06:00",
+     "thesis": "",
+     "chain": "eth",
+     "address": "0xe172e9b6cfbeeb5593bdce3f077356fdb33af904"
+    },
+    {
+     "time": "2026-08-19 19:11",
+     "status": "closed",
+     "entry_price": 0.0538819,
+     "exit_price": 0.0799136,
+     "realized": 24325.6,
+     "unrealized": null,
+     "closed": "2026-08-27 14:42",
+     "thesis": "",
+     "chain": "eth",
+     "address": "0xe172e9b6cfbeeb5593bdce3f077356fdb33af904"
+    }
+   ]
+  },
+  "CEILINGCAT": {
+   "open": 0,
+   "closed": 1,
+   "realized": -12558.08,
+   "unrealized": 0.0,
+   "first": "2026-08-25 22:30",
+   "last": "2026-08-25 22:30",
+   "entries": [
+    {
+     "time": "2026-08-25 22:30",
+     "status": "closed",
+     "entry_price": 0.00169569,
+     "exit_price": 0.000630716,
+     "realized": -12558.08,
+     "unrealized": null,
+     "closed": "2026-08-26 19:00",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x2e5ff79452a0dbdd992c3193d6d7f7c5dc93e7cc"
+    }
+   ]
+  },
+  "Marketplier": {
+   "open": 0,
+   "closed": 2,
+   "realized": -25040.075,
+   "unrealized": 0.0,
+   "first": "2026-08-31 21:35",
+   "last": "2026-08-31 22:54",
+   "entries": [
+    {
+     "time": "2026-08-31 22:54",
+     "status": "closed",
+     "entry_price": 0.00212176,
+     "exit_price": 6.85243e-05,
+     "realized": -24181.8,
+     "unrealized": null,
+     "closed": "2026-09-01 21:25",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0xea97dfed19cfc581627a433dc4cd35418d298667"
+    },
+    {
+     "time": "2026-08-31 21:35",
+     "status": "closed",
+     "entry_price": 0.00115983,
+     "exit_price": 0.000961334,
+     "realized": -858.275,
+     "unrealized": null,
+     "closed": "2026-08-31 21:36",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0xea97dfed19cfc581627a433dc4cd35418d298667"
+    }
+   ]
+  }
+ },
+ "holdings_now": [
+  {
+   "symbol": "USDC",
+   "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+   "chain": "solana",
+   "amount": 1057807.12,
+   "value_usd": 1057605.03,
+   "change24h": 0.0006
+  },
+  {
+   "symbol": "\u725b\u6765",
+   "address": "0xbeea1d618e533a387d941f58a7d4c9b7bd377777",
+   "chain": "bsc",
+   "amount": 5073351.67,
+   "value_usd": 486392.69,
+   "change24h": 21.345
+  },
+  {
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "chain": "robinhood",
+   "amount": 20081691.26,
+   "value_usd": 61821.43,
+   "change24h": -1.1594
+  },
+  {
+   "symbol": "butthole",
+   "address": "0x06e64ed98daf37bf1c552baa77cecbcfe6c90d41",
+   "chain": "robinhood",
+   "amount": 4850304.42,
+   "value_usd": 849.54,
+   "change24h": -82.7327
+  },
+  {
+   "symbol": "QQQB",
+   "address": "0x205812cdbed920aff76c6580abd681a46d11efc7",
+   "chain": "bsc",
+   "amount": 0.717356,
+   "value_usd": 514.98,
+   "change24h": 1.2923
+  },
+  {
+   "symbol": "BGEX",
+   "address": "GbBFQC34NhrfJz65uYw9udsy5TqGo1A3wVbiUkDxvdtB",
+   "chain": "solana",
+   "amount": 9601617.49,
+   "value_usd": 215.75,
+   "change24h": 5.8609
+  },
+  {
+   "symbol": "SCFROGN",
+   "address": "3WPLCMkXAJu37TdiptJTh7ikdvgTpEiU7hbKLtrMbFng",
+   "chain": "solana",
+   "amount": 7696478.8,
+   "value_usd": 164.45,
+   "change24h": 241.3846
+  },
+  {
+   "symbol": "CBULLX",
+   "address": "HaPPXiYoqnG6o6e3z6wm9QnS6aQFKGCDLnLF9Q7G725x",
+   "chain": "solana",
+   "amount": 4444771.62,
+   "value_usd": 101.74,
+   "change24h": 6.6321
+  },
+  {
+   "symbol": "FXIon",
+   "address": "0x9b8e987e6fec8cf1380c4dca7071e2c7853aeea1",
+   "chain": "bsc",
+   "amount": 1.36728,
+   "value_usd": 49.26,
+   "change24h": 0.6637
+  },
+  {
+   "symbol": "UNITY",
+   "address": "0xfd0bb211d479710dfa01d3d98751767f51edb2d9",
+   "chain": "ethereum",
+   "amount": 30000000000,
+   "value_usd": 9.52,
+   "change24h": 4.3228
+  },
+  {
+   "symbol": "TIMELESS",
+   "address": "0x63a26c936abdd4040c07306b120bc3235e3a7777",
+   "chain": "bsc",
+   "amount": 5100,
+   "value_usd": 3.26,
+   "change24h": -1.235
+  },
+  {
+   "symbol": "Hobbes",
+   "address": "7UuqhWmoMXQfrwGLTK9Yf4My9ZPH3ZEyWCwNu8LNpump",
+   "chain": "solana",
+   "amount": 81967.21,
+   "value_usd": 2.95,
+   "change24h": 4.2011
+  },
+  {
+   "symbol": "WETH",
+   "address": "0x0bd7d308f8e1639fab988df18a8011f41eacad73",
+   "chain": "robinhood",
+   "amount": 0.000304494,
+   "value_usd": 0.76,
+   "change24h": 4.9126
+  },
+  {
+   "symbol": "LUCiC",
+   "address": "0xe054017a2f0ecfa294b08a74af319bce0b985a39",
+   "chain": "bsc",
+   "amount": 2,
+   "value_usd": 0.28,
+   "change24h": 5.8186
+  },
+  {
+   "symbol": "YT",
+   "address": "0x49add5b12f8e8f26ed29b0416d927d7376db7777",
+   "chain": "bsc",
+   "amount": 1957,
+   "value_usd": 0.28,
+   "change24h": 5.4276
+  },
+  {
+   "symbol": "\u820d\u5229\u5b50",
+   "address": "0x74972bef354e890dec5df1c0eb659b73ab337777",
+   "chain": "bsc",
+   "amount": 10,
+   "value_usd": 0.12,
+   "change24h": 4.8739
+  },
+  {
+   "symbol": "TA",
+   "address": "0x30db03a051205ccbeb1b6524ddf87fbc6c0127bc",
+   "chain": "robinhood",
+   "amount": 4691.62,
+   "value_usd": 0.06,
+   "change24h": 3.2636
+  },
+  {
+   "symbol": "\u5495\u5495\u560e\u560e",
+   "address": "0x2142162f97af0800521478722c650450d7507777",
+   "chain": "bsc",
+   "amount": 3670,
+   "value_usd": 0.04,
+   "change24h": -16.5022
+  },
+  {
+   "symbol": "CLAWBSTR",
+   "address": "0x7ba6b156c182bdedf3bf2ff645e04a68fb57fb07",
+   "chain": "base",
+   "amount": 100000,
+   "value_usd": 0.03,
+   "change24h": 2.3785
+  },
+  {
+   "symbol": "CNHK",
+   "address": "0x4ec71f5f62244e27e886f3d742ae8871037a1111",
+   "chain": "bsc",
+   "amount": 0.1,
+   "value_usd": 0.03,
+   "change24h": 2.5114
+  },
+  {
+   "symbol": "\u725b\u6765\u4eba\u751f",
+   "address": "0x3d20fcc9f534a434f8be69246fcb52a16e687777",
+   "chain": "bsc",
+   "amount": 500,
+   "value_usd": 0.03,
+   "change24h": 19.2235
+  },
+  {
+   "symbol": "XST",
+   "address": "XSTuo1fV7HHMhs4BYiwtrWSLsMCJNrooH2AssWTYZqP",
+   "chain": "solana",
+   "amount": 16.4583,
+   "value_usd": 0.03,
+   "change24h": -46.4678
+  },
+  {
+   "symbol": "\u4f2f\u4e50",
+   "address": "0xb1985f7f020e111bafac5d8e86936e6606f17777",
+   "chain": "bsc",
+   "amount": 20,
+   "value_usd": 0.03,
+   "change24h": 8.5306
+  },
+  {
+   "symbol": "\u8774\u8776\u4eba\u751f",
+   "address": "0x87ae267002cd1ea0ec86bf3601d4a8ad76a47777",
+   "chain": "bsc",
+   "amount": 8,
+   "value_usd": 0.02,
+   "change24h": -7.4907
+  },
+  {
+   "symbol": "Hardcore",
+   "address": "0xe8a3cd5334423bd834894fce1a0c407c3a667777",
+   "chain": "bsc",
+   "amount": 100,
+   "value_usd": 0.02,
+   "change24h": 2.7311
+  },
+  {
+   "symbol": "alien",
+   "address": "0xe10833de865ec804e29499278457b3a620dc6666",
+   "chain": "bsc",
+   "amount": 3005.37,
+   "value_usd": 0.02,
+   "change24h": 7.0596
+  },
+  {
+   "symbol": "\u81ea\u62c9\u4eba\u751f",
+   "address": "0x3b27688def326eff59c59efd849becb4246f7777",
+   "chain": "bsc",
+   "amount": 102,
+   "value_usd": 0.02,
+   "change24h": 6.948
+  },
+  {
+   "symbol": "PRIZE",
+   "address": "0x48fe62970e2b3962ed9c59f0fce7e5a43b63ea5b",
+   "chain": "robinhood",
+   "amount": 450,
+   "value_usd": 0.01,
+   "change24h": 3.7706
+  },
+  {
+   "symbol": "RVH",
+   "address": "0x96765066f6a040a21eb027167d2315b707c82633",
+   "chain": "robinhood",
+   "amount": 1,
+   "value_usd": 0.01,
+   "change24h": -3.3725
+  },
+  {
+   "symbol": "KISHU",
+   "address": "0x6580939fb8a69d8f935d3a8ad6609e3599817777",
+   "chain": "bsc",
+   "amount": 500,
+   "value_usd": 0.01,
+   "change24h": 5.5256
+  },
+  {
+   "symbol": "\u4eac\u4e1c",
+   "address": "0x3db5a97b035235b6e5a2f13bcd6b466b5fbd7777",
+   "chain": "bsc",
+   "amount": 5,
+   "value_usd": 0.01,
+   "change24h": -5.0239
+  },
+  {
+   "symbol": "\u725b\u6765\u4e86",
+   "address": "0x19cc4651d845a5d7b16a070a51b361f7d6097777",
+   "chain": "bsc",
+   "amount": 100,
+   "value_usd": 0,
+   "change24h": 33.8907
+  },
+  {
+   "symbol": "\u793e\u533a\u8054\u76df",
+   "address": "0xae3d4ff1ea1e509ea0e01732b78dee0c61587777",
+   "chain": "bsc",
+   "amount": 0.1,
+   "value_usd": 0,
+   "change24h": 6.4941
+  },
+  {
+   "symbol": "\u652f\u4ed8\u5b9d",
+   "address": "0xe4ad6d996d5b61b5734afa20c19444b596787777",
+   "chain": "bsc",
+   "amount": 6,
+   "value_usd": 0,
+   "change24h": -1.2376
+  },
+  {
+   "symbol": "\u5929\u732b",
+   "address": "0xf3038d337824d7807912d4b954f74f7f3ceb7777",
+   "chain": "bsc",
+   "amount": 20,
+   "value_usd": 0,
+   "change24h": -3.8048
+  },
+  {
+   "symbol": "\u7f8a\u5934",
+   "address": "0xbc118beaa1c84c4a404f96349e50285718467777",
+   "chain": "bsc",
+   "amount": 0.1,
+   "value_usd": 0,
+   "change24h": -9.0343
+  },
+  {
+   "symbol": "\u62feU\u4eba\u751f",
+   "address": "0xe87030523f5d33046edd14ccaaae62edfea37777",
+   "chain": "bsc",
+   "amount": 11.8,
+   "value_usd": 0,
+   "change24h": -14.854
+  },
+  {
+   "symbol": "TYX",
+   "address": "0x8cf8c119ff435d9e72de4072f93d6878b6ff7777",
+   "chain": "bsc",
+   "amount": 10,
+   "value_usd": 0,
+   "change24h": 20.7361
+  },
+  {
+   "symbol": "AmberVibe",
+   "address": "0xb5b0f722d6d4a803d3df94c9ed12a191603eab07",
+   "chain": "base",
+   "amount": 2023,
+   "value_usd": 0,
+   "change24h": 0.7234
+  },
+  {
+   "symbol": "\u5e01\u5b89\u80a1\u7968",
+   "address": "0xd8348b96c8f23e1e24c0f40f495823c98f8e7777",
+   "chain": "bsc",
+   "amount": 0.1,
+   "value_usd": 0,
+   "change24h": -20.7131
+  },
+  {
+   "symbol": "FIT",
+   "address": "0x3bcaac7b233b4b3eb4aff2cba23fa1c653a33e67",
+   "chain": "bsc",
+   "amount": 0.001,
+   "value_usd": 0,
+   "change24h": 0.0087
+  },
+  {
+   "symbol": "\u5fae\u8f6f\u80a1\u7968",
+   "address": "0x013cae6f4e8971771a30f8d839b3be1a22117777",
+   "chain": "bsc",
+   "amount": 3,
+   "value_usd": 0,
+   "change24h": 8.0152
+  },
+  {
+   "symbol": "\u5b9d\u8d1d\u725b\u6765",
+   "address": "0x364598ccfb1dbbe28533ce53909e43f56adf7777",
+   "chain": "bsc",
+   "amount": 11,
+   "value_usd": 0,
+   "change24h": 38.8907
+  },
+  {
+   "symbol": "YANG",
+   "address": "4X2bvtDeaVNMnFq7oVA37zt2HLqUgdnEfoRxKihsSgan",
+   "chain": "solana",
+   "amount": 10,
+   "value_usd": 0,
+   "change24h": -15.019
+  },
+  {
+   "symbol": "VIRTUAL",
+   "address": "3iQL8BFS2vE7mww4ehAqQHAsbmRNCrPxizWAT2Zfyr9y",
+   "chain": "solana",
+   "amount": 0.000232749,
+   "value_usd": 0,
+   "change24h": 1.3486
+  },
+  {
+   "symbol": "\u5927\u7ea2\u5305",
+   "address": "0xccb5153c9fdcac74b565d8a1daa8a34852d93eb4",
+   "chain": "bsc",
+   "amount": 14,
+   "value_usd": 0,
+   "change24h": 11.2574
+  },
+  {
+   "symbol": "\u7f8a\u5e06\u8d77\u822a",
+   "address": "0xc82d112e7ed62880a310a77a62d5a46740bc7777",
+   "chain": "bsc",
+   "amount": 1,
+   "value_usd": 0,
+   "change24h": -10.642
+  },
+  {
+   "symbol": "\u9006\u88ad\u4eba\u751f2",
+   "address": "0x62d3f1156487ce9bc093d01773c6e6f48c417777",
+   "chain": "bsc",
+   "amount": 1,
+   "value_usd": 0,
+   "change24h": -11.8693
+  },
+  {
+   "symbol": "\u55b5\u55b5\u5e01",
+   "address": "0xd9d3dad2efed7ee99f1363fac549f5e476f19a5a",
+   "chain": "bsc",
+   "amount": 1.292,
+   "value_usd": 0,
+   "change24h": -0.0871
+  },
+  {
+   "symbol": "\u7f8a\u5fc5\u706b",
+   "address": "0xc839b8f4f6ded0cae5531a603b78ede6ca677777",
+   "chain": "bsc",
+   "amount": 0.001,
+   "value_usd": 0,
+   "change24h": -0.5257
+  },
+  {
+   "symbol": "\u725b\u6765",
+   "address": "0x7be91dd821959632b762eabb78d5d7840e906666",
+   "chain": "bsc",
+   "amount": 1,
+   "value_usd": 0,
+   "change24h": -10.5137
+  },
+  {
+   "symbol": "\u5c0f\u91d1\u9c7c",
+   "address": "0xbd5c9e77ee31f433427ab644da9235a2fd00aaaa",
+   "chain": "bsc",
+   "amount": 9.999999e-05,
+   "value_usd": 0,
+   "change24h": 3.3896
+  },
+  {
+   "symbol": "ANSUM",
+   "address": "GaZb3DE2U3Jcjx7ddAVwobsBKnCaDoJWLbzTvJYhpump",
+   "chain": "solana",
+   "amount": 0.366067,
+   "value_usd": 0,
+   "change24h": -10.8787
+  },
+  {
+   "symbol": "\u725b\u6765\u901f\u56de",
+   "address": "0xa197034a46ab6b459dabbaf0ef32fb1b28897777",
+   "chain": "bsc",
+   "amount": 1,
+   "value_usd": 0,
+   "change24h": -37.0874
+  },
+  {
+   "symbol": "LI",
+   "address": "0x947d4017a9d0071322611b0c0913386e1a26866b",
+   "chain": "bsc",
+   "amount": 0.0001,
+   "value_usd": 0,
+   "change24h": -1.0681
+  },
+  {
+   "symbol": "MSC",
+   "address": "0xab4db9aa1cf187897bc11b25e7b3ec33e3d84529",
+   "chain": "bsc",
+   "amount": 0.001,
+   "value_usd": 0,
+   "change24h": 0.0042
+  },
+  {
+   "symbol": "DOG",
+   "address": "0xf82d598ce6fce9f2d46f046fc46653e3284040aa",
+   "chain": "ethereum",
+   "amount": 1,
+   "value_usd": 0,
+   "change24h": 5.1256
+  },
+  {
+   "symbol": "STRAY",
+   "address": "0x807f574ba1a79c357bece49a6e9b5dca24f3eeac",
+   "chain": "robinhood",
+   "amount": 22957.31,
+   "value_usd": 0,
+   "change24h": 0
+  },
+  {
+   "symbol": "SOL",
+   "address": "So11111111111111111111111111111111111111112",
+   "chain": "solana",
+   "amount": -0.0989922,
+   "value_usd": -10.25,
+   "change24h": 3.5153
+  }
+ ],
+ "rh_fills": [
+  {
+   "ts": 1783650847.4369702,
+   "time": "2026-07-10 02:34",
+   "side": "buy",
+   "symbol": "CASHCAT",
+   "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+   "amount": 79.45831768143448,
+   "usd": 10.3731186323523,
+   "price": 0.130547926699636,
+   "launch_age_min": 9486.218855218855,
+   "block": 5723650
+  },
+  {
+   "ts": 1783853411.7013566,
+   "time": "2026-07-12 10:50",
+   "side": "buy",
+   "symbol": "CASHCAT",
+   "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+   "amount": 157472.57587981693,
+   "usd": 26248.674720733325,
+   "price": 0.166687276016659,
+   "launch_age_min": 12891.244107744107,
+   "block": 7746235
+  },
+  {
+   "ts": 1783853558.106497,
+   "time": "2026-07-12 10:52",
+   "side": "sell",
+   "symbol": "CASHCAT",
+   "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+   "amount": -157552.03419749837,
+   "usd": 26261.91941126451,
+   "price": 0.166687276016659,
+   "launch_age_min": 12893.70202020202,
+   "block": 7747695
+  },
+  {
+   "ts": 1785013780,
+   "time": "2026-07-25 21:09",
+   "side": "buy",
+   "symbol": "TA",
+   "address": "0x30db03a051205ccbeb1b6524ddf87fbc6c0127bc",
+   "amount": 4691.621395897529,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 19321490
+  },
+  {
+   "ts": 1785047119,
+   "time": "2026-07-26 06:25",
+   "side": "buy",
+   "symbol": "STRAY",
+   "address": "0x807f574ba1a79c357bece49a6e9b5dca24f3eeac",
+   "amount": 22957.313813079632,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 19653598
+  },
+  {
+   "ts": 1785992590,
+   "time": "2026-08-06 05:03",
+   "side": "buy",
+   "symbol": "CASHCAT",
+   "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+   "amount": 87.19111056890729,
+   "usd": 9.903637721407321,
+   "price": 0.11358540631938,
+   "launch_age_min": 48810.32154882154,
+   "block": 29082167
+  },
+  {
+   "ts": 1786141337,
+   "time": "2026-08-07 22:22",
+   "side": "buy",
+   "symbol": "TA",
+   "address": "0x9ca1cc0c90d97b4f36c5e2232d4fbd705a73c65d",
+   "amount": 1087.6666615622032,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 30566858
+  },
+  {
+   "ts": 1786143992,
+   "time": "2026-08-07 23:06",
+   "side": "buy",
+   "symbol": "TA",
+   "address": "0x9ca1cc0c90d97b4f36c5e2232d4fbd705a73c65d",
+   "amount": 979013.2832348198,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 30593396
+  },
+  {
+   "ts": 1786144001,
+   "time": "2026-08-07 23:06",
+   "side": "buy",
+   "symbol": "TA",
+   "address": "0x9ca1cc0c90d97b4f36c5e2232d4fbd705a73c65d",
+   "amount": 911848.0751576789,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 30593494
+  },
+  {
+   "ts": 1786144448,
+   "time": "2026-08-07 23:14",
+   "side": "sell",
+   "symbol": "TA",
+   "address": "0x9ca1cc0c90d97b4f36c5e2232d4fbd705a73c65d",
+   "amount": -945974.5125270304,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 30597952
+  },
+  {
+   "ts": 1786144456,
+   "time": "2026-08-07 23:14",
+   "side": "sell",
+   "symbol": "TA",
+   "address": "0x9ca1cc0c90d97b4f36c5e2232d4fbd705a73c65d",
+   "amount": -945974.5125270304,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 30598034
+  },
+  {
+   "ts": 1786240426,
+   "time": "2026-08-09 01:53",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 1930183.150660137,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31556016
+  },
+  {
+   "ts": 1786240472.4201388,
+   "time": "2026-08-09 01:54",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 1908542.349831247,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31556477
+  },
+  {
+   "ts": 1786240489.0347223,
+   "time": "2026-08-09 01:54",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 1739590.0717442252,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31556642
+  },
+  {
+   "ts": 1786240664,
+   "time": "2026-08-09 01:57",
+   "side": "buy",
+   "symbol": "FLY",
+   "address": "0x1faa5a8bb357d9210cd1d55e5737ec325bd8101f",
+   "amount": 13892966.957487855,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31558384
+  },
+  {
+   "ts": 1786240703.369085,
+   "time": "2026-08-09 01:58",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 1228795.6705766325,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31558774
+  },
+  {
+   "ts": 1786241010.059468,
+   "time": "2026-08-09 02:03",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 978770.7508875387,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31561844
+  },
+  {
+   "ts": 1786241089.6136363,
+   "time": "2026-08-09 02:04",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 907108.3101245982,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31562640
+  },
+  {
+   "ts": 1786241283.1555555,
+   "time": "2026-08-09 02:08",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 979967.563951207,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31564582
+  },
+  {
+   "ts": 1786241291,
+   "time": "2026-08-09 02:08",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 592724.9838484244,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31564663
+  },
+  {
+   "ts": 1786241315.6416185,
+   "time": "2026-08-09 02:08",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 983702.217149516,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31564908
+  },
+  {
+   "ts": 1786241443,
+   "time": "2026-08-09 02:10",
+   "side": "sell",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": -2812346.2671933817,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31566170
+  },
+  {
+   "ts": 1786241450,
+   "time": "2026-08-09 02:10",
+   "side": "sell",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": -2109259.700395036,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31566238
+  },
+  {
+   "ts": 1786241488.111369,
+   "time": "2026-08-09 02:11",
+   "side": "sell",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": -6327779.101185109,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31566620
+  },
+  {
+   "ts": 1786241568,
+   "time": "2026-08-09 02:12",
+   "side": "sell",
+   "symbol": "FLY",
+   "address": "0x1faa5a8bb357d9210cd1d55e5737ec325bd8101f",
+   "amount": -13892966.957487855,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31567433
+  },
+  {
+   "ts": 1786242136,
+   "time": "2026-08-09 02:22",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 2613347.8170535136,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31573104
+  },
+  {
+   "ts": 1786242187.0844245,
+   "time": "2026-08-09 02:23",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 2339821.771546144,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31573616
+  },
+  {
+   "ts": 1786242200.6537247,
+   "time": "2026-08-09 02:23",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 2135127.41139038,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31573752
+  },
+  {
+   "ts": 1786242441,
+   "time": "2026-08-09 02:27",
+   "side": "buy",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": 2046444.6927209124,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31576158
+  },
+  {
+   "ts": 1786242844.487909,
+   "time": "2026-08-09 02:34",
+   "side": "sell",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": -2283685.4231777377,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31580178
+  },
+  {
+   "ts": 1786242870,
+   "time": "2026-08-09 02:34",
+   "side": "sell",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": -1712764.0673833033,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31580433
+  },
+  {
+   "ts": 1786242902,
+   "time": "2026-08-09 02:35",
+   "side": "sell",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": -2569146.101074955,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31580760
+  },
+  {
+   "ts": 1786242918,
+   "time": "2026-08-09 02:35",
+   "side": "sell",
+   "symbol": "BLINK",
+   "address": "0x7b630f080807df83908b4ade46ba6396ee66b098",
+   "amount": -2569146.101074955,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 31580914
+  },
+  {
+   "ts": 1786257028.152733,
+   "time": "2026-08-09 06:30",
+   "side": "sell",
+   "symbol": "CASHCAT",
+   "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+   "amount": -87.19111056890729,
+   "usd": 10.029581485120518,
+   "price": 0.115029862788525,
+   "launch_age_min": 53253.944444444445,
+   "block": 31721679
+  },
+  {
+   "ts": 1786448828,
+   "time": "2026-08-11 11:47",
+   "side": "buy",
+   "symbol": "BROKERTOOLS",
+   "address": "0x37260f9f92026a5c8f1e059c1cacf1c70e35e02e",
+   "amount": 10902.21364334096,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 33636938
+  },
+  {
+   "ts": 1786449175,
+   "time": "2026-08-11 11:52",
+   "side": "sell",
+   "symbol": "BROKERTOOLS",
+   "address": "0x37260f9f92026a5c8f1e059c1cacf1c70e35e02e",
+   "amount": -10902.21364334096,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 33640397
+  },
+  {
+   "ts": 1786922297.2961445,
+   "time": "2026-08-16 23:18",
+   "side": "buy",
+   "symbol": "QUOTRON",
+   "address": "0x5a86828efd322bfb16d93cfed16ee9bc14940d7f",
+   "amount": 0.45899087994332316,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 38364338
+  },
+  {
+   "ts": 1786922332.3248565,
+   "time": "2026-08-16 23:18",
+   "side": "sell",
+   "symbol": "QUOTRON",
+   "address": "0x5a86828efd322bfb16d93cfed16ee9bc14940d7f",
+   "amount": -0.45899087994332316,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 38364688
+  },
+  {
+   "ts": 1787038878.8408203,
+   "time": "2026-08-18 07:41",
+   "side": "buy",
+   "symbol": "CATS",
+   "address": "0x7195e2088f3dfcca56e6a71d129051963ed9657a",
+   "amount": 8184950.882363988,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 39526564
+  },
+  {
+   "ts": 1787038889,
+   "time": "2026-08-18 07:41",
+   "side": "buy",
+   "symbol": "CATS",
+   "address": "0x7195e2088f3dfcca56e6a71d129051963ed9657a",
+   "amount": 1695107.308247468,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 39526665
+  },
+  {
+   "ts": 1787038923.4,
+   "time": "2026-08-18 07:42",
+   "side": "buy",
+   "symbol": "CATS",
+   "address": "0x7195e2088f3dfcca56e6a71d129051963ed9657a",
+   "amount": 287263.50331345614,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 39527009
+  },
+  {
+   "ts": 1787097111.5056875,
+   "time": "2026-08-18 23:51",
+   "side": "sell",
+   "symbol": "CATS",
+   "address": "0x7195e2088f3dfcca56e6a71d129051963ed9657a",
+   "amount": -10167321.693924913,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 40107358
+  },
+  {
+   "ts": 1787697054.8304527,
+   "time": "2026-08-25 22:30",
+   "side": "buy",
+   "symbol": "CEILINGCAT",
+   "address": "0x2e5ff79452a0dbdd992c3193d6d7f7c5dc93e7cc",
+   "amount": 6263328.265730572,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46088350
+  },
+  {
+   "ts": 1787697070.0671606,
+   "time": "2026-08-25 22:31",
+   "side": "buy",
+   "symbol": "CEILINGCAT",
+   "address": "0x2e5ff79452a0dbdd992c3193d6d7f7c5dc93e7cc",
+   "amount": 5522572.044865638,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46088501
+  },
+  {
+   "ts": 1787770800.47462,
+   "time": "2026-08-26 19:00",
+   "side": "sell",
+   "symbol": "CEILINGCAT",
+   "address": "0x2e5ff79452a0dbdd992c3193d6d7f7c5dc93e7cc",
+   "amount": -11785900.310596209,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46819527
+  },
+  {
+   "ts": 1787777057.762473,
+   "time": "2026-08-26 20:44",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 866099.0760006692,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46881456
+  },
+  {
+   "ts": 1787777942.7708366,
+   "time": "2026-08-26 20:59",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 182281.0631137915,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46890216
+  },
+  {
+   "ts": 1787778139.5416734,
+   "time": "2026-08-26 21:02",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 189926.16254372202,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46892164
+  },
+  {
+   "ts": 1787778155.7035491,
+   "time": "2026-08-26 21:02",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 207765.35925132816,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46892324
+  },
+  {
+   "ts": 1787778165.501686,
+   "time": "2026-08-26 21:02",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 206749.8151090942,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46892421
+  },
+  {
+   "ts": 1787778205.1992934,
+   "time": "2026-08-26 21:03",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 212989.0700313426,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46892814
+  },
+  {
+   "ts": 1787778216.1085596,
+   "time": "2026-08-26 21:03",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 307989.69134843966,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46892922
+  },
+  {
+   "ts": 1787782686.7833743,
+   "time": "2026-08-26 22:18",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 165838.90380640503,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46937164
+  },
+  {
+   "ts": 1787786669.4364004,
+   "time": "2026-08-26 23:24",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 152787.0380512423,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46976595
+  },
+  {
+   "ts": 1787786740.0349967,
+   "time": "2026-08-26 23:25",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 152174.26339266353,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46977293
+  },
+  {
+   "ts": 1787787629.090369,
+   "time": "2026-08-26 23:40",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 161943.28696063018,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46986088
+  },
+  {
+   "ts": 1787787800.5129983,
+   "time": "2026-08-26 23:43",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 81549.10174748582,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 46987785
+  },
+  {
+   "ts": 1787791018.099606,
+   "time": "2026-08-27 00:36",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 194086.57799446213,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47019637
+  },
+  {
+   "ts": 1787796475.5139387,
+   "time": "2026-08-27 02:07",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 88218.05476919691,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47073758
+  },
+  {
+   "ts": 1787797736.590869,
+   "time": "2026-08-27 02:28",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 88168.05966405432,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47086258
+  },
+  {
+   "ts": 1787798580.1079454,
+   "time": "2026-08-27 02:43",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 182980.4091713116,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47094628
+  },
+  {
+   "ts": 1787798904.267101,
+   "time": "2026-08-27 02:48",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 197055.5723965736,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47097843
+  },
+  {
+   "ts": 1787799179.8233757,
+   "time": "2026-08-27 02:52",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 100220.46566857808,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47100586
+  },
+  {
+   "ts": 1787799807.1211765,
+   "time": "2026-08-27 03:03",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 195022.34101416744,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47106805
+  },
+  {
+   "ts": 1787819141.6966293,
+   "time": "2026-08-27 08:25",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 99859.10244363488,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47298448
+  },
+  {
+   "ts": 1787854884.4384067,
+   "time": "2026-08-27 18:21",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 438008.28886459314,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47652595
+  },
+  {
+   "ts": 1787854889.287787,
+   "time": "2026-08-27 18:21",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 434036.54927680903,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47652643
+  },
+  {
+   "ts": 1787854902.3204958,
+   "time": "2026-08-27 18:21",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 1088316.5301569046,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47652772
+  },
+  {
+   "ts": 1787854919.1922975,
+   "time": "2026-08-27 18:21",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 429341.817739766,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47652939
+  },
+  {
+   "ts": 1787874873.1722531,
+   "time": "2026-08-27 23:54",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 1120878.133564749,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47850755
+  },
+  {
+   "ts": 1787875190.5351775,
+   "time": "2026-08-27 23:59",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 456692.55637492053,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47853900
+  },
+  {
+   "ts": 1787875209.5063157,
+   "time": "2026-08-28 00:00",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 450654.1872679812,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47854088
+  },
+  {
+   "ts": 1787882502.3565242,
+   "time": "2026-08-28 02:01",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 1356813.7774561022,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47926337
+  },
+  {
+   "ts": 1787882531.7085779,
+   "time": "2026-08-28 02:02",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 529918.3910717543,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47926628
+  },
+  {
+   "ts": 1787885249.5668595,
+   "time": "2026-08-28 02:47",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 570225.6930261535,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47953568
+  },
+  {
+   "ts": 1787887267.164735,
+   "time": "2026-08-28 03:21",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 1586730.591265151,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 47973454
+  },
+  {
+   "ts": 1787954517.5628767,
+   "time": "2026-08-28 22:01",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 1665456.9533422294,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 48639565
+  },
+  {
+   "ts": 1787954546.8365512,
+   "time": "2026-08-28 22:02",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 1535535.9406494494,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 48639853
+  },
+  {
+   "ts": 1787971468.4773242,
+   "time": "2026-08-29 02:44",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 1347694.7828965127,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 48807490
+  },
+  {
+   "ts": 1788156625.245569,
+   "time": "2026-08-31 06:10",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 1944890.0661386927,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 50639328
+  },
+  {
+   "ts": 1788156646.1423068,
+   "time": "2026-08-31 06:10",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 914446.9020826573,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 50639535
+  },
+  {
+   "ts": 1788156654.2183406,
+   "time": "2026-08-31 06:10",
+   "side": "buy",
+   "symbol": "BISCOTTI",
+   "address": "0x7cd7073a71eaf5f6e4febfa98460ee66cd97deb1",
+   "amount": 178346.68015780815,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 50639615
+  },
+  {
+   "ts": 1788207834.442326,
+   "time": "2026-08-31 20:23",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 1153305.058751185,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51146482
+  },
+  {
+   "ts": 1788207858.3107722,
+   "time": "2026-08-31 20:24",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 533251.2709285641,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51146716
+  },
+  {
+   "ts": 1788207878.099142,
+   "time": "2026-08-31 20:24",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 534614.2227536885,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51146910
+  },
+  {
+   "ts": 1788207893.2974262,
+   "time": "2026-08-31 20:24",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 535401.1917258572,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51147059
+  },
+  {
+   "ts": 1788207906.3536701,
+   "time": "2026-08-31 20:25",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 510002.58856047725,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51147187
+  },
+  {
+   "ts": 1788212121.6813362,
+   "time": "2026-08-31 21:35",
+   "side": "buy",
+   "symbol": "Marketplier",
+   "address": "0xea97dfed19cfc581627a433dc4cd35418d298667",
+   "amount": 4307260.434773206,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51188863
+  },
+  {
+   "ts": 1788212175.0786338,
+   "time": "2026-08-31 21:36",
+   "side": "sell",
+   "symbol": "Marketplier",
+   "address": "0xea97dfed19cfc581627a433dc4cd35418d298667",
+   "amount": -4307260.434773206,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51189391
+  },
+  {
+   "ts": 1788212484.8617952,
+   "time": "2026-08-31 21:41",
+   "side": "buy",
+   "symbol": "SLATE",
+   "address": "0x7bc7ad5724b17d6b5fab93b6966533838b4e96af",
+   "amount": 5108018.395598035,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51192462
+  },
+  {
+   "ts": 1788212530.6584592,
+   "time": "2026-08-31 21:42",
+   "side": "buy",
+   "symbol": "SLATE",
+   "address": "0x7bc7ad5724b17d6b5fab93b6966533838b4e96af",
+   "amount": 6313528.978612335,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51192916
+  },
+  {
+   "ts": 1788213485.6677852,
+   "time": "2026-08-31 21:58",
+   "side": "sell",
+   "symbol": "SLATE",
+   "address": "0x7bc7ad5724b17d6b5fab93b6966533838b4e96af",
+   "amount": -11421547.374210373,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51202377
+  },
+  {
+   "ts": 1788216890.7918968,
+   "time": "2026-08-31 22:54",
+   "side": "buy",
+   "symbol": "Marketplier",
+   "address": "0xea97dfed19cfc581627a433dc4cd35418d298667",
+   "amount": 1732610.0056456458,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51235983
+  },
+  {
+   "ts": 1788216898.355696,
+   "time": "2026-08-31 22:54",
+   "side": "buy",
+   "symbol": "Marketplier",
+   "address": "0xea97dfed19cfc581627a433dc4cd35418d298667",
+   "amount": 1751764.9730144155,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51236058
+  },
+  {
+   "ts": 1788216917.9207227,
+   "time": "2026-08-31 22:55",
+   "side": "buy",
+   "symbol": "Marketplier",
+   "address": "0xea97dfed19cfc581627a433dc4cd35418d298667",
+   "amount": 1606389.845082115,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51236252
+  },
+  {
+   "ts": 1788220821.9884615,
+   "time": "2026-09-01 00:00",
+   "side": "buy",
+   "symbol": "Marketplier",
+   "address": "0xea97dfed19cfc581627a433dc4cd35418d298667",
+   "amount": 2602459.5822726223,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51274887
+  },
+  {
+   "ts": 1788222351.6844413,
+   "time": "2026-09-01 00:25",
+   "side": "buy",
+   "symbol": "SCHIFFY",
+   "address": "0x42afa2124ca5a2b83898e46b2da9a190995b1e18",
+   "amount": 5128679.319818264,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51290035
+  },
+  {
+   "ts": 1788222364.5430307,
+   "time": "2026-09-01 00:26",
+   "side": "buy",
+   "symbol": "SCHIFFY",
+   "address": "0x42afa2124ca5a2b83898e46b2da9a190995b1e18",
+   "amount": 4489892.010975295,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51290162
+  },
+  {
+   "ts": 1788222380.135336,
+   "time": "2026-09-01 00:26",
+   "side": "buy",
+   "symbol": "SCHIFFY",
+   "address": "0x42afa2124ca5a2b83898e46b2da9a190995b1e18",
+   "amount": 396243.62161210645,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51290316
+  },
+  {
+   "ts": 1788225417.5628452,
+   "time": "2026-09-01 01:16",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 92595.36592793999,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51320396
+  },
+  {
+   "ts": 1788227675.0047393,
+   "time": "2026-09-01 01:54",
+   "side": "buy",
+   "symbol": "Marketplier",
+   "address": "0xea97dfed19cfc581627a433dc4cd35418d298667",
+   "amount": 4078404.852180153,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51342714
+  },
+  {
+   "ts": 1788227778.3459458,
+   "time": "2026-09-01 01:56",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 88289.03448803918,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51343731
+  },
+  {
+   "ts": 1788231374.9287953,
+   "time": "2026-09-01 02:56",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 86786.85912184896,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51379407
+  },
+  {
+   "ts": 1788233003.2372882,
+   "time": "2026-09-01 03:23",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 18046.934606731036,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51395538
+  },
+  {
+   "ts": 1788246939.4944053,
+   "time": "2026-09-01 07:15",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 95351.40718687463,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51533687
+  },
+  {
+   "ts": 1788246957.098968,
+   "time": "2026-09-01 07:15",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 18916.48459845359,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51533862
+  },
+  {
+   "ts": 1788272100.3521712,
+   "time": "2026-09-01 14:15",
+   "side": "sell",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": -530636.3851431275,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51783117
+  },
+  {
+   "ts": 1788272112.2609613,
+   "time": "2026-09-01 14:15",
+   "side": "sell",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": -747575.2403520377,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51783235
+  },
+  {
+   "ts": 1788272138.6015906,
+   "time": "2026-09-01 14:15",
+   "side": "sell",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": -774485.3544819467,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51783496
+  },
+  {
+   "ts": 1788272376.5937722,
+   "time": "2026-09-01 14:19",
+   "side": "sell",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": -800906.5267620591,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51785834
+  },
+  {
+   "ts": 1788273005.2353234,
+   "time": "2026-09-01 14:30",
+   "side": "sell",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": -812956.9119104886,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51792067
+  },
+  {
+   "ts": 1788275956.9065459,
+   "time": "2026-09-01 15:19",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 1011461.7761751832,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51821246
+  },
+  {
+   "ts": 1788277492.8753247,
+   "time": "2026-09-01 15:44",
+   "side": "buy",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": 149770.35449219742,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 51836415
+  },
+  {
+   "ts": 1788297933.229209,
+   "time": "2026-09-01 21:25",
+   "side": "sell",
+   "symbol": "Marketplier",
+   "address": "0xea97dfed19cfc581627a433dc4cd35418d298667",
+   "amount": -11771629.258194951,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 52038216
+  },
+  {
+   "ts": 1788299901.0395136,
+   "time": "2026-09-01 21:58",
+   "side": "sell",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": -580616.0653336904,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 52057597
+  },
+  {
+   "ts": 1788299905.2142856,
+   "time": "2026-09-01 21:58",
+   "side": "sell",
+   "symbol": "BONER",
+   "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18",
+   "amount": -580616.0653336904,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 52057638
+  },
+  {
+   "ts": 1788328736.6850455,
+   "time": "2026-09-02 05:58",
+   "side": "sell",
+   "symbol": "SCHIFFY",
+   "address": "0x42afa2124ca5a2b83898e46b2da9a190995b1e18",
+   "amount": -10014814.952405663,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 52343205
+  },
+  {
+   "ts": 1788423685.4876533,
+   "time": "2026-09-03 08:21",
+   "side": "buy",
+   "symbol": "butthole",
+   "address": "0x06e64ed98daf37bf1c552baa77cecbcfe6c90d41",
+   "amount": 4850304.420082227,
+   "usd": null,
+   "price": null,
+   "launch_age_min": null,
+   "block": 53272458
+  }
+ ],
+ "sol_fills": [
+  {
+   "ts": 1769477903,
+   "time": "2026-01-27 01:38",
+   "side": "buy",
+   "symbol": "?",
+   "address": "5ME6tBrsv8zNnUngiTe1EBULf1xY8vdC8KjhmoUhpump",
+   "amount": 7891789.839005,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1769596234,
+   "time": "2026-01-28 10:30",
+   "side": "buy",
+   "symbol": "?",
+   "address": "63XL5ttViSFT1aefpUuMtSNg59cNepcFE8kNXYEipump",
+   "amount": 13629635.379376,
+   "usd": 2000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1769732884,
+   "time": "2026-01-30 00:28",
+   "side": "buy",
+   "symbol": "ELON",
+   "address": "2akXpuyFXAVN5YofZpZMfBp2Vxognpmv9NooBMuHpump",
+   "amount": 1701868.610223,
+   "usd": 10000.0,
+   "src": "SOLANA_PROGRAM_LIBRARY"
+  },
+  {
+   "ts": 1769732893,
+   "time": "2026-01-30 00:28",
+   "side": "buy",
+   "symbol": "ELON",
+   "address": "2akXpuyFXAVN5YofZpZMfBp2Vxognpmv9NooBMuHpump",
+   "amount": 1652421.233403,
+   "usd": 10000.0,
+   "src": "SOLANA_PROGRAM_LIBRARY"
+  },
+  {
+   "ts": 1769742187,
+   "time": "2026-01-30 03:03",
+   "side": "sell",
+   "symbol": "ELON",
+   "address": "2akXpuyFXAVN5YofZpZMfBp2Vxognpmv9NooBMuHpump",
+   "amount": -330714.418182,
+   "usd": 4385.591941,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1769742224,
+   "time": "2026-01-30 03:03",
+   "side": "sell",
+   "symbol": "ELON",
+   "address": "2akXpuyFXAVN5YofZpZMfBp2Vxognpmv9NooBMuHpump",
+   "amount": -137790.827718,
+   "usd": 1926.920031,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1769763916,
+   "time": "2026-01-30 09:05",
+   "side": "buy",
+   "symbol": "?",
+   "address": "HeMtKjiwCohxM8dnMABCVooJREEPc2vY1YWU4nH8pump",
+   "amount": 3830232.474497,
+   "usd": 6000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1769763957,
+   "time": "2026-01-30 09:05",
+   "side": "buy",
+   "symbol": "?",
+   "address": "HeMtKjiwCohxM8dnMABCVooJREEPc2vY1YWU4nH8pump",
+   "amount": 3655325.977563,
+   "usd": 5000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1769763979,
+   "time": "2026-01-30 09:06",
+   "side": "sell",
+   "symbol": "ELON",
+   "address": "2akXpuyFXAVN5YofZpZMfBp2Vxognpmv9NooBMuHpump",
+   "amount": -2885784.597726,
+   "usd": 11354.619572,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1769764543,
+   "time": "2026-01-30 09:15",
+   "side": "sell",
+   "symbol": "?",
+   "address": "63XL5ttViSFT1aefpUuMtSNg59cNepcFE8kNXYEipump",
+   "amount": -13629635.379376,
+   "usd": 707.424063,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1769787105,
+   "time": "2026-01-30 15:31",
+   "side": "sell",
+   "symbol": "?",
+   "address": "5ME6tBrsv8zNnUngiTe1EBULf1xY8vdC8KjhmoUhpump",
+   "amount": -7891789.839005,
+   "usd": 1302.060637,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1769900853,
+   "time": "2026-01-31 23:07",
+   "side": "buy",
+   "symbol": "?",
+   "address": "DgN9zcmQgWF98qkhoMEshq7G4eRDjxcHoXvijfffBAGS",
+   "amount": 10657214.67725715,
+   "usd": 10000.0,
+   "src": "SOLANA_PROGRAM_LIBRARY"
+  },
+  {
+   "ts": 1769915156,
+   "time": "2026-02-01 03:05",
+   "side": "sell",
+   "symbol": "?",
+   "address": "HeMtKjiwCohxM8dnMABCVooJREEPc2vY1YWU4nH8pump",
+   "amount": -7485558.45206,
+   "usd": 446.920356,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1770133183,
+   "time": "2026-02-03 15:39",
+   "side": "buy",
+   "symbol": "?",
+   "address": "9S8edqWxoWz5LYLnxWUmWBJnePg35WfdYQp7HQkUpump",
+   "amount": 2616347.624922,
+   "usd": 25000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1770133290,
+   "time": "2026-02-03 15:41",
+   "side": "buy",
+   "symbol": "?",
+   "address": "9S8edqWxoWz5LYLnxWUmWBJnePg35WfdYQp7HQkUpump",
+   "amount": 1074871.892537,
+   "usd": 10000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1770133769,
+   "time": "2026-02-03 15:49",
+   "side": "buy",
+   "symbol": "?",
+   "address": "9S8edqWxoWz5LYLnxWUmWBJnePg35WfdYQp7HQkUpump",
+   "amount": 2974282.885352,
+   "usd": 24999.999999,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1770353456,
+   "time": "2026-02-06 04:50",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NopK9qESRHrP7b8TSPmgVbpWpovHUk49KDnhGPm8Mub",
+   "amount": 15625416.931983,
+   "usd": 10000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1771525838,
+   "time": "2026-02-19 18:30",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 679411.512821,
+   "usd": 15000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771527127,
+   "time": "2026-02-19 18:52",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 432612.117201,
+   "usd": 11033.854343,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771527384,
+   "time": "2026-02-19 18:56",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 433995.766931,
+   "usd": 12500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771527463,
+   "time": "2026-02-19 18:57",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 437972.564321,
+   "usd": 12750.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771551404,
+   "time": "2026-02-20 01:36",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 140918.387349,
+   "usd": 5000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1771554171,
+   "time": "2026-02-20 02:22",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 74016.405285,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771554659,
+   "time": "2026-02-20 02:30",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 79622.473749,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771615767,
+   "time": "2026-02-20 19:29",
+   "side": "buy",
+   "symbol": "?",
+   "address": "8dXhKvPNRgrVEnHo58xiw1gj1fDdZPB88VDYFTZppump",
+   "amount": 7005216.101822,
+   "usd": 5000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1771708403,
+   "time": "2026-02-21 21:13",
+   "side": "buy",
+   "symbol": "?",
+   "address": "2tkoGDwxfhGhHQrFFMJeVKwif75yGwgoyE9WM7UDpump",
+   "amount": 8671906.158026,
+   "usd": 1500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771708414,
+   "time": "2026-02-21 21:13",
+   "side": "buy",
+   "symbol": "?",
+   "address": "2tkoGDwxfhGhHQrFFMJeVKwif75yGwgoyE9WM7UDpump",
+   "amount": 2669504.564632,
+   "usd": 500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771980259,
+   "time": "2026-02-25 00:44",
+   "side": "sell",
+   "symbol": "?",
+   "address": "8VQErzhWAQEt1AXW1fNnA5g21sMBf1byBJHyNuDvpump",
+   "amount": -8474859.0,
+   "usd": 3032.145794,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1771981164,
+   "time": "2026-02-25 00:59",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 395035.920379,
+   "usd": 15555.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771981235,
+   "time": "2026-02-25 01:00",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 492411.121346,
+   "usd": 20000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771981753,
+   "time": "2026-02-25 01:09",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 130751.310394,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771982418,
+   "time": "2026-02-25 01:20",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 349257.899752,
+   "usd": 15000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771982953,
+   "time": "2026-02-25 01:29",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 84604.325262,
+   "usd": 3500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771984733,
+   "time": "2026-02-25 01:58",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 131791.509318,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771985203,
+   "time": "2026-02-25 02:06",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 81445.264057,
+   "usd": 3000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1771985793,
+   "time": "2026-02-25 02:16",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 413172.258306,
+   "usd": 15000.0,
+   "src": "SOLANA_PROGRAM_LIBRARY"
+  },
+  {
+   "ts": 1771990667,
+   "time": "2026-02-25 03:37",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 139398.825428,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1772641441,
+   "time": "2026-03-04 16:24",
+   "side": "buy",
+   "symbol": "?",
+   "address": "7nAwq66D2ChvEHL9pMdo9ozQ8Ks7AM1RbJShgUdTpump",
+   "amount": 12550286.974244,
+   "usd": 1500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1773994421,
+   "time": "2026-03-20 08:13",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 289962.096647,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1773994447,
+   "time": "2026-03-20 08:14",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 289135.822784,
+   "usd": 5000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1773994468,
+   "time": "2026-03-20 08:14",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 287298.131444,
+   "usd": 5000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1773994574,
+   "time": "2026-03-20 08:16",
+   "side": "buy",
+   "symbol": "?",
+   "address": "NV2RYH954cTJ3ckFUpvfqaQXU4ARqqDH3562nFSpump",
+   "amount": 166563.261352,
+   "usd": 2874.36323,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1774562896,
+   "time": "2026-03-26 22:08",
+   "side": "sell",
+   "symbol": "?",
+   "address": "2tkoGDwxfhGhHQrFFMJeVKwif75yGwgoyE9WM7UDpump",
+   "amount": -11341410.722658,
+   "usd": 1505.634437,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1774562907,
+   "time": "2026-03-26 22:08",
+   "side": "sell",
+   "symbol": "?",
+   "address": "8dXhKvPNRgrVEnHo58xiw1gj1fDdZPB88VDYFTZppump",
+   "amount": -10131090.643674,
+   "usd": 776.145564,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1774562929,
+   "time": "2026-03-26 22:08",
+   "side": "sell",
+   "symbol": "?",
+   "address": "NopK9qESRHrP7b8TSPmgVbpWpovHUk49KDnhGPm8Mub",
+   "amount": -15625416.931983,
+   "usd": 117.800669,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1774562937,
+   "time": "2026-03-26 22:08",
+   "side": "sell",
+   "symbol": "?",
+   "address": "7nAwq66D2ChvEHL9pMdo9ozQ8Ks7AM1RbJShgUdTpump",
+   "amount": -12550286.974244,
+   "usd": 61.426684,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1774562944,
+   "time": "2026-03-26 22:09",
+   "side": "sell",
+   "symbol": "?",
+   "address": "DgN9zcmQgWF98qkhoMEshq7G4eRDjxcHoXvijfffBAGS",
+   "amount": -10657214.67725715,
+   "usd": 58.488271,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1774562968,
+   "time": "2026-03-26 22:09",
+   "side": "sell",
+   "symbol": "TripleT",
+   "address": "J8PSdNP3QewKq2Z1JJJFDMaqF7KcaiJhR7gbr5KZpump",
+   "amount": -4642.322828,
+   "usd": 5.637829,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1776261471,
+   "time": "2026-04-15 13:57",
+   "side": "buy",
+   "symbol": "?",
+   "address": "GkwnLCyST4bGkYrq5ekEgvLBGcbSktJtbzyTNmKXpump",
+   "amount": 9237840.138804,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1776262666,
+   "time": "2026-04-15 14:17",
+   "side": "sell",
+   "symbol": "?",
+   "address": "GkwnLCyST4bGkYrq5ekEgvLBGcbSktJtbzyTNmKXpump",
+   "amount": -9237840.138804,
+   "usd": 293.721504,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1776400754,
+   "time": "2026-04-17 04:39",
+   "side": "buy",
+   "symbol": "?",
+   "address": "F1ppSHedBsGGwEKH78JVgoqr4xkQHswtsGGLpgM7bCP2",
+   "amount": 1035219.344052,
+   "usd": 10000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1776400769,
+   "time": "2026-04-17 04:39",
+   "side": "buy",
+   "symbol": "?",
+   "address": "F1ppSHedBsGGwEKH78JVgoqr4xkQHswtsGGLpgM7bCP2",
+   "amount": 1430786.979772,
+   "usd": 15000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1776400810,
+   "time": "2026-04-17 04:40",
+   "side": "buy",
+   "symbol": "?",
+   "address": "F1ppSHedBsGGwEKH78JVgoqr4xkQHswtsGGLpgM7bCP2",
+   "amount": 1364824.575515,
+   "usd": 15000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1776403304,
+   "time": "2026-04-17 05:21",
+   "side": "buy",
+   "symbol": "?",
+   "address": "F1ppSHedBsGGwEKH78JVgoqr4xkQHswtsGGLpgM7bCP2",
+   "amount": 747621.515683,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1776423219,
+   "time": "2026-04-17 10:53",
+   "side": "sell",
+   "symbol": "?",
+   "address": "F1ppSHedBsGGwEKH78JVgoqr4xkQHswtsGGLpgM7bCP2",
+   "amount": -4578452.415022,
+   "usd": 22081.978001,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778002674,
+   "time": "2026-05-05 17:37",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 1594734.928486,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778002680,
+   "time": "2026-05-05 17:38",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 1486625.83563,
+   "usd": 5000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778002692,
+   "time": "2026-05-05 17:38",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 1438087.777383,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778002730,
+   "time": "2026-05-05 17:38",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 1404372.192912,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778014361,
+   "time": "2026-05-05 20:52",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 144004.153707,
+   "usd": 1000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778014377,
+   "time": "2026-05-05 20:52",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 354271.927422,
+   "usd": 2500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778014390,
+   "time": "2026-05-05 20:53",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 351691.742362,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778014426,
+   "time": "2026-05-05 20:53",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 340853.578802,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778015177,
+   "time": "2026-05-05 21:06",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 163232.58742,
+   "usd": 1000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778015184,
+   "time": "2026-05-05 21:06",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 161711.329094,
+   "usd": 1000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778016514,
+   "time": "2026-05-05 21:28",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 182253.829176,
+   "usd": 1000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778016521,
+   "time": "2026-05-05 21:28",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 181003.472555,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778016708,
+   "time": "2026-05-05 21:31",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 94870.051377,
+   "usd": 500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778019570,
+   "time": "2026-05-05 22:19",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 159912.919971,
+   "usd": 1000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778019575,
+   "time": "2026-05-05 22:19",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 158245.413412,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778019578,
+   "time": "2026-05-05 22:19",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 156894.315113,
+   "usd": 1000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778019597,
+   "time": "2026-05-05 22:19",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 156494.695135,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778019601,
+   "time": "2026-05-05 22:20",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 155087.22966,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778019607,
+   "time": "2026-05-05 22:20",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 153901.049578,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778019777,
+   "time": "2026-05-05 22:22",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 162783.684534,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778019781,
+   "time": "2026-05-05 22:23",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 160650.222449,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778019954,
+   "time": "2026-05-05 22:25",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 162323.502799,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778019963,
+   "time": "2026-05-05 22:26",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 160108.487805,
+   "usd": 1000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778019974,
+   "time": "2026-05-05 22:26",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 158364.595018,
+   "usd": 1000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778019984,
+   "time": "2026-05-05 22:26",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 187458.763072,
+   "usd": 1200.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778019997,
+   "time": "2026-05-05 22:26",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 77152.643104,
+   "usd": 500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778020001,
+   "time": "2026-05-05 22:26",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 78237.106175,
+   "usd": 500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778020743,
+   "time": "2026-05-05 22:39",
+   "side": "sell",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": -2532679.501811,
+   "usd": 13072.036066,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778020783,
+   "time": "2026-05-05 22:39",
+   "side": "sell",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": -1846170.103644,
+   "usd": 9141.083509,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778022877,
+   "time": "2026-05-05 23:14",
+   "side": "sell",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": -1401619.399963,
+   "usd": 6256.810339,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778026957,
+   "time": "2026-05-06 00:22",
+   "side": "sell",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": -2102428.807466,
+   "usd": 9562.178328,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778026962,
+   "time": "2026-05-06 00:22",
+   "side": "sell",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": -2102430.221267,
+   "usd": 9182.760105,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778115933,
+   "time": "2026-05-07 01:05",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 991391.352228,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778115937,
+   "time": "2026-05-07 01:05",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 969517.676352,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778184197,
+   "time": "2026-05-07 20:03",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 281194.818557,
+   "usd": 1000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778201766,
+   "time": "2026-05-08 00:56",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 251361.583566,
+   "usd": 1000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778225967,
+   "time": "2026-05-08 07:39",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 270139.761567,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778267913,
+   "time": "2026-05-08 19:18",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 486870.585668,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778267933,
+   "time": "2026-05-08 19:18",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 199662.348628,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778267954,
+   "time": "2026-05-08 19:19",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 217647.335157,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778268918,
+   "time": "2026-05-08 19:35",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 330847.690793,
+   "usd": 2500.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778283339,
+   "time": "2026-05-08 23:35",
+   "side": "sell",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": -1002130.441192,
+   "usd": 5799.200756,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778283360,
+   "time": "2026-05-08 23:36",
+   "side": "sell",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": -2996502.711324,
+   "usd": 16425.886794,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778317311,
+   "time": "2026-05-09 09:01",
+   "side": "buy",
+   "symbol": "HANTA",
+   "address": "2tXpgu2DLTsPUf9zFmuZmA4xrYxXKBTpVq9wAM7hzs9y",
+   "amount": 1359498.717958,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778317316,
+   "time": "2026-05-09 09:01",
+   "side": "buy",
+   "symbol": "HANTA",
+   "address": "2tXpgu2DLTsPUf9zFmuZmA4xrYxXKBTpVq9wAM7hzs9y",
+   "amount": 1323884.430655,
+   "usd": 5000.0,
+   "src": "SOLANA_PROGRAM_LIBRARY"
+  },
+  {
+   "ts": 1778317327,
+   "time": "2026-05-09 09:02",
+   "side": "buy",
+   "symbol": "HANTA",
+   "address": "2tXpgu2DLTsPUf9zFmuZmA4xrYxXKBTpVq9wAM7hzs9y",
+   "amount": 1304114.996998,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778318486,
+   "time": "2026-05-09 09:21",
+   "side": "sell",
+   "symbol": "HANTA",
+   "address": "2tXpgu2DLTsPUf9zFmuZmA4xrYxXKBTpVq9wAM7hzs9y",
+   "amount": -996873.955578,
+   "usd": 3556.344371,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778344491,
+   "time": "2026-05-09 16:34",
+   "side": "sell",
+   "symbol": "HANTA",
+   "address": "2tXpgu2DLTsPUf9zFmuZmA4xrYxXKBTpVq9wAM7hzs9y",
+   "amount": -747656.047508,
+   "usd": 3232.160425,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778344501,
+   "time": "2026-05-09 16:35",
+   "side": "sell",
+   "symbol": "HANTA",
+   "address": "2tXpgu2DLTsPUf9zFmuZmA4xrYxXKBTpVq9wAM7hzs9y",
+   "amount": -560742.035631,
+   "usd": 2374.574014,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778344510,
+   "time": "2026-05-09 16:35",
+   "side": "sell",
+   "symbol": "HANTA",
+   "address": "2tXpgu2DLTsPUf9zFmuZmA4xrYxXKBTpVq9wAM7hzs9y",
+   "amount": -1682226.106894,
+   "usd": 6956.560679,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778389775,
+   "time": "2026-05-10 05:09",
+   "side": "buy",
+   "symbol": "?",
+   "address": "EL1mL2xB8pCDbr8C5yh3tqUorFCcYxoUVtCgXubapump",
+   "amount": 5838368.81962,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778389833,
+   "time": "2026-05-10 05:10",
+   "side": "buy",
+   "symbol": "?",
+   "address": "6EQKNJD6KMTQv9KmhKDjs1jm1SRsNVGNqdKeEEiJpump",
+   "amount": 11219436.167502,
+   "usd": 1500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778390720,
+   "time": "2026-05-10 05:25",
+   "side": "sell",
+   "symbol": "?",
+   "address": "6EQKNJD6KMTQv9KmhKDjs1jm1SRsNVGNqdKeEEiJpump",
+   "amount": -2804859.041875,
+   "usd": 2958.87258,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778392233,
+   "time": "2026-05-10 05:50",
+   "side": "sell",
+   "symbol": "?",
+   "address": "6EQKNJD6KMTQv9KmhKDjs1jm1SRsNVGNqdKeEEiJpump",
+   "amount": -2111687.911786,
+   "usd": 1794.038236,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778392252,
+   "time": "2026-05-10 05:50",
+   "side": "sell",
+   "symbol": "?",
+   "address": "6EQKNJD6KMTQv9KmhKDjs1jm1SRsNVGNqdKeEEiJpump",
+   "amount": -1542382.193605,
+   "usd": 1251.097339,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778444934,
+   "time": "2026-05-10 20:28",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 228249.812407,
+   "usd": 5000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778444936,
+   "time": "2026-05-10 20:28",
+   "side": "buy",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": 236563.518102,
+   "usd": 5000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778445579,
+   "time": "2026-05-10 20:39",
+   "side": "sell",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": -218294.701504,
+   "usd": 3975.120815,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778445582,
+   "time": "2026-05-10 20:39",
+   "side": "sell",
+   "symbol": "Goblin",
+   "address": "3KHMZhpthXuiCcgfTv7vVu9PpEz64KAEURFwi6Lopump",
+   "amount": -246518.629005,
+   "usd": 4629.948528,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778566615,
+   "time": "2026-05-12 06:16",
+   "side": "buy",
+   "symbol": "?",
+   "address": "kMKX8hBaj3BTRBbeYix9c16EieBP5dih8DTSSwCpump",
+   "amount": 2032796.356468,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778566710,
+   "time": "2026-05-12 06:18",
+   "side": "buy",
+   "symbol": "?",
+   "address": "kMKX8hBaj3BTRBbeYix9c16EieBP5dih8DTSSwCpump",
+   "amount": 974843.661486,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778607171,
+   "time": "2026-05-12 17:32",
+   "side": "buy",
+   "symbol": "?",
+   "address": "CmgJ1PobhUqB7MEa8qDkiG2TUpMTskWj8d9JeZWSpump",
+   "amount": 3094105.638144,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778607177,
+   "time": "2026-05-12 17:32",
+   "side": "buy",
+   "symbol": "?",
+   "address": "CmgJ1PobhUqB7MEa8qDkiG2TUpMTskWj8d9JeZWSpump",
+   "amount": 2969003.728834,
+   "usd": 2500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1778614893,
+   "time": "2026-05-12 19:41",
+   "side": "buy",
+   "symbol": "?",
+   "address": "3C4qPgC33dJETyxA3Jz2zXpDbetWdDd66aLdhGrEpump",
+   "amount": 11538136.033372,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778620508,
+   "time": "2026-05-12 21:15",
+   "side": "sell",
+   "symbol": "?",
+   "address": "3C4qPgC33dJETyxA3Jz2zXpDbetWdDd66aLdhGrEpump",
+   "amount": -11538136.033372,
+   "usd": 338.969543,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778621370,
+   "time": "2026-05-12 21:29",
+   "side": "sell",
+   "symbol": "?",
+   "address": "EL1mL2xB8pCDbr8C5yh3tqUorFCcYxoUVtCgXubapump",
+   "amount": -5838368.81962,
+   "usd": 12.621076,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1778715428,
+   "time": "2026-05-13 23:37",
+   "side": "sell",
+   "symbol": "?",
+   "address": "CmgJ1PobhUqB7MEa8qDkiG2TUpMTskWj8d9JeZWSpump",
+   "amount": -6063109.366978,
+   "usd": 1935.04866,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1778885935,
+   "time": "2026-05-15 22:58",
+   "side": "buy",
+   "symbol": "?",
+   "address": "2nSPriUf1smFyu88Y7ZZPVRPnpBN8TbQg3Nys8EQpump",
+   "amount": 14414038.96882,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1779216145,
+   "time": "2026-05-19 18:42",
+   "side": "buy",
+   "symbol": "?",
+   "address": "kMKX8hBaj3BTRBbeYix9c16EieBP5dih8DTSSwCpump",
+   "amount": 1686788.035004,
+   "usd": 3500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1779320858,
+   "time": "2026-05-20 23:47",
+   "side": "buy",
+   "symbol": "?",
+   "address": "kMKX8hBaj3BTRBbeYix9c16EieBP5dih8DTSSwCpump",
+   "amount": 860462.314189,
+   "usd": 1599.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1779854260,
+   "time": "2026-05-27 03:57",
+   "side": "buy",
+   "symbol": "?",
+   "address": "2kBH6UcR8TitebUbKNYNvjUkSFWaiFBJ7nAPTKQwpump",
+   "amount": 4045535.97728,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1779854266,
+   "time": "2026-05-27 03:57",
+   "side": "buy",
+   "symbol": "?",
+   "address": "2kBH6UcR8TitebUbKNYNvjUkSFWaiFBJ7nAPTKQwpump",
+   "amount": 1540193.301283,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1779854280,
+   "time": "2026-05-27 03:58",
+   "side": "buy",
+   "symbol": "?",
+   "address": "2kBH6UcR8TitebUbKNYNvjUkSFWaiFBJ7nAPTKQwpump",
+   "amount": 3605266.53331,
+   "usd": 2500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1779897891,
+   "time": "2026-05-27 16:04",
+   "side": "sell",
+   "symbol": "?",
+   "address": "2kBH6UcR8TitebUbKNYNvjUkSFWaiFBJ7nAPTKQwpump",
+   "amount": -9190995.811873,
+   "usd": 5105.828202,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1780157564,
+   "time": "2026-05-30 16:12",
+   "side": "buy",
+   "symbol": "?",
+   "address": "7kT2ShtAFg6ZYM7qKyJxrLDfqRNU5d1aLL5fRJT4pump",
+   "amount": 9873449.960822,
+   "usd": 2000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1780157575,
+   "time": "2026-05-30 16:12",
+   "side": "buy",
+   "symbol": "?",
+   "address": "7kT2ShtAFg6ZYM7qKyJxrLDfqRNU5d1aLL5fRJT4pump",
+   "amount": 4467834.100551,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1780159663,
+   "time": "2026-05-30 16:47",
+   "side": "sell",
+   "symbol": "?",
+   "address": "7kT2ShtAFg6ZYM7qKyJxrLDfqRNU5d1aLL5fRJT4pump",
+   "amount": -14341284.061373,
+   "usd": 1435.226359,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1780292602,
+   "time": "2026-06-01 05:43",
+   "side": "buy",
+   "symbol": "?",
+   "address": "gScbLjUZTckCcnmZngTyJNCo5eGKJQgQZMpL48Vpump",
+   "amount": 11942966.35035,
+   "usd": 1500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1780292672,
+   "time": "2026-06-01 05:44",
+   "side": "sell",
+   "symbol": "?",
+   "address": "2nSPriUf1smFyu88Y7ZZPVRPnpBN8TbQg3Nys8EQpump",
+   "amount": -14414038.96882,
+   "usd": 523.804835,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1780295924,
+   "time": "2026-06-01 06:38",
+   "side": "sell",
+   "symbol": "?",
+   "address": "gScbLjUZTckCcnmZngTyJNCo5eGKJQgQZMpL48Vpump",
+   "amount": -11942966.35035,
+   "usd": 1215.156284,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1780371645,
+   "time": "2026-06-02 03:40",
+   "side": "sell",
+   "symbol": "?",
+   "address": "kMKX8hBaj3BTRBbeYix9c16EieBP5dih8DTSSwCpump",
+   "amount": -5554890.367147,
+   "usd": 3763.362677,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1780871763,
+   "time": "2026-06-07 22:36",
+   "side": "buy",
+   "symbol": "?",
+   "address": "6RXiM7kFbVhqNnS12m8gUjNrvzUdL9kRTsYGJWHEFQTc",
+   "amount": 4236633.418228,
+   "usd": 1600.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1780877215,
+   "time": "2026-06-08 00:06",
+   "side": "buy",
+   "symbol": "?",
+   "address": "N9Curnf2ZQWBZWrjBkzP6xBe6n5WRhBhouRfiSqpump",
+   "amount": 14472367.993861,
+   "usd": 1500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1780877245,
+   "time": "2026-06-08 00:07",
+   "side": "buy",
+   "symbol": "?",
+   "address": "6RXiM7kFbVhqNnS12m8gUjNrvzUdL9kRTsYGJWHEFQTc",
+   "amount": 2665897.04419,
+   "usd": 1000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1780877356,
+   "time": "2026-06-08 00:09",
+   "side": "buy",
+   "symbol": "?",
+   "address": "N9Curnf2ZQWBZWrjBkzP6xBe6n5WRhBhouRfiSqpump",
+   "amount": 5108949.629667,
+   "usd": 500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1781124112,
+   "time": "2026-06-10 20:41",
+   "side": "buy",
+   "symbol": "?",
+   "address": "7BdfmAP5gUAwWAj78Pn3axyLBU7aa6HC8gpfL81Hpump",
+   "amount": 5518257.948813,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1781124114,
+   "time": "2026-06-10 20:41",
+   "side": "buy",
+   "symbol": "?",
+   "address": "7BdfmAP5gUAwWAj78Pn3axyLBU7aa6HC8gpfL81Hpump",
+   "amount": 2357580.624382,
+   "usd": 500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1781124121,
+   "time": "2026-06-10 20:42",
+   "side": "buy",
+   "symbol": "?",
+   "address": "7BdfmAP5gUAwWAj78Pn3axyLBU7aa6HC8gpfL81Hpump",
+   "amount": 2753199.466375,
+   "usd": 500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1781513297,
+   "time": "2026-06-15 08:48",
+   "side": "buy",
+   "symbol": "?",
+   "address": "J3pjYP2D3KK2rBRqys6D2WP3ZMdQiyN4MSs93Uc4pump",
+   "amount": 12210626.345686,
+   "usd": 2500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1781540324,
+   "time": "2026-06-15 16:18",
+   "side": "sell",
+   "symbol": "?",
+   "address": "J3pjYP2D3KK2rBRqys6D2WP3ZMdQiyN4MSs93Uc4pump",
+   "amount": -12210626.345686,
+   "usd": 1900.646757,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1781551455,
+   "time": "2026-06-15 19:24",
+   "side": "buy",
+   "symbol": "?",
+   "address": "YTKGpkppXRbyQq9fUnTJHoG27Nz83H1AfpheDbKpump",
+   "amount": 7427715.191631,
+   "usd": 1000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1781551464,
+   "time": "2026-06-15 19:24",
+   "side": "buy",
+   "symbol": "?",
+   "address": "YTKGpkppXRbyQq9fUnTJHoG27Nz83H1AfpheDbKpump",
+   "amount": 3625718.243678,
+   "usd": 500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1781552014,
+   "time": "2026-06-15 19:33",
+   "side": "sell",
+   "symbol": "?",
+   "address": "YTKGpkppXRbyQq9fUnTJHoG27Nz83H1AfpheDbKpump",
+   "amount": -11053433.435309,
+   "usd": 1138.629373,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1781560082,
+   "time": "2026-06-15 21:48",
+   "side": "buy",
+   "symbol": "ANT",
+   "address": "2hAaUpYyNWeeNpKwh2vnppwjmj1TKqSyAXUdcW8Ppump",
+   "amount": 7220807.941388,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1781560084,
+   "time": "2026-06-15 21:48",
+   "side": "buy",
+   "symbol": "ANT",
+   "address": "2hAaUpYyNWeeNpKwh2vnppwjmj1TKqSyAXUdcW8Ppump",
+   "amount": 3463359.603318,
+   "usd": 500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782629708,
+   "time": "2026-06-28 06:55",
+   "side": "sell",
+   "symbol": "?",
+   "address": "6RXiM7kFbVhqNnS12m8gUjNrvzUdL9kRTsYGJWHEFQTc",
+   "amount": -6902530.462418,
+   "usd": 85.105185,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1782629715,
+   "time": "2026-06-28 06:55",
+   "side": "sell",
+   "symbol": "?",
+   "address": "6EQKNJD6KMTQv9KmhKDjs1jm1SRsNVGNqdKeEEiJpump",
+   "amount": -4760507.020236,
+   "usd": 43.48804905570756,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1782629721,
+   "time": "2026-06-28 06:55",
+   "side": "sell",
+   "symbol": "?",
+   "address": "7BdfmAP5gUAwWAj78Pn3axyLBU7aa6HC8gpfL81Hpump",
+   "amount": -10629038.03957,
+   "usd": 41.717486,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782629730,
+   "time": "2026-06-28 06:55",
+   "side": "sell",
+   "symbol": "?",
+   "address": "N9Curnf2ZQWBZWrjBkzP6xBe6n5WRhBhouRfiSqpump",
+   "amount": -19581317.623528,
+   "usd": 63.23298,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782629738,
+   "time": "2026-06-28 06:55",
+   "side": "sell",
+   "symbol": "ANT",
+   "address": "2hAaUpYyNWeeNpKwh2vnppwjmj1TKqSyAXUdcW8Ppump",
+   "amount": -10684167.544706,
+   "usd": 19.311318,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782726159,
+   "time": "2026-06-29 09:42",
+   "side": "buy",
+   "symbol": "?",
+   "address": "GUZcvcpxtivSVkL6KkAcZiFLdMQc4h9mr1U3x8aJpump",
+   "amount": 196226200.96712,
+   "usd": 500.0,
+   "src": "PUMP_FUN"
+  },
+  {
+   "ts": 1782770843,
+   "time": "2026-06-29 22:07",
+   "side": "buy",
+   "symbol": "?",
+   "address": "GUZcvcpxtivSVkL6KkAcZiFLdMQc4h9mr1U3x8aJpump",
+   "amount": 14962420.410761,
+   "usd": 50.0,
+   "src": "PUMP_FUN"
+  },
+  {
+   "ts": 1782770860,
+   "time": "2026-06-29 22:07",
+   "side": "buy",
+   "symbol": "?",
+   "address": "GUZcvcpxtivSVkL6KkAcZiFLdMQc4h9mr1U3x8aJpump",
+   "amount": 9762840.994092,
+   "usd": 50.0,
+   "src": "PUMP_FUN"
+  },
+  {
+   "ts": 1782773044,
+   "time": "2026-06-29 22:44",
+   "side": "buy",
+   "symbol": "?",
+   "address": "GUZcvcpxtivSVkL6KkAcZiFLdMQc4h9mr1U3x8aJpump",
+   "amount": 134388420.561502,
+   "usd": 1000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1782773052,
+   "time": "2026-06-29 22:44",
+   "side": "sell",
+   "symbol": "?",
+   "address": "GUZcvcpxtivSVkL6KkAcZiFLdMQc4h9mr1U3x8aJpump",
+   "amount": -355339882.933475,
+   "usd": 2009.600356,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1782783941,
+   "time": "2026-06-30 01:45",
+   "side": "buy",
+   "symbol": "KINS",
+   "address": "Tqj8yFmagrg7oorpQkVGYR52r96RFTamvWfth9bpump",
+   "amount": 1697293.953536,
+   "usd": 20000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782783957,
+   "time": "2026-06-30 01:45",
+   "side": "buy",
+   "symbol": "KINS",
+   "address": "Tqj8yFmagrg7oorpQkVGYR52r96RFTamvWfth9bpump",
+   "amount": 1637787.913327,
+   "usd": 20000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782893473,
+   "time": "2026-07-01 08:11",
+   "side": "buy",
+   "symbol": "?",
+   "address": "3oX9emrqYRGzFEDPP3jA6tYnUBML4QSr3DfgD2r5pump",
+   "amount": 4345214.037489,
+   "usd": 3000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782936515,
+   "time": "2026-07-01 20:08",
+   "side": "buy",
+   "symbol": "?",
+   "address": "3oX9emrqYRGzFEDPP3jA6tYnUBML4QSr3DfgD2r5pump",
+   "amount": 3680474.483124,
+   "usd": 2000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782950013,
+   "time": "2026-07-01 23:53",
+   "side": "buy",
+   "symbol": "?",
+   "address": "32e2Rpw2ZLLhSaoVwMn4Vyx3vkHG6xCPRiyXrPJYpump",
+   "amount": 1183238.13388,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782962927,
+   "time": "2026-07-02 03:28",
+   "side": "buy",
+   "symbol": "?",
+   "address": "32e2Rpw2ZLLhSaoVwMn4Vyx3vkHG6xCPRiyXrPJYpump",
+   "amount": 1217888.116317,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782964357,
+   "time": "2026-07-02 03:52",
+   "side": "buy",
+   "symbol": "?",
+   "address": "32e2Rpw2ZLLhSaoVwMn4Vyx3vkHG6xCPRiyXrPJYpump",
+   "amount": 654554.778543,
+   "usd": 500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782965198,
+   "time": "2026-07-02 04:06",
+   "side": "buy",
+   "symbol": "?",
+   "address": "32e2Rpw2ZLLhSaoVwMn4Vyx3vkHG6xCPRiyXrPJYpump",
+   "amount": 1045117.901488,
+   "usd": 800.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782969660,
+   "time": "2026-07-02 05:21",
+   "side": "sell",
+   "symbol": "KINS",
+   "address": "Tqj8yFmagrg7oorpQkVGYR52r96RFTamvWfth9bpump",
+   "amount": -3335081.866863,
+   "usd": 44050.626468,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782974130,
+   "time": "2026-07-02 06:35",
+   "side": "buy",
+   "symbol": "?",
+   "address": "32e2Rpw2ZLLhSaoVwMn4Vyx3vkHG6xCPRiyXrPJYpump",
+   "amount": 1538094.046934,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1782978363,
+   "time": "2026-07-02 07:46",
+   "side": "buy",
+   "symbol": "?",
+   "address": "32e2Rpw2ZLLhSaoVwMn4Vyx3vkHG6xCPRiyXrPJYpump",
+   "amount": 1640508.715629,
+   "usd": 1000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1783029697,
+   "time": "2026-07-02 22:01",
+   "side": "buy",
+   "symbol": "?",
+   "address": "3oX9emrqYRGzFEDPP3jA6tYnUBML4QSr3DfgD2r5pump",
+   "amount": 3337165.253272,
+   "usd": 1500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783029875,
+   "time": "2026-07-02 22:04",
+   "side": "buy",
+   "symbol": "?",
+   "address": "32e2Rpw2ZLLhSaoVwMn4Vyx3vkHG6xCPRiyXrPJYpump",
+   "amount": 1042520.874395,
+   "usd": 500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783036309,
+   "time": "2026-07-02 23:51",
+   "side": "buy",
+   "symbol": "?",
+   "address": "HEpnawcnjTBKk1Vi5krT3S6C9waMJjp5g2rhJ2hYpump",
+   "amount": 18998933.558747,
+   "usd": 1250.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783128517,
+   "time": "2026-07-04 01:28",
+   "side": "buy",
+   "symbol": "?",
+   "address": "4i35vSVyniKBkAsJxn4RCx7y48tEo7yPKZMi8MhDpump",
+   "amount": 4191955.793086,
+   "usd": 500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783129823,
+   "time": "2026-07-04 01:50",
+   "side": "buy",
+   "symbol": "?",
+   "address": "4i35vSVyniKBkAsJxn4RCx7y48tEo7yPKZMi8MhDpump",
+   "amount": 4588887.291511,
+   "usd": 500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783242922,
+   "time": "2026-07-05 09:15",
+   "side": "buy",
+   "symbol": "ZERO",
+   "address": "EmcxFTNVDqyLHp11NvwvLZ4D7LKGbG9i7B8RF7dwpump",
+   "amount": 3183535.671107,
+   "usd": 15000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1783242948,
+   "time": "2026-07-05 09:15",
+   "side": "buy",
+   "symbol": "ZERO",
+   "address": "EmcxFTNVDqyLHp11NvwvLZ4D7LKGbG9i7B8RF7dwpump",
+   "amount": 1007172.485858,
+   "usd": 5000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1783270859,
+   "time": "2026-07-05 17:00",
+   "side": "sell",
+   "symbol": "?",
+   "address": "HEpnawcnjTBKk1Vi5krT3S6C9waMJjp5g2rhJ2hYpump",
+   "amount": -18998933.558747,
+   "usd": 1188.619481,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783286525,
+   "time": "2026-07-05 21:22",
+   "side": "sell",
+   "symbol": "ZERO",
+   "address": "EmcxFTNVDqyLHp11NvwvLZ4D7LKGbG9i7B8RF7dwpump",
+   "amount": -783235.799826,
+   "usd": 6212.00717,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783286556,
+   "time": "2026-07-05 21:22",
+   "side": "sell",
+   "symbol": "ZERO",
+   "address": "EmcxFTNVDqyLHp11NvwvLZ4D7LKGbG9i7B8RF7dwpump",
+   "amount": -234969.900483,
+   "usd": 1865.630917,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1783374241,
+   "time": "2026-07-06 21:44",
+   "side": "buy",
+   "symbol": "?",
+   "address": "6u7N3VXoqdzSnR3B9CgF3gTcaSsh2ngxNy4iNFnRpump",
+   "amount": 8049129.422759,
+   "usd": 2000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1783374658,
+   "time": "2026-07-06 21:50",
+   "side": "sell",
+   "symbol": "?",
+   "address": "6u7N3VXoqdzSnR3B9CgF3gTcaSsh2ngxNy4iNFnRpump",
+   "amount": -8049129.422759,
+   "usd": 1514.893868,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783377042,
+   "time": "2026-07-06 22:30",
+   "side": "buy",
+   "symbol": "?",
+   "address": "8jayQDfRc3GYxftBJ2VAwjqmRBdYPC9KnjY15rc9pump",
+   "amount": 2596769.486402,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783377048,
+   "time": "2026-07-06 22:30",
+   "side": "buy",
+   "symbol": "?",
+   "address": "8jayQDfRc3GYxftBJ2VAwjqmRBdYPC9KnjY15rc9pump",
+   "amount": 2640571.566402,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783377671,
+   "time": "2026-07-06 22:41",
+   "side": "buy",
+   "symbol": "?",
+   "address": "8jayQDfRc3GYxftBJ2VAwjqmRBdYPC9KnjY15rc9pump",
+   "amount": 660730.388973,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783390933,
+   "time": "2026-07-07 02:22",
+   "side": "buy",
+   "symbol": "ZERO",
+   "address": "EmcxFTNVDqyLHp11NvwvLZ4D7LKGbG9i7B8RF7dwpump",
+   "amount": 924594.15316,
+   "usd": 5000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1783464696,
+   "time": "2026-07-07 22:51",
+   "side": "buy",
+   "symbol": "ZERO",
+   "address": "EmcxFTNVDqyLHp11NvwvLZ4D7LKGbG9i7B8RF7dwpump",
+   "amount": 571628.663507,
+   "usd": 2500.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1783497565,
+   "time": "2026-07-08 07:59",
+   "side": "sell",
+   "symbol": "?",
+   "address": "4i35vSVyniKBkAsJxn4RCx7y48tEo7yPKZMi8MhDpump",
+   "amount": -4390366.568731,
+   "usd": 705.23065,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1783562838,
+   "time": "2026-07-09 02:07",
+   "side": "buy",
+   "symbol": "ZERO",
+   "address": "EmcxFTNVDqyLHp11NvwvLZ4D7LKGbG9i7B8RF7dwpump",
+   "amount": 612784.008821,
+   "usd": 1999.998629,
+   "src": "SOLANA_PROGRAM_LIBRARY"
+  },
+  {
+   "ts": 1784008171,
+   "time": "2026-07-14 05:49",
+   "side": "buy",
+   "symbol": "?",
+   "address": "F4GpAFr6vrxU3Y887F3XWkXRgybCVjZNk63m72f6pump",
+   "amount": 6973678.407999,
+   "usd": 2497.541839,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1784008247,
+   "time": "2026-07-14 05:50",
+   "side": "sell",
+   "symbol": "?",
+   "address": "F4GpAFr6vrxU3Y887F3XWkXRgybCVjZNk63m72f6pump",
+   "amount": -6973678.407999,
+   "usd": 2376.247174,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1786023524,
+   "time": "2026-08-06 13:38",
+   "side": "buy",
+   "symbol": "GTA6",
+   "address": "4kjruqGHDsSqkMdFfCjV7Vb62HPFhtXyWc2t6JpQzDnz",
+   "amount": 10450699.06336713,
+   "usd": 1000.0,
+   "src": "OKX_DEX_ROUTER"
+  },
+  {
+   "ts": 1786023567,
+   "time": "2026-08-06 13:39",
+   "side": "sell",
+   "symbol": "GTA6",
+   "address": "4kjruqGHDsSqkMdFfCjV7Vb62HPFhtXyWc2t6JpQzDnz",
+   "amount": -10450699.06336713,
+   "usd": 2541.760163,
+   "src": "DFLOW"
+  },
+  {
+   "ts": 1786241772,
+   "time": "2026-08-09 02:16",
+   "side": "sell",
+   "symbol": "ZERO",
+   "address": "EmcxFTNVDqyLHp11NvwvLZ4D7LKGbG9i7B8RF7dwpump",
+   "amount": -2111873.999433,
+   "usd": 5597.864287,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1786257068,
+   "time": "2026-08-09 06:31",
+   "side": "sell",
+   "symbol": "?",
+   "address": "4i35vSVyniKBkAsJxn4RCx7y48tEo7yPKZMi8MhDpump",
+   "amount": -4390476.515866,
+   "usd": 19.282865,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1786257081,
+   "time": "2026-08-09 06:31",
+   "side": "sell",
+   "symbol": "?",
+   "address": "3oX9emrqYRGzFEDPP3jA6tYnUBML4QSr3DfgD2r5pump",
+   "amount": -11362853.773885,
+   "usd": 172.856354,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1786418054,
+   "time": "2026-08-11 03:14",
+   "side": "buy",
+   "symbol": "MANLET",
+   "address": "HxQhDGYqyjorgogMJx7YbBHADEDxuHhLnMMmr6VYpyn",
+   "amount": 1672035.86145799,
+   "usd": 10000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1786418060,
+   "time": "2026-08-11 03:14",
+   "side": "buy",
+   "symbol": "MANLET",
+   "address": "HxQhDGYqyjorgogMJx7YbBHADEDxuHhLnMMmr6VYpyn",
+   "amount": 814416.98159662,
+   "usd": 5000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1786418064,
+   "time": "2026-08-11 03:14",
+   "side": "buy",
+   "symbol": "MANLET",
+   "address": "HxQhDGYqyjorgogMJx7YbBHADEDxuHhLnMMmr6VYpyn",
+   "amount": 794608.892433826,
+   "usd": 5000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1786418080,
+   "time": "2026-08-11 03:14",
+   "side": "buy",
+   "symbol": "MANLET",
+   "address": "HxQhDGYqyjorgogMJx7YbBHADEDxuHhLnMMmr6VYpyn",
+   "amount": 778131.159648089,
+   "usd": 5000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1786418090,
+   "time": "2026-08-11 03:14",
+   "side": "buy",
+   "symbol": "MANLET",
+   "address": "HxQhDGYqyjorgogMJx7YbBHADEDxuHhLnMMmr6VYpyn",
+   "amount": 390722.611530412,
+   "usd": 2500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1786422694,
+   "time": "2026-08-11 04:31",
+   "side": "buy",
+   "symbol": "?",
+   "address": "6mLmo53cpNy8PkSXt1XTVTF8CvJj466ea3bbhZqMpump",
+   "amount": 10580505.007887,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1786423029,
+   "time": "2026-08-11 04:37",
+   "side": "sell",
+   "symbol": "?",
+   "address": "6mLmo53cpNy8PkSXt1XTVTF8CvJj466ea3bbhZqMpump",
+   "amount": -10580505.007887,
+   "usd": 1537.973152,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1786476468,
+   "time": "2026-08-11 19:27",
+   "side": "buy",
+   "symbol": "?",
+   "address": "FQRGr4nFpC7y6VicqZSLrVBiRft5kiffcPkjKBfKpump",
+   "amount": 457938.35449,
+   "usd": 67.8833278831954,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1786606448,
+   "time": "2026-08-13 07:34",
+   "side": "buy",
+   "symbol": "K-HOME",
+   "address": "EUB1eZBt4m3X4FbperWnKGJdvLsuLMu2YmJix5yjpump",
+   "amount": 3841242.654105,
+   "usd": 1500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1786608846,
+   "time": "2026-08-13 08:14",
+   "side": "sell",
+   "symbol": "K-HOME",
+   "address": "EUB1eZBt4m3X4FbperWnKGJdvLsuLMu2YmJix5yjpump",
+   "amount": -960310.663526,
+   "usd": 1682.391179,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1786608872,
+   "time": "2026-08-13 08:14",
+   "side": "sell",
+   "symbol": "K-HOME",
+   "address": "EUB1eZBt4m3X4FbperWnKGJdvLsuLMu2YmJix5yjpump",
+   "amount": -288093.199057,
+   "usd": 480.212777,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1786609270,
+   "time": "2026-08-13 08:21",
+   "side": "sell",
+   "symbol": "K-HOME",
+   "address": "EUB1eZBt4m3X4FbperWnKGJdvLsuLMu2YmJix5yjpump",
+   "amount": -2592838.791522,
+   "usd": 4214.326604,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1786845222,
+   "time": "2026-08-16 01:53",
+   "side": "buy",
+   "symbol": "?",
+   "address": "DhmLxPEx5szhj3ZTZPvJWFhEdSAeZBcNcBeg8wJ6NoKc",
+   "amount": 5761689.288715,
+   "usd": 1500.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1786846135,
+   "time": "2026-08-16 02:08",
+   "side": "sell",
+   "symbol": "?",
+   "address": "DhmLxPEx5szhj3ZTZPvJWFhEdSAeZBcNcBeg8wJ6NoKc",
+   "amount": -5761689.288715,
+   "usd": 466.610141,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1786921798,
+   "time": "2026-08-16 23:09",
+   "side": "sell",
+   "symbol": "MANLET",
+   "address": "HxQhDGYqyjorgogMJx7YbBHADEDxuHhLnMMmr6VYpyn",
+   "amount": -4449915.506666937,
+   "usd": 11948.003437,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1787167967,
+   "time": "2026-08-19 19:32",
+   "side": "sell",
+   "symbol": "ANSEM",
+   "address": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+   "amount": -808.562013,
+   "usd": 185.463952,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787167999,
+   "time": "2026-08-19 19:33",
+   "side": "sell",
+   "symbol": "PENGU",
+   "address": "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv",
+   "amount": -456.706066,
+   "usd": 2.780252,
+   "src": "SOLANA_PROGRAM_LIBRARY"
+  },
+  {
+   "ts": 1787168014,
+   "time": "2026-08-19 19:33",
+   "side": "sell",
+   "symbol": "iPHONE18",
+   "address": "BdP1WRm13fnjepywesbGhMAEpP3Age3RPjYkb93gpump",
+   "amount": -250000.0,
+   "usd": 21.637804,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787169680,
+   "time": "2026-08-19 20:01",
+   "side": "buy",
+   "symbol": "TROOPET",
+   "address": "3bLw2fp44SGrAp19XAtaLmutCksRDRDvjLyTbWD7iEqV",
+   "amount": 3767847.746509,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787169682,
+   "time": "2026-08-19 20:01",
+   "side": "buy",
+   "symbol": "TROOPET",
+   "address": "3bLw2fp44SGrAp19XAtaLmutCksRDRDvjLyTbWD7iEqV",
+   "amount": 3476365.827741,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787169723,
+   "time": "2026-08-19 20:02",
+   "side": "buy",
+   "symbol": "TROOPET",
+   "address": "3bLw2fp44SGrAp19XAtaLmutCksRDRDvjLyTbWD7iEqV",
+   "amount": 1184680.575935,
+   "usd": 1500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787169770,
+   "time": "2026-08-19 20:02",
+   "side": "buy",
+   "symbol": "TROOPET",
+   "address": "3bLw2fp44SGrAp19XAtaLmutCksRDRDvjLyTbWD7iEqV",
+   "amount": 1472439.318112,
+   "usd": 1500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787169977,
+   "time": "2026-08-19 20:06",
+   "side": "sell",
+   "symbol": "TROOPET",
+   "address": "3bLw2fp44SGrAp19XAtaLmutCksRDRDvjLyTbWD7iEqV",
+   "amount": -4950666.734148,
+   "usd": 4084.602319,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787169985,
+   "time": "2026-08-19 20:06",
+   "side": "sell",
+   "symbol": "TROOPET",
+   "address": "3bLw2fp44SGrAp19XAtaLmutCksRDRDvjLyTbWD7iEqV",
+   "amount": -4950666.734149,
+   "usd": 4120.346211,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787468150,
+   "time": "2026-08-23 06:55",
+   "side": "sell",
+   "symbol": "Dinger",
+   "address": "3kvZYBrBPEySFwQfXZGEvJSeMWRa6BkTS34suBEYpump",
+   "amount": -464699.408263,
+   "usd": 2060.235077,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787551642,
+   "time": "2026-08-24 06:07",
+   "side": "buy",
+   "symbol": "LOOKSMAX",
+   "address": "GPzpoXpD74E2C4CJNayuoyBqPQJEsPtdse3nhntrpump",
+   "amount": 3565503.616269,
+   "usd": 10000.0,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1787551654,
+   "time": "2026-08-24 06:07",
+   "side": "buy",
+   "symbol": "LOOKSMAX",
+   "address": "GPzpoXpD74E2C4CJNayuoyBqPQJEsPtdse3nhntrpump",
+   "amount": 4473972.666357,
+   "usd": 15000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787557826,
+   "time": "2026-08-24 07:50",
+   "side": "sell",
+   "symbol": "GrokBot",
+   "address": "GeSfrQiscfsEv4Hx2TKaB9Nfid12qND1YYRYS1vSpump",
+   "amount": -221405.6906,
+   "usd": 402.026112,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1787600602,
+   "time": "2026-08-24 19:43",
+   "side": "buy",
+   "symbol": "LOOKSMAX",
+   "address": "GPzpoXpD74E2C4CJNayuoyBqPQJEsPtdse3nhntrpump",
+   "amount": 2852629.044847,
+   "usd": 5000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787600908,
+   "time": "2026-08-24 19:48",
+   "side": "sell",
+   "symbol": "LOOKSMAX",
+   "address": "GPzpoXpD74E2C4CJNayuoyBqPQJEsPtdse3nhntrpump",
+   "amount": -1089210.532747,
+   "usd": 3586.696844,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1787600914,
+   "time": "2026-08-24 19:48",
+   "side": "sell",
+   "symbol": "LOOKSMAX",
+   "address": "GPzpoXpD74E2C4CJNayuoyBqPQJEsPtdse3nhntrpump",
+   "amount": -980289.479472,
+   "usd": 3001.490247,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787600923,
+   "time": "2026-08-24 19:48",
+   "side": "sell",
+   "symbol": "LOOKSMAX",
+   "address": "GPzpoXpD74E2C4CJNayuoyBqPQJEsPtdse3nhntrpump",
+   "amount": -882260.531525,
+   "usd": 2555.501325,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787693911,
+   "time": "2026-08-25 21:38",
+   "side": "buy",
+   "symbol": "SpaceCat",
+   "address": "AY6dVdZ7DQUGnh3BBhpoXmTvaRGQgsppKkPkfucppump",
+   "amount": 7547983.023646,
+   "usd": 10000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787693927,
+   "time": "2026-08-25 21:38",
+   "side": "sell",
+   "symbol": "SpaceCat",
+   "address": "AY6dVdZ7DQUGnh3BBhpoXmTvaRGQgsppKkPkfucppump",
+   "amount": -7547983.023646,
+   "usd": 7707.396077,
+   "src": "JUPITER"
+  },
+  {
+   "ts": 1787694563,
+   "time": "2026-08-25 21:49",
+   "side": "buy",
+   "symbol": "glorp",
+   "address": "GLorPhfYWUQ6h8V63LEuhgaiRpyv4qKnDmhEnprLPwV4",
+   "amount": 12510293.857885,
+   "usd": 3500.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787696389,
+   "time": "2026-08-25 22:19",
+   "side": "buy",
+   "symbol": "glorp",
+   "address": "GLorPhfYWUQ6h8V63LEuhgaiRpyv4qKnDmhEnprLPwV4",
+   "amount": 10082178.945106,
+   "usd": 1000.0,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787707229,
+   "time": "2026-08-26 01:20",
+   "side": "sell",
+   "symbol": "glorp",
+   "address": "GLorPhfYWUQ6h8V63LEuhgaiRpyv4qKnDmhEnprLPwV4",
+   "amount": -22592472.802991,
+   "usd": 784.736231,
+   "src": "PUMP_AMM"
+  },
+  {
+   "ts": 1787716472,
+   "time": "2026-08-26 03:54",
+   "side": "sell",
+   "symbol": "LOOKSMAX",
+   "address": "GPzpoXpD74E2C4CJNayuoyBqPQJEsPtdse3nhntrpump",
+   "amount": -7940344.783729,
+   "usd": 14326.116257,
+   "src": "PUMP_AMM"
+  }
+ ],
+ "rh_summary": {
+  "fills": 118,
+  "buys": 91,
+  "tokens": 16,
+  "priced_buy_usd": 26268.951477087085,
+  "priced_sell_usd": 26271.94899274963,
+  "launch_age_min_median": 12891.244107744107,
+  "share_buys_within_1h_of_launch": 0.0,
+  "share_buys_within_24h": 0.0
+ },
+ "sol_summary": {
+  "fills": 235,
+  "buys": 158,
+  "tokens": 57,
+  "buy_usd": 668827.6413678832,
+  "sell_usd": 297270.5027720558
+ }
+}

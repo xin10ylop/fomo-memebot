@@ -1,0 +1,186 @@
+{
+ "handle": "crocsguy",
+ "ranks": {
+  "24h": null,
+  "7d": 39,
+  "30d": 54,
+  "all": 53
+ },
+ "followers": 3343,
+ "pnl_all": 926214,
+ "fomo_positions": {
+  "open": 4,
+  "closed_captured": 0,
+  "closed_total_reported": 0
+ },
+ "tokens_traded_fomo": [
+  "AI",
+  "TENDIES",
+  "UNITY",
+  "UPTOBER"
+ ],
+ "n_tokens_fomo": 4,
+ "chains_fomo": {
+  "eth": 1,
+  "robinhood": 3
+ },
+ "by_token": {
+  "AI": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 883027.34,
+   "first": "2026-08-25 19:19",
+   "last": "2026-08-25 19:19",
+   "entries": [
+    {
+     "time": "2026-08-25 19:19",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 883027.34,
+     "closed": "",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x2e8c31162b855a2ffa90f6f8634643ad6f111e18"
+    }
+   ]
+  },
+  "TENDIES": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 105523.43,
+   "first": "2026-08-25 19:18",
+   "last": "2026-08-25 19:18",
+   "entries": [
+    {
+     "time": "2026-08-25 19:18",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 105523.43,
+     "closed": "",
+     "thesis": "Most obvious play since Fartcoin / WIF. Enjoy the show.",
+     "chain": "robinhood",
+     "address": "0x45242320dbb855eea8fd36804c6487e10e97fcf9"
+    }
+   ]
+  },
+  "UNITY": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 0.663845,
+   "first": "2026-08-31 09:41",
+   "last": "2026-08-31 09:41",
+   "entries": [
+    {
+     "time": "2026-08-31 09:41",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 0.663845,
+     "closed": "",
+     "thesis": "",
+     "chain": "eth",
+     "address": "0xfd0bb211d479710dfa01d3d98751767f51edb2d9"
+    }
+   ]
+  },
+  "UPTOBER": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": -0.266484,
+   "first": "2026-08-28 10:55",
+   "last": "2026-08-28 10:55",
+   "entries": [
+    {
+     "time": "2026-08-28 10:55",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": -0.266484,
+     "closed": "",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0xe36dc5d02bdbf9601c9aba190411bbc8a6ff425f"
+    }
+   ]
+  }
+ },
+ "holdings_now": [
+  {
+   "symbol": "AI",
+   "address": "0x2e8c31162b855a2ffa90f6f8634643ad6f111e18",
+   "chain": "robinhood",
+   "amount": 3850224.33,
+   "value_usd": 1013289.75,
+   "change24h": -5.5951
+  },
+  {
+   "symbol": "TENDIES",
+   "address": "0x45242320dbb855eea8fd36804c6487e10e97fcf9",
+   "chain": "robinhood",
+   "amount": 7773987.46,
+   "value_usd": 237255.54,
+   "change24h": -9.0669
+  },
+  {
+   "symbol": "USDC",
+   "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+   "chain": "solana",
+   "amount": 27.5876,
+   "value_usd": 27.58,
+   "change24h": -0.0012
+  },
+  {
+   "symbol": "UNITY",
+   "address": "0xfd0bb211d479710dfa01d3d98751767f51edb2d9",
+   "chain": "ethereum",
+   "amount": 8266666667,
+   "value_usd": 2.88,
+   "change24h": 2.7386
+  },
+  {
+   "symbol": "UPTOBER",
+   "address": "0xe36dc5d02bdbf9601c9aba190411bbc8a6ff425f",
+   "chain": "robinhood",
+   "amount": 4450.26,
+   "value_usd": 0.74,
+   "change24h": 35.379
+  },
+  {
+   "symbol": "BOING",
+   "address": "0x70df9e6af145b74d0d23022549f0438abf02fd9a",
+   "chain": "robinhood",
+   "amount": 5000,
+   "value_usd": 0.03,
+   "change24h": -95.515
+  }
+ ],
+ "rh_fills": [],
+ "sol_fills": [],
+ "rh_summary": {
+  "fills": 0,
+  "buys": 0,
+  "tokens": 0,
+  "priced_buy_usd": 0,
+  "priced_sell_usd": 0,
+  "launch_age_min_median": null,
+  "share_buys_within_1h_of_launch": null,
+  "share_buys_within_24h": null
+ },
+ "sol_summary": {
+  "fills": 0,
+  "buys": 0,
+  "tokens": 0,
+  "buy_usd": 0,
+  "sell_usd": 0
+ }
+}

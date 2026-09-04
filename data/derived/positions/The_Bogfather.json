@@ -1,0 +1,257 @@
+{
+ "handle": "The_Bogfather",
+ "ranks": {
+  "24h": 78,
+  "7d": null,
+  "30d": null,
+  "all": null
+ },
+ "followers": 702,
+ "pnl_all": 168847,
+ "fomo_positions": {
+  "open": 6,
+  "closed_captured": 0,
+  "closed_total_reported": 0
+ },
+ "tokens_traded_fomo": [
+  "CARDS",
+  "CASHCAT",
+  "ETHMAXI",
+  "HOOK",
+  "PONS",
+  "UNITY"
+ ],
+ "n_tokens_fomo": 6,
+ "chains_fomo": {
+  "robinhood": 4,
+  "eth": 1,
+  "solana": 1
+ },
+ "by_token": {
+  "CASHCAT": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 362257.15,
+   "first": "2026-08-23 23:14",
+   "last": "2026-08-23 23:14",
+   "entries": [
+    {
+     "time": "2026-08-23 23:14",
+     "status": "open",
+     "entry_price": 0.204982,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 362257.15,
+     "closed": "",
+     "thesis": "popcat went to 2 billion without the largest fintech company backing it\u2026",
+     "chain": "robinhood",
+     "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4"
+    }
+   ]
+  },
+  "PONS": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 75881.53,
+   "first": "2026-09-02 22:59",
+   "last": "2026-09-02 22:59",
+   "entries": [
+    {
+     "time": "2026-09-02 22:59",
+     "status": "open",
+     "entry_price": 0.486,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 75881.53,
+     "closed": "",
+     "thesis": "this is clearly rerating itself after passing PUMP in revenue this week. should be a multi billion $ coin",
+     "chain": "robinhood",
+     "address": "0x39dbed3a2bd333467115de45665cc57f813c4571"
+    }
+   ]
+  },
+  "CARDS": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 10827.2,
+   "first": "2026-09-02 16:53",
+   "last": "2026-09-02 16:53",
+   "entries": [
+    {
+     "time": "2026-09-02 16:53",
+     "status": "open",
+     "entry_price": 0.161563,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 10827.2,
+     "closed": "",
+     "thesis": "The chart is one huge cup and handle and its fits in the revenue meta. Team will be doing buybacks and it\u2019s a pure play ",
+     "chain": "solana",
+     "address": "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp"
+    }
+   ]
+  },
+  "UNITY": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 0.678838,
+   "first": "2026-08-31 09:41",
+   "last": "2026-08-31 09:41",
+   "entries": [
+    {
+     "time": "2026-08-31 09:41",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 0.678838,
+     "closed": "",
+     "thesis": "",
+     "chain": "eth",
+     "address": "0xfd0bb211d479710dfa01d3d98751767f51edb2d9"
+    }
+   ]
+  },
+  "HOOK": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 0.245204,
+   "first": "2026-08-30 04:55",
+   "last": "2026-08-30 04:55",
+   "entries": [
+    {
+     "time": "2026-08-30 04:55",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 0.245204,
+     "closed": "",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x34074d698b28b1e8bf255c484d441350ba03c369"
+    }
+   ]
+  },
+  "ETHMAXI": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": -2.19651,
+   "first": "2026-08-30 07:01",
+   "last": "2026-08-30 07:01",
+   "entries": [
+    {
+     "time": "2026-08-30 07:01",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": -2.19651,
+     "closed": "",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0xaec630d3d84c9abc14826e5638b7f2077eb412a8"
+    }
+   ]
+  }
+ },
+ "holdings_now": [
+  {
+   "symbol": "CASHCAT",
+   "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+   "chain": "robinhood",
+   "amount": 3553789.26,
+   "value_usd": 1088455.3,
+   "change24h": 14.4849
+  },
+  {
+   "symbol": "PONS",
+   "address": "0x39dbed3a2bd333467115de45665cc57f813c4571",
+   "chain": "robinhood",
+   "amount": 537784.39,
+   "value_usd": 337244.49,
+   "change24h": 45.8243
+  },
+  {
+   "symbol": "CARDS",
+   "address": "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp",
+   "chain": "solana",
+   "amount": 1431348.21,
+   "value_usd": 257303.72,
+   "change24h": 4.0168
+  },
+  {
+   "symbol": "UNITY",
+   "address": "0xfd0bb211d479710dfa01d3d98751767f51edb2d9",
+   "chain": "ethereum",
+   "amount": 8266666667,
+   "value_usd": 2.9,
+   "change24h": 5.6359
+  },
+  {
+   "symbol": "ETHMAXI",
+   "address": "0xaec630d3d84c9abc14826e5638b7f2077eb412a8",
+   "chain": "robinhood",
+   "amount": 28000,
+   "value_usd": 0.66,
+   "change24h": 4.9622
+  },
+  {
+   "symbol": "HOOK",
+   "address": "0x34074d698b28b1e8bf255c484d441350ba03c369",
+   "chain": "robinhood",
+   "amount": 10000,
+   "value_usd": 0.46,
+   "change24h": 31.9223
+  },
+  {
+   "symbol": "LAMBO",
+   "address": "0x34af5e01c064f738e7c0f8ecd856aee7c6954661",
+   "chain": "robinhood",
+   "amount": 2000,
+   "value_usd": 0.16,
+   "change24h": 46.0492
+  },
+  {
+   "symbol": "PCC",
+   "address": "0xbf3e53713a53e9c3d5d1ddc25dd2c65669244663",
+   "chain": "robinhood",
+   "amount": 3.42757,
+   "value_usd": 0.02,
+   "change24h": -10.992
+  },
+  {
+   "symbol": "PEPONS",
+   "address": "0xd2a577e92438fd0c1f2485f4fb91b9f866eb1e6c",
+   "chain": "robinhood",
+   "amount": 11,
+   "value_usd": 0.01,
+   "change24h": 32.3492
+  }
+ ],
+ "rh_fills": [],
+ "sol_fills": [],
+ "rh_summary": {
+  "fills": 0,
+  "buys": 0,
+  "tokens": 0,
+  "priced_buy_usd": 0,
+  "priced_sell_usd": 0,
+  "launch_age_min_median": null,
+  "share_buys_within_1h_of_launch": null,
+  "share_buys_within_24h": null
+ },
+ "sol_summary": {
+  "fills": 0,
+  "buys": 0,
+  "tokens": 0,
+  "buy_usd": 0,
+  "sell_usd": 0
+ }
+}

@@ -33,6 +33,14 @@ artifacts are copied into `data/derived/` in this repo).
 | `gt/ohlcv/<token>.json` | 15-minute OHLCV (base-token pools only) |
 | `gt/ohlcv1m/<token>.json` | 1-minute OHLCV for tokens seen in the live feed |
 | `dossiers.json` | per-trader merged metrics |
+| `rh/creators/creators.json` | Robinhood token → mint tx, deployer (`from` of the mint tx), factory, Pons `feeRedirects` (always zero so far) |
+| `rh/mints/mints.json` | Robinhood token → mint block |
+| `fapi/holders/<token>.json` | fomoapi tracked top holders (amount, cost basis, pnl, `isDev`); `available:false` for tokens fomoapi does not track (PONS included) |
+| `fapi/theses/<token>.json` | fomoapi theses per token (`isDev`, `equity`, `tradeUsd` per author) |
+| `fapi/holders_series.json` | per-token holder count / fomoBuyers / market cap series from the 30-minute board snapshots (only tokens that made a board) |
+| `data/derived/token_metrics.json` | per token: supply, FDV, liquidity, created (source), launchpad, deployer, holders, leaderboard entry FDV stats |
+| `data/derived/trader_entry_metrics.json` | per trader: entry FDV / age distributions, launchpads, deployed tokens |
+| `data/derived/entry_outcomes.json` | per (trader, token) realized outcome with entry FDV / age / launchpad buckets |
 | `docs/research_round1.json` | external research findings with sources |
 
 ## Backtest traps found by the adversarial audit (check every one before quoting a number)
@@ -57,3 +65,6 @@ artifacts are copied into `data/derived/` in this repo).
 * "Dead token" = no GeckoTerminal pool and no DexScreener pair → treat as −100% for strategy
   PnL (conservative) and report separately.
 * Launch age = (block − mint block) / 9.9 blocks/s (Robinhood Chain ≈ 100 ms blocks).
+* Entry FDV = entry price × total supply (GeckoTerminal `total_supply`, else DexScreener FDV ÷ price). Tokens without supply are dead tokens: report them as their own bucket, never drop them.
+* Launchpad: Solana by mint suffix (`pump`/`bonk`/`BAGS`); Robinhood by mint-tx factory (`0xa5aa…` = Pons), DexScreener pool label (v3 = Pons V1, v4 = Pons V2 hook curve) and quote asset (stock token = LONG stock-paired).
+* Dev = mint-tx deployer wallet (Robinhood). fomoapi `isDev` flags (holders, theses) are the only dev signal on Solana/BSC and are rarely set.

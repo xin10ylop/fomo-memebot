@@ -1,0 +1,201 @@
+{
+ "handle": "LuckyManRRR",
+ "ranks": {
+  "24h": 68,
+  "7d": null,
+  "30d": null,
+  "all": null
+ },
+ "followers": 87,
+ "pnl_all": 178251,
+ "fomo_positions": {
+  "open": 3,
+  "closed_captured": 2,
+  "closed_total_reported": 2
+ },
+ "tokens_traded_fomo": [
+  "FOX",
+  "QQQB",
+  "ROBINHOOD",
+  "\u725b\u6765",
+  "\u80a5\u561f\u561f"
+ ],
+ "n_tokens_fomo": 5,
+ "chains_fomo": {
+  "bsc": 3,
+  "robinhood": 2
+ },
+ "by_token": {
+  "\u80a5\u561f\u561f": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": -0.0831304,
+   "first": "2026-09-03 07:49",
+   "last": "2026-09-03 07:49",
+   "entries": [
+    {
+     "time": "2026-09-03 07:49",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": -0.0831304,
+     "closed": "",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x03c59bbf8ba49ce79831403b86acbc40d3167777"
+    }
+   ]
+  },
+  "QQQB": {
+   "open": 1,
+   "closed": 0,
+   "realized": -5.59142,
+   "unrealized": 4.59399,
+   "first": "2026-08-31 18:11",
+   "last": "2026-08-31 18:11",
+   "entries": [
+    {
+     "time": "2026-08-31 18:11",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": 703.732,
+     "realized": -5.59142,
+     "unrealized": 4.59399,
+     "closed": "",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x205812cdbed920aff76c6580abd681a46d11efc7"
+    }
+   ]
+  },
+  "ROBINHOOD": {
+   "open": 0,
+   "closed": 1,
+   "realized": -858.808,
+   "unrealized": 0.0,
+   "first": "2026-09-02 18:18",
+   "last": "2026-09-02 18:18",
+   "entries": [
+    {
+     "time": "2026-09-02 18:18",
+     "status": "closed",
+     "entry_price": 0.000237493,
+     "exit_price": 0.000135304,
+     "realized": -858.808,
+     "unrealized": null,
+     "closed": "2026-09-02 18:20",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0xf7f071f4091d4d436cc8684729789f9335e0c9ec"
+    }
+   ]
+  },
+  "FOX": {
+   "open": 0,
+   "closed": 1,
+   "realized": -1540.23,
+   "unrealized": 0.0,
+   "first": "2026-09-01 07:17",
+   "last": "2026-09-01 07:17",
+   "entries": [
+    {
+     "time": "2026-09-01 07:17",
+     "status": "closed",
+     "entry_price": 0.000678427,
+     "exit_price": 0.000445717,
+     "realized": -1540.23,
+     "unrealized": null,
+     "closed": "2026-09-01 07:24",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x255dbb4b8102616fc999d44cf3f8e3df063e4501"
+    }
+   ]
+  },
+  "\u725b\u6765": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": -138259.38,
+   "first": "2026-08-31 18:09",
+   "last": "2026-08-31 18:09",
+   "entries": [
+    {
+     "time": "2026-08-31 18:09",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": -138259.38,
+     "closed": "",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0xbeea1d618e533a387d941f58a7d4c9b7bd377777"
+    }
+   ]
+  }
+ },
+ "holdings_now": [
+  {
+   "symbol": "\u725b\u6765",
+   "address": "0xbeea1d618e533a387d941f58a7d4c9b7bd377777",
+   "chain": "bsc",
+   "amount": 10264166.25,
+   "value_usd": 944887.41,
+   "change24h": 29.0204
+  },
+  {
+   "symbol": "QQQB",
+   "address": "0x205812cdbed920aff76c6580abd681a46d11efc7",
+   "chain": "bsc",
+   "amount": 0.726384,
+   "value_usd": 520.98,
+   "change24h": 1.1898
+  },
+  {
+   "symbol": "\u80a5\u561f\u561f",
+   "address": "0x03c59bbf8ba49ce79831403b86acbc40d3167777",
+   "chain": "bsc",
+   "amount": 1000,
+   "value_usd": 0.91,
+   "change24h": -24.833
+  },
+  {
+   "symbol": "\u8774\u8776\u4eba\u751f",
+   "address": "0x87ae267002cd1ea0ec86bf3601d4a8ad76a47777",
+   "chain": "bsc",
+   "amount": 8.8,
+   "value_usd": 0.02,
+   "change24h": -9.6327
+  },
+  {
+   "symbol": "\u4eac\u4e1c",
+   "address": "0x3db5a97b035235b6e5a2f13bcd6b466b5fbd7777",
+   "chain": "bsc",
+   "amount": 5,
+   "value_usd": 0,
+   "change24h": -0.8209
+  }
+ ],
+ "rh_fills": [],
+ "sol_fills": [],
+ "rh_summary": {
+  "fills": 0,
+  "buys": 0,
+  "tokens": 0,
+  "priced_buy_usd": 0,
+  "priced_sell_usd": 0,
+  "launch_age_min_median": null,
+  "share_buys_within_1h_of_launch": null,
+  "share_buys_within_24h": null
+ },
+ "sol_summary": {
+  "fills": 0,
+  "buys": 0,
+  "tokens": 0,
+  "buy_usd": 0,
+  "sell_usd": 0
+ }
+}

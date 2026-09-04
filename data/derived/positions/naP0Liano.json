@@ -1,0 +1,660 @@
+{
+ "handle": "naP0Liano",
+ "ranks": {
+  "24h": null,
+  "7d": 91,
+  "30d": null,
+  "all": null
+ },
+ "followers": 1610,
+ "pnl_all": 488350,
+ "fomo_positions": {
+  "open": 2,
+  "closed_captured": 25,
+  "closed_total_reported": 41
+ },
+ "tokens_traded_fomo": [
+  "0xZAPS",
+  "AGI",
+  "CINEMA",
+  "CLAN",
+  "EARN",
+  "ELON",
+  "HDD",
+  "HENT",
+  "HOMER",
+  "LLM",
+  "MOO",
+  "PEAR",
+  "PF",
+  "QC",
+  "RATRACE",
+  "SCOPL",
+  "SPACEHOOD",
+  "UNITY",
+  "VAULT",
+  "VERONA",
+  "WETH",
+  "WindChill",
+  "X",
+  "\u90b5\u9038\u592b\u5e01"
+ ],
+ "n_tokens_fomo": 24,
+ "chains_fomo": {
+  "robinhood": 23,
+  "eth": 1,
+  "solana": 1,
+  "bsc": 2
+ },
+ "by_token": {
+  "SPACEHOOD": {
+   "open": 0,
+   "closed": 1,
+   "realized": 265093.27,
+   "unrealized": 0.0,
+   "first": "2026-08-29 17:30",
+   "last": "2026-08-29 17:30",
+   "entries": [
+    {
+     "time": "2026-08-29 17:30",
+     "status": "closed",
+     "entry_price": 0.00250206,
+     "exit_price": 0.00224836,
+     "realized": 265093.27,
+     "unrealized": null,
+     "closed": "2026-09-02 02:28",
+     "thesis": "Nate launched Spacehood himself \n\nyou think this isn\u2019t going to be part of the LONG eco?",
+     "chain": "robinhood",
+     "address": "0xfe7e19cbce2f896c6c528bc355baf5a768291e18"
+    }
+   ]
+  },
+  "MOO": {
+   "open": 0,
+   "closed": 1,
+   "realized": 243090.85,
+   "unrealized": 0.0,
+   "first": "2026-08-29 22:08",
+   "last": "2026-08-29 22:08",
+   "entries": [
+    {
+     "time": "2026-08-29 22:08",
+     "status": "closed",
+     "entry_price": 0.00274922,
+     "exit_price": 0.00329701,
+     "realized": 243090.85,
+     "unrealized": null,
+     "closed": "2026-09-02 01:28",
+     "thesis": "MoospAIcehood",
+     "chain": "robinhood",
+     "address": "0xd9db30bb0d2b8d2eae3826a1372117e058791e18"
+    }
+   ]
+  },
+  "AGI": {
+   "open": 0,
+   "closed": 1,
+   "realized": 25546.85,
+   "unrealized": 0.0,
+   "first": "2026-08-26 22:31",
+   "last": "2026-08-26 22:31",
+   "entries": [
+    {
+     "time": "2026-08-26 22:31",
+     "status": "closed",
+     "entry_price": 0.000292796,
+     "exit_price": null,
+     "realized": 25546.85,
+     "unrealized": null,
+     "closed": "2026-08-29 20:39",
+     "thesis": "AI doing 23% of robinhoods NVIDIA volume. They\u2019re going to list AI soon which means AGI gets a second order listing. LIS",
+     "chain": "robinhood",
+     "address": "0x5a8625d314fdd298101d87932a784b756a401e18"
+    }
+   ]
+  },
+  "VERONA": {
+   "open": 0,
+   "closed": 1,
+   "realized": 10173.97,
+   "unrealized": 0.0,
+   "first": "2026-08-29 01:26",
+   "last": "2026-08-29 01:26",
+   "entries": [
+    {
+     "time": "2026-08-29 01:26",
+     "status": "closed",
+     "entry_price": 0.000102098,
+     "exit_price": 0.000940948,
+     "realized": 10173.97,
+     "unrealized": null,
+     "closed": "2026-08-29 04:49",
+     "thesis": "bonk guy get in here rhc infra dropped",
+     "chain": "robinhood",
+     "address": "0x3d0ef79957d2f7114a7c5fc0ca9f13f19c342764"
+    }
+   ]
+  },
+  "EARN": {
+   "open": 0,
+   "closed": 1,
+   "realized": 7412.43,
+   "unrealized": 0.0,
+   "first": "2026-08-25 02:53",
+   "last": "2026-08-25 02:53",
+   "entries": [
+    {
+     "time": "2026-08-25 02:53",
+     "status": "closed",
+     "entry_price": 1.70499e-05,
+     "exit_price": 2.31118e-05,
+     "realized": 7412.43,
+     "unrealized": null,
+     "closed": "2026-08-27 20:38",
+     "thesis": "yield generating stock lp omnipools on the stock chain where the CEO is actively looking at unique infra for stocks and ",
+     "chain": "robinhood",
+     "address": "0xa3b6aee90017b72c0812dc1e013de70eb2917ba3"
+    }
+   ]
+  },
+  "CINEMA": {
+   "open": 0,
+   "closed": 1,
+   "realized": 2139.07,
+   "unrealized": 0.0,
+   "first": "2026-08-30 17:43",
+   "last": "2026-08-30 17:43",
+   "entries": [
+    {
+     "time": "2026-08-30 17:43",
+     "status": "closed",
+     "entry_price": 0.000482612,
+     "exit_price": 0.00321392,
+     "realized": 2139.07,
+     "unrealized": null,
+     "closed": "2026-08-30 19:40",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x9936403a9cc72cf306063e3496ea387428a3aecd"
+    }
+   ]
+  },
+  "CLAN": {
+   "open": 0,
+   "closed": 1,
+   "realized": 1101.56,
+   "unrealized": 0.0,
+   "first": "2026-08-26 22:41",
+   "last": "2026-08-26 22:41",
+   "entries": [
+    {
+     "time": "2026-08-26 22:41",
+     "status": "closed",
+     "entry_price": 0.000181633,
+     "exit_price": 0.000371866,
+     "realized": 1101.56,
+     "unrealized": null,
+     "closed": "2026-08-26 23:03",
+     "thesis": "https://x.com/fiatphobia/status/2092743153031995435?s=46\n\nfriend tech on steroids",
+     "chain": "robinhood",
+     "address": "0xcebc0cfbc5dd0893a9e3b9d0f75b211ddf5934a0"
+    }
+   ]
+  },
+  "HOMER": {
+   "open": 0,
+   "closed": 1,
+   "realized": 6.70752,
+   "unrealized": 0.0,
+   "first": "2026-08-27 10:12",
+   "last": "2026-08-27 10:12",
+   "entries": [
+    {
+     "time": "2026-08-27 10:12",
+     "status": "closed",
+     "entry_price": 0.000645804,
+     "exit_price": 0.00065154,
+     "realized": 6.70752,
+     "unrealized": null,
+     "closed": "2026-08-27 10:23",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x4f06dba806d66e1caeb37516c0f7a28728067777"
+    }
+   ]
+  },
+  "LLM": {
+   "open": 0,
+   "closed": 1,
+   "realized": 6.12312,
+   "unrealized": 0.0,
+   "first": "2026-08-28 10:57",
+   "last": "2026-08-28 10:57",
+   "entries": [
+    {
+     "time": "2026-08-28 10:57",
+     "status": "closed",
+     "entry_price": 0.000158973,
+     "exit_price": 0.000159557,
+     "realized": 6.12312,
+     "unrealized": null,
+     "closed": "2026-08-28 11:17",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x388e4069f5484fe61d6737a4d8daa217f4071e18"
+    }
+   ]
+  },
+  "UNITY": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 1.00574,
+   "first": "2026-09-01 17:33",
+   "last": "2026-09-01 17:33",
+   "entries": [
+    {
+     "time": "2026-09-01 17:33",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 1.00574,
+     "closed": "",
+     "thesis": "",
+     "chain": "eth",
+     "address": "0xfd0bb211d479710dfa01d3d98751767f51edb2d9"
+    }
+   ]
+  },
+  "WETH": {
+   "open": 1,
+   "closed": 0,
+   "realized": -55.8655,
+   "unrealized": -0.003427,
+   "first": "2026-08-25 02:48",
+   "last": "2026-08-25 02:48",
+   "entries": [
+    {
+     "time": "2026-08-25 02:48",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": 2501.94,
+     "realized": -55.8655,
+     "unrealized": -0.003427,
+     "closed": "",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x0bd7d308f8e1639fab988df18a8011f41eacad73"
+    }
+   ]
+  },
+  "0xZAPS": {
+   "open": 0,
+   "closed": 1,
+   "realized": -66.0514,
+   "unrealized": 0.0,
+   "first": "2026-08-30 19:54",
+   "last": "2026-08-30 19:54",
+   "entries": [
+    {
+     "time": "2026-08-30 19:54",
+     "status": "closed",
+     "entry_price": 1.08512e-05,
+     "exit_price": 1.05733e-05,
+     "realized": -66.0514,
+     "unrealized": null,
+     "closed": "2026-08-30 20:19",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0xdd90bfa4adc7f4401e611abac692d939f9f4cb07"
+    }
+   ]
+  },
+  "SCOPL": {
+   "open": 0,
+   "closed": 1,
+   "realized": -128.306,
+   "unrealized": 0.0,
+   "first": "2026-08-26 04:30",
+   "last": "2026-08-26 04:30",
+   "entries": [
+    {
+     "time": "2026-08-26 04:30",
+     "status": "closed",
+     "entry_price": 0.000631335,
+     "exit_price": 0.000613808,
+     "realized": -128.306,
+     "unrealized": null,
+     "closed": "2026-08-26 22:33",
+     "thesis": "the JUP of RHC\n\nstudy how Delta is doing as the mateora of RHC",
+     "chain": "robinhood",
+     "address": "0xaa40e79e987517f7462bf79315b8a118799b04e3"
+    }
+   ]
+  },
+  "WindChill": {
+   "open": 0,
+   "closed": 1,
+   "realized": -172.983,
+   "unrealized": 0.0,
+   "first": "2026-08-28 11:19",
+   "last": "2026-08-28 11:19",
+   "entries": [
+    {
+     "time": "2026-08-28 11:19",
+     "status": "closed",
+     "entry_price": 0.000330078,
+     "exit_price": 0.000301896,
+     "realized": -172.983,
+     "unrealized": null,
+     "closed": "2026-08-28 11:34",
+     "thesis": "",
+     "chain": "solana",
+     "address": "CRJDgvxzZKCmCKbe7RjBkBWEhAneLFpncWAGuUrwpump"
+    }
+   ]
+  },
+  "PF": {
+   "open": 0,
+   "closed": 1,
+   "realized": -221.609,
+   "unrealized": 0.0,
+   "first": "2026-08-30 22:48",
+   "last": "2026-08-30 22:48",
+   "entries": [
+    {
+     "time": "2026-08-30 22:48",
+     "status": "closed",
+     "entry_price": 0.000312974,
+     "exit_price": 0.000292778,
+     "realized": -221.609,
+     "unrealized": null,
+     "closed": "2026-08-31 00:34",
+     "thesis": "it\u2019s as if LONG eco had a token but the main pair is the leader of RHC PONS",
+     "chain": "robinhood",
+     "address": "0x95f722469abb6b38d004bf7e02ee2a10c4246ab8"
+    }
+   ]
+  },
+  "HDD": {
+   "open": 0,
+   "closed": 1,
+   "realized": -226.119,
+   "unrealized": 0.0,
+   "first": "2026-08-28 22:34",
+   "last": "2026-08-28 22:34",
+   "entries": [
+    {
+     "time": "2026-08-28 22:34",
+     "status": "closed",
+     "entry_price": 0.000100544,
+     "exit_price": 8.35045e-05,
+     "realized": -226.119,
+     "unrealized": null,
+     "closed": "2026-08-28 23:12",
+     "thesis": "SNDK has been one of the best performers this year",
+     "chain": "robinhood",
+     "address": "0xae9b7d708270491ac4d046c1d25df73d62791e18"
+    }
+   ]
+  },
+  "\u90b5\u9038\u592b\u5e01": {
+   "open": 0,
+   "closed": 1,
+   "realized": -491.421,
+   "unrealized": 0.0,
+   "first": "2026-08-27 11:06",
+   "last": "2026-08-27 11:06",
+   "entries": [
+    {
+     "time": "2026-08-27 11:06",
+     "status": "closed",
+     "entry_price": 0.000434388,
+     "exit_price": 0.000283924,
+     "realized": -491.421,
+     "unrealized": null,
+     "closed": "2026-08-27 19:39",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0x7002bc937adce0878babae67db559a61dfa17777"
+    }
+   ]
+  },
+  "PEAR": {
+   "open": 0,
+   "closed": 3,
+   "realized": -760.1651999999999,
+   "unrealized": 0.0,
+   "first": "2026-08-27 19:40",
+   "last": "2026-08-28 11:35",
+   "entries": [
+    {
+     "time": "2026-08-28 11:35",
+     "status": "closed",
+     "entry_price": 0.00047757,
+     "exit_price": null,
+     "realized": -1138.27,
+     "unrealized": null,
+     "closed": "2026-08-28 17:51",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x3567c5d0ae5c5933920bbd6db982aa463a203bb2"
+    },
+    {
+     "time": "2026-08-28 10:54",
+     "status": "closed",
+     "entry_price": 0.000514753,
+     "exit_price": 0.000643359,
+     "realized": 410.69,
+     "unrealized": null,
+     "closed": "2026-08-28 10:57",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x3567c5d0ae5c5933920bbd6db982aa463a203bb2"
+    },
+    {
+     "time": "2026-08-27 19:40",
+     "status": "closed",
+     "entry_price": 9.10077e-05,
+     "exit_price": 8.78281e-05,
+     "realized": -32.5852,
+     "unrealized": null,
+     "closed": "2026-08-27 20:02",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x3567c5d0ae5c5933920bbd6db982aa463a203bb2"
+    }
+   ]
+  },
+  "RATRACE": {
+   "open": 0,
+   "closed": 1,
+   "realized": -952.57,
+   "unrealized": 0.0,
+   "first": "2026-08-29 21:50",
+   "last": "2026-08-29 21:50",
+   "entries": [
+    {
+     "time": "2026-08-29 21:50",
+     "status": "closed",
+     "entry_price": 0.000384991,
+     "exit_price": 0.000116396,
+     "realized": -952.57,
+     "unrealized": null,
+     "closed": "2026-08-29 22:20",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x12966f9c6046484e52f3eaef28c109c83bc81e18"
+    }
+   ]
+  },
+  "ELON": {
+   "open": 0,
+   "closed": 1,
+   "realized": -958.036,
+   "unrealized": 0.0,
+   "first": "2026-08-30 11:02",
+   "last": "2026-08-30 11:02",
+   "entries": [
+    {
+     "time": "2026-08-30 11:02",
+     "status": "closed",
+     "entry_price": null,
+     "exit_price": 0.000110153,
+     "realized": -958.036,
+     "unrealized": null,
+     "closed": "2026-08-30 17:42",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x38c4d77938821037d3a42c7da0519ee5a9158cad"
+    }
+   ]
+  },
+  "QC": {
+   "open": 0,
+   "closed": 1,
+   "realized": -1739.33,
+   "unrealized": 0.0,
+   "first": "2026-08-30 20:23",
+   "last": "2026-08-30 20:23",
+   "entries": [
+    {
+     "time": "2026-08-30 20:23",
+     "status": "closed",
+     "entry_price": 0.00117191,
+     "exit_price": 0.000325187,
+     "realized": -1739.33,
+     "unrealized": null,
+     "closed": "2026-08-30 21:01",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0xa802332f6c9daf2146a61c51876d180b1a4a9901"
+    }
+   ]
+  },
+  "HENT": {
+   "open": 0,
+   "closed": 2,
+   "realized": -2464.5800000000004,
+   "unrealized": 0.0,
+   "first": "2026-08-28 23:12",
+   "last": "2026-08-30 01:17",
+   "entries": [
+    {
+     "time": "2026-08-30 01:17",
+     "status": "closed",
+     "entry_price": null,
+     "exit_price": 0.00016884,
+     "realized": -176.57,
+     "unrealized": null,
+     "closed": "2026-08-30 06:38",
+     "thesis": "ticker physiognomy at its finest\n\nKyle knows what he holds",
+     "chain": "robinhood",
+     "address": "0xf9caa19ba4cb636acb60421c0bd21acc77d61e18"
+    },
+    {
+     "time": "2026-08-28 23:12",
+     "status": "closed",
+     "entry_price": 0.000318118,
+     "exit_price": 0.000191383,
+     "realized": -2288.01,
+     "unrealized": null,
+     "closed": "2026-08-30 00:20",
+     "thesis": "Kyle knows what he holds",
+     "chain": "robinhood",
+     "address": "0xf9caa19ba4cb636acb60421c0bd21acc77d61e18"
+    }
+   ]
+  },
+  "VAULT": {
+   "open": 0,
+   "closed": 1,
+   "realized": -5911.73,
+   "unrealized": 0.0,
+   "first": "2026-08-27 19:54",
+   "last": "2026-08-27 19:54",
+   "entries": [
+    {
+     "time": "2026-08-27 19:54",
+     "status": "closed",
+     "entry_price": 0.000771154,
+     "exit_price": 0.00010529,
+     "realized": -5911.73,
+     "unrealized": null,
+     "closed": "2026-08-28 01:26",
+     "thesis": "https://x.com/decentrlizordie/status/2093031550463983762?s=46\nSame guy who sent fartcoin btw",
+     "chain": "robinhood",
+     "address": "0xfdae23ce76018da62507bb5ef20e6ef5450e8312"
+    }
+   ]
+  },
+  "X": {
+   "open": 0,
+   "closed": 1,
+   "realized": -7384.02,
+   "unrealized": 0.0,
+   "first": "2026-08-29 23:52",
+   "last": "2026-08-29 23:52",
+   "entries": [
+    {
+     "time": "2026-08-29 23:52",
+     "status": "closed",
+     "entry_price": 0.000425647,
+     "exit_price": 7.90639e-05,
+     "realized": -7384.02,
+     "unrealized": null,
+     "closed": "2026-08-30 01:03",
+     "thesis": "the Elon basket",
+     "chain": "robinhood",
+     "address": "0x3701b015260c6735c3861f248c70b878da097689"
+    }
+   ]
+  }
+ },
+ "holdings_now": [
+  {
+   "symbol": "UNITY",
+   "address": "0xfd0bb211d479710dfa01d3d98751767f51edb2d9",
+   "chain": "ethereum",
+   "amount": 10952380953,
+   "value_usd": 3.42,
+   "change24h": 2.8109
+  },
+  {
+   "symbol": "WETH",
+   "address": "0x0bd7d308f8e1639fab988df18a8011f41eacad73",
+   "chain": "robinhood",
+   "amount": 0.000231936,
+   "value_usd": 0.58,
+   "change24h": 4.6106
+  },
+  {
+   "symbol": "DIH",
+   "address": "0x0c1ed62d7811e5b437e537ac9d0592469c119c74",
+   "chain": "robinhood",
+   "amount": 1,
+   "value_usd": 0,
+   "change24h": 13.6147
+  }
+ ],
+ "rh_fills": [],
+ "sol_fills": [],
+ "rh_summary": {
+  "fills": 0,
+  "buys": 0,
+  "tokens": 0,
+  "priced_buy_usd": 0,
+  "priced_sell_usd": 0,
+  "launch_age_min_median": null,
+  "share_buys_within_1h_of_launch": null,
+  "share_buys_within_24h": null
+ },
+ "sol_summary": {
+  "fills": 0,
+  "buys": 0,
+  "tokens": 0,
+  "buy_usd": 0,
+  "sell_usd": 0
+ }
+}

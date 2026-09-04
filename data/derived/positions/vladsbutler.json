@@ -1,0 +1,311 @@
+{
+ "handle": "vladsbutler",
+ "ranks": {
+  "24h": 87,
+  "7d": null,
+  "30d": null,
+  "all": null
+ },
+ "followers": 138,
+ "pnl_all": 157663,
+ "fomo_positions": {
+  "open": 3,
+  "closed_captured": 6,
+  "closed_total_reported": 6
+ },
+ "tokens_traded_fomo": [
+  "APEC",
+  "BONER",
+  "ETHMAXI",
+  "LIGMA",
+  "MarsCoin",
+  "PONS",
+  "SPCXB",
+  "UNITY",
+  "WUHAN"
+ ],
+ "n_tokens_fomo": 9,
+ "chains_fomo": {
+  "robinhood": 5,
+  "eth": 1,
+  "solana": 1,
+  "bsc": 2
+ },
+ "by_token": {
+  "PONS": {
+   "open": 1,
+   "closed": 0,
+   "realized": 8607.15,
+   "unrealized": 303265.46,
+   "first": "2026-08-27 18:17",
+   "last": "2026-08-27 18:17",
+   "entries": [
+    {
+     "time": "2026-08-27 18:17",
+     "status": "open",
+     "entry_price": 0.265112,
+     "exit_price": 0.414983,
+     "realized": 8607.15,
+     "unrealized": 303265.46,
+     "closed": "",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x39dbed3a2bd333467115de45665cc57f813c4571"
+    }
+   ]
+  },
+  "MarsCoin": {
+   "open": 0,
+   "closed": 1,
+   "realized": 5921.54,
+   "unrealized": 0.0,
+   "first": "2026-08-31 17:59",
+   "last": "2026-08-31 17:59",
+   "entries": [
+    {
+     "time": "2026-08-31 17:59",
+     "status": "closed",
+     "entry_price": 0.0460032,
+     "exit_price": 0.0739156,
+     "realized": 5921.54,
+     "unrealized": null,
+     "closed": "2026-09-01 13:52",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0xfe189e97832da1573e4e4ff034f4ffc3a15c7777"
+    }
+   ]
+  },
+  "BONER": {
+   "open": 0,
+   "closed": 1,
+   "realized": 2747.93,
+   "unrealized": 0.0,
+   "first": "2026-08-31 16:39",
+   "last": "2026-08-31 16:39",
+   "entries": [
+    {
+     "time": "2026-08-31 16:39",
+     "status": "closed",
+     "entry_price": 0.0430811,
+     "exit_price": 0.0552056,
+     "realized": 2747.93,
+     "unrealized": null,
+     "closed": "2026-09-01 13:05",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x98096d17e191b3da1d5f99a6d7b3584351b11e18"
+    }
+   ]
+  },
+  "LIGMA": {
+   "open": 0,
+   "closed": 1,
+   "realized": 1762.18,
+   "unrealized": 0.0,
+   "first": "2026-09-01 19:53",
+   "last": "2026-09-01 19:53",
+   "entries": [
+    {
+     "time": "2026-09-01 19:53",
+     "status": "closed",
+     "entry_price": 0.0029026,
+     "exit_price": 0.00549086,
+     "realized": 1762.18,
+     "unrealized": null,
+     "closed": "2026-09-01 21:03",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0x9f2c82a2b5c40472a3c6aa3d678c5858345ec71e"
+    }
+   ]
+  },
+  "UNITY": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": 0.680064,
+   "first": "2026-08-31 09:41",
+   "last": "2026-08-31 09:41",
+   "entries": [
+    {
+     "time": "2026-08-31 09:41",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": 0.680064,
+     "closed": "",
+     "thesis": "",
+     "chain": "eth",
+     "address": "0xfd0bb211d479710dfa01d3d98751767f51edb2d9"
+    }
+   ]
+  },
+  "SPCXB": {
+   "open": 0,
+   "closed": 1,
+   "realized": 0.0333978,
+   "unrealized": 0.0,
+   "first": "2026-09-01 03:45",
+   "last": "2026-09-01 03:45",
+   "entries": [
+    {
+     "time": "2026-09-01 03:45",
+     "status": "closed",
+     "entry_price": null,
+     "exit_price": 142.831,
+     "realized": 0.0333978,
+     "unrealized": null,
+     "closed": "2026-09-01 14:52",
+     "thesis": "",
+     "chain": "bsc",
+     "address": "0xbe9d156892e55e7154bcd3cb0fea677f9d3103e1"
+    }
+   ]
+  },
+  "ETHMAXI": {
+   "open": 1,
+   "closed": 0,
+   "realized": 0.0,
+   "unrealized": -1.83622,
+   "first": "2026-08-30 03:02",
+   "last": "2026-08-30 03:02",
+   "entries": [
+    {
+     "time": "2026-08-30 03:02",
+     "status": "open",
+     "entry_price": null,
+     "exit_price": null,
+     "realized": 0,
+     "unrealized": -1.83622,
+     "closed": "",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0xaec630d3d84c9abc14826e5638b7f2077eb412a8"
+    }
+   ]
+  },
+  "WUHAN": {
+   "open": 0,
+   "closed": 1,
+   "realized": -7.65158,
+   "unrealized": 0.0,
+   "first": "2026-09-01 20:20",
+   "last": "2026-09-01 20:20",
+   "entries": [
+    {
+     "time": "2026-09-01 20:20",
+     "status": "closed",
+     "entry_price": 2.12583e-05,
+     "exit_price": 1.94488e-05,
+     "realized": -7.65158,
+     "unrealized": null,
+     "closed": "2026-09-02 17:44",
+     "thesis": "",
+     "chain": "robinhood",
+     "address": "0xa9eb553cdbe8b8fd59cea9e464ca52d710251e18"
+    }
+   ]
+  },
+  "APEC": {
+   "open": 0,
+   "closed": 1,
+   "realized": -1905.68,
+   "unrealized": 0.0,
+   "first": "2026-08-31 18:12",
+   "last": "2026-08-31 18:12",
+   "entries": [
+    {
+     "time": "2026-08-31 18:12",
+     "status": "closed",
+     "entry_price": 0.00197742,
+     "exit_price": 6.72727e-05,
+     "realized": -1905.68,
+     "unrealized": null,
+     "closed": "2026-09-01 20:20",
+     "thesis": "",
+     "chain": "solana",
+     "address": "7TBkWkqohDZEoCAh1ykErGKyZzgFUEjxTv75xQeAvTeP"
+    }
+   ]
+  }
+ },
+ "holdings_now": [
+  {
+   "symbol": "PONS",
+   "address": "0x39dbed3a2bd333467115de45665cc57f813c4571",
+   "chain": "robinhood",
+   "amount": 830304.29,
+   "value_usd": 524036.25,
+   "change24h": 46.7438
+  },
+  {
+   "symbol": "UNITY",
+   "address": "0xfd0bb211d479710dfa01d3d98751767f51edb2d9",
+   "chain": "ethereum",
+   "amount": 8266666667,
+   "value_usd": 2.9,
+   "change24h": 5.6806
+  },
+  {
+   "symbol": "ETHMAXI",
+   "address": "0xaec630d3d84c9abc14826e5638b7f2077eb412a8",
+   "chain": "robinhood",
+   "amount": 25000,
+   "value_usd": 0.59,
+   "change24h": 4.9622
+  },
+  {
+   "symbol": "LAMBO",
+   "address": "0x34af5e01c064f738e7c0f8ecd856aee7c6954661",
+   "chain": "robinhood",
+   "amount": 2000,
+   "value_usd": 0.16,
+   "change24h": 45.9612
+  },
+  {
+   "symbol": "PEPONS",
+   "address": "0xd2a577e92438fd0c1f2485f4fb91b9f866eb1e6c",
+   "chain": "robinhood",
+   "amount": 22,
+   "value_usd": 0.01,
+   "change24h": 31.3026
+  },
+  {
+   "symbol": "GENESIS",
+   "address": "0xc367486cc27a232218fc91bc93c63ac1ec8abc73",
+   "chain": "robinhood",
+   "amount": 100,
+   "value_usd": 0.01,
+   "change24h": 36.187
+  },
+  {
+   "symbol": "LEMON.FUN",
+   "address": "0xf0e17e54239cd945cd7bea471a3a2ca6a8c7f7a3",
+   "chain": "robinhood",
+   "amount": 2.57,
+   "value_usd": 0,
+   "change24h": -10.2814
+  }
+ ],
+ "rh_fills": [],
+ "sol_fills": [],
+ "rh_summary": {
+  "fills": 0,
+  "buys": 0,
+  "tokens": 0,
+  "priced_buy_usd": 0,
+  "priced_sell_usd": 0,
+  "launch_age_min_median": null,
+  "share_buys_within_1h_of_launch": null,
+  "share_buys_within_24h": null
+ },
+ "sol_summary": {
+  "fills": 0,
+  "buys": 0,
+  "tokens": 0,
+  "buy_usd": 0,
+  "sell_usd": 0
+ }
+}
