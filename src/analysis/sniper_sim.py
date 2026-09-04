@@ -120,3 +120,18 @@ run('land 2 s late',R,delay=2.0)
 run('land 1 s late, hold 3 s',R,0.03,3.0,None,300.0,0.0,1.0)
 run('pay 25% more AND land 1 s late',R,0.03,7.0,None,300.0,0.25,1.0)
 run('6% of supply (two equal snipers share the exit)',R,0.06,7.0,None,600.0)
+
+# hourly breakdown of the baseline rule (pooled $ ROI per hour) for regime reading
+import datetime as _dt
+hourly=collections.defaultdict(lambda:[0.0,0.0,0])
+t0d=_dt.datetime.fromisoformat(DAY+'T00:00:00+00:00').timestamp()
+for cv in creates:
+    m=creates[cv]
+    if not (t0d+H0*3600<=m['ts']<t0d+H1*3600-1800) or not R(cv): continue
+    r=sim(cv,0.03,7.0,None,300.0)
+    if r is None: continue
+    pnl,cost,t_in=r; q=quotes.get(cv,'native'); u=usd(pnl,q); c=usd(cost,q)
+    if u is None: continue
+    h=hourly[m['hour']]; h[0]+=u; h[1]+=c; h[2]+=1
+print(f"\n## {DAY} baseline rule by hour (UTC): hour, launches, net $, pooled ROI")
+for h in sorted(hourly): print(f"  {h:02d}h n={hourly[h][2]:4d} net ${hourly[h][0]:>8,.0f} on ${hourly[h][1]:>8,.0f} ({100*hourly[h][0]/max(1,hourly[h][1]):+5.1f}%)")
