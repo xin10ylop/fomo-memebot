@@ -13,6 +13,7 @@ Everything below was computed from data collected in this session; scripts are i
 6. **Where the "big edge" actually sits on Robinhood Chain is structural, not a trade**: Pons creators receive 70% of a 1% fee on every trade forever (creators were paid ~$20.9M in 47 days); insiders/whitelisted wallets own the first seconds of every launch; audiences of 100k–500k followers move thin pools 60–140% in seconds. None of these is available to a retail trader with no special access, and the report says so rather than dressing them up as a strategy.
 7. **Memecoin fundamentals at entry were checked for every priced entry (docs/TOKEN_METRICS.md, section 3b).** By count, half of the leaders' app positions are opened below $1M FDV; by dollars, 76% of their priced meme capital goes in above $10M FDV and 82% into tokens older than a week. No entry-market-cap, age, launchpad or holder-count bucket has a significantly positive realized (bag-at-zero) return; the only clear result is that late entries above $100M FDV lost money (−29%, CI −49% to −14%), and pump.fun / Solana entries lose on a realized basis (−10% and −21%). Dev involvement is rare: fomoapi's `isDev` flag is false on every tracked holder and marks a dev on 3 tokens' theses (none a leaderboard handle); on-chain, exactly one traded meme was deployed by a leaderboard wallet (SANDIH by LehmanFarters).
 8. **Round 2 (the viral "95% lose, buy the revenue protocols" clip) was tested and does not change the verdict.** The 6.16%-profitable figure is DWF Ventures' realized-PnL count over 292k wallets and matches this data. Following leaderboard traders into fresh launches and holding for the runner had a real positive expectancy only in the July launch wave (+326% mean at 24h with dead tokens at −100%, four tokens carrying it); since mid-August it is −41% to −75%, and for big-audience posters it is −55% throughout. The "revenue protocol" trade is PONS: real fee cash flow, but the buyback that reaches holders is about 45% of protocol revenue (not 80%), lumpy, and roughly 7% of gross fees; on actual burns PONS is priced like pump.fun's PUMP (≈13% trailing buyback yield), its price is a same-day function of the fee cycle (correlation 0.32, no lead), the buyback flow is too small to front-run, and the gas subsidy that made the fee cycle ends in early October. Section 10 has the numbers; it is a beta bet on the casino staying open, not an edge.
+9. **Round 3 went mechanism by mechanism with the tails, not the medians, and found one thing that survives every trap: a delta-neutral funding carry on the mania tokens' Hyperliquid perps.** CASHCAT's perp has paid positive funding on 100% of hourly prints since July 11, 17.7% of notional in 55 days; long Robinhood spot against a 1.4×-margined short earned +16% on capital net of costs and basis (≈108%/yr), with every two-week window positive and a −15% equity drawdown from basis swings. It is executable inside the fomo app (which carries Hyperliquid perps), capacity is tens of millions, and its source is the long-only leverage demand of the very traders who lose. It is a yield, not a jackpot, it is one to three names, and it lasts as long as the crowd stays long. The other mechanisms were quantified and closed: the audience-pump scalp is +12% gross in the first minute but a $250 clip in a $30k pool nets zero and $500 nets −8%; realized winners and losers pick the same market caps and ages, and the only behavioural difference is exits; cross-pool arbitrage on PONS is already bot-tight (spread p5–p95 ±1%, six 4-minute episodes above 1.5% in a $28M day); new-venue first-days baskets are inconsistent. Section 11.
 
 ## 1. Data access and what was analysed
 
@@ -258,3 +259,79 @@ On PONS the price and the fees move the same day (log-change correlation 0.32; f
 * "Buy the revenue protocols": PONS is a real fee business priced like its Solana peer, with a discretionary, under-delivered buyback and a subsidy cliff four weeks out. Holding it is a directional bet on Robinhood Chain memecoin volume. That may be a fine bet; it is not the treasure, because nothing here gives a retail trader an expectancy the market has not already priced.
 
 No angle in either round produced a strategy that is simultaneously profitable after costs, sustainable across regimes, and executable at retail. The one item still worth money is the hindsight-free forward test of the 15-minute overreaction bounce (section 7), and the one item worth watching is what Pons fees do in the two weeks after the gas subsidy ends.
+
+## 11. Round 3: how the money is actually made, mechanism by mechanism
+
+The instruction was: when something fails, find out why, look from other angles, use the tails. Rounds 1–2 mostly reported medians and populations. This round takes each way the top handles made money, quantifies it as a strategy with its tail, its costs and its capacity, and adds three mechanisms that had never been tested here: the carry on the mania perps, cross-pool arbitrage, and the creator seat.
+
+### 11.1 The audience pump, costed (the poster's edge, and whether a fast follower can take it)
+
+276 leaderboard fills matched to exact pool swaps (`data/derived/kol_swap_events2.jsonl`), follower entry two blocks (0.2 s) after the fill via the public sequencer feed, exit at the pool price 60 s or 300 s later, costs = 1% pool fee each side + constant-product impact of the clip on the pool's measured depth.
+
+| Cohort | n | gross mean 60 s | net mean, $250 clip [CI] | net mean, $500 clip | net mean, $1,000 clip |
+|---|---|---|---|---|---|
+| all fills | 276 | +7.8% | −0.1% [−2.9%, +2.7%] | −6.0% | −17.8% |
+| ≥100k followers, pool < $50k | 80 | +12.2% (median +7.0%, MFE60 +27.8%) | +1.1% [−5.1%, +7.2%] | −8.0% | −26.2% |
+| ≥30k followers, pool < $30k | 123 | +11.0% | −1.4% [−6.4%, +3.8%] | −11.8% | −32.6% |
+| ≥100k & <$50k, events after Aug 15 | 8 | −5.6% | | −22.6% | |
+
+The pump is real and large (57% of big-audience fills print +10% within a minute, 35% print +30%), which is exactly the poster's edge: they are in before their own audience and they pay no impact to enter the move they cause. A follower in the same pool pays the impact both ways; at $250 the expectancy is zero, at $500 it is −8%, and the mechanism has faded since mid-August. The audience is the edge; the trade is not transferable.
+
+### 11.2 What the realized winners do differently (selection, sizing, exits)
+
+`src/analysis/behavior.py`, `data/derived/behavior_positions.json`: 1,826 fully priced (trader, token) meme positions with every fill, 126 traders. Traders with ≥15 positions are ranked by realized ROI with unsold bags at zero. Only four traders clear +15% ROI with a ≥35% win rate (GuavaGuy2001, Samisa_btc, cryptochi3f_, montyMole44; 99 positions between them); 19 are below −15%.
+
+| Dimension (p25 / median / p75) | winners | losers |
+|---|---|---|
+| entry FDV | $1.1M / $3.0M / $7.0M | $1.3M / $3.6M / $13.6M |
+| token age at first buy | 38h / 10d / 22d | 27h / 9d / 29d |
+| 24h price change before entry | −30% / +42% / +42% (n=3) | +14% / +64% / +1229% (n=24) |
+| position size | $400 / $800 / $2.8k | $525 / $2.5k / $10k |
+| first buy as share of position | 35% / 100% / 100% | 22% / 57% / 100% |
+| hold to first sell | 16m / 11.5h / 2.2d | 34m / 5.8h / 30h |
+| share of sells below cost | 21% | 46% |
+| share of sells at ≥2× cost | 60% | 21% |
+| best exit ÷ 7-day peak (captured) | 20% / 33% / 33% (n=3) | 35% / 49% / 73% (n=31) |
+
+Selection does not separate them: same market caps, same ages, same venues (pump.fun dominates both). Sizing does: winners buy smaller, in one clip, and average down less (across all traders, positions with 4+ buys return −15% pooled versus −10% for single-clip entries; positions above $50k return −20%). Exits separate them by construction (a sell at 2× is what a realized win is), so the non-circular content is: winners are not better at catching the peak (they capture a third of it, losers half), they simply hold the ones that go up and do not add to the ones that go down. Time to first sell does not predict outcome in the pooled data (every bucket from <30 min to >10 days has a negative median). There is no rulebook to extract beyond "small, single clip, no averaging, let winners run"; that is position management, and it does not create expectancy on its own: the pooled realized ROI of all 1,765 clean positions is negative in every size bucket except $500–50k (+5–11% pooled, median −25%).
+
+### 11.3 New-venue first-days baskets
+
+`data/derived/venue_first_days.json`: for each launch factory on Robinhood Chain, the three tokens with the most 72-hour candle volume among those created in the venue's first 72 hours, bought at the day-3 close. Pons V1 (Jul 13): ×2.8 at 30 days, ×0.9 today; Pons V2 (Aug 5): ×1.9 at 30 days; the 0x7ed5 pad (Aug 4): ×4.7; the 0x0000ff pad (Aug 5): ×11 on one token (HOOKR) and ×0.4 on another; the Aug 26–Sep 2 pads: ×0.9–1.0. Day-14 and day-28 placebo cohorts range from ×0.4 to ×4.6. Cohorts are 4–80 tokens with most dead tokens unrankable, so this is a handful of lottery tickets per venue, not a strategy; the July ones paid, the late-August ones did not.
+
+### 11.4 Cross-pool arbitrage (PONS: WETH v3 pool vs USDG v4 pool, Sep 3)
+
+`src/analysis/pool_swaps2.py`, `data/derived/swaps_PONS_WETH_v3_2026-09-03.json`: 9,023 swaps in the WETH pool ($7.8M) against 23,092 in the USDG pool ($28M), ETH/USD from hourly CoinGecko. Spread between the two pools' PONS prices: mean +0.01%, p5 −0.87%, p95 +1.00%; 0.4% of prints beyond ±1.5% (six episodes, median 224 s, mean 1.7% at the start), none beyond 3%. With 0.3% + 1% pool fees the round trip is 1.3%, so the bots that already run this leave nothing for a slower entrant, even with sponsored gas.
+
+### 11.5 The carry on the mania perps (the one that survived)
+
+Hyperliquid lists CASHCAT and PONS perpetuals at 3× max leverage (`data/raw/hyperliquid/`). Funding history:
+
+| Perp | since | hourly prints positive | mean funding (annualized) | cumulative funding | 30-day funding |
+|---|---|---|---|---|---|
+| CASHCAT | Jul 11 (1,333 h) | 100% | 118%/yr | 18.0% | 7.7% (next best on the exchange: XMR 4.6%, PURR 3.2%, FARTCOIN 2.0%, PUMP 1.5%) |
+| PONS | Aug 31 (110 h) | 85% | 63%/yr | 0.8% | |
+
+Simulation (`src/analysis/hl_carry.py`): long CASHCAT spot on Robinhood Chain (the CASHCAT/WETH pool has $3.4–6M depth; Hyperliquid has no CASHCAT spot), short an equal notional on the perp with 70% margin (survives a 70% adverse move; the largest perp up-move from entry was 53%, and the perp wicked −60% in minutes on listing day, which hurts longs, not this short), funding accrued hourly, basis marked to market hour by hour, costs 1.2% of notional (0.3% pool fee each side, 0.5% impact, 0.035% perp fee each side).
+
+| | CASHCAT, Jul 11 → Sep 3 |
+|---|---|
+| funding collected | +17.7% of notional |
+| basis P&L at exit (noise, range −5% … +20%) | +10.9% |
+| costs | −1.2% |
+| net | +27.5% of notional = +16.2% on capital (spot + 70% margin) ≈ 108%/yr |
+| max equity drawdown | −15.5% of notional (basis swings) |
+| 14-day trades started each week, net of costs | +10.1%, +3.1%, +8.5%, +2.9%, +3.8%, +1.8% (all positive) |
+| weekly funding | 2.0%, 4.7%, 2.1%, 1.2%, 2.3%, 1.1%, 1.7%, 2.2%, 0.5% |
+
+Why it exists: the perp is crowded long by the same traders section 10.1 counts as losers, funding is what longs pay shorts, and Robinhood Chain spot is where the hedge sits. Why it is executable at retail: the fomo app itself carries Hyperliquid perp accounts (137 of 147 leaderboard balances expose a perp margin summary), so both legs sit in one app; capacity is the perp's open interest ($55M CASHCAT, $71M PONS) against $3–6M of spot depth per pool, i.e. six-figure size without moving either. Why it is not the jackpot: it is a yield of 1–2% a week, on one to three names, with ±15% basis swings that require sizing for, and it stops the day the crowd flips short or the perp is delisted. Funding on PUMP decayed from mania levels to 12%/yr within months; CASHCAT is nine weeks in and still at 24% for the last 30 days annualized 94%.
+
+Execution spec (frozen, for the forward test): enter when the perp's trailing 7-day funding annualizes above 40% and the perp trades within ±3% of Robinhood spot; size the short at 1.4× leverage or less; rebalance the hedge when the spot leg drifts more than 10% from the perp notional; exit when 7-day funding annualizes below 15% or the basis exceeds ±8% against the position; never hold through a delisting notice. Paper-trade it with the same rule for two weeks before sizing.
+
+### 11.6 The creator seat (partially measured)
+
+Every swap on a Pons token pays 0.7% to the creator, forever, from a $1 launch, and the creator's initial buy is the only trade that executes in the launch block. The lockers pay creators on every swap, which made the full payout history too dense to pull from the public RPC in this session (the query cap is hit at 4,000-block windows); DefiLlama's split gives the aggregate: $63.2M of fees in 52 days, of which about $44M went to creators. The mint-transaction census shows what the seat looks like in practice: eight wallets deployed 30–54 of the tokens the leaderboard traded, one wallet deployed 17 of the memes with two or more leaderboard buyers, and exactly one leaderboard handle is a deployer. Serial launching is a real business on this chain and it needs no audience and no edge in price, only volume; it was not resolved to a per-launch expectancy here because the per-token payout distribution could not be pulled. Launch counts per day from the factory logs are in `rh/factory_logs.json` when that pull completes.
+
+### 11.7 Verdict on round 3
+
+Directional edge: none survived (scalp, lottery, baskets, arbitrage, copy, dip). The two seats that actually earn on this chain without price prediction are the house's (creator fees, buybacks) and the lender's (funding from crowded longs). The second one is open to a retail account, is measured above with no look-ahead and no survivorship, and is the recommendation of this report: run the carry in section 11.5 as a two-week paper test alongside the section 7 forward test, and treat every directional memecoin idea in this repository as refuted until a hindsight-free test says otherwise.
