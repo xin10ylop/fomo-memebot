@@ -1,0 +1,36 @@
+V2 launches in day 19261 in window (with >=30min follow-up) 6108 distinct creators (day) 8470 creators with >=10 launches today 234 share of launches by them 43.45568765900005
+curve events 418595 matched to today launches 354938 bad 0 launches with trades 8063
+launches in window 6108; with any trade 6108 (100%); >=10 trades 3579; >=100 trades 730
+first-buy quote p50/p90: 0.1000 / 4.4416; net quote collected p50/p90/p99: 0.034 / 0.965 / 42.05; >=4.2 collected: 277; ever 2x: 25.4%; ever 5x: 7.0%; ended below first price: 92%; life>30min: 52%
+graduated to a v4 pool (same day): 280 of 6108 traded (4.58%); creator initial buy share of supply p50/p90: 7.10% / 22.62%
+serial creators (>=10 launches/day): share of traded launches 50%; their launches reach >=10 trades 55% vs one-off creators 63%
+
+## V2 curve scalp rules (costs: 1%+1% fees, impact of a 2%-of-curve clip both ways, no-bid exit at 0.5x)
+ALL traded launches: enter 10s, exit 60s                                 | fit: n= 3129 mean  -39.6% [-42,-37] med  -29.8% win   9% | holdout: n= 2706 mean  -46.1% [-48,-44] med  -37.2% win   8%
+ALL: enter 10s, exit 300s                                                | fit: n= 3129 mean  -37.6% [-40,-35] med  -28.8% win   5% | holdout: n= 2706 mean  -40.5% [-44,-37] med  -31.2% win   6%
+>=5 buys & 0 sells in 30s: enter 30s, exit 120s                          | fit: n=   78 mean  -16.4% [-34,+8] med  -24.5% win  13% | holdout: n=   66 mean  -33.9% [-49,-21] med  -25.6% win  17%
+>=5 buys & 0 sells in 30s: enter 30s, exit 300s, TP1.5 SL0.7             | fit: n=   78 mean  -23.3% [-32,-14] med  -26.6% win  21% | holdout: n=   66 mean  -33.1% [-45,-23] med  -26.9% win  14%
+>=10 buys in 60s & p60>=1.5x: enter 60s, exit 300s                       | fit: n=  272 mean  -21.8% [-31,-11] med  -43.0% win  25% | holdout: n=  255 mean  -23.1% [-36,-11] med  -49.0% win  27%
+>=10 buys in 60s & p60>=1.5x: enter 60s, exit 300s TP2 SL0.7             | fit: n=  272 mean  -18.6% [-25,-12] med  -39.5% win  24% | holdout: n=  255 mean  -21.7% [-30,-14] med  -39.5% win  26%
+>=20 buys in 60s: enter 60s, exit 900s                                   | fit: n=  667 mean  -26.3% [-32,-20] med  -30.3% win  14% | holdout: n=  564 mean  -28.1% [-35,-21] med  -25.2% win  15%
+>=20 buys in 60s: enter 60s, exit 900s TP1.5 SL0.7                       | fit: n=  667 mean  -25.9% [-29,-23] med  -28.6% win  19% | holdout: n=  564 mean  -28.3% [-32,-25] med  -17.9% win  20%
+buys/sells>=3 & q300>=1: enter 300s, exit 1800s                          | fit: n=   22 mean   -0.7% [-31,+36] med  -28.3% win  32% | holdout: n=   48 mean  -21.2% [-37,-4] med  -10.4% win  12%
+buys/sells>=3 & q300>=1: enter 300s, exit 1800s TP1.5 SL0.7              | fit: n=   22 mean  -12.3% [-26,+1] med  -28.3% win  32% | holdout: n=   48 mean  -12.5% [-20,-5] med   -8.0% win  17%
+near graduation q>=3 by 900s: enter 900s, exit 1800s                     | fit: n=  135 mean  -24.3% [-32,-15] med  -34.3% win  12% | holdout: n=  140 mean  -22.9% [-29,-14] med  -17.0% win   8%
+dip: p60 < 0.7 x max(0-60s) & >=8 buys: enter 60s, exit 600s             | fit: n=  771 mean  -31.4% [-35,-27] med  -12.8% win   9% | holdout: n=  670 mean  -36.3% [-41,-31] med  -12.4% win   7%
+one-off creator & >=10 buys 60s: enter 60s exit 900s                     | fit: n=  365 mean  -25.5% [-33,-18] med  -36.7% win  10% | holdout: n=  352 mean  -22.8% [-29,-15] med  -19.5% win  12%
+serial creator (>=10/day) & >=10 buys 60s: enter 60s exit 900s           | fit: n=  478 mean  -31.5% [-36,-26] med  -12.8% win  12% | holdout: n=  373 mean  -37.8% [-47,-29] med  -18.2% win  11%
+big first buy (>=0.2 quote): enter 10s, exit 300s                        | fit: n= 1577 mean  -17.7% [-21,-14] med  -21.9% win   6% | holdout: n= 1153 mean  -10.2% [-15,-5] med  -21.2% win   9%
+creator init buy >=3% supply & >=10 buys 60s: enter 60s exit 900s        | fit: n=  816 mean  -29.3% [-34,-25] med  -23.0% win  11% | holdout: n=  709 mean  -32.7% [-39,-27] med  -20.0% win  11%
+creator init buy <1% supply & >=10 buys 60s: enter 60s exit 900s         | fit: n=   45 mean  -30.0% [-43,-19] med  -23.8% win   7% | holdout: n=   48 mean  -13.0% [-23,-1] med  -12.9% win  10%
+graduated same day (hindsight): enter 60s exit 1800s                     | fit: n=  123 mean  +49.7% [+17,+84] med   -9.5% win  42% | holdout: n=   91 mean +119.7% [+66,+168] med  +14.0% win  59%
+
+## hit rates: share of cohort whose price after t=60s later exceeds 2x / 5x of the 60s price (before costs), and share that never prints again
+  all traded                                                   n= 6108 >=2x   3.8% >=5x   0.7% no-later-print   17%
+  >=10 buys in 60s                                             n= 2187 >=2x   8.0% >=5x   1.2% no-later-print   12%
+  >=20 buys in 60s                                             n= 1395 >=2x  10.0% >=5x   1.5% no-later-print   12%
+  >=10 buys & 0 sells in 60s                                   n=   36 >=2x   5.6% >=5x   2.8% no-later-print   36%
+  serial creator >=10/day                                      n= 3074 >=2x   1.8% >=5x   0.4% no-later-print   13%
+  one-off creator                                              n= 1887 >=2x   6.1% >=5x   1.0% no-later-print   22%
+  creator init buy >=3%                                        n= 4478 >=2x   3.6% >=5x   0.6% no-later-print   14%
+  creator init buy <1%                                         n=  742 >=2x   2.0% >=5x   0.5% no-later-print   27%
