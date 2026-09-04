@@ -1,0 +1,26 @@
+# fomo-memebot — "The Big Treasure" research
+
+Research repository: is there a big, sustainable, retail-executable edge behind the fomo (fomo.family) memecoin leaderboards?
+
+**Read `docs/REPORT.md` first.** Short version: the leaderboards rank unrealized bags, following the leaders has no edge after costs, and the one repeatable regularity found (buying sharp dips in liquid, leaderboard-active tokens) is promising but still small-sample and regime-dependent; it is specified, backtested, audited and running as a paper trade.
+
+## Layout
+
+| Path | What |
+|---|---|
+| `docs/REPORT.md` | full findings, trader-by-trader summary, hypotheses, candidate strategy, audit |
+| `docs/TRADERS.md` | 147 leaderboard traders classified from fomo + on-chain data |
+| `docs/trader_dossiers_agents.json` | deep dives on the top 10 handles |
+| `docs/research_round1.json`, `docs/research_synthesis_round1.md` | external research with sources |
+| `docs/DATA_SOURCES.md`, `docs/ANALYSIS_GUIDE.md` | data access, file formats, conventions |
+| `src/collect/` | collectors: fomoapi leaderboards/trades/balances/feed (`pull_fapi.py`, `ws_collect.py`, `snapshot_loop.py`), Helius (`pull_sigs.py`, `pull_helius_parsed*.py`), Robinhood Chain logs/blocks (`pull_rh_logs.py`, `pull_rh_blocks_all.py`), GeckoTerminal candles (`gt_common.py`, `pull_gt.py`, `pull_gt_1m.py`), DexScreener metadata (`pull_dex.py`) |
+| `src/analysis/` | ledgers (`rh_ledger_v2.py`, `sol_ledger.py`), dossiers (`dossier.py`, `classify_traders.py`), event studies and backtests (`kol_swap_study2.py`, `kol_event_study.py`, `flow_backtest.py`, `momentum_1m.py`, `crash_reversion_15m.py`, `crash_swaps.py`, `survivor_test.py`, `pick_quality.py`) |
+| `src/strategy/dip_reversion_paper_trader.py` | the candidate strategy as a live paper trader (DexScreener polling, fomo feed universe) |
+| `data/raw/fomoapi/` | leaderboards, feed (`ws_alerts.jsonl`), 30-minute board snapshots |
+| `data/derived/` | classification table, on-chain fills per trader (`rh_fills/`), event-study outputs, paper-trade log |
+
+## Reproducing
+
+All scripts expect to run from a data root containing the raw pulls (`fapi/`, `rh/`, `helius/`, `gt/`, `dex/`, `prices/`); see `docs/ANALYSIS_GUIDE.md`. Keys (fomoapi `fapi_…`, Helius) are read from the scripts' constants; replace them with your own. Rate limits that matter: fomoapi free key 10k requests/month and 25 handle resolutions/month (never call `/v2/users/{handle}` in a loop), GeckoTerminal ~30 requests/minute, Robinhood Chain public RPC batches of ≤100 with a browser user agent.
+
+Order: `pull_fapi.py` → `pull_sigs.py` + `pull_helius_parsed.py` → `pull_rh_logs.py` + `pull_rh_blocks_all.py` → `pull_dex.py` → `pull_gt.py` → `rh_ledger_v2.py`, `sol_ledger.py` → `dossier.py`, `classify_traders.py` → backtests.
