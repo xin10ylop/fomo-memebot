@@ -1,0 +1,107 @@
+tokens with candles and supply: 737 (Counter({'robinhood': 676, 'bsc': 32, 'base': 23, 'eth': 6}))
+
+=== FDV >= $1M, new 24h high, 1h volume >= 3x trailing hourly average (net of 3% costs)
+TP +50% / SL -25% / 24h                              all  n=1308 tokens=200 mean   -2.8% [-4, -1] median   -5.4% win  30% | exits time:40% sl:36% tp:18% gap:3% eod:2%
+                                                     fit  n= 439 tokens= 75 mean   -3.0% [-6, -0] median   -5.0% win  28% | exits time:47% sl:33% tp:17% gap:3%
+                                                     hold n= 869 tokens=186 mean   -2.7% [-5, -1] median   -5.8% win  31% | exits sl:38% time:36% tp:19% eod:4% gap:3%
+TP +50% / SL -25% / 4h                               all  n=1308 tokens=200 mean   -4.8% [-6, -4] median   -4.7% win  22% | exits time:70% sl:20% tp:9% eod:1% gap:0%
+                                                     fit  n= 439 tokens= 75 mean   -4.1% [-6, -2] median   -3.8% win  23% | exits time:71% sl:20% tp:9% gap:0%
+                                                     hold n= 869 tokens=186 mean   -5.1% [-7, -4] median   -5.3% win  22% | exits time:69% sl:21% tp:9% eod:1% gap:0%
+TP +30% / SL -15% / 4h                               all  n=1308 tokens=200 mean   -4.8% [-6, -4] median   -5.7% win  21% | exits time:48% sl:38% tp:14% eod:0% gap:0%
+                                                     fit  n= 439 tokens= 75 mean   -4.3% [-6, -3] median   -4.3% win  21% | exits time:50% sl:35% tp:15% gap:0%
+                                                     hold n= 869 tokens=186 mean   -5.1% [-6, -4] median   -6.7% win  21% | exits time:46% sl:39% tp:13% eod:1% gap:0%
+no exits, 1h                                         all  n=1308 tokens=200 mean   -4.1% [-5, -3] median   -4.0% win  20% | exits time:100% eod:0%
+                                                     fit  n= 439 tokens= 75 mean   -3.7% [-6, -1] median   -3.7% win  19% | exits time:100%
+                                                     hold n= 869 tokens=186 mean   -4.4% [-6, -3] median   -4.2% win  21% | exits time:100% eod:0%
+no exits, 4h                                         all  n=1308 tokens=200 mean   -4.9% [-6, -4] median   -4.5% win  23% | exits time:99% eod:1% gap:0%
+                                                     fit  n= 439 tokens= 75 mean   -5.1% [-8, -3] median   -3.8% win  23% | exits time:100% gap:0%
+                                                     hold n= 869 tokens=186 mean   -4.7% [-6, -3] median   -4.9% win  23% | exits time:99% eod:1% gap:0%
+no exits, 24h                                        all  n=1308 tokens=200 mean   +0.6% [-2, +4] median   -4.2% win  33% | exits time:89% eod:6% gap:5%
+                                                     fit  n= 439 tokens= 75 mean   -1.8% [-6, +3] median   -4.3% win  30% | exits time:96% gap:4%
+                                                     hold n= 869 tokens=186 mean   +1.8% [-2, +6] median   -4.1% win  35% | exits time:86% eod:9% gap:5%
+--- same threshold, new high only (no volume condition)
+TP +50% / SL -25% / 24h, new high only               all  n=3867 tokens=230 mean   -3.3% [-4, -2] median   -4.0% win  26% | exits time:49% sl:28% tp:13% gap:6% eod:4%
+                                                     fit  n=1389 tokens= 87 mean   -3.9% [-6, -2] median   -3.7% win  23% | exits time:58% sl:25% tp:10% gap:7%
+                                                     hold n=2478 tokens=215 mean   -3.0% [-4, -2] median   -4.1% win  27% | exits time:43% sl:30% tp:15% gap:6% eod:6%
+--- placebo: random candles above the threshold
+TP +50% / SL -25% / 24h, placebo                     all  n=3000 tokens=207 mean   -2.3% [-3, -1] median   -3.1% win  25% | exits time:60% sl:23% tp:12% eod:3% gap:2%
+                                                     fit  n=1261 tokens= 70 mean   -2.5% [-4, -1] median   -3.1% win  23% | exits time:68% sl:21% tp:10% gap:2%
+                                                     hold n=1739 tokens=192 mean   -2.2% [-4, -1] median   -3.3% win  27% | exits time:55% sl:25% tp:13% eod:6% gap:2%
+no exits, 4h, placebo                                all  n=3000 tokens=206 mean   -2.6% [-3, -2] median   -3.0% win  22% | exits time:99% eod:1% gap:0%
+                                                     fit  n=1241 tokens= 73 mean   -3.0% [-4, -2] median   -3.0% win  19% | exits time:100% gap:0%
+                                                     hold n=1759 tokens=192 mean   -2.3% [-3, -2] median   -3.0% win  24% | exits time:98% eod:1% gap:0%
+
+=== FDV >= $3M, new 24h high, 1h volume >= 3x trailing hourly average (net of 3% costs)
+TP +50% / SL -25% / 24h                              all  n= 862 tokens=127 mean   -2.9% [-5, -1] median   -4.3% win  29% | exits time:50% sl:30% tp:14% gap:3% eod:3%
+                                                     fit  n= 318 tokens= 47 mean   -2.4% [-5, +1] median   -4.3% win  27% | exits time:58% sl:25% tp:14% gap:3%
+                                                     hold n= 544 tokens=120 mean   -3.2% [-6, -1] median   -4.3% win  30% | exits time:45% sl:33% tp:15% eod:4% gap:3%
+TP +50% / SL -25% / 4h                               all  n= 862 tokens=127 mean   -4.9% [-6, -4] median   -3.9% win  20% | exits time:77% sl:16% tp:6% eod:0% gap:0%
+                                                     fit  n= 318 tokens= 47 mean   -3.9% [-6, -2] median   -3.5% win  21% | exits time:80% sl:14% tp:6% gap:0%
+                                                     hold n= 544 tokens=120 mean   -5.4% [-7, -4] median   -4.4% win  20% | exits time:75% sl:17% tp:6% eod:1% gap:0%
+TP +30% / SL -15% / 4h                               all  n= 862 tokens=127 mean   -4.6% [-6, -4] median   -4.3% win  19% | exits time:58% sl:31% tp:11% gap:0% eod:0%
+                                                     fit  n= 318 tokens= 47 mean   -4.0% [-5, -2] median   -3.7% win  19% | exits time:61% sl:27% tp:11% gap:0%
+                                                     hold n= 544 tokens=120 mean   -5.0% [-6, -4] median   -4.8% win  19% | exits time:56% sl:33% tp:11% eod:1% gap:0%
+no exits, 1h                                         all  n= 862 tokens=127 mean   -4.6% [-5, -4] median   -3.6% win  19% | exits time:100% eod:0%
+                                                     fit  n= 318 tokens= 47 mean   -4.9% [-6, -4] median   -3.4% win  16% | exits time:100%
+                                                     hold n= 544 tokens=120 mean   -4.4% [-5, -3] median   -3.7% win  20% | exits time:100% eod:0%
+no exits, 4h                                         all  n= 862 tokens=127 mean   -5.2% [-7, -4] median   -3.9% win  20% | exits time:99% eod:1% gap:0%
+                                                     fit  n= 318 tokens= 47 mean   -5.4% [-7, -4] median   -3.5% win  20% | exits time:100% gap:0%
+                                                     hold n= 544 tokens=120 mean   -5.1% [-7, -3] median   -4.3% win  20% | exits time:99% eod:1% gap:0%
+no exits, 24h                                        all  n= 862 tokens=127 mean   -1.5% [-4, +1] median   -4.0% win  31% | exits time:91% eod:5% gap:4%
+                                                     fit  n= 318 tokens= 47 mean   -3.5% [-7, +0] median   -4.3% win  26% | exits time:97% gap:3%
+                                                     hold n= 544 tokens=120 mean   -0.3% [-4, +4] median   -3.8% win  34% | exits time:88% eod:8% gap:5%
+--- same threshold, new high only (no volume condition)
+TP +50% / SL -25% / 24h, new high only               all  n=2583 tokens=148 mean   -3.1% [-4, -2] median   -3.8% win  26% | exits time:57% sl:23% tp:10% gap:5% eod:4%
+                                                     fit  n=1020 tokens= 56 mean   -3.3% [-5, -1] median   -3.6% win  24% | exits time:66% sl:19% tp:8% gap:7%
+                                                     hold n=1563 tokens=140 mean   -2.9% [-5, -1] median   -3.9% win  27% | exits time:52% sl:26% tp:12% eod:7% gap:4%
+--- placebo: random candles above the threshold
+TP +50% / SL -25% / 24h, placebo                     all  n=3000 tokens=131 mean   -1.3% [-3, +0] median   -3.1% win  28% | exits time:64% sl:19% tp:11% eod:3% gap:2%
+                                                     fit  n=1227 tokens= 50 mean   -1.5% [-3, +1] median   -3.1% win  26% | exits time:70% sl:18% tp:10% gap:2%
+                                                     hold n=1773 tokens=119 mean   -1.1% [-3, +0] median   -3.1% win  29% | exits time:60% sl:20% tp:12% eod:5% gap:2%
+no exits, 4h, placebo                                all  n=3000 tokens=124 mean   -2.4% [-3, -2] median   -3.0% win  22% | exits time:99% eod:1% gap:0%
+                                                     fit  n=1218 tokens= 49 mean   -2.4% [-3, -2] median   -3.0% win  21% | exits time:100% gap:0%
+                                                     hold n=1782 tokens=113 mean   -2.4% [-3, -2] median   -3.0% win  23% | exits time:99% eod:1% gap:0%
+
+=== FDV >= $10M, new 24h high, 1h volume >= 3x trailing hourly average (net of 3% costs)
+TP +50% / SL -25% / 24h                              all  n= 464 tokens= 62 mean   -1.5% [-4, +1] median   -3.6% win  29% | exits time:65% sl:19% tp:10% eod:4% gap:2%
+                                                     fit  n= 189 tokens= 31 mean   -3.6% [-7, -0] median   -3.7% win  23% | exits time:76% sl:16% tp:6% gap:1%
+                                                     hold n= 275 tokens= 54 mean   -0.1% [-3, +3] median   -3.5% win  33% | exits time:58% sl:20% tp:13% eod:6% gap:3%
+TP +50% / SL -25% / 4h                               all  n= 464 tokens= 62 mean   -3.8% [-5, -3] median   -3.4% win  19% | exits time:88% sl:8% tp:3% eod:0% gap:0%
+                                                     fit  n= 189 tokens= 31 mean   -4.3% [-7, -3] median   -3.4% win  16% | exits time:90% sl:8% tp:1% gap:1%
+                                                     hold n= 275 tokens= 54 mean   -3.5% [-6, -1] median   -3.4% win  21% | exits time:87% sl:8% tp:4% eod:1% gap:0%
+TP +30% / SL -15% / 4h                               all  n= 464 tokens= 62 mean   -4.1% [-5, -3] median   -3.4% win  17% | exits time:73% sl:20% tp:6% gap:0% eod:0%
+                                                     fit  n= 189 tokens= 31 mean   -4.0% [-6, -3] median   -3.4% win  14% | exits time:79% sl:16% tp:4% gap:1%
+                                                     hold n= 275 tokens= 54 mean   -4.1% [-6, -3] median   -3.6% win  19% | exits time:68% sl:24% tp:8% gap:0% eod:0%
+no exits, 1h                                         all  n= 464 tokens= 62 mean   -4.1% [-5, -3] median   -3.3% win  14% | exits time:100%
+                                                     fit  n= 189 tokens= 31 mean   -4.8% [-7, -4] median   -3.2% win   9% | exits time:100%
+                                                     hold n= 275 tokens= 54 mean   -3.7% [-5, -3] median   -3.3% win  18% | exits time:100%
+no exits, 4h                                         all  n= 464 tokens= 62 mean   -3.3% [-5, -2] median   -3.3% win  20% | exits time:99% eod:1% gap:0%
+                                                     fit  n= 189 tokens= 31 mean   -4.6% [-7, -3] median   -3.3% win  17% | exits time:99% gap:1%
+                                                     hold n= 275 tokens= 54 mean   -2.4% [-4, -0] median   -3.3% win  23% | exits time:99% eod:1% gap:0%
+no exits, 24h                                        all  n= 464 tokens= 62 mean   -1.0% [-3, +2] median   -3.4% win  30% | exits time:92% eod:6% gap:2%
+                                                     fit  n= 189 tokens= 31 mean   -4.2% [-8, -2] median   -3.7% win  23% | exits time:99% gap:1%
+                                                     hold n= 275 tokens= 54 mean   +1.2% [-3, +5] median   -3.2% win  35% | exits time:88% eod:10% gap:3%
+--- same threshold, new high only (no volume condition)
+TP +50% / SL -25% / 24h, new high only               all  n=1542 tokens= 71 mean   -2.3% [-4, -1] median   -3.4% win  24% | exits time:71% sl:15% tp:7% eod:5% gap:3%
+                                                     fit  n= 673 tokens= 36 mean   -2.8% [-5, -0] median   -3.3% win  21% | exits time:82% sl:11% tp:4% gap:3%
+                                                     hold n= 869 tokens= 63 mean   -1.9% [-4, +0] median   -3.5% win  26% | exits time:63% sl:18% tp:9% eod:8% gap:2%
+--- placebo: random candles above the threshold
+TP +50% / SL -25% / 24h, placebo                     all  n=3000 tokens= 63 mean   -1.0% [-2, +1] median   -3.0% win  25% | exits time:77% sl:11% tp:8% eod:3% gap:1%
+                                                     fit  n=1286 tokens= 30 mean   -2.6% [-4, -1] median   -3.0% win  19% | exits time:85% sl:10% tp:4% gap:1%
+                                                     hold n=1714 tokens= 56 mean   +0.2% [-2, +2] median   -2.9% win  29% | exits time:71% sl:12% tp:11% eod:6% gap:2%
+no exits, 4h, placebo                                all  n=3000 tokens= 66 mean   -2.8% [-3, -2] median   -3.0% win  16% | exits time:99% eod:0% gap:0%
+                                                     fit  n=1292 tokens= 32 mean   -3.1% [-4, -3] median   -3.0% win  13% | exits time:100% gap:0%
+                                                     hold n=1708 tokens= 59 mean   -2.6% [-3, -2] median   -3.0% win  18% | exits time:99% eod:1% gap:0%
+
+=== the clip's literal rule: first time FDV crosses $10M in the data, buy, sell at $15M (+50%) or -25% or 24h
+first $10M cross                                     all  n=  58 tokens= 58 mean   +0.1% [-9, +10] median  -28.0% win  38% | exits sl:55% tp:34% time:9% gap:2%
+      STATICS 08-30 02:00  +47.0% tp
+        NUDES 09-02 17:15  +47.0% tp
+          Max 09-03 08:00  +47.0% tp
+          RAM 08-31 19:30  +47.0% tp
+          MOO 08-31 23:30  +47.0% tp
+      Surplus 06-01 01:30  -28.0% sl
+           AI 07-22 16:00  -28.0% sl
+       MOTION 08-11 04:30  -28.0% sl
+           GG 08-29 21:45  -28.0% sl
+     PROLOGUE 08-30 10:30  -28.0% sl
