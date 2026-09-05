@@ -1,0 +1,9 @@
+CASHCAT/WETH 0.3% v3, Sep 3: 6961 swaps, volume $6.15M, LP fees $18.4k | virtual full-range TVL of the in-range liquidity: median $13.3M (p10 $11.8M, p90 $14.2M) vs pool TVL $3.4M
+  fee yield of a full-range $ position on Sep 3: 0.14% per day (the TVL proxy would say 0.54%)
+
+period         days vol/day $M 15-min rehedged LP cost/day daily vol CASHCAT funding/day | fee yield/day for a full-range position at virtual TVL $13M / $30M | net/day (fee + funding on the hedged half - LP cost), $13M
+all              56      10.65                      -0.75%     22.8%              0.318% | 0.24% / 0.11% | -0.35%
+July             22       5.80                      -1.10%     28.2%              0.443% | 0.13% / 0.06% | -0.75%
+Aug 1-19         19       7.14                      -0.53%     18.9%              0.221% | 0.16% / 0.07% | -0.26%
+since Aug 20     15      22.23                      -0.52%     20.0%              0.259% | 0.50% / 0.22% | +0.11%
+worst days by rehedged LP cost: [('2026-07-17', '-3.5%'), ('2026-07-16', '-2.8%'), ('2026-07-29', '-2.8%'), ('2026-08-06', '-2.3%'), ('2026-07-10', '-2.0%')]
