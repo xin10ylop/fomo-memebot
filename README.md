@@ -11,6 +11,7 @@ Research repository: is there a big, sustainable, retail-executable edge behind 
 | `docs/REPORT.md` | full findings, trader-by-trader summary, hypotheses, candidate strategy, audit |
 | `docs/TRADERS.md` | 147 leaderboard traders classified from fomo + on-chain data |
 | `docs/TRADER_POSITIONS.md`, `docs/MEMES.md` | every captured position / entry per trader; every meme the leaderboard trades, ranked by number of leaderboard traders |
+| `docs/CREATOR_FEE_RUNBOOK.md` | the one launchpad income that needs no selling: the creator fee share, A to Z, with the no-dump / no-impersonation rules, go/no-go gauge, launch facts, claiming and kill criteria; tools `src/analysis/creator_fee_gauge.py` (is today's flow paying?) and `creator_fee_tracker.py` (what did my launches earn?) |
 | `docs/TOKEN_METRICS.md` | memecoin fundamentals per meme and per trader: entry market cap (FDV), token age at entry, launchpad, deployer / dev, fomo holder counts and tracked top holders, and whether any of it predicted the leaders' realized results |
 | `docs/trader_dossiers_agents.json` | deep dives on the top 10 handles |
 | `docs/research_round1.json`, `docs/research_synthesis_round1.md` | external research with sources |
