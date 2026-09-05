@@ -11,15 +11,24 @@ Every token launched on Pons V2 charges 1% on every trade on its bonding curve (
 graduation). About 70% of that fee accrues to the token's creator, 30% to the protocol. The fee accrues in the protocol's
 fee position and is claimed by the creator; it does not depend on the creator holding or selling anything. Launching costs
 0.0005 ETH (≈ $1.22) plus gas (sponsored until early October 2026, cents afterwards). Across five six-hour windows in
-August–September 2026, a first-time creator's fee share inside the window was $12–44 mean and $2–11 median per launch,
-58–93% of launches covered the launch fee, and tokens with a tiny or no initial buy still averaged $9–22. The flow that
-produces those fees is the bots and traders that buy every fresh launch; it rises and falls with the launchpad's fee
+August–September 2026 (`REPORT.md` section 13.3), a wallet's first launch of the day with a dust initial buy (under $5)
+earned a fee share of $4–23 mean and $0–2.7 median inside the window, and 24–76% of such launches covered the launch fee.
+That is the number for this runbook. The larger means quoted in section 13.2 ($12–44) come from creators who staked
+$25–600 in the launch block, and a stake that is kept loses more than its fee earns on every measured day; the fee only
+nets positive with a stake if the stake is sold into the first buyers, which is the dump this runbook excludes. The flow
+that produces the fee is the bots and traders that buy every fresh launch; it rises and falls with the launchpad's fee
 cycle, and it can stop.
+
+**Bottom line before you read on:** one wallet, one launch a day, no stake, all rules followed: $3–21 a day in mean,
+$0–2.7 in median, a third to a half of days earning nothing beyond the $1.22 lost. Extra launches from the same wallet
+earn roughly nothing each (section 13.3 (c)), because the bots buy first-time creators. This is a few dollars a day, not
+an income; the rest of the document is here so the number can be checked and the mechanics are on record.
 
 ## 1. Rules (these are what make it not a rug)
 
-1. **No launch-block buy that you sell into the first minutes.** Either launch with no initial buy (or a trivial one you
-   intend to keep), or if you buy, do not sell it for at least a day. Selling the creator's buy into the first buyers is
+1. **No launch-block buy that you sell into the first minutes.** Launch with a dust initial buy you intend to keep
+   (0.00001 ETH is the smallest used on the chain; no creation in the 48,048 sampled had a zero buy, and whether the
+   contract accepts zero is untested), or if you buy more, do not sell it for at least a day and expect to lose it. Selling the creator's buy into the first buyers is
    the launch-and-dump measured in sections 13–13.1; it is excluded here.
 2. **No impersonation.** Do not name tokens after existing tokens, projects, people, or trending tickers. Original names only.
 3. **No promotion claims.** No "team", "roadmap", "partnership" or price talk anywhere (name, symbol, image, metadata).
@@ -47,9 +56,10 @@ Run the gauge for the last two hours:
 python3 src/analysis/creator_fee_gauge.py --hours 2
 ```
 
-* Go if the median fee per first-time launch is ≥ $2 and ≥ 60% of launches cover the launch fee (the trough day, Aug 20,
-  printed $2.1 / 58%; the peak day $10.8 / 89%).
-* No-go if the median is under $1 or fewer than half the launches cover the fee. Do not launch into a dead hour to "catch
+* Read the first line, "single launch, initial buy < $5": that is your cohort. Go if its median is ≥ $1 and ≥ 50% of
+  those launches cover the launch fee (the measured windows printed medians of $0.03–2.7 and 24–76% covering; only
+  Aug 27 and Sep 2 pass this bar). Ignore the "initial buy ≥ $5" line unless you are willing to lose the stake.
+* No-go if the first line's median is under $0.5 or fewer than a third of the launches cover the fee. Do not launch into a dead hour to "catch
   the next wave"; the fee is earned on flow that exists now.
 * Also no-go: the day the gas subsidy ends until you have measured the real per-launch gas cost (a creation is 3–7M gas;
   at the Sep 1–2 congestion prices that was $20–60, which would erase the median launch).
@@ -77,15 +87,18 @@ python3 src/analysis/creator_fee_gauge.py --hours 2
 
 ## 6. Cadence and sizing
 
-* Start with 20 launches at zero initial buy over one "go" session. Expected on the measured days: $12–44 mean and
-  $2–11 median per launch, so $240–880 mean for the batch against $24 of launch fees, with most of it in one or two
-  launches (the top 5% of launches are 36–65% of the fees).
-* Stop and re-measure with the tracker after 20. Continue only if the batch's fee income is at least 3× its launch fees.
-* If you add an initial buy to seed the curve (measured: a moderate buy roughly doubles fee income versus none), it is
-  capital you are choosing to hold, not a trade; size it as something you can lose in full, because 92% of launches end
-  below their first price.
-* Rate: 30–60 launches an hour is the pace of the serial launchers in the census; there is no measured benefit to more,
-  and the chain already sees 28,000 launches a day. Do not run more than one wallet.
+* One launch per wallet per day, with a dust initial buy. That is the only cohort measured positive: $4–23 mean fee
+  per launch, $0–2.7 median (section 13.3 (a), the "< $5" column).
+* Do not batch. The second to ninth launches from the same wallet in a day earned a quarter or less of the first and the
+  tenth onward about the launch fee or less on every measured day (section 13.3 (c)), because the sniper bots that
+  supply the fee buy first-time creators only. Twenty launches from one wallet are worth $0–5 net each, not twenty
+  times the one-off number.
+* Do not open fresh wallets to get around that. One wallet per launch is exactly the serial-launcher pattern of
+  section 13.1, and it is excluded from this runbook.
+* Do not seed the curve with a real stake to attract the bots. It raises the fee (a $100+ stake earned $26–53 of fee
+  per launch) but the stake itself ended 50–90% down in every window, so the kept-stake version nets −$150 to −$490
+  per launch (section 13.3 (b)). The only way that cohort is positive is to sell the stake, which is rule 1.
+* Re-measure with the tracker after 20 launch-days. Continue only if the fee income is at least 3× the launch fees paid.
 
 ## 7. Claiming
 
@@ -106,6 +119,8 @@ claiming costs gas only.
 
 It is not a trade and it has no edge in the market sense: you are being paid the launchpad's creator share for supplying
 tokens that bots and traders churn. The income is a lottery ticket with a positive mean on days with flow and a near-zero
-median on days without; the tail is tokens that happen to run, and you do not control that. It contributes to the launch
+median on days without; the tail is tokens that happen to run, and you do not control that. Measured under its own rules
+it is $3–21 a day per wallet in mean and $0–2.7 in median, and it does not scale, because every way of scaling it (more
+launches per wallet, more wallets, a real stake) is either measured to earn nothing or is the dump. It contributes to the launch
 spam the chain's 0.077% survival rate describes. The repository documents it because it is one of the two seats that
 actually earned during the study; it does not include a launcher, and the author of this runbook would not run it at scale.

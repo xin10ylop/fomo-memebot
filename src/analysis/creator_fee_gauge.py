@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Live gauge for the creator fee share (report section 13.2). Read-only: no keys, no transactions.
 
-Looks at the Pons V2 launches of the last HOURS hours, excludes creators with more than one launch in that span, and
-reports what the 0.7% fee share on curve volume has earned per launch so far: mean, median, p90, share of launches that
-covered the $1.22 launch fee, and the split between tokens with and without a stranger's buy. Run it before launching
-anything: if today's median is a few dollars and the mean is tens, the day's flow is paying; if the median is cents,
-it is not.
+Looks at the Pons V2 launches of the last HOURS hours and reports what the 0.7% fee share on curve volume has earned per
+launch so far, for three cohorts that the report (section 13.3) showed earn very different amounts: single-launch
+creators with an initial buy under $5 (the no-stake version), single-launch creators with a larger initial buy (whose fee
+comes with a stake that is usually lost), and creators with 2-9 launches in the span (the bots filter them and their fee
+collapses). Each line: n, mean, median, p90, share of launches covering the $1.22 launch fee, share nobody else traded.
+Run it before launching anything: the first line is the number that applies to one launch from a fresh wallet.
 
 usage: python3 creator_fee_gauge.py [--hours 2] [--eth-usd 2445]
 """
@@ -55,12 +56,14 @@ def main():
     creations = [l for l in creations if len(l["topics"]) > 3]
     creators = collections.Counter("0x" + l["topics"][3][-40:] for l in creations)
     print(f"last {hours:g} h: {len(creations)} Pons V2 launches, {len(creators)} creators, {sum(1 for c, n in creators.items() if n == 1)} single-launch creators")
-    fees = []; fees_eth_quoted = []; no_stranger = 0; priced = 0
+    cohorts = {k: {"fees": [], "no_stranger": 0} for k in ("single launch, initial buy < $5", "single launch, initial buy >= $5", "2-9 launches, initial buy < $25")}
+    fees_eth_quoted = []
     for l in creations:
         creator = "0x" + l["topics"][3][-40:]
-        if creators[creator] != 1:
+        if creators[creator] >= 10:
             continue
         token = "0x" + l["topics"][1][-40:]; curve = "0x" + l["topics"][2][-40:]; b = int(l["blockNumber"], 16)
+        d0 = l["data"][2:]; q0_raw = int(d0[64:128], 16) if len(d0) >= 128 else 0
         rc = call("eth_getTransactionReceipt", [l["transactionHash"]]) or {}
         quote = "native"
         for lg in rc.get("logs", []):
@@ -69,23 +72,34 @@ def main():
         px = usd.get(quote)
         if px is None:
             continue
+        stake = q0_raw / 10 ** QUOTE_DEC.get(quote, 18) * px
+        if creators[creator] == 1:
+            key = "single launch, initial buy < $5" if stake < 5 else "single launch, initial buy >= $5"
+        elif stake < 25:
+            key = "2-9 launches, initial buy < $25"
+        else:
+            continue
         ev = call("eth_getLogs", [{"fromBlock": hex(b), "toBlock": hex(head), "address": curve, "topics": [[BUY, SELL]]}])
         vol = 0.0
         for e in ev:
             d = e["data"][2:]; w = [int(d[i:i + 64], 16) for i in range(0, len(d), 64)]
             vol += (w[0] if e["topics"][0] == BUY else w[1]) / 10 ** QUOTE_DEC.get(quote, 18)
-        f = vol * FEE_SHARE * px; fees.append(f); priced += 1
-        if quote == "native":
+        f = vol * FEE_SHARE * px; c = cohorts[key]; c["fees"].append(f)
+        if quote == "native" and creators[creator] == 1:
             fees_eth_quoted.append(f)
         if len(ev) <= 1:
-            no_stranger += 1
+            c["no_stranger"] += 1
         time.sleep(0.1)
-    if not fees:
-        print("no priced single-launch creators in the window"); return
-    fees.sort(); n = len(fees); fee_usd = LAUNCH_FEE_ETH * eth_usd
-    print(f"fee share earned so far per launch (single-launch creators, n={n}): mean ${st.mean(fees):.2f} median ${fees[n // 2]:.2f} p90 ${fees[9 * n // 10]:.2f} max ${fees[-1]:.0f}")
-    print(f"launches covering the ${fee_usd:.2f} launch fee: {100 * sum(1 for x in fees if x > fee_usd) / n:.0f}% | launches nobody else traded: {100 * no_stranger / n:.0f}% | ETH-quoted only (n={len(fees_eth_quoted)}): mean ${st.mean(fees_eth_quoted) if fees_eth_quoted else 0:.2f} median ${st.median(fees_eth_quoted) if fees_eth_quoted else 0:.2f}")
-    print("reference (six-hour windows, section 13.2): peak day mean $44 / median $10.8; trough day mean $17 / median $2.1")
+    fee_usd = LAUNCH_FEE_ETH * eth_usd
+    print(f"fee share earned so far per launch, USD (launch fee ${fee_usd:.2f}):")
+    for key, c in cohorts.items():
+        fees = sorted(c["fees"]); n = len(fees)
+        if not n:
+            print(f"  {key:36s} n=0"); continue
+        print(f"  {key:36s} n={n:4d} mean ${st.mean(fees):7.2f} median ${fees[n // 2]:6.2f} p90 ${fees[9 * n // 10]:7.2f} max ${fees[-1]:6.0f} | covering the launch fee {100 * sum(1 for x in fees if x > fee_usd) / n:3.0f}% | nobody else traded {100 * c['no_stranger'] / n:3.0f}%")
+    if fees_eth_quoted:
+        print(f"  single-launch, ETH-quoted only: n={len(fees_eth_quoted)} mean ${st.mean(fees_eth_quoted):.2f} median ${st.median(fees_eth_quoted):.2f}")
+    print("reference (six-hour windows, section 13.3): single launch < $5 initial buy: mean $4-23, median $0-2.7; 2-9 launches: mean $0.2-6.6, median $0-1.5")
 
 
 if __name__ == "__main__":
