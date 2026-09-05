@@ -59,7 +59,16 @@ python3 src/analysis/creator_fee_gauge.py --hours 2
 * Read the first line, "single launch, initial buy < $5": that is your cohort. Go if its median is ≥ $1 and ≥ 50% of
   those launches cover the launch fee (the measured windows printed medians of $0.03–2.7 and 24–76% covering; only
   Aug 27 and Sep 2 pass this bar). Ignore the "initial buy ≥ $5" line unless you are willing to lose the stake.
-* No-go if the first line's median is under $0.5 or fewer than a third of the launches cover the fee. Do not launch into a dead hour to "catch
+* No-go if the first line's median is under $0.5 or fewer than a third of the launches cover the fee.
+* A live reading, Sep 5 2026, 12:00–14:00 UTC (a fee-peak week day, 1,228 launches in two hours):
+
+  ```
+  single launch, initial buy < $5      n=  66 mean $   3.49 median $  0.19 p90 $  13.03 | covering the launch fee 35%
+  single launch, initial buy >= $5     n= 510 mean $  59.23 median $ 15.32 p90 $ 147.57 | covering the launch fee 94%
+  2-9 launches, initial buy < $25      n=  70 mean $   2.65 median $  0.66 p90 $   6.80 | covering the launch fee 31%
+  ```
+
+  That is a no-go for the rules of this runbook, on a day when the staked-and-dumped cohort was earning $59 a launch. Do not launch into a dead hour to "catch
   the next wave"; the fee is earned on flow that exists now.
 * Also no-go: the day the gas subsidy ends until you have measured the real per-launch gas cost (a creation is 3–7M gas;
   at the Sep 1–2 congestion prices that was $20–60, which would erase the median launch).
