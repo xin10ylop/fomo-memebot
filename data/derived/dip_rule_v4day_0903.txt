@@ -1,0 +1,20 @@
+2026-09-03: dip >= 20% below the 12h high, bottom third, trailing-12h volume >= $100k, pool >= 1 day old; net of 3% + impact for a $300 clip
+  dip signals, hold 3h : n=  200 pools= 149 mean   -0.5% [-8, +10] median   -8.6% win  36%
+  dip signals, hold 6h : n=  109 pools= 109 mean   -4.9% [-15, +6] median  -17.6% win  30%
+  placebo,     hold 3h : n=   83 pools=  60 mean   -7.4% [-17, +3] median  -14.0% win  30%
+  placebo,     hold 6h : n=   51 pools=  41 mean   -5.2% [-20, +12] median  -12.6% win  35%
+2026-09-03: dip >= 20% below the 12h high, bottom third, trailing-12h volume >= $300k, pool >= 1 day old; net of 3% + impact for a $300 clip
+  dip signals, hold 3h : n=   77 pools=  58 mean   -6.7% [-14, +0] median  -11.0% win  32%
+  dip signals, hold 6h : n=   43 pools=  43 mean   -2.6% [-18, +16] median  -20.3% win  33%
+  placebo,     hold 3h : n=   37 pools=  25 mean   +3.6% [-14, +21] median   -1.1% win  49%
+  placebo,     hold 6h : n=   25 pools=  17 mean  +19.8% [-15, +64] median  -10.0% win  48%
+2026-09-03: dip >= 30% below the 12h high, bottom third, trailing-12h volume >= $100k, pool >= 1 day old; net of 3% + impact for a $300 clip
+  dip signals, hold 3h : n=  188 pools= 147 mean   +0.9% [-8, +12] median   -8.3% win  38%
+  dip signals, hold 6h : n=  105 pools= 105 mean   -3.8% [-14, +9] median  -16.8% win  32%
+  placebo,     hold 3h : n=   89 pools=  59 mean   -6.0% [-17, +10] median  -13.6% win  30%
+  placebo,     hold 6h : n=   64 pools=  43 mean  -10.4% [-24, +7] median  -22.0% win  33%
+2026-09-03: dip >= 20% below the 12h high, bottom third, trailing-12h volume >= $100k, pool >= 1 day old; net of 3% + impact for a $1000 clip
+  dip signals, hold 3h : n=  200 pools= 149 mean   -3.2% [-11, +7] median  -11.6% win  32%
+  dip signals, hold 6h : n=  109 pools= 109 mean   -7.7% [-17, +4] median  -19.6% win  28%
+  placebo,     hold 3h : n=   83 pools=  60 mean   -9.8% [-20, +1] median  -15.9% win  27%
+  placebo,     hold 6h : n=   51 pools=  41 mean   -7.6% [-23, +10] median  -13.4% win  31%

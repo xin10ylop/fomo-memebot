@@ -1,0 +1,85 @@
+tokens 676 (Robinhood, 15-minute candles)
+
+=== dip >= 20% below the 24h high, bottom third of the range, trailing-24h volume >= $0.2M; net of 3% costs
+hold 6h                                        all  n= 5910 tokens=446 mean   +2.7% [+1, +5] median   -3.3% win  42%
+                                               fit  n= 2108 tokens= 96 mean   +2.0% [+0, +4] median   -3.2% win  43%
+                                               hold n= 3802 tokens=429 mean   +3.1% [+1, +6] median   -3.3% win  41%
+hold 12h                                       all  n= 5910 tokens=446 mean   +4.7% [+2, +8] median   -5.1% win  41%
+                                               fit  n= 2108 tokens= 96 mean   +4.7% [+2, +8] median   -5.4% win  42%
+                                               hold n= 3802 tokens=429 mean   +4.7% [+1, +9] median   -5.1% win  41%
+hold 24h                                       all  n= 5910 tokens=446 mean   +7.7% [+4, +12] median   -8.5% win  40%
+                                               fit  n= 2108 tokens= 96 mean   +6.9% [+2, +11] median   -8.9% win  41%
+                                               hold n= 3802 tokens=429 mean   +8.2% [+2, +15] median   -8.4% win  39%
+TP +15% / SL -15% / 24h                        all  n= 5910 tokens=446 mean   -2.8% [-3, -2] median   -1.4% win  50%
+                                               fit  n= 2108 tokens= 96 mean   -2.5% [-3, -2] median  +12.0% win  51%
+                                               hold n= 3802 tokens=429 mean   -2.9% [-3, -2] median   -3.0% win  49%
+TP +30% / SL -20% / 24h                        all  n= 5910 tokens=446 mean   -1.1% [-2, -0] median  -16.3% win  43%
+                                               fit  n= 2108 tokens= 96 mean   -1.6% [-3, -1] median  -23.0% win  43%
+                                               hold n= 3802 tokens=429 mean   -0.9% [-2, -0] median  -12.5% win  43%
+--- placebo: random candles, same volume filter, hold 12h
+placebo hold 12h                               all  n= 9480 tokens=446 mean   +1.2% [-0, +3] median   -3.6% win  33%
+                                               fit  n= 3136 tokens=103 mean   +0.7% [-1, +3] median   -4.0% win  34%
+                                               hold n= 6344 tokens=429 mean   +1.4% [-1, +4] median   -3.5% win  33%
+
+=== dip >= 20% below the 24h high, bottom third of the range, trailing-24h volume >= $1M; net of 3% costs
+hold 6h                                        all  n= 1943 tokens=269 mean   +1.1% [-1, +4] median   -3.0% win  42%
+                                               fit  n=  789 tokens= 67 mean   +1.4% [-1, +4] median   -3.1% win  43%
+                                               hold n= 1154 tokens=232 mean   +0.9% [-2, +5] median   -3.0% win  41%
+hold 12h                                       all  n= 1943 tokens=269 mean   +0.9% [-2, +3] median   -5.3% win  40%
+                                               fit  n=  789 tokens= 67 mean   +1.3% [-2, +5] median   -5.8% win  39%
+                                               hold n= 1154 tokens=232 mean   +0.6% [-3, +5] median   -4.4% win  41%
+hold 24h                                       all  n= 1943 tokens=269 mean   +0.7% [-4, +5] median   -9.0% win  38%
+                                               fit  n=  789 tokens= 67 mean   -0.2% [-5, +5] median  -11.5% win  39%
+                                               hold n= 1154 tokens=232 mean   +1.4% [-5, +9] median   -7.8% win  38%
+TP +15% / SL -15% / 24h                        all  n= 1943 tokens=269 mean   -2.7% [-3, -2] median   -0.5% win  50%
+                                               fit  n=  789 tokens= 67 mean   -2.4% [-3, -1] median  +12.0% win  52%
+                                               hold n= 1154 tokens=232 mean   -2.9% [-4, -2] median   -2.4% win  49%
+TP +30% / SL -20% / 24h                        all  n= 1943 tokens=269 mean   -1.1% [-2, +0] median  -12.5% win  43%
+                                               fit  n=  789 tokens= 67 mean   -1.2% [-3, +1] median  -23.0% win  44%
+                                               hold n= 1154 tokens=232 mean   -1.0% [-2, +0] median   -9.9% win  42%
+--- placebo: random candles, same volume filter, hold 12h
+placebo hold 12h                               all  n= 3779 tokens=270 mean   -1.2% [-3, +0] median   -3.1% win  31%
+                                               fit  n= 1427 tokens= 74 mean   -1.0% [-3, +1] median   -3.1% win  30%
+                                               hold n= 2352 tokens=233 mean   -1.4% [-3, +0] median   -3.0% win  32%
+
+=== dip >= 30% below the 24h high, bottom third of the range, trailing-24h volume >= $0.2M; net of 3% costs
+hold 6h                                        all  n= 5089 tokens=446 mean   +3.6% [+2, +6] median   -3.1% win  43%
+                                               fit  n= 1847 tokens= 94 mean   +2.7% [+1, +5] median   -3.2% win  43%
+                                               hold n= 3242 tokens=426 mean   +4.2% [+1, +8] median   -3.1% win  43%
+hold 12h                                       all  n= 5089 tokens=446 mean   +5.8% [+3, +9] median   -5.0% win  42%
+                                               fit  n= 1847 tokens= 94 mean   +5.6% [+2, +9] median   -5.6% win  42%
+                                               hold n= 3242 tokens=426 mean   +5.9% [+2, +12] median   -4.9% win  41%
+hold 24h                                       all  n= 5089 tokens=446 mean   +8.9% [+4, +14] median   -9.5% win  39%
+                                               fit  n= 1847 tokens= 94 mean   +7.8% [+3, +13] median   -9.4% win  40%
+                                               hold n= 3242 tokens=426 mean   +9.5% [+3, +19] median   -9.5% win  38%
+TP +15% / SL -15% / 24h                        all  n= 5089 tokens=446 mean   -2.6% [-3, -2] median  +12.0% win  51%
+                                               fit  n= 1847 tokens= 94 mean   -2.3% [-3, -2] median  +12.0% win  52%
+                                               hold n= 3242 tokens=426 mean   -2.7% [-3, -2] median   -0.6% win  50%
+TP +30% / SL -20% / 24h                        all  n= 5089 tokens=446 mean   -1.2% [-2, -0] median  -23.0% win  43%
+                                               fit  n= 1847 tokens= 94 mean   -2.0% [-3, -1] median  -23.0% win  42%
+                                               hold n= 3242 tokens=426 mean   -0.7% [-2, +0] median  -16.3% win  44%
+--- placebo: random candles, same volume filter, hold 12h
+placebo hold 12h                               all  n= 9480 tokens=440 mean   +1.0% [-0, +3] median   -3.5% win  33%
+                                               fit  n= 3129 tokens=102 mean   +0.7% [-1, +2] median   -3.9% win  34%
+                                               hold n= 6351 tokens=423 mean   +1.2% [-1, +3] median   -3.5% win  33%
+
+=== dip >= 15% below the 24h high, bottom third of the range, trailing-24h volume >= $0.2M; net of 3% costs
+hold 6h                                        all  n= 6181 tokens=449 mean   +2.5% [+1, +4] median   -3.3% win  41%
+                                               fit  n= 2201 tokens= 97 mean   +1.8% [+0, +4] median   -3.2% win  42%
+                                               hold n= 3980 tokens=431 mean   +2.9% [+0, +6] median   -3.3% win  41%
+hold 12h                                       all  n= 6181 tokens=449 mean   +4.4% [+2, +8] median   -4.8% win  41%
+                                               fit  n= 2201 tokens= 97 mean   +4.4% [+1, +8] median   -5.2% win  42%
+                                               hold n= 3980 tokens=431 mean   +4.4% [+1, +9] median   -4.6% win  40%
+hold 24h                                       all  n= 6181 tokens=449 mean   +7.4% [+3, +12] median   -7.8% win  40%
+                                               fit  n= 2201 tokens= 97 mean   +6.6% [+2, +11] median   -7.5% win  41%
+                                               hold n= 3980 tokens=431 mean   +7.8% [+2, +15] median   -7.9% win  39%
+TP +15% / SL -15% / 24h                        all  n= 6181 tokens=449 mean   -2.7% [-3, -2] median   -1.6% win  50%
+                                               fit  n= 2201 tokens= 97 mean   -2.3% [-3, -2] median  +12.0% win  52%
+                                               hold n= 3980 tokens=431 mean   -2.9% [-3, -2] median   -3.0% win  49%
+TP +30% / SL -20% / 24h                        all  n= 6181 tokens=449 mean   -1.1% [-2, -0] median  -12.8% win  43%
+                                               fit  n= 2201 tokens= 97 mean   -1.5% [-2, -1] median  -23.0% win  43%
+                                               hold n= 3980 tokens=431 mean   -0.9% [-2, -0] median  -10.5% win  43%
+--- placebo: random candles, same volume filter, hold 12h
+placebo hold 12h                               all  n= 9487 tokens=446 mean   +1.5% [-0, +4] median   -3.4% win  34%
+                                               fit  n= 3144 tokens=102 mean   +1.4% [-1, +3] median   -3.9% win  34%
+                                               hold n= 6343 tokens=427 mean   +1.6% [-1, +4] median   -3.3% win  33%
