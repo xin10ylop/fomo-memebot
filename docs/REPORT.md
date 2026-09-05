@@ -433,6 +433,23 @@ Every filter and scalp in section 12 loses. Someone is on the other side of thos
 
 **Forward test (frozen).** First, at zero cost, rerun `creator_seat.py`, `pull_first_buyers.py` and `bundle_check.py` on a fresh day to confirm the one-off cohort still clears +$100 mean and ≥ 95% non-negative. Then a launch bot with a fixed $100 stake in ETH, a sell 10 seconds after launch or when curve proceeds reach 1.5× the stake, 50 launches with names drawn from the day's trending list, a hard stop if the first 20 average below +$20, and the fee share left to accrue.
 
+### 13.2 The fee share on its own (no initial-buy sale)
+
+The creator's income has two parts and they are different things: the sale of the launch-block buy (the dump, sections 13–13.1) and the 0.7% share of every trade on the token, which the launchpad pays whether or not the creator ever sells. Isolating the fee share for one-off creators across the five windows (fees counted only inside each six-hour window; a token that keeps trading after graduation keeps paying, which is not included):
+
+| window | n | mean fee / launch | median | p90 | p99 | launches covering the $1.22 launch fee | > $10 | > $100 | top 5% share of fees |
+|---|---|---|---|---|---|---|---|---|---|
+| Aug 12 | 331 | $12 | $3.1 | $14 | $268 | 75% | 13% | 3.6% | 65% |
+| Aug 20 | 205 | $17 | $2.1 | $35 | $256 | 58% | 21% | 4.4% | 61% |
+| Aug 27 | 1,294 | $38 | $6.7 | $76 | $517 | 81% | 43% | 8.0% | 50% |
+| Sep 2 | 1,926 | $38 | $7.1 | $99 | $448 | 93% | 44% | 9.9% | 42% |
+| Sep 3 | 1,740 | $44 | $10.8 | $115 | $404 | 89% | 51% | 12.2% | 36% |
+| pooled | 5,496 | $37.6 | $6.8 | $97 | | 87% | | | |
+
+Launches with a tiny or no initial buy (< $25) still earn $9–22 mean, $0.3–2.8 median per launch: the fee needs no stake, only the $1.22 launch fee. Creators who did not sell inside the window earned more fees ($70–165 mean), partly selection (tokens that ran) and partly because a token whose creator has not dumped keeps trading. On Sep 3, the 280 launches that graduated to a pool earned $203 mean ($151 median) in curve-phase fees against $23 ($8.5) for the rest, and were 29% of all creator fees; their pool-phase fees afterwards are not counted here.
+
+So the fee share alone is a lottery ticket priced at $1.22 with a mean payout of $12–44 depending on the day's flow, a median of $2–11, and 58–93% of tickets paying back the fee. It requires no dumping and no stake; it is the launchpad's intended creator income, and it scales with the same bot flow as everything else on the curve. Measured here as a finding; `src/analysis/creator_fee_tracker.py` reads any creator address's launches, curve volume and accrued fee share from the chain, without keys or transactions.
+
 ## 14. Round 6: the sniper bots, and the seat that actually wins
 
 Section 12 showed every scalp entered after the snipe window losing, section 13 showed creators collecting from the first minute of every launch, and 185 sniper-bot wallets were identified as the payers. Bots do not run 953 launches a day at a loss for long, so this round reconstructed what each of them actually made.
