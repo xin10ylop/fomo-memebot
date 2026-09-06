@@ -401,6 +401,21 @@ The question was why the community playbook (new-pair filters: early buyer count
 
 **Verdict on round 4**: filtering new launches and scalping them has negative expectancy on this chain under every rule tried, on the full universe, on both halves of the day, with realistic costs. That closes the last untested branch of the brief. The measured, positive, retail-executable expectancy in this repository is still only the funding carry of section 11.5, and the structural seats (creator fees, buybacks) remain the house's.
 
+### 12.1 Addendum: the "Viral Coin Sniping" cheat sheet's entry, as written
+
+A four-page PDF sold as a lead magnet for a paid Discord ("Viral Coin Sniping", "we help traders reach 5 figs a month") describes one entry: watch new and migrated coins, wait for a hype signal, then confirm momentum before entering: holders rising fast (5–10 per tick), five-minute volume rising, chart not already crashed. No exit, sizing or stop is given. `src/analysis/vcs_rule_test.py` runs that entry on every Uniswap v4 pool that opened on Sep 3 with candles built from the day's own swaps (17,054 pools with a priced quote side; 8,569 with any swaps; 3,882 with twenty or more): per minute after the pool's first swap, at least five buy swaps in the minute (the holder proxy), the last five minutes' volume above the previous five and at least $10k, the close within 10% of the pool's high so far; first qualifying minute per pool; entry at the next swap; exits at 15, 30 and 60 minutes or +50%/−30% inside the hour; a pool with no later swap exits at half its last price; costs 3% plus a $300 clip's impact against a quarter of the five-minute volume, capped at 10%. Output `data/derived/vcs_rule_0903.txt`.
+
+| cohort | n | 15 min: mean [CI], median, win | 60 min | TP +50% / SL −30% |
+|---|---|---|---|---|
+| all qualifying pools | 275 | +0.2% [−22, +38], −20%, 28% | −0.1% [−26, +39], −40%, 25% | −8.3% [−13, −4], −31%, 38% |
+| graduated Pons V2 ("migrated") | 69 | −11.1% [−25, +4], −21%, 30% | −19.7% [−35, −1], −33%, 29% | −10.0% [−19, −1], −37%, 38% |
+| launched on v4 (pads, LONG) ("new") | 206 | +3.9% [−25, +60], −20%, 28% | +6.4% [−29, +59], −41%, 24% | −7.8% [−13, −3], −19%, 38% |
+| fit, 00–12 UTC | 122 | +17.7% [−29, +122], −25%, 30% | +31.3% [−29, +114], −53%, 28% | −7.2% [−14, −1], −32%, 42% |
+| holdout, 12–24 UTC | 153 | −13.9% [−22, −5], −15%, 27% | −25.2% [−35, −16], −36%, 23% | −9.3% [−15, −4], −29%, 35% |
+| ≥ 10 buys in the minute | 220 | +5.1% [−22, +51], −23%, 28% | +2.0% [−31, +54], −44%, 24% | −9.2% [−14, −4], −35%, 37% |
+
+The confirmed-momentum entry buys the top of the first wave: the median trade loses 20–40% within the hour, one trade in four is positive, the take-profit/stop version loses 8–10% with the interval entirely negative, and the only positive means are two or three morning pools that ran, which the confidence intervals cannot separate from zero; the afternoon is negative on every exit. The "migrated" branch is the worst. It is the same result as the rest of section 12, with the sheet's own filters.
+
 ## 13. Round 5: the creator's seat, priced exactly and audited
 
 Every filter and scalp in section 12 loses. Someone is on the other side of those trades in the first minute of a launch. Section 11.6 measured the creator seat only as a fee base rate. This round prices it as a strategy on the mechanics of the Pons V2 curve, then audits it against the launchers' own wallets and the identity of their first buyers.
