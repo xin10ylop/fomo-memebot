@@ -1,0 +1,122 @@
+{"ev": "error", "stage": "seed", "err": "{'code': 429, 'message': 'Too Many Requests'}", "t": 1788707983.3464878}
+{"ev": "start", "bankroll": 300.0, "frac": 0.2, "stake": [50.0, 300.0], "hold": 7.0, "min_creator_supply": 0.05, "switch": [30, 0.05], "daily_stop": 0.3, "max_resolve_ms": 300, "dry_run": true, "t": 1788707983.3476999}
+{"ev": "feed_connected", "t": 1788707984.1936085}
+{"ev": "creation", "creator": "0x2a31eeb35ceb11031faa305a4cb3a33173c91386", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.02, "t": 1788707984.796397}
+{"ev": "creation", "creator": "0xfcbb0ffdffea35b13940d28f9880e76b0fc8d061", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.01, "t": 1788707984.9945102}
+{"ev": "creation", "creator": "0x1b60e8c38e47aed1a992cbbb5d0af5aca242cfff", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.5, "t": 1788707985.0442133}
+{"ev": "creation", "creator": "0x8cbf16f7cfeb015bccd3e9bc7fdf0ac3977bca3b", "quote": "0x117cc2133c37b721f49de2a7a74833232b3b4c0c", "init_buy_eth": 0.01383238, "t": 1788707985.1003604}
+{"ev": "creation", "creator": "0x78b8d23bda7a6eacfb2cd33746b435028156cd0c", "quote": "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec", "init_buy_eth": 2.6766235430674135, "t": 1788707985.1706262}
+{"ev": "creation", "creator": "0xa60e892ab5fbf4754e3052b7643e48a1bd6b3065", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 1.238825349e-09, "t": 1788707985.2061238}
+{"ev": "creation", "creator": "0xb216a423a89635cbae26cb3cb4aa6725cfc6832a", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.1, "t": 1788707985.2498138}
+{"ev": "creation", "creator": "0xded329f849662d8ff0e29d06db2b70f88d5e3a36", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 3.71654305e-10, "t": 1788707985.2781723}
+{"ev": "creation", "creator": "0xfaf16098a1df0171701377fdf05ff59e2352939c", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.054, "t": 1788707985.30467}
+{"ev": "creation", "creator": "0x0931051809ad25ba7c7f191a39779b16d872170c", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.15, "t": 1788707985.3497536}
+{"ev": "creation", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "quote": "0x322f0929c4625ed5bad873c95208d54e1c003b2d", "init_buy_eth": 1.0432411420967538, "t": 1788707985.372386}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0x2a31eeb35ceb11031faa305a4cb3a33173c91386", "t": 1788707987.8156872}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0xfcbb0ffdffea35b13940d28f9880e76b0fc8d061", "t": 1788707988.0519016}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0x1b60e8c38e47aed1a992cbbb5d0af5aca242cfff", "t": 1788707988.128973}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0x78b8d23bda7a6eacfb2cd33746b435028156cd0c", "t": 1788707988.1773472}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0x8cbf16f7cfeb015bccd3e9bc7fdf0ac3977bca3b", "t": 1788707988.1839414}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0xded329f849662d8ff0e29d06db2b70f88d5e3a36", "t": 1788707988.2951205}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0xa60e892ab5fbf4754e3052b7643e48a1bd6b3065", "t": 1788707988.319945}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0xb216a423a89635cbae26cb3cb4aa6725cfc6832a", "t": 1788707988.3343322}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0xfaf16098a1df0171701377fdf05ff59e2352939c", "t": 1788707988.3620956}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "t": 1788707988.388082}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0x0931051809ad25ba7c7f191a39779b16d872170c", "t": 1788707988.3994489}
+{"ev": "creation", "creator": "0x1d9c1f5f8350d52464dd72dbf799536977d72f60", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.15, "t": 1788707989.5483012}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0x1d9c1f5f8350d52464dd72dbf799536977d72f60", "t": 1788707992.602267}
+{"ev": "creation", "creator": "0x633f7ac8b1c408cccff045c84c893abea6e7a1f5", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 1.23e-05, "t": 1788708003.1007826}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0x633f7ac8b1c408cccff045c84c893abea6e7a1f5", "t": 1788708006.4794376}
+{"ev": "creation", "creator": "0xa60e892ab5fbf4754e3052b7643e48a1bd6b3065", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 1.239273693e-09, "t": 1788708006.6923108}
+{"ev": "skip", "why": ["creator launched 39 times today", "quote not native ETH"], "curve": "0xb65142eb6ad5ab5fdf42f0318338f1949c230c1d", "creator": "0xa60e892ab5fbf4754e3052b7643e48a1bd6b3065", "resolve_ms": 1143, "t": 1788708007.828115}
+{"ev": "creation", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 3.71785192e-10, "t": 1788708008.2936885}
+{"ev": "skip", "why": ["quote not native ETH"], "curve": "0x0afaf7f3a954688d5c9d92286ac34825abb76f92", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "resolve_ms": 630, "t": 1788708008.9131875}
+{"ev": "creation", "creator": "0xcd183d7bc0d3d4268562806ba7fffd23ab6a620d", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.001, "t": 1788708014.6969643}
+{"ev": "skip", "why": ["creator buy 0.1% of supply < 5%"], "curve": "0x31a899388f4959034c4a325292bdcdbb0f3b5c9b", "creator": "0xcd183d7bc0d3d4268562806ba7fffd23ab6a620d", "resolve_ms": 720, "t": 1788708015.4092498}
+{"ev": "creation", "creator": "0xc701876fda27a43785d6419cdee69c4f14b9f606", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.001, "t": 1788708017.268041}
+{"ev": "skip", "why": ["creator buy 0.1% of supply < 5%"], "curve": "0x6b65a00111d6d3627f6f1faa5bb26f781bcfa7a0", "creator": "0xc701876fda27a43785d6419cdee69c4f14b9f606", "resolve_ms": 764, "t": 1788708018.0251598}
+{"ev": "creation", "creator": "0x0d41608087ffcb9bb9f9eba932c61d1f0d84f11b", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.07, "t": 1788708019.2597358}
+{"ev": "skip", "why": ["creator buy 3.9% of supply < 5%"], "curve": "0x91e7c238907519507f57db81a1102f396ddb68b3", "creator": "0x0d41608087ffcb9bb9f9eba932c61d1f0d84f11b", "resolve_ms": 716, "t": 1788708019.9679296}
+{"ev": "creation", "creator": "0x385670a62a17c29365331a2766e49bd51c50e62f", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.065, "t": 1788708024.8221965}
+{"ev": "skip", "why": ["creator buy 3.7% of supply < 5%"], "curve": "0x3b1681328cd9273c1b7202d6ddda86e08b66845b", "creator": "0x385670a62a17c29365331a2766e49bd51c50e62f", "resolve_ms": 767, "t": 1788708025.5819588}
+{"ev": "creation", "creator": "0x4c27c9f67169e90fd03f9baa45c29acb888c052d", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 1.214649441e-09, "t": 1788708026.5443819}
+{"ev": "creation", "creator": "0x41208cfad447adbb5e5c92d3c70f1199e0097ba0", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.017494533, "t": 1788708027.4407942}
+{"ev": "skip", "why": ["creator launched 7 times today", "quote not native ETH"], "curve": "0x4650b7f44cd5a8e92b3f3221f06e362525312455", "creator": "0x4c27c9f67169e90fd03f9baa45c29acb888c052d", "resolve_ms": 1410, "t": 1788708027.9472425}
+{"ev": "skip", "why": ["creator buy 1.0% of supply < 5%"], "curve": "0x5e9413e0ccd8fa068469a083b00bc7f3c6ed908e", "creator": "0x41208cfad447adbb5e5c92d3c70f1199e0097ba0", "resolve_ms": 681, "t": 1788708028.1150224}
+{"ev": "creation", "creator": "0xcc18274f34a0baf219f35071460c92096e50b1c0", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.02, "t": 1788708029.5170133}
+{"ev": "skip", "why": ["creator buy 1.2% of supply < 5%"], "curve": "0x95bbf1048b37a7c66d521018bc812019375b7f36", "creator": "0xcc18274f34a0baf219f35071460c92096e50b1c0", "resolve_ms": 753, "t": 1788708030.2625573}
+{"ev": "creation", "creator": "0x6d795f3883c4fd485300511b63b06919e8b68ef1", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.01, "t": 1788708038.9978306}
+{"ev": "skip", "why": ["creator buy 0.6% of supply < 5%"], "curve": "0x846582092d0b3b1eb257cc1a43aef19ed20a75dd", "creator": "0x6d795f3883c4fd485300511b63b06919e8b68ef1", "resolve_ms": 874, "t": 1788708039.8642068}
+{"ev": "creation", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 3.71951719e-10, "t": 1788708047.8010306}
+{"ev": "creation", "creator": "0x4847fdaeda5aa646fc22acfe9b71d2a974da0b75", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.05, "t": 1788708048.0915794}
+{"ev": "skip", "why": ["creator launched 1 times today", "quote not native ETH"], "curve": "0xa7500bb05a33f82333cd0142cc28ca628d476059", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "resolve_ms": 460, "t": 1788708048.2538657}
+{"ev": "creation", "creator": "0xe75f0a74e61729cebaf994b943cb4cb1b1c8e466", "quote": "0x1b0e319c6a659f002271b69db8a7df2f911c153e", "init_buy_eth": 0.15076300790586505, "t": 1788708048.8032532}
+{"ev": "skip", "why": ["creator buy 2.8% of supply < 5%"], "curve": "0xabc8a8138f93f6dc63bffe4dee92249ce7e034d8", "creator": "0x4847fdaeda5aa646fc22acfe9b71d2a974da0b75", "resolve_ms": 728, "t": 1788708048.8121576}
+{"ev": "skip", "why": ["creator launched 1 times today", "quote not native ETH", "creator buy 0.1% of supply < 5%"], "curve": "0x25bedb8bd7a5421e6398172bad499cb0af5b8e98", "creator": "0xe75f0a74e61729cebaf994b943cb4cb1b1c8e466", "resolve_ms": 540, "t": 1788708049.3353052}
+{"ev": "creation", "creator": "0xf00efe1bae88046b5be4b11af6f5f0e6da4d41d9", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.035, "t": 1788708050.2681305}
+{"ev": "skip", "why": ["creator buy 2.0% of supply < 5%"], "curve": "0x9ce3b00f75167a82c2258e54a194d7c98411bdc8", "creator": "0xf00efe1bae88046b5be4b11af6f5f0e6da4d41d9", "resolve_ms": 530, "t": 1788708050.7909603}
+{"ev": "creation", "creator": "0x328a722a79d6410d7cafbe08eaa8f094594f7248", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.071, "t": 1788708055.9105673}
+{"ev": "skip", "why": ["creator buy 4.0% of supply < 5%"], "curve": "0x824bc572d3495fbf46271f46baa0980bade4d397", "creator": "0x328a722a79d6410d7cafbe08eaa8f094594f7248", "resolve_ms": 991, "t": 1788708056.8942215}
+{"ev": "creation", "creator": "0x8e6528dd780bcf5448a7714d5f545576398ba882", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 4.90816731e-10, "t": 1788708056.932194}
+{"ev": "skip", "why": ["quote not native ETH"], "curve": "0x135bc39d27f47aafa7b2dcb4d1ded1e3857a75f2", "creator": "0x8e6528dd780bcf5448a7714d5f545576398ba882", "resolve_ms": 434, "t": 1788708057.3591666}
+{"ev": "creation", "creator": "0x72eeac5b542b47900b9b61c899daa9ec9a7051b0", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.42, "t": 1788708059.610139}
+{"ev": "eligible_not_traded", "curve": "0xf7dac5c3ee0617abc6d7a2dfe7836c07c33c064d", "creator": "0x72eeac5b542b47900b9b61c899daa9ec9a7051b0", "resolve_ms": 826, "gates": ["regime switch off (rolling +0.000 over 0)", "resolved in 826 ms > 300"], "stake_usd": 60.0, "t": 1788708060.4627268}
+{"ev": "creation", "creator": "0x04e0fd01c0bb1b87f5e61d33ad1cfe49d6ffe0ac", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.1, "t": 1788708066.7775216}
+{"ev": "creation", "creator": "0xd6e2fed1bb9fe7ac836e8423f7c9ae2cb653c80f", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.01, "t": 1788708067.5769835}
+{"ev": "skip", "why": ["creator buy 0.6% of supply < 5%"], "curve": "0xb4606cc753ea0efeb94d3ab1ae207e6760f0e63d", "creator": "0xd6e2fed1bb9fe7ac836e8423f7c9ae2cb653c80f", "resolve_ms": 563, "t": 1788708068.1331406}
+{"ev": "skip", "why": "curve not resolved in 3 s", "creator": "0x04e0fd01c0bb1b87f5e61d33ad1cfe49d6ffe0ac", "t": 1788708069.8266332}
+{"ev": "creation", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 3.71818971e-10, "t": 1788708075.8616183}
+{"ev": "skip", "why": ["creator launched 2 times today", "quote not native ETH"], "curve": "0x1c2bbcdc93b9a03f591b54d2e386a10cd8d19f0d", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "resolve_ms": 428, "t": 1788708076.2827642}
+{"ev": "creation", "creator": "0xc67993ef6bc117f88f98065a9c4707a7d681a8f0", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 1.2393554e-11, "t": 1788708077.171705}
+{"ev": "skip", "why": ["quote not native ETH", "creator buy 0.4% of supply < 5%"], "curve": "0x98d681705ecae617b83fc7713a4bc93256dd3cfe", "creator": "0xc67993ef6bc117f88f98065a9c4707a7d681a8f0", "resolve_ms": 722, "t": 1788708077.886164}
+{"ev": "creation", "creator": "0x1b60e8c38e47aed1a992cbbb5d0af5aca242cfff", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.5, "t": 1788708082.210817}
+{"ev": "eligible_not_traded", "curve": "0x98a696e7c5d77e339e2e1430a61372450e3c43f1", "creator": "0x1b60e8c38e47aed1a992cbbb5d0af5aca242cfff", "resolve_ms": 681, "gates": ["regime switch off (rolling +0.000 over 0)", "resolved in 681 ms > 300"], "stake_usd": 60.0, "t": 1788708082.9354248}
+{"ev": "creation", "creator": "0xa60e892ab5fbf4754e3052b7643e48a1bd6b3065", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 1.239410278e-09, "t": 1788708085.0479248}
+{"ev": "score", "curve": "0xf7dac5c3ee0617abc6d7a2dfe7836c07c33c064d", "roi": -1.0086, "t_in_s": -0.6, "n_scores": 1, "rolling_mean": -1.0086, "switch_on": false, "t": 1788708085.8210094}
+{"ev": "skip", "why": ["creator launched 40 times today", "quote not native ETH"], "curve": "0x1c14b87c55b76108682106c5dcffb95b4aa283fd", "creator": "0xa60e892ab5fbf4754e3052b7643e48a1bd6b3065", "resolve_ms": 1529, "t": 1788708086.5688872}
+{"ev": "creation", "creator": "0x6f0f97684573954fae9babee5f1659f9b9db4520", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.0001, "t": 1788708088.8457453}
+{"ev": "skip", "why": ["creator buy 0.0% of supply < 5%"], "curve": "0xe7220e3c9e9c3282e5d71a5dc59f57900cc2f40b", "creator": "0x6f0f97684573954fae9babee5f1659f9b9db4520", "resolve_ms": 654, "t": 1788708089.492784}
+{"ev": "creation", "creator": "0x7abe2ab0e8efc85212da6d1683ca0c02f6f64d33", "quote": "0x4a0e65a3eccec6dbe60ae065f2e7bb85fae35eea", "init_buy_eth": 0.06, "t": 1788708089.553737}
+{"ev": "skip", "why": ["quote not native ETH", "creator buy 0.2% of supply < 5%"], "curve": "0x0dcce1fa8e0b8a9c08be89ab58397a88b053c272", "creator": "0x7abe2ab0e8efc85212da6d1683ca0c02f6f64d33", "resolve_ms": 449, "t": 1788708089.9947846}
+{"ev": "creation", "creator": "0xa2273de62aae86e7e0194472e612459ab9cbeb89", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.1, "t": 1788708091.3734603}
+{"ev": "eligible_not_traded", "curve": "0xa2640bd084ebd7f075e1ab677c8759fd98dd6284", "creator": "0xa2273de62aae86e7e0194472e612459ab9cbeb89", "resolve_ms": 593, "gates": ["regime switch off (rolling -1.009 over 1)", "resolved in 593 ms > 300"], "stake_usd": 60.0, "t": 1788708092.010351}
+{"ev": "creation", "creator": "0xcfa08d9671965e8f44ec88bb622b0727a2e1bed6", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.0001, "t": 1788708092.4913418}
+{"ev": "skip", "why": ["creator buy 0.0% of supply < 5%"], "curve": "0xb5fb011b6dca5f4273218e174a36b4fc1d4a22c6", "creator": "0xcfa08d9671965e8f44ec88bb622b0727a2e1bed6", "resolve_ms": 545, "t": 1788708093.0295956}
+{"ev": "creation", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 3.71813669e-10, "t": 1788708093.819881}
+{"ev": "skip", "why": ["creator launched 3 times today", "quote not native ETH"], "curve": "0x3ccadd2055d0bb8ee65e226cab6de9f6be2485da", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "resolve_ms": 754, "t": 1788708094.5646324}
+{"ev": "creation", "creator": "0xa60e892ab5fbf4754e3052b7643e48a1bd6b3065", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 1.239348938e-09, "t": 1788708094.905719}
+{"ev": "skip", "why": ["creator launched 41 times today", "quote not native ETH"], "curve": "0x7d24bbdaa287b5de327cc74e4f37abf8f5d30730", "creator": "0xa60e892ab5fbf4754e3052b7643e48a1bd6b3065", "resolve_ms": 661, "t": 1788708095.557772}
+{"ev": "creation", "creator": "0x9b96ba8ca601ed4278dcd5267a15abc3ed36525d", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.05, "t": 1788708096.3700101}
+{"ev": "skip", "why": ["creator buy 2.8% of supply < 5%"], "curve": "0xabb4a0cba08fa36fbfd144a45999594679d0c836", "creator": "0x9b96ba8ca601ed4278dcd5267a15abc3ed36525d", "resolve_ms": 648, "t": 1788708097.0105343}
+{"ev": "creation", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 3.7183754e-10, "t": 1788708099.472119}
+{"ev": "skip", "why": ["creator launched 4 times today", "quote not native ETH"], "curve": "0x5769c78ef2c801d36e77fbd2e6f711cbbd6ddec5", "creator": "0x6704043f2c37e112c65a06c1794e52c31d8dc6a8", "resolve_ms": 641, "t": 1788708100.1062453}
+{"ev": "creation", "creator": "0x3e2037f693b1a8463a11da80790b5d775a5cb145", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 7.28676054e-10, "t": 1788708103.301817}
+{"ev": "skip", "why": ["quote not native ETH"], "curve": "0xaacd434ef781c07637f879b630ea9671a7bfa942", "creator": "0x3e2037f693b1a8463a11da80790b5d775a5cb145", "resolve_ms": 841, "t": 1788708104.1355386}
+{"ev": "score", "curve": "0x98a696e7c5d77e339e2e1430a61372450e3c43f1", "roi": 0.2296, "t_in_s": -0.2, "n_scores": 2, "rolling_mean": -0.3895, "switch_on": false, "t": 1788708109.3553593}
+{"ev": "creation", "creator": "0x3f4c46d3e799cad937904ed189214431ba3ee888", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.044, "t": 1788708111.2365146}
+{"ev": "skip", "why": ["creator buy 2.5% of supply < 5%"], "curve": "0xdff7401cd4e0ff8f900d3460534c2e7da592938a", "creator": "0x3f4c46d3e799cad937904ed189214431ba3ee888", "resolve_ms": 1038, "t": 1788708112.2663448}
+{"ev": "creation", "creator": "0xa60e892ab5fbf4754e3052b7643e48a1bd6b3065", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 1.239322412e-09, "t": 1788708113.8342404}
+{"ev": "skip", "why": ["creator launched 42 times today", "quote not native ETH"], "curve": "0x04708486a37efb2a5b265ea1c9a7287cadcab373", "creator": "0xa60e892ab5fbf4754e3052b7643e48a1bd6b3065", "resolve_ms": 685, "t": 1788708114.512639}
+{"ev": "score", "curve": "0xa2640bd084ebd7f075e1ab677c8759fd98dd6284", "roi": -0.0363, "t_in_s": 0.63, "n_scores": 3, "rolling_mean": -0.2717, "switch_on": false, "t": 1788708117.312219}
+{"ev": "creation", "creator": "0xfb248496276295c6dea562e1a561fa185fca166d", "quote": "0xaf3d76f1834a1d425780943c99ea8a608f8a93f9", "init_buy_eth": 0.009887438458867031, "t": 1788708123.7671454}
+{"ev": "creation", "creator": "0x3a44cb7f096cf803a710deeaf961e307faa33240", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.42, "t": 1788708123.7755535}
+{"ev": "eligible_not_traded", "curve": "0xace938df584e17563f43a691b4cea371f6ec1d12", "creator": "0x3a44cb7f096cf803a710deeaf961e307faa33240", "resolve_ms": 829, "gates": ["regime switch off (rolling -0.272 over 3)", "resolved in 829 ms > 300"], "stake_usd": 60.0, "t": 1788708124.6425204}
+{"ev": "skip", "why": ["quote not native ETH", "creator buy 0.1% of supply < 5%"], "curve": "0xd09cccb0093803e70bd6c56709bd8b14d6fdd556", "creator": "0xfb248496276295c6dea562e1a561fa185fca166d", "resolve_ms": 1233, "t": 1788708124.9928966}
+{"ev": "creation", "creator": "0xbf28dad96ba125b8db039386b1387857de327735", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.1, "t": 1788708125.7494524}
+{"ev": "eligible_not_traded", "curve": "0x92cb3f25f4d82522743b2dc672d18b74e2f2e413", "creator": "0xbf28dad96ba125b8db039386b1387857de327735", "resolve_ms": 772, "gates": ["regime switch off (rolling -0.272 over 3)", "resolved in 772 ms > 300"], "stake_usd": 60.0, "t": 1788708126.5609424}
+{"ev": "creation", "creator": "0xa3161656440ecbda8a1d4173f4f5e1c6a4639ffc", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.08, "t": 1788708128.8109932}
+{"ev": "skip", "why": ["creator buy 4.5% of supply < 5%"], "curve": "0x778a94b0c3985ae5eb15496b6328953160a0936f", "creator": "0xa3161656440ecbda8a1d4173f4f5e1c6a4639ffc", "resolve_ms": 767, "t": 1788708129.5709476}
+{"ev": "creation", "creator": "0x51e005b49b86c4becc67ba88cfe507921741536e", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 1e-09, "t": 1788708132.5572205}
+{"ev": "skip", "why": ["quote not native ETH"], "curve": "0xfd71789c18fdd51de04c3ead1d78b512cae04959", "creator": "0x51e005b49b86c4becc67ba88cfe507921741536e", "resolve_ms": 1178, "t": 1788708133.7279375}
+{"ev": "creation", "creator": "0x5b22e141fac19860432de36d1cdb565b050e01eb", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.056, "t": 1788708139.6523514}
+{"ev": "skip", "why": ["creator buy 3.2% of supply < 5%"], "curve": "0x4ab51ef6cc84e6c16fca0651feba807f4cc74fba", "creator": "0x5b22e141fac19860432de36d1cdb565b050e01eb", "resolve_ms": 874, "t": 1788708140.5197582}
+{"ev": "creation", "creator": "0x35ef63bdd7656349a90c5ccb077b77076883351a", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.01, "t": 1788708150.5750837}
+{"ev": "score", "curve": "0xace938df584e17563f43a691b4cea371f6ec1d12", "roi": -0.0341, "t_in_s": 2.24, "n_scores": 4, "rolling_mean": -0.2123, "switch_on": false, "t": 1788708151.0792806}
+{"ev": "skip", "why": ["creator buy 0.6% of supply < 5%"], "curve": "0xfc0b9339c5d11d120ba33c6eef4477f6848ea9c8", "creator": "0x35ef63bdd7656349a90c5ccb077b77076883351a", "resolve_ms": 564, "t": 1788708151.132495}
+{"ev": "creation", "creator": "0x2cbb8d3cf99605e3cf4470da940989cea2fef73c", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.058, "t": 1788708151.1413636}
+{"ev": "skip", "why": ["creator buy 3.3% of supply < 5%"], "curve": "0xa7b5e3bc65df9254466898b1ef4a052bbb2932c5", "creator": "0x2cbb8d3cf99605e3cf4470da940989cea2fef73c", "resolve_ms": 975, "t": 1788708152.1086292}
+{"ev": "error", "stage": "score", "err": "{'code': 429, 'message': 'Too Many Requests'}", "t": 1788708152.5616107}
+{"ev": "creation", "creator": "0x57a01234c07902722dca5c7363c4cdde6b059f9d", "quote": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "init_buy_eth": 6.19999843e-10, "t": 1788708162.6820679}
+{"ev": "skip", "why": ["creator launched 7 times today", "quote not native ETH"], "curve": "0x9badbb9f4263b823e230480631dfebbea18970fc", "creator": "0x57a01234c07902722dca5c7363c4cdde6b059f9d", "resolve_ms": 568, "t": 1788708163.2433338}
+{"ev": "creation", "creator": "0x7ef7196188fbf2c22410467c3797005a70276363", "quote": "0x0000000000000000000000000000000000000000", "init_buy_eth": 0.007, "t": 1788708176.8981256}
+{"ev": "skip", "why": ["creator buy 0.4% of supply < 5%"], "curve": "0x6e9dc87600cfffa09b6f5d8783eab28fcfc2e74b", "creator": "0x7ef7196188fbf2c22410467c3797005a70276363", "resolve_ms": 538, "t": 1788708177.4291093}

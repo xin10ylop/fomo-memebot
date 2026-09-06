@@ -1,0 +1,94 @@
+gas $1.00 per round trip; rule: creator's first launch today, ETH-quoted, buy at the first non-creator price, 3% of supply capped at the stake, exit 7 s later
+
+(a) per-launch ROI and net $ per six-hour window by stake (base filter; 'stake' column = creator buy >= 5% of supply filter at the same stake)
+window      stake    n  mean ROI           CI  median  win    net $ $/launch overlap max DD $ ||    n  mean ROI    net $ max DD $  (creator buy >= 5%)
+2026-08-12     20  229     -7.4% [ -10,  -5]     -7%  13%     -340     -1.5      7%     -340 || (too few)
+2026-08-12     50  229     -4.2% [  -7,  -2]     -4%  25%     -480     -2.1      7%     -484 || (too few)
+2026-08-12    100  229     -2.3% [  -4,  -1]     -3%  25%     -541     -2.4      7%     -576 || (too few)
+2026-08-12    200  229     -1.9% [  -4,  -0]     -3%  22%     -648     -2.8      7%     -698 || (too few)
+2026-08-12    300  229     -1.9% [  -4,  -0]     -3%  22%     -747     -3.3      7%     -797 || (too few)
+2026-08-12    500  229     -1.9% [  -4,  -0]     -3%  22%     -945     -4.1      7%     -995 || (too few)
+2026-08-12   1000  229     -1.9% [  -4,  -0]     -3%  22%   -1,440     -6.3      7%   -1,490 || (too few)
+2026-08-12   2000  229     -1.9% [  -4,  -0]     -3%  22%   -2,429    -10.6      7%   -2,479 || (too few)
+
+2026-08-20     20  120     +3.1% [  -6, +14]     -7%  20%       75      0.6      5%      -84 || (too few)
+2026-08-20     50  120     +7.5% [  -1, +17]     -4%  20%      454      3.8      5%     -103 || (too few)
+2026-08-20    100  120     +9.3% [  +0, +19]     -3%  20%    1,125      9.4      5%     -132 || (too few)
+2026-08-20    200  120     +9.3% [  +2, +19]     -3%  20%    1,593     13.3      5%     -144 || (too few)
+2026-08-20    300  120     +9.3% [  +2, +19]     -3%  20%    1,593     13.3      5%     -144 || (too few)
+2026-08-20    500  120     +9.3% [  +2, +20]     -3%  20%    1,593     13.3      5%     -144 || (too few)
+2026-08-20   1000  120     +9.3% [  +2, +18]     -3%  20%    1,593     13.3      5%     -144 || (too few)
+2026-08-20   2000  120     +9.3% [  +2, +18]     -3%  20%    1,593     13.3      5%     -144 || (too few)
+
+2026-08-27     20  842     +3.2% [  -0,  +8]     -7%  34%      544      0.6     26%     -354 ||   98     -3.7%      -73      -85
+2026-08-27     50  842     +6.0% [  +2, +10]     -4%  37%    2,551      3.0     26%     -605 ||   98     -1.2%      -59     -134
+2026-08-27    100  842     +6.7% [  +4, +11]     -3%  37%    5,688      6.8     26%     -938 ||   98     -0.3%      -30     -202
+2026-08-27    200  842     +6.6% [  +3, +10]     -3%  36%    7,816      9.3     26%   -1,228 ||   98     -0.3%      -59     -302
+2026-08-27    300  842     +6.6% [  +3, +10]     -3%  36%    7,255      8.6     26%   -1,427 ||   98     -0.3%      -95     -306
+2026-08-27    500  842     +6.6% [  +3, +10]     -3%  36%    6,045      7.2     26%   -2,063 ||   98     -0.3%      -98     -307
+2026-08-27   1000  842     +6.6% [  +3, +10]     -3%  36%    3,027      3.6     26%   -4,074 ||   98     -0.3%      -98     -307
+2026-08-27   2000  842     +6.6% [  +3, +10]     -3%  36%   -3,008     -3.6     26%   -9,800 ||   98     -0.3%      -98     -307
+
+2026-09-02     20 1632    +12.5% [  +8, +17]     -7%  37%    4,127      2.5     47%     -597 ||  302    +21.0%    1,282      -96
+2026-09-02     50 1632    +15.4% [ +11, +20]     -4%  41%   12,713      7.8     47%   -1,024 ||  302    +23.6%    3,592     -217
+2026-09-02    100 1632    +16.4% [ +12, +20]     -3%  41%   27,079     16.6     47%   -1,401 ||  302    +24.4%    7,456     -410
+2026-09-02    200 1632    +16.6% [ +13, +21]     -3%  40%   40,860     25.0     47%   -1,250 ||  302    +24.3%   11,908     -534
+2026-09-02    300 1632    +16.6% [ +13, +21]     -3%  40%   40,632     24.9     47%   -1,242 ||  302    +24.3%   11,700     -535
+2026-09-02    500 1632    +16.6% [ +13, +21]     -3%  40%   39,695     24.3     47%   -1,243 ||  302    +24.1%   10,930     -613
+2026-09-02   1000 1632    +16.6% [ +12, +21]     -3%  40%   36,676     22.5     47%   -1,628 ||  302    +24.1%    8,928   -1,113
+2026-09-02   2000 1632    +16.6% [ +13, +21]     -3%  40%   30,970     19.0     47%   -4,139 ||  302    +24.1%    5,256   -2,847
+
+2026-09-03     20 1311    +32.4% [ +27, +38]     -5%  44%    8,592      6.6     36%     -126 ||  283    +49.4%    2,824     -122
+2026-09-03     50 1311    +35.2% [ +30, +42]     -3%  46%   23,302     17.8     36%     -310 ||  283    +50.7%    7,239     -287
+2026-09-03    100 1311    +35.6% [ +30, +41]     -2%  46%   47,147     36.0     36%     -573 ||  283    +50.4%   14,407     -529
+2026-09-03    200 1311    +34.7% [ +29, +41]     -2%  45%   67,723     51.7     36%     -872 ||  283    +48.7%   22,604     -788
+2026-09-03    300 1311    +34.6% [ +29, +40]     -2%  45%   66,876     51.0     36%   -1,054 ||  283    +48.5%   22,655     -962
+2026-09-03    500 1311    +34.6% [ +28, +40]     -2%  45%   64,194     49.0     36%   -1,717 ||  283    +48.4%   21,766   -1,557
+2026-09-03   1000 1311    +34.6% [ +29, +41]     -2%  45%   56,689     43.2     36%   -4,204 ||  283    +48.4%   18,740   -3,083
+2026-09-03   2000 1311    +34.6% [ +29, +41]     -2%  45%   41,856     31.9     36%  -12,449 ||  283    +48.4%   12,868   -7,395
+
+(b) regime switch, base filter: score every eligible launch (outcome known 7 s later); trade live only while the mean of the last 30 scored outcomes is >= +5% of stake; $300 stake, one position at a time
+window     always-on net $ switched net $ live share always-on max DD switched max DD switched, 1 at a time
+2026-08-12            -747              0         0%             -797               0                     0
+2026-08-20           1,593            543        48%             -144            -153                   600
+2026-08-27           7,255          4,878        56%           -1,427            -511                 4,253
+2026-09-02          40,632         34,042        74%           -1,242            -991                19,894
+2026-09-03          66,876         60,260        90%           -1,054            -857                41,271
+
+(b) regime switch, creator buy >= 5% of supply: score every eligible launch (outcome known 7 s later); trade live only while the mean of the last 30 scored outcomes is >= +5% of stake; $300 stake, one position at a time
+window     always-on net $ switched net $ live share always-on max DD switched max DD switched, 1 at a time
+2026-08-12 (too few)
+2026-08-20 (too few)
+2026-08-27             -95             -6         2%             -306              -6                    -6
+2026-09-02          11,700         10,394        85%             -535            -487                 8,959
+2026-09-03          22,655         20,237        82%             -962            -962                18,580
+
+(c) compounding from a small bankroll: stake = clamp(bankroll x FRAC, 50, 300), one position at a time, regime switch on, trades in time order; ROI at the stake actually used is taken from the nearest simulated stake; stops for the day at -30% of the starting bankroll or when it cannot fund a $50 stake
+  2026-09-02 base                 start $  300 sizing 20%: end $     188 after  22 trades, low $188 (daily stop hit)
+  2026-09-02 base                 start $  500 sizing 20%: end $     350 after  22 trades, low $350 (daily stop hit)
+  2026-09-02 base                 start $1,000 sizing 20%: end $     694 after  38 trades, low $694 (daily stop hit)
+  2026-09-02 base                 start $  300 sizing 50%: end $     179 after  15 trades, low $179 (daily stop hit)
+  2026-09-02 creator buy >= 5%    start $  300 sizing 20%: end $  15,563 after 236 trades, low $300
+  2026-09-02 creator buy >= 5%    start $  500 sizing 20%: end $  16,754 after 236 trades, low $500
+  2026-09-02 creator buy >= 5%    start $1,000 sizing 20%: end $  17,959 after 236 trades, low $1,000
+  2026-09-02 creator buy >= 5%    start $  300 sizing 50%: end $  17,258 after 236 trades, low $300
+  2026-09-03 base                 start $  300 sizing 20%: end $  82,641 after 821 trades, low $219
+  2026-09-03 base                 start $  500 sizing 20%: end $  83,603 after 821 trades, low $379
+  2026-09-03 base                 start $1,000 sizing 20%: end $  85,012 after 821 trades, low $787
+  2026-09-03 base                 start $  300 sizing 50%: end $     130 after   2 trades, low $130 (daily stop hit)
+  2026-09-03 creator buy >= 5%    start $  300 sizing 20%: end $  32,439 after 212 trades, low $300
+  2026-09-03 creator buy >= 5%    start $  500 sizing 20%: end $  33,384 after 212 trades, low $500
+  2026-09-03 creator buy >= 5%    start $1,000 sizing 20%: end $  34,710 after 212 trades, low $1,000
+  2026-09-03 creator buy >= 5%    start $  300 sizing 50%: end $  33,940 after 212 trades, low $300
+  2026-08-27 base                 start $  300 sizing 20%: end $   5,465 after 366 trades, low $269
+  2026-08-27 base                 start $  500 sizing 20%: end $   7,132 after 366 trades, low $468
+  2026-08-27 base                 start $1,000 sizing 20%: end $   9,401 after 366 trades, low $942
+  2026-08-27 base                 start $  300 sizing 50%: end $   8,905 after 366 trades, low $254
+  2026-08-27 creator buy >= 5%    start $  300 sizing 20%: end $     297 after   2 trades, low $297
+  2026-08-27 creator buy >= 5%    start $  500 sizing 20%: end $     496 after   2 trades, low $496
+  2026-08-27 creator buy >= 5%    start $1,000 sizing 20%: end $     992 after   2 trades, low $992
+  2026-08-27 creator buy >= 5%    start $  300 sizing 50%: end $     295 after   2 trades, low $295
+  2026-08-20 base                 start $  300 sizing 20%: end $     597 after  54 trades, low $295
+  2026-08-20 base                 start $  500 sizing 20%: end $   1,016 after  54 trades, low $494
+  2026-08-20 base                 start $1,000 sizing 20%: end $   2,059 after  54 trades, low $989
+  2026-08-20 base                 start $  300 sizing 50%: end $   1,310 after  54 trades, low $291

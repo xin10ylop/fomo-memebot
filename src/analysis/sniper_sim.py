@@ -14,7 +14,9 @@ def bts(b):
     x0,y0,x1,y1=xs[i-1],ys[i-1],xs[i],ys[i]; return y0+(y1-y0)*(b-x0)/(x1-x0)
 creates={}
 for line in open(f'rh/creates_v2_{DAY}.jsonl'):
-    b,tx,topics,data=json.loads(line); cv='0x'+topics[2][-40:].lower(); d=data[2:]; w=[int(d[i:i+64],16) for i in range(0,len(d),64)]
+    b,tx,topics,data=json.loads(line)
+    if len(topics)<4: continue
+    cv='0x'+topics[2][-40:].lower(); d=data[2:]; w=[int(d[i:i+64],16) for i in range(0,len(d),64)]
     creates[cv]={'ts':bts(b),'creator':'0x'+topics[3][-40:].lower(),'q0':w[1]/1e18,'tk0':w[2]/1e18,'hour':datetime.datetime.utcfromtimestamp(bts(b)).hour}
 serial=collections.Counter(c['creator'] for c in creates.values())
 import os
@@ -79,6 +81,7 @@ def sim(cv,frac=0.03,hold=7.0,tp=None,cap_usd=300.0,slip=0.0,delay=0.0):
     stack=[[m['tk0'],m['q0']],[tk_bot,tk_bot*p_in]]; best=0; out=None
     for t,buy,q,tk,tx in evs[1:]:
         if t<=t_in: continue
+        if t>=t_in+hold: out=lifo_value(stack,tk_bot); break   # sell at t_in+hold: value the curve before this later event (fix: earlier versions applied it first)
         if buy: stack.append([tk,q])
         else:
             need=tk
@@ -89,7 +92,6 @@ def sim(cv,frac=0.03,hold=7.0,tp=None,cap_usd=300.0,slip=0.0,delay=0.0):
                 need-=take
         v=lifo_value(stack,tk_bot)
         if tp and v>=tp*cost: out=v; break
-        if t>=t_in+hold: out=v; break
     if out is None: out=lifo_value(stack,tk_bot)
     return out-cost,cost,t_in
 print("\n## (2) generic block-2 sniper on every launch: buy 3% of supply at the first non-creator price, sell 7 s later into whoever bought after (exact curve exits), fees 1%+1%")
