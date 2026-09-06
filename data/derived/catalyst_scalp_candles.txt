@@ -1,0 +1,12 @@
+leader buys >= $1k: 11242; tokens with 1m candles: 174
+events with candle paths: 418 (Counter({'robinhood': 418})), placebo 309
+
+entry 60 s after the fill; stop -22%, TP +50%, trail 25% after +30%, 30 min; costs 3%
+  all                          n= 418 posters= 69 mean   -1.3% [-5, +5] median   -6.0% win  30% | time:57% stop:24% tp:12% trail:6%
+  followers >= 100k            n=  79 posters= 11 mean   -0.5% [-6, +8] median   -2.5% win  32% | time:70% stop:14% tp:10% trail:6%
+  followers >= 300k            n=  24 posters=  3 mean   -3.5% [-18, -1] median   -3.1% win  12% | time:92% stop:4% trail:4%
+  solana                       n=0
+  solana, followers >= 100k    n=0
+  robinhood                    n= 418 posters= 69 mean   -1.3% [-5, +4] median   -6.0% win  30% | time:57% stop:24% tp:12% trail:6%
+  fill >= $5k                  n= 149 posters= 53 mean   +4.7% [-2, +16] median   -3.5% win  32% | time:58% stop:19% tp:15% trail:7%
+  placebo 60-90 min earlier    n= 309 posters= 63 mean  +24.7% [-0, +65] median   -3.2% win  39% | time:60% stop:20% tp:15% trail:5%

@@ -1,0 +1,90 @@
+
+=== clip $500, entry 3 s after the fill; stop -22%, TP +50%, trail 25% after +30%, 60 min; costs 1% each way + impact
+  all fills                                    n=276 mean   -1.6% [-4, +2] median   -6.0% win  41% | exits time:36% stop:26% tp:22% trail:16%
+  followers >= 100k                            n=123 mean   -2.4% [-6, +3] median   -9.1% win  41% | exits stop:29% time:28% tp:23% trail:20%
+  followers >= 300k                            n= 16 mean   +6.5% [-9, +25] median   +9.1% win  56% | exits tp:38% stop:31% time:25% trail:6%
+  pool depth >= $100k                          n= 88 mean   +2.9% [-3, +8] median   -0.0% win  50% | exits time:56% stop:18% tp:14% trail:12%
+  followers >= 100k & depth >= $100k           n= 33 mean   -1.9% [-11, +8] median   -2.1% win  42% | exits time:45% stop:27% trail:18% tp:9%
+  fill >= $5k                                  n=  5 mean   +3.0% [-14, +18] median   -1.7% win  40% | exits time:60% trail:20% stop:20%
+  walk-forward influential, later events       n= 28 mean   +1.5% [-7, +13] median   -5.4% win  39% | exits tp:32% stop:32% time:25% trail:11%
+  placebo: same pools, 10-30 min earlier       n=220 mean  +11.6% [+7, +17] median  +13.5% win  62% | exits tp:41% time:30% stop:18% trail:10%
+
+=== clip $500, entry 15 s after the fill; stop -22%, TP +50%, trail 25% after +30%, 60 min; costs 1% each way + impact
+  all fills                                    n=276 mean   -5.8% [-9, -2] median   -9.4% win  34% | exits time:37% stop:33% tp:17% trail:13%
+  followers >= 100k                            n=123 mean   -7.1% [-11, -2] median  -14.5% win  33% | exits stop:36% time:28% tp:18% trail:18%
+  followers >= 300k                            n= 16 mean   +0.8% [-7, +12] median   -8.9% win  44% | exits time:31% tp:25% stop:25% trail:19%
+  pool depth >= $100k                          n= 88 mean   +1.2% [-4, +7] median   -0.8% win  45% | exits time:58% stop:20% tp:11% trail:10%
+  followers >= 100k & depth >= $100k           n= 33 mean   -2.4% [-11, +6] median   -2.4% win  45% | exits time:45% stop:27% trail:18% tp:9%
+  fill >= $5k                                  n=  5 mean   -1.5% [-22, +19] median  -10.3% win  40% | exits time:60% stop:40%
+  walk-forward influential, later events       n= 28 mean   -4.8% [-11, +4] median   -8.4% win  29% | exits stop:32% time:29% tp:21% trail:18%
+  placebo: same pools, 10-30 min earlier       n=220 mean   +9.2% [+5, +14] median   +9.0% win  60% | exits tp:39% time:33% stop:23% trail:5%
+
+=== clip $500, entry 60 s after the fill; stop -22%, TP +50%, trail 25% after +30%, 60 min; costs 1% each way + impact
+  all fills                                    n=273 mean  -11.0% [-14, -8] median  -15.2% win  26% | exits stop:41% time:37% trail:12% tp:11%
+  followers >= 100k                            n=122 mean  -12.9% [-18, -8] median  -23.4% win  25% | exits stop:48% time:27% trail:15% tp:10%
+  followers >= 300k                            n= 15 mean  -12.5% [-21, -3] median  -15.1% win  20% | exits stop:40% time:33% trail:20% tp:7%
+  pool depth >= $100k                          n= 87 mean   -4.9% [-8, -1] median   -4.3% win  36% | exits time:59% stop:30% trail:7% tp:5%
+  followers >= 100k & depth >= $100k           n= 33 mean   -6.5% [-13, +1] median   -9.2% win  33% | exits time:48% stop:39% tp:6% trail:6%
+  fill >= $5k                                  n=  5 mean   -0.4% [-16, +19] median   -9.2% win  40% | exits time:80% stop:20%
+  walk-forward influential, later events       n= 28 mean  -16.9% [-22, -9] median  -24.0% win  11% | exits stop:46% time:32% trail:14% tp:7%
+  placebo: same pools, 10-30 min earlier       n=220 mean   +8.7% [+4, +13] median   +7.8% win  59% | exits tp:37% time:31% stop:22% trail:10%
+
+=== clip $2,000, entry 3 s after the fill; stop -22%, TP +50%, trail 25% after +30%, 60 min; costs 1% each way + impact
+  all fills                                    n=276 mean  -19.3% [-25, -14] median  -16.2% win  29% | exits time:36% stop:26% tp:22% trail:16%
+  followers >= 100k                            n=123 mean  -20.7% [-29, -13] median  -19.6% win  28% | exits stop:29% time:28% tp:23% trail:20%
+  followers >= 300k                            n= 16 mean  -10.1% [-28, +13] median   -3.5% win  50% | exits tp:38% stop:31% time:25% trail:6%
+  pool depth >= $100k                          n= 88 mean   +1.8% [-4, +7] median   -0.8% win  45% | exits time:56% stop:18% tp:14% trail:12%
+  followers >= 100k & depth >= $100k           n= 33 mean   -3.1% [-12, +7] median   -2.4% win  42% | exits time:45% stop:27% trail:18% tp:9%
+  fill >= $5k                                  n=  5 mean   +2.2% [-15, +21] median   -3.7% win  40% | exits time:60% trail:20% stop:20%
+  walk-forward influential, later events       n= 28 mean  -15.9% [-30, +3] median  -21.6% win  32% | exits tp:32% stop:32% time:25% trail:11%
+  placebo: same pools, 10-30 min earlier       n=220 mean   -5.8% [-11, +1] median   -2.5% win  46% | exits tp:41% time:30% stop:18% trail:11%
+
+=== clip $2,000, entry 15 s after the fill; stop -22%, TP +50%, trail 25% after +30%, 60 min; costs 1% each way + impact
+  all fills                                    n=276 mean  -23.5% [-30, -18] median  -22.2% win  25% | exits time:37% stop:33% tp:17% trail:13%
+  followers >= 100k                            n=123 mean  -25.5% [-36, -17] median  -24.8% win  25% | exits stop:36% time:28% tp:18% trail:18%
+  followers >= 300k                            n= 16 mean  -15.8% [-26, +2] median  -12.2% win  44% | exits time:31% tp:25% stop:25% trail:19%
+  pool depth >= $100k                          n= 88 mean   +0.2% [-6, +6] median   -2.0% win  40% | exits time:58% stop:20% tp:11% trail:10%
+  followers >= 100k & depth >= $100k           n= 33 mean   -3.6% [-11, +4] median   -2.5% win  36% | exits time:45% stop:27% trail:18% tp:9%
+  fill >= $5k                                  n=  5 mean   -2.3% [-22, +21] median  -10.9% win  40% | exits time:60% stop:40%
+  walk-forward influential, later events       n= 28 mean  -22.1% [-33, -7] median  -19.6% win  21% | exits stop:32% time:29% tp:21% trail:18%
+  placebo: same pools, 10-30 min earlier       n=220 mean   -7.4% [-13, -0] median   -3.8% win  46% | exits tp:40% time:30% stop:21% trail:9%
+
+=== clip $2,000, entry 60 s after the fill; stop -22%, TP +50%, trail 25% after +30%, 60 min; costs 1% each way + impact
+  all fills                                    n=273 mean  -28.8% [-36, -22] median  -25.8% win  19% | exits stop:41% time:37% trail:12% tp:11%
+  followers >= 100k                            n=122 mean  -31.3% [-41, -24] median  -26.8% win  16% | exits stop:48% time:27% trail:15% tp:10%
+  followers >= 300k                            n= 15 mean  -28.5% [-39, -17] median  -15.6% win  20% | exits stop:40% time:33% trail:20% tp:7%
+  pool depth >= $100k                          n= 87 mean   -5.9% [-10, -2] median   -4.6% win  31% | exits time:59% stop:30% trail:7% tp:5%
+  followers >= 100k & depth >= $100k           n= 33 mean   -7.7% [-15, -0] median   -9.8% win  27% | exits time:48% stop:39% tp:6% trail:6%
+  fill >= $5k                                  n=  5 mean   -1.2% [-18, +18] median   -9.8% win  40% | exits time:80% stop:20%
+  walk-forward influential, later events       n= 28 mean  -34.2% [-42, -23] median  -26.3% win   7% | exits stop:46% time:32% trail:14% tp:7%
+  placebo: same pools, 10-30 min earlier       n=220 mean  -10.0% [-15, -3] median   -6.7% win  43% | exits tp:35% time:32% stop:25% trail:8%
+
+=== clip $5,000, entry 3 s after the fill; stop -22%, TP +50%, trail 25% after +30%, 60 min; costs 1% each way + impact
+  all fills                                    n=276 mean  -54.8% [-69, -42] median  -33.3% win  21% | exits time:36% stop:26% tp:22% trail:16%
+  followers >= 100k                            n=123 mean  -57.5% [-78, -42] median  -35.5% win  17% | exits stop:29% time:28% tp:23% trail:20%
+  followers >= 300k                            n= 16 mean  -43.3% [-67, -9] median  -22.5% win  44% | exits tp:38% stop:31% time:25% trail:6%
+  pool depth >= $100k                          n= 88 mean   -0.3% [-7, +6] median   -3.1% win  43% | exits time:56% stop:18% tp:14% trail:12%
+  followers >= 100k & depth >= $100k           n= 33 mean   -5.4% [-15, +6] median   -5.2% win  36% | exits time:45% stop:27% trail:18% tp:9%
+  fill >= $5k                                  n=  5 mean   +0.7% [-17, +18] median   -7.9% win  40% | exits time:60% trail:20% stop:20%
+  walk-forward influential, later events       n= 28 mean  -50.5% [-73, -19] median  -31.2% win  21% | exits tp:32% stop:32% time:25% trail:11%
+  placebo: same pools, 10-30 min earlier       n=220 mean  -40.0% [-53, -26] median  -25.7% win  32% | exits tp:44% time:30% stop:20% trail:6%
+
+=== clip $5,000, entry 15 s after the fill; stop -22%, TP +50%, trail 25% after +30%, 60 min; costs 1% each way + impact
+  all fills                                    n=276 mean  -59.0% [-73, -46] median  -35.4% win  18% | exits time:37% stop:33% tp:17% trail:13%
+  followers >= 100k                            n=123 mean  -62.2% [-85, -44] median  -37.2% win  17% | exits stop:36% time:28% tp:18% trail:18%
+  followers >= 300k                            n= 16 mean  -48.9% [-67, -24] median  -22.5% win  38% | exits time:31% tp:25% stop:25% trail:19%
+  pool depth >= $100k                          n= 88 mean   -2.0% [-8, +3] median   -4.2% win  38% | exits time:58% stop:20% tp:11% trail:10%
+  followers >= 100k & depth >= $100k           n= 33 mean   -5.9% [-14, +2] median   -6.2% win  33% | exits time:45% stop:27% trail:18% tp:9%
+  fill >= $5k                                  n=  5 mean   -3.8% [-26, +18] median  -12.1% win  40% | exits time:60% stop:40%
+  walk-forward influential, later events       n= 28 mean  -56.8% [-78, -30] median  -31.6% win   7% | exits stop:32% time:29% tp:21% trail:18%
+  placebo: same pools, 10-30 min earlier       n=220 mean  -41.8% [-53, -27] median  -30.6% win  31% | exits tp:40% time:31% stop:20% trail:9%
+
+=== clip $5,000, entry 60 s after the fill; stop -22%, TP +50%, trail 25% after +30%, 60 min; costs 1% each way + impact
+  all fills                                    n=273 mean  -64.3% [-80, -50] median  -39.2% win  13% | exits stop:41% time:37% trail:12% tp:11%
+  followers >= 100k                            n=122 mean  -67.9% [-90, -50] median  -45.5% win  10% | exits stop:48% time:27% trail:15% tp:10%
+  followers >= 300k                            n= 15 mean  -60.5% [-79, -40] median  -23.6% win  20% | exits stop:40% time:33% trail:20% tp:7%
+  pool depth >= $100k                          n= 87 mean   -8.0% [-12, -4] median   -5.8% win  25% | exits time:59% stop:30% trail:7% tp:5%
+  followers >= 100k & depth >= $100k           n= 33 mean  -10.0% [-16, -2] median  -11.0% win  24% | exits time:48% stop:39% tp:6% trail:6%
+  fill >= $5k                                  n=  5 mean   -2.7% [-20, +18] median  -11.0% win  40% | exits time:80% stop:20%
+  walk-forward influential, later events       n= 28 mean  -68.9% [-86, -43] median  -45.3% win   0% | exits stop:46% time:32% trail:14% tp:7%
+  placebo: same pools, 10-30 min earlier       n=220 mean  -42.5% [-55, -30] median  -32.1% win  29% | exits tp:40% time:30% stop:23% trail:7%
