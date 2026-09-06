@@ -1049,10 +1049,17 @@ round. Exact curve, $300 stakes, 3% of supply, sell 0.3 s late; "behind" means 0
 | Sep 3 (in-sample) | 1,962 | 20% | +14.8% | +10.4% | +11.4% | +8.0% | $6.3k |
 | **Sep 4 (new)** | 799 | 19% | +11.9% [+4,+18] | +8.5% [+1,+15] | +13.2% [+6,+20] | +9.6% [+4,+16] | **$2.7k** |
 | **Sep 5 (new)** | 1,730 | 24% | +4.7% [0,+9] | +0.6% [−4,+6] | +5.0% [+1,+9] | +4.2% [0,+9] | **$4.3k** |
+| **Aug 30 (new)** | 1,344 | 18% | −1.1% [−6,+3] | −1.9% [−6,+2] | +2.8% [−3,+8] | +0.4% [−5,+5] | **−$0.5k** |
+| **Sep 6 (new)** | 1,695 | 21% | +9.4% [+4,+14] | +2.5% [−2,+7] | +5.8% [+1,+11] | +0.9% [−4,+6] | **$2.9k** |
 
-Two things the new days add. First, the filter survives out of sample: every bundled-launch cell is positive on both
-new days while the unfiltered outsider seat is within a point or two of zero (Sep 4 E1 +1.1%, Sep 5 E1 +1.6%,
-negative 0.3 s behind). Second, **the E2 seat (the second whole second after creation, +0.19% surcharge) is at least
+What the new days add. The filter survives out of sample on three of four new windows (Sep 6, the day this was
+written, is +9.4% at the front and +2.5% behind on 364 bundled launches, $2.9k to $6.6k switched): every bundled-launch cell is
+positive on Sep 4 and Sep 5 while the unfiltered outsider seat is within a point or two of zero (Sep 4 E1 +1.1%, Sep 5
+E1 +1.6%, negative 0.3 s behind). Aug 30, a busy day (1,344 launches, 18% bundled), is the counter-example: the launch
+teams' own seat made +31.5% but the outsider's bundled seat was flat (E2 +2.8% front, +0.4% behind, confidence
+intervals straddling zero), and the switch held the day to a loss of $79 to $736. So the bundled seat is not "busy day
+= profit"; it is "busy day with follow-on buyers behind the bundle = profit", and the switch is what tells the two
+apart, thirty launches at a time. Second, **the E2 seat (the second whole second after creation, +0.19% surcharge) is at least
 as good as E1 behind the front**, and it is the cheaper, less contested slot: the fastest outsider bots fight for the
 first block of second one, and the E2 buyer sits behind them paying six points less tax. The runbook now runs E2 by
 default. Rows for Sep 6, Aug 30, Aug 31, Sep 1 and the off-hours windows are appended to `sniper_oos.txt` as their

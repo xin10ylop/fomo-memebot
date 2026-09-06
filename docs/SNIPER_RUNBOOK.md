@@ -38,17 +38,18 @@ dollar is sent.
 
 ## 2. What to expect (exact curve, $300 stakes, 3% of supply, sell 0.3 s late)
 
-| | Aug 20 | Aug 27 | Sep 2 | Sep 3 | Sep 4 (new) | Sep 5 (new) |
-|---|---|---|---|---|---|---|
-| bundled launches in 6 h | 17 | 85 | 303 | 400 | 155 | 416 |
-| E1 front | −4.5% | +2.4% | +9.1% | +14.8% | +11.9% | +4.7% |
-| E1, 0.3 s behind | −6.2% | −1.9% | +5.1% | +10.4% | +8.5% | +0.6% |
-| E2 front | +2.9% | +2.3% | +8.9% | +11.4% | +13.2% | +5.0% |
-| **E2, 0.3 s behind** | −0.4% | +0.2% | +6.2% | +8.0% | **+9.6%** | **+4.2%** |
-| switched, one at a time, E2 behind | $0 | −$193 | +$1,765 | +$6,258 | +$2,665 | +$4,271 |
+| | Aug 20 | Aug 27 | Aug 30 (new) | Sep 2 | Sep 3 | Sep 4 (new) | Sep 5 (new) | Sep 6 (new) |
+|---|---|---|---|---|---|---|---|---|
+| bundled launches in 6 h | 17 | 85 | 246 | 303 | 400 | 155 | 416 | 364 |
+| E1 front | −4.5% | +2.4% | −1.1% | +9.1% | +14.8% | +11.9% | +4.7% | +9.4% |
+| E1, 0.3 s behind | −6.2% | −1.9% | −1.9% | +5.1% | +10.4% | +8.5% | +0.6% | +2.5% |
+| E2 front | +2.9% | +2.3% | +2.8% | +8.9% | +11.4% | +13.2% | +5.0% | +5.8% |
+| **E2, 0.3 s behind** | −0.4% | +0.2% | +0.4% | +6.2% | +8.0% | **+9.6%** | **+4.2%** | **+0.9%** |
+| switched, one at a time, E2 behind | $0 | −$193 | −$538 | +$1,765 | +$6,258 | +$2,665 | +$4,271 | +$2,868 |
 
-Sep 2 and Sep 3 were the two busiest days of the fee cycle; Sep 4 and Sep 5 were never used to choose anything.
-Aug 12 had no bundled launches at all. More windows are appended to `data/derived/sniper_oos.txt` as they are pulled.
+Sep 2 and Sep 3 were the two busiest days of the fee cycle; Aug 30, Sep 4, Sep 5 and Sep 6 were never used to choose
+anything: three of the four pay, Aug 30 is flat with the switch holding the loss to a few hundred dollars. Aug 12 had no
+bundled launches at all. More windows are appended to `data/derived/sniper_oos.txt` as they are pulled.
 
 ## 3. The machine
 
