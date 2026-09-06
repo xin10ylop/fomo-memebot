@@ -1052,10 +1052,12 @@ round. Exact curve, $300 stakes, 3% of supply, sell 0.3 s late; "behind" means 0
 | **Aug 30 (new)** | 1,344 | 18% | −1.1% [−6,+3] | −1.9% [−6,+2] | +2.8% [−3,+8] | +0.4% [−5,+5] | **−$0.5k** |
 | **Sep 6 (new)** | 1,695 | 21% | +9.4% [+4,+14] | +2.5% [−2,+7] | +5.8% [+1,+11] | +0.9% [−4,+6] | **$2.9k** |
 | **Aug 31 (new)** | 1,502 | 21% | +2.2% [−2,+7] | +1.1% [−4,+6] | +6.2% [+2,+12] | +2.6% [−2,+8] | **$0.5k** |
+| **Sep 1 (new)** | 1,912 | 18% | −2.1% [−8,+3] | −6.0% [−10,−1] | −2.3% [−6,+2] | −4.7% [−9,0] | **−$0.7k** |
 
-What the new days add. The filter survives out of sample on four of five new windows (Sep 6, the day this was
+What the new days add. The filter survives out of sample on four of six new windows (Sep 6, the day this was
 written, is +9.4% at the front and +2.5% behind on 364 bundled launches, $2.9k to $6.6k switched; Aug 31 is small
-but positive on every outsider cell, $0.5k to $3.7k switched): every bundled-launch cell is
+but positive on every outsider cell, $0.5k to $3.7k switched; Sep 1 loses on every outsider cell, −$0.6k to −$0.9k
+switched): every bundled-launch cell is
 positive on Sep 4 and Sep 5 while the unfiltered outsider seat is within a point or two of zero (Sep 4 E1 +1.1%, Sep 5
 E1 +1.6%, negative 0.3 s behind). Aug 30, a busy day (1,344 launches, 18% bundled), is the counter-example: the launch
 teams' own seat made +31.5% but the outsider's bundled seat was flat (E2 +2.8% front, +0.4% behind, confidence
@@ -1072,6 +1074,20 @@ the list of wallets the creator exempted; on 600 Sep 3 launches the count of tho
 the outsider's return (0 named: −5.1% at E1 behind; 6 or more named, 27% of launches: 71% of them bundle three or more
 and the seat returns +13.5%). A filter of "three or more named wallets" earns +9.7% against +12.9% for "three or more
 observed bundle buys"; the engine logs both.
+
+**The E2 seat on every launch, and what latency does to each seat.** `data/derived/sniper_e2front.txt` runs the
+second-two seat on all eleven windows (66 hours), at the front of the T+2 flip block, one block (0.1 s) behind it,
+and three blocks behind, with and without the bundle filter. Switched, one position at a time:
+
+| E2 seat, 3% of supply | front | +1 block | +3 blocks |
+|---|---|---|---|
+| every eligible launch, sum of 11 windows | $38.0k (9 of 11 positive; +2.4% to +6.2% a trade from Aug 27 on) | $14.7k | $8.7k |
+| bundled launches only | $23.7k | $19.5k | (section 21.1: about zero on Aug 30 and Sep 1, positive elsewhere) |
+
+The unfiltered front seat is the largest and the most consistent per trade, and it evaporates one block behind; the
+bundled seat is smaller and survives a block of delay. That is the whole latency question in one table: the filter
+buys tolerance for being late, the front seat buys size for being first. The engine runs the bundled seat by default
+and can run the unfiltered one (`BUNDLE_MIN=0`) once the `landing` events show it is first in the flip block.
 
 ### 21.2 What speed a retail box can have, and what to run
 

@@ -38,17 +38,22 @@ dollar is sent.
 
 ## 2. What to expect (exact curve, $300 stakes, 3% of supply, sell 0.3 s late)
 
-| | Aug 20 | Aug 27 | Aug 30 (new) | Aug 31 (new) | Sep 2 | Sep 3 | Sep 4 (new) | Sep 5 (new) | Sep 6 (new) |
-|---|---|---|---|---|---|---|---|---|---|
-| bundled launches in 6 h | 17 | 85 | 246 | 321 | 303 | 400 | 155 | 416 | 364 |
-| E1 front | −4.5% | +2.4% | −1.1% | +2.2% | +9.1% | +14.8% | +11.9% | +4.7% | +9.4% |
-| E1, 0.3 s behind | −6.2% | −1.9% | −1.9% | +1.1% | +5.1% | +10.4% | +8.5% | +0.6% | +2.5% |
-| E2 front | +2.9% | +2.3% | +2.8% | +6.2% | +8.9% | +11.4% | +13.2% | +5.0% | +5.8% |
-| **E2, 0.3 s behind** | −0.4% | +0.2% | +0.4% | +2.6% | +6.2% | +8.0% | **+9.6%** | **+4.2%** | **+0.9%** |
-| switched, one at a time, E2 behind | $0 | −$193 | −$538 | +$479 | +$1,765 | +$6,258 | +$2,665 | +$4,271 | +$2,868 |
+| | Aug 20 | Aug 27 | Aug 30 (new) | Aug 31 (new) | Sep 1 (new) | Sep 2 | Sep 3 | Sep 4 (new) | Sep 5 (new) | Sep 6 (new) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| bundled launches in 6 h | 17 | 85 | 246 | 321 | 335 | 303 | 400 | 155 | 416 | 364 |
+| E1 front | −4.5% | +2.4% | −1.1% | +2.2% | −2.1% | +9.1% | +14.8% | +11.9% | +4.7% | +9.4% |
+| E1, 0.3 s behind | −6.2% | −1.9% | −1.9% | +1.1% | −6.0% | +5.1% | +10.4% | +8.5% | +0.6% | +2.5% |
+| E2 front | +2.9% | +2.3% | +2.8% | +6.2% | −2.3% | +8.9% | +11.4% | +13.2% | +5.0% | +5.8% |
+| E2, 1 block behind | +1.3% | −0.8% | +1.8% | +3.7% | −3.5% | +7.4% | +9.6% | +12.0% | +4.1% | +3.3% |
+| **E2, 0.3 s behind** | −0.4% | +0.2% | +0.4% | +2.6% | −4.7% | +6.2% | +8.0% | **+9.6%** | **+4.2%** | **+0.9%** |
+| switched, one at a time, E2 1 block behind | $0 | −$67 | −$706 | +$1,897 | −$1,181 | +$2,439 | +$6,956 | +$3,085 | +$3,561 | +$3,517 |
 
-Sep 2 and Sep 3 were the two busiest days of the fee cycle; Aug 30, Aug 31, Sep 4, Sep 5 and Sep 6 were never used
-to choose anything: four of the five pay, Aug 30 is flat with the switch holding the loss to a few hundred dollars. Aug 12 had no
+Sum over the eleven windows (66 hours), switched and one position at a time: bundled seat $23.7k at the front and
+$19.5k one block behind; every launch without the filter $38.0k at the front but $14.7k one block behind and $8.7k
+three blocks behind (`data/derived/sniper_e2front.txt`).
+
+Sep 2 and Sep 3 were the two busiest days of the fee cycle; Aug 30, Aug 31, Sep 1, Sep 4, Sep 5 and Sep 6 were never
+used to choose anything: four of the six pay, Aug 30 and Sep 1 lose with the switch holding each to under $1,200. Aug 12 had no
 bundled launches at all. More windows are appended to `data/derived/sniper_oos.txt` as they are pulled.
 
 ## 3. The machine
