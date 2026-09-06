@@ -1120,3 +1120,45 @@ Sep 4, Sep 5, Sep 6, Aug 30, Aug 31, Sep 1, and three off-hours windows (Sep 3 0
 that the seat is seen on ordinary days and at night. The rows land in `sniper_oos.txt`; the table above is updated in
 place as they arrive, and the verdict of section 20.9 stands: an outside seat that pays on busy days, about zero
 otherwise, now confirmed on two days it had never seen.
+
+### 21.5 The latency, researched and made operational
+
+**Ordering.** Robinhood's documentation states first-come-first-served ordering by arrival at the sequencer, with no
+fee-based bypass; Timeboost (the Arbitrum express-lane auction) is not enabled on the chain. So the seat is a pure
+arrival race, which is the one kind of race a $30 box next to the sequencer can win.
+
+**Where the first outsiders actually land.** Sampling 70 bundled launches on Sep 6 and fetching the real block
+timestamps around each: the first block stamped with the next second (the E1 boundary) comes 1 to 9 blocks after the
+creation (median 4, i.e. the boundary falls anywhere inside the creation second). The first surcharged outsider buy is
+**in that flip block itself on 33% of launches and within two blocks on 63%**; the rest arrive up to nine blocks
+later. The first outsider block holds a median of one and at most two outsider buys. Two conclusions: the fastest
+outsiders *predict* the boundary (a reactive sender, one that waits to see the new second on the feed, can only land
+one or two blocks after it, 100–200 ms late), and once in that block there is almost nobody to share it with. The E2
+seat is more relaxed: the first +0.19% buyer lands in the T+2 flip block 12 times, one block later 18 times, two later
+14 times: mostly reactive, which is why E2 behind the front holds up as well as it does in 21.1.
+
+**Measuring the boundary without sending.** The feed's L2 messages (header kind 3; kind 11 batch-posting reports carry
+Ethereum's clock and must be ignored) arrive one per block at ~93 ms median cadence here, and the block timestamp flips
+once a second. Because flips are only visible at block granularity, the sequencer's true boundary is the *low edge* of
+the wall-clock phases at which flips are observed, not their median. `src/strategy/latency_probe.py` measures that
+edge, its spread, the feed's delivery delay and the round trips to the sequencer and the RPC; on connect the feed
+replays a backlog of several seconds in a burst, so the first five seconds are discarded (the engine now discards them
+too, and never trades a creation from the replay). From this sandbox, through a proxy: boundary edge stable to a few
+ms across runs, flip spread 0.34 s (block cadence plus proxy jitter), sequencer round trip 27–37 ms, RPC 37–42 ms.
+From Ohio the round trip should be 1–3 ms and the spread close to one block.
+
+**The engine's send modes.** `SEND_MODE=react` sends when the feed shows the seat's second (lands one to two blocks
+after the boundary: the E2 seat's typical position). `SEND_MODE=predict` keeps the last 600 observed flips, estimates
+the boundary edge, and sends at the seat's boundary plus `MARGIN_MS` (default 25 ms); if the feed shows the seat's
+second before that moment it sends immediately and logs `predict-late`. Live, every buy receipt is checked against the
+block timestamps: a revert stamped before the seat's second means "too early" (the minOut guard turned a 95% tax into a
+gas fee) and the margin grows by 20 ms; a landing in the seat's second but not its first block shrinks it by 5 ms; a
+first-block landing keeps it. The margin therefore converges on the smallest value that never lands early, which is
+the definition of being first among the outsiders on that machine.
+
+**The machine, as a script.** `deploy/ohio_setup.sh` installs chrony (the boundary is the sequencer's clock; the box
+must be on NTP), a Python environment, the engine as a systemd service in dry run with the runbook's configuration,
+and the probe as a one-shot service. What day one must show: `boundary` events with a stable phase, `trade_decision`
+events with `send_mode: predict` and `sent_ms` equal to the seat's wait, `feed_resolution_ok` after every bundled
+launch, probe round trips in single-digit milliseconds. Then the send step, then the first receipts' `landing`
+events, which are the only measurement of the race itself.

@@ -24,7 +24,7 @@ signs with your key and sends eth_sendRawTransaction; the runbook says what to v
 
 env: RPC_URL, FEED_URL, WALLET, BANKROLL_USD, ETH_USD, LOG_PATH, SEAT (E0|E1), EXEMPT (1|0), SUPPLY_FRAC, and the rest below.
 """
-import asyncio, base64, json, os, time, threading, http.client, urllib.parse, urllib.request, collections, statistics as st, datetime
+import asyncio, base64, json, os, time, math, threading, http.client, urllib.parse, urllib.request, collections, statistics as st, datetime
 import rlp
 from eth_account import Account
 
@@ -38,7 +38,9 @@ FRAC = float(os.environ.get("FRAC", "0.2")); STAKE_MIN = float(os.environ.get("S
 HOLD = float(os.environ.get("HOLD_S", "7")); SUPPLY_FRAC = float(os.environ.get("SUPPLY_FRAC", "0.03")); SLIP = float(os.environ.get("SLIP", "0.25"))
 SEAT = os.environ.get("SEAT", "E1").upper(); EXEMPT = os.environ.get("EXEMPT", "0") == "1"
 BUNDLE_MIN = int(os.environ.get("BUNDLE_MIN", "3" if SEAT in ("E1", "E2") else "0"))   # E1 only trades launches whose creator bundle bought with >= BUNDLE_MIN named wallets in the creation second (section 20.6)
-TIER_ASSUMED = float(os.environ.get("TIER_ASSUMED", "0.05"))     # the creator-set fee tier is unknown before the buy lands: size the ETH for the worst common tier
+TIER_ASSUMED = float(os.environ.get("TIER_ASSUMED", "0.05"))
+SEND_MODE = os.environ.get("SEND_MODE", "react")                   # react: send when the feed shows the seat's second; predict: send at the estimated boundary + MARGIN_MS
+MARGIN_MS = float(os.environ.get("MARGIN_MS", "25"))                 # predict mode: how far past the estimated boundary to send (covers boundary error and one-way delay)     # the creator-set fee tier is unknown before the buy lands: size the ETH for the worst common tier
 MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.0")); MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
 SWITCH_N = int(os.environ.get("SWITCH_N", "30")); SWITCH = float(os.environ.get("SWITCH", "0.05")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.30"))
 MAX_RESOLVE_MS = int(os.environ.get("MAX_RESOLVE_MS", "300")); GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.03"))
@@ -82,7 +84,7 @@ class Rpc:
 
 rpc = Rpc(RPC_URL)
 state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": False, "busy_until": 0.0, "scores": collections.deque(maxlen=SWITCH_N),
-         "launched_today": collections.Counter(), "feed_ts": 0, "traded": {}, "eth_usd": ETH_USD, "recent_buys": collections.deque(maxlen=20000), "first_seen": {}, "known_curves": set()}
+         "launched_today": collections.Counter(), "feed_ts": 0, "traded": {}, "eth_usd": ETH_USD, "recent_buys": collections.deque(maxlen=20000), "first_seen": {}, "known_curves": set(), "flips": collections.deque(maxlen=600), "connected_at": 0.0, "last_seen_ts": 0}
 lock = threading.Lock()
 
 
@@ -98,6 +100,9 @@ def submit(tx, label):
 
 def price_loop():
     while True:
+        ph = boundary_phase()
+        if ph is not None:
+            log({"ev": "boundary", "phase_local_s": round(ph, 4), "flips": len(state["flips"])})
         try:
             d = json.load(urllib.request.urlopen(urllib.request.Request(ETH_USD_URL, headers={"User-Agent": UA["User-Agent"]}), timeout=10))
             px = float(d["data"]["amount"])
@@ -106,6 +111,60 @@ def price_loop():
         except Exception:
             pass
         time.sleep(300)
+
+
+def boundary_phase():
+    """the sequencer's second boundary in local wall-clock phase: the low edge (2nd percentile) of the phases at which the
+    feed's L2 timestamp was seen to flip, over the last few hundred flips (flips are visible at block granularity, so
+    the true boundary is the low edge, not the median). None until 30 flips have been seen."""
+    ph = sorted(t % 1.0 for t in state["flips"])
+    if len(ph) < 30:
+        return None
+    gaps = [(ph[(i + 1) % len(ph)] - ph[i]) % 1.0 for i in range(len(ph))]
+    k = max(range(len(ph)), key=lambda i: gaps[i]); base = ph[(k + 1) % len(ph)]
+    rot = sorted((x - base) % 1.0 for x in ph)
+    return (base + rot[int(0.02 * len(rot))]) % 1.0
+
+
+def wait_for_second(feed_ts, seconds, seen_at, deadline=3.5):
+    """block until it is time to send for the seat: react mode waits to see the seat's second on the feed; predict mode
+    sends at the estimated boundary of that second plus MARGIN_MS (falls back to react while the estimate is not ready).
+    Returns the mode used."""
+    if SEND_MODE == "predict":
+        ph = boundary_phase()
+        if ph is not None:
+            # the creation's second started at the last boundary before it was seen; the seat's second starts `seconds` later
+            now = time.time(); last_boundary = math.floor(now - ph) + ph
+            if last_boundary > seen_at:
+                last_boundary -= 1.0
+            target = last_boundary + seconds + MARGIN_MS / 1000.0
+            while time.time() < target and time.time() - seen_at < deadline:
+                time.sleep(0.001)
+            if state["feed_ts"] >= feed_ts + seconds:                  # the feed already shows the seat's second: we are late, go now
+                return "predict-late"
+            return "predict"
+    while state["feed_ts"] < feed_ts + seconds and time.time() - seen_at < deadline:
+        time.sleep(0.003)
+    return "react"
+
+
+def tune_margin(receipt, seat_ts):
+    """live only: learn MARGIN_MS from where the buy landed. Reverted with a block stamped before the seat's second means
+    we sent too early (the 93-98% tax would have applied; minOut saved us): add 20 ms. Landed in the seat's second but
+    not in its first block: take 5 ms off (floor 5). Landed in the first block: keep."""
+    global MARGIN_MS
+    try:
+        b = int(receipt["blockNumber"], 16); blk = rpc.call("eth_getBlockByNumber", [hex(b), False]); ts = int(blk["timestamp"], 16)
+        prev = int(rpc.call("eth_getBlockByNumber", [hex(b - 1), False])["timestamp"], 16)
+        if ts < seat_ts:
+            MARGIN_MS += 20; where = "early"
+        elif prev < ts:
+            where = "first block"
+        else:
+            MARGIN_MS = max(5.0, MARGIN_MS - 5); where = "later block"
+        log({"ev": "landing", "block": b, "block_ts": ts, "seat_ts": seat_ts, "where": where, "margin_ms": MARGIN_MS, "status": receipt.get("status")})
+    except Exception as e:
+        log({"ev": "error", "stage": "tune_margin", "err": str(e)[:200]})
 
 
 def gas_ok(stake_usd):
@@ -335,9 +394,9 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named=frozen
         nonce = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); gas_price = int(rpc.call("eth_gasPrice", []), 16)
     except Exception:
         nonce, gas_price = 0, 0
-    if SEAT in ("E1", "E2"):                                          # not exempt: never land in the creation second (93-98% tax); wait for the seat's whole second on the feed
-        while state["feed_ts"] < feed_ts + SEAT_SECONDS[SEAT] and time.time() - seen_at < 3.5:
-            time.sleep(0.003)
+    send_mode = None
+    if SEAT in ("E1", "E2"):                                          # not exempt: never land in the creation second (93-98% tax); wait for the seat's second
+        send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at)
         if bundle is None:
             bundle = sum(1 for ts_, to_, snd in list(state["recent_buys"]) if to_ == curve and (snd in named or ts_ == feed_ts))   # the named wallets' buys (or any direct buy inside the creation second)
         if bundle < BUNDLE_MIN:
@@ -346,13 +405,15 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named=frozen
                 state["busy_until"] = 0.0
             return
     buy = {"to": curve, "value": hex(amount_in), "data": "0x" + BUY_SEL + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
-    log({"ev": "trade_decision", "seat": SEAT, "curve": curve, "token": token, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), "bundle": bundle, "sent_ms": round((time.time() - seen_at) * 1000), "stake_usd": stake_usd,
+    log({"ev": "trade_decision", "seat": SEAT, "curve": curve, "token": token, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), "bundle": bundle, "sent_ms": round((time.time() - seen_at) * 1000), "send_mode": send_mode, "feed_ts_at_send": state["feed_ts"], "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0), "stake_usd": stake_usd,
          "amount_in_eth": amount_in / 1e18, "tokens_target": tk, "supply_share": tk / Y0, "min_out_tokens": min_out / 1e18, "fee_assumed": fee})
     h = submit(buy, "buy"); t_buy = time.time(); tokens = tk
     with lock:
         state["traded"][curve] = min(stake_usd, gross * state["eth_usd"])
     if h:                                                            # live: the tokens actually received, from the buy's own event
         rec = wait_receipt(h)
+        if rec and SEAT in ("E1", "E2"):
+            tune_margin(rec, feed_ts + SEAT_SECONDS[SEAT])
         if not rec or rec.get("status") != "0x1":
             log({"ev": "buy_failed_or_reverted", "curve": curve, "hash": h}); state["traded"].pop(curve, None); return
         for l in rec.get("logs", []):
@@ -387,18 +448,23 @@ async def main():
     if SEAT == "E0" and not EXEMPT:
         raise SystemExit("SEAT=E0 needs an address exempt from the snipe surcharge (EXEMPT=1); anyone else pays 93-98% in the creation second. Use SEAT=E1 or get the exemption first (runbook).")
     new_day_check(); threading.Thread(target=price_loop, daemon=True).start()
-    log({"ev": "start", "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bankroll": BANKROLL, "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "max_resolve_ms": MAX_RESOLVE_MS, "dry_run": True})
+    log({"ev": "start", "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "send_mode": SEND_MODE, "margin_ms": MARGIN_MS, "bankroll": BANKROLL, "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "max_resolve_ms": MAX_RESOLVE_MS, "dry_run": True})
     while True:
         try:
             async with websockets.connect(FEED_URL, open_timeout=15, max_size=None, ping_interval=20) as ws:
-                log({"ev": "feed_connected"})
+                log({"ev": "feed_connected"}); state["connected_at"] = time.time()
                 while True:
                     d = json.loads(await ws.recv()); seen = time.time()
+                    warm = seen - state["connected_at"] < 5.0            # the feed replays a backlog on connect: no flips, no trades from it
                     for m in d.get("messages", []):
-                        inner = m["message"]["message"]
-                        ts = int(inner.get("header", {}).get("timestamp", 0) or 0)
+                        inner = m["message"]["message"]; hdr = inner.get("header", {})
+                        ts = int(hdr.get("timestamp", 0) or 0) if int(hdr.get("kind", 0) or 0) == 3 else 0   # L2 messages only: batch reports carry L1 time
                         if ts:
-                            state["feed_ts"] = max(state["feed_ts"], ts)
+                            if ts > state["last_seen_ts"] and state["last_seen_ts"] and not warm:
+                                state["flips"].append(seen)
+                            state["last_seen_ts"] = max(state["last_seen_ts"], ts); state["feed_ts"] = max(state["feed_ts"], ts)
+                        if warm:
+                            continue
                         for t in decode_batch(inner.get("l2Msg", "")):
                             try:
                                 if t[0] != 2:

@@ -55,7 +55,8 @@ bundled launches at all. More windows are appended to `data/derived/sniper_oos.t
 
 - EC2 in **us-east-2 (Ohio)**, where the sequencer lives; the smallest general-purpose instance is enough (the feed
   is ~70 transactions a second, decoded in microseconds). From anywhere else the round trips alone put every row above
-  in the loss bucket.
+  in the loss bucket. `deploy/ohio_setup.sh` sets the box up in one command (chrony, the engine as a dry-run service,
+  the probe).
 - Detection from `wss://feed.mainnet.chain.robinhood.com` (directly, or through Offchain Labs' Nitro relay if more than
   one process needs it: Robinhood rate-limits per client). The curve comes from the feed itself (section 21.2), so no
   RPC sits before the buy. Submission straight to `sequencer.mainnet.chain.robinhood.com` (first come, first served,
@@ -67,11 +68,23 @@ bundled launches at all. More windows are appended to `data/derived/sniper_oos.t
   boundary: use one to place a manual test buy if you want to see the fee tier and the tax with your own wallet, not to
   run the rule.
 
+## 3b. The latency, in numbers (section 21.5)
+
+- Ordering is first come, first served at the sequencer; no priority fee, no express lane.
+- The fastest outsiders land in the very first block of the seat's second on a third of bundled launches and within
+  two blocks on two thirds; that block holds one or two outsider buys. They predict the boundary; a sender that reacts
+  to seeing the new second on the feed lands one to two blocks (100–200 ms) later.
+- `SEND_MODE=predict` with `MARGIN_MS` is how the engine joins that race; `react` is the safe default for the first
+  days. Live, the engine tunes the margin from each receipt (`landing` events): early landings revert on minOut and
+  cost gas, so the margin only ever creeps toward the boundary from the late side.
+- Before anything else run the probe: `deploy/ohio_setup.sh` installs it as a service. A sequencer round trip above
+  10 ms or a flip spread far above one block means the box is in the wrong place or its clock is off.
+
 ## 4. Configure
 
 ```
 SEAT=E2 BUNDLE_MIN=3 SUPPLY_FRAC=0.03 SLIP=0.25 HOLD_S=7 BANKROLL_USD=300 FRAC=0.2 STAKE_MIN=50 STAKE_MAX=300 \
-SWITCH_N=30 SWITCH=0.05 DAILY_STOP=0.30 MAX_RESOLVE_MS=300 GAS_MAX_SHARE=0.03 TIER_ASSUMED=0.05 \
+SWITCH_N=30 SWITCH=0.05 DAILY_STOP=0.30 MAX_RESOLVE_MS=1500 GAS_MAX_SHARE=0.03 TIER_ASSUMED=0.05 SEND_MODE=react MARGIN_MS=25 \
 WALLET=0x… RPC_URL=https://… FEED_URL=wss://feed.mainnet.chain.robinhood.com LOG_PATH=engine.jsonl \
 python3 src/strategy/sniper_engine.py
 ```
