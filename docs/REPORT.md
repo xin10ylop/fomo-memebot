@@ -1051,9 +1051,11 @@ round. Exact curve, $300 stakes, 3% of supply, sell 0.3 s late; "behind" means 0
 | **Sep 5 (new)** | 1,730 | 24% | +4.7% [0,+9] | +0.6% [−4,+6] | +5.0% [+1,+9] | +4.2% [0,+9] | **$4.3k** |
 | **Aug 30 (new)** | 1,344 | 18% | −1.1% [−6,+3] | −1.9% [−6,+2] | +2.8% [−3,+8] | +0.4% [−5,+5] | **−$0.5k** |
 | **Sep 6 (new)** | 1,695 | 21% | +9.4% [+4,+14] | +2.5% [−2,+7] | +5.8% [+1,+11] | +0.9% [−4,+6] | **$2.9k** |
+| **Aug 31 (new)** | 1,502 | 21% | +2.2% [−2,+7] | +1.1% [−4,+6] | +6.2% [+2,+12] | +2.6% [−2,+8] | **$0.5k** |
 
-What the new days add. The filter survives out of sample on three of four new windows (Sep 6, the day this was
-written, is +9.4% at the front and +2.5% behind on 364 bundled launches, $2.9k to $6.6k switched): every bundled-launch cell is
+What the new days add. The filter survives out of sample on four of five new windows (Sep 6, the day this was
+written, is +9.4% at the front and +2.5% behind on 364 bundled launches, $2.9k to $6.6k switched; Aug 31 is small
+but positive on every outsider cell, $0.5k to $3.7k switched): every bundled-launch cell is
 positive on Sep 4 and Sep 5 while the unfiltered outsider seat is within a point or two of zero (Sep 4 E1 +1.1%, Sep 5
 E1 +1.6%, negative 0.3 s behind). Aug 30, a busy day (1,344 launches, 18% bundled), is the counter-example: the launch
 teams' own seat made +31.5% but the outsider's bundled seat was flat (E2 +2.8% front, +0.4% behind, confidence
