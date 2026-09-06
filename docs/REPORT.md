@@ -22,6 +22,7 @@ Everything below was computed from data collected in this session; scripts are i
 16. **Round 10 tested the influencer-catalyst scalp exactly as its author describes it (section 18): the second an influential, trustworthy person does something, size in, stop −22%, sell into the crowd at +50% or on a trailing stop.** On the 276 leaderboard fills matched to exact pool swaps, with every swap of the pool for the following half hour, the rule is −1.6% per trade for a $500 clip entering 3 s behind the fill (bot speed), −5.8% at 15 s, −11.0% at 60 s (app speed); for the audience over 100k followers −2.4%, −7.1%, −12.9%; at $2,000 clips −19% to −29%, at $5,000 −55% to −64%, because the median pool is $30k deep. The only cohorts near zero are the deepest pools (+2.9% at $500, −0.3% at $5,000) and the three posters above 300k followers (+6.5% on 16 trades, interval −9% to +25%). Entering ten to thirty minutes *before* the fill, which only the poster can do, returns +11.6%: the strategy is the poster's seat seen from behind. The author's own fomo handle draws 3,124 follower swaps within ten minutes of a fill and sells inside ten minutes two times in three; his scanned Solana wallet shows 53 completed tokens, 36% winners, $137k net over seven months, $125k of it one token. A live shadow on the real-time feed is running.
 17. **Round 11 made the sniper executable from a $300 bankroll (section 19, `docs/SNIPER_RUNBOOK.md`, `src/strategy/sniper_engine.py`).** A simulator bug that valued the seven-second exit after the next event was found and fixed; corrected, the first-in-line rule is positive on four of five windows (Aug 20 +4%, Aug 27 +7%, Sep 2 +17%, Sep 3 +35% per trade at $300 stakes, Aug 12 flat) and every window is non-negative with a regime switch that trades only while the mean of the last 30 scored launches is above +5%. Gas is ≈ $1 a round trip, which sets a $50 floor on the stake; returns are flat from $100 to $300 and fall above $500. The creator-stake filter (launch-block buy ≥ 5% of supply) earns +24% and +48% per trade on the two flow days on a quarter of the launches. Compounding from $300 with 20% sizing, one position at a time, switch and a −30% daily stop: $32k–83k on Sep 3, $15.6k on Sep 2 with the filter, $5.5k on Aug 27, $600 on Aug 20, a stop on Aug 12. The engine detects creations from the sequencer feed, filters, sizes, builds the exact unsigned buy/approve/sell transactions and scores every launch for the switch; from this sandbox it resolves a creation in 630–1,150 ms, which its own gate refuses, so the machine must sit near the sequencer. The send step is left to the operator, and the subsidy that makes gas cheap ends in October.
 18. **Round 12 audited the sniper with three independent auditors and an exact rebuild of the bonding curve (section 20), and the answer changed.** The curve is constant-product with 1.68 ETH / 1e9 virtual reserves (exact to 1e-15); every token has a creator-set 1–5% fee on both legs; the snipe tax is keyed to whole seconds (93–98% in the creation second, +6.18% the next, +0.19% the one after) and **wallets the creator names in the creation calldata are exempt**: all sampled untaxed first-block buyers are on their launch's list. The first-in-line seat of sections 14 and 19 (+36% a trade on the exact curve on Sep 3) is therefore the launch team's own bundle, not a seat an outsider can take. The first legal outside seat (next second, +6.18%) is −5% to +3% across the five windows and negative 0.3 s behind; filtered to launches whose bundle bought with three or more wallets it earns +5% to +10% a trade on the two peak days from Ohio latency (about $8k in six hours on $300 stakes, in-sample filter), about zero otherwise, and from $50 all-in it reaches $300 one time in three at best. Engine v2 shares the curve, fee, seat, filter, sizing and scoring with the simulator, sells the receipt's balance, and refuses the creation-second seat without the exemption.
+19. **Round 13 answered the reader's three questions (section 21): more days, the machine, the chain.** Sep 4 and Sep 5, never looked at before, confirm the bundle filter out of sample (E2 seat 0.3 s behind: +9.6% and +4.2% a trade on bundled launches, $2.7k and $4.3k switched net in six hours; the unfiltered outsider seat stays near zero), with more windows landing in `sniper_oos.txt`. The engine's critical path no longer needs an RPC call: the creator's exempted wallets, listed in the creation calldata, buy the new curve inside the creation second, and matching feed buyers to that list gives the curve address exactly. The machine is a small EC2 in Ohio on the public feed with a provider RPC for bookkeeping, not a full node. The seat exists on Robinhood Chain because ordering is first-come with no priority fee and the tax is per second; on Solana the same slot is bought with Jito tips by sub-50 ms bare-metal bots and was not tested.
 12. **Round 6 found the treasure's real owner and measured its seat: the first-block sniper.** The 185 sniper-bot wallets that pay the creators are not all losers. Reconstructing the dollar P&L of the fifteen busiest from their transfers, curve trades and pool swaps: the bots that buy 0.3–3 seconds after launch and sell 3–21 seconds later are net positive (the fastest: +$30.8k on $107k of turnover in six hours, +28.7% per trade, 175 launches, nothing left unsold); every bot that holds minutes or hours loses (−44% to −94%). Simulating that seat on every launch of the window with launch-time filters (creator's first launch of the day, ETH-quoted, stake min(3% of supply, $300), sell 7 s later into whoever bought next, exact curve exits, 1% fees each way) gives +27% on $97k in the fitting hours and +32% on $98k in the holdout hours, per-launch mean +27%/+33% with confidence intervals of +20% to +41%, median −2%, 46–48% of launches positive, worst case one stake. That is $26k and $31k of profit per three hours on a working capital of a few thousand dollars, and it reproduces the fastest real bot's holdout result (+31%). The sensitivity analysis says what it is: paying 10% more than first-in-line still earns +18–23%, paying 25% more earns +6–10%, paying 50% more or landing half a second late loses. It is a latency race for the first block after creation, on a chain with 100 ms blocks, sponsored gas and a first-come sequencer; the winner takes +30% a trade several hundred times a day and everyone behind them pays. Out of sample on Sep 2 (a lower-flow day) the same untouched rule made +0.4% in the first three hours and +15% in the next three. Three further windows across the fee cycle (section 14.2) then showed the seat is a peak-flow phenomenon: −13% in Pons V2's second week (Aug 12), flat at the trough (Aug 20) and on the ramp (Aug 27), positive only on the two peak days. It is not a structural edge. Section 14 has the tables and a live shadow tester that scores every new launch against the rule without capital.
 
 ## 1. Data access and what was analysed
@@ -1028,3 +1029,87 @@ rule. The chain's terms of use have an automated-trading clause whose scope is a
   model, the fee model, the seat, the filter, the sizing and the scoring, and the dry run measures the one thing the
   backtest cannot, resolution latency. The remaining gap is the race for the first block of second one, which only a
   live wallet in Ohio can measure.
+
+## 21. Round 13: more days, the machine, and the chain question
+
+Three questions from the reader after section 20: what speed can a retail box actually get and with what, which
+chain, and why only five windows. This round pulled nine more six-hour windows (three in flight as this is written),
+rebuilt the engine's critical path so that it needs no RPC call before the buy, and priced the Solana alternative.
+Scripts: `src/analysis/sniper_oos.py` (out-of-sample seats), engine v2.1 in `src/strategy/sniper_engine.py`; outputs in
+`data/derived/sniper_oos.txt`.
+
+### 21.1 Out of sample: the bundle filter holds, at about half the peak-day size
+
+The bundle filter of section 20.5 was chosen on Aug 12 to Sep 3. Sep 4 and Sep 5 were never looked at before this
+round. Exact curve, $300 stakes, 3% of supply, sell 0.3 s late; "behind" means 0.3 s behind the first outsider.
+
+| window (12–18 UTC) | eligible | bundled (≥3) | E1 front | E1 behind | E2 front | E2 behind | switched net, 1 at a time (E2 behind) |
+|---|---|---|---|---|---|---|---|
+| Sep 2 (in-sample) | 2,199 | 14% | +9.1% | +5.1% | +8.9% | +6.2% | $1.8k |
+| Sep 3 (in-sample) | 1,962 | 20% | +14.8% | +10.4% | +11.4% | +8.0% | $6.3k |
+| **Sep 4 (new)** | 799 | 19% | +11.9% [+4,+18] | +8.5% [+1,+15] | +13.2% [+6,+20] | +9.6% [+4,+16] | **$2.7k** |
+| **Sep 5 (new)** | 1,730 | 24% | +4.7% [0,+9] | +0.6% [−4,+6] | +5.0% [+1,+9] | +4.2% [0,+9] | **$4.3k** |
+
+Two things the new days add. First, the filter survives out of sample: every bundled-launch cell is positive on both
+new days while the unfiltered outsider seat is within a point or two of zero (Sep 4 E1 +1.1%, Sep 5 E1 +1.6%,
+negative 0.3 s behind). Second, **the E2 seat (the second whole second after creation, +0.19% surcharge) is at least
+as good as E1 behind the front**, and it is the cheaper, less contested slot: the fastest outsider bots fight for the
+first block of second one, and the E2 buyer sits behind them paying six points less tax. The runbook now runs E2 by
+default. Rows for Sep 6, Aug 30, Aug 31, Sep 1 and the off-hours windows are appended to `sniper_oos.txt` as their
+pulls finish.
+
+The launch-time signal can be read even earlier than the bundle's buys. The creation transaction's calldata carries
+the list of wallets the creator exempted; on 600 Sep 3 launches the count of those wallets predicts both the bundle and
+the outsider's return (0 named: −5.1% at E1 behind; 6 or more named, 27% of launches: 71% of them bundle three or more
+and the seat returns +13.5%). A filter of "three or more named wallets" earns +9.7% against +12.9% for "three or more
+observed bundle buys"; the engine logs both.
+
+### 21.2 What speed a retail box can have, and what to run
+
+- **Where the time goes.** The sequencer orders, executes, then broadcasts; the feed message arrives after the block
+  exists, and RPC nodes show the block only after re-executing it. So nobody outside the sequencer sees a creation
+  before the feed does, and anyone who then asks an RPC "which curve did that create" pays the re-execution and the
+  network twice. From this sandbox that resolution took 550–1,150 ms; from a box next to the sequencer it is a few
+  tens of milliseconds with a provider node, and a few milliseconds with a local node.
+- **The engine no longer asks.** The creator's exempted wallets buy the new curve inside the creation second, and their
+  addresses are in the creation calldata. Engine v2.1 recovers the sender of every buy on the feed (about 70 µs each),
+  matches it against the creation's named list, and takes the address they bought as the curve: no RPC call before the
+  buy, and an exact match rather than a guess. In the dry run the match is validated against the factory event 25 s
+  later; the first version with a freshness heuristic mismatched 2 of 16 (simultaneous creations in a feed burst),
+  which is why the match is now by sender. The creator's token count is derived from the calldata's initial buy on the
+  exact curve (within 4% at the worst fee tier). The only remaining waits are the seat's second boundary, which every
+  outsider shares, and the submit round trip.
+- **What to rent.** An EC2 instance in us-east-2 (Ohio), the smallest general-purpose size is enough for the engine
+  (the feed is ~70 transactions a second; decoding is microseconds). Connect to `wss://feed.mainnet.chain.robinhood.com`
+  directly, or through Offchain Labs' Nitro relay (23 MB, 1.6% of a core) if more than one process needs the feed, since
+  Robinhood rate-limits per client. Submit to `sequencer.mainnet.chain.robinhood.com`. For nonces, receipts and the
+  25-second scorer use a provider endpoint (Alchemy, QuickNode and Chainstack list the chain; QuickNode and Chainstack
+  let you pick a US-East region or a dedicated node) rather than the public RPC, which returned 429s to three engines
+  from one address here. A full Nitro node (64 GB RAM, several TB of NVMe, an Ethereum L1 RPC and beacon endpoint) is
+  not needed for this path and costs more than the strategy's quiet weeks.
+- **What to measure on day one.** `resolve_ms` (feed to curve known: should be the wait to the second boundary and
+  nothing else), `sent_ms` (feed to submit), and the surcharge on the first receipts (the token's tier + 0.19% at E2,
+  + 6.18% at E1; 93–98% means the wrong second). Section 20.7 and the runbook say what each number must be.
+
+### 21.3 Which chain
+
+The seat was found, measured and audited on Robinhood Chain, and only there. It exists because of three things that
+are specific to this chain and this launchpad: first-come-first-served ordering with no priority fee, so a box in Ohio
+can be first among outsiders without paying for it; a snipe tax keyed to whole seconds, which fixes the seat at a known
+boundary; and a bonding curve that is exact and cheap to replay, which is what lets a $150 trade be priced to the
+cent. Solana was checked in rounds 1 and 3 for the leaderboard traders, not for this seat. On pump.fun the equivalent
+seat is bought, not raced: token creation and the team's buys land in one Jito bundle, the first outside slot goes to
+the highest tip (0.001–0.05 SOL under competition), and the competitive bots run sub-50 ms end-to-end on bare metal
+co-located in Frankfurt and Ashburn with shred-level visibility; a 200 ms pipeline lands in slot two or three, which is
+where the trade stops paying. That is a different business, with a data pull the remaining Helius budget cannot cover
+at trade level, and it is not what was tested. If the reader wants the Solana seat priced the same way, that is a new
+round with its own data.
+
+### 21.4 Why five windows, and what changed
+
+Each six-hour window is 200–420 thousand curve events pulled through a rate-limited public RPC (ten to twenty minutes
+a window when it behaves); the first five were chosen to span the fee cycle rather than to be many. This round adds
+Sep 4, Sep 5, Sep 6, Aug 30, Aug 31, Sep 1, and three off-hours windows (Sep 3 00–06, Sep 3 18–24, Sep 5 00–06) so
+that the seat is seen on ordinary days and at night. The rows land in `sniper_oos.txt`; the table above is updated in
+place as they arrive, and the verdict of section 20.9 stands: an outside seat that pays on busy days, about zero
+otherwise, now confirmed on two days it had never seen.

@@ -9,7 +9,7 @@ curve (virtual reserves 1.68 ETH / 1e9 tokens, section 20), takes its SEAT:
   E0  submit at once, in front of the first outside buyer. Only for an address exempt from the snipe surcharge: anyone
       else buying in the creation second pays a 93-98% tax (EXEMPT=1 is required to start in this seat);
   E1  wait for the first feed message stamped in the next whole second, then submit: +6.18% surcharge, in front of the
-      non-exempt bots. Section 20 shows this seat only pays on launches whose creator bundle bought with BUNDLE_MIN or
+      non-exempt bots. E2 waits one more second and pays +0.19%, behind the second-one bots. Section 20 shows this seat only pays on launches whose creator bundle bought with BUNDLE_MIN or
       more named wallets in the creation second, and only on peak-flow days; the engine counts those buys on the feed;
 builds the unsigned buy, then (live) reads the tokens actually received from the buy receipt, approves the curve right
 away so the exit is a single transaction, and sells exactly that balance HOLD seconds after the buy landed. Every
@@ -37,7 +37,7 @@ BANKROLL = float(os.environ.get("BANKROLL_USD", "300"))
 FRAC = float(os.environ.get("FRAC", "0.2")); STAKE_MIN = float(os.environ.get("STAKE_MIN", "50")); STAKE_MAX = float(os.environ.get("STAKE_MAX", "300"))
 HOLD = float(os.environ.get("HOLD_S", "7")); SUPPLY_FRAC = float(os.environ.get("SUPPLY_FRAC", "0.03")); SLIP = float(os.environ.get("SLIP", "0.25"))
 SEAT = os.environ.get("SEAT", "E1").upper(); EXEMPT = os.environ.get("EXEMPT", "0") == "1"
-BUNDLE_MIN = int(os.environ.get("BUNDLE_MIN", "3" if SEAT == "E1" else "0"))   # E1 only trades launches whose creator bundle bought with >= BUNDLE_MIN named wallets in the creation second (section 20.6)
+BUNDLE_MIN = int(os.environ.get("BUNDLE_MIN", "3" if SEAT in ("E1", "E2") else "0"))   # E1 only trades launches whose creator bundle bought with >= BUNDLE_MIN named wallets in the creation second (section 20.6)
 TIER_ASSUMED = float(os.environ.get("TIER_ASSUMED", "0.05"))     # the creator-set fee tier is unknown before the buy lands: size the ETH for the worst common tier
 MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.0")); MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
 SWITCH_N = int(os.environ.get("SWITCH_N", "30")); SWITCH = float(os.environ.get("SWITCH", "0.05")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.30"))
@@ -48,7 +48,8 @@ BUY_EV = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"; S
 BUY_SEL = "59a87bc1"; SELL_SEL = "d04c6983"; APPROVE_SEL = "095ea7b3"
 UA = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) fomo-memebot/engine"}
 X0, Y0 = 1.68, 1e9                                                  # virtual reserves (section 20)
-SURCHARGE = {"E0": 0.0, "E1": 0.0618}
+SURCHARGE = {"E0": 0.0, "E1": 0.0618, "E2": 0.0019}                 # by seat: creation second (exempt only), next second, the one after
+SEAT_SECONDS = {"E0": 0, "E1": 1, "E2": 2}
 
 
 def log(ev):
@@ -81,7 +82,7 @@ class Rpc:
 
 rpc = Rpc(RPC_URL)
 state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": False, "busy_until": 0.0, "scores": collections.deque(maxlen=SWITCH_N),
-         "launched_today": collections.Counter(), "feed_ts": 0, "traded": {}, "eth_usd": ETH_USD, "recent_buys": collections.deque(maxlen=20000)}
+         "launched_today": collections.Counter(), "feed_ts": 0, "traded": {}, "eth_usd": ETH_USD, "recent_buys": collections.deque(maxlen=20000), "first_seen": {}, "known_curves": set()}
 lock = threading.Lock()
 
 
@@ -171,7 +172,7 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
         if sum(1 for r in rows[1:] if r[1] == "B" and r[0] < min(1.0, first_taxed) and r[5] - tier <= 0.0008) < bundle_min:
             return "filtered"
     X, Y = X0, Y0; X += rows[0][4]; Y -= rows[0][3]
-    lo, hi, fb = {"E0": (-1.0, 0.0008, 0.1), "E1": (0.05, 0.075, 1.0)}[seat]
+    lo, hi, fb = {"E0": (-1.0, 0.0008, 0.1), "E1": (0.05, 0.075, 1.0), "E2": (0.0012, 0.0035, 2.0)}[seat]
     idx = next((i for i in range(1, len(rows)) if rows[i][1] == "B" and rows[i][0] <= 3.0 and lo <= rows[i][5] - tier <= hi), None)
     if idx is None:
         idx = next((i for i in range(1, len(rows)) if rows[i][0] >= fb), len(rows)); t_in = fb
@@ -203,10 +204,17 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
     return (out - gross) * state["eth_usd"] - 1.0, gross * state["eth_usd"], t_in, tier
 
 
-def score_launch(curve, tk0, b_create, stake_usd):
+def score_launch(curve, tk0, b_create, stake_usd, creator=None, src=None):
     """25 s after creation: the regime signal, and in dry run the bankroll update for launches the engine would have traded"""
     time.sleep(25)
     try:
+        if b_create is None:                                            # feed-resolved launch: confirm the curve against the factory event and get its block
+            r = resolve_rpc(creator, deadline=5.0, lookback=600)          # the creation is ~250 blocks back by now
+            if not r:
+                log({"ev": "score", "curve": curve, "result": "creation event not found"}); return
+            if r[1].lower() != curve.lower():
+                log({"ev": "feed_resolution_mismatch", "feed_curve": curve, "event_curve": r[1], "creator": creator}); state["traded"].pop(curve, None); return
+            tk0, b_create = r[2], r[3]; log({"ev": "feed_resolution_ok", "curve": curve})
         head = int(rpc.call("eth_blockNumber", []), 16)
         ev = rpc.call("eth_getLogs", [{"fromBlock": hex(b_create), "toBlock": hex(head), "address": curve, "topics": [[BUY_EV, SELL_EV]]}])
         events = []
@@ -244,24 +252,45 @@ def wait_receipt(h, timeout=10.0):
     return None
 
 
-def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts):
-    """resolve the curve, apply the filters, size on the exact curve, take the seat, build the buy, then approve and sell"""
-    t0 = time.time(); curve = token = None; tk0 = None; b_create = None
-    while time.time() - t0 < 3.0:
+def resolve_rpc(creator, deadline=3.0, lookback=40):
+    """the curve from the factory's event: (token, curve, tk0, b_create) or None"""
+    t0 = time.time()
+    while time.time() - t0 < deadline:
         try:
             head = int(rpc.call("eth_blockNumber", []), 16)
-            for l in rpc.call("eth_getLogs", [{"fromBlock": hex(head - 8), "toBlock": hex(head), "address": FACTORY}]):
+            for l in rpc.call("eth_getLogs", [{"fromBlock": hex(head - lookback), "toBlock": hex(head), "address": FACTORY}]):
                 if len(l["topics"]) > 3 and ("0x" + l["topics"][3][-40:]).lower() == creator:
-                    token = "0x" + l["topics"][1][-40:]; curve = "0x" + l["topics"][2][-40:]; d = l["data"][2:]; w = [int(d[i:i + 64], 16) for i in range(0, len(d), 64)]
-                    tk0 = w[2] / 1e18; b_create = int(l["blockNumber"], 16); break
-            if curve:
-                break
+                    d = l["data"][2:]; w = [int(d[i:i + 64], 16) for i in range(0, len(d), 64)]
+                    return "0x" + l["topics"][1][-40:], "0x" + l["topics"][2][-40:], w[2] / 1e18, int(l["blockNumber"], 16)
         except Exception:
             pass
         time.sleep(0.02)
+    return None
+
+
+def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named=frozenset()):
+    """resolve the curve (from the feed when the creator's named wallets reveal it, else from the factory event), apply the
+    filters, size on the exact curve, take the seat, build the buy, then approve and sell"""
+    t0 = time.time(); curve = token = None; tk0 = None; b_create = None; src = None; bundle = None; named = set(named)
+    if SEAT in ("E1", "E2") and BUNDLE_MIN > 0 and quote == "0x" + "0" * 40 and len(named) >= BUNDLE_MIN:
+        # feed-only path: the wallets the creator named in the calldata buy the new curve inside the creation second, so
+        # the address they buy is the curve. Matching buyers to the named list is exact; no RPC on the critical path.
+        while state["feed_ts"] <= feed_ts and time.time() - seen_at < 1.5:
+            time.sleep(0.003)
+        cands = collections.Counter(a for ts_, a, snd in list(state["recent_buys"]) if snd in named and ts_ >= feed_ts and a not in state["known_curves"])
+        if cands:
+            a, c = cands.most_common(1)[0]
+            if c >= BUNDLE_MIN:
+                curve, bundle = a, c; src = "feed"; token = None
+                net0 = init_buy_wei / 1e18 * (1 - 0.01); tk0 = Y0 - X0 * Y0 / (X0 + net0) if net0 > 0 else 0.0   # creator's tokens at the 1% tier (within 4% at 5%)
+    if curve is None:
+        r = resolve_rpc(creator)
+        if r:
+            token, curve, tk0, b_create = r; src = "rpc"
     resolve_ms = round((time.time() - seen_at) * 1000)
     if not curve:
-        log({"ev": "skip", "why": "curve not resolved in 3 s", "creator": creator}); return
+        log({"ev": "skip", "why": "curve not resolved in 3 s", "creator": creator, "named_wallets": len(named)}); return
+    state["known_curves"].add(curve)
     new_day_check()
     prior = state["launched_today"][creator]; state["launched_today"][creator] += 1
     reasons = []
@@ -276,7 +305,7 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts):
     if init_buy_wei / 1e18 > MAX_CREATOR_BUY_ETH:
         reasons.append("creator buy too large")
     if reasons:
-        log({"ev": "skip", "why": reasons, "curve": curve, "creator": creator, "resolve_ms": resolve_ms}); return
+        log({"ev": "skip", "why": reasons, "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named)}); return
     with lock:
         sc = list(state["scores"]); on = len(sc) >= SWITCH_N and st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC))
@@ -294,9 +323,9 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts):
         ok, gas_cost = gas_ok(stake_usd)
         if not ok:
             gates.append(f"gas ${gas_cost:.2f} per round trip > {100 * GAS_MAX_SHARE:.0f}% of stake")
-    threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd), daemon=True).start()
+    threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src), daemon=True).start()
     if gates:
-        log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "gates": gates, "stake_usd": stake_usd}); return
+        log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), "bundle": bundle, "gates": gates, "stake_usd": stake_usd}); return
     with lock:
         state["busy_until"] = time.time() + HOLD + 3
     stake_eth = stake_usd / state["eth_usd"]
@@ -306,17 +335,18 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts):
         nonce = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); gas_price = int(rpc.call("eth_gasPrice", []), 16)
     except Exception:
         nonce, gas_price = 0, 0
-    if SEAT == "E1":                                                  # not exempt: never land in the creation second (93-98% tax); wait for the next whole second on the feed
-        while state["feed_ts"] <= feed_ts and time.time() - seen_at < 3.0:
-            time.sleep(0.005)
-        bundle = sum(1 for ts_, to_ in list(state["recent_buys"]) if ts_ == feed_ts and to_ == curve)   # direct curve buys stamped in the creation second: the creator's named wallets
+    if SEAT in ("E1", "E2"):                                          # not exempt: never land in the creation second (93-98% tax); wait for the seat's whole second on the feed
+        while state["feed_ts"] < feed_ts + SEAT_SECONDS[SEAT] and time.time() - seen_at < 3.5:
+            time.sleep(0.003)
+        if bundle is None:
+            bundle = sum(1 for ts_, to_, snd in list(state["recent_buys"]) if to_ == curve and (snd in named or ts_ == feed_ts))   # the named wallets' buys (or any direct buy inside the creation second)
         if bundle < BUNDLE_MIN:
             log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "gates": [f"bundle {bundle} < {BUNDLE_MIN}"], "stake_usd": stake_usd})
             with lock:
                 state["busy_until"] = 0.0
             return
     buy = {"to": curve, "value": hex(amount_in), "data": "0x" + BUY_SEL + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
-    log({"ev": "trade_decision", "seat": SEAT, "curve": curve, "token": token, "creator": creator, "resolve_ms": resolve_ms, "sent_ms": round((time.time() - seen_at) * 1000), "stake_usd": stake_usd,
+    log({"ev": "trade_decision", "seat": SEAT, "curve": curve, "token": token, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), "bundle": bundle, "sent_ms": round((time.time() - seen_at) * 1000), "stake_usd": stake_usd,
          "amount_in_eth": amount_in / 1e18, "tokens_target": tk, "supply_share": tk / Y0, "min_out_tokens": min_out / 1e18, "fee_assumed": fee})
     h = submit(buy, "buy"); t_buy = time.time(); tokens = tk
     with lock:
@@ -329,6 +359,9 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts):
             if l["topics"][0] == BUY_EV and l["address"].lower() == curve:
                 tokens = int(l["data"][2 + 64:2 + 128], 16) / 1e18
         t_buy = time.time()
+    if token is None:                                                 # feed-resolved: the token address comes from the factory event, needed only for the approve
+        r = resolve_rpc(creator, deadline=HOLD - 1, lookback=120)
+        token = r[0] if r else curve
     approve = {"to": token, "value": "0x0", "data": "0x" + APPROVE_SEL + abi_word(curve) + abi_word(2 ** 256 - 1), "gas": hex(GAS_APPROVE), "gasPrice": hex(gas_price), "nonce": hex(nonce + 1), "chainId": 4663}
     submit(approve, "approve")                                       # right after the buy, so the exit is one transaction
     time.sleep(max(0.0, HOLD - (time.time() - t_buy)))
@@ -372,13 +405,20 @@ async def main():
                                     continue
                                 body = rlp.decode(t[1:]); to = body[5]; data = body[7]
                                 if len(to) == 20 and data[:4].hex() == BUY_SEL:
-                                    state["recent_buys"].append((ts, "0x" + to.hex())); continue
+                                    a = "0x" + to.hex()
+                                    try:
+                                        snd = Account.recover_transaction(t).lower()               # ~70 us; the buyer, matched against the creation's named wallets
+                                    except Exception:
+                                        snd = None
+                                    state["recent_buys"].append((ts, a, snd)); state["first_seen"].setdefault(a, seen); continue
                                 if len(to) != 20 or "0x" + to.hex() != FACTORY or data[:4] != CREATE_SEL:
                                     continue
                                 creator = Account.recover_transaction(t).lower()
                                 quote = "0x" + data[4 + 32 * 2 + 12: 4 + 32 * 3].hex(); init_buy = int.from_bytes(data[4 + 32 * 3: 4 + 32 * 4], "big")
-                                log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts})
-                                threading.Thread(target=handle_creation, args=(creator, quote, init_buy, seen, ts), daemon=True).start()
+                                words = [data[4 + 32 * i: 4 + 32 * (i + 1)] for i in range((len(data) - 4) // 32)]
+                                named = {"0x" + w[12:].hex() for w in words if w[:12] == b"\0" * 12 and int.from_bytes(w[12:], "big") > 2 ** 100} - {creator, quote}
+                                log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named)})
+                                threading.Thread(target=handle_creation, args=(creator, quote, init_buy, seen, ts, named), daemon=True).start()
                             except Exception as e:
                                 log({"ev": "error", "stage": "decode", "err": str(e)[:200]})
         except Exception as e:

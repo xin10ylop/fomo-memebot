@@ -12,18 +12,22 @@ dollar is sent.
   +0.19% in the one after, then nothing. Wallets the creator names at creation are exempt. Nobody else is.
 - So the creation-second seat (E0) belongs to the launch team. Your earliest seat is the first block of the next
   second (E1), paying the token's fee plus 6.18%.
-- On the exact curve, E1 on every launch is −5% to +3% a trade depending on the day. E1 on **bundled launches** (three
-  or more named wallets bought in the creation second) is +9% and +15% at the front on the two peak days, +5% and
-  +10% from 0.3 s behind, about zero on Aug 27, and there are too few such launches off-peak to trade. That is the
-  trade this runbook runs.
+- On the exact curve, E1 on every launch is −5% to +3% a trade depending on the day. On **bundled launches** (three
+  or more named wallets bought in the creation second) the outsider's seats pay: E1 +9% and +15% at the front on the
+  two peak days, +5% and +10% from 0.3 s behind; and out of sample on Sep 4 and Sep 5 (section 21.1) +8.5% and +0.6%
+  at E1 behind, **+9.6% and +4.2% at E2 behind**. E2, the second whole second after creation, pays +0.19% instead of
+  +6.18% and sits behind the fastest bots rather than racing them; it is the seat this runbook runs by default.
+- The engine resolves the curve from the feed alone: the wallets the creator exempted are listed in the creation
+  calldata, and the address they buy inside the creation second is the curve. No RPC call before the buy.
 
 ## 1. The trade
 
 1. A Pons V2 creation appears on the sequencer feed (factory `0xe33e…`, selector `0xf85f8e41`); the engine recovers the
    creator and the quote asset from the calldata and resolves the curve from the factory's event.
 2. Filters: creator's first launch of the UTC day, ETH quote, a usable launch-block buy.
-3. The engine waits for the first feed message stamped in the next whole second, counts the direct curve buys stamped in
-   the creation second (the bundle), and trades only if there are at least `BUNDLE_MIN` (3).
+3. The engine reads the creator's exempted wallets from the creation calldata, watches the feed for their buys inside the
+   creation second (that address is the curve; at least `BUNDLE_MIN` = 3 of them must have bought), and waits for the
+   first feed message stamped in the seat's second (`SEAT=E2`: two seconds after the creation's timestamp; `E1`: one).
 4. Buy 3% of supply or the stake, whichever is smaller, sized on the exact curve with the fee assumed at 5% + 6.18%;
    `minOut` = sized tokens × (1 − `SLIP`), so a landing in the wrong second reverts for gas rather than paying 95%.
 5. Read the tokens received from the buy's Buy event; approve the curve at once; sell that balance 7 s after the buy
@@ -34,24 +38,29 @@ dollar is sent.
 
 ## 2. What to expect (exact curve, $300 stakes, 3% of supply, sell 0.3 s late)
 
-| | Aug 20 | Aug 27 | Sep 2 | Sep 3 |
-|---|---|---|---|---|
-| bundled launches in 6 h | 17 | 85 | 303 | 400 |
-| mean ROI per trade, front of second one | −4.5% | +2.4% | +9.1% | +14.8% |
-| mean ROI, 0.3 s behind | −6.2% | −1.9% | +5.1% | +10.4% |
-| switched, one at a time, 0.3 s behind | $0 | −$242 | +$265 | +$8,015 |
-| from $300 at 20% sizing | $300 | $236 | $193 (stop) | $6,136 |
+| | Aug 20 | Aug 27 | Sep 2 | Sep 3 | Sep 4 (new) | Sep 5 (new) |
+|---|---|---|---|---|---|---|
+| bundled launches in 6 h | 17 | 85 | 303 | 400 | 155 | 416 |
+| E1 front | −4.5% | +2.4% | +9.1% | +14.8% | +11.9% | +4.7% |
+| E1, 0.3 s behind | −6.2% | −1.9% | +5.1% | +10.4% | +8.5% | +0.6% |
+| E2 front | +2.9% | +2.3% | +8.9% | +11.4% | +13.2% | +5.0% |
+| **E2, 0.3 s behind** | −0.4% | +0.2% | +6.2% | +8.0% | **+9.6%** | **+4.2%** |
+| switched, one at a time, E2 behind | $0 | −$193 | +$1,765 | +$6,258 | +$2,665 | +$4,271 |
 
-Sep 2 and Sep 3 were the two busiest days of the fee cycle. Aug 12 had no bundled launches at all. The filter was
-found on these windows: treat the numbers as the upper end until a forward test reproduces them.
+Sep 2 and Sep 3 were the two busiest days of the fee cycle; Sep 4 and Sep 5 were never used to choose anything.
+Aug 12 had no bundled launches at all. More windows are appended to `data/derived/sniper_oos.txt` as they are pulled.
 
 ## 3. The machine
 
-- EC2 in **us-east-2 (Ohio)**, where the sequencer lives. From anywhere else the resolution latency alone puts every
-  row above in the loss bucket (this sandbox: 550–1,150 ms; the gate is 300 ms).
-- Detection from `wss://feed.mainnet.chain.robinhood.com`. Reads from an RPC in the same region; best is a Nitro node
-  following the feed on the same instance so that resolving the curve is a local call. Submission straight to
-  `sequencer.mainnet.chain.robinhood.com` (first come, first served, no priority fee).
+- EC2 in **us-east-2 (Ohio)**, where the sequencer lives; the smallest general-purpose instance is enough (the feed
+  is ~70 transactions a second, decoded in microseconds). From anywhere else the round trips alone put every row above
+  in the loss bucket.
+- Detection from `wss://feed.mainnet.chain.robinhood.com` (directly, or through Offchain Labs' Nitro relay if more than
+  one process needs it: Robinhood rate-limits per client). The curve comes from the feed itself (section 21.2), so no
+  RPC sits before the buy. Submission straight to `sequencer.mainnet.chain.robinhood.com` (first come, first served,
+  no priority fee). Nonce, receipts and the 25-second scorer go to a provider endpoint in the same region (Alchemy,
+  QuickNode, Chainstack all list the chain; pick a US-East region or a dedicated node); the public RPC rate-limits.
+  A full Nitro node (64 GB RAM, several TB NVMe, an L1 RPC and beacon endpoint) is not needed.
 - Gas ≈ $1 a round trip at 0.5 gwei. The engine halts if a round trip exceeds 3% of the stake.
 - Telegram bots (Maestro has Pons V2 support at a flat 1%; GMGN lists the chain) cannot take a seat or wait for a second
   boundary: use one to place a manual test buy if you want to see the fee tier and the tax with your own wallet, not to
@@ -60,13 +69,15 @@ found on these windows: treat the numbers as the upper end until a forward test 
 ## 4. Configure
 
 ```
-SEAT=E1 BUNDLE_MIN=3 SUPPLY_FRAC=0.03 SLIP=0.25 HOLD_S=7 BANKROLL_USD=300 FRAC=0.2 STAKE_MIN=50 STAKE_MAX=300 \
+SEAT=E2 BUNDLE_MIN=3 SUPPLY_FRAC=0.03 SLIP=0.25 HOLD_S=7 BANKROLL_USD=300 FRAC=0.2 STAKE_MIN=50 STAKE_MAX=300 \
 SWITCH_N=30 SWITCH=0.05 DAILY_STOP=0.30 MAX_RESOLVE_MS=300 GAS_MAX_SHARE=0.03 TIER_ASSUMED=0.05 \
 WALLET=0x… RPC_URL=https://… FEED_URL=wss://feed.mainnet.chain.robinhood.com LOG_PATH=engine.jsonl \
 python3 src/strategy/sniper_engine.py
 ```
 
-`SEAT=E0` refuses to start without `EXEMPT=1`, and `EXEMPT=1` is only true for a wallet the creator named. Do not set it.
+`SEAT=E2` waits two seconds past the creation's timestamp (+0.19%); `SEAT=E1` waits one (+6.18%, in front of the
+second-one bots, only worth it if your `sent_ms` is consistently first). `SEAT=E0` refuses to start without `EXEMPT=1`,
+and `EXEMPT=1` is only true for a wallet the creator named. Do not set it.
 
 ## 5. Dry run first, then the send step
 
@@ -75,8 +86,10 @@ the gate that stopped it, including `bundle N < 3` and `resolved in N ms`), `tra
 tokens, minOut), `unsigned_tx` (buy, approve, sell) and `score` (the exact-curve outcome of every bundled launch, the
 rolling mean, the switch state, and the dry-run bankroll). Go/no-go from that log:
 
-- median `resolve_ms` under 150 and `sent_ms` (feed to send) under 1,100 for E1 (the second boundary is at most a
-  second away), otherwise the machine is in the wrong place;
+- `resolve_src` is `feed` on bundled launches and `feed_resolution_ok` follows every one of them 25 s later
+  (a `feed_resolution_mismatch` means the engine would have bought the wrong curve: stop);
+- `sent_ms` (feed to send) equal to the wait for the seat's second plus a few milliseconds, otherwise the machine is in
+  the wrong place;
 - rolling mean of the scores positive over at least one full peak day, and the dry-run bankroll path matching the
   compounding table within its confidence interval;
 - the switch turning on and off as the flow changes rather than sitting on.

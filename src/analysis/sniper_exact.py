@@ -23,8 +23,12 @@ import sniper_core as C
 X0, Y0 = 1.68, 1e9
 BUY, SELL = "0xec36bf57", "0x8113d738"
 DAYS = ["2026-08-12", "2026-08-20", "2026-08-27", "2026-09-02", "2026-09-03"]
-STAKE = float(sys.argv[1]) if len(sys.argv) > 1 else 300.0
-FRAC = float(sys.argv[2]) if len(sys.argv) > 2 else 0.05
+_argv = sys.argv[1:] if __name__ == "__main__" else []
+STAKE = float(_argv[0]) if len(_argv) > 0 else 300.0
+FRAC = float(_argv[1]) if len(_argv) > 1 else 0.05
+WINDOW = "12-18"
+if len(_argv) > 2:                                                      # extra windows as day:h0-h1, e.g. 2026-09-04:12-18
+    DAYS = [a.split(":")[0] for a in _argv[2:]]; WINDOW = _argv[2].split(":")[1]
 HOLD = 7.0
 PX = C.PX["native"]
 
@@ -37,11 +41,11 @@ def load_exact(day):
             continue
         cv = "0x" + topics[2][-40:].lower()
         creates[cv] = {"b": b, "ts": C.bts(b), "creator": "0x" + topics[3][-40:].lower()}
-    quotes = json.load(open(f"rh/launch_quotes_{day}.json"))
+    quotes = json.load(open(f"rh/launch_quotes_{day}.json")) if os.path.exists(f"rh/launch_quotes_{day}.json") else None
     ev = collections.defaultdict(list)
-    for line in open(f"rh/v2curve_{day}_12-18.jsonl"):
+    for line in open(f"rh/v2curve_{day}_{WINDOW}.jsonl"):
         b, li, tx, addr, t0, data = json.loads(line)
-        if addr not in creates or quotes.get(addr, "native") != "native":
+        if addr not in creates or (quotes is not None and quotes.get(addr, "native") != "native"):
             continue
         d = data[2:]; w = [int(d[i:i + 64], 16) / 1e18 for i in range(0, len(d), 64)]
         if t0 == BUY:
@@ -53,6 +57,10 @@ def load_exact(day):
         e.sort(); c = creates[cv]
         if e[0][2] != "B" or e[0][0] != c["b"]:
             continue
+        if quotes is None:                                             # no quote file: keep the curve only if the creator's buy fits the native reserves
+            b, li, k, q, tk, f = e[0]
+            if q <= 0 or tk <= 0 or tk >= Y0 or abs((q - f) * (Y0 - tk) / tk / X0 - 1) > 0.02:
+                continue
         X, Y = X0, Y0; rows = []; tier = None; ok = True
         for i, (b, li, k, q, tk, f) in enumerate(e):
             t = C.bts(b) - c["ts"]
@@ -133,6 +141,8 @@ def bundle_count(L):
 
 
 def summarize(res):
+    if not res:
+        return dict(n=0, roi=float("nan"), med=float("nan"), net=0.0, per=0.0, lo=float("nan"), hi=float("nan"), alone=0.0, top5=float("nan"), big_loss=0.0, cost=0.0)
     v = [r[0] / r[1] for r in res]; n = len(v); dollars = [r[0] for r in res]; net = sum(dollars)
     top = sum(sorted(dollars)[-max(1, n // 20):]); vs = sorted(v)
     return dict(n=n, roi=st.mean(v), med=vs[n // 2], net=net, per=net / n, lo=C.ci(v)[0], hi=C.ci(v)[1],
@@ -145,7 +155,7 @@ def main():
     data = {}
     for day in DAYS:
         launches, prior = load_exact(day)
-        creates, trades, quotes, _ = C.load(day)
+        creates, trades, quotes, _ = C.load(day) if WINDOW == "12-18" and os.path.exists(f"rh/launch_quotes_{day}.json") else ({}, {}, {}, None)
         elig = [cv for cv, L in launches.items() if prior[L["creator"]][0] == L["ts"]]
         data[day] = (launches, elig, creates, trades, quotes)
     scen = [
@@ -183,6 +193,8 @@ def main():
             launches, elig, creates, trades, quotes = data[day]; res = []
             for cv in elig:
                 if kw is None:
+                    if cv not in creates:
+                        continue
                     r = C.sim_all(cv, creates, trades, quotes, STAKE, HOLD, FRAC)
                     if r and r[1] >= 5.0:
                         res.append((r[0], r[1], r[2], r[3], r[4]))
