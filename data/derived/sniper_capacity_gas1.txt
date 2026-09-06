@@ -64,31 +64,31 @@ window     always-on net $ switched net $ live share always-on max DD switched m
 2026-09-03          22,655         20,237        82%             -962            -962                18,580
 
 (c) compounding from a small bankroll: stake = clamp(bankroll x FRAC, 50, 300), one position at a time, regime switch on, trades in time order; ROI at the stake actually used is taken from the nearest simulated stake; stops for the day at -30% of the starting bankroll or when it cannot fund a $50 stake
-  2026-09-02 base                 start $  300 sizing 20%: end $     188 after  22 trades, low $188 (daily stop hit)
-  2026-09-02 base                 start $  500 sizing 20%: end $     350 after  22 trades, low $350 (daily stop hit)
-  2026-09-02 base                 start $1,000 sizing 20%: end $     694 after  38 trades, low $694 (daily stop hit)
-  2026-09-02 base                 start $  300 sizing 50%: end $     179 after  15 trades, low $179 (daily stop hit)
-  2026-09-02 creator buy >= 5%    start $  300 sizing 20%: end $  15,563 after 236 trades, low $300
-  2026-09-02 creator buy >= 5%    start $  500 sizing 20%: end $  16,754 after 236 trades, low $500
-  2026-09-02 creator buy >= 5%    start $1,000 sizing 20%: end $  17,959 after 236 trades, low $1,000
-  2026-09-02 creator buy >= 5%    start $  300 sizing 50%: end $  17,258 after 236 trades, low $300
-  2026-09-03 base                 start $  300 sizing 20%: end $  82,641 after 821 trades, low $219
-  2026-09-03 base                 start $  500 sizing 20%: end $  83,603 after 821 trades, low $379
-  2026-09-03 base                 start $1,000 sizing 20%: end $  85,012 after 821 trades, low $787
-  2026-09-03 base                 start $  300 sizing 50%: end $     130 after   2 trades, low $130 (daily stop hit)
-  2026-09-03 creator buy >= 5%    start $  300 sizing 20%: end $  32,439 after 212 trades, low $300
-  2026-09-03 creator buy >= 5%    start $  500 sizing 20%: end $  33,384 after 212 trades, low $500
-  2026-09-03 creator buy >= 5%    start $1,000 sizing 20%: end $  34,710 after 212 trades, low $1,000
-  2026-09-03 creator buy >= 5%    start $  300 sizing 50%: end $  33,940 after 212 trades, low $300
-  2026-08-27 base                 start $  300 sizing 20%: end $   5,465 after 366 trades, low $269
-  2026-08-27 base                 start $  500 sizing 20%: end $   7,132 after 366 trades, low $468
-  2026-08-27 base                 start $1,000 sizing 20%: end $   9,401 after 366 trades, low $942
-  2026-08-27 base                 start $  300 sizing 50%: end $   8,905 after 366 trades, low $254
+  2026-09-02 base                 start $  300 sizing 20%: end $     198 after  22 trades, low $198 (daily stop hit)
+  2026-09-02 base                 start $  500 sizing 20%: end $     348 after  23 trades, low $348 (daily stop hit)
+  2026-09-02 base                 start $1,000 sizing 20%: end $     625 after  48 trades, low $625 (daily stop hit)
+  2026-09-02 base                 start $  300 sizing 50%: end $     209 after  15 trades, low $209 (daily stop hit)
+  2026-09-02 creator buy >= 5%    start $  300 sizing 20%: end $   8,481 after 236 trades, low $300
+  2026-09-02 creator buy >= 5%    start $  500 sizing 20%: end $   9,360 after 236 trades, low $500
+  2026-09-02 creator buy >= 5%    start $1,000 sizing 20%: end $   9,974 after 236 trades, low $1,000
+  2026-09-02 creator buy >= 5%    start $  300 sizing 50%: end $   9,249 after 236 trades, low $300
+  2026-09-03 base                 start $  300 sizing 20%: end $  41,250 after 821 trades, low $227
+  2026-09-03 base                 start $  500 sizing 20%: end $  41,790 after 821 trades, low $379
+  2026-09-03 base                 start $1,000 sizing 20%: end $  42,776 after 821 trades, low $857
+  2026-09-03 base                 start $  300 sizing 50%: end $     173 after   2 trades, low $173 (daily stop hit)
+  2026-09-03 creator buy >= 5%    start $  300 sizing 20%: end $  18,434 after 212 trades, low $300
+  2026-09-03 creator buy >= 5%    start $  500 sizing 20%: end $  19,027 after 212 trades, low $500
+  2026-09-03 creator buy >= 5%    start $1,000 sizing 20%: end $  19,658 after 212 trades, low $1,000
+  2026-09-03 creator buy >= 5%    start $  300 sizing 50%: end $  18,891 after 212 trades, low $300
+  2026-08-27 base                 start $  300 sizing 20%: end $   3,410 after 366 trades, low $273
+  2026-08-27 base                 start $  500 sizing 20%: end $   4,136 after 366 trades, low $468
+  2026-08-27 base                 start $1,000 sizing 20%: end $   5,126 after 366 trades, low $958
+  2026-08-27 base                 start $  300 sizing 50%: end $   4,412 after 366 trades, low $264
   2026-08-27 creator buy >= 5%    start $  300 sizing 20%: end $     297 after   2 trades, low $297
   2026-08-27 creator buy >= 5%    start $  500 sizing 20%: end $     496 after   2 trades, low $496
-  2026-08-27 creator buy >= 5%    start $1,000 sizing 20%: end $     992 after   2 trades, low $992
-  2026-08-27 creator buy >= 5%    start $  300 sizing 50%: end $     295 after   2 trades, low $295
-  2026-08-20 base                 start $  300 sizing 20%: end $     597 after  54 trades, low $295
-  2026-08-20 base                 start $  500 sizing 20%: end $   1,016 after  54 trades, low $494
-  2026-08-20 base                 start $1,000 sizing 20%: end $   2,059 after  54 trades, low $989
-  2026-08-20 base                 start $  300 sizing 50%: end $   1,310 after  54 trades, low $291
+  2026-08-27 creator buy >= 5%    start $1,000 sizing 20%: end $     994 after   2 trades, low $994
+  2026-08-27 creator buy >= 5%    start $  300 sizing 50%: end $     296 after   2 trades, low $296
+  2026-08-20 base                 start $  300 sizing 20%: end $     579 after  54 trades, low $296
+  2026-08-20 base                 start $  500 sizing 20%: end $     986 after  54 trades, low $494
+  2026-08-20 base                 start $1,000 sizing 20%: end $   1,600 after  54 trades, low $993
+  2026-08-20 base                 start $  300 sizing 50%: end $     872 after  54 trades, low $294

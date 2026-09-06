@@ -1,0 +1,43 @@
+(a) launches the rule skipped because nobody bought within 3 s; a live bot buys them all. $300 stake, base filter.
+window     eligible followed no follower mean ROI followed mean ROI no-follower mean ROI all net $ followed  net $ all
+2026-08-12      341      229         112             -1.9%                -2.6%        -2.1%           -747     -1,141
+2026-08-20      223      120         103             +9.3%                -2.9%        +3.7%          1,593      1,176
+2026-08-27     1365      842         523             +6.6%                +2.8%        +5.2%          7,255     10,301
+2026-09-02     1977     1632         345            +16.6%                +1.6%       +14.0%         40,632     42,307
+2026-09-03     1694     1311         383            +34.6%                +2.7%       +27.4%         66,876     69,388
+
+(b) capital deployed per trade at a $300 stake (the 3%-of-supply cap binds when 3% of supply costs less than the stake)
+  2026-08-12: cost per trade p10 $129 median $134 p90 $142 mean $136; share of trades at the full $300: 0%
+  2026-08-20: cost per trade p10 $128 median $133 p90 $142 mean $135; share of trades at the full $300: 0%
+  2026-08-27: cost per trade p10 $130 median $137 p90 $153 mean $144; share of trades at the full $300: 2%
+  2026-09-02: cost per trade p10 $131 median $140 p90 $160 mean $146; share of trades at the full $300: 2%
+  2026-09-03: cost per trade p10 $132 median $142 p90 $163 mean $149; share of trades at the full $300: 3%
+
+(c) per-trade return distribution (followed launches, $300 and $50 stakes) and ruin from $50 all-in
+  2026-08-27 $50: n=1365 mean +4.7% p5 -33% p25 -4% median -4% p75 +6% p95 +67% | loss > 50%: 4.7%  loss > 90%: 3.9%  gain > 100%: 2.7%
+    $50 all-in until $300: actual day sequence ruined; i.i.d. bootstrap success 8%; 200-trade block bootstrap success 8%
+  2026-08-27 $300: n=1365 mean +5.2% p5 -22% p25 -3% median -3% p75 +5% p95 +64% | loss > 50%: 4.2%  loss > 90%: 2.9%  gain > 100%: 2.6%
+  2026-09-02 $50: n=1977 mean +13.0% p5 -102% p25 -4% median -4% p75 +9% p95 +183% | loss > 50%: 9.8%  loss > 90%: 8.5%  gain > 100%: 8.6%
+    $50 all-in until $300: actual day sequence ruined; i.i.d. bootstrap success 10%; 200-trade block bootstrap success 12%
+  2026-09-02 $300: n=1977 mean +14.0% p5 -85% p25 -3% median -3% p75 +8% p95 +178% | loss > 50%: 7.9%  loss > 90%: 4.7%  gain > 100%: 8.2%
+  2026-09-03 $50: n=1694 mean +27.8% p5 -102% p25 -4% median -4% p75 +24% p95 +240% | loss > 50%: 9.9%  loss > 90%: 8.8%  gain > 100%: 14.2%
+    $50 all-in until $300: actual day sequence reached $300; i.i.d. bootstrap success 19%; 200-trade block bootstrap success 17%
+  2026-09-03 $300: n=1694 mean +27.4% p5 -98% p25 -3% median -3% p75 +21% p95 +230% | loss > 50%: 7.9%  loss > 90%: 5.7%  gain > 100%: 13.4%
+
+(d) fee charged by the curve, from the Buy/Sell event fee field, Sep 3 sample
+  fee / quote: median 1.000% p10 1.000% p90 1.020% (n=20000)
+
+(e) regime-switch robustness: net $ per window at $300, base filter, by lookback N and threshold T (trade live while mean of last N scores >= T)
+N/T           08-12      08-20      08-27      09-02      09-03
+ 20/  0%        -133      1,180      6,919     31,917     63,322
+ 20/  2%         -43      1,125      6,293     30,743     62,755
+ 20/  5%           0        448      4,494     28,254     61,279
+ 20/ 10%           0        446      1,649     26,719     55,365
+ 30/  0%        -104      1,176      6,264     36,565     62,602
+ 30/  2%         -10        566      5,800     36,173     62,032
+ 30/  5%           0        543      4,878     34,042     60,260
+ 30/ 10%           0        408      2,452     29,808     59,093
+ 50/  0%         -73        890      6,488     39,235     62,647
+ 50/  2%          -7        476      6,156     36,352     62,154
+ 50/  5%           0        547      5,039     35,868     60,717
+ 50/ 10%           0         14      1,482     29,972     59,088

@@ -9,12 +9,14 @@ overlap (how often a hold is still open when the next qualifying launch arrives)
 maximum drawdown, the rolling-score regime switch (trade live only when the mean outcome of the last N scored launches
 is above THRESH; every launch is always scored) against always-on, and a compounding schedule.
 
-usage: python3 sniper_capacity.py [GAS_USD_PER_ROUND_TRIP]   (run from the data root)
+usage: python3 sniper_capacity.py [GAS_USD_PER_ROUND_TRIP] [SUPPLY_FRACTION]   (run from the data root)
 """
 import json, glob, bisect, datetime, collections, statistics as st, random, sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import sniper_core as _core
 
 random.seed(0)
 GAS = float(sys.argv[1]) if len(sys.argv) > 1 else 1.0
+FRAC_SUPPLY = float(sys.argv[2]) if len(sys.argv) > 2 else 0.05   # share of supply the bot buys, capped by the stake
 HERE = os.path.dirname(os.path.abspath(__file__))
 tm = json.load(open(os.path.join(HERE, "..", "..", "data", "derived", "token_metrics.json")))
 DEC = {"native": 18, "0x0bd7d308f8e1639fab988df18a8011f41eacad73": 18, "0x5fc5360d0400a0fd4f2af552add042d716f1d168": 6, "0xc1a0957594a80aa55a12e76ae4cdf513e84301c7": 6}
@@ -88,7 +90,7 @@ def sim(cv, creates, trades, quotes, stake, hold=7.0, tp=None):
     p_in = q1 / tk1; q = quotes.get(cv, "native"); pu = usd(p_in, q)
     if pu is None:
         return None
-    tk_bot = 0.03e9
+    tk_bot = FRAC_SUPPLY * 1e9
     if tk_bot * pu > stake:
         tk_bot = stake / pu
     cost = tk_bot * p_in * 1.01
@@ -125,7 +127,8 @@ def ci(v, B=400):
 DAYS = ["2026-08-12", "2026-08-20", "2026-08-27", "2026-09-02", "2026-09-03"]
 STAKES = [20, 50, 100, 200, 300, 500, 1000, 2000]
 data = {d: load(d) for d in DAYS}
-print(f"gas ${GAS:.2f} per round trip; rule: creator's first launch today, ETH-quoted, buy at the first non-creator price, 3% of supply capped at the stake, exit 7 s later\n")
+_core.GAS = GAS
+print(f"gas ${GAS:.2f} per round trip, {100 * FRAC_SUPPLY:.0f}% of supply, every eligible launch bought (followed or not); rule: creator's first launch today, ETH-quoted, buy at the first non-creator price, 3% of supply capped at the stake, exit 7 s later\n")
 print("(a) per-launch ROI and net $ per six-hour window by stake (base filter; 'stake' column = creator buy >= 5% of supply filter at the same stake)")
 print(f"{'window':10s} {'stake':>6s} {'n':>4s} {'mean ROI':>9s} {'CI':>12s} {'median':>7s} {'win':>4s} {'net $':>8s} {'$/launch':>8s} {'overlap':>7s} {'max DD $':>8s} || {'n':>4s} {'mean ROI':>9s} {'net $':>8s} {'max DD $':>8s}  (creator buy >= 5%)")
 results = {}
@@ -140,9 +143,9 @@ for day in DAYS:
             for cv in elig:
                 if not flt(cv):
                     continue
-                r = sim(cv, creates, trades, quotes, stake)
+                r = _core.sim_all(cv, creates, trades, quotes, stake, 7.0, FRAC_SUPPLY)   # every eligible launch, followed or not
                 if r:
-                    rows.append(r)
+                    rows.append(r[:4])
             rows.sort(key=lambda r: r[2])
             if len(rows) < 20:
                 cols.append(None); continue
@@ -200,5 +203,6 @@ for day in ("2026-09-02", "2026-09-03", "2026-08-27", "2026-08-20"):
                 near = min(by_stake, key=lambda s_: abs(s_ - stake)); rr = by_stake[near].get(t_in)
                 if not rr:
                     continue
-                bank += stake * (rr[0] / rr[1]); busy = rr[3]; path.append(bank); n += 1
+                deployed = min(stake, rr[1])                  # the 3%-of-supply cap: the trade deploys the simulated cost, not the whole stake
+                bank += deployed * (rr[0] / rr[1]); busy = rr[3]; path.append(bank); n += 1
             print(f"  {day} {flab:20s} start ${start:>5,} sizing {100 * FRAC:.0f}%: end ${bank:8,.0f} after {n:3d} trades, low ${min(path):,.0f}{' (daily stop hit)' if stopped else ''}")

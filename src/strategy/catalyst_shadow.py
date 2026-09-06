@@ -3,8 +3,8 @@
 
 Listens to the fomo alerts WebSocket. On every buy alert from a trader whose audience is at least MINF followers
 (from the leaderboard files), it starts a 60-minute price watch on DexScreener (one poll every 20 s) and simulates the
-rule exactly: entry at the first polled price (about 20-40 s after the alert, the latency of a person reacting to the
-app), stop -22%, take-profit +50%, trailing stop 25% below the running high once +30% is reached, exit at 60 minutes
+rule: entry at the first polled price that differs from the pre-alert quote (DexScreener lags the chain, so the first
+reading after an alert is the pre-fill price; section 20), typically 20-60 s after the alert, stop -22%, take-profit +50%, trailing stop 25% below the running high once +30% is reached, exit at 60 minutes
 otherwise, costs 3% round trip. Logs each finished trade to data/derived/catalyst_shadow.jsonl.
 
 usage: python3 catalyst_shadow.py [MINF]   (run from the data root with fapi/lb/*.json)
@@ -42,13 +42,20 @@ def price(chain, addr):
 def watch(alert):
     addr = alert.get("tokenAddress"); chain = CHAIN.get(alert.get("chain")); key = (alert.get("trader"), addr)
     t_alert = (alert.get("ts") or alert.get("_recv") or time.time() * 1000) / 1000
-    e = None; hi = None; liq = None; path = []
+    e = None; hi = None; liq = None; path = []; p_first = None; t_first = None
     t_end = time.time() + 3600; why = "time"
     while time.time() < t_end:
         px, lq = price(chain, addr)
         now = time.time()
         if px:
+            # audit fix (section 20): DexScreener's price lags the chain by seconds to a minute, so the first poll after the alert
+            # returned the price BEFORE the poster's own fill and the shadow "bought" at a price nobody could get. Enter only once
+            # the quoted price has moved from that first reading (the post-fill print), or after 90 s at whatever it shows.
+            if p_first is None:
+                p_first = px; t_first = now; time.sleep(5); continue
             if e is None:
+                if px == p_first and now - t_first < 90:
+                    time.sleep(5); continue
                 e = px; hi = px; liq = lq; t_in = now
             else:
                 hi = max(hi, px); r = px / e - 1
@@ -69,7 +76,7 @@ def watch(alert):
             r = -0.22
         elif why == "tp":
             r = 0.50
-        rec = {"trader": alert.get("trader"), "followers": lb.get((alert.get("trader") or "").lower(), {}).get("followers"), "token": alert.get("token"), "addr": addr, "chain": alert.get("chain"), "usd": alert.get("usdValue"), "t_alert": t_alert, "t_in": t_in, "entry_delay_s": round(t_in - t_alert), "entry": e, "liq": liq, "exit_reason": why, "ret_gross": r, "ret_net": r - 0.03, "mfe": hi / e - 1, "hold_s": round(time.time() - t_in), "path": path[::3]}
+        rec = {"trader": alert.get("trader"), "followers": lb.get((alert.get("trader") or "").lower(), {}).get("followers"), "token": alert.get("token"), "addr": addr, "chain": alert.get("chain"), "usd": alert.get("usdValue"), "t_alert": t_alert, "t_in": t_in, "entry_delay_s": round(t_in - t_alert), "entry": e, "pre_alert_price": p_first, "entry_vs_pre": (e / p_first - 1) if p_first else None, "liq": liq, "exit_reason": why, "ret_gross": r, "ret_net": r - 0.03, "mfe": hi / e - 1, "hold_s": round(time.time() - t_in), "path": path[::3]}
     with open(OUT, "a") as f:
         f.write(json.dumps(rec) + "\n")
     print(time.strftime("%H:%M:%S"), "done", rec.get("trader"), rec.get("token"), rec.get("exit_reason"), rec.get("ret_net"), file=sys.stderr, flush=True)

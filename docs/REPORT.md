@@ -21,6 +21,7 @@ Everything below was computed from data collected in this session; scripts are i
 15. **Round 9 left the leaderboard behind and scored the whole app: every fomo wallet that traded in a seven-hour window, then eight weeks of history for the ones that looked consistent, and a random sample as the base rate (section 17).** 11,738 wallets traded through the fomo entry point on Sep 3, 12:00–19:00 UTC; the 5,431 with priced buys spent $5.0M and received $1.6M, net −$3.5M with unsold tokens at zero and +$0.17M with them marked; the best wallet realized $4.5k in the window. The 251 that looked best were followed back to Jul 13: $1.07M realized between them, 89% of it in the week of Aug 31, and negative in five of the six weeks before Aug 24. Four wallets in 251 were positive in all but one of five or more weeks with $5k or more; one was consistent before the mania ($24k over five weeks, then $102k in it). A random sample of 120 app wallets realized a median of $0 over the eight weeks, none above $5k. What the winners do is the same for all of them: days-old, liquid, leaderboard memes, never the first hour, hold hours to days, small clips, many partial exits, with the profit in two or three tokens per wallet. Random timing on the same tokens over the same holds earns what they earned (pooled timing alpha −3.5% median), so the money is being long the right names in the two mania weeks. The one wallet whose behaviour is a rule, buying 20–25% dips in liquid names and turning $1.3M over for $63k, made 117% of its profit in its ten best trades, and its rule fails on a hindsight-free universe (−0.5% to −7.7% on every v4 pool of Sep 3) exactly as section 5's did. Nobody in the sampled population is making $30–100k a month from a repeatable rule.
 16. **Round 10 tested the influencer-catalyst scalp exactly as its author describes it (section 18): the second an influential, trustworthy person does something, size in, stop −22%, sell into the crowd at +50% or on a trailing stop.** On the 276 leaderboard fills matched to exact pool swaps, with every swap of the pool for the following half hour, the rule is −1.6% per trade for a $500 clip entering 3 s behind the fill (bot speed), −5.8% at 15 s, −11.0% at 60 s (app speed); for the audience over 100k followers −2.4%, −7.1%, −12.9%; at $2,000 clips −19% to −29%, at $5,000 −55% to −64%, because the median pool is $30k deep. The only cohorts near zero are the deepest pools (+2.9% at $500, −0.3% at $5,000) and the three posters above 300k followers (+6.5% on 16 trades, interval −9% to +25%). Entering ten to thirty minutes *before* the fill, which only the poster can do, returns +11.6%: the strategy is the poster's seat seen from behind. The author's own fomo handle draws 3,124 follower swaps within ten minutes of a fill and sells inside ten minutes two times in three; his scanned Solana wallet shows 53 completed tokens, 36% winners, $137k net over seven months, $125k of it one token. A live shadow on the real-time feed is running.
 17. **Round 11 made the sniper executable from a $300 bankroll (section 19, `docs/SNIPER_RUNBOOK.md`, `src/strategy/sniper_engine.py`).** A simulator bug that valued the seven-second exit after the next event was found and fixed; corrected, the first-in-line rule is positive on four of five windows (Aug 20 +4%, Aug 27 +7%, Sep 2 +17%, Sep 3 +35% per trade at $300 stakes, Aug 12 flat) and every window is non-negative with a regime switch that trades only while the mean of the last 30 scored launches is above +5%. Gas is ≈ $1 a round trip, which sets a $50 floor on the stake; returns are flat from $100 to $300 and fall above $500. The creator-stake filter (launch-block buy ≥ 5% of supply) earns +24% and +48% per trade on the two flow days on a quarter of the launches. Compounding from $300 with 20% sizing, one position at a time, switch and a −30% daily stop: $32k–83k on Sep 3, $15.6k on Sep 2 with the filter, $5.5k on Aug 27, $600 on Aug 20, a stop on Aug 12. The engine detects creations from the sequencer feed, filters, sizes, builds the exact unsigned buy/approve/sell transactions and scores every launch for the switch; from this sandbox it resolves a creation in 630–1,150 ms, which its own gate refuses, so the machine must sit near the sequencer. The send step is left to the operator, and the subsidy that makes gas cheap ends in October.
+18. **Round 12 audited the sniper with three independent auditors and an exact rebuild of the bonding curve (section 20), and the answer changed.** The curve is constant-product with 1.68 ETH / 1e9 virtual reserves (exact to 1e-15); every token has a creator-set 1–5% fee on both legs; the snipe tax is keyed to whole seconds (93–98% in the creation second, +6.18% the next, +0.19% the one after) and **wallets the creator names in the creation calldata are exempt**: all sampled untaxed first-block buyers are on their launch's list. The first-in-line seat of sections 14 and 19 (+36% a trade on the exact curve on Sep 3) is therefore the launch team's own bundle, not a seat an outsider can take. The first legal outside seat (next second, +6.18%) is −5% to +3% across the five windows and negative 0.3 s behind; filtered to launches whose bundle bought with three or more wallets it earns +5% to +10% a trade on the two peak days from Ohio latency (about $8k in six hours on $300 stakes, in-sample filter), about zero otherwise, and from $50 all-in it reaches $300 one time in three at best. Engine v2 shares the curve, fee, seat, filter, sizing and scoring with the simulator, sells the receipt's balance, and refuses the creation-second seat without the exemption.
 12. **Round 6 found the treasure's real owner and measured its seat: the first-block sniper.** The 185 sniper-bot wallets that pay the creators are not all losers. Reconstructing the dollar P&L of the fifteen busiest from their transfers, curve trades and pool swaps: the bots that buy 0.3–3 seconds after launch and sell 3–21 seconds later are net positive (the fastest: +$30.8k on $107k of turnover in six hours, +28.7% per trade, 175 launches, nothing left unsold); every bot that holds minutes or hours loses (−44% to −94%). Simulating that seat on every launch of the window with launch-time filters (creator's first launch of the day, ETH-quoted, stake min(3% of supply, $300), sell 7 s later into whoever bought next, exact curve exits, 1% fees each way) gives +27% on $97k in the fitting hours and +32% on $98k in the holdout hours, per-launch mean +27%/+33% with confidence intervals of +20% to +41%, median −2%, 46–48% of launches positive, worst case one stake. That is $26k and $31k of profit per three hours on a working capital of a few thousand dollars, and it reproduces the fastest real bot's holdout result (+31%). The sensitivity analysis says what it is: paying 10% more than first-in-line still earns +18–23%, paying 25% more earns +6–10%, paying 50% more or landing half a second late loses. It is a latency race for the first block after creation, on a chain with 100 ms blocks, sponsored gas and a first-come sequencer; the winner takes +30% a trade several hundred times a day and everyone behind them pays. Out of sample on Sep 2 (a lower-flow day) the same untouched rule made +0.4% in the first three hours and +15% in the next three. Three further windows across the fee cycle (section 14.2) then showed the seat is a peak-flow phenomenon: −13% in Pons V2's second week (Aug 12), flat at the trough (Aug 20) and on the ramp (Aug 27), positive only on the two peak days. It is not a structural edge. Section 14 has the tables and a live shadow tester that scores every new launch against the rule without capital.
 
 ## 1. Data access and what was analysed
@@ -855,3 +856,175 @@ The signing and broadcasting step. It is a few lines for whoever holds the key, 
 ### 19.7 Verdict
 
 With the exit valued correctly, the first-block seat is the best return per dollar in this study on every flow day and about zero on the others, and a switch built from the seat's own live scores separates the two. From $300 it is a machine near the sequencer, a wallet, a send function, and October's expiry.
+
+## 20. Round 12: the audit that changed the answer
+
+Section 19 said the first-block sniper was executable from $300. This round audited that claim with three independent
+auditors (infrastructure and region; live-versus-backtest gap and ruin odds; simulator correctness), triple-checked every
+flag against the chain, and rebuilt the simulator on the exact bonding curve. The audit found the curve, the fees and
+the snipe tax exactly, and then found the thing that matters most: **the seat sections 14 and 19 measured cannot be
+taken by an outside wallet.** What is left for an outsider is smaller, later, filtered and peak-day-only, and it is
+written up here with the same care as the original claim. Scripts: `src/analysis/sniper_exact.py` (exact replay),
+`sniper_compound.py` (switch, compounding, ruin), `sniper_audit.py`, `sniper_capacity.py` (LIFO capacity, kept for
+comparison); outputs in `data/derived/sniper_exact.txt`, `sniper_compound.txt`, `sniper_bundle_filter.txt`,
+`sniper_audit.txt`; engine v2 in `src/strategy/sniper_engine.py`; runbook v2 in `docs/SNIPER_RUNBOOK.md`.
+
+### 20.1 The curve, exactly
+
+Pons V2 curves are constant-product with virtual reserves **X0 = 1.68 ETH and Y0 = 1e9 tokens**. Fitted on the creator's
+launch-block buy of 1,896 Sep 3 curves the median is 1.6800 ETH (p10 1.6800); the curve contract's own getter
+(selector `0xc57eadfc`) returns 1.68e18. With that state every later buy is predicted to 1e-15 at the 1% and 1.19% fee
+tiers and to 6e-4 at 7.18%, and every sell's gross is predicted exactly; the sell event's `quoteOut` is net of fee. The
+creation event's `(q0, tk0)` are the creator's launch-block buy, not the reserves (section 19 read them correctly as the
+first layer). Two things the LIFO simulator did not know:
+
+- **Every token has its own creator-set trading fee**, 1% to 5% of the quote on both sides, exposed by the curve getter
+  `0x24a9d853` in basis points (100 = 1%) and readable from the launch-block Buy event's fee before anyone else trades.
+  On the eligible launches: Sep 3 46% at 1%, 24% at 2%, the rest 2.5–5%; Aug 12 66% at 1%. The flat 1% of sections 14
+  and 19 under-charged 40–60% of launches on both legs.
+- **The snipe tax is keyed to whole timestamp seconds, not to milliseconds.** The factory reports `snipeTaxStartBps =
+  9900` and `snipeTaxSeconds = 3` (the public docs say 99% decaying over five seconds, which is out of date). Measured
+  on 45 early buys with their real block timestamps: a buy in the **same second as the creation pays 93–98%**, in the
+  next second **+6.18%** on top of the token's fee, in the second after that **+0.19%**, then nothing. Within a second
+  the block does not matter (buys 3 to 18 blocks after creation all paid exactly 6.18% when stamped one second later).
+
+### 20.2 Who pays no snipe tax, and why that closes the seat
+
+Among 400 outside buys in the first 20 blocks after creation on Sep 3, 225 paid **no** surcharge at any delay,
+including inside the creation second, and 175 paid the schedule. It is not the token (392 curves have both kinds), not
+the path (both classes call the curve directly), not the size. It is the address: of 62 senders seen on two or more
+curves, 62 are always taxed or always untaxed. The public v2 documentation says the creator "can name further
+addresses at creation for a team bundling its opening buys", fixed at creation. **All 8 sampled untaxed first-second
+buyers appear, address for address, in their launch's creation calldata**, whose length varies with the size of that
+list (39–40 words without one, 44–57 with one). The untaxed wallets buy launches of 27 different creators and 44 of the
+188 are themselves creators of other tokens in our windows: launch operators rotating creator and bundle wallets.
+
+So the "first-in-line" buyer of sections 14 and 19, whose price the rule assumed it could take, is the launch team's own
+bundle. An outside wallet that lands in the creation second pays 93–98% and is wiped out; the earliest legal outside
+seat is the first block of the next second, at +6.18%, behind every bundle wallet. The fastest bot of section 14
+(+28.7% a trade) is such a bundle: 12 of its early buys carried the 7.18% fee, i.e. the +6.18% surcharge on a 1% token,
+and it still won because it was first *among the outsiders* on peak days. The seats are therefore:
+
+| seat | who | when | surcharge |
+|---|---|---|---|
+| E0 | creator's named wallets only | creation second | none |
+| E1 | fastest outsider | first block of the next second | +6.18% |
+| E2 | slower outsider | first block of the second after | +0.19% |
+
+### 20.3 What the auditors flagged, and what survived a triple check
+
+| flag | verdict | effect |
+|---|---|---|
+| exit valued after the next event | confirmed, fixed (19.1) | large |
+| compounding credited ROI-on-cost to the whole stake | confirmed, fixed | table inflated 1.4–2.3× |
+| launches with no follower within 3 s were skipped (post-entry selection) | confirmed; every eligible launch is now traded | Sep 3 +34.6 → +26 % on the LIFO model |
+| 3% cap binds on 97% of launches: return on stake is half the return on cost | confirmed; tables now show net $ and cost | reporting |
+| engine sold `min_out` instead of the balance (34% left unsold) | confirmed; engine v2 sells the receipt's tokens | large |
+| engine scorer used wall clock and log order | confirmed, fixed | small |
+| LIFO exit is an artefact: exact replay ranges +5.7% to +65.7% | confirmed; the exact replay replaces LIFO | the E0 seat on the exact curve is +36.5% (Sep 3), close to LIFO by coincidence |
+| block-time interpolation ±20% | confirmed; ±2 pp; engine (block count) and simulator (interpolated) agree to 0.1 pp on the mean | small |
+| entry fee double-charged, layers gross | confirmed; −0.1 to −0.4 pp | small |
+| switch used the previous launch's outcome before it was known | confirmed; scores now available 20 s after exit | ≤11% of net |
+| 630–1,150 ms resolution from the sandbox puts the engine in the loss bucket | confirmed from here; the machine must sit in Ohio (20.8) | decisive |
+| "quoteIn is post-tax, tx value ≫ quoteIn" | refuted: one splitter contract emits 2–3 Buy events per transaction whose sum equals the value | none |
+| "99% tax makes 300 ms the wrong goal" | partly right for the wrong reason: the tax is per second and the barrier is the exemption (20.2) | decisive |
+| Maestro / GMGN on Robinhood Chain at 1% | confirmed (Maestro announced Pons V2 support; 1% flat) | fallback only |
+| region: sequencer in AWS us-east-2 (Ohio), FCFS, 100 ms blocks | as reported | plan |
+| Robinhood Chain terms of use, automated-trading clause | ambiguous; flagged, not resolved | operator's call |
+
+### 20.4 The seats on the exact curve, five windows
+
+Exact replay, $300 stake, hold 7 s, gas $1, every eligible launch (creator's first launch of the day, ETH-quoted),
+per-token fee on both legs, the seat's surcharge, later buyers spend the same ETH on the modified curve and revert
+beyond a 10% shortfall, dropped buyers cannot sell, the sniper's sell lands 0.3 s late. Mean ROI on cost per launch;
+`data/derived/sniper_exact.txt` has the confidence intervals, net dollars and every variant.
+
+| seat, 3% of supply | Aug 12 | Aug 20 | Aug 27 | Sep 2 | Sep 3 |
+|---|---|---|---|---|---|
+| E0 (named wallets only) | +0.6 | +4.0 | +9.4 | +26.1 | +38.2 |
+| E0, 0.3 s behind the first bundle buy | +0.2 | −1.7 | +3.1 | +5.0 | +7.6 |
+| **E1, first outsider (+6.18%)** | **−5.0** | **−7.0** | **−0.2** | **+1.6** | **+3.2** |
+| E1, 0.3 s behind the first outsider | −6.0 | −8.1 | −2.9 | −2.9 | −1.4 |
+| E2, first of the next second (+0.19%) | +0.7 | −1.6 | +4.2 | +3.8 | +3.8 |
+| E2, 0.3 s behind | −2.7 | −3.1 | +0.2 | −1.1 | −0.7 |
+
+The E0 row reproduces section 19's headline (it is what the LIFO model measured, corrected for the fee tiers); it is the
+launch team's return on its own launches. The outsider's seats are within a few points of zero on every window, and
+negative 0.3 s behind. Five percent of supply is worse on every outsider row (impact); eight percent is negative
+everywhere.
+
+### 20.5 The one filter the outsider can see in time: bundled launches
+
+The E1 decision is taken at the second boundary, after the creation second's blocks are on the feed. Those blocks show
+how many wallets the creator's bundle bought with. Launches where **three or more named wallets bought inside the
+creation second** (6–20% of eligible launches on the five windows; the bundle's median outlay 0.33–0.79 ETH) are the
+ones the follow-on flow chases (`sniper_bundle_filter.txt`):
+
+| bundle ≥ 3, 3% of supply | Aug 12 | Aug 20 (n=17) | Aug 27 (n=85) | Sep 2 (n=303) | Sep 3 (n=400) |
+|---|---|---|---|---|---|
+| E1, front | none | −4.5 | +2.4 | +9.1 [+4,+15] | +14.8 [+10,+21] |
+| **E1, 0.3 s behind** | none | −6.2 | −1.9 | **+5.1 [0,+11]** | **+10.4 [+6,+15]** |
+| E1, 0.75 s behind | none | −4.7 | −4.3 | +2.1 | +5.9 |
+| E2, front | none | +2.9 | +2.3 | +8.9 | +11.4 |
+| E2, 0.3 s behind | none | −0.4 | +0.2 | +6.2 | +8.0 |
+
+Thresholds 2, 4 and 6 give the same picture. Between the E1 seat and its exit on those launches (Sep 3), 284 ETH of
+buying carries no surcharge (the bundle's own later buys inside 3 s, and anyone after 3 s) against 19 ETH from
+surcharged outsiders: the outsider is riding the bundle's pump for seven seconds and selling into it. Two cautions:
+the filter was chosen on these five windows (it is a natural hypothesis, and it is monotone in the threshold, but it
+is in-sample), and it only pays on the two peak-flow days.
+
+### 20.6 Switch, compounding and ruin, on the exact trades
+
+`sniper_compound.py` replays the exact-curve trades in time order with the regime switch (mean of the last 30 scores
+≥ +5%, each score available 20 s after its launch's exit), one position at a time, stake = 20% of bankroll clamped
+$50–$300, deployed = min(stake, simulated cost), a −30% daily stop.
+
+| E1 on bundled launches, 0.3 s behind, 3% | Aug 20 | Aug 27 | Sep 2 | Sep 3 |
+|---|---|---|---|---|
+| always-on, $300 stakes, 6 h | −$180 | +$122 | +$4,811 | +$11,691 |
+| switched, one at a time | $0 (never on) | −$242 | +$265 | +$8,015 |
+| from $300, 20% sizing | $300 | $236 | $193 (stop) | $6,136 |
+| from $1,000, 20% sizing | $1,000 | $774 | $654 | $8,714 |
+| from $50, all-in: chance of reaching $300 before $25 | 0% | 5% | 23% | 33% |
+
+For comparison the E0 seat (the launch team's) compounds $300 into $63k on Sep 3 and reaches $300 from $50 96% of the
+time; that is the table section 19 printed, and it is not available to the reader.
+
+### 20.7 The engine, version 2
+
+`src/strategy/sniper_engine.py` now: sizes on the exact curve (virtual reserves, per-token fee assumed at the worst
+common tier, the seat's surcharge); takes the seat (E0 refuses to start unless `EXEMPT=1`; E1 waits for the first feed
+message stamped in the next whole second, counts the creation second's direct curve buys on the feed and trades only if
+they number at least `BUNDLE_MIN`); builds the buy with `minOut` at the sized tokens less `SLIP`, so a landing in the
+wrong second reverts for gas instead of paying 95%; live, reads the tokens received from the buy's own event, approves
+the curve immediately so the exit is one 81k-gas transaction, and sells that balance HOLD seconds after the buy
+landed; scores every eligible launch 25 s after creation with the simulator's replay (mean agrees to 0.1 pp on Aug 27
+and Sep 3) so the switch is fed the same way in the backtest, the dry run and live; in dry run the bankroll follows
+those scores. Still not built: signing and sending (`submit()` returns None), and a local sequencer-following node.
+
+### 20.8 Infrastructure
+
+The sequencer (`sequencer.mainnet.chain.robinhood.com`) is in AWS us-east-2 (Ohio), first-come-first-served, no
+priority fee, 100 ms blocks, and publishes `wss://feed.mainnet.chain.robinhood.com`. From this sandbox the engine
+resolves a creation in 550–1,150 ms, which is the losing bucket on every row above; the seat requires an EC2 instance
+in us-east-2, the feed for detection, a nearby RPC (a provider endpoint in Ohio, or better a Nitro node following the
+feed on the same machine, which makes the curve resolution a local call) and direct submission to the sequencer. Gas
+is ≈ $1 a round trip at 0.5 gwei (buy ~450k, approve ~46k, sell ~81k gas); Robinhood's gas subsidy applies to its own
+wallet's swaps, not to bots. Telegram bots (Maestro announced Pons V2 on Robinhood Chain at a flat 1%; GMGN lists the
+chain) trade from a phone with no seat control and no second-gating: usable to place a manual test buy, not to run this
+rule. The chain's terms of use have an automated-trading clause whose scope is ambiguous; it is flagged, not resolved.
+
+### 20.9 Verdict
+
+- The treasure of sections 14 and 19 is real and it is the launch team's: the creator's named wallets buy tax-free in
+  the creation second and sell into the outsiders seven seconds later. That is the creator's seat of section 13 seen
+  from its bundle wallets, and it is the launch-and-dump this project declined to automate.
+- The best outside seat is the first block of the next second, on launches whose bundle bought with three or more
+  wallets, from a machine in Ohio. On the exact curve it earns +5% to +10% a trade on the two peak-flow days (a few
+  thousand dollars on $300 stakes over six hours), about zero on the ramp, and nothing off-peak; the switch keeps the
+  off-peak days near zero. The filter is in-sample. Starting from $50 all-in it reaches $300 one time in three at best.
+- Backtest = paper = live is now true in the sense the brief demanded: the engine and the simulator share the curve
+  model, the fee model, the seat, the filter, the sizing and the scoring, and the dry run measures the one thing the
+  backtest cannot, resolution latency. The remaining gap is the race for the first block of second one, which only a
+  live wallet in Ohio can measure.
