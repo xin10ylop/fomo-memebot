@@ -1053,8 +1053,13 @@ round. Exact curve, $300 stakes, 3% of supply, sell 0.3 s late; "behind" means 0
 | **Sep 6 (new)** | 1,695 | 21% | +9.4% [+4,+14] | +2.5% [−2,+7] | +5.8% [+1,+11] | +0.9% [−4,+6] | **$2.9k** |
 | **Aug 31 (new)** | 1,502 | 21% | +2.2% [−2,+7] | +1.1% [−4,+6] | +6.2% [+2,+12] | +2.6% [−2,+8] | **$0.5k** |
 | **Sep 1 (new)** | 1,912 | 18% | −2.1% [−8,+3] | −6.0% [−10,−1] | −2.3% [−6,+2] | −4.7% [−9,0] | **−$0.7k** |
+| **Sep 3, 00–06 UTC (night)** | 1,909 | 13% | +2.4% [−3,+9] | −0.9% [−6,+5] | +4.2% [−1,+10] | +0.4% [−5,+6] | **−$0.3k** |
+| **Sep 3, 18–24 UTC (evening)** | 2,674 | 22% | +11.5% [+7,+16] | +7.4% [+3,+12] | +10.1% [+6,+14] | +5.9% [+2,+10] | **$2.5k** |
 
-What the new days add. The filter survives out of sample on four of six new windows (Sep 6, the day this was
+The off-hours windows say the launchpad does not sleep: 1,909 launches between midnight and 06:00 UTC on Sep 3 and
+2,674 between 18:00 and 24:00, the busiest window of the thirteen. At night the bundled seat is about zero (the
+switch holds the window to −$311 at E2 behind) and the unfiltered seats lose 5–6% a trade; in the evening every
+outsider cell pays (+5.9% to +11.5%), with $2.5k to $11.6k switched. What the new days add. The filter survives out of sample on four of six new windows (Sep 6, the day this was
 written, is +9.4% at the front and +2.5% behind on 364 bundled launches, $2.9k to $6.6k switched; Aug 31 is small
 but positive on every outsider cell, $0.5k to $3.7k switched; Sep 1 loses on every outsider cell, −$0.6k to −$0.9k
 switched): every bundled-launch cell is

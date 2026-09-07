@@ -48,6 +48,10 @@ dollar is sent.
 | **E2, 0.3 s behind** | −0.4% | +0.2% | +0.4% | +2.6% | −4.7% | +6.2% | +8.0% | **+9.6%** | **+4.2%** | **+0.9%** |
 | switched, one at a time, E2 1 block behind | $0 | −$67 | −$706 | +$1,897 | −$1,181 | +$2,439 | +$6,956 | +$3,085 | +$3,561 | +$3,517 |
 
+Off hours, Sep 3 (bundled seat, E2 one block behind): 00–06 UTC 1,909 launches, about zero (−$311 switched at
+0.3 s behind); 18–24 UTC 2,674 launches, +5.9% to +10.1% a trade, $2.5k to $10.9k switched. The launchpad is busy
+around the clock; the switch, not the clock, decides when to trade.
+
 Sum over the eleven windows (66 hours), switched and one position at a time: bundled seat $23.7k at the front and
 $19.5k one block behind; every launch without the filter $38.0k at the front but $14.7k one block behind and $8.7k
 three blocks behind (`data/derived/sniper_e2front.txt`).
