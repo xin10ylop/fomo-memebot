@@ -31,8 +31,11 @@ dollar is sent.
    boundary, requires that **no wallet outside the named list bought the curve during second one** (`OUT1_MAX=0`;
    section 21.6: those are the bots that sell during our hold). Then it sends for the seat's second (`SEAT=E2`: two
    seconds after the creation's timestamp).
-4. Buy 3% of supply or the stake, whichever is smaller, sized on the exact curve with the fee assumed at 5% + 6.18%;
-   `minOut` = sized tokens × (1 − `SLIP`), so a landing in the wrong second reverts for gas rather than paying 95%.
+4. Buy 3% of supply or the stake, whichever is smaller, sized on the curve **as the feed shows it at send time** (the
+   creator's buy, the bundle and every later buy and sell applied to the exact curve), with the fee assumed at 5% +
+   the seat's surcharge; `minOut` = sized tokens × (1 − `SLIP`, 25%), so a landing in the wrong second reverts for gas
+   rather than paying 95%, and a price that ran more than 25% in the 0.3 s before we land refuses the trade (0.8–5.7%
+   of trades, section 21.9).
 5. Read the tokens received from the buy's Buy event; approve the curve at once; sell that balance 7 s after the buy
    landed, in one transaction.
 6. Every rule-passing launch is scored 25 s after creation with the simulator's replay. The engine keeps trading unless
@@ -136,7 +139,9 @@ rolling mean, the switch state, and the dry-run bankroll). Go/no-go from that lo
 - the switch turning on and off as the flow changes rather than sitting on.
 
 The send step is yours: replace `submit()` with a function that signs with your key and calls
-`eth_sendRawTransaction`, returning the hash. On the first live trade verify, from the receipt: the Buy event's fee ÷
+`eth_sendRawTransaction`, returning the hash. Sign the sell as soon as the buy's receipt is in (the engine builds it
+with the next nonce) and keep a second endpoint to send it through if the first fails: a token held past the dump is
+the one loss the tables do not contain. On the first live trade verify, from the receipt: the Buy event's fee ÷
 quoteIn equals the token's tier + 6.18% (if it is 93–98% you landed in the creation second: stop and fix the
 second-boundary wait); tokens received within `SLIP` of the sized tokens; the approve landed before the hold ended; the
 sell moved exactly the balance. Then compare the first 30 live scores with the first 30 engine scores of the same

@@ -1297,3 +1297,29 @@ exist for the day the seat stops working, not for ordinary variance.
    before losing half of it is 16–68% by window (`rule_plan.txt`): still a lottery ticket below $300.
 5. Everything above is the backtest side; the engine now trades this exact universe in its dry run, so the first days
    in Ohio will show whether the live scores match these tables before any money moves.
+
+### 21.9 "Do we always get filled?"
+
+On a bonding curve a buy that lands executes; there is no counterparty to disappear. "Filled" therefore means landing
+in the seat's second with a `minOut` the price at that moment satisfies. Three things decide that, and one of them was
+wrong in the engine until this section.
+
+- **The sizing bug.** The engine sized the buy on the curve's state right after the creator's launch buy. By the time
+  it sends, two seconds later, the bundle (0.3–0.8 ETH into reserves of about 1.7 ETH) and the team's follow-up buys
+  have moved the price 30–60% higher; the sized ETH would have bought far fewer tokens than intended and `minOut`
+  would have reverted most trades. The engine now rebuilds the curve's reserves from the feed at send time (creator
+  buy from the calldata, every buy of the curve with its ETH value, every direct sell with its token amount) and
+  sizes 3% of supply on that state, logging `price_vs_creator` on every decision. This is also what the simulator does.
+- **The minOut refusal.** The simulator now refuses a trade the way the live engine would: if the price it meets 0.3 s
+  behind the seat's start is more than `SLIP` above the price at the seat's start, the buy reverts for half a round
+  trip of gas. At the engine's 25% tolerance that refuses 0.8–5.7% of rule-passing trades per window and changes the
+  window's return by −1.1 to +0.7 points (Sep 1 +2.5 → +2.2%, Sep 3 evening +11.5 → +12.2%, Sep 6 +6.1 → +5.0%); at
+  a 10% tolerance it would refuse 2–16%. Twenty-five percent stays.
+- **The wrong second.** A buy stamped in the creation second reverts on `minOut` (the tax would take 95%), costing
+  gas only; a buy stamped in second one pays +6.18% and lands. Neither is in the backtest, which assumes we land where
+  we aim; the receipt-tuned margin exists to keep both rare, and `landing` events count them.
+
+The sell side always fills: `minOut` is zero, the approve is sent right after the buy confirms, and a dump landing
+just before our sell is priced into the 0.3 s exit slip. The operational exception is a box or endpoint failure during
+the seven seconds, which is why the runbook asks for the sell to be signed at buy time and sent through a second
+endpoint if the first fails.

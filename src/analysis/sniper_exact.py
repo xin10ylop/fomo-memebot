@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sniper_core as C
 
 X0, Y0 = 1.68, 1e9
+GAS_ETH = 0.0002                                                    # a reverted buy costs about half a round trip of gas
 BUY, SELL = "0xec36bf57", "0x8113d738"
 DAYS = ["2026-08-12", "2026-08-20", "2026-08-27", "2026-09-02", "2026-09-03"]
 _argv = sys.argv[1:] if __name__ == "__main__" else []
@@ -84,7 +85,7 @@ def load_exact(day):
     return launches, prior
 
 
-def replay(L, stake_eth, frac=FRAC, hold=HOLD, entry="E1", tol=None, exempt=False, lat=0.0, slip=0.0, replace=False, stop_sell_frac=None, no_follow=None):
+def replay(L, stake_eth, frac=FRAC, hold=HOLD, entry="E1", tol=None, exempt=False, lat=0.0, slip=0.0, replace=False, stop_sell_frac=None, no_follow=None, min_out_slip=None):
     """returns (pnl_eth, cost_eth, t_in, t_out, kind, displaced_buy_row_or_None)"""
     rows = L["rows"]; tier = L["tier"]; X, Y = X0, Y0
     t, k, q, tk, net, tax = rows[0]; X += net; Y -= tk                 # the creator's launch-block buy
@@ -101,6 +102,7 @@ def replay(L, stake_eth, frac=FRAC, hold=HOLD, entry="E1", tol=None, exempt=Fals
         idx = next((i for i in range(1, len(rows)) if rows[i][0] >= fb), len(rows)); t_entry = fb
     else:
         t_entry = rows[idx][0]
+    idx_seat = idx
     if lat > 0:                                                         # slower: behind everything that lands before t_entry + lat
         t_entry += lat; idx = next((i for i in range(1, len(rows)) if rows[i][0] >= t_entry), len(rows))
     displaced = rows[idx] if idx < len(rows) and rows[idx][1] == "B" and rows[idx][0] <= 3.0 else None
@@ -111,6 +113,15 @@ def replay(L, stake_eth, frac=FRAC, hold=HOLD, entry="E1", tol=None, exempt=Fals
         else:
             X -= r[4]; Y += r[3]
     fee = tier + (0.0 if exempt else target)
+    if min_out_slip is not None and lat > 0:                            # the engine sizes at the seat's start and reverts if the price it meets is more than min_out_slip higher
+        Xs, Ys = X0 + rows[0][4], Y0 - rows[0][3]
+        for r in rows[1:idx_seat]:
+            if r[1] == "B":
+                Xs += r[4]; Ys -= r[3]
+            else:
+                Xs -= r[4]; Ys += r[3]
+        if (X / Y) > (Xs / Ys) * (1 + min_out_slip):
+            return -GAS_ETH, 1e-9, t_entry, t_entry, "reverted", None
     tk_bot = frac * Y0
     net = X * tk_bot / (Y - tk_bot); gross = net / (1 - fee)
     if gross > stake_eth:

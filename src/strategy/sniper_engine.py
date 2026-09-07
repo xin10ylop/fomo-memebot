@@ -203,9 +203,28 @@ def seed_launched_today():
         log({"ev": "error", "stage": "seed", "err": str(e)[:200]})
 
 
-def size_buy(tk0, stake_eth, seat):
-    """exact curve after the creator's buy; returns (tokens targeted, net ETH into the curve, gross ETH to send, fee rate assumed)"""
+def curve_state(curve, tk0, feed_ts, seat):
+    """the curve's reserves at send time, rebuilt from the feed: the creator's launch buy (from the calldata), then every
+    buy of the curve seen on the feed (ETH value net of a 1% fee; exempt wallets pay no surcharge and outsiders in
+    second one are excluded by the gate) and every direct sell (token amount). Section 21.9: sizing on the post-creator
+    state alone under-buys by the whole bundle and trips minOut."""
     net0 = X0 * tk0 / (Y0 - tk0); X = X0 + net0; Y = Y0 - tk0
+    evs = [(at, "B", val) for ts_, to_, snd, val in list(state["recent_buys"]) if to_ == curve and ts_ >= feed_ts for at in [ts_]]
+    evs += [(at, "S", sz) for at, cv_, sz in list(state["recent_sells"]) if cv_ == curve and sz != float("inf") for at in [at]]
+    for at, k, v in evs:
+        if k == "B" and v > 0:
+            net = v * (1 - 0.01); tk = Y - X * Y / (X + net); X += net; Y -= tk
+        elif k == "S" and 0 < v < Y0:
+            g = X - X * Y / (Y + v); X -= g; Y += v
+    return X, Y
+
+
+def size_buy(tk0, stake_eth, seat, curve=None, feed_ts=None):
+    """exact curve at send time; returns (tokens targeted, net ETH into the curve, gross ETH to send, fee rate assumed)"""
+    if curve is not None:
+        X, Y = curve_state(curve, tk0, feed_ts, seat)
+    else:
+        net0 = X0 * tk0 / (Y0 - tk0); X = X0 + net0; Y = Y0 - tk0
     fee = TIER_ASSUMED + SURCHARGE[seat]
     tk = SUPPLY_FRAC * Y0; net = X * tk / (Y - tk); gross = net / (1 - fee)
     if gross > stake_eth:
@@ -397,7 +416,7 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named=frozen
     with lock:
         state["busy_until"] = time.time() + HOLD + 3
     stake_eth = stake_usd / state["eth_usd"]
-    tk, net, gross, fee = size_buy(tk0, stake_eth, SEAT)
+    tk, net, gross, fee = size_buy(tk0, stake_eth, SEAT, curve=curve, feed_ts=feed_ts)   # sized on the curve as the feed shows it now, not on the post-creator state
     amount_in = int(gross * 1e18); min_out = int(tk * (1 - SLIP) * 1e18)
     try:
         nonce = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); gas_price = int(rpc.call("eth_gasPrice", []), 16)
@@ -428,7 +447,8 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named=frozen
             return
     buy = {"to": curve, "value": hex(amount_in), "data": "0x" + BUY_SEL + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
     log({"ev": "trade_decision", "seat": SEAT, "curve": curve, "token": token, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), "bundle": bundle, "sent_ms": round((time.time() - seen_at) * 1000), "send_mode": send_mode, "feed_ts_at_send": state["feed_ts"], "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0), "stake_usd": stake_usd,
-         "amount_in_eth": amount_in / 1e18, "tokens_target": tk, "supply_share": tk / Y0, "min_out_tokens": min_out / 1e18, "fee_assumed": fee})
+         "amount_in_eth": amount_in / 1e18, "tokens_target": tk, "supply_share": tk / Y0, "min_out_tokens": min_out / 1e18, "fee_assumed": fee,
+         "price_vs_creator": round((curve_state(curve, tk0, feed_ts, SEAT)[0] / curve_state(curve, tk0, feed_ts, SEAT)[1]) / ((X0 + X0 * tk0 / (Y0 - tk0)) / (Y0 - tk0)), 3)})
     h = submit(buy, "buy"); t_buy = time.time(); tokens = tk
     with lock:
         state["traded"][curve] = min(stake_usd, gross * state["eth_usd"])
