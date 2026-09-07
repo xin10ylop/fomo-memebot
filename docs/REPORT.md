@@ -1265,3 +1265,35 @@ curve stamped in second one; `MIN_CREATOR_SUPPLY=0.01` from the calldata's initi
 the named wallets' transaction values on the feed), so the switch scores the same universe the engine trades. The
 sell selector and the fast bots' router are watched during the hold so that `trade_done` records whether a dump landed
 and when, which is the live measurement of this section's mechanism.
+
+### 21.7 The switch and the stop, re-tuned under the rule
+
+`data/derived/stop_sweep.txt`: compounding from $300 at 20% sizing (stakes clamped $50–$300), one position at a time,
+on the eleven windows with enough rule-passing launches, end bankroll summed as gains over the start:
+
+| setting | sum of gains from $300 | windows ending below start | from $1,000 |
+|---|---|---|---|
+| switch 30 launches / +5%, stop −30% (section 19's) | $19,623 | 3 | $29,015 |
+| switch 15 / 0%, stop −50% | $20,430 | 0 | $32,071 |
+| no switch, stop −30% | $30,011 | 1 | $39,896 |
+| **no switch, stop −50%** | **$30,343** | **0** | **$44,071** |
+| no switch, no stop | $30,343 | 0 | $44,071 |
+
+Two conclusions. The regime switch was doing the filter's job badly: once the rule removes the launches where the
+fast bots sit, the switch's warm-up only skips good trades, and every switched setting loses to none. The −30% daily
+stop is too tight for a $300 bankroll where one dumped trade is a 12% hit: it fired on Aug 31 and Sep 1 in windows
+that ended positive; at −50% it never fired. The engine's defaults are now a safety-net switch that only stops
+trading when the last 15 scores average below −10% (it never triggers on these windows), and a −50% daily stop. Both
+exist for the day the seat stops working, not for ordinary variance.
+
+### 21.8 What this round changes in the plan
+
+1. Enter only bundled launches with no outside buyer in second one, a creator launch buy of at least 1% of supply
+   and a bundle of at least 0.3 ETH: positive on every window measured, worst +2.5%.
+2. Hold 7 s, no reactive exit: the dump cannot be outrun, only avoided by the gate above.
+3. No regime switch in normal operation; a −50% daily stop; a −10% safety switch.
+4. From $300 the rule compounded to $625 to $9,379 per six-hour window on the eleven windows (median about $1,500),
+   from $1,000 to $1,880 to $11,524, with every window ending above its start. The chance of running $50 into $300
+   before losing half of it is 16–68% by window (`rule_plan.txt`): still a lottery ticket below $300.
+5. Everything above is the backtest side; the engine now trades this exact universe in its dry run, so the first days
+   in Ohio will show whether the live scores match these tables before any money moves.

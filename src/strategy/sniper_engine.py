@@ -44,8 +44,9 @@ BUNDLE_MIN_ETH = float(os.environ.get("BUNDLE_MIN_ETH", "0.3"))      # section 2
 STOP_SELL_FRAC = float(os.environ.get("STOP_SELL_FRAC", "0"))      # section 21.6: reactive exit on a dump; off by default, dumps land 94% inside 0.3 s so reacting does not help
 SEND_MODE = os.environ.get("SEND_MODE", "react")                   # react: send when the feed shows the seat's second; predict: send at the estimated boundary + MARGIN_MS
 MARGIN_MS = float(os.environ.get("MARGIN_MS", "25"))                 # predict mode: how far past the estimated boundary to send (covers boundary error and one-way delay)     # the creator-set fee tier is unknown before the buy lands: size the ETH for the worst common tier
-MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.01"))   # section 21.6: creator launch buy >= 1% of supply; MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
-SWITCH_N = int(os.environ.get("SWITCH_N", "30")); SWITCH = float(os.environ.get("SWITCH", "0.05")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.30"))
+MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.01"))   # section 21.6: creator launch buy >= 1% of supply
+MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
+SWITCH_N = int(os.environ.get("SWITCH_N", "15")); SWITCH = float(os.environ.get("SWITCH", "-0.10")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.50"))   # section 21.7: under the rule no switch was best; this one is a safety net that should stay quiet
 MAX_RESOLVE_MS = int(os.environ.get("MAX_RESOLVE_MS", "300")); GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.03"))
 GAS_BUY, GAS_APPROVE, GAS_SELL = 500_000, 80_000, 200_000        # observed: direct curve buys ~450k, approve ~46k, direct curve sell ~81k
 FACTORY = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"; CREATE_SEL = bytes.fromhex("f85f8e41")

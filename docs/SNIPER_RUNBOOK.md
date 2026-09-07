@@ -35,9 +35,10 @@ dollar is sent.
    `minOut` = sized tokens × (1 − `SLIP`), so a landing in the wrong second reverts for gas rather than paying 95%.
 5. Read the tokens received from the buy's Buy event; approve the curve at once; sell that balance 7 s after the buy
    landed, in one transaction.
-6. Every eligible bundled launch is scored 25 s after creation with the simulator's replay; the engine trades only
-   while the mean of the last 30 scores is ≥ +5%. Daily stop at −30% of the day's starting bankroll. One position at a
-   time. Stake = 20% of bankroll, clamped $50–$300.
+6. Every rule-passing launch is scored 25 s after creation with the simulator's replay. The engine keeps trading unless
+   the mean of the last 15 scores falls below −10% (a safety net: under the rule no switch was the best setting on every
+   window, section 21.7). Daily stop at −50% of the day's starting bankroll (−30% fired on days that ended positive).
+   One position at a time. Stake = 20% of bankroll, clamped $50–$300.
 
 ## 2. What to expect (exact curve, $300 stakes, 3% of supply, sell 0.3 s late)
 
@@ -110,7 +111,7 @@ entering the launches where the fast bots already sit (the second-one gate).
 
 ```
 SEAT=E2 BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.3 OUT1_MAX=0 MIN_CREATOR_SUPPLY=0.01 STOP_SELL_FRAC=0 SUPPLY_FRAC=0.03 SLIP=0.25 HOLD_S=7 BANKROLL_USD=300 FRAC=0.2 STAKE_MIN=50 STAKE_MAX=300 \
-SWITCH_N=30 SWITCH=0.05 DAILY_STOP=0.30 MAX_RESOLVE_MS=1500 GAS_MAX_SHARE=0.03 TIER_ASSUMED=0.05 SEND_MODE=react MARGIN_MS=25 \
+SWITCH_N=15 SWITCH=-0.10 DAILY_STOP=0.50 MAX_RESOLVE_MS=1500 GAS_MAX_SHARE=0.03 TIER_ASSUMED=0.05 SEND_MODE=react MARGIN_MS=25 \
 WALLET=0x… RPC_URL=https://… FEED_URL=wss://feed.mainnet.chain.robinhood.com LOG_PATH=engine.jsonl \
 python3 src/strategy/sniper_engine.py
 ```
@@ -143,7 +144,7 @@ launches: they are computed the same way, and a gap is a latency or a seat probl
 
 ## 6. Kill criteria
 
-Stop for the day at −30%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while
+Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while
 the engine's scores for the same launches are above +5% (you are not getting the seat), if the measured surcharge is
 ever above 6.18% on a next-second landing, or if the bundled-launch count falls under ten a day (the flow that pays
 is gone).
