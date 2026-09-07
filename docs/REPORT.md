@@ -1055,6 +1055,12 @@ round. Exact curve, $300 stakes, 3% of supply, sell 0.3 s late; "behind" means 0
 | **Sep 1 (new)** | 1,912 | 18% | −2.1% [−8,+3] | −6.0% [−10,−1] | −2.3% [−6,+2] | −4.7% [−9,0] | **−$0.7k** |
 | **Sep 3, 00–06 UTC (night)** | 1,909 | 13% | +2.4% [−3,+9] | −0.9% [−6,+5] | +4.2% [−1,+10] | +0.4% [−5,+6] | **−$0.3k** |
 | **Sep 3, 18–24 UTC (evening)** | 2,674 | 22% | +11.5% [+7,+16] | +7.4% [+3,+12] | +10.1% [+6,+14] | +5.9% [+2,+10] | **$2.5k** |
+| **Sep 5, 00–06 UTC (night)** | 842 | 28% | +6.1% [+2,+11] | +2.6% [−1,+7] | +8.0% [+3,+13] | +6.2% [+1,+11] | **$2.2k** |
+
+Nine windows were never used to choose anything (the six new days and the three off-hours windows). At the E2 seat
+0.3 s behind the front, on bundled launches, seven of the nine are positive, two are flat (Aug 30, the Sep 3 night)
+and one loses (Sep 1); the switched, one-position-at-a-time nets sum to about +$13.4k over those 54 hours, with the
+worst window at −$677.
 
 The off-hours windows say the launchpad does not sleep: 1,909 launches between midnight and 06:00 UTC on Sep 3 and
 2,674 between 18:00 and 24:00, the busiest window of the thirteen. At night the bundled seat is about zero (the
