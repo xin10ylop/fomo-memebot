@@ -39,15 +39,18 @@ HOLD = float(os.environ.get("HOLD_S", "7")); SUPPLY_FRAC = float(os.environ.get(
 SEAT = os.environ.get("SEAT", "E1").upper(); EXEMPT = os.environ.get("EXEMPT", "0") == "1"
 BUNDLE_MIN = int(os.environ.get("BUNDLE_MIN", "3" if SEAT in ("E1", "E2") else "0"))   # E1 only trades launches whose creator bundle bought with >= BUNDLE_MIN named wallets in the creation second (section 20.6)
 TIER_ASSUMED = float(os.environ.get("TIER_ASSUMED", "0.05"))
+OUT1_MAX = int(os.environ.get("OUT1_MAX", "0"))                     # section 21.6: trade only if at most this many outsiders (non-named buyers) bought in second one
+BUNDLE_MIN_ETH = float(os.environ.get("BUNDLE_MIN_ETH", "0.3"))      # section 21.6: the named wallets' buys in the creation second must total at least this much ETH
+STOP_SELL_FRAC = float(os.environ.get("STOP_SELL_FRAC", "0"))      # section 21.6: reactive exit on a dump; off by default, dumps land 94% inside 0.3 s so reacting does not help
 SEND_MODE = os.environ.get("SEND_MODE", "react")                   # react: send when the feed shows the seat's second; predict: send at the estimated boundary + MARGIN_MS
 MARGIN_MS = float(os.environ.get("MARGIN_MS", "25"))                 # predict mode: how far past the estimated boundary to send (covers boundary error and one-way delay)     # the creator-set fee tier is unknown before the buy lands: size the ETH for the worst common tier
-MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.0")); MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
+MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.01"))   # section 21.6: creator launch buy >= 1% of supply; MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
 SWITCH_N = int(os.environ.get("SWITCH_N", "30")); SWITCH = float(os.environ.get("SWITCH", "0.05")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.30"))
 MAX_RESOLVE_MS = int(os.environ.get("MAX_RESOLVE_MS", "300")); GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.03"))
 GAS_BUY, GAS_APPROVE, GAS_SELL = 500_000, 80_000, 200_000        # observed: direct curve buys ~450k, approve ~46k, direct curve sell ~81k
 FACTORY = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"; CREATE_SEL = bytes.fromhex("f85f8e41")
 BUY_EV = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"; SELL_EV = "0x8113d738abdcb6b38357e9d53a54a7157861a09031b453651f0fe7fe151f59df"
-BUY_SEL = "59a87bc1"; SELL_SEL = "d04c6983"; APPROVE_SEL = "095ea7b3"
+BUY_SEL = "59a87bc1"; SELL_SEL = "d04c6983"; APPROVE_SEL = "095ea7b3"; ROUTER_SELL_SELS = {"4d819a2a"}   # the fast bots' router: sells reference the curve in calldata with no value
 UA = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) fomo-memebot/engine"}
 X0, Y0 = 1.68, 1e9                                                  # virtual reserves (section 20)
 SURCHARGE = {"E0": 0.0, "E1": 0.0618, "E2": 0.0019}                 # by seat: creation second (exempt only), next second, the one after
@@ -84,7 +87,7 @@ class Rpc:
 
 rpc = Rpc(RPC_URL)
 state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": False, "busy_until": 0.0, "scores": collections.deque(maxlen=SWITCH_N),
-         "launched_today": collections.Counter(), "feed_ts": 0, "traded": {}, "eth_usd": ETH_USD, "recent_buys": collections.deque(maxlen=20000), "first_seen": {}, "known_curves": set(), "flips": collections.deque(maxlen=600), "connected_at": 0.0, "last_seen_ts": 0}
+         "launched_today": collections.Counter(), "feed_ts": 0, "traded": {}, "eth_usd": ETH_USD, "recent_buys": collections.deque(maxlen=20000), "first_seen": {}, "known_curves": set(), "flips": collections.deque(maxlen=600), "connected_at": 0.0, "last_seen_ts": 0, "recent_sells": collections.deque(maxlen=5000)}
 lock = threading.Lock()
 
 
@@ -209,7 +212,7 @@ def size_buy(tk0, stake_eth, seat):
     return tk, net, gross, fee
 
 
-def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold=HOLD, frac=SUPPLY_FRAC, bundle_min=0):
+def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold=HOLD, frac=SUPPLY_FRAC, bundle_min=0, stop_sell_frac=None):
     """the offline simulator's replay (sniper_exact.replay) on the curve's own Buy/Sell events: label each event's implied tax
     from the exact curve state, seat the sniper, replay the later flow on the modified curve, sell hold s after entry."""
     rows = []; X, Y = X0, Y0; tier = None
@@ -226,9 +229,12 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
             gross = X - X * Y / (Y + tk); rows.append((t, "S", q, tk, gross, 1 - q / gross if gross > 0 else 0.0)); X -= gross; Y += tk
     if tier is None or rows[0][1] != "B":
         return None
-    if bundle_min:                                                    # the simulator's bundle count: unsurcharged buys inside the creation second, before any surcharged buy
+    if bundle_min:                                                    # the simulator's universe: bundle count and ETH, outsiders in second one (the +6.18% label), creator buy
         first_taxed = next((r[0] for r in rows[1:] if r[1] == "B" and r[5] - tier > 0.001), 9e9)
-        if sum(1 for r in rows[1:] if r[1] == "B" and r[0] < min(1.0, first_taxed) and r[5] - tier <= 0.0008) < bundle_min:
+        bundle_rows = [r for r in rows[1:] if r[1] == "B" and r[0] < min(1.0, first_taxed) and r[5] - tier <= 0.0008]
+        if len(bundle_rows) < bundle_min or sum(r[2] for r in bundle_rows) < BUNDLE_MIN_ETH or rows[0][3] < MIN_CREATOR_SUPPLY * Y0:
+            return "filtered"
+        if seat == "E2" and sum(1 for r in rows[1:] if r[1] == "B" and 0.05 <= r[5] - tier <= 0.075) > OUT1_MAX:
             return "filtered"
     X, Y = X0, Y0; X += rows[0][4]; Y -= rows[0][3]
     lo, hi, fb = {"E0": (-1.0, 0.0008, 0.1), "E1": (0.05, 0.075, 1.0), "E2": (0.0012, 0.0035, 2.0)}[seat]
@@ -246,11 +252,13 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
     tk_bot = frac * Y0; net = X * tk_bot / (Y - tk_bot); gross = net / (1 - fee)
     if gross > stake_eth:
         gross = stake_eth; net = gross * (1 - fee); tk_bot = Y * net / (X + net)
-    X += net; Y -= tk_bot; held = Y0 - Y - tk_bot; phantom = 0.0
+    X += net; Y -= tk_bot; held = Y0 - Y - tk_bot; phantom = 0.0; t_exit = t_in + hold + slip
     for r in rows[idx:]:
         t, k, q, tk, net_obs, tax = r
-        if t >= t_in + hold + slip:
+        if t >= t_exit:
             break
+        if k == "S" and stop_sell_frac is not None and tk >= stop_sell_frac * Y0 and t_exit > t + slip:
+            t_exit = t + slip                                           # the simulator's reactive exit: sell after the dump we saw lands
         if k == "B":
             tokens = Y - X * Y / (X + net_obs)
             if tokens < tk * (1 - tol):
@@ -281,7 +289,7 @@ def score_launch(curve, tk0, b_create, stake_usd, creator=None, src=None):
             d = e["data"][2:]; w = [int(d[i:i + 64], 16) / 1e18 for i in range(0, len(d), 64)]; buy = e["topics"][0] == BUY_EV
             events.append((int(e["blockNumber"], 16), int(e["logIndex"], 16), buy, w[0] if buy else w[1], w[1] if buy else w[0], w[2] if len(w) > 2 else 0.0))
         events.sort(key=lambda x: (x[0], x[1]))
-        r = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, bundle_min=BUNDLE_MIN)
+        r = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, bundle_min=BUNDLE_MIN, stop_sell_frac=STOP_SELL_FRAC if STOP_SELL_FRAC > 0 else None)
         if r is None:
             log({"ev": "score", "curve": curve, "result": "no usable launch-block buy"}); return
         if r == "filtered":
@@ -336,7 +344,7 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named=frozen
         # the address they buy is the curve. Matching buyers to the named list is exact; no RPC on the critical path.
         while state["feed_ts"] <= feed_ts and time.time() - seen_at < 1.5:
             time.sleep(0.003)
-        cands = collections.Counter(a for ts_, a, snd in list(state["recent_buys"]) if snd in named and ts_ >= feed_ts and a not in state["known_curves"])
+        cands = collections.Counter(a for ts_, a, snd, val in list(state["recent_buys"]) if snd in named and ts_ >= feed_ts and a not in state["known_curves"])
         if cands:
             a, c = cands.most_common(1)[0]
             if c >= BUNDLE_MIN:
@@ -397,8 +405,21 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named=frozen
     send_mode = None
     if SEAT in ("E1", "E2"):                                          # not exempt: never land in the creation second (93-98% tax); wait for the seat's second
         send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at)
+        buys = list(state["recent_buys"])
         if bundle is None:
-            bundle = sum(1 for ts_, to_, snd in list(state["recent_buys"]) if to_ == curve and (snd in named or ts_ == feed_ts))   # the named wallets' buys (or any direct buy inside the creation second)
+            bundle = sum(1 for ts_, to_, snd, val in buys if to_ == curve and (snd in named or ts_ == feed_ts))   # the named wallets' buys (or any direct buy inside the creation second)
+        bundle_eth = sum(val for ts_, to_, snd, val in buys if to_ == curve and snd in named and ts_ <= feed_ts + 1)
+        out1 = sum(1 for ts_, to_, snd, val in buys if to_ == curve and snd not in named and snd != creator and ts_ == feed_ts + 1)   # outsiders in second one
+        late_gates = []
+        if bundle_eth < BUNDLE_MIN_ETH:
+            late_gates.append(f"bundle {bundle_eth:.3f} ETH < {BUNDLE_MIN_ETH}")
+        if SEAT == "E2" and out1 > OUT1_MAX:
+            late_gates.append(f"{out1} outsider buys in second one > {OUT1_MAX}")
+        if late_gates:
+            log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "gates": late_gates, "bundle": bundle, "bundle_eth": bundle_eth, "out1": out1, "stake_usd": stake_usd})
+            with lock:
+                state["busy_until"] = 0.0
+            return
         if bundle < BUNDLE_MIN:
             log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "gates": [f"bundle {bundle} < {BUNDLE_MIN}"], "stake_usd": stake_usd})
             with lock:
@@ -425,10 +446,16 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named=frozen
         token = r[0] if r else curve
     approve = {"to": token, "value": "0x0", "data": "0x" + APPROVE_SEL + abi_word(curve) + abi_word(2 ** 256 - 1), "gas": hex(GAS_APPROVE), "gasPrice": hex(gas_price), "nonce": hex(nonce + 1), "chainId": 4663}
     submit(approve, "approve")                                       # right after the buy, so the exit is one transaction
-    time.sleep(max(0.0, HOLD - (time.time() - t_buy)))
+    why = "hold"
+    while time.time() - t_buy < HOLD:                                  # the hold: leave at once if a dump lands on our curve (section 21.6)
+        if STOP_SELL_FRAC > 0:
+            dump = next((sz for at, cv_, sz in reversed(state["recent_sells"]) if at > t_buy and cv_ == curve and sz >= STOP_SELL_FRAC * Y0), None)
+            if dump is not None:
+                why = f"dump {dump / Y0 * 100:.1f}% of supply" if dump != float("inf") else "router sell on the curve"; break
+        time.sleep(0.005)
     sell = {"to": curve, "value": "0x0", "data": "0x" + SELL_SEL + abi_word(int(tokens * 1e18)) + abi_word(0) + abi_word(WALLET), "gas": hex(GAS_SELL), "gasPrice": hex(gas_price), "nonce": hex(nonce + 2), "chainId": 4663}
     submit(sell, "sell")
-    log({"ev": "trade_done", "curve": curve, "tokens_sold": tokens, "dry_run": h is None, "note": "dry run: the bankroll follows the exact-curve score 25 s after creation"})
+    log({"ev": "trade_done", "curve": curve, "tokens_sold": tokens, "held_s": round(time.time() - t_buy, 2), "exit": why, "dry_run": h is None, "note": "dry run: the bankroll follows the exact-curve score 25 s after creation"})
 
 
 def decode_batch(l2msg_b64):
@@ -448,7 +475,7 @@ async def main():
     if SEAT == "E0" and not EXEMPT:
         raise SystemExit("SEAT=E0 needs an address exempt from the snipe surcharge (EXEMPT=1); anyone else pays 93-98% in the creation second. Use SEAT=E1 or get the exemption first (runbook).")
     new_day_check(); threading.Thread(target=price_loop, daemon=True).start()
-    log({"ev": "start", "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "send_mode": SEND_MODE, "margin_ms": MARGIN_MS, "bankroll": BANKROLL, "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "max_resolve_ms": MAX_RESOLVE_MS, "dry_run": True})
+    log({"ev": "start", "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY, "stop_sell_frac": STOP_SELL_FRAC, "send_mode": SEND_MODE, "margin_ms": MARGIN_MS, "bankroll": BANKROLL, "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "max_resolve_ms": MAX_RESOLVE_MS, "dry_run": True})
     while True:
         try:
             async with websockets.connect(FEED_URL, open_timeout=15, max_size=None, ping_interval=20) as ws:
@@ -471,12 +498,20 @@ async def main():
                                     continue
                                 body = rlp.decode(t[1:]); to = body[5]; data = body[7]
                                 if len(to) == 20 and data[:4].hex() == BUY_SEL:
-                                    a = "0x" + to.hex()
+                                    a = "0x" + to.hex(); val = int.from_bytes(body[6], "big") / 1e18 if isinstance(body[6], (bytes, bytearray)) else 0.0
                                     try:
                                         snd = Account.recover_transaction(t).lower()               # ~70 us; the buyer, matched against the creation's named wallets
                                     except Exception:
                                         snd = None
-                                    state["recent_buys"].append((ts, a, snd)); state["first_seen"].setdefault(a, seen); continue
+                                    state["recent_buys"].append((ts, a, snd, val)); state["first_seen"].setdefault(a, seen); continue
+                                sel = data[:4].hex()
+                                if len(to) == 20 and sel == SELL_SEL and len(data) >= 36:                       # direct curve sell: tokens are the first argument
+                                    state["recent_sells"].append((seen, "0x" + to.hex(), int.from_bytes(data[4:36], "big") / 1e18)); continue
+                                if sel in ROUTER_SELL_SELS and int.from_bytes(body[6], "big") == 0 and len(data) >= 36:   # router sell: size unknown, note every curve it references
+                                    for cv_ in state["known_curves"]:
+                                        if bytes.fromhex(cv_[2:]) in data:
+                                            state["recent_sells"].append((seen, cv_, float("inf")))
+                                    continue
                                 if len(to) != 20 or "0x" + to.hex() != FACTORY or data[:4] != CREATE_SEL:
                                     continue
                                 creator = Account.recover_transaction(t).lower()

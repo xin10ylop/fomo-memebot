@@ -84,7 +84,7 @@ def load_exact(day):
     return launches, prior
 
 
-def replay(L, stake_eth, frac=FRAC, hold=HOLD, entry="E1", tol=None, exempt=False, lat=0.0, slip=0.0, replace=False):
+def replay(L, stake_eth, frac=FRAC, hold=HOLD, entry="E1", tol=None, exempt=False, lat=0.0, slip=0.0, replace=False, stop_sell_frac=None, no_follow=None):
     """returns (pnl_eth, cost_eth, t_in, t_out, kind, displaced_buy_row_or_None)"""
     rows = L["rows"]; tier = L["tier"]; X, Y = X0, Y0
     t, k, q, tk, net, tax = rows[0]; X += net; Y -= tk                 # the creator's launch-block buy
@@ -115,13 +115,18 @@ def replay(L, stake_eth, frac=FRAC, hold=HOLD, entry="E1", tol=None, exempt=Fals
     net = X * tk_bot / (Y - tk_bot); gross = net / (1 - fee)
     if gross > stake_eth:
         gross = stake_eth; net = gross * (1 - fee); tk_bot = Y * net / (X + net)
-    X += net; Y -= tk_bot; t_in = t_entry
+    X += net; Y -= tk_bot; t_in = t_entry; t_exit = t_in + hold + slip; followed = False
     held = Y0 - Y - tk_bot; phantom = 0.0                              # tokens held by others vs tokens dropped buyers would have held
     for r in rows[idx:]:
         t, k, q, tk, net_obs, tax = r
-        if t >= t_in + hold + slip:
+        if no_follow is not None and not followed and t > t_in + no_follow:
+            t_exit = t_in + no_follow; break                            # nobody bought after us: leave early
+        if t >= t_exit:
             break
+        if k == "S" and stop_sell_frac is not None and tk >= stop_sell_frac * Y0 and t_exit > t + slip:
+            t_exit = t + slip                                           # we see the dump on the feed and sell; everything landing before our sell still applies
         if k == "B":
+            followed = True
             tokens = Y - X * Y / (X + net_obs)
             if (replace and r is displaced) or (tol is not None and tokens < tk * (1 - tol)):
                 phantom += tk; continue                                 # never bought (replaced, or reverted on its minOut)
@@ -130,7 +135,7 @@ def replay(L, stake_eth, frac=FRAC, hold=HOLD, entry="E1", tol=None, exempt=Fals
             share = held / (held + phantom) if held + phantom > 0 else 1.0
             s = min(tk * share, held); g = X - X * Y / (Y + s); X -= g; Y += s; held -= s; phantom = max(0.0, phantom - (tk - s))
     out = (X - X * Y / (Y + tk_bot)) * (1 - tier)
-    return out - gross, gross, t_in, t_in + hold + slip, kind, displaced
+    return out - gross, gross, t_in, t_exit, kind, displaced
 
 
 def bundle_count(L):

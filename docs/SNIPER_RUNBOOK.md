@@ -26,8 +26,11 @@ dollar is sent.
    creator and the quote asset from the calldata and resolves the curve from the factory's event.
 2. Filters: creator's first launch of the UTC day, ETH quote, a usable launch-block buy.
 3. The engine reads the creator's exempted wallets from the creation calldata, watches the feed for their buys inside the
-   creation second (that address is the curve; at least `BUNDLE_MIN` = 3 of them must have bought), and waits for the
-   first feed message stamped in the seat's second (`SEAT=E2`: two seconds after the creation's timestamp; `E1`: one).
+   creation second (that address is the curve; at least `BUNDLE_MIN` = 3 of them must have bought, for at least
+   `BUNDLE_MIN_ETH` = 0.3 ETH), requires the creator's own launch buy to be at least 1% of supply, and, at the second
+   boundary, requires that **no wallet outside the named list bought the curve during second one** (`OUT1_MAX=0`;
+   section 21.6: those are the bots that sell during our hold). Then it sends for the seat's second (`SEAT=E2`: two
+   seconds after the creation's timestamp).
 4. Buy 3% of supply or the stake, whichever is smaller, sized on the exact curve with the fee assumed at 5% + 6.18%;
    `minOut` = sized tokens × (1 − `SLIP`), so a landing in the wrong second reverts for gas rather than paying 95%.
 5. Read the tokens received from the buy's Buy event; approve the curve at once; sell that balance 7 s after the buy
@@ -62,6 +65,18 @@ Sep 2 and Sep 3 were the two busiest days of the fee cycle; Aug 30, Aug 31, Sep 
 used to choose anything: four of the six pay, Aug 30 and Sep 1 lose with the switch holding each to under $1,200. Aug 12 had no
 bundled launches at all. More windows are appended to `data/derived/sniper_oos.txt` as they are pulled.
 
+### 2b. With the section 21.6 rule (no outsider in second one, creator buy ≥1%, bundle ≥0.3 ETH)
+
+| window | Aug 30 | Aug 31 | Sep 1 | Sep 2 | Sep 3 night | Sep 3 day | Sep 3 eve | Sep 4 | Sep 5 night | Sep 5 | Sep 6 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| launches kept in 6 h | 164 | 261 | 188 | 184 | 68 | 211 | 339 | 70 | 48 | 124 | 177 |
+| mean ROI, E2 0.3 s behind | +4.4% | +4.0% | +2.5% | +12.8% | +14.0% | +13.4% | +11.5% | +18.9% | +9.7% | +20.7% | +6.1% |
+| switched, one at a time | $292 | $2,365 | −$889 | $4,898 | $1,509 | $6,606 | $7,458 | $1,851 | −$150 | $6,662 | $409 |
+
+Every window positive per trade, worst +2.5%. The losing trades are the team's dump landing inside the hold; it lands
+94% inside 0.3 s, so no exit rule beats it and the reactive exit (`STOP_SELL_FRAC`) stays off. What beats it is not
+entering the launches where the fast bots already sit (the second-one gate).
+
 ## 3. The machine
 
 - EC2 in **us-east-2 (Ohio)**, where the sequencer lives; the smallest general-purpose instance is enough (the feed
@@ -94,7 +109,7 @@ bundled launches at all. More windows are appended to `data/derived/sniper_oos.t
 ## 4. Configure
 
 ```
-SEAT=E2 BUNDLE_MIN=3 SUPPLY_FRAC=0.03 SLIP=0.25 HOLD_S=7 BANKROLL_USD=300 FRAC=0.2 STAKE_MIN=50 STAKE_MAX=300 \
+SEAT=E2 BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.3 OUT1_MAX=0 MIN_CREATOR_SUPPLY=0.01 STOP_SELL_FRAC=0 SUPPLY_FRAC=0.03 SLIP=0.25 HOLD_S=7 BANKROLL_USD=300 FRAC=0.2 STAKE_MIN=50 STAKE_MAX=300 \
 SWITCH_N=30 SWITCH=0.05 DAILY_STOP=0.30 MAX_RESOLVE_MS=1500 GAS_MAX_SHARE=0.03 TIER_ASSUMED=0.05 SEND_MODE=react MARGIN_MS=25 \
 WALLET=0x… RPC_URL=https://… FEED_URL=wss://feed.mainnet.chain.robinhood.com LOG_PATH=engine.jsonl \
 python3 src/strategy/sniper_engine.py

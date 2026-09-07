@@ -1191,3 +1191,77 @@ and the probe as a one-shot service. What day one must show: `boundary` events w
 events with `send_mode: predict` and `sent_ms` equal to the seat's wait, `feed_resolution_ok` after every bundled
 launch, probe round trips in single-digit milliseconds. Then the send step, then the first receipts' `landing`
 events, which are the only measurement of the race itself.
+
+### 21.6 Why the losing windows lose, and the rule that came out of it
+
+`src/analysis/sniper_failure.py` builds a feature table for all 20,728 eligible launches in fourteen windows (3,704
+bundled) and scores each at the E2 seat, 0.3 s behind, 3% of supply, 7 s hold (`data/derived/sniper_features.json`,
+`sniper_failure.txt`).
+
+**The timing budget.** The third named-wallet buy lands inside the creation second by definition; the E2 send goes at
+the boundary two seconds later (median 2.30 s after creation, p10 1.76 s). In between, the engine decodes and matches
+a few dozen transactions (microseconds each), sizes on the exact curve, signs and sends (a few milliseconds from Ohio).
+The seat sets the pace, not the machine; what the machine must not do is miss the boundary.
+
+**What a losing trade looks like.** Of trades losing more than 30% (792 of 3,704), 100% had a sell of at least 1% of
+supply during the hold, with a median 45.7% of supply dumped, against 0.3% for trades winning more than 20%. The
+first sell comes at 2.0 s after entry for losers, 2.6 s for winners; losers see 0.31 ETH of buying during the hold,
+winners 0.79 ETH. It is the team unloading into the crowd it attracted, seven seconds after we joined it.
+
+**Can the exit dodge the dump?** No. The dump lands 86% in its first sell and 94% within 0.3 s (median of 2,012 dumped
+launches), so a reactive sell that reaches the chain 0.3 s after seeing the first big sell exits at the same price a
+7 s hold would (+3.4% versus +3.3% mean over twelve windows; a first version of the replay that stopped applying the
+cascade at the trigger showed +14% and was wrong). A 5 s hold is slightly better on money and equal on return; 10 s is
+much worse. 82% of dumped supply goes through direct curve calls, visible on the feed by selector, so the engine can
+see dumps; it just cannot outrun them. The reactive exit is implemented (`STOP_SELL_FRAC`) and off by default.
+
+**What is visible before the send, and what it says.** Feature splits on bundled launches (mean return at E2, 0.3 s
+behind):
+
+| feature, known before the send | worst bucket | best bucket |
+|---|---|---|
+| outsiders (non-named buyers) in second one | ≥1: −2.9% to −4.1% (1,459) | none: +7.9% (2,245) |
+| creator's own launch buy | <1% of supply: −4.5% (308) | ≥6%: +12.1% (686) |
+| bundle's ETH in the creation second | <0.3: −1.9% (603) | 0.3–0.6: +7.7% (713) |
+| team buys continuing in seconds 1–3 | none: −0.5% (1,493) | ≥0.5 ETH: +25.0% (183) |
+| creator seen launching on earlier days | ≥2 days: −12.6% (13) | never: +3.6% (3,663) |
+
+The first line is the one that matters and it is counterintuitive: outsiders piling in at second one are not a sign
+of demand, they are the fast bots that will sell at 3–7 s, exactly during our hold. Walk-forward, fitting nothing:
+
+| pre-entry rule (bundle ≥3 plus …) | first 7 windows | last 7 windows | windows > 0 | worst window |
+|---|---|---|---|---|
+| nothing | +0.9% | +5.4% | 11 of 13 | −4.7% (Sep 1) |
+| no outsider in second one | +4.1% | +11.3% | 10 of 12 | −1.8% |
+| no outsider + creator buy ≥1% | +5.4% | +12.2% | 12 of 12 | +1.3% (Sep 1) |
+| **no outsider + creator ≥1% + bundle ≥0.3 ETH** | **+6.4%** | **+12.6%** | **11 of 11** | **+2.5% (Sep 1)** |
+
+The full rule keeps 1,843 of the 3,704 bundled launches and turns Sep 1, the losing day, into +2.5%. Per window,
+E2 0.3 s behind, 7 s hold, $300 stakes (`data/derived/rule_plan.txt`):
+
+| window | n | mean ROI | always-on | switched, 1 at a time | from $300 at 20% |
+|---|---|---|---|---|---|
+| Aug 30 | 164 | +4.4% | $2,041 | $292 | $313 |
+| Aug 31 | 261 | +4.0% | $2,917 | $2,365 | $1,093 |
+| Sep 1 | 188 | +2.5% | $1,277 | −$889 | $190 (stop) |
+| Sep 2 | 184 | +12.8% | $6,756 | $4,898 | $3,258 |
+| Sep 3 night | 68 | +14.0% | $2,824 | $1,509 | $725 |
+| Sep 3 day | 211 | +13.4% | $8,296 | $6,606 | $4,830 |
+| Sep 3 evening | 339 | +11.5% | $11,599 | $7,458 | $6,076 |
+| Sep 4 | 70 | +18.9% | $3,947 | $1,851 | $884 |
+| Sep 5 night | 48 | +9.7% | $1,400 | −$150 | $273 |
+| Sep 5 | 124 | +20.7% | $7,511 | $6,662 | $5,075 |
+| Sep 6 | 177 | +6.1% | $3,217 | $409 | $205 (stop) |
+| sum | 1,843 | | $51,910 | $31,010 | |
+
+Every window is positive per trade. The switched column is lower because the rule leaves 50–340 launches a window
+and the 30-launch warm-up eats a third to a half of them; two windows end slightly negative for that reason. The
+compounding column shows the other side of risk control: with a $300 bankroll a single dumped trade is a 12% hit, so
+the −30% daily stop fires after two or three bad trades in a row and twice stops a day that ends positive (Sep 1,
+Sep 6). Section 21.7 sweeps the stop and the switch.
+
+**The engine.** All three gates are now in the engine and in its scorer (`OUT1_MAX=0`: no non-named buyer of the
+curve stamped in second one; `MIN_CREATOR_SUPPLY=0.01` from the calldata's initial buy; `BUNDLE_MIN_ETH=0.3` from
+the named wallets' transaction values on the feed), so the switch scores the same universe the engine trades. The
+sell selector and the fast bots' router are watched during the hold so that `trade_done` records whether a dump landed
+and when, which is the live measurement of this section's mechanism.
