@@ -20,6 +20,34 @@ dollar is sent.
 - The engine resolves the curve from the feed alone: the wallets the creator exempted are listed in the creation
   calldata, and the address they buy inside the creation second is the curve. No RPC call before the buy.
 
+## 0b. From nothing to a running dry run (the complete list)
+
+Accounts and tools, all standard, no colocation and no custom node:
+
+1. **AWS account** and one EC2 instance in **us-east-2 (Ohio)**, Ubuntu 24.04, t3.small (about $15–20 a month; the engine
+   uses a fraction of a core). Open no inbound ports; connect by SSH key only.
+2. **A provider RPC key** with Robinhood Chain (Alchemy, QuickNode or Chainstack; free tiers cover the nonce, receipt
+   and scoring calls). The public RPC rate-limits and is a fallback, not the plan.
+3. **A fresh wallet** generated on the box (any standard Ethereum key tool), used for nothing else. Keep the key in
+   `/etc/sniper/engine.env` with permissions 600, never in the repository, never on a phone.
+4. **Funding, $300 plus about $20 of gas and bridge fees.** Buy ETH on any exchange you already use, withdraw it to
+   **Arbitrum One or Base** (cheap withdrawals), then bridge to Robinhood Chain with a fast bridge that lists the chain
+   (Relay, Across or LiFi: minutes, a few dollars) or with the canonical Arbitrum portal from Ethereum (about ten
+   minutes, Ethereum gas). Bridge ETH, not only tokens: ETH is the gas token and the trade currency. Withdrawing from
+   the chain back to Ethereum through the canonical bridge takes seven days; fast bridges are quicker.
+5. **Clone the repository and run** `sudo bash deploy/ohio_setup.sh`. It installs chrony (the second boundary is the
+   sequencer's clock), a Python environment, the engine as a systemd service in dry run, and the probe. Fill in
+   `/etc/sniper/engine.env` (wallet address, RPC URL).
+6. **Monitoring.** Two cron lines: one that alerts you (email or a Telegram bot message) if `engine.jsonl` has not
+   grown in ten minutes, one that alerts if `chronyc tracking` reports an offset above 20 ms. systemd restarts the
+   engine on any crash; the feed reconnect is handled in the engine and replayed backlogs are ignored.
+7. **The send step**, after the dry-run days pass the checks in section 5: a function that signs the engine's
+   transactions with the key and calls `eth_sendRawTransaction` on the provider endpoint with the sequencer as a second
+   endpoint, returning the hash. About twenty lines with any standard Ethereum library.
+
+Running cost: about $20–40 a month for the instance and nothing for the feed, the RPC free tier or chrony. Gas: about
+$1 per trade, $0.50 per refused trade.
+
 ## 1. The trade
 
 1. A Pons V2 creation appears on the sequencer feed (factory `0xe33e…`, selector `0xf85f8e41`); the engine recovers the

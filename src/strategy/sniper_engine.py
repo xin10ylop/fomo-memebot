@@ -47,7 +47,7 @@ MARGIN_MS = float(os.environ.get("MARGIN_MS", "25"))                 # predict m
 MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.01"))   # section 21.6: creator launch buy >= 1% of supply
 MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
 SWITCH_N = int(os.environ.get("SWITCH_N", "15")); SWITCH = float(os.environ.get("SWITCH", "-0.10")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.50"))   # section 21.7: under the rule no switch was best; this one is a safety net that should stay quiet
-MAX_RESOLVE_MS = int(os.environ.get("MAX_RESOLVE_MS", "300")); GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.03"))
+MAX_RESOLVE_MS = int(os.environ.get("MAX_RESOLVE_MS", "1500"))   # E2 resolves from the feed while waiting for the seat's second, so 400-1,000 ms is the design, not a delay; GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.03"))
 GAS_BUY, GAS_APPROVE, GAS_SELL = 500_000, 80_000, 200_000        # observed: direct curve buys ~450k, approve ~46k, direct curve sell ~81k
 FACTORY = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"; CREATE_SEL = bytes.fromhex("f85f8e41")
 BUY_EV = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"; SELL_EV = "0x8113d738abdcb6b38357e9d53a54a7157861a09031b453651f0fe7fe151f59df"
@@ -316,7 +316,7 @@ def score_launch(curve, tk0, b_create, stake_usd, creator=None, src=None):
             log({"ev": "score", "curve": curve, "result": f"bundle below {BUNDLE_MIN}: not scored"}); state["traded"].pop(curve, None); return
         pnl, cost, t_in, tier = r; roi = pnl / cost
         with lock:
-            state["scores"].append(roi); sc = list(state["scores"]); on = len(sc) >= SWITCH_N and st.mean(sc) >= SWITCH
+            state["scores"].append(roi); sc = list(state["scores"]); on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
             traded = state["traded"].pop(curve, None)
             if traded is not None:
                 state["bankroll"] += min(traded, cost) * roi
@@ -394,11 +394,11 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named=frozen
     if reasons:
         log({"ev": "skip", "why": reasons, "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named)}); return
     with lock:
-        sc = list(state["scores"]); on = len(sc) >= SWITCH_N and st.mean(sc) >= SWITCH
+        sc = list(state["scores"]); on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC))
         gates = []
         if not on:
-            gates.append(f"regime switch off (rolling {st.mean(sc) if sc else 0:+.3f} over {len(sc)})")
+            gates.append(f"safety switch off (rolling {st.mean(sc) if sc else 0:+.3f} over {len(sc)} < {SWITCH:+.2f})")
         if state["stopped"] or state["bankroll"] < (1 - DAILY_STOP) * state["day_start"]:
             state["stopped"] = True; gates.append("daily stop")
         if time.time() < state["busy_until"]:
