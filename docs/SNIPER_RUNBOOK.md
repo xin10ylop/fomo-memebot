@@ -7,7 +7,8 @@ dollar is sent.
 ## 0. What changed
 
 - The curve is exactly constant-product (1.68 ETH / 1e9 virtual reserves). Every token has its own 1–5% fee on both
-  legs, readable from the launch-block Buy event (fee ÷ quoteIn) or the curve getter `0x24a9d853` (basis points).
+  legs, implied by the launch-block Buy event (the tokens it delivers against the exact curve; the event's `fee`
+  field is only the 1% protocol fee) or read from the curve getter `0x24a9d853` (basis points).
 - The snipe tax is per whole timestamp second since creation: 93–98% in the creation second, +6.18% in the next,
   +0.19% in the one after, then nothing. Wallets the creator names at creation are exempt. Nobody else is.
 - So the creation-second seat (E0) belongs to the launch team. Your earliest seat is the first block of the next
@@ -59,7 +60,9 @@ $1 per trade, $0.50 per refused trade.
    boundary, requires that **no wallet outside the named list bought the curve during second one** (`OUT1_MAX=0`;
    section 21.6: those are the bots that sell during our hold). Then it sends for the seat's second (`SEAT=E2`: two
    seconds after the creation's timestamp).
-4. Buy 3% of supply or the stake, whichever is smaller, sized on the curve **as the feed shows it at send time** (the
+4. Buy 3% of supply or the stake, whichever is smaller (with a $300 stake the stake binds on three trades in four, so
+   the trade is usually the whole stake, 1.5–2% of supply; with the $60 stakes of a $300 bankroll it is always the
+   stake), sized on the curve **as the feed shows it at send time** (the
    creator's buy, the bundle and every later buy and sell applied to the exact curve), with the fee assumed at 5% +
    the seat's surcharge; `minOut` = sized tokens × (1 − `SLIP`, 25%), so a landing in the wrong second reverts for gas
    rather than paying 95%, and a price that ran more than 25% in the 0.3 s before we land refuses the trade (0.8–5.7%
@@ -97,17 +100,24 @@ Sep 2 and Sep 3 were the two busiest days of the fee cycle; Aug 30, Aug 31, Sep 
 used to choose anything: four of the six pay, Aug 30 and Sep 1 lose with the switch holding each to under $1,200. Aug 12 had no
 bundled launches at all. More windows are appended to `data/derived/sniper_oos.txt` as they are pulled.
 
-### 2b. With the section 21.6 rule (no outsider in second one, creator buy ≥1%, bundle ≥0.3 ETH)
+### 2b. With the section 21.6 rule, after the two audits (section 22)
+
+E2 seat 0.3 s behind, 3% of supply, 7 s hold, minOut refusals included, corrected universe (`data/derived/sniper_plan.txt`):
 
 | window | Aug 30 | Aug 31 | Sep 1 | Sep 2 | Sep 3 night | Sep 3 day | Sep 3 eve | Sep 4 | Sep 5 night | Sep 5 | Sep 6 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| launches kept in 6 h | 164 | 261 | 188 | 184 | 68 | 211 | 339 | 70 | 48 | 124 | 177 |
-| mean ROI, E2 0.3 s behind | +4.4% | +4.0% | +2.5% | +12.8% | +14.0% | +13.4% | +11.5% | +18.9% | +9.7% | +20.7% | +6.1% |
-| switched, one at a time | $292 | $2,365 | −$889 | $4,898 | $1,509 | $6,606 | $7,458 | $1,851 | −$150 | $6,662 | $409 |
+| launches kept in 6 h | 175 | 276 | 197 | 184 | 68 | 211 | 339 | 87 | 51 | 136 | 192 |
+| mean ROI per trade | +3.7% | +4.1% | +1.8% | +12.8% | +14.0% | +14.1% | +12.2% | +13.8% | +9.9% | +18.6% | +5.4% |
+| one at a time, $300 stakes | $1,433 | $3,041 | $1,264 | $5,742 | $2,685 | $8,299 | $11,291 | $3,136 | $1,487 | $7,491 | $1,919 |
+| from $300, engine defaults | $559 | $1,853 | $344 | $4,053 | $1,221 | $6,456 | $9,430 | $1,754 | $633 | $5,962 | $609 |
+| chance of the −50% stop (resampled) | 15% | 18% | 34% | 2% | 0% | 2% | 6% | 0% | 0% | 0% | 10% |
 
-Every window positive per trade, worst +2.5%. The losing trades are the team's dump landing inside the hold; it lands
-94% inside 0.3 s, so no exit rule beats it and the reactive exit (`STOP_SELL_FRAC`) stays off. What beats it is not
-entering the launches where the fast bots already sit (the second-one gate).
+What to plan on, after two independent audits (section 22): the rule was chosen on these windows, so take +5% to +8%
+per trade on a busy window as the planning number rather than the fitted +10% to +14%; the un-gated bundled seat is
++3.6% and is the floor; one other bot in the same seat roughly halves both. In money, from $300 at the engine's
+sizing: +$100 to +$800 per busy six-hour window as the median outcome with a right tail to several thousand, −$150 to
++$100 per quiet window, and on flat days about one chance in three of ending at the −50% daily stop. Nothing has been
+sent live; the first month's real fills are the information.
 
 ## 3. The machine
 
@@ -132,8 +142,10 @@ entering the launches where the fast bots already sit (the second-one gate).
 - The fastest outsiders land in the very first block of the seat's second on a third of bundled launches and within
   two blocks on two thirds; that block holds one or two outsider buys. They predict the boundary; a sender that reacts
   to seeing the new second on the feed lands one to two blocks (100–200 ms) later.
-- `SEND_MODE=predict` with `MARGIN_MS` is how the engine joins that race; `react` is the safe default for the first
-  days. Live, the engine tunes the margin from each receipt (`landing` events): early landings revert on minOut and
+- `SEND_MODE=react` is the default and the recommended mode at E2: it sends when the feed shows the seat's second, which
+  lands one or two blocks after the boundary, exactly the "0.3 s behind" the tables assume, and it can never land in
+  second one (which at E2 costs +6.18%, paid, not reverted). `predict` with `MARGIN_MS` is for a later stage, once the
+  `landing` events show where react-mode buys land. Live, the engine tunes the margin from each receipt (`landing` events): early landings revert on minOut and
   cost gas, so the margin only ever creeps toward the boundary from the late side.
 - Before anything else run the probe: `deploy/ohio_setup.sh` installs it as a service. A sequencer round trip above
   10 ms or a flip spread far above one block means the box is in the wrong place or its clock is off.
@@ -169,10 +181,11 @@ rolling mean, the switch state, and the dry-run bankroll). Go/no-go from that lo
 The send step is yours: replace `submit()` with a function that signs with your key and calls
 `eth_sendRawTransaction`, returning the hash. Sign the sell as soon as the buy's receipt is in (the engine builds it
 with the next nonce) and keep a second endpoint to send it through if the first fails: a token held past the dump is
-the one loss the tables do not contain. On the first live trade verify, from the receipt: the Buy event's fee ÷
-quoteIn equals the token's tier + 6.18% (if it is 93–98% you landed in the creation second: stop and fix the
-second-boundary wait); tokens received within `SLIP` of the sized tokens; the approve landed before the hold ended; the
-sell moved exactly the balance. Then compare the first 30 live scores with the first 30 engine scores of the same
+the one loss the tables do not contain. On the first live trade verify, from the receipt: the block's timestamp is the seat's second (the engine's `landing`
+event says early / first block / later block; "early" at E2 means you paid the +6.18% of second one, and a revert
+means the creation second); tokens received within `SLIP` of the engine's `tokens_target` (the event's `fee` field is
+only the 1% protocol fee, the token's own 1–5% tax is a separate deduction, so compare tokens, not fees); the approve
+landed before the hold ended; the sell moved exactly the balance. Then compare the first 30 live scores with the first 30 engine scores of the same
 launches: they are computed the same way, and a gap is a latency or a seat problem, not a market problem.
 
 ## 6. Kill criteria

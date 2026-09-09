@@ -58,9 +58,12 @@ def load_exact(day):
         e.sort(); c = creates[cv]
         if e[0][2] != "B" or e[0][0] != c["b"]:
             continue
-        if quotes is None:                                             # no quote file: keep the curve only if the creator's buy fits the native reserves
-            b, li, k, q, tk, f = e[0]
-            if q <= 0 or tk <= 0 or tk >= Y0 or abs((q - f) * (Y0 - tk) / tk / X0 - 1) > 0.02:
+        if quotes is None:                                             # no quote file: keep the curve only if the creator's buy fits the native reserves for some token tax
+            b, li, k, q, tk, f = e[0]                                   # (the event's fee field is the 1% protocol fee; the token's own 1-5% tax is a separate deduction)
+            if q <= 0 or tk <= 0 or tk >= Y0:
+                continue
+            x_implied = X0 * tk / (Y0 - tk)                             # net ETH the reserves needed for these tokens
+            if not any(abs(q * (1 - tax) / x_implied - 1) < 0.006 for tax in (0.01, 0.011, 0.012, 0.015, 0.02, 0.022, 0.025, 0.03, 0.035, 0.04, 0.05, 0.06, 0.08, 0.10)):
                 continue
         X, Y = X0, Y0; rows = []; tier = None; ok = True
         for i, (b, li, k, q, tk, f) in enumerate(e):
@@ -70,7 +73,9 @@ def load_exact(day):
                     ok = False; break
                 net = X * tk / (Y - tk); tax = 1 - net / q
                 if i == 0:
-                    tier = max(0.0, min(tax, 0.2))
+                    if not (0.0 <= tax <= 0.2):                         # a launch-block buy that does not fit the curve: not a native Pons V2 curve
+                        ok = False; break
+                    tier = tax
                 rows.append((t, "B", q, tk, net, tax)); X += net; Y -= tk
             else:
                 gross = X - X * Y / (Y + tk)
