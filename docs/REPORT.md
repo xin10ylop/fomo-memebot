@@ -1870,4 +1870,6 @@ configured (+6% a trade on the ten unseen windows, +$200 a busy window from $300
 `out1_share_last_60` each evening; move to 20% once the live scores match the tables; run the thirty-launch E1 test
 of runbook section 9 at $5–10 stakes, and if the receipts show the first block of second one on most attempts, run
 E1 at 10% while `out1_share_last_60` is above 55% and E2 otherwise. Nothing in this section changes what the engine
-sends; it adds the two readouts.
+sends; it adds the two readouts, and `src/analysis/live_check.py` (runbook section 5), which pulls the receipts of every
+live trade and puts the live return next to the engine's score of the same launch, so the first thirty live trades
+settle whether the box lands where the tables assume.

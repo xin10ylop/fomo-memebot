@@ -699,7 +699,8 @@ def close_position(pos, why):
         ha = submit(approve, "approve"); pos["approved"] = True; pos["approve_hash"] = ha
     sell = {"to": to_checksum_address(pos["curve"]), "value": "0x0", "data": "0x" + SELL_SEL.hex() + abi_word(int(pos["tokens"] * 1e18)) + abi_word(0) + abi_word(WALLET), "gas": hex(GAS_SELL), "gasPrice": hex(gp), "nonce": hex(nonce + 2), "chainId": 4663}
     hs = submit(sell, "sell")
-    log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": pos["tokens"], "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": hs is None and pos.get("buy_hash") is None, "sell_hash": hs})
+    log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": pos["tokens"], "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": hs is None and pos.get("buy_hash") is None,
+         "buy_hash": pos.get("buy_hash"), "approve_hash": pos.get("approve_hash"), "sell_hash": hs, "seat_ts": pos.get("seat_ts")})
     state["open"] = None; save_state()
 
 

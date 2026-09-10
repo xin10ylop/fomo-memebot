@@ -14,7 +14,8 @@ its nights +10%) and the day. The bots in second one do not lower a kept launch'
 were tried and rejected. What is left: 20% sizing once live scores match the tables (September stop odds 0.5%), and
 the E1 seat when second one is crowded (section 9). The `flow` event now prints the demand (`follow_eth_last_20`,
 `follow_eth_last_60`: ETH later buyers brought while a scored launch was held) and the crowding (`out1_share_last_60`:
-share of the last sixty bundled launches with an outsider in second one). Nothing the engine sends has changed.
+share of the last sixty bundled launches with an outsider in second one). Nothing the engine sends has changed. `src/analysis/live_check.py` compares the live receipts with the engine's
+scores of the same launches (section 5).
 
 **v3 (round 15, report section 23).** Four researchers, two per question, then a triple check of everything:
 
@@ -305,6 +306,16 @@ rolling mean, the switch state, and the dry-run bankroll). Go/no-go from that lo
 - the `flow` event every five minutes: `follow_eth_last_60` between 0.2 and 0.5 ETH on a normal day (under 0.2 means
   +3% to +4% a trade, section 23.11) and `out1_share_last_60` about 0.6 in September (above 0.55 is the crowded regime
   where the E1 seat pays, section 9).
+
+**The live check, one command.** Once the send step returns hashes, every `trade_done` carries the buy, approve and
+sell hashes, and `python3 src/analysis/live_check.py engine.jsonl` pulls the receipts and prints, per trade, where the
+buy landed (first block / later block of the seat's second, or EARLY / LATE), its index in the block, ETH in and tokens
+out from the buy's own event, tokens against the engine's target, the share the sell moved, ETH out, gas, the live
+return, and the engine's exact-curve score of the same launch next to it; then the mean gap over all trades with a
+bootstrap interval and a verdict. It was exercised on real receipts from the chain (a stranger's buy and sell on one
+curve: +4.6% live, gas 0.00004 ETH, sell moved 100%). Ten compared trades are the minimum for the verdict; thirty is the
+plan. A gap whose interval excludes zero is the box or the seat (latency, landing, slippage), never the market, because
+both numbers are computed on the same launches. Send the log and the checker's output when you want them read.
 
 The send step is yours: replace `submit()` with a function that signs with your key and calls
 `eth_sendRawTransaction`, returning the hash. Sign the sell as soon as the buy's receipt is in (the engine builds it
