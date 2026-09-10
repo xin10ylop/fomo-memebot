@@ -1,0 +1,33 @@
+=== E1 on every bundled launch: ROI per trade, tail (< -40%), own path from $300, stop odds by resample; per half
+   E1 front            hold 5 TP 0.5  sizing 10%  FIT ROI  +5.5% tail 13.3% own   4,377 ( 962 tr, +win 4/5, own stops 1) P(stop) 20.1% max 100.0% | NEW ROI  +8.7% tail 10.1% own  25,003 (2606 tr, +win 9/10, own stops 1) P(stop)  0.7% max  6.4% | TEST ROI  +7.8% tail 11.8% own  18,935 (1729 tr, +win 5/7, own stops 1) P(stop)  5.1% max 34.3%
+   E1 front            hold 5 TP 0.5  sizing 15%  FIT ROI  +5.5% tail 13.3% own   8,355 ( 961 tr, +win 4/5, own stops 1) P(stop) 20.2% max 99.3% | NEW ROI  +8.7% tail 10.1% own  39,497 (2365 tr, +win 8/10, own stops 2) P(stop)  1.3% max 10.6% | TEST ROI  +7.8% tail 11.8% own  26,513 (1739 tr, +win 6/7, own stops 1) P(stop)  6.6% max 43.0%
+   E1 front            hold 7 TP None sizing 10%  FIT ROI  +4.5% tail 21.5% own   3,196 ( 883 tr, +win 3/5, own stops 2) P(stop) 28.1% max 99.4% | NEW ROI +13.1% tail 17.4% own  50,290 (2495 tr, +win 9/10, own stops 1) P(stop)  1.2% max  4.8% | TEST ROI  +9.6% tail 18.8% own  18,655 (1856 tr, +win 7/7, own stops 0) P(stop)  1.6% max  8.7%
+   E1 front            hold 7 TP None sizing 15%  FIT ROI  +4.5% tail 21.5% own   5,848 ( 864 tr, +win 3/5, own stops 2) P(stop) 30.9% max 93.9% | NEW ROI +13.1% tail 17.4% own  60,360 (2140 tr, +win 7/10, own stops 3) P(stop)  2.5% max 10.1% | TEST ROI  +9.6% tail 18.8% own  29,997 (1856 tr, +win 7/7, own stops 0) P(stop)  3.4% max 16.0%
+   E1 one block behind hold 5 TP 0.5  sizing 10%  FIT ROI  +4.7% tail 13.5% own   3,062 ( 952 tr, +win 4/5, own stops 1) P(stop) 20.3% max 100.0% | NEW ROI  +3.8% tail 11.4% own   4,021 (2047 tr, +win 6/10, own stops 3) P(stop) 20.1% max 100.0% | TEST ROI  +5.7% tail 12.3% own  13,222 (1578 tr, +win 4/7, own stops 2) P(stop) 17.2% max 100.0%
+   E1 one block behind hold 5 TP 0.5  sizing 15%  FIT ROI  +4.7% tail 13.5% own   6,449 ( 940 tr, +win 4/5, own stops 1) P(stop) 20.7% max 99.9% | NEW ROI  +3.8% tail 11.4% own   8,023 (1642 tr, +win 4/10, own stops 5) P(stop) 22.6% max 100.0% | TEST ROI  +5.7% tail 12.3% own  20,753 (1470 tr, +win 5/7, own stops 2) P(stop) 18.5% max 100.0%
+   E1 one block behind hold 7 TP None sizing 10%  FIT ROI  +2.4% tail 22.2% own   1,631 ( 780 tr, +win 3/5, own stops 2) P(stop) 42.6% max 100.0% | NEW ROI  +7.1% tail 17.7% own  18,568 (1903 tr, +win 5/10, own stops 4) P(stop) 11.8% max 59.8% | TEST ROI  +7.0% tail 18.9% own  10,071 (1670 tr, +win 6/7, own stops 1) P(stop)  8.1% max 42.3%
+   E1 one block behind hold 7 TP None sizing 15%  FIT ROI  +2.4% tail 22.2% own   4,112 ( 755 tr, +win 3/5, own stops 2) P(stop) 44.6% max 100.0% | NEW ROI  +7.1% tail 17.7% own  25,727 (1866 tr, +win 5/10, own stops 4) P(stop) 17.5% max 79.4% | TEST ROI  +7.0% tail 18.9% own  15,299 (1298 tr, +win 4/7, own stops 3) P(stop) 11.9% max 57.0%
+
+=== per window, E1 front, hold 5 + TP 50%, 15%: own path and resampled stop odds; next to E2 kept
+   08-27 12-18 E1 front n   20 ROI +10.0% tail  0.0%  own    +100 ( 20 tr) P(stop)  0.0% median end    +101   | E2 kept n   6 ROI  +2.9%
+   08-30 12-18 E1 front n  244 ROI  -1.0% tail 14.3%  own    -154 (151 tr, STOPPED) P(stop) 99.3% median end    -155   | E2 kept n 151 ROI  +8.6%
+   08-31 12-18 E1 front n  322 ROI  +4.1% tail 13.7%  own    +451 (291 tr) P(stop)  1.3% median end  +1,058   | E2 kept n 240 ROI +10.0%
+   09-01 12-18 E1 front n  282 ROI  +5.8% tail 15.2%  own  +1,716 (265 tr) P(stop)  0.2% median end  +2,140   | E2 kept n 180 ROI  +8.7%
+   09-02 12-18 E1 front n  243 ROI +13.2% tail 10.7%  own  +6,242 (234 tr) P(stop)  0.0% median end  +6,491   | E2 kept n 167 ROI +15.7%
+   09-03 0-6   E1 front n  163 ROI  +2.7% tail  9.2%  own    +194 (158 tr) P(stop)  0.9% median end    +199   | E2 kept n  53 ROI +16.5%
+   09-03 12-18 E1 front n  342 ROI +17.3% tail  8.8%  own +13,208 (330 tr) P(stop)  0.0% median end +14,053   | E2 kept n 160 ROI +21.7%
+   09-03 18-24 E1 front n  489 ROI  +8.9% tail 13.5%  own  +9,318 (437 tr) P(stop)  0.3% median end +10,050   | E2 kept n 262 ROI +16.4%
+   09-04 12-18 E1 front n  156 ROI +10.1% tail  6.4%  own  +1,699 (148 tr) P(stop)  0.0% median end  +2,016   | E2 kept n  62 ROI  +6.5%
+   09-05 0-6   E1 front n  216 ROI  +7.8% tail  7.4%  own  +2,235 (206 tr) P(stop)  0.0% median end  +2,458   | E2 kept n  43 ROI +13.4%
+   09-05 12-18 E1 front n  374 ROI  +1.5% tail 17.1%  own     +20 (341 tr) P(stop) 43.0% median end     -35   | E2 kept n  97 ROI +19.3%
+   09-06 12-18 E1 front n  320 ROI  +5.0% tail 13.1%  own    -160 (119 tr, STOPPED) P(stop)  2.0% median end  +1,582   | E2 kept n  81 ROI  +5.6%
+   09-07 0-6   E1 front n  301 ROI +11.5% tail  9.6%  own  +7,029 (282 tr) P(stop)  0.0% median end  +7,278   | E2 kept n 131 ROI  +9.6%
+   09-07 12-18 E1 front n  284 ROI +11.2% tail  8.8%  own  +5,272 (262 tr) P(stop)  0.1% median end  +6,225   | E2 kept n  73 ROI  -0.3%
+   09-07 18-24 E1 front n  559 ROI  +9.7% tail 11.6%  own +11,245 (491 tr) P(stop)  0.1% median end +12,594   | E2 kept n 199 ROI  +6.2%
+   09-08 0-6   E1 front n  257 ROI +15.1% tail  8.9%  own  +6,940 (244 tr) P(stop)  0.0% median end  +8,522   | E2 kept n  60 ROI +12.9%
+   09-08 12-18 E1 front n  291 ROI  +2.5% tail 13.4%  own    -151 ( 54 tr, STOPPED) P(stop) 10.6% median end    +232   | E2 kept n  75 ROI  +3.5%
+   09-08 18-24 E1 front n  408 ROI  +6.7% tail 11.0%  own  +4,585 (379 tr) P(stop)  1.6% median end  +4,695   | E2 kept n 139 ROI  +5.3%
+   09-09 0-6   E1 front n  244 ROI  +9.4% tail  6.6%  own  +3,618 (232 tr) P(stop)  0.0% median end  +3,910   | E2 kept n  71 ROI  +6.6%
+   09-09 12-18 E1 front n  213 ROI  +9.3% tail  7.5%  own    -152 ( 22 tr, STOPPED) P(stop)  0.0% median end  +2,938   | E2 kept n  43 ROI  +7.7%
+   09-09 18-24 E1 front n  219 ROI  +5.1% tail 11.9%  own    +562 (213 tr) P(stop)  0.5% median end    +691   | E2 kept n  21 ROI  +1.9%
+   09-10 0-6   E1 front n  194 ROI  +5.4% tail  8.8%  own    +549 (186 tr) P(stop)  0.1% median end    +807   | E2 kept n  28 ROI +15.5%

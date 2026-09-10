@@ -1,0 +1,17 @@
+=== clean launches (no outsider in second one, none before our send) as a share of bundled launches, and windows' mean
+   FIT: kept 745 of 1104 bundled = 67%
+   TEST: kept 758 of 1990 bundled = 38%
+   NEW: kept 840 of 2918 bundled = 29%
+   kept per window: FIT 124, TEST 108, NEW 84
+   mean ROI per kept trade: FIT +10.6%, TEST +15.8%, NEW +6.6%
+   FIT -> NEW: trades per window x0.68, ROI per trade x0.62; of the drop in (trades x ROI) per window, 45% is fewer trades (crowding), 55% is less return per trade (demand)
+   TEST -> NEW: trades per window x0.78, ROI per trade x0.42; 22% fewer trades, 78% less return per trade
+
+=== stop odds (bankroll below half of $300 at any point) over 1000 shuffles of each window's kept trades, then averaged per half; and the median end
+   flat 15% (the rule)    FIT P(stop)  0.1% max  0.2%  median end   2,937  95th drawdown 38.3% | TEST P(stop)  0.0% max  0.0%  median end   3,086  95th drawdown 24.9% | NEW P(stop)  0.1% max  0.3%  median end     326  95th drawdown 29.7%
+   flat 17.5%             FIT P(stop)  0.1% max  0.4%  median end   3,417  95th drawdown 42.3% | TEST P(stop)  0.0% max  0.0%  median end   3,378  95th drawdown 28.1% | NEW P(stop)  0.2% max  1.0%  median end     423  95th drawdown 33.1%
+   flat 20%               FIT P(stop)  0.3% max  0.6%  median end   3,796  95th drawdown 46.2% | TEST P(stop)  0.0% max  0.1%  median end   3,609  95th drawdown 30.9% | NEW P(stop)  0.5% max  2.2%  median end     542  95th drawdown 35.9%
+   flat 22.5%             FIT P(stop)  0.5% max  1.2%  median end   4,087  95th drawdown 49.5% | TEST P(stop)  0.1% max  0.5%  median end   3,813  95th drawdown 33.7% | NEW P(stop)  1.1% max  5.6%  median end     648  95th drawdown 38.9%
+   flat 25%               FIT P(stop)  1.0% max  1.7%  median end   4,314  95th drawdown 53.0% | TEST P(stop)  0.1% max  0.5%  median end   3,981  95th drawdown 36.7% | NEW P(stop)  1.8% max 10.1%  median end     753  95th drawdown 42.1%
+   tiers on 15%           FIT P(stop)  0.3% max  0.7%  median end   3,624  95th drawdown 46.1% | TEST P(stop)  0.0% max  0.3%  median end   3,749  95th drawdown 31.8% | NEW P(stop)  1.2% max  9.2%  median end     589  95th drawdown 35.3%
+   tiers on 20%           FIT P(stop)  1.3% max  2.0%  median end   4,274  95th drawdown 55.4% | TEST P(stop)  0.2% max  1.0%  median end   4,179  95th drawdown 39.6% | NEW P(stop)  4.9% max 40.0%  median end     863  95th drawdown 42.5%

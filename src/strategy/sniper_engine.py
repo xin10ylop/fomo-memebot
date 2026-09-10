@@ -276,7 +276,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
          "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "connected_at": 0.0,
          "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "decisions": {},
-         "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "creations": 0, "timing": collections.deque(maxlen=60), "last_creation_at": 0.0}
+         "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "creations": 0, "timing": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0}
 lock = threading.Lock()
 cond = threading.Condition()                           # notified by the feed loop after every message is fully indexed
 
@@ -336,10 +336,12 @@ def chain_loop():
             except Exception:
                 pass
             rp = state["rule_passing"]; now = time.time()
-            tm = list(state["timing"]); fs = [a for a, b in tm if a is not None]
+            tm = list(state["timing"]); fs = [a for a, b, c in tm if a is not None]
             log({"ev": "flow", "rule_passing_last_6h": sum(1 for t in rp if now - t < 21600), "rule_passing_last_1h": sum(1 for t in rp if now - t < 3600),
                  "mean_score_last_60": round(st.mean(list(state["scores"])[-60:]), 4) if state["scores"] else None, "creations_seen": state["creations"],
-                 "median_first_sell_s": round(st.median(fs), 2) if fs else None, "share_dumped_inside_hold": round(st.mean(b for a, b in tm), 4) if tm else None,
+                 "median_first_sell_s": round(st.median(fs), 2) if fs else None, "share_dumped_inside_hold": round(st.mean(b for a, b, c in tm), 4) if tm else None,
+                 "follow_eth_last_20": round(st.mean([c for a, b, c in tm][-20:]), 3) if tm else None, "follow_eth_last_60": round(st.mean(c for a, b, c in tm), 3) if tm else None,
+                 "out1_share_last_60": round(st.mean(state["out1_flags"]), 2) if state["out1_flags"] else None,
                  "silent_min": round((mono() - state["last_creation_at"]) / 60, 1) if state["last_creation_at"] else None})
             if state["last_creation_at"] and mono() - state["last_creation_at"] > 1800 and mono() - state["connected_at"] > 1800:
                 log({"ev": "alarm", "what": "no creation seen from the factory for 30 minutes while the feed is connected: the launchpad moved, stopped or changed its factory"})
@@ -569,6 +571,8 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
     sur = [r[5] - tier for r in rows[1:] if r[1] == "B" and r[0] <= 3.0 and r[5] - tier > 0.001]
     odd = sum(1 for x in sur if not (0.85 <= x <= 0.995 or 0.05 <= x <= 0.075 or 0.0012 <= x <= 0.0035))
     state["schedule"].append(1 if (sur and odd / len(sur) > 0.5) else 0)
+    if lab[0] >= BUNDLE_MIN and lab[1] >= BUNDLE_MIN_ETH:
+        state["out1_flags"].append(1 if lab[2] > 0 else 0)                              # crowding readout: share of bundled launches with an outsider in second one
     if gated and (lab[0] < BUNDLE_MIN or lab[1] < BUNDLE_MIN_ETH or rows[0][3] < MIN_CREATOR_SUPPLY * Y0 or (seat == "E2" and lab[2] > OUT1_MAX)):
         return ("filtered",) + lab
     X, Y = X0, Y0; X += rows[0][4]; Y -= rows[0][3]
@@ -608,7 +612,8 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
     out = (X - X * Y / (Y + tk_bot)) * (1 - tier)
     first_sell = next((r[0] - t_in for r in rows if r[1] == "S" and r[0] >= t_in), None)
     dumped = sum(r[3] for r in rows if r[1] == "S" and t_in <= r[0] < t_in + hold + slip) / Y0
-    state["timing"].append((first_sell, dumped))
+    follow_eth = sum(r[2] for r in rows if r[1] == "B" and t_in <= r[0] < t_exit)       # demand readout: ETH later buyers brought while we held (section 23.11)
+    state["timing"].append((first_sell, dumped, follow_eth))
     return ((out - gross) * state["eth_usd"] - 1.0, gross * state["eth_usd"], t_in, tier) + lab
 
 

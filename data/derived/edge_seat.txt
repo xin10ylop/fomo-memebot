@@ -1,0 +1,37 @@
+=== seat choice per launch from the previous 60 bundled launches' second-one occupancy (known at send time)
+   E2 always (the rule)                                       FIT  10,597 (706 tr,   0 at E1, ROI +10.3%, worst  1,082) | TEST  20,808 (731 tr,   0 at E1, ROI +15.6%, worst    102) | NEW   3,250 (814 tr,   0 at E1, ROI  +6.1%, worst    -52) | stops 0
+   E1 front always                                            FIT   8,255 (941 tr, 941 at E1, ROI  +5.7%, worst   -154) | TEST  26,513 (1739 tr, 1739 at E1, ROI  +7.7%, worst   -160) | NEW  39,497 (2365 tr, 2365 at E1, ROI  +8.7%, worst   -152) | stops 4
+   E1 one block behind always                                 FIT   6,362 (921 tr, 921 at E1, ROI  +4.9%, worst   -150) | TEST  20,753 (1470 tr, 1470 at E1, ROI  +6.9%, worst   -164) | NEW   8,023 (1642 tr, 1642 at E1, ROI  +2.8%, worst   -158) | stops 8
+   E1 front when occupancy of last 60 > 35%, else E2          FIT  10,319 (735 tr,  81 at E1, ROI  +9.8%, worst  1,138) | TEST  22,106 (1411 tr, 1101 at E1, ROI  +8.2%, worst   -164) | NEW  36,640 (2268 tr, 2119 at E1, ROI  +9.1%, worst   -153) | stops 2
+   E1 one block behind when occupancy > 35%, else E2          FIT  10,078 (733 tr,  79 at E1, ROI  +9.5%, worst    937) | TEST  17,972 (1348 tr, 1038 at E1, ROI  +6.4%, worst   -169) | NEW  10,380 (1828 tr, 1702 at E1, ROI  +4.4%, worst   -165) | stops 5
+   E1 front when occupancy of last 60 > 45%, else E2          FIT  10,408 (714 tr,  14 at E1, ROI +10.2%, worst  1,082) | TEST  18,782 (1216 tr, 753 at E1, ROI  +8.3%, worst   -160) | NEW  28,065 (2112 tr, 1830 at E1, ROI  +8.5%, worst   -153) | stops 2
+      per window: 08-30/12-18 +1,082, 08-31/12-18 +3,067, 09-01/12-18 +1,305, 09-02/12-18 +4,954, 09-03/0-6 -31, 09-03/12-18 +7,157, 09-03/18-24 +9,305, 09-04/12-18 +638, 09-05/0-6 +1,684, 09-05/12-18 +188, 09-06/12-18 -160, 09-07/0-6 +2,572, 09-07/12-18 +2,461, 09-07/18-24 +7,147, 09-08/0-6 +6,212, 09-08/12-18 -153, 09-08/18-24 +2,728, 09-09/0-6 +2,827, 09-09/12-18 +3,350, 09-09/18-24 +374, 09-10/0-6 +546
+   E1 one block behind when occupancy > 45%, else E2          FIT  10,328 (713 tr,  13 at E1, ROI +10.1%, worst  1,082) | TEST  16,853 (1096 tr, 633 at E1, ROI  +7.2%, worst   -165) | NEW   8,220 (1715 tr, 1472 at E1, ROI  +4.1%, worst   -165) | stops 5
+   E1 front when occupancy of last 60 > 55%, else E2          FIT  10,597 (706 tr,   0 at E1, ROI +10.3%, worst  1,082) | TEST  19,670 (1115 tr, 507 at E1, ROI +10.2%, worst    131) | NEW  19,802 (1795 tr, 1336 at E1, ROI  +7.9%, worst   -153) | stops 1
+      per window: 08-30/12-18 +1,082, 08-31/12-18 +3,067, 09-01/12-18 +1,494, 09-02/12-18 +4,954, 09-03/0-6 +131, 09-03/12-18 +7,204, 09-03/18-24 +9,548, 09-04/12-18 +324, 09-05/0-6 +1,684, 09-05/12-18 +569, 09-06/12-18 +209, 09-07/0-6 +927, 09-07/12-18 +1,499, 09-07/18-24 +4,986, 09-08/0-6 +6,226, 09-08/12-18 -153, 09-08/18-24 +1,482, 09-09/0-6 +697, 09-09/12-18 +3,195, 09-09/18-24 +396, 09-10/0-6 +546
+   E1 one block behind when occupancy > 55%, else E2          FIT  10,597 (706 tr,   0 at E1, ROI +10.3%, worst  1,082) | TEST  17,910 (1106 tr, 498 at E1, ROI  +8.9%, worst    -37) | NEW   7,265 (1653 tr, 1194 at E1, ROI  +4.0%, worst   -165) | stops 2
+   E1 front when occupancy of last 60 > 65%, else E2          FIT  10,597 (706 tr,   0 at E1, ROI +10.3%, worst  1,082) | TEST  21,242 (996 tr, 354 at E1, ROI +11.9%, worst    102) | NEW   7,404 (1441 tr, 754 at E1, ROI  +5.9%, worst    -37) | stops 0
+   E1 one block behind when occupancy > 65%, else E2          FIT  10,597 (706 tr,   0 at E1, ROI +10.3%, worst  1,082) | TEST  18,939 (990 tr, 348 at E1, ROI +11.0%, worst    102) | NEW   3,030 (1266 tr, 579 at E1, ROI  +3.2%, worst   -155) | stops 2
+
+=== the same by half, ROI per trade of E1 front on ALL bundled launches vs E2 on the kept ones, per window
+   08-30 12-18 occupancy  28%  E2 kept n 151 ROI  +8.3%   E1 front n 244 ROI  -1.0%
+   08-31 12-18 occupancy  14%  E2 kept n 240 ROI  +9.7%   E1 front n 322 ROI  +4.1%
+   09-01 12-18 occupancy  30%  E2 kept n 180 ROI  +8.3%   E1 front n 282 ROI  +5.8%
+   09-02 12-18 occupancy  24%  E2 kept n 167 ROI +15.3%   E1 front n 243 ROI +13.2%
+   09-03 0-6   occupancy  58%  E2 kept n  53 ROI +16.1%   E1 front n 163 ROI  +2.7%
+   09-03 12-18 occupancy  38%  E2 kept n 160 ROI +21.4%   E1 front n 342 ROI +17.3%
+   09-03 18-24 occupancy  31%  E2 kept n 262 ROI +16.1%   E1 front n 489 ROI  +8.9%
+   09-04 12-18 occupancy  44%  E2 kept n  62 ROI  +6.1%   E1 front n 156 ROI +10.1%
+   09-05 0-6   occupancy  76%  E2 kept n  43 ROI +13.1%   E1 front n 216 ROI  +7.8%
+   09-05 12-18 occupancy  64%  E2 kept n  97 ROI +18.9%   E1 front n 374 ROI  +1.5%
+   09-06 12-18 occupancy  40%  E2 kept n  81 ROI  +5.3%   E1 front n 320 ROI  +5.0%
+   09-07 0-6   occupancy  36%  E2 kept n 131 ROI  +9.3%   E1 front n 301 ROI +11.5%
+   09-07 12-18 occupancy  55%  E2 kept n  73 ROI  -0.6%   E1 front n 284 ROI +11.2%
+   09-07 18-24 occupancy  51%  E2 kept n 199 ROI  +5.8%   E1 front n 559 ROI  +9.7%
+   09-08 0-6   occupancy  68%  E2 kept n  60 ROI +12.5%   E1 front n 257 ROI +15.1%
+   09-08 12-18 occupancy  65%  E2 kept n  75 ROI  +3.2%   E1 front n 291 ROI  +2.5%
+   09-08 18-24 occupancy  54%  E2 kept n 139 ROI  +5.0%   E1 front n 408 ROI  +6.7%
+   09-09 0-6   occupancy  61%  E2 kept n  71 ROI  +6.3%   E1 front n 244 ROI  +9.4%
+   09-09 12-18 occupancy  69%  E2 kept n  43 ROI  +7.4%   E1 front n 213 ROI  +9.3%
+   09-09 18-24 occupancy  84%  E2 kept n  21 ROI  +1.5%   E1 front n 219 ROI  +5.1%
+   09-10 0-6   occupancy  75%  E2 kept n  28 ROI +15.1%   E1 front n 194 ROI  +5.4%

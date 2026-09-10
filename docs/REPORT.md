@@ -25,6 +25,7 @@ Everything below was computed from data collected in this session; scripts are i
 19. **Round 13 answered the reader's three questions (section 21): more days, the machine, the chain.** Sep 4 and Sep 5, never looked at before, confirm the bundle filter out of sample (E2 seat 0.3 s behind: +9.6% and +4.2% a trade on bundled launches, $2.7k and $4.3k switched net in six hours; the unfiltered outsider seat stays near zero), with more windows landing in `sniper_oos.txt`. The engine's critical path no longer needs an RPC call: the creator's exempted wallets, listed in the creation calldata, buy the new curve inside the creation second, and matching feed buyers to that list gives the curve address exactly. The machine is a small EC2 in Ohio on the public feed with a provider RPC for bookkeeping, not a full node. The seat exists on Robinhood Chain because ordering is first-come with no priority fee and the tax is per second; on Solana the same slot is bought with Jito tips by sub-50 ms bare-metal bots and was not tested.
 20. **Round 14 put the whole thing in front of two independent auditors with one brief (section 22).** They agreed on the essentials: the mechanism is real and the tables reproduce, but the engine only saw about 40% of the buyers whose absence is the rule's main gate, the rule is in-sample, the compounding paths were single orderings, one gas-gate constant had been swallowed by a comment, and the setup had a dozen operational holes. Engine v3 decodes every transaction type and router buys and checks its own feed readings against the chain at score time (they match); state is persisted and an open position is closed on restart; the setup script is hardened; the simulator's universe on the newer windows was corrected (the event's fee field is the protocol fee, not the token's tax). The corrected rule stays positive on all eleven windows (+1.8% to +18.6% per trade), but the planning number is now +5% to +8% per trade on busy windows with a 10–34% chance of a −50% day on flat ones, +$100 to +$800 per busy six hours from $300, and nothing has been sent live.
 21. **Round 15 asked two things of four researchers (section 23): lose less, and land where the tables assume.** Both risk researchers found the same fat left tail (one trade in five ends near −70%, no clustering) and the same remedies: hold 5 s instead of 7, a +50% take-profit, 15% sizing with a $25 floor, and, from one of them, a gate that skips launches where a rival is already in the seat. The gate's threshold turned out to be an artefact of the replay's interpolated clock, but the signal under it is real and executable (launches nobody else takes earn +10%/+20%, launches a rival took lose), so the rule now sends 0.3 s into second two only if no outsider has bought. Fit half +10.7% a trade, test half +16.4%, every window above +7.6%, one-at-a-time $22.0k and $37.4k, and a resampled chance of the −50% stop of zero at either sizing; from $100 the stop odds stay under 7%. The speed engineers found a signing landmine (lowercase addresses), a feed loop busy 17% of the time, a curve state rebuilt after the boundary, polling wakes and cold sockets; engine v4 fixes all of it (0.26 ms per frame, 0.5 µs of post-boundary work) and the new rule makes the send a fixed 300 ms after the second opens, which the first live receipts must confirm. Ten more windows (Sep 7–10) that no choice ever touched keep the rule positive (nine of ten, +6.2% a trade, stop odds 0.1%) at a third of the earlier level, because two thirds of bundled launches now carry a bot in second one; the money moved to the first-in-second-one seat (+13% a trade on 2,970 launches, but +4% one block late and zero 0.3 s late), which only live receipts can test. Section 23.7 then measured the nine ways it could die: real gas is $0.10 a round trip (a $100 start is back), the sequencer takes raw transactions from unknown senders, the contracts carry no blacklist, a fee-headroom landmine that would have refused the first live buy is fixed, and alarms for a changed tax schedule, a silent factory and a thinning flow are in the engine.
+22. **Why the edge thinned (section 23.11).** The September return, taken apart on the exact curve: fees and the teams' dumps are unchanged; the buyers who come after us bring 28% less ETH per hold, and that alone is the drop in return per trade (+0.88 correlation across twenty-one windows; the competition does not correlate with a kept launch's return). The competition costs trades instead: clean launches fell from 67% to 29% of bundled launches. It depends on the day and the hour: September's US-morning hours pay +3% a trade, its nights +10%, where the earlier windows paid +15% at any hour. Sizing to a live demand gauge, reacting to dumps and changing the exit were tested and rejected; 20% sizing is the most the September windows allow under 1% stop odds; and the seat the crowd moved to, first in second one, pays +8.7% a trade on every bundled launch in September (twelve times the E2 gain, stop odds 1.3%) if the box lands first, loses to E2 on the August windows, and collapses one block late. The engine now prints the demand and the crowding as `follow_eth_last_60` and `out1_share_last_60`.
 12. **Round 6 found the treasure's real owner and measured its seat: the first-block sniper.** The 185 sniper-bot wallets that pay the creators are not all losers. Reconstructing the dollar P&L of the fifteen busiest from their transfers, curve trades and pool swaps: the bots that buy 0.3–3 seconds after launch and sell 3–21 seconds later are net positive (the fastest: +$30.8k on $107k of turnover in six hours, +28.7% per trade, 175 launches, nothing left unsold); every bot that holds minutes or hours loses (−44% to −94%). Simulating that seat on every launch of the window with launch-time filters (creator's first launch of the day, ETH-quoted, stake min(3% of supply, $300), sell 7 s later into whoever bought next, exact curve exits, 1% fees each way) gives +27% on $97k in the fitting hours and +32% on $98k in the holdout hours, per-launch mean +27%/+33% with confidence intervals of +20% to +41%, median −2%, 46–48% of launches positive, worst case one stake. That is $26k and $31k of profit per three hours on a working capital of a few thousand dollars, and it reproduces the fastest real bot's holdout result (+31%). The sensitivity analysis says what it is: paying 10% more than first-in-line still earns +18–23%, paying 25% more earns +6–10%, paying 50% more or landing half a second late loses. It is a latency race for the first block after creation, on a chain with 100 ms blocks, sponsored gas and a first-come sequencer; the winner takes +30% a trade several hundred times a day and everyone behind them pays. Out of sample on Sep 2 (a lower-flow day) the same untouched rule made +0.4% in the first three hours and +15% in the next three. Three further windows across the fee cycle (section 14.2) then showed the seat is a peak-flow phenomenon: −13% in Pons V2's second week (Aug 12), flat at the trough (Aug 20) and on the ramp (Aug 27), positive only on the two peak days. It is not a structural edge. Section 14 has the tables and a live shadow tester that scores every new launch against the rule without capital.
 
 ## 1. Data access and what was analysed
@@ -1764,3 +1765,109 @@ with B armed: the terms' only remedy against a client is to refuse it access (th
 or cancel transactions" and holds no funds), the engine sends through the provider as well as the sequencer already,
 and it now switches detection to the provider by itself after five refused feed connections. So A costs nothing
 extra if the door closes, and B is what remains.
+
+### 23.11 Why the edge thinned, measured, and what still pays
+
+The September windows pay +6% a trade against +11% to +16% before. The question was whether that is the day, the
+competition, the buyers or the sells, and what, if anything, restores it. Every number below is from the exact-curve
+replay of the twenty-one windows in the harness cache (`src/analysis/edge_anatomy.py`, `edge_gauge.py`, `edge_fix.py`,
+`edge_stops.py`, `edge_seat.py`, `edge_seat2.py`; outputs in `data/derived/edge_*.txt`).
+
+**The return, taken apart.** For each kept launch (bundled, creator ≥ 1%, no outsider in second one, nobody in the seat
+before our send 0.3 s into second two) the return at the engine's exit (hold 5 s, +50% take-profit, $300) is split into
+three parts on the exact curve: *base*, the token's fee, the seat's +0.19% and our own impact in and out (the return if
+nothing happened while we held); *buys*, what the buyers who came after us add; *sells*, what the sells inside the hold
+take. Per half of the data (fit Aug 30–Sep 2, test Sep 3–6, September Sep 7–10):
+
+| half | windows | kept per window | ROI a trade | = base | + buys | + sells | later buys per hold | later ETH per hold | bots in second one | seat rivals |
+|---|---|---|---|---|---|---|---|---|---|---|
+| fit | 4 | 124 | +10.7% | −2.5% | +26.4% | −10.5% | 7.2 | 0.36 | 24% | 10% |
+| test | 7 | 108 | +14.2% | −2.8% | +24.5% | −9.7% | 6.3 | 0.35 | 50% | 27% |
+| September | 10 | 84 | +6.9% | −3.0% | +18.1% | −10.9% | 6.2 | 0.26 | 62% | 32% |
+
+The fees did not move and the sells did not move: the teams dump the same share of supply (5–7%) at the same time.
+The whole drop is in the buys: the people who buy after us bring 28% less ETH per hold (0.36 → 0.26 ETH), a little
+fewer of them and smaller. Across the twenty-one windows the kept launches' return correlates +0.88 with the later ETH
+per hold, +0.59 with the creator's own buy, and only −0.15 with the share of bundled launches carrying a bot in second
+one and −0.38 with the share of seat rivals; the later buyers per hold do not correlate with the bots (−0.08). The
+chain-wide bonding-curve volume in the window (every curve, every buy: 30k–350k ETH a window) predicts nothing
+(−0.08). So on the launches we keep, the competition does not cost return; it costs *trades*: the clean share of
+bundled launches fell from 67% (fit) to 38% (test) to 29% (September), 124 → 108 → 84 kept per window, while bundled
+launches per window stayed at 250–300. Of the drop in gains per window from the first four windows to September, 45% is
+fewer trades (crowding) and 55% is less return per trade (demand); from the strongest seven windows, 22% and 78%.
+
+**It depends on the day, and on the hour.** Window by window the kept launches pay −0.3% (Sep 7 12–18) to +21.7%
+(Sep 3 12–18); the follow-on ETH per hold runs 0.17 to 0.47 and the two move together. By hour of day, September's
+loss is concentrated in the US day:
+
+| UTC hours | test half, n / ROI | September, n / ROI | bots in second one |
+|---|---|---|---|
+| 0–6 (US evening) | 96 / +15.1% | 290 / +10.1% | 55–68% |
+| 12–18 (US morning) | 400 / +15.5% | 191 / +3.0% | 35–49% |
+| 18–24 (US afternoon) | 262 / +16.4% | 359 / +5.6% | 38–61% |
+
+The night hours have the most bots in second one and the best returns, which says the same thing as the correlations:
+demand sets the return of a kept launch, the bots set how many there are. Three nights of evidence is a lean, not a
+law; the engine runs around the clock and the readout below tells the operator which regime the hour is in.
+
+**Five things tried against it, three rejected.**
+
+1. *Read the demand live and size to it.* The engine scores every bundled launch 25 s after it, so the ETH later
+   buyers brought inside the hold is known then. The rolling mean over the previous twenty scored launches, taken
+   before the next send, sorts the next return by bin over all windows (below 0.25 ETH +3.6% a trade, 0.25–0.35
+   +8.4%, 0.35–0.5 +11.3%, above +13.2%), but launch by launch it is noise (r = +0.05): a bad hour and a good hour
+   are told apart, two consecutive launches are not. Sizing to it (off below 0.15, half to 0.25, full to 0.35,
+   1.5× above) earns the same return per trade as the flat rule, and its gains ($13.3k / $25.5k / $6.2k on the three
+   halves against $10.6k / $20.8k / $3.3k at 15%) are what a flat 20% earns ($13.7k / $24.2k / $5.5k) with *higher*
+   stop odds (September 1.2%, 9% on one window, against 0.5% and 2.2% for flat 20%), because the 1.5× tier fires on
+   Sep 7 12–18, where the demand gauge read 0.36 ETH and the window paid −0.3%. Thresholds re-fitted on the fit half
+   alone do worse. Rejected as a rule; kept as a readout: the `flow` event now carries `follow_eth_last_20` and
+   `follow_eth_last_60`, and under 0.2 ETH the operator should expect +3% to +4% a trade.
+2. *React to the dump.* Sell as soon as a sell of 0.5% to 5% of supply lands inside the hold (we land 0.3 s after
+   seeing it). Worse everywhere it was not fitted: September +3.7% to +5.3% instead of +6.1%, test +13.5% to +14.2%
+   instead of +15.6%. The sells we would react to are followed by buys; leaving on them sells the dip. Rejected.
+3. *Change the exit.* Hold 7 s with no take-profit pays +8.8% on September but +8.2% on the fit half against +10.4%,
+   at a 17% tail; hold 4 and a +30% take-profit are better on the fit half and worse on September. The plateau of
+   section 23.8 stands: hold 5 with +50% stays.
+4. *Size up.* Stop odds by resample (each window's kept trades shuffled a thousand times, $300 start, −50% stop),
+   averaged over the windows of each half, with the worst window:
+
+   | sizing | fit P(stop) / worst | test | September | September median gain per window |
+   |---|---|---|---|---|
+   | 15% (the rule) | 0.1% / 0.2% | 0.0% / 0.0% | 0.1% / 0.3% | $326 |
+   | 17.5% | 0.1% / 0.4% | 0.0% / 0.0% | 0.2% / 1.0% | $423 |
+   | 20% | 0.3% / 0.6% | 0.0% / 0.1% | 0.5% / 2.2% | $542 |
+   | 22.5% | 0.5% / 1.2% | 0.1% / 0.5% | 1.1% / 5.6% | $648 |
+   | 25% | 1.0% / 1.7% | 0.1% / 0.5% | 1.8% / 10.1% | $753 |
+
+   20% is the most the September windows allow at stop odds under 1% on every window; 15% stays for the first $300
+   and the first live windows. That is the only lever on the E2 rule itself, and it buys two thirds more gain.
+5. *Take the seat the crowd moved to.* The bots in second one are not competitors of a kept E2 trade; they are the
+   buyers an E1 trade sells to. On every bundled launch (no gate on outsiders is possible at E1, because landing
+   first in second one *is* the seat), at the engine's own exit, front landing:
+
+   | E1 front, hold 5 + 50%, 15% | ROI a trade | tail < −40% | own path from $300 | windows positive | P(stop) mean / worst window |
+   |---|---|---|---|---|---|
+   | fit (Aug 30–Sep 2) | +5.5% | 13.3% | $8.4k (E2: $10.6k) | 4 of 5 | 20% / 99% (Aug 30: −1.0% a trade) |
+   | test (Sep 3–6) | +7.8% | 11.8% | $26.5k (E2: $20.8k) | 6 of 7 | 6.6% / 43% (Sep 5 12–18: +1.5%) |
+   | September (Sep 7–10) | +8.7% | 10.1% | $39.5k (E2: $3.3k) | 8 of 10 | 1.3% / 10.6% (Sep 8 12–18: +2.5%) |
+
+   Three times the trades (2,365 against 814 on September) at a higher return each, twelve times the September
+   gain, at September stop odds that match E2 at 22.5%; and on the August windows, where second one was empty, it
+   loses to E2 and stops on Aug 30. One block behind the front it is +3.8% a trade on September with 22% stop odds;
+   hold 7 without take-profit lifts the front to +13.1% at a 17% tail. Choosing the seat from the share of the
+   previous sixty bundled launches that carried a bot in second one (known at send time; the engine now prints it
+   as `out1_share_last_60`): above 45%, $10.4k / $18.8k / $28.1k with two stopped windows; above 55%, $10.6k /
+   $19.7k / $19.8k with one; above 65%, $10.6k / $21.2k / $7.4k with none. None of this exists unless the box lands
+   first in second one, which no dry run can show (section 23.8, point 4).
+
+**What this means, in one place.** The September edge is thinner for two measured reasons, one of which is ours to
+act on. Demand (the ETH other people put in after us) fell by a quarter and moves with the hour and the day; it can be
+read live but not predicted launch by launch, so nothing sizes to it, and the operator reads it as a regime. Crowding
+(bots taking second one on two thirds of launches) took half the trades; the E2 rule survives it by skipping them,
+and the E1 seat converts it into the best return in the data, conditional on the race. So: run E2 at 15% as
+configured (+6% a trade on the ten unseen windows, +$200 a busy window from $300); read `follow_eth_last_60` and
+`out1_share_last_60` each evening; move to 20% once the live scores match the tables; run the thirty-launch E1 test
+of runbook section 9 at $5–10 stakes, and if the receipts show the first block of second one on most attempts, run
+E1 at 10% while `out1_share_last_60` is above 55% and E2 otherwise. Nothing in this section changes what the engine
+sends; it adds the two readouts.

@@ -6,6 +6,16 @@ dollar is sent.
 
 ## 0. What changed
 
+**v3.1 (report section 23.11): why September pays less, and the two readouts.** The return of a kept launch, taken
+apart on the exact curve, is the same fees and the same dumps as before with 28% less ETH from the buyers who come
+after you; that is the whole drop in return per trade, and it moves with the hour (September's US-morning hours +3%,
+its nights +10%) and the day. The bots in second one do not lower a kept launch's return; they take the launches
+(clean launches 67% → 29% of bundled ones). Sizing to a live demand gauge, reacting to dumps and changing the exit
+were tried and rejected. What is left: 20% sizing once live scores match the tables (September stop odds 0.5%), and
+the E1 seat when second one is crowded (section 9). The `flow` event now prints the demand (`follow_eth_last_20`,
+`follow_eth_last_60`: ETH later buyers brought while a scored launch was held) and the crowding (`out1_share_last_60`:
+share of the last sixty bundled launches with an outsider in second one). Nothing the engine sends has changed.
+
 **v3 (round 15, report section 23).** Four researchers, two per question, then a triple check of everything:
 
 - **The rule loses less by not trading behind a rival.** Launches nobody else enters in second two earn +10% (fit half)
@@ -291,7 +301,10 @@ rolling mean, the switch state, and the dry-run bankroll). Go/no-go from that lo
   rival gate is reading the feed (about a quarter of bundled launches on the busy days);
 - rolling mean of the scores positive over at least one full peak day, and the dry-run bankroll path matching the
   compounding table within its confidence interval;
-- the switch turning on and off as the flow changes rather than sitting on.
+- the switch turning on and off as the flow changes rather than sitting on;
+- the `flow` event every five minutes: `follow_eth_last_60` between 0.2 and 0.5 ETH on a normal day (under 0.2 means
+  +3% to +4% a trade, section 23.11) and `out1_share_last_60` about 0.6 in September (above 0.55 is the crowded regime
+  where the E1 seat pays, section 9).
 
 The send step is yours: replace `submit()` with a function that signs with your key and calls
 `eth_sendRawTransaction`, returning the hash. Sign the sell as soon as the buy's receipt is in (the engine builds it
@@ -310,7 +323,10 @@ the engine's scores for the same launches are above +5% (you are not getting the
 ever above 6.18% on a next-second landing, or if the flow that pays is gone: the engine scores every rule-passing
 launch (`score` events), so read two numbers each evening from the log: rule-passing launches in the last six hours
 (under 40 means a thin window; September ran 21–200) and the mean score of the last 60 (under +3% does not cover gas
-at $25 stakes; do not trade the next day until it is back above +5%).
+at $25 stakes; do not trade the next day until it is back above +5%). The `flow` event's `follow_eth_last_60` is the
+reason behind the second number: it is the ETH later buyers put in while a scored launch was held, 0.36 on the days
+that paid +11% to +16%, 0.26 on the September days that paid +6%, 0.17 on the one window that paid nothing. It is a
+regime readout, not a per-trade signal (section 23.11): do not size to it.
 
 ## 7. Starting small
 
@@ -332,7 +348,8 @@ unclear; that is the operator's call.
 
 | killer | the sign in the log | what happens by itself | what you do |
 |---|---|---|---|
-| bots take the seat (already in motion) | `flow`: `rule_passing_last_6h` under 40, or `eligible_not_traded` mostly gated by `outsider buys in the seat's second` | the rule skips those launches | run the E1 test below; if it lands the first block, switch seats |
+| bots take the seat (already in motion) | `flow`: `out1_share_last_60` above 0.55, `rule_passing_last_6h` under 40, or `eligible_not_traded` mostly gated by `outsider buys in the seat's second` | the rule skips those launches (September: two thirds of bundled launches) | run the E1 test below; if it lands the first block on most attempts, run `SEAT=E1` at `FRAC=0.10` while `out1_share_last_60` is above 0.55 and E2 otherwise: at the front E1 pays +8.7% a trade on every bundled launch of the ten September windows ($39.5k from $300 against $3.3k at E2, stop odds 1.3%), loses to E2 on the August windows, and is +3.8% with 22% stop odds one block late (section 23.11) |
+| the buyers after you bring less | `flow`: `follow_eth_last_60` under 0.25 ETH for a day | nothing; the switch reacts only when scores go negative | expect +3% to +4% a trade instead of +6%; the hour matters (September nights +10%, US mornings +3%); do not size to the gauge (tested, rejected) and do not react to dumps (tested, worse) |
 | the exit is wrong for the regime | `flow`: `median_first_sell_s` well past 7 s while the take-profit rarely fires (`trade_done` with `exit: hold`) | nothing | `HOLD_S=7` earned +8.6% instead of +6.2% on Sep 7–10 at a tail of 11.6% instead of 7.7%; over all 21 windows holds of 5, 6 and 7 with the take-profit are within a point of each other |
 | the other buyers tighten their slippage | not visible in the log (their minimum is in their calldata) | nothing | the replay says −2 to −3 points per trade if they do (section 23.8); re-read the sample with `src/collect/chain_checks_slippage.py` monthly |
 | teams dump earlier | `flow`: `median_first_sell_s` falling toward the hold, `share_dumped_inside_hold` rising | nothing | shorten `HOLD_S` to 3 (+3.6% on September instead of +6%) or stop |

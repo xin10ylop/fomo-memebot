@@ -1,0 +1,42 @@
+=== the gauge (mean follow-on ETH of the previous 20 scored launches) against the next kept launch's return, all 21 windows pooled
+   FIT : [0.00-0.15) n    0     -     [0.15-0.25) n   19   +3.6%   [0.25-0.35) n  281   +9.7%   [0.35-0.50) n  333   +9.0%   [0.50-9.00) n   76  +20.7%   
+   TEST: [0.00-0.15) n    2  +32.4%   [0.15-0.25) n   28   +2.4%   [0.25-0.35) n   56  +12.1%   [0.35-0.50) n  247  +18.0%   [0.50-9.00) n  394  +16.7%   
+   NEW : [0.00-0.15) n   13   +7.8%   [0.15-0.25) n   59   +4.2%   [0.25-0.35) n  142   +4.4%   [0.35-0.50) n  242   +7.8%   [0.50-9.00) n  350   +7.6%   
+   ALL : [0.00-0.15) n   15  +11.1%   [0.15-0.25) n  106   +3.6%   [0.25-0.35) n  479   +8.4%   [0.35-0.50) n  822  +11.3%   [0.50-9.00) n  820  +13.2%   
+   launch-level correlation, gauge vs next return: r = +0.052 (n 2242); rolling ROI of the previous 20 vs next return: r = +0.074
+
+=== walk-forward rules on the gauge (own path from $300, 15% sizing, $25 floor, one position at a time, stop -50%), gains summed per half
+   always on (the rule as is)                                     FIT  10,597 ( 706 trades, worst  1,082) | TEST  20,808 ( 731, worst    102) | NEW   3,250 ( 814, worst    -52) | stops 0
+   off below 0.15 ETH                                             FIT  10,597 ( 706 trades, worst  1,082) | TEST  20,769 ( 729, worst     62) | NEW   3,213 ( 801, worst    -70) | stops 0
+   off below 0.20 ETH                                             FIT  10,597 ( 706 trades, worst  1,082) | TEST  20,631 ( 722, worst    103) | NEW   3,047 ( 783, worst    -67) | stops 0
+   off below 0.25 ETH                                             FIT  10,210 ( 687 trades, worst    945) | TEST  20,576 ( 702, worst    126) | NEW   3,251 ( 745, worst    -64) | stops 0
+   tiers: <0.15 off, 0.15-0.25 half, 0.25-0.35 full, >=0.35 x1.5  FIT  13,349 ( 706 trades, worst  1,233) | TEST  25,532 ( 729, worst     87) | NEW   6,207 ( 801, worst    -82) | stops 0
+      per window: 08-30/12-18 +1,233, 08-31/12-18 +3,640, 09-01/12-18 +2,454, 09-02/12-18 +6,023, 09-03/0-6 +1,224, 09-03/12-18 +8,439, 09-03/18-24 +10,941, 09-04/12-18 +341, 09-05/0-6 +491, 09-05/12-18 +4,009, 09-06/12-18 +87, 09-07/0-6 +2,075, 09-07/12-18 -82, 09-07/18-24 +2,051, 09-08/0-6 +788, 09-08/12-18 +253, 09-08/18-24 +461, 09-09/0-6 +187, 09-09/12-18 +179, 09-09/18-24 -10, 09-10/0-6 +305
+   tiers: <0.20 half, 0.20-0.35 full, >=0.35 x1.5                 FIT  13,350 ( 706 trades, worst  1,334) | TEST  25,584 ( 731, worst    114) | NEW   6,085 ( 814, worst    -73) | stops 0
+   rolling ROI switch 20/+3% (for comparison)                     FIT   5,995 ( 463 trades, worst    383) | TEST  13,406 ( 523, worst     74) | NEW   2,328 ( 438, worst     -2) | stops 0
+
+=== chain-wide bonding-curve buy volume per window (every curve, every buy) as the outside driver; kept launches' ROI next to it
+   08-20 12-18 buys   11841  ETH     1,757  | kept    1 ROI  -2.0%  follow-on ETH/hold 0.00
+   08-27 12-18 buys   81319  ETH    20,673  | kept    6 ROI  +2.9%  follow-on ETH/hold 0.70
+   08-30 12-18 buys  164060  ETH    37,590  | kept  151 ROI  +8.6%  follow-on ETH/hold 0.38
+   08-31 12-18 buys  156731  ETH    88,817  | kept  240 ROI +10.0%  follow-on ETH/hold 0.36
+   09-01 12-18 buys  175700  ETH    79,904  | kept  180 ROI  +8.7%  follow-on ETH/hold 0.34
+   09-02 12-18 buys  180040  ETH   140,045  | kept  167 ROI +15.7%  follow-on ETH/hold 0.47
+   09-03 0-6   buys  164468  ETH   114,214  | kept   53 ROI +16.5%  follow-on ETH/hold 0.58
+   09-03 12-18 buys  219308  ETH   190,022  | kept  160 ROI +21.7%  follow-on ETH/hold 0.56
+   09-03 18-24 buys  197015  ETH   225,175  | kept  262 ROI +16.4%  follow-on ETH/hold 0.53
+   09-04 12-18 buys  184622  ETH   348,288  | kept   62 ROI  +6.5%  follow-on ETH/hold 0.40
+   09-05 0-6   buys  197427  ETH   187,742  | kept   43 ROI +13.4%  follow-on ETH/hold 0.46
+   09-05 12-18 buys  274889  ETH   140,508  | kept   97 ROI +19.3%  follow-on ETH/hold 0.42
+   09-06 12-18 buys  284887  ETH   158,880  | kept   81 ROI  +5.6%  follow-on ETH/hold 0.27
+   09-07 0-6   buys  140355  ETH   106,991  | kept  131 ROI  +9.6%  follow-on ETH/hold 0.52
+   09-07 12-18 buys  240513  ETH   220,989  | kept   73 ROI  -0.3%  follow-on ETH/hold 0.36
+   09-07 18-24 buys  220735  ETH   154,380  | kept  199 ROI  +6.2%  follow-on ETH/hold 0.37
+   09-08 0-6   buys  163680  ETH   113,589  | kept   60 ROI +12.9%  follow-on ETH/hold 0.49
+   09-08 12-18 buys  208927  ETH   349,236  | kept   75 ROI  +3.5%  follow-on ETH/hold 0.40
+   09-08 18-24 buys  206744  ETH    84,165  | kept  139 ROI  +5.3%  follow-on ETH/hold 0.39
+   09-09 0-6   buys  142737  ETH    61,892  | kept   71 ROI  +6.6%  follow-on ETH/hold 0.32
+   09-09 12-18 buys  174038  ETH    90,837  | kept   43 ROI  +7.7%  follow-on ETH/hold 0.30
+   09-09 18-24 buys  130369  ETH    31,022  | kept   21 ROI  +1.9%  follow-on ETH/hold 0.20
+   09-10 0-6   buys  102880  ETH    39,119  | kept   28 ROI +15.5%  follow-on ETH/hold 0.45
+   correlation of window buy volume with kept ROI: r = -0.08; with follow-on ETH per hold: r = +0.24

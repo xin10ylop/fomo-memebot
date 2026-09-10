@@ -1,0 +1,27 @@
+=== 1) selector or throttle? the tiers against flat sizing (own path from $300, $25 floor, $300 cap, one at a time)
+   flat 15%                                                               FIT  10,597 (706 tr, worst  1,082, ROI +10.3%) | TEST  20,808 (731, worst    102, ROI +15.6%) | NEW   3,250 (814, worst    -52, ROI  +6.1%) | stops 0
+   flat 20%                                                               FIT  13,729 (705 tr, worst  1,684, ROI +10.5%) | TEST  24,188 (731, worst    163, ROI +15.6%) | NEW   5,493 (814, worst    -54, ROI  +6.3%) | stops 0
+   flat 22.5%                                                             FIT  15,499 (705 tr, worst  2,198, ROI +10.5%) | TEST  25,701 (731, worst    232, ROI +15.7%) | NEW   6,720 (814, worst    -53, ROI  +6.3%) | stops 0
+   tiers on 15% (<0.15 off, <0.25 half, <0.35 full, else x1.5)            FIT  13,349 (706 tr, worst  1,233, ROI +10.4%) | TEST  25,532 (729, worst     87, ROI +15.5%) | NEW   6,207 (801, worst    -82, ROI  +6.1%) | stops 0
+   gauge halves 22.5% below 0.25 ETH                                      FIT  15,467 (705 tr, worst  2,083, ROI +10.5%) | TEST  25,694 (731, worst    234, ROI +15.6%) | NEW   6,707 (814, worst    -80, ROI  +6.3%) | stops 0
+   tiers on 20%                                                           FIT  15,610 (705 tr, worst  1,865, ROI +10.4%) | TEST  28,705 (731, worst    165, ROI +15.6%) | NEW   8,781 (814, worst   -119, ROI  +6.3%) | stops 0
+
+=== 2) the gauge's bins on FIT alone (the thresholds were round numbers picked after seeing all windows); quartiles of the FIT gauge
+   FIT gauge quartiles: 0.311 0.368 0.451
+   tiers at FIT quartiles: <0.31 half, <0.45 full, else x1.5              FIT  10,225 (706 tr, worst    852, ROI +10.2%) | TEST  24,861 (731, worst     80, ROI +15.5%) | NEW   5,506 (814, worst    -97, ROI  +6.0%) | stops 0
+
+=== 3) dump reaction: sell as soon as a sell of >= x% of supply lands inside the hold (we land slip=0.3 s later), ROI per trade on the kept launches
+   no dump reaction (the rule)                                            FIT  10,597 (706 tr, worst  1,082, ROI +10.3%) | TEST  20,808 (731, worst    102, ROI +15.6%) | NEW   3,250 (814, worst    -52, ROI  +6.1%) | stops 0
+   stop on sell >= 0.005                                                  FIT  13,068 (709 tr, worst    964, ROI +11.3%) | TEST  18,965 (732, worst    -17, ROI +13.9%) | NEW   1,590 (817, worst    -89, ROI  +3.7%) | stops 0
+   stop on sell >= 0.01                                                   FIT  12,825 (709 tr, worst  1,077, ROI +11.2%) | TEST  18,313 (732, worst     -0, ROI +13.5%) | NEW   1,673 (817, worst    -93, ROI  +3.8%) | stops 0
+   stop on sell >= 0.02                                                   FIT  11,185 (709 tr, worst  1,033, ROI +10.5%) | TEST  18,771 (732, worst     66, ROI +14.0%) | NEW   2,343 (817, worst      2, ROI  +5.0%) | stops 0
+   stop on sell >= 0.03                                                   FIT  10,811 (709 tr, worst  1,076, ROI +10.4%) | TEST  18,961 (732, worst     79, ROI +14.0%) | NEW   2,318 (817, worst      2, ROI  +5.1%) | stops 0
+   stop on sell >= 0.05                                                   FIT  10,822 (709 tr, worst  1,076, ROI +10.4%) | TEST  19,186 (732, worst     55, ROI +14.2%) | NEW   2,432 (817, worst    -57, ROI  +5.3%) | stops 0
+
+=== 4) exits with the gauge on top, NEW windows in view
+   hold 5 TP 0.5 with tiers                                               FIT  13,349 (706 tr, worst  1,233, ROI +10.4%) | TEST  25,532 (729, worst     87, ROI +15.5%) | NEW   6,207 (801, worst    -82, ROI  +6.1%) | stops 0
+   hold 7 TP 0.5 with tiers                                               FIT  11,282 (700 tr, worst    646, ROI  +9.6%) | TEST  28,533 (724, worst     62, ROI +17.3%) | NEW   6,937 (752, worst   -151, ROI  +6.7%) | stops 1
+   hold 7 TP None with tiers                                              FIT   9,307 (693 tr, worst    447, ROI  +8.2%) | TEST  23,804 (720, worst    107, ROI +15.8%) | NEW   9,257 (783, worst     -5, ROI  +8.8%) | stops 0
+   hold 4 TP 0.5 with tiers                                               FIT  15,474 (711 tr, worst  1,490, ROI +11.3%) | TEST  23,071 (735, worst     21, ROI +14.0%) | NEW   4,783 (804, worst    -56, ROI  +5.3%) | stops 0
+   hold 5 TP 0.3 with tiers                                               FIT  16,449 (712 tr, worst  1,615, ROI +11.6%) | TEST  19,657 (730, worst    -10, ROI +12.3%) | NEW   3,670 (803, worst    -74, ROI  +4.4%) | stops 0
+   hold 5 TP None with tiers                                              FIT  11,822 (701 tr, worst    720, ROI +10.0%) | TEST  23,811 (728, worst     77, ROI +14.8%) | NEW   6,763 (800, worst    -26, ROI  +6.9%) | stops 0
