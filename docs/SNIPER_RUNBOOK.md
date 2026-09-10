@@ -76,7 +76,10 @@ Accounts and tools, all standard, no colocation and no custom node:
    testing and development. B: your provider's WebSocket and RPC only (`FEED_SOURCE=provider`,
    `PROVIDER_WS=wss://robinhood-mainnet.g.alchemy.com/v2/KEY`, `SEQ_URL=` empty), which touches no Robinhood endpoint;
    on the replay it costs about a tenth of the trades at the same return per trade. Under B, dry-run a full day first:
-   the provider path was tested only against a synthetic node.
+   the provider path was tested only against a synthetic node. **Recommended: A with B as the fallback.** Set
+   `PROVIDER_WS` even under A: if Robinhood's feed ever refuses the box (five HTTP refusals in a row) the engine
+   switches detection to the provider by itself and logs an `alarm`; the send already goes to both the sequencer and
+   the provider, so a refused sequencer costs nothing. The worst the terms can do to A is exactly that refusal.
 7. **The send step**, after the dry-run days pass the checks in section 5: a function that signs the engine's
    transactions with the key and calls `eth_sendRawTransaction` on the provider endpoint with the sequencer as a second
    endpoint, returning the hash. About twenty lines with any standard Ethereum library.

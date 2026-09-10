@@ -1026,7 +1026,7 @@ async def main():
         if not PROVIDER_WS:
             raise SystemExit("FEED_SOURCE=provider needs PROVIDER_WS (a third-party node's WebSocket endpoint)")
         last_prune_holder[0] = mono(); await provider_loop(websockets); return
-    last_prune = mono(); backoff = 0.2
+    last_prune = mono(); backoff = 0.2; refused = 0
     while True:
         try:
             async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=None) as ws:
@@ -1060,6 +1060,10 @@ async def main():
                             state["prev_seen"] = seen; state["prev_ts"] = ts
                             cond.notify_all()
         except Exception as e:
+            refused = refused + 1 if ("rejected WebSocket connection" in str(e) or "HTTP 4" in str(e)) else 0        # an HTTP refusal, not a network drop
+            if refused >= 5 and PROVIDER_WS:                              # Robinhood's feed has shut the door: carry on from the provider's node (posture B)
+                log({"ev": "alarm", "what": "the sequencer feed refused five connections in a row: switching detection to the provider WebSocket"})
+                last_prune_holder[0] = mono(); await provider_loop(websockets); return
             log({"ev": "feed_error", "err": str(e)[:200], "retry_s": backoff}); await asyncio.sleep(backoff); backoff = min(5.0, backoff * 2)   # 0.2 s after a drop, slower if the network is gone
 
 

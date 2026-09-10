@@ -1759,5 +1759,8 @@ named buys, the seat's second, a decision at 300 ms); a real provider WebSocket 
 before it is trusted.
 
 That is the whole answer available from here: the terms are ambiguous on automation, silent on the trade, and
-avoidable by using a provider's endpoints at a cost of about a tenth of the trades. Whether to accept the ambiguity
-or pay the tenth is the operator's decision, and now an informed one.
+avoidable by using a provider's endpoints at a cost of about a tenth of the trades. The recommendation is posture A
+with B armed: the terms' only remedy against a client is to refuse it access (the sequencer "cannot modify, reverse,
+or cancel transactions" and holds no funds), the engine sends through the provider as well as the sequencer already,
+and it now switches detection to the provider by itself after five refused feed connections. So A costs nothing
+extra if the door closes, and B is what remains.
