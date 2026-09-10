@@ -50,9 +50,20 @@ def main(path):
     # 2) feed vs chain on the gates
     gc = [e for e in by["gate_check"] if e.get("src") == "feed"]           # only launches the feed resolved: the ones it could have traded
     if gc:
-        same = lambda e: e["feed"].get("bundle") == e["chain"].get("bundle") and (e["feed"].get("out1", 0) > 0) == (e["chain"].get("out1", 0) > 0)
-        agree = sum(1 for e in gc if same(e)); bad = [e for e in gc if not same(e)]
-        checks.append(("feed and chain agree on the gates", agree >= 0.9 * len(gc), f"{agree} of {len(gc)} feed-resolved launches agree" + (f"; e.g. feed {bad[0]['feed']} chain {bad[0]['chain']}" if bad else "")))
+        blind = [e for e in gc if e["chain"].get("out1", 0) > 0 and e["feed"].get("out1", 0) == 0]          # the chain saw a rival the feed missed: the one that matters
+        cautious = [e for e in gc if e["feed"].get("out1", 0) > 0 and e["chain"].get("out1", 0) == 0]       # the feed counted an attempt that never landed: a skipped trade, not a loss
+        bundle_off = [e for e in gc if abs(e["feed"].get("bundle", 0) - e["chain"].get("bundle", 0)) > 1]
+        print(f"\n--- feed against chain on {len(gc)} feed-resolved launches: rival missed by the feed {len(blind)}, rival counted that never landed {len(cautious)}, bundle count off by more than one {len(bundle_off)}")
+        if blind:
+            print(f"    missed e.g. feed {blind[0]['feed']} chain {blind[0]['chain']}")
+        checks.append(("feed misses no rival the chain saw (under 10%)", len(blind) <= 0.1 * len(gc), f"{len(blind)} of {len(gc)}"))
+        checks.append(("feed's bundle count matches the chain (under 10% off)", len(bundle_off) <= 0.1 * len(gc), f"{len(bundle_off)} of {len(gc)} off by more than one"))
+        if cautious:
+            checks.append(("rivals counted that never landed (skipped trades)", None, f"{len(cautious)} of {len(gc)}: engine 4.3 learns these senders after three misses; not a loss"))
+    rv = by["rival"]
+    if rv:
+        senders = collections.Counter(e.get("sender") for e in rv); learned = [e.get("sender") for e in by["reverter_learned"]]
+        print(f"--- rivals counted: {len(rv)} ({sum(1 for e in rv if e.get('ignored'))} ignored as learned reverters); most frequent senders: " + ", ".join(f"{k[:10]} x{v}" for k, v in senders.most_common(4)) + (f"; learned reverters {[x[:10] for x in learned]}" if learned else ""))
     checks.append(("no wrong-curve resolutions", len(by["feed_resolution_mismatch"]) == 0, f"{len(by['feed_resolution_mismatch'])} mismatches"))
     # 3) scores and the paper bankroll
     sc = [e for e in by["score"] if "roi" in e]

@@ -281,7 +281,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
          "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "connected_at": 0.0,
          "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "decisions": {},
-         "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "creations": 0, "timing": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0}
+         "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "creations": 0, "timing": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
 lock = threading.Lock()
 cond = threading.Condition()                           # notified by the feed loop after every message is fully indexed
 
@@ -522,38 +522,51 @@ def curve_buys(curve, since_ts=None):
                     e[2] = sender_of(e[5])
                 except Exception:
                     e[2] = "?"
-            out.append((e[1], e[2], e[3], e[0]))
+            out.append((e[1], e[2], e[3], e[0], e[6] if len(e) > 6 else None, e[7] if len(e) > 7 else None, e[8] if len(e) > 8 else None))
     if since_ts is not None:
         out = [b for b in out if b[0] >= since_ts]
     return out
 
 
-def watch_curve(curve, tk0, feed_ts, named, creator):
+def watch_curve(curve, tk0, feed_ts, named, creator, blk0=None):
     """register the curve for incremental folding and build its state from what the feed has shown so far"""
-    net0 = X0 * tk0 / (Y0 - tk0); w = {"X": X0 + net0, "Y": Y0 - tk0, "cb": bytes.fromhex(curve[2:]), "ts0": feed_ts, "named": named, "creator": creator,
-                                       "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "buys": 0, "sells": 0, "since": mono(), "dump": None, "wallets": set()}
-    for ts_, snd, val, seen in curve_buys(curve, feed_ts):
-        fold_buy(w, ts_, snd, val)
+    net0 = X0 * tk0 / (Y0 - tk0); w = {"X": X0 + net0, "Y": Y0 - tk0, "cb": bytes.fromhex(curve[2:]), "ts0": feed_ts, "blk0": blk0, "named": named, "creator": creator, "curve": curve,
+                                       "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "buys": 0, "sells": 0, "since": mono(), "dump": None, "wallets": set(), "rivals": []}
+    for b in curve_buys(curve, feed_ts):
+        ts_, snd, val, seen = b[:4]; blk = b[4] if len(b) > 4 else None
+        fold_buy(w, ts_, snd, val, blk, b[5] if len(b) > 5 else None, b[6] if len(b) > 6 else None)
     for seen, tk in state["sells"].get(curve, []):
         fold_sell(w, tk)
     state["watch"][curve] = w
     return w
 
 
-def fold_buy(w, ts_, snd, val):
+def fold_buy(w, ts_, snd, val, blk=None, to=None, sel=None):
+    """the tables' definitions (section 23.11 dry-run findings): the bundle is the named wallets' buys within nine blocks of the
+    creation (block-count time under 1.0 s, as the replay measures it), not the creation's whole timestamp second; its ETH is
+    those buys only (named wallets buying again in second one are the team's second round, not the bundle). A rival is any
+    non-named sender whose transaction names the curve in second one or two: a direct buy, a value-carrying router buy, or a
+    value-less router call (a router buy paid in tokens). A sender whose counted attempts never land (a bot whose second-one buys
+    revert on the surcharge) is learned from the chain at scoring time and ignored after three misses."""
     if val > 0:
         net = val * 0.99; X, Y = w["X"], w["Y"]; tk = Y - X * Y / (X + net); w["X"] = X + net; w["Y"] = Y - tk
     w["buys"] += 1
+    in_creation = (blk - w["blk0"] <= 9) if (blk is not None and w.get("blk0") is not None) else (ts_ == w["ts0"])
     if snd in w["named"]:
-        if ts_ == w["ts0"]:
-            w["bundle"] += 1; w["wallets"].add(snd)                        # buys and distinct wallets: the tables count buys (no sender in the event data)
-        if ts_ <= w["ts0"] + 1:
-            w["bundle_eth"] += val
+        if in_creation:
+            w["bundle"] += 1; w["wallets"].add(snd); w["bundle_eth"] += val   # buys and distinct wallets: the tables count buys (no sender in the event data)
     elif snd != w["creator"] and snd != WALLET:
-        if ts_ == w["ts0"] + 1 and val >= OUT1_MIN_ETH:
-            w["out1"] += 1
-        elif ts_ == w["ts0"] + 2:
-            w["out2"] += 1
+        sec = ts_ - w["ts0"]
+        if sec in (1, 2):
+            ignored = state["reverters"].get(snd, 0) >= 3
+            log({"ev": "rival", "curve": w.get("curve"), "second": sec, "sender": snd, "to": to, "selector": sel, "value": round(val, 5), "ignored": ignored})
+            if ignored:
+                return
+            w["rivals"].append([sec, snd])
+            if sec == 1 and val >= OUT1_MIN_ETH:
+                w["out1"] += 1
+            elif sec == 2:
+                w["out2"] += 1
 
 
 def fold_sell(w, tk):
@@ -675,11 +688,20 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
             tk0, b_create = r[2], r[3]; log({"ev": "feed_resolution_ok", "curve": curve})
         head = int(rpc.call("eth_blockNumber", []), 16)
         ev = rpc.call("eth_getLogs", [{"fromBlock": hex(b_create), "toBlock": hex(head), "address": curve, "topics": [[BUY_EV, SELL_EV]]}])
-        events = []
+        events = []; buyers = set()
         for e in ev:
             d = e["data"][2:]; w = [int(d[i:i + 64], 16) / 1e18 for i in range(0, len(d), 64)]; buy = e["topics"][0] == BUY_EV
             events.append((int(e["blockNumber"], 16), int(e["logIndex"], 16), buy, w[0] if buy else w[1], w[1] if buy else w[0], w[2] if len(w) > 2 else 0.0))
+            if buy and len(e["topics"]) > 2:
+                buyers.add("0x" + e["topics"][2][-40:].lower())
         events.sort(key=lambda x: (x[0], x[1]))
+        for sec, snd in (decision or {}).get("rivals", []):                # a counted rival that never bought is a reverted attempt: learn the sender
+            if snd in buyers:
+                state["reverters"].pop(snd, None)
+            else:
+                state["reverters"][snd] += 1
+                if state["reverters"][snd] == 3:
+                    log({"ev": "reverter_learned", "sender": snd, "note": "three counted attempts that never landed: this sender's attempts are no longer rivals"})
         r = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, gated=BUNDLE_MIN > 0, stop_sell_frac=STOP_SELL_FRAC if STOP_SELL_FRAC > 0 else None, tp=TAKE_PROFIT if TAKE_PROFIT > 0 else None)
         if r is None:
             log({"ev": "score", "curve": curve, "result": "no usable launch-block buy"}); return
@@ -904,14 +926,14 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
         reasons.append("creator buy too large")
     if reasons:
         log({"ev": "skip", "why": reasons, "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named)}); return
-    w = watch_curve(curve, tk0, feed_ts, named, creator)                 # from here the feed loop folds every buy and sell of this curve as it arrives
+    w = watch_curve(curve, tk0, feed_ts, named, creator, blk0)           # from here the feed loop folds every buy and sell of this curve as it arrives
     curve_cs = to_checksum_address(curve)
     # the seat's wait: the bundle and second one must be fully visible before the gates are read
     send_mode = None
     if SEAT in ("E1", "E2"):
         send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at, watch=w)
     t_wake = mono()
-    decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "blocks_to_seat": state["blocks"] - blk0}
+    decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"])}
     with lock:
         sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []
@@ -1047,9 +1069,9 @@ def index_message(inner, ts, seen):
         try:
             if sel == BUY_SEL:                                                       # direct curve buy
                 snd = sender_of(t)
-                state["buys"][to_hex].append((ts, snd, val, seen))
+                state["buys"][to_hex].append((ts, snd, val, seen, state["blocks"], to_hex, sel.hex()))
                 if to_hex in watched:
-                    fold_buy(watched[to_hex], ts, snd, val)
+                    fold_buy(watched[to_hex], ts, snd, val, state["blocks"], to_hex, sel.hex())
                 continue
             if sel == SELL_SEL and len(data) >= 36:                                 # direct curve sell
                 tk = int.from_bytes(data[4:36], "big") / 1e18; state["sells"][to_hex].append((seen, tk))
@@ -1068,14 +1090,16 @@ def index_message(inner, ts, seen):
                 log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named), "selector": sel.hex(), "tx_type": ty})
                 threading.Thread(target=handle_creation, args=(creator, quote, init_buy, seen, ts, named, state["blocks"]), daemon=True).start(); continue
             if val > 0 and len(data) >= 36:                                         # a router buy of some curve: sender recovered only if it names a curve we trade
-                e = [seen, ts, None, val, data, t]; state["valtx"].append(e)
+                e = [seen, ts, None, val, data, t, state["blocks"], to_hex, sel.hex()]; state["valtx"].append(e)
                 for cv, w in watched.items():
                     if w["cb"] in data:
-                        e[2] = sender_of(t); fold_buy(w, ts, e[2], val)
+                        e[2] = sender_of(t); fold_buy(w, ts, e[2], val, state["blocks"], to_hex, sel.hex())
                 continue
             if watched and val == 0 and sel not in (BUY_SEL, SELL_SEL):
                 for cv, w in watched.items():
-                    if w["cb"] in data:                                             # router sell touching a curve we hold
+                    if w["cb"] in data:                                             # a value-less call naming a curve we watch: a router sell, or a router buy paid in tokens
+                        if sel.hex() != APPROVE_SEL and to_hex != cv and ts - w["ts0"] in (1, 2):
+                            fold_buy(w, ts, sender_of(t), 0.0, state["blocks"], to_hex, sel.hex())   # counted as a rival (section 23.11: a 0.001 ETH router buy the feed missed)
                         fold_sell(w, float("inf") if STOP_SELL_FRAC > 0 else 0.0)
         except Exception as e:
             log({"ev": "error", "stage": "decode", "err": str(e)[:200]})
@@ -1124,7 +1148,7 @@ async def provider_loop(websockets):
                     if sub == SUB["curve"] and len(topics) >= 3:
                         curve = res["address"].lower(); who = "0x" + topics[2][-40:].lower()
                         if topics[0] == BUY_EV:
-                            val = w[0] / 1e18; state["buys"][curve].append((ts, who, val, seen))
+                            val = w[0] / 1e18; state["buys"][curve].append((ts, who, val, seen, state["blocks"], curve, None))
                             if curve in state["watch"]:
                                 fold_buy(state["watch"][curve], ts, who, val)
                         else:
@@ -1174,7 +1198,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.2, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 4.3, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
