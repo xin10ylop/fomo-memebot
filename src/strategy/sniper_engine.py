@@ -461,7 +461,7 @@ def curve_buys(curve, since_ts=None):
 def watch_curve(curve, tk0, feed_ts, named, creator):
     """register the curve for incremental folding and build its state from what the feed has shown so far"""
     net0 = X0 * tk0 / (Y0 - tk0); w = {"X": X0 + net0, "Y": Y0 - tk0, "cb": bytes.fromhex(curve[2:]), "ts0": feed_ts, "named": named, "creator": creator,
-                                       "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "buys": 0, "sells": 0, "since": mono(), "dump": None}
+                                       "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "buys": 0, "sells": 0, "since": mono(), "dump": None, "wallets": set()}
     for ts_, snd, val, seen in curve_buys(curve, feed_ts):
         fold_buy(w, ts_, snd, val)
     for seen, tk in state["sells"].get(curve, []):
@@ -476,7 +476,7 @@ def fold_buy(w, ts_, snd, val):
     w["buys"] += 1
     if snd in w["named"]:
         if ts_ == w["ts0"]:
-            w["bundle"] += 1
+            w["bundle"] += 1; w["wallets"].add(snd)                        # buys and distinct wallets: the tables count buys (no sender in the event data)
         if ts_ <= w["ts0"] + 1:
             w["bundle_eth"] += val
     elif snd != w["creator"] and snd != WALLET:
@@ -717,7 +717,7 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
     if SEAT in ("E1", "E2"):
         send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at, watch=w)
     t_wake = mono()
-    decision = {"bundle": w["bundle"], "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "blocks_to_seat": state["blocks"] - blk0}
+    decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "blocks_to_seat": state["blocks"] - blk0}
     with lock:
         sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []

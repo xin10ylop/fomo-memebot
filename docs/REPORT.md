@@ -1554,7 +1554,7 @@ windows were pulled (Sep 7 night, day and evening; Sep 8 night, day and evening;
 night: `src/collect/pull_v2_curve.py`, block anchors from `pull_anchors.py`) and scored with the same harness and no
 further choice (`data/derived/risk_harness_sep.txt`, `risk_seats.txt`).
 
-| window | rule-passing | kept (no rival) | mean ROI | trades below −40% | one at a time, $300 | from $300, 15% / $25 | stop odds |
+| window | rule-passing | kept (no rival) | mean ROI | trades below −40% | one at a time, $300 | end bankroll from $300, 15% / $25 | stop odds |
 |---|---|---|---|---|---|---|---|
 | Sep 7 night | 193 | 136 | +9.3% | 11% | $3,589 | $906 | 0% |
 | Sep 7 day | 128 | 74 | −0.6% | 7% | −$92 | $321 | 0% |
@@ -1567,16 +1567,18 @@ further choice (`data/derived/risk_harness_sep.txt`, `risk_seats.txt`).
 | Sep 9 evening | 35 | 21 | +1.5% | 10% | $110 | $301 | 0% |
 | Sep 10 night | 48 | 28 | +15.1% | 0% | $1,178 | $527 | 0% |
 
-Ten windows, 855 trades, +6.2% per trade, nine of ten windows positive, worst −0.6%, tail 7.7%, one-at-a-time
-$15.3k, compounding gains from $300 of $3.0k in total (median window about +$200, best +$1,126, worst +$1), resampled
-stop odds 0.1%. At 20% / $50 sizing the gains are $5.3k with stop odds of at most 6%. From $100 the $25 floor meets
+Ten windows, 855 kept launches of which 840 executed (15 minOut refusals, charged gas in the dollar columns), +6.2% per
+executed trade, nine of ten windows positive, worst −0.6%, tail 7.7%, one-at-a-time $15.3k (a number that needs $300
+available on every launch; from a $300 bankroll the same windows compound to $3.0k of gains in total, median window
+about +$190, best +$1,126, worst +$1), resampled stop odds 0.1%. Section 23.8 narrows the per-trade figure to a range. At 20% / $50 sizing the gains are $5.3k with stop odds of at most 6%. From $100 the $25 floor meets
 $1 of gas per round trip on windows that pay 2–3%, and the stop odds reach 98% on Sep 7 day: a $100 start is no longer
 advised while the flow is this thin. The section 22 rule (hold 7, no gate) on the same windows: +6.1% per trade,
 $7.3k of gains at its bigger sizing, stop odds up to 18%. The rule held out of sample; what changed is the level.
 
 **Why the level fell.** The launch teams did not change; the other bots did. Of the bundled launches, the share with an
 outsider already buying in second one (which the rule excludes) went from 14% on Aug 31 to 67% on Sep 9, and the share
-of the rest with a rival in second two within 0.3 s from 8–11% (Aug 30–Sep 2) to 30–55% (Sep 6–9). The rule therefore
+of the rest with a rival in second two within 0.3 s from 7–11% (Aug 30–Sep 2) to 23–42% on the ten new windows (54% on
+Sep 6), about a third overall. The rule therefore
 keeps 21–200 launches per window instead of 87–339, and the launches it keeps have fewer follow-on buyers (4–8 buys
 inside the hold against 7–10 before). Per window, the three classes of bundled launch and the E1 seat:
 
@@ -1600,15 +1602,18 @@ Sep 8 (19 trades at −28%); its total over twenty windows ($36–42k) is within
 risk is worse. Tighter safety switches (+3% or +5% over 30 scores) cost gains on every half and save nothing, because
 the new windows are thin, not negative.
 
-**Where the flow went.** The E1 seat, first in second one and paying +6.18%, on every bundled launch: +13.1% per trade
-on the ten new windows, 2,970 launches, one-at-a-time $92.8k, ten of ten positive, and +9.6% on the test half. That is
-the seat the bots moved into. It is a knife edge: one block behind the first outsider it pays +3.8% with stop odds of
-24%, 0.3 s behind −0.1% with stop odds of 64%. The replay's "front" means ahead of every other outsider in that second;
-on chain the first outsider of second one sits in its very first block on a third of launches (section 21.5), so a
-sender that lands in the first block is in front on the other two thirds and in a coin flip on the rest, an expected
-+8% to +10% per trade if predict mode lands the first block as reliably as the second engineer inferred (80–90%) and
-much less if it does not. That cannot be proven in a dry run; it needs live receipts. It is the next test, at $5 to
-$10 stakes over thirty launches (about $2 each in gas and surcharge), before any capital goes to E1.
+**Where the flow went.** The E1 seat, first in second one and paying +6.18%, on every bundled launch. At the exit the
+engine runs (hold 5 s, take-profit +50%) the front of that seat pays +8.7% per trade on the ten new windows (2,970
+launches, ten of ten positive, median trade +4.8%); at a 7 s hold with no take-profit it shows +13.1%, but that mean is
+carried by a thin right tail (median trade +0.8%, 17% of trades below −40%) and is not the engine's exit. It is a
+knife edge: one block behind the first outsider it pays +3.8% with stop odds of 24%, 0.3 s behind −0.1% with stop odds
+of 64%. The replay's "front" means ahead of every other outsider in that second; on chain the first outsider of second
+one sits in its very first block on a third of launches (section 21.5), so a sender that lands in the first block is in
+front on the other two thirds and in a coin flip on the rest. The auditor's expected value under stated landing mixes
+(section 23.8): +7.0% per attempt at 85% first-block landings, +6.5% at 80% with 7% early, +4.8% at a coin flip on the
+boundary, so +5% to +7%, provided an early landing (the creation second, 93–98% tax) is refused by the minOut: verified
+on a live curve by simulation (23.8). That cannot be proven in a dry run; it needs live receipts. It is the next test,
+at $5 to $10 stakes over thirty launches (about $2 each in gas and surcharge), before any capital goes to E1.
 
 **Verdict, restated.** The clean-seat rule is real and still positive, but in the September regime it is a +6% trade
 on 20–200 launches per six hours: from $300, about +$200 per busy window and about zero on a thin one, gas included,
@@ -1624,7 +1629,7 @@ auditor re-derived section 23.6 and the E1 analysis from the raw files in parall
 
 | # | killer | what was measured | what is in place now |
 |---|---|---|---|
-| 1 | **Competition in the seat** (in progress: second-one bots on 14% → 67% of bundled launches) | The seat the bots moved to, first in second one, pays +13.5% at the front on the ten September windows, +7.0% one block behind, +4.9% two behind, +3.3% at 0.3 s. Under landing mixes of 90/8/2/0, 70/20/7/3, 50/30/15/5 and 30/40/20/10 (front / block 2 / block 3 / later, an early landing refused for gas): +12.8%, +11.3%, +9.7%, +8.1% on September; +9.7% to +7.6% on the test half; +4.4% to +3.0% on the fit half, where E2 was the better seat. A seat chosen by the regime (E1 when the previous window's second-one occupancy was above 45%, else the E2 rule) makes $69k over the twenty windows against $38k for E2 alone, $45k if every E1 landing is one block late, with stop odds up to 22% on one window | The engine already runs `SEAT=E1 SEND_MODE=predict` with the vote estimator; at E1 an early landing is the creation second, refused by minOut for gas only, so the margin controller now steps +5 ms there instead of +15. The landing position cannot be proven in a dry run: runbook section 9 gives the thirty-launch live test at $5–10 stakes that decides it |
+| 1 | **Competition in the seat** (in progress: second-one bots on 14% → 67% of bundled launches) | The seat the bots moved to, first in second one, at a 7 s hold with no take-profit pays +13.5% at the front on the ten September windows, +7.0% one block behind, +4.9% two behind, +3.3% at 0.3 s; under landing mixes of 90/8/2/0, 70/20/7/3, 50/30/15/5 and 30/40/20/10 (front / block 2 / block 3 / later, an early landing refused for gas) +12.8%, +11.3%, +9.7%, +8.1% on September, +9.7% to +7.6% on the test half, +4.4% to +3.0% on the fit half, where E2 was the better seat. At the engine's own exit (hold 5, take-profit) the front pays +8.7% and the auditor's landing-mix value is +5% to +7% per attempt (23.8). A seat chosen by the regime (E1 when the previous window's second-one occupancy was above 45%, else the E2 rule) makes $69k over the twenty windows against $38k for E2 alone, $45k if every E1 landing is one block late, with stop odds up to 22% on one window | The engine already runs `SEAT=E1 SEND_MODE=predict` with the vote estimator; at E1 an early landing is the creation second, refused by minOut for gas only, so the margin controller now steps +5 ms there instead of +15. The landing position cannot be proven in a dry run: runbook section 9 gives the thirty-launch live test at $5–10 stakes that decides it |
 | 2 | **Teams adapt** (dump earlier, or plant a cheap second-one buy to trip the gate) | Two seconds faster dumps (a 3 s hold) leave +3.6% on September, +10.1% / +12.5% on the two earlier halves. A hold re-chosen every window from the previous one earns $39.7k against $38.0k fixed: no gain, the teams' timing has been stable. A planted second-one buy under 0.01 ETH predicts +6.0% (fit and test) and +4.7% (September) against +13.3% / +7.2% clean and −5.5% / +18.5% for buys above 0.05 ETH | The scorer now logs the median first sell after entry and the supply dumped inside the hold (`flow` events); `OUT1_MIN_ETH` lets the gate ignore dust if planting starts (default 0: every buy counts) |
 | 3 | **The venue changes the rules** (tax schedule, exemption, ordering) | The sequencer accepts raw transactions from an unknown sender: an unfunded key's transaction is refused for insufficient funds, after signature recovery, at both endpoints. The factory (4,416 bytes) carries `transferOwnership` and no pause or blacklist selector; the curves (10,229 bytes) and tokens (3,248 bytes) carry none of 28 candidate blacklist, pause, trading-switch or upgrade selectors | A schedule alarm: every scored launch's surcharges must fall in the three known bands; when half of the last twenty do not, trading stops and `alarm` is logged. A factory-silence alarm after 30 minutes without a creation on a live feed. The chain's terms of use could not be fetched from here (503); this stays the operator's call |
 | 4 | **The flow dries up** | Bundled launches per window are stable (218–387); the second launchpad on the chain (factory 0x7ed5…) logs 30–36k events a day against 14–19k for Pons V2 and was never tested for the same mechanism | The `flow` event every five minutes: rule-passing launches in the last hour and six hours, mean score of the last 60, creations seen; runbook section 6 turns it into a stop rule |
@@ -1637,3 +1642,56 @@ auditor re-derived section 23.6 and the E1 analysis from the raw files in parall
 The one killer already in motion is the first. The answer to it is not a parameter but a different seat, and that seat is
 a first-block race whose outcome only live receipts can show. Everything else on the list is either measured harmless
 today (gas, blacklists, the sequencer), or wired to an alarm the operator reads in the log before it costs a trade.
+
+### 23.8 The audit of 23.6, and what it changed
+
+An independent auditor re-derived section 23.6 from the raw event files with its own loader and replay
+(`data/derived/audit_sep_opus.md`). The per-window table reproduced to the digit (one launch of 855 differs), the
+flow shift reproduced (14.3% → 68.5%), the exit modelling was found conservative (selling later than the modelled
+0.3 s helps; the sell tax matches the tier to four decimals over 360k sells), no double count, no survivorship loss
+(the native-quote fallback drops zero rule-passing launches), and the second-one gate has no material look-ahead (two
+launches in 1,756 vetoed by a band buy after our send). Six points needed an answer; each was tested here
+(`data/derived/risk_audit_checks.txt`; `src/analysis/risk_audit_checks.py`, `src/collect/chain_checks_slippage.py`).
+
+**1. The later buyers' slippage tolerance is an unpinned constant, and at 5% the result halves.** True, and the tables'
+10% never binds (10%, 25% and "no reverts" give identical numbers), so the tables were the optimistic edge. The real
+tolerances were read from 79 direct buyers' calldata on Sep 9: 59% send no minimum at all, and of the rest 28% sit at
+or below 5%, 41% at or below 10%, 69% at or below 25%. Replayed with that mix (each later buyer drawn from it; router
+buyers, whose minimum is not decoded, treated like direct ones): fit +7.2%, test +13.0%, September +3.9%; with every
+router buyer at 5%: +5.1%, +10.0%, +2.9%. A buyer who reverts may resend, which the replay does not allow, so the truth
+sits between the mix and the tables. **The planning number for September is +4% to +6% per trade, not +6%.**
+
+**2. The gate's 0.3 s threshold is on a clock the data cannot resolve** (the creation's position inside its second is
+interpolated, and the derived lag falls outside its feasible range on 35–44% of launches). True. Read on the entry's
+own clock instead (skip when the first second-two outsider is stamped before 2.3 s), the ten windows give +8.4% on 523
+launches and $12.4k one-at-a-time against +6.2% on 855 and $15.3k; the look-ahead bound (skip any launch a rival ever
+takes) +8.3% on 473; widening the second-two surcharge band changes nothing; off-grid fee tiers are 5 launches in
+2,430. So the gate's existence is robust (every reading beats no gate by 2.6–4.8 points) and its calibration is not:
+**per trade +6.2% to +8.4%, one-at-a-time $11.3k to $15.3k, compounding gains $2.1k to $4.3k over the ten windows.**
+Live, the rule is exact (no outsider seen before the send at 300 ms into the second) and the dry run's
+`seat_flip_to_send_ms` and `out2` counts are the calibration the backtest lacks.
+
+**3. The tuned exit lost on the newest windows.** True for September alone: hold 7 with no take-profit makes +8.6% and
+$20.2k there against +6.2% and $15.3k, at a tail of 11.6% against 7.7%. Over all twenty-one windows the picture is flat:
+compounding gains from $300 sum to $38.0k for hold 5 with the take-profit, $39.4k for hold 6, $38.0k for hold 7, and
+$32.5k for hold 7 without it (with 4% stop odds on the fit half). The hold is a plateau between 5 and 7 s once the
+take-profit is on; the default stays at 5 s because it has the smallest tail, and the runbook says what the longer
+hold would have earned.
+
+**4. The E1 seat was priced at an exit the engine does not run, and its early-landing branch was unmodelled.** Both true;
+23.6 now carries the engine's-exit figure (+8.7%) and the auditor's landing-mix value (+5% to +7%). The branch was
+closed by simulation: a buy sent to a live curve with an impossible minimum reverts with the curve's slippage error
+(`0x71c4efed`, carrying the tokens it would have given), and with a zero minimum returns the tokens; an early landing
+in the creation second delivers about a twentieth of the sized tokens against a minimum of three quarters, so it is
+refused for gas. The margin controller at E1 therefore steps +5 ms on an early landing, not +15.
+
+**5. "Three or more named wallets" is three or more tax-free buys.** True: the event data has no sender, and the tables
+count buys. The live engine now logs both (`bundle` buys and `bundle_wallets` distinct senders) on every decision and
+gates on buys, as the tables do; the dry run shows how often the two differ.
+
+**6. Two confirmation windows (Sep 5 and Sep 6) had four or five block anchors in six hours.** True; dense anchors (one
+per 300 blocks) were pulled for every earlier window and the tables re-run on them (below).
+
+The auditor's ranked weakest point is the one this section cannot remove: one launchpad, one chain, 21 windows over
+29 days, and a regime that deteriorated inside the sample. Nothing in the data says the deterioration stops where the
+data stops.

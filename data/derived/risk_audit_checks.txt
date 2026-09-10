@@ -1,0 +1,72 @@
+answers to the September audit (report 23.8): chain checks (src/collect/chain_checks.py part 2) and replay checks (src/analysis/risk_audit_checks.py)
+
+== chain
+direct buyers' slippage tolerance (Sep 9 12-18, 79 direct buys of 240 sampled; 161 router buys not decoded): minOut = 0 on 59%; the protected rest by decile 0.1, 1.0, 2.6, 5.0, 10, 20, 20, 25, 30, 42 %; of the protected 28% at <= 5%, 41% at <= 10%, 69% at <= 25%
+minOut honoured: eth_call buy on a live curve from a funded address, minOut 1e30 -> execution reverted (custom error 0x71c4efed carrying the tokens the curve would give), minOut 0 -> returns the tokens
+
+== replay
+=== (a) later buyers' tolerance: flat assumptions vs the measured mix (direct buyers: 59% unprotected, the rest by decile); routers unknown
+flat 10% (the tables)                        FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  11,512 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  23,471 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +6.2% worst  -0.6% tail  7.7% net1  15,346 own   3,022 P(stop)  0.1% max   0% +win 9/10
+flat 5% (the auditor's worst case)           FIT  n  759 ROI  +5.2% worst  +3.3% tail 14.8% net1  10,805 own   6,616 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI  +9.9% worst  +2.7% tail  9.6% net1  22,651 own  15,806 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +3.0% worst  -2.7% tail  8.0% net1   7,328 own   3,029 P(stop)  0.1% max   0% +win 8/10
+flat 25%                                     FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  11,512 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  23,471 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +6.2% worst  -0.6% tail  7.7% net1  15,346 own   3,022 P(stop)  0.1% max   0% +win 9/10
+no reverts at all                            FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  11,512 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  23,471 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +6.2% worst  -0.6% tail  7.7% net1  15,346 own   3,022 P(stop)  0.1% max   0% +win 9/10
+measured mix, routers like direct buyers     FIT  n  759 ROI  +7.2% worst  +5.2% tail 15.0% net1  14,635 own   6,446 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +13.0% worst  +5.8% tail  8.8% net1  29,826 own  17,431 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +3.9% worst  -2.0% tail  8.1% net1   9,653 own   2,532 P(stop)  0.1% max   1% +win 9/10
+measured mix, every router buyer at 5%       FIT  n  759 ROI  +5.1% worst  +3.5% tail 14.9% net1  10,465 own   5,705 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +10.0% worst  +2.5% tail  9.5% net1  22,983 own  14,850 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +2.9% worst  -2.8% tail  8.0% net1   7,043 own   2,587 P(stop)  0.1% max   0% +win 7/10
+measured mix, every router buyer unprotected FIT  n  759 ROI  +7.2% worst  +5.2% tail 15.0% net1  14,635 own   6,446 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +13.0% worst  +5.8% tail  8.8% net1  29,826 own  17,431 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +3.9% worst  -2.0% tail  8.1% net1   9,653 own   2,532 P(stop)  0.1% max   1% +win 9/10
+
+=== (b) exits, same gate, 15%/$25, all halves
+hold 5 + TP 50% (adopted)                    FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  11,512 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  23,471 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +6.2% worst  -0.6% tail  7.7% net1  15,346 own   3,022 P(stop)  0.1% max   0% +win 9/10
+hold 5, no TP                                FIT  n  759 ROI +10.4% worst  +8.0% tail 15.3% net1  21,152 own  10,764 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +15.6% worst  +6.8% tail 11.1% net1  34,962 own  21,292 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +6.8% worst  +1.6% tail  8.4% net1  16,400 own   3,667 P(stop)  0.0% max   0% +win 10/10
+hold 6 + TP 50%                              FIT  n  759 ROI  +9.9% worst  +5.9% tail 17.3% net1  20,267 own   9,772 P(stop)  0.2% max   0% +win 4/4
+                                             TEST n  809 ROI +17.5% worst  +7.3% tail  8.6% net1  39,769 own  25,856 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +6.7% worst  +0.4% tail  9.2% net1  16,651 own   3,790 P(stop)  0.1% max   1% +win 10/10
+hold 7 + TP 50%                              FIT  n  759 ROI  +9.3% worst  +5.0% tail 18.4% net1  19,376 own   9,100 P(stop)  0.4% max   1% +win 4/4
+                                             TEST n  809 ROI +17.6% worst  +6.2% tail  9.8% net1  39,917 own  25,497 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +7.2% worst  +2.0% tail 10.1% net1  17,199 own   3,391 P(stop)  0.1% max   1% +win 10/10
+hold 7, no TP (the section-22 exit)          FIT  n  759 ROI  +7.3% worst  +2.6% tail 21.7% net1  15,006 own   6,324 P(stop)  4.0% max  11% +win 4/4
+                                             TEST n  809 ROI +15.6% worst  +5.6% tail 15.4% net1  35,179 own  21,340 P(stop)  0.1% max   0% +win 7/7
+                                             NEW  n  855 ROI  +8.6% worst  +2.9% tail 11.6% net1  20,242 own   4,821 P(stop)  0.2% max   1% +win 10/10
+hold 7 no TP, 20%/$50                        FIT  n  759 ROI  +7.3% worst  +2.6% tail 21.7% net1  15,006 own   8,340 P(stop)  9.6% max  21% +win 4/4
+                                             TEST n  809 ROI +15.6% worst  +5.6% tail 15.4% net1  35,179 own  24,516 P(stop)  0.9% max   3% +win 7/7
+                                             NEW  n  855 ROI  +8.6% worst  +2.9% tail 11.6% net1  20,242 own   7,969 P(stop)  1.5% max   5% +win 10/10
+
+=== (c) the gate on the entry's own clock: skip if the first second-two outsider is stamped before 2.3 s (no creation phase), and a widened rival band
+rival stamped before 2.3 s                   FIT  n  687 ROI +12.3% worst  +9.1% tail 13.2% net1  22,756 own  12,407 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  589 ROI +18.8% worst  +5.7% tail  5.4% net1  31,313 own  19,127 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  523 ROI  +8.4% worst  -3.2% tail  5.8% net1  12,416 own   2,551 P(stop)  0.0% max   0% +win 9/10
+rival_lag < 0.3 (adopted)                    FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  11,512 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  23,471 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +6.2% worst  -0.6% tail  7.7% net1  15,346 own   3,022 P(stop)  0.1% max   0% +win 9/10
+rival stamped before 2.0 s                   FIT  n  726 ROI +11.2% worst  +8.1% tail 13.9% net1  21,828 own  11,512 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  742 ROI +16.8% worst  +5.0% tail  7.6% net1  35,016 own  22,398 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  760 ROI  +7.6% worst  -0.5% tail  6.2% net1  16,890 own   4,315 P(stop)  0.0% max   0% +win 9/10
+any rival ever in the seat (look-ahead bound) FIT  n  653 ROI +13.2% worst +10.6% tail 12.3% net1  23,161 own  12,968 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  498 ROI +18.0% worst  +4.8% tail  6.2% net1  25,137 own  13,927 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  473 ROI  +8.3% worst  -3.2% tail  5.3% net1  11,279 own   2,054 P(stop)  0.0% max   0% +win 9/10
+rival_lag < 0.3 with the band widened to 0.10-0.50% FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  11,512 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  23,471 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +6.2% worst  -0.6% tail  7.7% net1  15,346 own   3,022 P(stop)  0.1% max   0% +win 9/10
+
+=== (d) off-grid fee tiers among the kept launches (a tier off the 0.5% grid can hide a second-two rival)
+{'FIT': '0 of 766 (0.0%)', 'TEST': '2 of 809 (0.2%)', 'NEW': '3 of 855 (0.4%)'}
+adopted rule, off-grid tiers skipped         FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  11,512 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  807 ROI +16.4% worst  +7.5% tail  8.0% net1  37,313 own  23,430 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  852 ROI  +6.2% worst  -0.6% tail  7.7% net1  15,248 own   3,007 P(stop)  0.1% max   0% +win 9/10

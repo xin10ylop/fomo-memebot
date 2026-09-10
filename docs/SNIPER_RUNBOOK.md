@@ -23,8 +23,9 @@ dollar is sent.
   the curve resolved the moment the bundle is visible, one wake per feed message, the curve's reserves folded as the
   feed arrives (nothing rebuilt after the boundary), warm keep-alive sockets to the sequencer and the provider, an
   interval-vote boundary estimator, a margin controller that can come down, a feed watchdog, monotonic clock. Section 3b.
-- **Expect**, on the ten September windows the rule never saw (section 23.6, runbook 2d): +6% per trade, nine windows
-  of ten positive, from $300 about +$200 per busy six-hour window and about zero on a thin one, stop odds 0.1%. The
+- **Expect**, on the ten September windows the rule never saw (section 23.6, runbook 2d): +4% to +6% per trade after
+  the audit of 23.8, nine windows of ten positive, from $300 about +$200 per busy six-hour window and about zero on a
+  thin one, stop odds 0.1%. The
   Aug 30–Sep 6 windows paid +11% to +16% a trade and +$1,500 a window; the difference is other bots now sitting in
   second one on two thirds of bundled launches. At the measured gas ($0.10 a round trip, section 23.7) a $100 start is
   back on the table; section 9 lists the nine ways this dies and the alarm for each.
@@ -181,11 +182,15 @@ Same rule, no change (`data/derived/risk_harness_sep.txt`):
 | chance of the −50% stop from $300 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
 | chance of the stop from $100 | 5% | 98% | 8% | 1% | 7% | 22% | 2% | 0% | 0% | 0% |
 
-Plan on +6% per trade and 20–200 trades per six hours: from $300, +$0 to +$1,100 per window, median about +$200,
-gas included. The flow is thinner because bots now buy in second one on two thirds of bundled launches (the rule skips
-those) and a rival is in second two within 0.3 s on a third of the rest. The seat they moved to, first in second one
-(E1 at the front), pays +13% a trade on 2,970 launches in these windows and +4% one block late; whether a box in Ohio
-lands that block is a live question (section 23.6), not a dry-run one, and it is the next thing to test at $5 stakes.
+Plan on +4% to +6% per trade and 20–200 trades per six hours: from $300, +$0 to +$1,100 per window, median about
++$200, gas included (the "from $300" row above is the end bankroll). The audit of these numbers (section 23.8) moved
+the per-trade figure down: the other buyers' real slippage settings (59% none, the rest often tight) take 2 points
+off the tables, and the gate's backtest calibration spans +6% to +8%. The flow is thinner because bots now buy in
+second one on two thirds of bundled launches (the rule skips those) and a rival is in second two within 0.3 s on a
+third of the rest. The seat they moved to, first in second one (E1 at the front), pays +8.7% a trade at this engine's
+exit on 2,970 launches in these windows, +4% one block late, and +5% to +7% per attempt under realistic landing
+mixes; an early landing is refused by the minOut (verified on a live curve). Whether a box in Ohio lands the first
+block is a live question, and section 9 gives the test.
 
 ## 3. The machine
 
@@ -299,6 +304,8 @@ unclear; that is the operator's call.
 | killer | the sign in the log | what happens by itself | what you do |
 |---|---|---|---|
 | bots take the seat (already in motion) | `flow`: `rule_passing_last_6h` under 40, or `eligible_not_traded` mostly gated by `outsider buys in the seat's second` | the rule skips those launches | run the E1 test below; if it lands the first block, switch seats |
+| the exit is wrong for the regime | `flow`: `median_first_sell_s` well past 7 s while the take-profit rarely fires (`trade_done` with `exit: hold`) | nothing | `HOLD_S=7` earned +8.6% instead of +6.2% on Sep 7–10 at a tail of 11.6% instead of 7.7%; over all 21 windows holds of 5, 6 and 7 with the take-profit are within a point of each other |
+| the other buyers tighten their slippage | not visible in the log (their minimum is in their calldata) | nothing | the replay says −2 to −3 points per trade if they do (section 23.8); re-read the sample with `src/collect/chain_checks_slippage.py` monthly |
 | teams dump earlier | `flow`: `median_first_sell_s` falling toward the hold, `share_dumped_inside_hold` rising | nothing | shorten `HOLD_S` to 3 (+3.6% on September instead of +6%) or stop |
 | teams plant a dust buy in second one to trip the gate | many `outsider buys in second one` gates with tiny `bundle_eth`-sized buys in the scored launches | nothing | set `OUT1_MIN_ETH=0.01` (dust below it no longer counts) |
 | the tax schedule or the exemption changes | `alarm: tax schedule changed` (half of the last 20 scored launches show surcharges outside the three bands) | trading stops until restart | read the curve's getters (`0x24a9d853` tax, `0xc57eadfc` reserves); the rule is dead until the new schedule is measured |

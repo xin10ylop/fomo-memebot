@@ -141,7 +141,8 @@ def replay(L, stake_eth, frac=0.03, hold=7.0, entry="E2", tol=0.10, lat=0.3, sli
         if k == "B":
             followed = True
             tokens = Y - X * Y / (X + net_obs)
-            if tol is not None and tokens < tk * (1 - tol):
+            t_i = tol(r) if callable(tol) else tol                          # a callable gives each later buyer its own tolerance (None = no minOut)
+            if t_i is not None and tokens < tk * (1 - t_i):
                 phantom += tk; continue
             X += net_obs; Y -= tokens; held += tokens
         else:
