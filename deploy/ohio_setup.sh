@@ -1,6 +1,8 @@
 #!/bin/bash
 # One-shot setup for the sniper's machine: an EC2 instance in us-east-2 (Ohio), Ubuntu 24.04. t3.small is enough for the dry run;
 # for live, c6i.large / c7i.large (two dedicated cores, no CPU credits) and PIN_CPU=1 (runbook section 3).
+# Also fine on a DigitalOcean droplet in New York (Ubuntu 24.04, the $6 plan) for the E2 seat: docs/STEP_BY_STEP.md. On one
+# vCPU the script leaves PIN_CPU empty; the Amazon time server line is ignored by chrony where it is unreachable.
 # Installs the engine and the probe as systemd services in DRY RUN. Nothing here signs or sends a transaction.
 # usage: sudo bash deploy/ohio_setup.sh   (run from a clone of the repository)
 set -euo pipefail
@@ -55,6 +57,7 @@ PIN_CPU=1
 LOG_PATH=/var/log/sniper/engine.jsonl
 ENV
 chmod 600 /etc/sniper/engine.env                                  # this file will hold the key: owner-only
+[ "$(nproc)" -ge 2 ] || sed -i 's/^PIN_CPU=1/PIN_CPU=/' /etc/sniper/engine.env   # one vCPU (the $6 droplet): nothing to pin to
 cat > /etc/logrotate.d/sniper <<'ROT'
 /var/log/sniper/*.jsonl { daily rotate 14 compress missingok notifempty copytruncate }
 ROT
