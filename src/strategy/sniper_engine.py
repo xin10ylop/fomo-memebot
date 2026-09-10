@@ -51,6 +51,7 @@ SEAT = os.environ.get("SEAT", "E2").upper(); EXEMPT = os.environ.get("EXEMPT", "
 BUNDLE_MIN = int(os.environ.get("BUNDLE_MIN", "3" if SEAT in ("E1", "E2") else "0"))
 BUNDLE_MIN_ETH = float(os.environ.get("BUNDLE_MIN_ETH", "0.3"))
 OUT1_MAX = int(os.environ.get("OUT1_MAX", "0"))
+OUT1_MIN_ETH = float(os.environ.get("OUT1_MIN_ETH", "0"))                 # second-one outsider buys below this size do not count (0 = all count; 0.01 makes the gate immune to planted dust)
 OUT2_MAX = int(os.environ.get("OUT2_MAX", "0"))                          # non-named buys visible in the seat's second before we send
 SEAT_WAIT_MS = float(os.environ.get("SEAT_WAIT_MS", "300"))              # react mode: watch the seat's second this long for an outsider before sending (section 23)
 TIER_ASSUMED = float(os.environ.get("TIER_ASSUMED", "0.05"))
@@ -63,6 +64,8 @@ MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
 SWITCH_N = int(os.environ.get("SWITCH_N", "15")); SWITCH = float(os.environ.get("SWITCH", "-0.10")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.50"))
 MAX_RESOLVE_MS = int(os.environ.get("MAX_RESOLVE_MS", "1500"))
 GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.05"))
+GAS_HEADROOM = float(os.environ.get("GAS_HEADROOM", "2.0"))                # gasPrice sent = this x eth_gasPrice: the quote equals the base fee, a tick up refuses the tx (23.7)
+GAS_EST_BUY, GAS_EST_APPROVE, GAS_EST_SELL = 100_000, 50_000, 80_000        # measured gas used by direct curve calls (receipts, Sep 9): the cost estimate; limits below are higher
 REQUIRE_COINCURVE = os.environ.get("REQUIRE_COINCURVE", "0") == "1"
 PIN_CPU = os.environ.get("PIN_CPU", "")                                   # e.g. "1": keep the process off core 0 (interrupts) on a 2-vCPU box
 GAS_BUY, GAS_APPROVE, GAS_SELL = 500_000, 80_000, 200_000
@@ -226,7 +229,7 @@ class Sender:
 
 rpc = Rpc(RPC_URL)
 SENDER = Sender([SEQ_URL, RPC_URL if RPC_URL != SEQ_URL else None])
-state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": False, "busy_until": 0.0, "scores": collections.deque(maxlen=SWITCH_N),
+state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": False, "busy_until": 0.0, "scores": collections.deque(maxlen=max(SWITCH_N, 60)),
          "launched_today": collections.Counter(), "seeded": False, "feed_ts": 0, "last_seen_ts": 0, "traded": {}, "eth_usd": ETH_USD,
          "buys": collections.defaultdict(list),        # curve -> [(ts, sender, value_eth, seen)] direct buys
          "sells": collections.defaultdict(list),       # curve -> [(seen, tokens)] direct sells
@@ -234,7 +237,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
          "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "connected_at": 0.0,
          "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "decisions": {},
-         "landings": {"since_early": 0, "first": 0}}
+         "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "creations": 0, "timing": collections.deque(maxlen=60), "last_creation_at": 0.0}
 lock = threading.Lock()
 cond = threading.Condition()                           # notified by the feed loop after every message is fully indexed
 
@@ -282,7 +285,7 @@ def chain_loop():
     n = 0
     while True:
         try:
-            state["nonce"] = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); state["gas_price"] = int(rpc.call("eth_gasPrice", []), 16); state["chain_at"] = mono()
+            state["nonce"] = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); state["gas_price"] = int(int(rpc.call("eth_gasPrice", []), 16) * GAS_HEADROOM); state["chain_at"] = mono()
         except Exception as e:
             if n % 20 == 0:
                 log({"ev": "error", "stage": "chain_loop", "err": str(e)[:160]})
@@ -293,6 +296,14 @@ def chain_loop():
                     state["eth_usd"] = px
             except Exception:
                 pass
+            rp = state["rule_passing"]; now = time.time()
+            tm = list(state["timing"]); fs = [a for a, b in tm if a is not None]
+            log({"ev": "flow", "rule_passing_last_6h": sum(1 for t in rp if now - t < 21600), "rule_passing_last_1h": sum(1 for t in rp if now - t < 3600),
+                 "mean_score_last_60": round(st.mean(list(state["scores"])[-60:]), 4) if state["scores"] else None, "creations_seen": state["creations"],
+                 "median_first_sell_s": round(st.median(fs), 2) if fs else None, "share_dumped_inside_hold": round(st.mean(b for a, b in tm), 4) if tm else None,
+                 "silent_min": round((mono() - state["last_creation_at"]) / 60, 1) if state["last_creation_at"] else None})
+            if state["last_creation_at"] and mono() - state["last_creation_at"] > 1800 and mono() - state["connected_at"] > 1800:
+                log({"ev": "alarm", "what": "no creation seen from the factory for 30 minutes while the feed is connected: the launchpad moved, stopped or changed its factory"})
             b = boundary()
             if b:
                 log({"ev": "boundary", "theta_ms": round(1000 * b[0], 1), "confidence": round(b[1], 3), "bracket_width_ms": round(1000 * b[2], 1), "samples": len(state["brackets"]), "margin_ms": round(MARGIN_MS, 2)})
@@ -369,7 +380,8 @@ def wait_for_second(feed_ts, seconds, seen_at, deadline=3.5, watch=None):
 
 
 def tune_margin(receipt, seat_ts):
-    """live only, off the trade path. Early (stamped before the seat's second, paid +6.18%): MARGIN_MS +15 at once. Otherwise
+    """live only, off the trade path. Early (stamped before the seat's second): +15 ms at E2, where it means second one was paid
+    at +6.18%; +5 ms at E1, where it means the creation second and the minOut refused it for gas only. Otherwise
     every 20 landings without an early one: -2 ms if fewer than 80% of them were first-block landings (a later block is a
     noisy signal, the sequencer drains on its own timer). Floor MARGIN_MIN_MS, cap MARGIN_MAX_MS. Logs the landing position
     from the receipt: block, timestamp against the seat's second, transaction index, blocks after the feed's flip."""
@@ -378,7 +390,7 @@ def tune_margin(receipt, seat_ts):
         b = int(receipt["blockNumber"], 16); ts = int(rpc.call("eth_getBlockByNumber", [hex(b), False])["timestamp"], 16)
         prev = int(rpc.call("eth_getBlockByNumber", [hex(b - 1), False])["timestamp"], 16); L = state["landings"]
         if ts < seat_ts:
-            MARGIN_MS = min(MARGIN_MAX_MS, MARGIN_MS + 15.0); where = "early"; L["since_early"] = 0; L["first"] = 0
+            MARGIN_MS = min(MARGIN_MAX_MS, MARGIN_MS + (5.0 if SEAT == "E1" else 15.0)); where = "early"; L["since_early"] = 0; L["first"] = 0
         else:
             where = "first block" if prev < ts else "later block"; L["since_early"] += 1; L["first"] += where == "first block"
             if L["since_early"] >= 20:
@@ -393,8 +405,9 @@ def tune_margin(receipt, seat_ts):
 
 
 def gas_cost_usd():
+    """the round trip's cost at the price we send with (measured gas used, not the limits)"""
     gp = state["gas_price"]
-    return (GAS_BUY + GAS_APPROVE + GAS_SELL) * gp / 1e18 * state["eth_usd"] if gp else None
+    return (GAS_EST_BUY + GAS_EST_APPROVE + GAS_EST_SELL) * gp / 1e18 * state["eth_usd"] if gp else None
 
 
 def new_day_check():
@@ -467,7 +480,7 @@ def fold_buy(w, ts_, snd, val):
         if ts_ <= w["ts0"] + 1:
             w["bundle_eth"] += val
     elif snd != w["creator"] and snd != WALLET:
-        if ts_ == w["ts0"] + 1:
+        if ts_ == w["ts0"] + 1 and val >= OUT1_MIN_ETH:
             w["out1"] += 1
         elif ts_ == w["ts0"] + 2:
             w["out2"] += 1
@@ -511,7 +524,12 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
         return None
     first_taxed = next((r[0] for r in rows[1:] if r[1] == "B" and r[5] - tier > 0.001), 9e9)
     bundle_rows = [r for r in rows[1:] if r[1] == "B" and r[0] < min(1.0, first_taxed) and r[5] - tier <= 0.0008]
-    lab = (len(bundle_rows), sum(r[2] for r in bundle_rows), sum(1 for r in rows[1:] if r[1] == "B" and 0.05 <= r[5] - tier <= 0.075))
+    lab = (len(bundle_rows), sum(r[2] for r in bundle_rows), sum(1 for r in rows[1:] if r[1] == "B" and 0.05 <= r[5] - tier <= 0.075 and r[2] >= OUT1_MIN_ETH))
+    # the tax schedule: every surcharged buy in the first three seconds must sit in a known band (creation second 85-99.5%, second one
+    # 5-7.5%, second two 0.12-0.35%); a launch where most surcharged buys fall outside them is anomalous, a run of them means the rules changed
+    sur = [r[5] - tier for r in rows[1:] if r[1] == "B" and r[0] <= 3.0 and r[5] - tier > 0.001]
+    odd = sum(1 for x in sur if not (0.85 <= x <= 0.995 or 0.05 <= x <= 0.075 or 0.0012 <= x <= 0.0035))
+    state["schedule"].append(1 if (sur and odd / len(sur) > 0.5) else 0)
     if gated and (lab[0] < BUNDLE_MIN or lab[1] < BUNDLE_MIN_ETH or rows[0][3] < MIN_CREATOR_SUPPLY * Y0 or (seat == "E2" and lab[2] > OUT1_MAX)):
         return ("filtered",) + lab
     X, Y = X0, Y0; X += rows[0][4]; Y -= rows[0][3]
@@ -549,6 +567,9 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
         if tp is not None and X / Y >= p_in * (1 + tp) and t_exit > t + slip:
             t_exit = t + slip
     out = (X - X * Y / (Y + tk_bot)) * (1 - tier)
+    first_sell = next((r[0] - t_in for r in rows if r[1] == "S" and r[0] >= t_in), None)
+    dumped = sum(r[3] for r in rows if r[1] == "S" and t_in <= r[0] < t_in + hold + slip) / Y0
+    state["timing"].append((first_sell, dumped))
     return ((out - gross) * state["eth_usd"] - 1.0, gross * state["eth_usd"], t_in, tier) + lab
 
 
@@ -592,11 +613,14 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
         if decision is not None:                                        # what the feed said at decision time vs what the chain says
             lab = r[-3:]
             log({"ev": "gate_check", "curve": curve, "feed": decision, "chain": {"bundle": lab[0], "bundle_eth": round(lab[1], 4), "out1": lab[2]}, "src": src})
+        if len(state["schedule"]) >= 20 and sum(state["schedule"]) >= 10 and not state["rules_changed"]:
+            state["rules_changed"] = True; log({"ev": "alarm", "what": "tax schedule changed: half of the last 20 scored launches show surcharges outside the known bands; trading stopped until restarted"})
         if r[0] == "filtered":
             log({"ev": "score", "curve": curve, "result": "outside the rule on the chain's reading"}); state["traded"].pop(curve, None); return
+        state["rule_passing"].append(time.time())
         pnl, cost, t_in, tier = r[:4]; roi = pnl / cost
         with lock:
-            state["scores"].append(roi); sc = list(state["scores"]); on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
+            state["scores"].append(roi); sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
             traded = state["traded"].pop(curve, None)
             if traded is not None:
                 state["bankroll"] += min(traded, cost) * roi
@@ -695,7 +719,7 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
     t_wake = mono()
     decision = {"bundle": w["bundle"], "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "blocks_to_seat": state["blocks"] - blk0}
     with lock:
-        sc = list(state["scores"]); on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
+        sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []
         if w["bundle"] < BUNDLE_MIN:
             gates.append(f"bundle {w['bundle']} < {BUNDLE_MIN}")
@@ -709,6 +733,8 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
             gates.append(f"safety switch off (rolling {st.mean(sc):+.3f} over {len(sc)} < {SWITCH:+.2f})")
         if state["stopped"] or state["bankroll"] < (1 - DAILY_STOP) * state["day_start"]:
             state["stopped"] = True; gates.append("daily stop")
+        if state["rules_changed"]:
+            gates.append("tax schedule changed (alarm): not trading")
         if mono() < state["busy_until"] or state["open"] is not None:
             gates.append("position open")
         if resolve_ms > MAX_RESOLVE_MS:
@@ -843,6 +869,7 @@ def index_message(inner, ts, seen):
                 if quote != ZERO and int(quote, 16) < 2 ** 100:                     # unknown layout: not an address, let the RPC path decide
                     quote = ZERO
                 named = {"0x" + w[12:].hex() for w in words if w[:12] == b"\0" * 12 and int.from_bytes(w[12:], "big") > 2 ** 100} - {creator, quote}
+                state["creations"] += 1; state["last_creation_at"] = mono()
                 log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named), "selector": sel.hex(), "tx_type": ty})
                 threading.Thread(target=handle_creation, args=(creator, quote, init_buy, seen, ts, named, state["blocks"]), daemon=True).start(); continue
             if val > 0 and len(data) >= 36:                                         # a router buy of some curve: sender recovered only if it names a curve we trade

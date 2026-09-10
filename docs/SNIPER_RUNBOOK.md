@@ -26,7 +26,8 @@ dollar is sent.
 - **Expect**, on the ten September windows the rule never saw (section 23.6, runbook 2d): +6% per trade, nine windows
   of ten positive, from $300 about +$200 per busy six-hour window and about zero on a thin one, stop odds 0.1%. The
   Aug 30–Sep 6 windows paid +11% to +16% a trade and +$1,500 a window; the difference is other bots now sitting in
-  second one on two thirds of bundled launches. A $100 start is no longer advised while the flow is this thin.
+  second one on two thirds of bundled launches. At the measured gas ($0.10 a round trip, section 23.7) a $100 start is
+  back on the table; section 9 lists the nine ways this dies and the alarm for each.
 
 **v2 (rounds 12–14).**
 
@@ -279,11 +280,11 @@ at $25 stakes; do not trade the next day until it is back above +5%).
 
 ## 7. Starting small
 
-Under the round-15 rule with 15% sizing and a $25 floor (section 2c) the Aug 30–Sep 6 windows allowed a $100 start
-(stop odds at most 7%). The September 7–10 windows do not (section 2d): with +6% a trade, $1 of gas is 4% of a $25
-stake, and the stop odds from $100 reach 98% on the thinnest window. Start at **$300** (stakes $45 at 15%), where the
-stop odds are 0.1% on every window seen, or wait until the engine's scores show the flow back (section 6). From $50
-never. If gas rises the `GAS_MAX_SHARE=0.05` gate stops the small stakes by itself.
+The tables charged $1 of gas per round trip; the receipts say $0.10 (section 23.7), and that changes the small start. At a
+planning gas of $0.25: from **$100** the stop odds are 1.7% / 0.3% / 3.3% on the three halves of the data (20% on the
+single thinnest September window), gains of $1.8k over the ten September windows; from **$300** 0% everywhere; from **$50**
+12% / 3% / 16% (66% on the thinnest window): not advised. So $100 is the floor again, $300 is comfortable, and the
+`GAS_MAX_SHARE=0.05` gate stops the small stakes by itself if gas ever climbs toward the old assumption.
 
 ## 8. What this is not
 
@@ -292,3 +293,45 @@ bundle filter was chosen on the five windows. It is not available from a phone o
 Ohio-latency, five-second ride on other people's pumps, taken only when no faster bot is already in the seat, sized at
 $25–$300 a trade, with a switch that keeps quiet days near zero and a stop that caps a bad one. The chain's terms of use have an automated-trading clause whose scope is
 unclear; that is the operator's call.
+
+## 9. What could kill it, and what you watch (section 23.7)
+
+| killer | the sign in the log | what happens by itself | what you do |
+|---|---|---|---|
+| bots take the seat (already in motion) | `flow`: `rule_passing_last_6h` under 40, or `eligible_not_traded` mostly gated by `outsider buys in the seat's second` | the rule skips those launches | run the E1 test below; if it lands the first block, switch seats |
+| teams dump earlier | `flow`: `median_first_sell_s` falling toward the hold, `share_dumped_inside_hold` rising | nothing | shorten `HOLD_S` to 3 (+3.6% on September instead of +6%) or stop |
+| teams plant a dust buy in second one to trip the gate | many `outsider buys in second one` gates with tiny `bundle_eth`-sized buys in the scored launches | nothing | set `OUT1_MIN_ETH=0.01` (dust below it no longer counts) |
+| the tax schedule or the exemption changes | `alarm: tax schedule changed` (half of the last 20 scored launches show surcharges outside the three bands) | trading stops until restart | read the curve's getters (`0x24a9d853` tax, `0xc57eadfc` reserves); the rule is dead until the new schedule is measured |
+| the launchpad moves or stops | `alarm: no creation seen from the factory for 30 minutes` on a live feed | nothing to trade | find the new factory address (a new creation selector or contract), or stop |
+| ordering changes (a priority lane, a different sequencer) | `landing` events with `where: early` or `later block` on every trade while `seat_flip_to_send_ms` reads 300 | the margin controller moves, the stop caps the loss | stop; the seat depends on first-come ordering |
+| gas | `eligible_not_traded` with `gas $… per round trip > 5% of stake` | the small stakes stop trading by themselves | wait, or raise the bankroll (gas is $0.10 today, the gate allows $1.25 on a $25 stake) |
+| your send step | `sent_tx` answers that are errors, `buy_reverted`, `receipt_timeout` | an open position is closed on restart | the reference below is tested; do not improvise on it at the boundary |
+| the terms of use | nothing in the log | nothing | your call; it is flagged, not resolved |
+
+**The send step, tested.** This is the whole of what replaces `submit()`; it was run against the engine's own transaction
+with a throwaway key, and the sequencer's only complaint was that the key had no funds:
+
+```python
+from eth_account import Account
+KEY = Account.from_key(os.environ["PRIVATE_KEY"])          # the key lives in /etc/sniper/engine.env, mode 600, nowhere else
+
+def submit(tx, label):
+    signed = KEY.sign_transaction(tx)                       # tx is exactly as the engine builds it: checksummed to, hex fields
+    body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction",
+                       "params": ["0x" + bytes(signed.raw_transaction).hex()]}).encode()
+    result, answers = SENDER.fire(body)                     # the warm sockets: sequencer first, provider second, same hash
+    log({"ev": "sent_tx", "label": label, "hash": result, "answers": [(h, str(d)[:120]) for h, d in answers]})
+    return result
+```
+
+Two things this round found by running it: `eth_gasPrice` on this chain is the base fee itself, and a transaction sent at
+exactly that price is refused the moment the fee ticks up (`GAS_HEADROOM=2` fixes it, about five cents a trade); and
+`eth_account` refuses lowercase addresses (fixed in round 15). Both would have lost the first live buy.
+
+**The E1 test, before any capital goes to that seat.** Set `SEAT=E1 SEND_MODE=predict MARGIN_MS=15 STAKE_MIN=5 STAKE_MAX=10
+FRAC=0.02` with $50 in the wallet and the send step live, and let it take thirty bundled launches (a busy window). Read the
+`landing` events: `where` (early = the creation second, refused for gas; first block; later block) and `tx_index`. If
+twenty-five or more of thirty land in the first block and the live outcomes track the engine's E1 scores, the seat is real
+for this box and `SEAT=E1 HOLD_S=7` at normal sizing is the plan when `flow` shows second-one occupancy above 45%; if
+fewer than twenty do, stay at E2. The cost of the test is about $2 a launch in gas and surcharge, $60 in all.
+

@@ -1,0 +1,139 @@
+Round 16 (report 23.7): the killers, measured. chain checks (killers_rpc.py), replay checks (killers_harness.py, killers_harness2.py)
+
+== chain: real gas per transaction, sequencer acceptance from an unknown key, blacklist selectors
+gas price now: 0.1310 gwei
+buy  direct n=19 gasUsed median 97,676 (p90 100,627)  price median 0.1848 gwei  -> $0.0441 per tx at ETH $2445
+buy  router n=21 gasUsed median 408,028 (p90 473,494)  price median 0.1841 gwei  -> $0.1836 per tx at ETH $2445
+sell direct n=19 gasUsed median 78,243 (p90 93,383)  price median 0.1831 gwei  -> $0.0350 per tx at ETH $2445
+sell router n=21 gasUsed median 386,285 (p90 453,337)  price median 0.1837 gwei  -> $0.1735 per tx at ETH $2445
+round trip buy+approve+sell at the observed price: 97,676+50,000+78,243 gas x 0.1840 gwei = $0.1016; the tables assume $1.00 -> gas gate GAS_MAX_SHARE 5% of a $25 stake = $1.25
+factory: code 4,416 bytes, proxy-like False, selectors present: ['transferOwnership(address)']
+curve 0x2f09e6c9: code 10,229 bytes, proxy-like False, selectors present: []
+sequencer / public rpc, unfunded raw tx at 3x gas price -> insufficient funds for gas * price + value (the sender was recovered and its balance checked: raw transactions from unknown senders are accepted)
+tokens (Sep 9 launches, 3,248 bytes each): only burn(uint256) among the candidate selectors; curves: none; factory: transferOwnership only
+
+== replay
+=== (1) E1 seat: per-launch ROI at the front, one block behind, two blocks behind, 0.3 s behind (hold 7, no TP, $300), every bundled launch (rival-in-seat launches included: at E1 nothing is visible before the send)
+FIT: n 1116  front  +4.6%  block2  +2.8%  block3  +1.8%  0.3s  +1.7% | mixes: 90/8/2/0  +4.4%  70/20/7/3  +4.0%  50/30/15/5  +3.5%  30/40/20/10  +3.0%
+TEST: n 2059  front  +9.9%  block2  +7.3%  block3  +6.2%  0.3s  +4.6% | mixes: 90/8/2/0  +9.7%  70/20/7/3  +9.0%  50/30/15/5  +8.3%  30/40/20/10  +7.6%
+NEW: n 2970  front +13.5%  block2  +7.0%  block3  +4.9%  0.3s  +3.3% | mixes: 90/8/2/0 +12.8%  70/20/7/3 +11.3%  50/30/15/5  +9.7%  30/40/20/10  +8.1%
+per new window, front / block2 / mix 70-20-7-3:
+   09-07 0-6   n  301 front  +17.1%  block2  +10.0%  mix  +14.8%
+   09-07 12-18 n  284 front  +21.1%  block2  +14.0%  mix  +18.7%
+   09-07 18-24 n  559 front  +18.1%  block2   +9.8%  mix  +15.4%
+   09-08 0-6   n  257 front  +19.0%  block2  +11.3%  mix  +16.3%
+   09-08 12-18 n  291 front   +6.3%  block2   +2.6%  mix   +5.0%
+   09-08 18-24 n  408 front  +10.1%  block2   +2.0%  mix   +7.5%
+   09-09 0-6   n  244 front   +7.9%  block2   +3.1%  mix   +6.2%
+   09-09 12-18 n  213 front  +17.2%  block2  +13.1%  mix  +15.3%
+   09-09 18-24 n  219 front   +5.6%  block2   -0.4%  mix   +3.5%
+   09-10 0-6   n  194 front   +5.6%  block2   +2.4%  mix   +4.4%
+
+=== (1b) E1 front as a plan: hold and sizing (every bundled launch, no gate possible before the send)
+E1 front, hold 7, 15%/$25                    FIT  n 1111 ROI  +4.2% worst  -0.9% tail 21.9% net1  10,763 own   5,842 P(stop) 37.5% max  95% +win 3/5
+                                             TEST n 2059 ROI  +9.6% worst  +4.4% tail 18.9% net1  46,759 own  30,291 P(stop)  3.5% max  16% +win 7/7
+                                             NEW  n 2970 ROI +13.1% worst  +5.2% tail 17.4% net1  92,825 own  67,718 P(stop)  2.5% max  10% +win 10/10
+E1 front, hold 9, 15%/$25                    FIT  n 1111 ROI  +1.4% worst  -4.3% tail 25.9% net1   3,386 own   1,961 P(stop) 52.4% max 100% +win 3/5
+                                             TEST n 2059 ROI  +8.5% worst  +2.9% tail 23.0% net1  41,113 own  21,376 P(stop)  9.8% max  45% +win 7/7
+                                             NEW  n 2970 ROI +13.9% worst  +6.5% tail 20.5% net1  95,045 own  64,779 P(stop)  2.8% max  10% +win 10/10
+E1 front, hold 7, TP 50%, 15%/$25            FIT  n 1111 ROI  +4.9% worst  -0.1% tail 17.9% net1  14,112 own   7,630 P(stop) 18.2% max  79% +win 4/5
+                                             TEST n 2059 ROI  +9.0% worst  +2.6% tail 13.2% net1  48,115 own  32,291 P(stop)  3.4% max  22% +win 7/7
+                                             NEW  n 2970 ROI  +8.5% worst  +3.2% tail 13.1% net1  61,713 own  38,778 P(stop)  1.9% max   7% +win 10/10
+E1 one block behind, hold 7, 15%/$25         FIT  n 1111 ROI  +2.4% worst  -3.3% tail 22.2% net1   6,295 own   4,595 P(stop) 44.3% max 100% +win 3/5
+                                             TEST n 2059 ROI  +7.1% worst  +1.9% tail 19.1% net1  34,409 own  17,595 P(stop) 11.1% max  52% +win 7/7
+                                             NEW  n 2970 ROI  +7.1% worst  -0.7% tail 17.7% net1  47,971 own  29,090 P(stop) 17.9% max  82% +win 9/10
+E1 front, hold 7, 20%/$50                    FIT  n 1111 ROI  +4.2% worst  -0.9% tail 21.9% net1  10,763 own   6,766 P(stop) 41.9% max  99% +win 3/5
+                                             TEST n 2059 ROI  +9.6% worst  +4.4% tail 18.9% net1  46,759 own  33,055 P(stop)  8.6% max  29% +win 7/7
+                                             NEW  n 2970 ROI +13.1% worst  +5.2% tail 17.4% net1  92,825 own  64,013 P(stop)  7.0% max  22% +win 10/10
+
+=== (2) walk-forward hold: each window uses the hold (3,4,5,6,7) that did best on the previous window; the E2 rule, TP 50%, 15%/$25
+   08-30 12-18 hold used 5: ROI  +8.9% own  1,497 | fixed 5: ROI  +8.9% own  1,497
+   08-31 12-18 hold used 6: ROI  +8.3% own  2,693 | fixed 5: ROI  +9.7% own  3,717
+   09-01 12-18 hold used 4: ROI +10.0% own  3,088 | fixed 5: ROI  +8.7% own  1,805
+   09-02 12-18 hold used 4: ROI +17.6% own  6,083 | fixed 5: ROI +16.1% own  5,693
+   09-03 0-6   hold used 4: ROI +12.6% own    718 | fixed 5: ROI +16.6% own    894
+   09-03 12-18 hold used 7: ROI +22.7% own  8,203 | fixed 5: ROI +20.9% own  7,658
+   09-03 18-24 hold used 7: ROI +18.5% own 12,494 | fixed 5: ROI +18.0% own 12,367
+   09-04 12-18 hold used 6: ROI +10.0% own    680 | fixed 5: ROI  +9.5% own    632
+   09-05 0-6   hold used 7: ROI +17.4% own    804 | fixed 5: ROI +16.0% own    728
+   09-05 12-18 hold used 7: ROI +19.9% own  3,832 | fixed 5: ROI +16.3% own  2,722
+   09-06 12-18 hold used 7: ROI  +6.2% own    420 | fixed 5: ROI  +7.6% own    571
+   09-07 0-6   hold used 5: ROI  +9.3% own    906 | fixed 5: ROI  +9.3% own    906
+   09-07 12-18 hold used 7: ROI  +2.0% own    385 | fixed 5: ROI  -0.6% own    321
+   09-07 18-24 hold used 7: ROI  +6.2% own    907 | fixed 5: ROI  +5.8% own  1,426
+   09-08 0-6   hold used 7: ROI +11.7% own    710 | fixed 5: ROI +12.5% own    726
+   09-08 12-18 hold used 4: ROI  +2.4% own    360 | fixed 5: ROI  +3.2% own    395
+   09-08 18-24 hold used 6: ROI  +4.2% own    485 | fixed 5: ROI  +5.0% own    516
+   09-09 0-6   hold used 5: ROI  +6.3% own    466 | fixed 5: ROI  +6.3% own    466
+   09-09 12-18 hold used 5: ROI  +7.4% own    438 | fixed 5: ROI  +7.4% own    438
+   09-09 18-24 hold used 7: ROI  +8.0% own    339 | fixed 5: ROI  +1.5% own    301
+   09-10 0-6   hold used 7: ROI +13.9% own    494 | fixed 5: ROI +15.1% own    527
+   sum of gains: walk-forward 39,702  fixed 5 s 38,004
+
+=== (3) tiny second-one outsiders: does a small (< 0.01 ETH) second-one buy predict the same loss as a big one? E2 0.3 s in, hold 5, $300
+FIT+TEST: big (>=0.05 ETH): n 326  -5.5%  clean: n 1545 +13.3%  small (0.01-0.05): n 394  -0.2%  tiny (<0.01 ETH): n 124  +6.0%
+NEW: big (>=0.05 ETH): n 440 +18.5%  clean: n 840  +7.2%  small (0.01-0.05): n 357  +0.6%  tiny (<0.01 ETH): n 216  +4.7%
+
+=== (4) bootstrap: the September mean per trade and per-window gains (final rule), 2,000 resamples of trades within each window
+all ten windows: n 840 mean  +6.2%  90% interval [ +4.4%,  +7.9%]  P(mean<0) 0.000
+   09-07 0-6   n 131 mean  +9.3%  90% [ +4.4%, +14.4%]
+   09-07 12-18 n  73 mean  -0.6%  90% [ -5.3%,  +4.3%]
+   09-07 18-24 n 199 mean  +5.8%  90% [ +2.5%,  +8.8%]
+   09-08 0-6   n  60 mean +12.5%  90% [ +4.4%, +20.4%]
+   09-08 12-18 n  75 mean  +3.2%  90% [ -1.5%,  +7.6%]
+   09-08 18-24 n 139 mean  +5.0%  90% [ +0.6%,  +9.8%]
+   09-09 0-6   n  71 mean  +6.3%  90% [ +0.8%, +11.5%]
+   09-09 12-18 n  43 mean  +7.4%  90% [ +1.3%, +13.6%]
+   09-09 18-24 n  21 mean  +1.5%  90% [ -8.9%, +11.8%]
+   09-10 0-6   n  28 mean +15.1%  90% [ +6.9%, +23.2%]
+
+=== (5) gas at the measured level ($0.10 per round trip at 0.18 gwei) instead of the $1 assumed
+final rule, gas $0.10, 15%/$25               FIT  n  759 ROI +11.0% worst  +9.0% tail 14.4% net1  22,643 own  12,954 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +16.7% worst  +7.9% tail  8.0% net1  38,090 own  24,851 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +6.5% worst  -0.3% tail  7.7% net1  16,078 own   4,339 P(stop)  0.0% max   0% +win 9/10
+final rule, gas $0.10, from $100             FIT  n  759 ROI +11.0% worst  +9.0% tail 14.4% net1  22,643 own   7,311 P(stop)  1.4% max   2% +win 4/4
+                                             TEST n  809 ROI +16.7% worst  +7.9% tail  8.0% net1  38,090 own  18,126 P(stop)  0.2% max   1% +win 7/7
+                                             NEW  n  855 ROI  +6.5% worst  -0.3% tail  7.7% net1  16,078 own   2,090 P(stop)  2.4% max  14% +win 9/10
+final rule, gas $0.10, from $50              FIT  n  759 ROI +11.0% worst  +9.0% tail 14.4% net1  22,643 own   2,702 P(stop) 10.7% max  14% +win 4/4
+                                             TEST n  809 ROI +16.7% worst  +7.9% tail  8.0% net1  38,090 own  16,777 P(stop)  3.0% max   8% +win 7/7
+                                             NEW  n  855 ROI  +6.5% worst  -0.3% tail  7.7% net1  16,078 own     970 P(stop) 13.5% max  53% +win 9/10
+
+=== (6) seat by regime: previous window's share of bundled launches with a second-one outsider; E1 front (hold 7, TP 50%) above the threshold, the E2 rule below; both 15%/$25
+threshold 0.35: sum of gains switch 82,061 (E1 landings one block late: 44,088) | E2 always 38,004 | E1 always 78,557 | max stop odds on the path 22%
+threshold 0.45: sum of gains switch 69,303 (E1 landings one block late: 44,671) | E2 always 38,004 | E1 always 78,557 | max stop odds on the path 22%
+   08-30 12-18 prev out1 share   0% -> E2: ROI  +8.9% own  1,497 stop   0% | E2  1,497 E1    146 E1 one block late    137
+   08-31 12-18 prev out1 share  28% -> E2: ROI  +9.7% own  3,717 stop   0% | E2  3,717 E1  1,058 E1 one block late    945
+   09-01 12-18 prev out1 share  14% -> E2: ROI  +8.7% own  1,805 stop   0% | E2  1,805 E1  1,201 E1 one block late    983
+   09-02 12-18 prev out1 share  30% -> E2: ROI +16.1% own  5,693 stop   0% | E2  5,693 E1  6,283 E1 one block late  5,766
+   09-03 0-6   prev out1 share  24% -> E2: ROI +16.6% own    894 stop   0% | E2    894 E1    369 E1 one block late    243
+   09-03 12-18 prev out1 share  58% -> E1: ROI +17.1% own 13,553 stop   0% | E2  7,658 E1 13,553 E1 one block late 11,466
+   09-03 18-24 prev out1 share  38% -> E2: ROI +18.0% own 12,367 stop   0% | E2 12,367 E1 10,557 E1 one block late  7,378
+   09-04 12-18 prev out1 share  31% -> E2: ROI  +9.5% own    632 stop   0% | E2    632 E1  1,677 E1 one block late    935
+   09-05 0-6   prev out1 share  44% -> E2: ROI +16.0% own    728 stop   0% | E2    728 E1  4,284 E1 one block late  2,903
+   09-05 12-18 prev out1 share  76% -> E1: ROI  +2.6% own    822 stop  22% | E2  2,722 E1    822 E1 one block late    348
+   09-06 12-18 prev out1 share  64% -> E1: ROI  +6.8% own  3,129 stop   0% | E2    571 E1  3,129 E1 one block late  1,137
+   09-07 0-6   prev out1 share  40% -> E2: ROI  +9.3% own    906 stop   0% | E2    906 E1  7,079 E1 one block late  1,644
+   09-07 12-18 prev out1 share  36% -> E2: ROI  -0.6% own    321 stop   0% | E2    321 E1  5,159 E1 one block late  1,814
+   09-07 18-24 prev out1 share  55% -> E1: ROI +10.3% own 11,609 stop   0% | E2  1,426 E1 11,609 E1 one block late  5,368
+   09-08 0-6   prev out1 share  51% -> E1: ROI +14.4% own  6,349 stop   0% | E2    726 E1  6,349 E1 one block late  1,979
+   09-08 12-18 prev out1 share  68% -> E1: ROI  +3.2% own    955 stop   7% | E2    395 E1    955 E1 one block late    148
+   09-08 18-24 prev out1 share  65% -> E1: ROI  +6.2% own  4,733 stop   5% | E2    516 E1  4,733 E1 one block late    146
+   09-09 0-6   prev out1 share  54% -> E1: ROI  +8.2% own  2,221 stop   0% | E2    466 E1  2,221 E1 one block late    509
+   09-09 12-18 prev out1 share  61% -> E1: ROI  +9.7% own  2,616 stop   0% | E2    438 E1  2,616 E1 one block late  1,026
+   09-09 18-24 prev out1 share  69% -> E1: ROI  +3.5% own    609 stop   6% | E2    301 E1    609 E1 one block late    139
+   09-10 0-6   prev out1 share  84% -> E1: ROI  +4.7% own    447 stop   0% | E2    527 E1    447 E1 one block late    146
+threshold 0.55: sum of gains switch 51,742 (E1 landings one block late: 39,433) | E2 always 38,004 | E1 always 78,557 | max stop odds on the path 22%
+
+=== (7) small starts at a planning gas of $0.25 per round trip
+final rule, gas $0.25, from $300             FIT  n  759 ROI +11.0% worst  +8.9% tail 14.4% net1  22,535 own  12,844 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +16.6% worst  +7.8% tail  8.0% net1  37,975 own  24,684 P(stop)  0.0% max   0% +win 7/7
+                                             NEW  n  855 ROI  +6.5% worst  -0.4% tail  7.7% net1  15,956 own   4,143 P(stop)  0.0% max   0% +win 9/10
+final rule, gas $0.25, from $100             FIT  n  759 ROI +11.0% worst  +8.9% tail 14.4% net1  22,535 own   7,122 P(stop)  1.7% max   3% +win 4/4
+                                             TEST n  809 ROI +16.6% worst  +7.8% tail  8.0% net1  37,975 own  17,864 P(stop)  0.3% max   1% +win 7/7
+                                             NEW  n  855 ROI  +6.5% worst  -0.4% tail  7.7% net1  15,956 own   1,817 P(stop)  3.3% max  20% +win 9/10
+final rule, gas $0.25, from $50              FIT  n  759 ROI +11.0% worst  +8.9% tail 14.4% net1  22,535 own   2,505 P(stop) 11.9% max  15% +win 4/4
+                                             TEST n  809 ROI +16.6% worst  +7.8% tail  8.0% net1  37,975 own  16,528 P(stop)  3.4% max   9% +win 7/7
+                                             NEW  n  855 ROI  +6.5% worst  -0.4% tail  7.7% net1  15,956 own     709 P(stop) 16.2% max  66% +win 9/10
+final rule, gas $0.25, from $100, 20%/$25    FIT  n  759 ROI +11.0% worst  +8.9% tail 14.4% net1  22,535 own  10,557 P(stop)  1.7% max   3% +win 4/4
+                                             TEST n  809 ROI +16.6% worst  +7.8% tail  8.0% net1  37,975 own  21,787 P(stop)  0.3% max   1% +win 7/7
+                                             NEW  n  855 ROI  +6.5% worst  -0.4% tail  7.7% net1  15,956 own   2,589 P(stop)  3.3% max  20% +win 9/10
