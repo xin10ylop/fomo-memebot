@@ -164,7 +164,9 @@ refusals included (`data/derived/risk_harness.txt`):
 | chance of the −50% stop from $100 | 6% | 3% | 7% | 2% | 0% | 0% | 2% | 0% | 0% | 0% | 2% |
 
 The hold and the take-profit were chosen on the first four windows and confirmed on the last seven (which are the
-better half by +5.7 points); the 0.3 s wait was not tuned. Plan on +9% to +12% per trade. From $300: +$270 to
+better half by +5.7 points); the 0.3 s wait was not tuned. Re-run on dense block anchors after the audit (section 23.8)
+the two halves read +10.3% and +15.4% per trade, one-at-a-time $20.0k and $33.3k, stop odds unchanged at zero; single
+windows move by up to four points (Sep 4 +6.1%, Sep 5 +18.9%, Sep 6 +5.3%). Plan on +9% to +12% per trade. From $300: +$270 to
 +$12,000 per six-hour window on the window's own ordering, median about +$1,500, no window below start, and a
 resampled chance of the daily stop of zero. From $100: +$50 to +$10,000, median about +$400, stop odds at most 7%.
 From $50 the $25 floor is half the bankroll and the stop is hit one time in five on the weaker windows: do not.

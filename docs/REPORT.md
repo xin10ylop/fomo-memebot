@@ -1690,7 +1690,11 @@ count buys. The live engine now logs both (`bundle` buys and `bundle_wallets` di
 gates on buys, as the tables do; the dry run shows how often the two differ.
 
 **6. Two confirmation windows (Sep 5 and Sep 6) had four or five block anchors in six hours.** True; dense anchors (one
-per 300 blocks) were pulled for every earlier window and the tables re-run on them (below).
+per 300 blocks, 16,574 in all from Aug 30 to Sep 10) were pulled for every earlier window and the tables re-run on them
+(`data/derived/risk_harness_dense.txt`). The final rule reads fit +10.3% and test +15.4% per trade (against +10.7% and
++16.4% on the sparse anchors), one-at-a-time $20.0k and $33.3k (against $22.0k and $37.4k), stop odds still zero on
+every window; single windows move by up to four points (Sep 4 day +6.1% from +9.5%, Sep 5 day +18.9% from +16.3%,
+Sep 6 +5.3% from +7.6%). The confirmation half survives; the earlier tables were one point too high.
 
 The auditor's ranked weakest point is the one this section cannot remove: one launchpad, one chain, 21 windows over
 29 days, and a regime that deteriorated inside the sample. Nothing in the data says the deterioration stops where the
