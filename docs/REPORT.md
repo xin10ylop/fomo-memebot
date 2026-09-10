@@ -1710,3 +1710,54 @@ Cloudflare-free path. A cloud-hosted sequencer has no colocation; an instance in
 can do, and the only refinement left is the zone, which the engine now measures itself (it pings each address, pins
 the fastest socket and logs the three round trips every twenty minutes: from this sandbox 34.9, 38.1 and 41.3 ms, a
 spread that on an Ohio box separates the sequencer's own zone from the other two). Runbook section 3 has the zone test.
+
+### 23.10 The terms of use, read
+
+The Robinhood Chain Terms of Service (docs.robinhood.com/chain/terms-of-service, last updated August 24, 2026, provider
+RHDA, LLC) were fetched and read in full on Sep 10. What they govern, in their own words (section 1): "your access to
+and use of Robinhood Chain Sequencer, Robinhood Chain Public RPC, Full Node Snapshot, and the Robinhood Chain Testnet
+... and any other content, tools, documentation, SDKs, features, and functionality made available on or through
+https://docs.robinhood.com/chain (collectively, the 'Services')". The sequencer feed is listed on the documentation's
+connecting page next to the sequencer and the public RPC ("The following public endpoints are available but are
+rate-limited and not recommended for production use"), so it is a Service. What they do not govern (section 2.1):
+"Robinhood Chain itself, including its protocol smart contracts and any associated bridging contracts ... is not part
+of the Services", and "Robinhood does not control what third parties build on Robinhood Chain, the activity of such
+parties, any user transacting on Robinhood Chain".
+
+The clause the earlier rounds flagged is section 2.3, Network Abuse or Security Violations, a Prohibited Use: "Any
+activity that interferes with, disrupts, degrades, or attempts to circumvent the intended operation, security, or
+integrity of the Services, or any underlying blockchain or infrastructure, including unauthorized access attempts,
+use of automated tools (such as bots, scrapers, or spiders), denial-of-service activity, or bypassing technical or
+usage restrictions." There is no clause on MEV, front-running, sniping or trading strategy. Two further covenants
+matter: section 2.4, "you will use the Services solely for lawful testing, experimentation, evaluation, and
+development purposes", and section 2.2, no VPN or proxy "to mask or misrepresent your identity, location, or IP
+address" (an EC2 instance is neither). The Onchain Integrations Terms (July 1, 2026) bind users of the Robinhood
+mobile app's wallet and its protocol integrations, prohibit "wash trading, spoofing, layering, or other forms of
+market manipulation" (7.1.4), and do not apply to a self-generated wallet used through a third-party node. The
+launchpad's interface is operated by Pons Labs, LLC and is unavailable in the UK and EU according to third-party
+summaries; its site refuses connections from this sandbox, so its interface terms could not be read, and the engine
+never uses the interface, only the contracts.
+
+**What this means, in plain terms.** The engine as configured uses two Services: it reads the sequencer feed and it
+posts transactions to the sequencer. Both are automated. Read one way, section 2.3 prohibits automation only when it
+"interferes with, disrupts, degrades, or attempts to circumvent" the Services, and one WebSocket client plus one
+transaction per launch does none of that; read the other way, "use of automated tools (such as bots ...)" is listed
+as a prohibited use in itself, and section 2.4 limits the Services to testing and development. The second reading is
+the one a lawyer for Robinhood would give. Nothing in either reading touches the trade itself: the chain and its
+contracts are outside the terms, and every wallet on the chain transacts through some sequencer.
+
+**The posture that removes the question.** Use no Robinhood Service at all: a third-party node (the documentation
+itself recommends Alchemy, QuickNode, Blockdaemon, dRPC and Validation Cloud, and Alchemy publishes a Robinhood Chain
+WebSocket) for detection and for sending. The engine now supports it (`FEED_SOURCE=provider`, `PROVIDER_WS=...`):
+the node's `newHeads` gives the chain's second, its Buy and Sell logs carry the curve and the buyer in their topics
+(verified: the buyer topic equals the transaction's sender) and the amounts in their data, the factory's log marks a
+creation and one call fetches its calldata for the named wallets. Everything downstream is unchanged. The cost is the
+node's own delay: on the replay a detection 150 ms later than the sequencer feed keeps the same return per trade and
+takes 10% fewer trades (September: 770 against 855, $2.5k against $3.0k from $300); 300 ms later, 20% fewer. The E1
+seat is not reachable this way. The path was exercised against a synthetic node in the sandbox (a creation, three
+named buys, the seat's second, a decision at 300 ms); a real provider WebSocket must be watched for a day in dry run
+before it is trusted.
+
+That is the whole answer available from here: the terms are ambiguous on automation, silent on the trade, and
+avoidable by using a provider's endpoints at a cost of about a tenth of the trades. Whether to accept the ambiguity
+or pay the tenth is the operator's decision, and now an informed one.

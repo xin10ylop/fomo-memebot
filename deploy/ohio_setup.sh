@@ -16,6 +16,8 @@ install -d -m 700 /etc/sniper /var/log/sniper
 cat > /etc/sniper/engine.env <<'ENV'
 # fill in and keep private (chmod 600). The engine runs in dry run until submit() is replaced (runbook section 5).
 # SEQ_URL: the engine keeps a warm socket to it (SENDER) for your send step; RPC_URL is the provider for bookkeeping and the second send endpoint.
+FEED_SOURCE=sequencer                                 # or provider: detection from PROVIDER_WS and no Robinhood endpoint at all (runbook 0b, posture B)
+PROVIDER_WS=
 FEED_URL=wss://feed.mainnet.chain.robinhood.com
 RPC_URL=https://REPLACE-WITH-YOUR-PROVIDER-ENDPOINT   # the public https://rpc.mainnet.chain.robinhood.com rate-limits; the engine needs a provider key
 SEQ_URL=https://sequencer.mainnet.chain.robinhood.com

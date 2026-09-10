@@ -40,6 +40,8 @@ from eth_utils import keccak, to_checksum_address
 RPC_URL = os.environ.get("RPC_URL", "https://rpc.mainnet.chain.robinhood.com")
 SEQ_URL = os.environ.get("SEQ_URL", "https://sequencer.mainnet.chain.robinhood.com")
 FEED_URL = os.environ.get("FEED_URL", "wss://feed.mainnet.chain.robinhood.com")
+FEED_SOURCE = os.environ.get("FEED_SOURCE", "sequencer")                  # "sequencer": Robinhood's feed; "provider": a third-party node's WebSocket (PROVIDER_WS), no Robinhood endpoint at all
+PROVIDER_WS = os.environ.get("PROVIDER_WS", "")                            # e.g. wss://robinhood-mainnet.g.alchemy.com/v2/KEY (section 23.10)
 LOG_PATH = os.environ.get("LOG_PATH", "sniper_engine.jsonl"); STATE_PATH = LOG_PATH + ".state.json"
 WALLET = os.environ.get("WALLET", "0x0000000000000000000000000000000000000000").lower()
 ETH_USD = float(os.environ.get("ETH_USD", "2445")); ETH_USD_URL = os.environ.get("ETH_USD_URL", "https://api.coinbase.com/v2/prices/ETH-USD/spot")
@@ -923,6 +925,86 @@ def index_message(inner, ts, seen):
             log({"ev": "error", "stage": "decode", "err": str(e)[:200]})
 
 
+async def provider_loop(websockets):
+    """detection from a third-party node's WebSocket instead of the sequencer feed: newHeads gives the chain's second (the flip),
+    the curve Buy/Sell logs carry the curve and the buyer in their topics and the amounts in their data, the factory's log
+    marks a creation and one RPC call fetches its calldata (the named wallets). Everything downstream (the seat wait, the
+    gates, the fold, the scorer) is unchanged. Lags the sequencer feed by the node's own processing (measured 100-300 ms on
+    the replay as 10-30% fewer trades at the same return, section 23.10); E1 in predict mode is not meaningful on it."""
+    global _bcache
+    SUB = {"heads": None, "curve": None, "factory": None}; backoff = 0.2
+    while True:
+        try:
+            async with websockets.connect(PROVIDER_WS, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=None) as ws:
+                for i, (name, params) in enumerate((("heads", ["newHeads"]), ("curve", ["logs", {"topics": [[BUY_EV, SELL_EV]]}]), ("factory", ["logs", {"address": FACTORY_HEX}]))):
+                    await ws.send(json.dumps({"jsonrpc": "2.0", "id": i + 1, "method": "eth_subscribe", "params": params}))
+                    r = json.loads(await asyncio.wait_for(ws.recv(), timeout=10)); SUB[name] = r.get("result")
+                log({"ev": "feed_connected", "source": "provider", "subscriptions": SUB}); state["connected_at"] = mono(); backoff = 0.2
+                blk_ts = {}
+                while True:
+                    try:
+                        raw = await asyncio.wait_for(ws.recv(), timeout=2.0)
+                    except asyncio.TimeoutError:
+                        log({"ev": "feed_stall", "note": "no message for 2 s: reconnecting"}); break
+                    seen = mono(); d = json.loads(raw)
+                    if seen - last_prune_holder[0] > 30:
+                        prune(seen); last_prune_holder[0] = seen
+                    if d.get("method") != "eth_subscription":
+                        continue
+                    sub = d["params"]["subscription"]; res = d["params"]["result"]
+                    if sub == SUB["heads"]:
+                        ts = int(res["timestamp"], 16); bn = int(res["number"], 16); blk_ts[bn] = ts
+                        if len(blk_ts) > 600:
+                            for k in sorted(blk_ts)[:-300]:
+                                blk_ts.pop(k, None)
+                        state["blocks"] += 1
+                        with cond:
+                            if ts > state["last_seen_ts"] and state["last_seen_ts"]:
+                                state["flip_at"].setdefault(ts, seen); state["flip_block"].setdefault(ts, bn)
+                            state["last_seen_ts"] = max(state["last_seen_ts"], ts); state["feed_ts"] = max(state["feed_ts"], ts); cond.notify_all()
+                        continue
+                    bn = int(res["blockNumber"], 16); ts = blk_ts.get(bn) or state["feed_ts"]
+                    topics = res["topics"]; data = res["data"][2:]; w = [int(data[i:i + 64], 16) for i in range(0, len(data), 64)]
+                    if sub == SUB["curve"] and len(topics) >= 3:
+                        curve = res["address"].lower(); who = "0x" + topics[2][-40:].lower()
+                        if topics[0] == BUY_EV:
+                            val = w[0] / 1e18; state["buys"][curve].append((ts, who, val, seen))
+                            if curve in state["watch"]:
+                                fold_buy(state["watch"][curve], ts, who, val)
+                        else:
+                            tk = w[1] / 1e18; state["sells"][curve].append((seen, tk))
+                            if curve in state["watch"]:
+                                fold_sell(state["watch"][curve], tk)
+                    elif sub == SUB["factory"] and len(topics) >= 4:
+                        creator = "0x" + topics[3][-40:].lower(); txh = res["transactionHash"]
+                        threading.Thread(target=provider_creation, args=(creator, txh, seen, ts, state["blocks"]), daemon=True).start()
+        except Exception as e:
+            log({"ev": "feed_error", "source": "provider", "err": str(e)[:200], "retry_s": backoff}); await asyncio.sleep(backoff); backoff = min(5.0, backoff * 2)
+
+
+def provider_creation(creator, txh, seen, ts, blk0):
+    """the creation's calldata (quote, initial buy, named wallets) from the node, then the normal path"""
+    try:
+        t = rpc.call("eth_getTransactionByHash", [txh])
+        data = bytes.fromhex(t["input"][2:]); sel = data[:4]
+        if sel not in CREATE_SELS:
+            log({"ev": "skip", "why": "factory log from an unknown selector", "creator": creator, "selector": sel.hex()}); return
+        words = [data[4 + 32 * i: 4 + 32 * (i + 1)] for i in range((len(data) - 4) // 32)]
+        quote = "0x" + data[4 + 32 * 2 + 12: 4 + 32 * 3].hex() if len(data) >= 4 + 32 * 4 else ZERO
+        init_buy = int.from_bytes(data[4 + 32 * 3: 4 + 32 * 4], "big") if len(data) >= 4 + 32 * 4 else 0
+        if quote != ZERO and int(quote, 16) < 2 ** 100:
+            quote = ZERO
+        named = {"0x" + w[12:].hex() for w in words if w[:12] == b"\0" * 12 and int.from_bytes(w[12:], "big") > 2 ** 100} - {creator, quote}
+        state["creations"] += 1; state["last_creation_at"] = mono()
+        log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named), "selector": sel.hex(), "source": "provider", "calldata_ms": round(1000 * (mono() - seen))})
+        handle_creation(creator, quote, init_buy, seen, ts, named, blk0)
+    except Exception as e:
+        log({"ev": "error", "stage": "provider_creation", "err": str(e)[:200]})
+
+
+last_prune_holder = [0.0]
+
+
 async def main():
     import websockets
     if SEAT == "E0" and not EXEMPT:
@@ -936,10 +1018,14 @@ async def main():
     load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.1, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 4.1, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": True})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
+    if FEED_SOURCE == "provider":
+        if not PROVIDER_WS:
+            raise SystemExit("FEED_SOURCE=provider needs PROVIDER_WS (a third-party node's WebSocket endpoint)")
+        last_prune_holder[0] = mono(); await provider_loop(websockets); return
     last_prune = mono(); backoff = 0.2
     while True:
         try:

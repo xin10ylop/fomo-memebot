@@ -70,6 +70,13 @@ Accounts and tools, all standard, no colocation and no custom node:
 6. **Monitoring.** Two cron lines: one that alerts you (email or a Telegram bot message) if `engine.jsonl` has not
    grown in ten minutes, one that alerts if `chronyc tracking` reports an offset above 20 ms. systemd restarts the
    engine on any crash; the feed reconnect is handled in the engine and replayed backlogs are ignored.
+6b. **Posture.** Decide which endpoints you use (section 23.10). A: Robinhood's sequencer feed for detection and the
+   sequencer for sending, the defaults: the fastest path and the only one that can take the E1 seat, and it uses
+   Robinhood's "Services", whose terms list automated tools under prohibited network abuse and limit the Services to
+   testing and development. B: your provider's WebSocket and RPC only (`FEED_SOURCE=provider`,
+   `PROVIDER_WS=wss://robinhood-mainnet.g.alchemy.com/v2/KEY`, `SEQ_URL=` empty), which touches no Robinhood endpoint;
+   on the replay it costs about a tenth of the trades at the same return per trade. Under B, dry-run a full day first:
+   the provider path was tested only against a synthetic node.
 7. **The send step**, after the dry-run days pass the checks in section 5: a function that signs the engine's
    transactions with the key and calls `eth_sendRawTransaction` on the provider endpoint with the sequencer as a second
    endpoint, returning the hash. About twenty lines with any standard Ethereum library.
@@ -257,7 +264,8 @@ WALLET=0x… RPC_URL=https://… SEQ_URL=https://sequencer.mainnet.chain.robinho
 python3 src/strategy/sniper_engine.py
 ```
 
-`SEAT=E2` waits two seconds past the creation's timestamp (+0.19%); `SEAT=E1` waits one (+6.18%, in front of the
+`FEED_SOURCE=provider` with `PROVIDER_WS=wss://…` replaces the sequencer feed by a third-party node's subscriptions
+(posture B above). `SEAT=E2` waits two seconds past the creation's timestamp (+0.19%); `SEAT=E1` waits one (+6.18%, in front of the
 second-one bots, only worth it if your `sent_ms` is consistently first). `SEAT=E0` refuses to start without `EXEMPT=1`,
 and `EXEMPT=1` is only true for a wallet the creator named. Do not set it. `SEAT_WAIT_MS=300` with `OUT2_MAX=0` is
 the round-15 rule (send 0.3 s into the seat's second unless an outsider has bought); `TAKE_PROFIT=0.5` sells when the
@@ -331,7 +339,7 @@ unclear; that is the operator's call.
 | ordering changes (a priority lane, a different sequencer) | `landing` events with `where: early` or `later block` on every trade while `seat_flip_to_send_ms` reads 300 | the margin controller moves, the stop caps the loss | stop; the seat depends on first-come ordering |
 | gas | `eligible_not_traded` with `gas $… per round trip > 5% of stake` | the small stakes stop trading by themselves | wait, or raise the bankroll (gas is $0.10 today, the gate allows $1.25 on a $25 stake) |
 | your send step | `sent_tx` answers that are errors, `buy_reverted`, `receipt_timeout` | an open position is closed on restart | the reference below is tested; do not improvise on it at the boundary |
-| the terms of use | nothing in the log | nothing | your call; it is flagged, not resolved |
+| the terms of use | nothing in the log | nothing | read in full (section 23.10): Robinhood's chain terms cover the sequencer, the public RPC and the feed, not the chain or your trade; they list "use of automated tools (such as bots ...)" under network abuse and limit those Services to "testing, experimentation, evaluation, and development". Two postures: A, the sequencer feed and the sequencer endpoint (fastest, uses the Services); B, a provider's WebSocket and RPC only (`FEED_SOURCE=provider PROVIDER_WS=...`, no Robinhood endpoint, about a tenth fewer trades, no E1). Your choice |
 
 **The send step, tested.** This is the whole of what replaces `submit()`; it was run against the engine's own transaction
 with a throwaway key, and the sequencer's only complaint was that the key had no funds:
