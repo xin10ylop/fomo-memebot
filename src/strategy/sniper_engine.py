@@ -69,7 +69,9 @@ MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
 SWITCH_N = int(os.environ.get("SWITCH_N", "15")); SWITCH = float(os.environ.get("SWITCH", "-0.10")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.50"))
 MAX_RESOLVE_MS = int(os.environ.get("MAX_RESOLVE_MS", "1500"))
 GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.05"))
-GAS_HEADROOM = float(os.environ.get("GAS_HEADROOM", "2.0"))                # gasPrice sent = this x eth_gasPrice: the quote equals the base fee, a tick up refuses the tx (23.7)
+GAS_HEADROOM = float(os.environ.get("GAS_HEADROOM", "2.0"))
+SELL_GAS_HEADROOM = float(os.environ.get("SELL_GAS_HEADROOM", "8.0"))   # cap on the approve and the sell: receipts show only the base fee is charged, so a high cap is free and a fee spike cannot refuse the exit
+SELL_CONFIRM_S = float(os.environ.get("SELL_CONFIRM_S", "1.5")); SELL_MAX_S = float(os.environ.get("SELL_MAX_S", "20"))                # gasPrice sent = this x eth_gasPrice: the quote equals the base fee, a tick up refuses the tx (23.7)
 GAS_EST_BUY, GAS_EST_APPROVE, GAS_EST_SELL = 100_000, 50_000, 80_000        # measured gas used by direct curve calls (receipts, Sep 9): the cost estimate; limits below are higher
 REQUIRE_COINCURVE = os.environ.get("REQUIRE_COINCURVE", "0") == "1"
 PIN_CPU = os.environ.get("PIN_CPU", "")                                   # e.g. "1": keep the process off core 0 (interrupts) on a 2-vCPU box
@@ -255,7 +257,7 @@ class Sender:
 
     def fire(self, body, wait_s=2.0):
         """post the same body to every endpoint at once; returns (result, per-endpoint answers)"""
-        out = []; ths = [threading.Thread(target=self._one, args=(e, body, out), daemon=True) for e in self.eps]
+        out = []; self.last = out; ths = [threading.Thread(target=self._one, args=(e, body, out), daemon=True) for e in self.eps]
         for th in ths:
             th.start()
         t0 = mono()
@@ -346,7 +348,7 @@ def chain_loop():
     n = 0
     while True:
         try:
-            state["nonce"] = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); state["gas_price"] = int(int(rpc.call("eth_gasPrice", []), 16) * GAS_HEADROOM); state["chain_at"] = mono()
+            state["nonce"] = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); state["base_fee"] = int(rpc.call("eth_gasPrice", []), 16); state["gas_price"] = int(state["base_fee"] * GAS_HEADROOM); state["chain_at"] = mono()
             if SEND is not None and state["open"] is None:            # live: the bankroll is the wallet's ETH, so every profit is staked again and the daily stop reads real money
                 bal = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18; state["wallet_eth"] = bal
                 with lock:
@@ -718,17 +720,137 @@ def wait_receipt(h, timeout=10.0):
     return None
 
 
+def next_nonce():
+    try:
+        return int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16)
+    except Exception:
+        return state["nonce"]
+
+
+def token_balance(token):
+    try:
+        return int(rpc.call("eth_call", [{"to": to_checksum_address(token), "data": "0x70a08231" + abi_word(WALLET)}, "latest"]), 16)
+    except Exception:
+        return None
+
+
+def token_allowance(token, spender):
+    try:
+        return int(rpc.call("eth_call", [{"to": to_checksum_address(token), "data": "0xdd62ed3e" + abi_word(WALLET) + abi_word(spender)}, "latest"]), 16)
+    except Exception:
+        return None
+
+
+def tx_approve(pos, nonce, cap):
+    return {"to": to_checksum_address(pos["token"]), "value": "0x0", "data": "0x" + APPROVE_SEL + abi_word(pos["curve"]) + abi_word(2 ** 256 - 1), "gas": hex(GAS_APPROVE), "gasPrice": hex(int(cap)), "nonce": hex(nonce), "chainId": 4663}
+
+
+def tx_sell(pos, amount_wei, nonce, cap):
+    return {"to": to_checksum_address(pos["curve"]), "value": "0x0", "data": "0x" + SELL_SEL.hex() + abi_word(amount_wei) + abi_word(0) + abi_word(WALLET), "gas": hex(GAS_SELL), "gasPrice": hex(int(cap)), "nonce": hex(nonce), "chainId": 4663}
+
+
+def send_confirmed(build, label, max_s):
+    """live only: send build(cap, nonce) and wait for its receipt; no receipt within SELL_CONFIRM_S, or a refusal, means send again
+    with a doubled cap at the next free nonce. 'nonce too low' from the sequencer means an earlier attempt landed: its receipt is
+    fetched. Returns (receipt, hash), (None, last hash) after max_s."""
+    t0 = mono(); cap = (state.get("base_fee") or state["gas_price"] or 10 ** 8) * SELL_GAS_HEADROOM; hashes = []; attempt = 0
+    while mono() - t0 < max_s:
+        attempt += 1; h = submit(build(cap, next_nonce()), label)
+        if h:
+            hashes.append(h); rec = wait_receipt(h, SELL_CONFIRM_S)
+            if rec:
+                return rec, h
+        else:
+            ans = " ".join(str(d) for _, d in (getattr(SENDER, "last", None) or []))
+            if "nonce too low" in ans or "already known" in ans:
+                for hh in hashes:
+                    rec = wait_receipt(hh, 1.0)
+                    if rec:
+                        return rec, hh
+            time.sleep(0.2)
+        cap = min(cap * 2, 10 ** 12)
+        log({"ev": "resend", "label": label, "attempt": attempt + 1, "cap_gwei": round(cap / 1e9, 4), "hashes": len(hashes)})
+    return None, (hashes[-1] if hashes else None)
+
+
+def ensure_approved(pos, amount_wei, max_s):
+    """the curve pulls the tokens with transferFrom (a sell without an allowance reverts with ERC20InsufficientAllowance, checked on
+    the chain), so the approve must have landed before the sell: its receipt, else the allowance itself, else a fresh approve"""
+    h = pos.get("approve_hash"); rec = wait_receipt(h, 1.0) if h else None
+    if rec and rec.get("status") == "0x1":
+        return True
+    al = token_allowance(pos["token"], pos["curve"])
+    if al is not None and al >= amount_wei:
+        return True
+    log({"ev": "approve_missing", "curve": pos["curve"], "approve_hash": h, "allowance": al, "note": "sending the approve again with a high cap"})
+    rec, h2 = send_confirmed(lambda cap, nonce: tx_approve(pos, nonce, cap), "approve", max_s)
+    if h2:
+        pos["approve_hash"] = h2
+    if rec and rec.get("status") == "0x1":
+        return True
+    al = token_allowance(pos["token"], pos["curve"])
+    return al is not None and al >= amount_wei
+
+
+def watch_approve(pos):
+    """live: says in the log whether the approve landed inside the hold; close_position re-sends it if not"""
+    rec = wait_receipt(pos["approve_hash"], max(1.0, HOLD - 1.0)); pos["approve_ok"] = bool(rec and rec.get("status") == "0x1")
+    if not pos["approve_ok"]:
+        log({"ev": "approve_not_seen", "curve": pos["curve"], "hash": pos["approve_hash"], "status": rec.get("status") if rec else None})
+
+
 def close_position(pos, why):
-    """approve (if not yet) and sell the position's balance; used by the hold and by crash recovery"""
-    gp = state["gas_price"] or 0; nonce = pos["nonce"]
-    if not pos.get("approved"):
-        approve = {"to": to_checksum_address(pos["token"]), "value": "0x0", "data": "0x" + APPROVE_SEL + abi_word(pos["curve"]) + abi_word(2 ** 256 - 1), "gas": hex(GAS_APPROVE), "gasPrice": hex(gp), "nonce": hex(nonce + 1), "chainId": 4663}
-        ha = submit(approve, "approve"); pos["approved"] = True; pos["approve_hash"] = ha
-    sell = {"to": to_checksum_address(pos["curve"]), "value": "0x0", "data": "0x" + SELL_SEL.hex() + abi_word(int(pos["tokens"] * 1e18)) + abi_word(0) + abi_word(WALLET), "gas": hex(GAS_SELL), "gasPrice": hex(gp), "nonce": hex(nonce + 2), "chainId": 4663}
-    hs = submit(sell, "sell")
-    log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": pos["tokens"], "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": hs is None and pos.get("buy_hash") is None,
-         "buy_hash": pos.get("buy_hash"), "approve_hash": pos.get("approve_hash"), "sell_hash": hs, "seat_ts": pos.get("seat_ts")})
-    state["open"] = None; save_state()
+    """sell the position; used by the hold and by crash recovery. Dry run: logs the approve and sell it would send. Live: the
+    approve is confirmed first (receipt, allowance, or a fresh approve), the amount is the wallet's real token balance, the sell
+    is sent and re-sent with rising caps until its receipt is in, a reverted sell is diagnosed (allowance, balance) and retried,
+    and a position whose sell cannot be confirmed within SELL_MAX_S stays open (no new trade is taken) while a background
+    retry keeps trying every 5 s and an alarm is logged. The engine never forgets a position."""
+    if SEND is None or pos.get("buy_hash") is None:                 # dry run: the transactions as they would be sent
+        gp = state["gas_price"] or 0; nonce = pos["nonce"]
+        if not pos.get("approved"):
+            pos["approve_hash"] = submit(tx_approve(pos, nonce + 1, gp), "approve"); pos["approved"] = True
+        hs = submit(tx_sell(pos, int(pos["tokens"] * 1e18), nonce + 2, gp), "sell")
+        log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": pos["tokens"], "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": True,
+             "buy_hash": pos.get("buy_hash"), "approve_hash": pos.get("approve_hash"), "sell_hash": hs, "seat_ts": pos.get("seat_ts")})
+        state["open"] = None; save_state(); return
+    with lock:
+        if pos.get("closing"):
+            return
+        pos["closing"] = True
+    try:
+        t0 = mono(); bal = token_balance(pos["token"]); amount = bal if bal else int(pos["tokens"] * 1e18)
+        if bal == 0 and pos.get("sell_hash"):
+            log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": pos["tokens"], "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": False, "note": "balance already zero: an earlier sell landed",
+                 "buy_hash": pos.get("buy_hash"), "approve_hash": pos.get("approve_hash"), "sell_hash": pos.get("sell_hash"), "seat_ts": pos.get("seat_ts")})
+            state["open"] = None; save_state(); return
+        if not ensure_approved(pos, amount, SELL_MAX_S / 2):
+            log({"ev": "alarm", "what": "approve not confirmed: the sell would revert; retrying in the background", "curve": pos["curve"]})
+            threading.Timer(5.0, close_position, args=(pos, "retry after approve")).start(); return
+        for _ in range(3):
+            rec, hs = send_confirmed(lambda cap, nonce: tx_sell(pos, amount, nonce, cap), "sell", max(2.0, SELL_MAX_S - (mono() - t0)))
+            if hs:
+                pos["sell_hash"] = hs; save_state()
+            if rec and rec.get("status") == "0x1":
+                log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": amount / 1e18, "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": False, "sell_confirm_s": round(mono() - t0, 2),
+                     "buy_hash": pos.get("buy_hash"), "approve_hash": pos.get("approve_hash"), "sell_hash": hs, "seat_ts": pos.get("seat_ts")})
+                state["open"] = None; save_state(); return
+            if rec:                                                  # landed and reverted: find out why and fix it
+                bal = token_balance(pos["token"]); al = token_allowance(pos["token"], pos["curve"])
+                log({"ev": "sell_reverted", "curve": pos["curve"], "hash": hs, "balance": bal, "allowance": al})
+                if bal == 0:
+                    log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": amount / 1e18, "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": False, "note": "reverted sell but the balance is zero",
+                         "buy_hash": pos.get("buy_hash"), "approve_hash": pos.get("approve_hash"), "sell_hash": hs, "seat_ts": pos.get("seat_ts")})
+                    state["open"] = None; save_state(); return
+                if bal:
+                    amount = bal
+                if al is not None and al < amount and not ensure_approved(pos, amount, 5.0):
+                    break
+            if mono() - t0 > SELL_MAX_S:
+                break
+        log({"ev": "alarm", "what": f"sell not confirmed after {round(mono() - t0, 1)} s: position stays open, retrying every 5 s; check the wallet and the endpoints", "curve": pos["curve"], "sell_hash": pos.get("sell_hash")})
+        threading.Timer(5.0, close_position, args=(pos, "retry")).start()
+    finally:
+        pos["closing"] = False
 
 
 def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0):
@@ -855,9 +977,10 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
         r = resolve_rpc(creator, deadline=HOLD - 1, lookback=120); token = r[0] if r else curve
     pos = {"curve": curve, "token": token, "tokens": tokens, "nonce": nonce, "t_buy": t_buy, "buy_hash": h, "approved": False, "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0)}
     state["open"] = pos; save_state()
-    gp = gas_price or 0
-    approve = {"to": to_checksum_address(token), "value": "0x0", "data": "0x" + APPROVE_SEL + abi_word(curve) + abi_word(2 ** 256 - 1), "gas": hex(GAS_APPROVE), "gasPrice": hex(gp), "nonce": hex(nonce + 1), "chainId": 4663}
-    pos["approve_hash"] = submit(approve, "approve"); pos["approved"] = True; save_state()
+    cap = (state.get("base_fee") or gas_price or 0) * SELL_GAS_HEADROOM if h else (gas_price or 0)
+    pos["approve_hash"] = submit(tx_approve(pos, nonce + 1, cap), "approve"); pos["approved"] = True; save_state()
+    if pos["approve_hash"]:
+        threading.Thread(target=watch_approve, args=(pos,), daemon=True).start()
     why = "hold"
     with cond:
         while mono() - t_buy < HOLD:
@@ -1051,7 +1174,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.1, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 4.2, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
