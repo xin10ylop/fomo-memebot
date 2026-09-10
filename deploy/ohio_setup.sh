@@ -18,13 +18,17 @@ install -d -m 700 /etc/sniper /var/log/sniper
 if [ -f /etc/sniper/engine.env ]; then echo "keeping the existing /etc/sniper/engine.env"; else
 cat > /etc/sniper/engine.env <<'ENV'
 # fill in and keep private (chmod 600). The engine runs in dry run until SEND_MODULE and PRIVATE_KEY are set (docs/STEP_BY_STEP.md).
-SEND_MODULE=                                          # live: /etc/sniper/send_step.py (copy of deploy/send_step.py); empty = dry run
-PRIVATE_KEY=                                          # live: the wallet's private key, 0x..., used only by send_step.py
-# SEQ_URL: the engine keeps a warm socket to it (SENDER) for your send step; RPC_URL is the provider for bookkeeping and the second send endpoint.
-FEED_SOURCE=sequencer                                 # or provider: detection from PROVIDER_WS and no Robinhood endpoint at all (runbook 0b, posture B)
+# Comments only on their own lines: systemd reads everything after '=' as the value.
+# live: SEND_MODULE=/etc/sniper/send_step.py (a copy of deploy/send_step.py) and the wallet's private key; empty = dry run
+SEND_MODULE=
+PRIVATE_KEY=
+# FEED_SOURCE sequencer (default) or provider (detection from PROVIDER_WS, no Robinhood endpoint: runbook 0b, posture B).
+# SEQ_URL: the engine keeps a warm socket to it for the send step; RPC_URL is your provider (Alchemy) for bookkeeping and the second send endpoint.
+# The public https://rpc.mainnet.chain.robinhood.com works for the dry run but rate-limits; put the Alchemy HTTPS URL here before going live.
+FEED_SOURCE=sequencer
 PROVIDER_WS=
 FEED_URL=wss://feed.mainnet.chain.robinhood.com
-RPC_URL=https://REPLACE-WITH-YOUR-PROVIDER-ENDPOINT   # the public https://rpc.mainnet.chain.robinhood.com rate-limits; the engine needs a provider key
+RPC_URL=https://rpc.mainnet.chain.robinhood.com
 SEQ_URL=https://sequencer.mainnet.chain.robinhood.com
 WALLET=0x0000000000000000000000000000000000000000
 SEAT=E2

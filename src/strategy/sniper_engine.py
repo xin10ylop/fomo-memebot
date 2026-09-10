@@ -37,6 +37,9 @@ import rlp
 from eth_account import Account
 from eth_utils import keccak, to_checksum_address
 
+for _k, _v in list(os.environ.items()):                 # systemd's EnvironmentFile keeps an inline "# comment" as part of the value: drop it
+    if " #" in _v:
+        os.environ[_k] = _v.split(" #", 1)[0].rstrip()
 RPC_URL = os.environ.get("RPC_URL", "https://rpc.mainnet.chain.robinhood.com")
 SEQ_URL = os.environ.get("SEQ_URL", "https://sequencer.mainnet.chain.robinhood.com")
 FEED_URL = os.environ.get("FEED_URL", "wss://feed.mainnet.chain.robinhood.com")
