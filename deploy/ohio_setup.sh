@@ -15,6 +15,7 @@ python3 -m venv /opt/sniper-venv && /opt/sniper-venv/bin/pip install -q websocke
 /opt/sniper-venv/bin/python3 -c "import coincurve, eth_keys; b = eth_keys.KeyAPI().backend.__class__.__name__; print('signature backend:', b); raise SystemExit(0 if 'CoinCurve' in b else 1)" || { echo "coincurve is not the eth-keys backend: fix before running live"; exit 1; }
 sysctl -w net.ipv4.tcp_slow_start_after_idle=0 >/dev/null && grep -q tcp_slow_start_after_idle /etc/sysctl.conf || echo 'net.ipv4.tcp_slow_start_after_idle=0' >> /etc/sysctl.conf   # a warm socket keeps its window between trades
 install -d -m 700 /etc/sniper /var/log/sniper
+if [ -f /etc/sniper/engine.env ]; then echo "keeping the existing /etc/sniper/engine.env"; else
 cat > /etc/sniper/engine.env <<'ENV'
 # fill in and keep private (chmod 600). The engine runs in dry run until SEND_MODULE and PRIVATE_KEY are set (docs/STEP_BY_STEP.md).
 SEND_MODULE=                                          # live: /etc/sniper/send_step.py (copy of deploy/send_step.py); empty = dry run
@@ -56,6 +57,7 @@ REQUIRE_COINCURVE=1
 PIN_CPU=1
 LOG_PATH=/var/log/sniper/engine.jsonl
 ENV
+fi
 chmod 600 /etc/sniper/engine.env                                  # this file will hold the key: owner-only
 [ "$(nproc)" -ge 2 ] || sed -i 's/^PIN_CPU=1/PIN_CPU=/' /etc/sniper/engine.env   # one vCPU (the $6 droplet): nothing to pin to
 cat > /etc/logrotate.d/sniper <<'ROT'
@@ -69,7 +71,7 @@ if [ ! -f "$LOG" ] || [ $(( $(date +%s) - $(stat -c %Y "$LOG") )) -gt 600 ]; the
 OFF=$(chronyc tracking 2>/dev/null | awk '/System time/ {print $4}'); if [ -n "$OFF" ] && [ "$(echo "$OFF > 0.02" | bc)" = "1" ]; then echo "sniper: clock offset ${OFF}s" | $ALERT_CMD; fi
 CHK
 chmod +x /usr/local/bin/sniper-check; apt-get install -y bc >/dev/null 2>&1 || true
-( crontab -l 2>/dev/null | grep -v sniper-check; echo "*/5 * * * * /usr/local/bin/sniper-check" ) | crontab -
+( crontab -l 2>/dev/null | grep -v sniper-check || true; echo "*/5 * * * * /usr/local/bin/sniper-check" ) | crontab -   # a fresh machine has no crontab: without the || true, set -e ended the script here
 cat > /etc/systemd/system/sniper-engine.service <<UNIT
 [Unit]
 Description=first-block sniper engine (dry run until submit() is replaced)
