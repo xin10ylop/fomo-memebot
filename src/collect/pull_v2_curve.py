@@ -21,6 +21,7 @@ def call(payload,tries=10):
         except Exception as e: time.sleep(4*(i+1))
 t0=datetime.datetime.fromisoformat(day+'T00:00:00+00:00').timestamp()
 def scan(params_fn,b0,b1,step,label,out_path,mapper):
+    final=out_path; out_path=out_path+'.tmp'
     f=open(out_path,'w'); b=b0; n=0; tot=0
     while b<b1:
         e=min(b1,b+step); r=call({"jsonrpc":"2.0","id":1,"method":"eth_getLogs","params":[params_fn(b,e-1)]})
@@ -34,6 +35,10 @@ def scan(params_fn,b0,b1,step,label,out_path,mapper):
         if n%25==0: f.flush(); print(label,n,'calls',b-b0,'/',b1-b0,'blocks',tot,'logs',file=sys.stderr,flush=True)
         time.sleep(0.25)
     f.close(); print('DONE',label,tot,file=sys.stderr,flush=True)
+    # keep the larger of the old and new files: a struggling RPC node can return empty ranges and silently truncate a scan
+    old_n=sum(1 for _ in open(final)) if os.path.exists(final) else 0
+    if tot>=old_n: os.replace(out_path,final)
+    else: os.remove(out_path); print('KEPT OLD',label,old_n,'>',tot,file=sys.stderr,flush=True)
 # 1) creation events with full topics for the whole day (V2 + pad)
 for F,name in ((V2F,'v2'),(PADF,'pad')):
     scan(lambda b,e,F=F:{"fromBlock":hex(b),"toBlock":hex(e),"address":F},blk(t0),blk(t0+86400),20000,'create_'+name,f'rh/creates_{name}_{day}.jsonl',

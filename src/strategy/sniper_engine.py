@@ -876,11 +876,11 @@ async def main():
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": True})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
-    last_prune = mono()
+    last_prune = mono(); backoff = 0.2
     while True:
         try:
             async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=None) as ws:
-                log({"ev": "feed_connected"}); state["connected_at"] = mono(); state["prev_seen"] = None
+                log({"ev": "feed_connected"}); state["connected_at"] = mono(); state["prev_seen"] = None; backoff = 0.2
                 state["brackets"].clear(); state["ref"] = None; _bcache["at"] = -1e9              # the route, hence theta, may have changed
                 while True:
                     try:
@@ -910,7 +910,7 @@ async def main():
                             state["prev_seen"] = seen; state["prev_ts"] = ts
                             cond.notify_all()
         except Exception as e:
-            log({"ev": "feed_error", "err": str(e)[:200]}); await asyncio.sleep(0.2)
+            log({"ev": "feed_error", "err": str(e)[:200], "retry_s": backoff}); await asyncio.sleep(backoff); backoff = min(5.0, backoff * 2)   # 0.2 s after a drop, slower if the network is gone
 
 
 if __name__ == "__main__":

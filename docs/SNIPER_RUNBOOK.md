@@ -23,9 +23,10 @@ dollar is sent.
   the curve resolved the moment the bundle is visible, one wake per feed message, the curve's reserves folded as the
   feed arrives (nothing rebuilt after the boundary), warm keep-alive sockets to the sequencer and the provider, an
   interval-vote boundary estimator, a margin controller that can come down, a feed watchdog, monotonic clock. Section 3b.
-- **Expect** +9% to +12% per trade (fit +10.7%, test +16.4%, no window under +7.6%), from $300 between +$270 and
-  +$12,000 per six-hour window on its own ordering (median about +$1,500), and a $100 start with the stop hit at most
-  7% of the time. Section 2c.
+- **Expect**, on the ten September windows the rule never saw (section 23.6, runbook 2d): +6% per trade, nine windows
+  of ten positive, from $300 about +$200 per busy six-hour window and about zero on a thin one, stop odds 0.1%. The
+  Aug 30–Sep 6 windows paid +11% to +16% a trade and +$1,500 a window; the difference is other bots now sitting in
+  second one on two thirds of bundled launches. A $100 start is no longer advised while the flow is this thin.
 
 **v2 (rounds 12–14).**
 
@@ -166,6 +167,25 @@ better half by +5.7 points); the 0.3 s wait was not tuned. Plan on +9% to +12% p
 resampled chance of the daily stop of zero. From $100: +$50 to +$10,000, median about +$400, stop odds at most 7%.
 From $50 the $25 floor is half the bankroll and the stop is hit one time in five on the weaker windows: do not.
 
+### 2d. September 7–10, ten windows the rule never saw (section 23.6)
+
+Same rule, no change (`data/derived/risk_harness_sep.txt`):
+
+| window | Sep 7 night | Sep 7 day | Sep 7 eve | Sep 8 night | Sep 8 day | Sep 8 eve | Sep 9 night | Sep 9 day | Sep 9 eve | Sep 10 night |
+|---|---|---|---|---|---|---|---|---|---|---|
+| launches kept in 6 h | 136 | 74 | 200 | 61 | 75 | 145 | 72 | 43 | 21 | 28 |
+| mean ROI per trade | +9.3% | −0.6% | +5.8% | +12.5% | +3.2% | +5.0% | +6.3% | +7.4% | +1.5% | +15.1% |
+| one at a time, $300 stakes | $3,589 | −$92 | $3,614 | $2,128 | $713 | $1,831 | $1,363 | $912 | $110 | $1,178 |
+| from $300, engine defaults | $906 | $321 | $1,426 | $726 | $395 | $516 | $466 | $438 | $301 | $527 |
+| chance of the −50% stop from $300 | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| chance of the stop from $100 | 5% | 98% | 8% | 1% | 7% | 22% | 2% | 0% | 0% | 0% |
+
+Plan on +6% per trade and 20–200 trades per six hours: from $300, +$0 to +$1,100 per window, median about +$200,
+gas included. The flow is thinner because bots now buy in second one on two thirds of bundled launches (the rule skips
+those) and a rival is in second two within 0.3 s on a third of the rest. The seat they moved to, first in second one
+(E1 at the front), pays +13% a trade on 2,970 launches in these windows and +4% one block late; whether a box in Ohio
+lands that block is a live question (section 23.6), not a dry-run one, and it is the next thing to test at $5 stakes.
+
 ## 3. The machine
 
 - EC2 in **us-east-2 (Ohio)**, where the sequencer lives; the smallest general-purpose instance is enough (the feed
@@ -252,17 +272,18 @@ launches: they are computed the same way, and a gap is a latency or a seat probl
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while
 the engine's scores for the same launches are above +5% (you are not getting the seat), if the measured surcharge is
-ever above 6.18% on a next-second landing, or if the bundled-launch count falls under ten a day (the flow that pays
-is gone).
+ever above 6.18% on a next-second landing, or if the flow that pays is gone: the engine scores every rule-passing
+launch (`score` events), so read two numbers each evening from the log: rule-passing launches in the last six hours
+(under 40 means a thin window; September ran 21–200) and the mean score of the last 60 (under +3% does not cover gas
+at $25 stakes; do not trade the next day until it is back above +5%).
 
 ## 7. Starting small
 
-Under the round-15 rule with 15% sizing and a $25 floor (section 2c): from **$100** the resampled chance of the −50%
-daily stop is at most 7% on the weakest window and under 3% on most, and the windows end between $148 and $10,083 on
-their own orderings; from **$150** it is under 2% everywhere; from **$200** it is 0.1% or less. From **$50** the floor is
-half the bankroll and the stop is hit one time in five on the weaker windows: save to $100 first. Gas is about $1 a
-round trip, 4% of a $25 stake, which the `GAS_MAX_SHARE=0.05` gate allows; if gas rises the engine stops trading the
-small stakes by itself.
+Under the round-15 rule with 15% sizing and a $25 floor (section 2c) the Aug 30–Sep 6 windows allowed a $100 start
+(stop odds at most 7%). The September 7–10 windows do not (section 2d): with +6% a trade, $1 of gas is 4% of a $25
+stake, and the stop odds from $100 reach 98% on the thinnest window. Start at **$300** (stakes $45 at 15%), where the
+stop odds are 0.1% on every window seen, or wait until the engine's scores show the flow back (section 6). From $50
+never. If gas rises the `GAS_MAX_SHARE=0.05` gate stops the small stakes by itself.
 
 ## 8. What this is not
 

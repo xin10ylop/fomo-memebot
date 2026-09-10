@@ -20,7 +20,18 @@ WINS = [("2026-08-12", "12-18"), ("2026-08-20", "12-18"), ("2026-08-27", "12-18"
         ("2026-09-02", "12-18"), ("2026-09-03", "0-6"), ("2026-09-03", "12-18"), ("2026-09-03", "18-24"), ("2026-09-04", "12-18"), ("2026-09-05", "0-6"),
         ("2026-09-05", "12-18"), ("2026-09-06", "12-18")]
 FIT = set(WINS[:7]); TEST = set(WINS[7:])
-CACHE = "risk_harness_cache.pkl"
+CACHE = "risk_harness_cache_v2.pkl"; CACHE_NEW = "risk_harness_cache_new_v2.pkl"     # v2: every bundled launch, the second-one gate applied per configuration
+
+
+def new_windows():
+    """windows pulled after the round-15 rule was fixed (any rh/v2curve_<day>_<h0>-<h1>.jsonl not in WINS): never used for a choice"""
+    import glob, re
+    out = []
+    for f in sorted(glob.glob("rh/v2curve_*.jsonl")):
+        m = re.match(r"rh/v2curve_(\d{4}-\d{2}-\d{2})_(\d+-\d+)\.jsonl$", f)
+        if m and (m.group(1), m.group(2)) not in WINS:
+            out.append((m.group(1), m.group(2)))
+    return out
 STAKES = (25, 50, 100, 200, 300)
 
 
@@ -41,9 +52,9 @@ def features(L):
                 rival_lag=(rival - (2.0 - pos)) if rival is not None else None)
 
 
-def build():
+def build(wins=WINS, cache=CACHE):
     data = {}
-    for day, win in WINS:
+    for day, win in wins:
         SE.WINDOW = win
         try:
             launches, prior = SE.load_exact(day)
@@ -54,10 +65,21 @@ def build():
             if prior[L["creator"]][0] != L["ts"]:
                 continue
             f = features(L)
-            if f["bundle_n"] >= 3 and f["bundle_eth"] >= 0.3 and f["tk0"] >= 0.01 and f["out1_n"] == 0:
+            if f["bundle_n"] >= 3 and f["bundle_eth"] >= 0.3 and f["tk0"] >= 0.01:
                 keep[cv] = (L, f)
         data[(day, win)] = keep; print("loaded", day, win, len(keep), file=sys.stderr)
-    pickle.dump(data, open(CACHE, "wb")); return data
+    pickle.dump(data, open(cache, "wb")); return data
+
+
+def load_new():
+    """the new windows, cached separately; rebuilt when a window is missing from the cache"""
+    wins = new_windows()
+    if not wins:
+        return {}
+    data = pickle.load(open(CACHE_NEW, "rb")) if os.path.exists(CACHE_NEW) and "--build-new" not in sys.argv else {}
+    if any(k not in data for k in wins):
+        data = build(wins, CACHE_NEW)
+    return data
 
 
 def load():
@@ -147,12 +169,14 @@ def check_replay(data, n=300):
 
 def trade_book(cfg, data):
     """per window: list of per-launch dicts {stake: (pnl_usd, cost_usd, t_in_abs, t_out_abs, kind)} plus the features"""
-    kw = dict(frac=cfg.get("frac", 0.03), hold=cfg.get("hold", 7.0), tol=cfg.get("tol", 0.10), slip=cfg.get("slip", 0.3), lat=cfg.get("lat", 0.3),
+    kw = dict(frac=cfg.get("frac", 0.03), hold=cfg.get("hold", 7.0), entry=cfg.get("entry", "E2"), tol=cfg.get("tol", 0.10), slip=cfg.get("slip", 0.3), lat=cfg.get("lat", 0.3),
               min_out_slip=cfg.get("min_out_slip", 0.25), stop_sell_frac=cfg.get("stop_sell_frac"), no_follow=cfg.get("no_follow"), tp=cfg.get("take_profit"))
     stakes = cfg.get("stakes", STAKES); book = {}
     for k, keep in data.items():
         trades = []
         for cv, (L, f) in keep.items():
+            if f["out1_n"] > 0 and not cfg.get("include_out1"):                # the section 21.6 gate: no outsider in second one
+                continue
             if cfg.get("skip_fn") and cfg["skip_fn"](f):
                 continue
             mult = cfg["size_fn"](f) if cfg.get("size_fn") else 1.0
@@ -208,6 +232,54 @@ def evaluate(cfg, data, book=None):
     return out
 
 
+def evaluate_adaptive(cfg, data, classes=("clean", "out1"), n_roll=20, thr=0.03, start=300.0):
+    """the engine's switch per class of launch ('clean' = no outsider in second one, 'out1' = one present; seat rivals are
+    always skipped): every bundled launch is scored 20 s after its exit, in the window's own time order, and a class is
+    traded only while the mean of its last n_roll scores is at least thr (trade until proven bad: fewer than n_roll scores
+    counts as on). Returns per window: trades taken per class, mean ROI of taken trades, own-path end from start."""
+    kw = dict(frac=cfg.get("frac", 0.03), hold=cfg.get("hold", 5.0), tol=0.10, slip=0.3, lat=0.3, min_out_slip=0.25, tp=cfg.get("take_profit"))
+    sizing = cfg.get("sizing", 0.15); clamp = cfg.get("clamp", (25.0, 300.0)); stop = 0.50; stakes = cfg.get("stakes", STAKES); out = {}
+    for k, keep in data.items():
+        rows = []
+        for cv, (L, f) in keep.items():
+            if G_WAIT(0.3)(f):
+                continue
+            cls = "out1" if f["out1_n"] > 0 else "clean"
+            by = {}
+            for stk in stakes:
+                pnl, cost, t_in, t_out, kind = replay(L, stk / PX, **kw)
+                by[stk] = (pnl * PX - (C.GAS if kind != "reverted" else 0.0), cost * PX if kind != "reverted" else 1e-9, L["ts"] + t_in, L["ts"] + t_out, kind)
+            rows.append((by, cls))
+        if len(rows) < 10:
+            out[k] = None; continue
+        rows.sort(key=lambda r: r[0][300][2]); bank = start; busy = -1e9; scored = {"clean": [], "out1": []}; stopped = False; taken = {"clean": [], "out1": []}
+        for by, cls in rows:
+            r = by[300]; t_in = r[2]
+            avail = [x[1] for x in scored[cls] if x[0] <= t_in]; on = cls in classes and (len(avail) < n_roll or st.mean(avail[-n_roll:]) >= thr)
+            scored[cls].append((r[3] + 20.0, r[0] / r[1] if r[1] > 1e-6 else 0.0))
+            if bank < (1 - stop) * start:
+                stopped = True
+            if not on or t_in < busy or stopped or bank < clamp[0]:
+                continue
+            stake = min(max(bank * sizing, clamp[0]), min(clamp[1], bank)); near = min(stakes, key=lambda s_: abs(s_ - stake)); rr = by[near]
+            dep = min(stake, rr[1]) if rr[1] > 1e-6 else 0.0; roi = (rr[0] / rr[1]) if rr[1] > 1e-6 else 0.0; bank += dep * roi if rr[1] > 1e-6 else rr[0]; busy = rr[3]; taken[cls].append(roi)
+        out[k] = dict(n=len(rows), own=bank, taken={c: (len(v), st.mean(v) if v else 0.0) for c, v in taken.items()},
+                      clsroi={c: (sum(1 for by, cl in rows if cl == c), st.mean([by[300][0] / by[300][1] for by, cl in rows if cl == c and by[300][1] > 1e-6] or [0.0])) for c in ("clean", "out1")})
+    return out
+
+
+def print_adaptive(res, label, start=300.0):
+    print(f"{label}: per window, launches scored per class (clean = no second-one outsider, out1 = one present; seat rivals skipped), mean ROI per class, trades taken per class with their mean, own-path end from ${start:.0f}")
+    tot = 0.0
+    for k in sorted(res):
+        r = res[k]
+        if not r:
+            continue
+        tot += r["own"] - start
+        print(f"   {k[0][5:]} {k[1]:5s} clean {r['clsroi']['clean'][0]:3d} {100*r['clsroi']['clean'][1]:+6.1f}%  out1 {r['clsroi']['out1'][0]:3d} {100*r['clsroi']['out1'][1]:+6.1f}%  | taken clean {r['taken']['clean'][0]:3d} ({100*r['taken']['clean'][1]:+5.1f}%) out1 {r['taken']['out1'][0]:3d} ({100*r['taken']['out1'][1]:+5.1f}%) | end {r['own']:7,.0f}")
+    print(f"   sum of gains over the windows: {tot:,.0f}"); sys.stdout.flush()
+
+
 def summarize(res, label, per_window=False, start=300.0):
     def agg(keys):
         r = [res[k] for k in keys if res.get(k)]
@@ -218,6 +290,8 @@ def summarize(res, label, per_window=False, start=300.0):
                 f"net1 {sum(x['net1'] for x in r):7,.0f} own {sum(x['own']-start for x in r):7,.0f} P(stop) {100*st.mean(x['pstop'] for x in r):4.1f}% max {100*max(x['pstop'] for x in r):3.0f}% +win {sum(1 for x in r if x['roi']>0)}/{len(r)}")
     print(f"{label:44s} FIT  {agg([k for k in res if k in FIT])}")
     print(f"{'':44s} TEST {agg([k for k in res if k in TEST])}")
+    if any(k not in FIT and k not in TEST for k in res):
+        print(f"{'':44s} NEW  {agg([k for k in res if k not in FIT and k not in TEST])}")
     if per_window:
         for k in sorted(res):
             r = res[k]
@@ -287,6 +361,22 @@ def suite(name, data):
         "final": [("FINAL: wait 0.3 s, hold 5, TP 50%, 15%/$25", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0)}),
                   ("FINAL at 20%/$50", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5}),
                   ("FINAL without the take-profit", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "sizing": 0.15, "clamp": (25.0, 300.0)})],
+        "new": [("baseline: hold 7, 20%/$50", {}), ("hold 5, 20%/$50", {"hold": 5.0}), ("wait 0.3 s, hold 5, 20%/$50", {"skip_fn": G_WAIT(0.3), "hold": 5.0}),
+                ("FINAL: wait 0.3 s, hold 5, TP 50%, 15%/$25", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0)}),
+                ("FINAL at 20%/$50", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5}),
+                ("FINAL from $100", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0), "start": 100})],
+        "classes": [("FINAL (clean launches only)", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0)}),
+                    ("all bundled launches (second-one outsider allowed), wait 0.3 s, hold 5, TP 50%", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0), "include_out1": True}),
+                    ("only launches with a second-one outsider, wait 0.3 s, hold 5, TP 50%", {"skip_fn": lambda f: G_WAIT(0.3)(f) or f["out1_n"] == 0, "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0), "include_out1": True}),
+                    ("E1 seat at the front (first in second one), all bundled, hold 5, TP 50%", {"entry": "E1", "lat": 0.0, "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0), "include_out1": True}),
+                    ("E1 seat one block behind (0.1 s), all bundled, hold 5, TP 50%", {"entry": "E1", "lat": 0.1, "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0), "include_out1": True}),
+                    ("E1 seat 0.3 s behind, all bundled, hold 5, TP 50%", {"entry": "E1", "lat": 0.3, "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0), "include_out1": True}),
+                    ("E1 seat at the front, all bundled, hold 7, no TP", {"entry": "E1", "lat": 0.0, "hold": 7.0, "sizing": 0.15, "clamp": (25.0, 300.0), "include_out1": True})],
+        "switch": [("FINAL, switch 15/-10% (default)", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0)}),
+                   ("FINAL, switch 30/+3%", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0), "switch_n": 30, "switch": 0.03}),
+                   ("FINAL, switch 30/+5%", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0), "switch_n": 30, "switch": 0.05}),
+                   ("FINAL, switch 20/+5%", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0), "switch_n": 20, "switch": 0.05}),
+                   ("FINAL 20%/$50, switch 30/+5%", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "switch_n": 30, "switch": 0.05})],
         "start": [(f"FINAL from ${s0}", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0), "start": s0}) for s0 in (50, 100, 150, 200)],
         "wait": [(f"wait {w:.1f} s for a rival, hold {h:.0f}", {"skip_fn": G_WAIT(w), "hold": h}) for w in (0.2, 0.3, 0.4, 0.5) for h in (7.0, 5.0)]
                 + [("wait 0.3 s, hold 5, 15%/$25", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "sizing": 0.15, "clamp": (25.0, 300.0)}),
@@ -294,12 +384,20 @@ def suite(name, data):
                    ("wait 0.3 s, hold 5 + TP 50%, 15%/$25", {"skip_fn": G_WAIT(0.3), "hold": 5.0, "take_profit": 0.5, "sizing": 0.15, "clamp": (25.0, 300.0)}),
                    ("wait 0.3 s, hold 4", {"skip_fn": G_WAIT(0.3), "hold": 4.0}), ("wait 0.3 s, hold 6", {"skip_fn": G_WAIT(0.3), "hold": 6.0})],
     }
+    if name == "adaptive":
+        for label, kw in (("adaptive: both classes, roll 20, on while >= +3%", dict(n_roll=20, thr=0.03)), ("adaptive: both classes, roll 20, on while >= 0%", dict(n_roll=20, thr=0.0)),
+                          ("adaptive: both classes, roll 30, on while >= +3%", dict(n_roll=30, thr=0.03)), ("clean class only, roll 20, on while >= +3%", dict(classes=("clean",), n_roll=20, thr=0.03)),
+                          ("static: clean class always on", dict(classes=("clean",), n_roll=10**9, thr=-9)), ("static: both classes always on", dict(n_roll=10**9, thr=-9))):
+            print_adaptive(evaluate_adaptive({"take_profit": 0.5}, data, **kw), label)
+        return
     for label, cfg in cfgs[name]:
         summarize(evaluate(cfg, data), label, per_window=("--windows" in sys.argv), start=float(cfg.get("start", 300.0)))
 
 
 if __name__ == "__main__":
-    data = load()
     names = [a for a in sys.argv[1:] if not a.startswith("--")] or ["check", "base"]
+    data = load_new() if names == ["new"] else load()
+    if "new" in names and names != ["new"]:
+        data = dict(data); data.update(load_new())
     for nm in names:
         suite(nm, data)
