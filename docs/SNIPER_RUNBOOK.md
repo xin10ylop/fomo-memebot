@@ -385,6 +385,7 @@ exactly that price is refused the moment the fee ticks up (`GAS_HEADROOM=2` fixe
 FRAC=0.02` with $50 in the wallet and the send step live, and let it take thirty bundled launches (a busy window). Read the
 `landing` events: `where` (early = the creation second, refused for gas; first block; later block) and `tx_index`. If
 twenty-five or more of thirty land in the first block and the live outcomes track the engine's E1 scores, the seat is real
-for this box and `SEAT=E1 HOLD_S=7` at normal sizing is the plan when `flow` shows second-one occupancy above 45%; if
-fewer than twenty do, stay at E2. The cost of the test is about $2 a launch in gas and surcharge, $60 in all.
+for this box and `SEAT=E1 FRAC=0.10` is the plan while `flow` shows `out1_share_last_60` above 0.55, E2 otherwise
+(section 23.11: hold 5 with the take-profit as the engine runs it, or `HOLD_S=7 TAKE_PROFIT=0` for +13.1% a trade at a
+17% tail); if fewer than twenty do, stay at E2. The cost of the test is about $2 a launch in gas and surcharge, $60 in all.
 
