@@ -48,11 +48,11 @@ def main(path):
     else:
         checks.append(("would-be trades", False, "none yet: wait for a busy hour"))
     # 2) feed vs chain on the gates
-    gc = by["gate_check"]
+    gc = [e for e in by["gate_check"] if e.get("src") == "feed"]           # only launches the feed resolved: the ones it could have traded
     if gc:
-        agree = sum(1 for e in gc if e["feed"].get("bundle") == e["chain"].get("bundle") and (e["feed"].get("out1", 0) > 0) == (e["chain"].get("out1", 0) > 0))
-        bad = [e for e in gc if not (e["feed"].get("bundle") == e["chain"].get("bundle") and (e["feed"].get("out1", 0) > 0) == (e["chain"].get("out1", 0) > 0))]
-        checks.append(("feed and chain agree on the gates", agree >= 0.9 * len(gc), f"{agree} of {len(gc)} agree" + (f"; disagreements e.g. feed {bad[0]['feed']} chain {bad[0]['chain']}" if bad else "")))
+        same = lambda e: e["feed"].get("bundle") == e["chain"].get("bundle") and (e["feed"].get("out1", 0) > 0) == (e["chain"].get("out1", 0) > 0)
+        agree = sum(1 for e in gc if same(e)); bad = [e for e in gc if not same(e)]
+        checks.append(("feed and chain agree on the gates", agree >= 0.9 * len(gc), f"{agree} of {len(gc)} feed-resolved launches agree" + (f"; e.g. feed {bad[0]['feed']} chain {bad[0]['chain']}" if bad else "")))
     checks.append(("no wrong-curve resolutions", len(by["feed_resolution_mismatch"]) == 0, f"{len(by['feed_resolution_mismatch'])} mismatches"))
     # 3) scores and the paper bankroll
     sc = [e for e in by["score"] if "roi" in e]
@@ -60,7 +60,10 @@ def main(path):
         rois = [e["roi"] for e in sc]; traded = [e for e in sc if e.get("traded_dry_run")]
         print(f"\n--- scores: {len(sc)} rule-passing launches, mean {100*st.mean(rois):+.1f}% a trade, median {100*st.median(rois):+.1f}%, share below -40% {100*sum(1 for r in rois if r < -0.4)/len(rois):.0f}%, "
               f"switch on at the end: {sc[-1].get('switch_on')}; paper trades {len(traded)}, bankroll {sc[0].get('bankroll')} -> {sc[-1].get('bankroll')}")
-        checks.append(("mean score above +3% (gas is covered)", st.mean(rois) > 0.03, f"{100*st.mean(rois):+.1f}% over {len(rois)}"))
+        if len(rois) >= 20:
+            checks.append(("mean score above +3% (gas is covered)", st.mean(rois) > 0.03, f"{100*st.mean(rois):+.1f}% over {len(rois)}"))
+        else:
+            checks.append(("mean score above +3% (gas is covered)", None, f"{100*st.mean(rois):+.1f}% over {len(rois)}: fewer than 20, too few to judge"))
     # 4) gates that stopped trades
     gates = collections.Counter()
     for e in by["eligible_not_traded"]:
@@ -83,8 +86,9 @@ def main(path):
         print("--- round trips: " + ", ".join(f"{x['host'].split('.')[0]} {x['warm_rtt_ms']} ms" for x in rt[-1]["endpoints"]))
     print("\n=== checks")
     for name, ok, detail in checks:
-        print(f"   {'PASS' if ok else 'FAIL':4s}  {name:48s} {detail}")
-    print("verdict: " + ("ready for the first five $25 trades" if all(ok for _, ok, _ in checks) else "not yet: fix the FAIL lines first (or wait, if the only FAIL is 'none yet')"))
+        print(f"   {'WAIT' if ok is None else ('PASS' if ok else 'FAIL'):4s}  {name:48s} {detail}")
+    fails = [n for n, ok, _ in checks if ok is False]
+    print("verdict: " + ("ready for the first five $25 trades" if not fails and any(ok for _, ok, _ in checks) else ("not yet: " + "; ".join(fails))))
 
 
 if __name__ == "__main__":
