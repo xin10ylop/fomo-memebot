@@ -310,10 +310,29 @@ def abi_word(x):
     return x.to_bytes(32, "big").hex() if isinstance(x, int) else x[2:].rjust(64, "0")
 
 
+SEND = None                                                # the operator's send step, loaded from SEND_MODULE (deploy/send_step.py); None = dry run
+
+
+def load_send_step():
+    """SEND_MODULE=/etc/sniper/send_step.py: a file the operator writes (the reference is deploy/send_step.py) whose make(engine)
+    returns a function submit(tx, label) -> hash. Nothing in the repository signs or sends; without the file the engine
+    stays in dry run. The file is read once at start; an error in it stops the engine before the feed is opened."""
+    global SEND
+    path = os.environ.get("SEND_MODULE", "")
+    if not path:
+        return
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("sniper_send_step", path); mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    SEND = mod.make(sys.modules[__name__])
+    log({"ev": "send_step_loaded", "path": path, "wallet": WALLET})
+
+
 def submit(tx, label):
-    """DRY RUN: logs the exact unsigned transaction and returns None. Live: sign it (Account.sign_transaction(tx) works as
-    built: checksummed to, hex fields), then SENDER.fire(json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction",
-    "params": ["0x" + raw.hex()]}).encode()) and return the hash."""
+    """DRY RUN (SEND is None): logs the exact unsigned transaction and returns None. Live: the operator's send step signs it
+    (Account.sign_transaction(tx) works as built: checksummed to, hex fields), fires it through SENDER (sequencer first,
+    provider second) and returns the hash."""
+    if SEND is not None:
+        return SEND(tx, label)
     log({"ev": "unsigned_tx", "label": label, "tx": tx})
     return None
 
@@ -325,6 +344,10 @@ def chain_loop():
     while True:
         try:
             state["nonce"] = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); state["gas_price"] = int(int(rpc.call("eth_gasPrice", []), 16) * GAS_HEADROOM); state["chain_at"] = mono()
+            if SEND is not None and state["open"] is None:            # live: the bankroll is the wallet's ETH, so every profit is staked again and the daily stop reads real money
+                bal = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18; state["wallet_eth"] = bal
+                with lock:
+                    state["bankroll"] = bal * state["eth_usd"]
         except Exception as e:
             if n % 20 == 0:
                 log({"ev": "error", "stage": "chain_loop", "err": str(e)[:160]})
@@ -342,6 +365,7 @@ def chain_loop():
                  "median_first_sell_s": round(st.median(fs), 2) if fs else None, "share_dumped_inside_hold": round(st.mean(b for a, b, c in tm), 4) if tm else None,
                  "follow_eth_last_20": round(st.mean([c for a, b, c in tm][-20:]), 3) if tm else None, "follow_eth_last_60": round(st.mean(c for a, b, c in tm), 3) if tm else None,
                  "out1_share_last_60": round(st.mean(state["out1_flags"]), 2) if state["out1_flags"] else None,
+                 "bankroll_usd": round(state["bankroll"], 2), "wallet_eth": round(state["wallet_eth"], 5) if state.get("wallet_eth") is not None else None,
                  "silent_min": round((mono() - state["last_creation_at"]) / 60, 1) if state["last_creation_at"] else None})
             if state["last_creation_at"] and mono() - state["last_creation_at"] > 1800 and mono() - state["connected_at"] > 1800:
                 log({"ev": "alarm", "what": "no creation seen from the factory for 30 minutes while the feed is connected: the launchpad moved, stopped or changed its factory"})
@@ -666,7 +690,7 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
         with lock:
             state["scores"].append(roi); sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
             traded = state["traded"].pop(curve, None)
-            if traded is not None:
+            if traded is not None and SEND is None:                     # dry run: the paper bankroll follows the scores; live: the wallet balance (chain_loop)
                 state["bankroll"] += min(traded, cost) * roi
         save_state()
         log({"ev": "score", "curve": curve, "roi": round(roi, 4), "pnl_usd": round(pnl, 2), "cost_usd": round(cost, 2), "tier": round(tier, 4), "t_in_s": round(t_in, 2),
@@ -1021,12 +1045,12 @@ async def main():
         except Exception as e:
             log({"ev": "error", "stage": "pin_cpu", "err": str(e)[:100]})
     sys.setswitchinterval(0.0005)
-    load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
+    load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
     log({"ev": "start", "version": 4.1, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
-         "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": True})
+         "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
         if not PROVIDER_WS:
@@ -1074,5 +1098,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    print("sniper engine v4: DRY RUN (submit() logs unsigned transactions and sends nothing); seat", SEAT, "log", LOG_PATH, "sender backend", SENDER_BACKEND)
+    print("sniper engine v4:", ("LIVE (send step " + os.environ["SEND_MODULE"] + ")") if os.environ.get("SEND_MODULE") else "DRY RUN (submit() logs unsigned transactions and sends nothing)", "; seat", SEAT, "log", LOG_PATH, "sender backend", SENDER_BACKEND)
     asyncio.run(main())

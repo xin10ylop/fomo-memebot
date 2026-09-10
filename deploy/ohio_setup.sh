@@ -14,7 +14,9 @@ python3 -m venv /opt/sniper-venv && /opt/sniper-venv/bin/pip install -q websocke
 sysctl -w net.ipv4.tcp_slow_start_after_idle=0 >/dev/null && grep -q tcp_slow_start_after_idle /etc/sysctl.conf || echo 'net.ipv4.tcp_slow_start_after_idle=0' >> /etc/sysctl.conf   # a warm socket keeps its window between trades
 install -d -m 700 /etc/sniper /var/log/sniper
 cat > /etc/sniper/engine.env <<'ENV'
-# fill in and keep private (chmod 600). The engine runs in dry run until submit() is replaced (runbook section 5).
+# fill in and keep private (chmod 600). The engine runs in dry run until SEND_MODULE and PRIVATE_KEY are set (docs/STEP_BY_STEP.md).
+SEND_MODULE=                                          # live: /etc/sniper/send_step.py (copy of deploy/send_step.py); empty = dry run
+PRIVATE_KEY=                                          # live: the wallet's private key, 0x..., used only by send_step.py
 # SEQ_URL: the engine keeps a warm socket to it (SENDER) for your send step; RPC_URL is the provider for bookkeeping and the second send endpoint.
 FEED_SOURCE=sequencer                                 # or provider: detection from PROVIDER_WS and no Robinhood endpoint at all (runbook 0b, posture B)
 PROVIDER_WS=

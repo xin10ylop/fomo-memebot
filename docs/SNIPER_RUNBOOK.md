@@ -15,7 +15,8 @@ were tried and rejected. What is left: 20% sizing once live scores match the tab
 the E1 seat when second one is crowded (section 9). The `flow` event now prints the demand (`follow_eth_last_20`,
 `follow_eth_last_60`: ETH later buyers brought while a scored launch was held) and the crowding (`out1_share_last_60`:
 share of the last sixty bundled launches with an outsider in second one). Nothing the engine sends has changed. `src/analysis/live_check.py` compares the live receipts with the engine's
-scores of the same launches (section 5).
+scores of the same launches (section 5); the send step is now a file the engine loads (`SEND_MODULE`, `deploy/send_step.py`)
+instead of an edit, and live the bankroll is the wallet's balance. `docs/STEP_BY_STEP.md` is the operator's checklist.
 
 **v3 (round 15, report section 23).** Four researchers, two per question, then a triple check of everything:
 
@@ -317,8 +318,13 @@ curve: +4.6% live, gas 0.00004 ETH, sell moved 100%). Ten compared trades are th
 plan. A gap whose interval excludes zero is the box or the seat (latency, landing, slippage), never the market, because
 both numbers are computed on the same launches. Send the log and the checker's output when you want them read.
 
-The send step is yours: replace `submit()` with a function that signs with your key and calls
-`eth_sendRawTransaction`, returning the hash. Sign the sell as soon as the buy's receipt is in (the engine builds it
+The send step is yours, and it is one file: `deploy/send_step.py` (the tested code of section 9). Copy it to
+`/etc/sniper/send_step.py`, set `SEND_MODULE=/etc/sniper/send_step.py` and the wallet's private key in `engine.env`,
+restart. The engine loads it at start (`send_step_loaded` in the log, `"dry_run": false` in the start line), refuses to
+start if the key does not match `WALLET`, and from then on sizes from the wallet's real ETH balance (`flow`:
+`wallet_eth`, `bankroll_usd`), so every profit is staked again and the daily stop reads real money. Without the file
+the engine is the dry run it always was; nothing in the repository signs or sends. `docs/STEP_BY_STEP.md` walks the
+whole thing. The engine signs the sell as soon as the buy's receipt is in (it builds it
 with the next nonce) and keep a second endpoint to send it through if the first fails: a token held past the dump is
 the one loss the tables do not contain. On the first live trade verify, from the receipt: the block's timestamp is the seat's second and `tx_index` puts you
 in the fourth or fifth block of it (the engine's `landing` event says early / first block / later block; "early" at E2 means you paid the +6.18% of second one, and a revert
@@ -372,8 +378,9 @@ unclear; that is the operator's call.
 | your send step | `sent_tx` answers that are errors, `buy_reverted`, `receipt_timeout` | an open position is closed on restart | the reference below is tested; do not improvise on it at the boundary |
 | the terms of use | nothing in the log | nothing | read in full (section 23.10): Robinhood's chain terms cover the sequencer, the public RPC and the feed, not the chain or your trade; they list "use of automated tools (such as bots ...)" under network abuse and limit those Services to "testing, experimentation, evaluation, and development". Two postures: A, the sequencer feed and the sequencer endpoint (fastest, uses the Services); B, a provider's WebSocket and RPC only (`FEED_SOURCE=provider PROVIDER_WS=...`, no Robinhood endpoint, about a tenth fewer trades, no E1). Your choice |
 
-**The send step, tested.** This is the whole of what replaces `submit()`; it was run against the engine's own transaction
-with a throwaway key, and the sequencer's only complaint was that the key had no funds:
+**The send step, tested.** This is the whole of `deploy/send_step.py`, the file `SEND_MODULE` loads (section 5); it was
+run against the engine's own transaction with a throwaway key through both warm sockets, and the sequencer's and the
+provider's only complaint was that the key had no funds:
 
 ```python
 from eth_account import Account
