@@ -11,6 +11,7 @@ grep -q '^makestep 1.0 3' /etc/chrony/chrony.conf || printf 'makestep 1.0 3\nmax
 systemctl enable --now chrony && systemctl restart chrony         # the second boundary is the sequencer's clock: keep ours on NTP
 python3 -m venv /opt/sniper-venv && /opt/sniper-venv/bin/pip install -q websockets rlp eth-account eth-utils coincurve   # coincurve: 0.1 ms signature recovery instead of 5 ms
 /opt/sniper-venv/bin/python3 -c "import coincurve, eth_keys; b = eth_keys.KeyAPI().backend.__class__.__name__; print('signature backend:', b); raise SystemExit(0 if 'CoinCurve' in b else 1)" || { echo "coincurve is not the eth-keys backend: fix before running live"; exit 1; }
+sysctl -w net.ipv4.tcp_slow_start_after_idle=0 >/dev/null && grep -q tcp_slow_start_after_idle /etc/sysctl.conf || echo 'net.ipv4.tcp_slow_start_after_idle=0' >> /etc/sysctl.conf   # a warm socket keeps its window between trades
 install -d -m 700 /etc/sniper /var/log/sniper
 cat > /etc/sniper/engine.env <<'ENV'
 # fill in and keep private (chmod 600). The engine runs in dry run until submit() is replaced (runbook section 5).

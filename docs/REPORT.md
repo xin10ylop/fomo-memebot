@@ -1699,3 +1699,14 @@ Sep 6 +5.3% from +7.6%). The confirmation half survives; the earlier tables were
 The auditor's ranked weakest point is the one this section cannot remove: one launchpad, one chain, 21 windows over
 29 days, and a regime that deteriorated inside the sample. Nothing in the data says the deterioration stops where the
 data stops.
+
+### 23.9 The box, re-verified
+
+The choice of an EC2 instance in us-east-2 rests on the sequencer's location, which was re-checked on Sep 10 rather than
+carried forward: `sequencer.mainnet.chain.robinhood.com` resolves to three addresses, all inside Amazon's published
+us-east-2 EC2 ranges, one per availability zone, behind an Envoy front; the feed and the public RPC resolve to
+Cloudflare, the sequencer host refuses WebSocket upgrades and the Nitro feed ports are closed, so the feed has no
+Cloudflare-free path. A cloud-hosted sequencer has no colocation; an instance in its region is the best any operator
+can do, and the only refinement left is the zone, which the engine now measures itself (it pings each address, pins
+the fastest socket and logs the three round trips every twenty minutes: from this sandbox 34.9, 38.1 and 41.3 ms, a
+spread that on an Ohio box separates the sequencer's own zone from the other two). Runbook section 3 has the zone test.

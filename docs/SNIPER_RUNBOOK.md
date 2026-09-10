@@ -196,20 +196,36 @@ block is a live question, and section 9 gives the test.
 
 ## 3. The machine
 
-- EC2 in **us-east-2 (Ohio)**, where the sequencer lives; the smallest general-purpose instance is enough (the feed
-  is ~70 transactions a second, decoded in microseconds). From anywhere else the round trips alone put every row above
-  in the loss bucket. `deploy/ohio_setup.sh` sets the box up in one command (chrony, the engine as a dry-run service,
-  the probe).
-- Detection from `wss://feed.mainnet.chain.robinhood.com` (directly, or through Offchain Labs' Nitro relay if more than
-  one process needs it: Robinhood rate-limits per client). The curve comes from the feed itself (section 21.2), so no
-  RPC sits before the buy. Submission straight to `sequencer.mainnet.chain.robinhood.com` (first come, first served,
-  no priority fee). Nonce, receipts and the 25-second scorer go to a provider endpoint in the same region (Alchemy,
-  QuickNode, Chainstack all list the chain; pick a US-East region or a dedicated node); the public RPC rate-limits.
-  A full Nitro node (64 GB RAM, several TB NVMe, an L1 RPC and beacon endpoint) is not needed.
-- Gas ≈ $1 a round trip at 0.5 gwei. The engine halts if a round trip exceeds 3% of the stake.
-- Telegram bots (Maestro has Pons V2 support at a flat 1%; GMGN lists the chain) cannot take a seat or wait for a second
-  boundary: use one to place a manual test buy if you want to see the fee tier and the tax with your own wallet, not to
-  run the rule.
+**Where the sequencer is, verified on Sep 10.** `sequencer.mainnet.chain.robinhood.com` resolves to three addresses
+(3.136.74.196, 3.141.111.43, 3.142.9.34); all three are inside Amazon's published `us-east-2` EC2 ranges
+(`ip-ranges.amazonaws.com`), one per availability zone, behind an Envoy front (`server: istio-envoy`). The feed and the
+public RPC resolve to Cloudflare (104.20.46.209, 172.66.147.70); the sequencer host refuses WebSocket upgrades and the
+Nitro feed ports (9642, 8547) are closed on all three addresses, so there is no feed path that bypasses Cloudflare.
+Ordering is first-come-first-served with no priority fee. That fixes the machine:
+
+- **Region: us-east-2 (Ohio), and nothing else.** The sequencer is a cloud service, not a colocation venue: an
+  instance in its own region reaches it over Amazon's backbone in about a millisecond, and no bare-metal, other-cloud
+  or other-region option can beat that; anything outside the region adds 10–80 ms, which section 20.8 showed puts the
+  engine in the losing bucket. The one improvement left is the **zone**: cross-zone round trips are 0.5–1 ms, same-zone
+  0.1–0.3 ms. The engine measures the three sequencer addresses at start and every 20 minutes (`sender_addresses`),
+  pins its socket to the fastest and logs which; a box in the sequencer's own zone will see one address well under the
+  other two. To choose the zone, run the probe or the dry run for ten minutes on a t3.micro in each of us-east-2a, 2b
+  and 2c and keep the zone whose best address reads lowest (a $1 experiment); if all three read alike, the zone does
+  not matter and any is fine.
+- **Instance:** c6i.large or c7i.large (two dedicated cores, no CPU credits, enhanced networking) for live; t3.small is
+  fine for the dry run. `PIN_CPU=1` keeps the engine off the core that takes the network interrupts.
+- **Network:** IPv4, the default VPC, no NAT instance in the path (a NAT gateway adds a hop), the sequencer reached by
+  address with TCP_NODELAY and a warm TLS session (done by the engine), `tcp_slow_start_after_idle` off (the setup script
+  sets it). The feed goes through the Cloudflare edge nearest the box (Columbus for an Ohio instance); nothing you do
+  changes that path.
+- **Clock:** chrony on Amazon Time Sync (`169.254.169.123`), stepping only at boot, slewing after; the engine times
+  everything on the monotonic clock, so a step during a trade cannot move a send.
+- **Provider RPC:** a key from Alchemy, QuickNode or Chainstack for the nonce, receipts and scoring; it is not on the
+  buy path (the curve is resolved from the feed) and its own latency only matters as the second send endpoint.
+
+With the round-15 rule the send is a fixed 300 ms after the seat's second opens, so the last millisecond does not
+decide the E2 trade; it decides the E1 test (section 9), and that is where the zone choice and the pinned address earn
+their keep.
 
 ## 3b. The latency, in numbers (sections 21.5 and 23.4)
 

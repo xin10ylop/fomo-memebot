@@ -32,7 +32,7 @@ function that signs with your key (to-addresses are checksummed; eth_account ref
 transaction through SENDER.fire(body) (the sequencer and the provider, same hash); return the transaction hash. The
 runbook says what to verify on the first live trade.
 """
-import asyncio, base64, json, os, sys, time, math, threading, queue, http.client, ssl, urllib.parse, urllib.request, collections, statistics as st, datetime, gc
+import asyncio, base64, json, os, sys, time, math, threading, queue, http.client, ssl, socket, urllib.parse, urllib.request, collections, statistics as st, datetime, gc
 import rlp
 from eth_account import Account
 from eth_utils import keccak, to_checksum_address
@@ -172,8 +172,10 @@ class Rpc:
 
 class Sender:
     """pre-opened, keep-alive TLS sockets to the send endpoints (the sequencer first: it is the admission point; the provider
-    forwards to it). fire(body) posts the same signed transaction to every endpoint and returns the first answer. Live only:
-    the dry run keeps the sockets warm and measures them, and sends nothing."""
+    forwards to it). The sequencer name resolves to one address per availability zone; each is measured and the socket is
+    kept to the fastest (re-measured every 20 minutes), so a box in the sequencer's own zone talks to its own zone.
+    fire(body) posts the same signed transaction to every endpoint and returns the first answer. Live only: the dry run
+    keeps the sockets warm and measures them, and sends nothing."""
     PING = b'{"jsonrpc":"2.0","id":0,"method":"eth_chainId","params":[]}'
 
     def __init__(self, urls):
@@ -181,14 +183,46 @@ class Sender:
         for u in urls:
             if not u:
                 continue
-            p = urllib.parse.urlparse(u); self.eps.append({"url": u, "host": p.netloc, "path": p.path or "/", "c": None, "lock": threading.Lock(), "rtt_ms": None, "ok": False})
+            p = urllib.parse.urlparse(u); self.eps.append({"url": u, "host": p.netloc, "path": p.path or "/", "c": None, "lock": threading.Lock(), "rtt_ms": None, "ok": False, "ip": None, "ips": {}})
         threading.Thread(target=self._keepalive, daemon=True).start()
+
+    def _connect(self, e):
+        """a TLS connection to the pinned address (SNI and Host stay the hostname), or by name when nothing is pinned"""
+        c = http.client.HTTPSConnection(e["host"], timeout=5, context=_CTX)
+        if e["ip"]:
+            raw = socket.create_connection((e["ip"], 443), timeout=5); raw.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            c.sock = _CTX.wrap_socket(raw, server_hostname=e["host"])
+        return c
+
+    def _measure(self, e):
+        """round trip to every address the name resolves to (5 pings each, the median), then pin the fastest"""
+        try:
+            ips = sorted({ai[4][0] for ai in socket.getaddrinfo(e["host"], 443, socket.AF_INET)})
+        except Exception:
+            return
+        res = {}
+        for ip in ips:
+            try:
+                raw = socket.create_connection((ip, 443), timeout=5); raw.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                c = http.client.HTTPSConnection(e["host"], timeout=5, context=_CTX); c.sock = _CTX.wrap_socket(raw, server_hostname=e["host"]); t = []
+                for _ in range(5):
+                    t0 = mono(); c.request("POST", e["path"], body=self.PING, headers=UA); c.getresponse().read(); t.append(1000 * (mono() - t0))
+                c.close(); res[ip] = round(sorted(t)[2], 2)
+            except Exception:
+                res[ip] = None
+        e["ips"] = res; good = {ip: v for ip, v in res.items() if v is not None}
+        if good:
+            best = min(good, key=good.get)
+            if best != e["ip"]:
+                with e["lock"]:
+                    e["ip"] = best; e["c"] = None
+        log({"ev": "sender_addresses", "host": e["host"], "rtt_ms_by_address": res, "pinned": e["ip"]})
 
     def _ping(self, e):
         with e["lock"]:
             try:
                 if e["c"] is None:
-                    e["c"] = http.client.HTTPSConnection(e["host"], timeout=5, context=_CTX)
+                    e["c"] = self._connect(e)
                 t0 = mono(); e["c"].request("POST", e["path"], body=self.PING, headers=UA); e["c"].getresponse().read(); e["rtt_ms"] = round(1000 * (mono() - t0), 1); e["ok"] = True
             except Exception:
                 e["c"] = None; e["ok"] = False
@@ -196,17 +230,20 @@ class Sender:
     def _keepalive(self):
         n = 0
         while True:
+            if n % 240 == 0:                                            # at start and every 20 minutes: which address is nearest
+                for e in self.eps:
+                    self._measure(e)
             for e in self.eps:
                 self._ping(e)
             if n % 20 == 0:
-                log({"ev": "sender_rtt", "endpoints": [{"host": e["host"], "warm_rtt_ms": e["rtt_ms"], "ok": e["ok"]} for e in self.eps]})
+                log({"ev": "sender_rtt", "endpoints": [{"host": e["host"], "address": e["ip"], "warm_rtt_ms": e["rtt_ms"], "ok": e["ok"]} for e in self.eps]})
             n += 1; time.sleep(5)
 
     def _one(self, e, body, out):
         with e["lock"]:
             try:
                 if e["c"] is None:
-                    e["c"] = http.client.HTTPSConnection(e["host"], timeout=5, context=_CTX)
+                    e["c"] = self._connect(e)
                 e["c"].request("POST", e["path"], body=body, headers=UA); d = json.loads(e["c"].getresponse().read()); out.append((e["host"], d))
             except Exception as ex:
                 e["c"] = None; out.append((e["host"], {"error": str(ex)[:120]}))
