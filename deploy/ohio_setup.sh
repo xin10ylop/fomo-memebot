@@ -29,6 +29,8 @@ FEED_SOURCE=sequencer
 PROVIDER_WS=
 FEED_URL=wss://feed.mainnet.chain.robinhood.com
 RPC_URL=https://rpc.mainnet.chain.robinhood.com
+# LOGS_RPC_URL serves the log queries (hundreds of blocks per call): the public node; Alchemy's free tier allows ten blocks and is the chunked fallback.
+LOGS_RPC_URL=https://rpc.mainnet.chain.robinhood.com
 SEQ_URL=https://sequencer.mainnet.chain.robinhood.com
 WALLET=0x0000000000000000000000000000000000000000
 SEAT=E2

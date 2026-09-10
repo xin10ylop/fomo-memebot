@@ -41,6 +41,7 @@ for _k, _v in list(os.environ.items()):                 # systemd's EnvironmentF
     if " #" in _v:
         os.environ[_k] = _v.split(" #", 1)[0].rstrip()
 RPC_URL = os.environ.get("RPC_URL", "https://rpc.mainnet.chain.robinhood.com")
+LOGS_RPC_URL = os.environ.get("LOGS_RPC_URL", "https://rpc.mainnet.chain.robinhood.com")   # log queries span hundreds of blocks; Alchemy's free tier allows 10, the public node allows any
 SEQ_URL = os.environ.get("SEQ_URL", "https://sequencer.mainnet.chain.robinhood.com")
 FEED_URL = os.environ.get("FEED_URL", "wss://feed.mainnet.chain.robinhood.com")
 FEED_SOURCE = os.environ.get("FEED_SOURCE", "sequencer")                  # "sequencer": Robinhood's feed; "provider": a third-party node's WebSocket (PROVIDER_WS), no Robinhood endpoint at all
@@ -271,7 +272,25 @@ class Sender:
         return None, out
 
 
-rpc = Rpc(RPC_URL)
+rpc = Rpc(RPC_URL); rpc_logs = Rpc(LOGS_RPC_URL)
+
+
+def get_logs(filt, tries=3):
+    """eth_getLogs with the public node first (any range; backs off on 429), then the provider in ten-block chunks (Alchemy's
+    free tier) if the public node fails. Both failing raises."""
+    last = None
+    for i in range(tries):
+        try:
+            return rpc_logs.call("eth_getLogs", [filt])
+        except Exception as e:
+            last = e; time.sleep(0.5 * (i + 1))
+    a, b = int(filt["fromBlock"], 16), int(filt["toBlock"], 16); out = []
+    try:
+        for x in range(a, b + 1, 10):
+            out += rpc.call("eth_getLogs", [dict(filt, fromBlock=hex(x), toBlock=hex(min(b, x + 9)))])
+        return out
+    except Exception as e:
+        raise RuntimeError(f"logs: public node {str(last)[:80]}; provider {str(e)[:80]}")
 SENDER = Sender([SEQ_URL, RPC_URL if RPC_URL != SEQ_URL else None])
 state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": False, "busy_until": 0.0, "scores": collections.deque(maxlen=max(SWITCH_N, 60)),
          "launched_today": collections.Counter(), "seeded": False, "feed_ts": 0, "last_seen_ts": 0, "traded": {}, "eth_usd": ETH_USD,
@@ -496,7 +515,7 @@ def seed_launched_today():
             b = head - int(secs * 9.9); found = collections.Counter()
             while b <= head:
                 e = min(head, b + 20000)
-                for l in rpc.call("eth_getLogs", [{"fromBlock": hex(b), "toBlock": hex(e), "address": FACTORY_HEX}]):
+                for l in get_logs({"fromBlock": hex(b), "toBlock": hex(e), "address": FACTORY_HEX}):
                     if len(l["topics"]) > 3:
                         found["0x" + l["topics"][3][-40:]] += 1
                 b = e + 1; time.sleep(0.2)
@@ -665,7 +684,7 @@ def resolve_rpc(creator, deadline=3.0, lookback=40):
     while mono() - t0 < deadline:
         try:
             head = int(rpc.call("eth_blockNumber", []), 16)
-            for l in rpc.call("eth_getLogs", [{"fromBlock": hex(head - lookback), "toBlock": hex(head), "address": FACTORY_HEX}]):
+            for l in get_logs({"fromBlock": hex(head - lookback), "toBlock": hex(head), "address": FACTORY_HEX}):
                 if len(l["topics"]) > 3 and ("0x" + l["topics"][3][-40:]).lower() == creator:
                     d = l["data"][2:]; w = [int(d[i:i + 64], 16) for i in range(0, len(d), 64)]
                     return "0x" + l["topics"][1][-40:], "0x" + l["topics"][2][-40:], w[2] / 1e18, int(l["blockNumber"], 16)
@@ -687,7 +706,7 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
                 log({"ev": "feed_resolution_mismatch", "feed_curve": curve, "event_curve": r[1], "creator": creator}); state["traded"].pop(curve, None); return
             tk0, b_create = r[2], r[3]; log({"ev": "feed_resolution_ok", "curve": curve})
         head = int(rpc.call("eth_blockNumber", []), 16)
-        ev = rpc.call("eth_getLogs", [{"fromBlock": hex(b_create), "toBlock": hex(head), "address": curve, "topics": [[BUY_EV, SELL_EV]]}])
+        ev = get_logs({"fromBlock": hex(b_create), "toBlock": hex(head), "address": curve, "topics": [[BUY_EV, SELL_EV]]})
         events = []; buyers = set()
         for e in ev:
             d = e["data"][2:]; w = [int(d[i:i + 64], 16) / 1e18 for i in range(0, len(d), 64)]; buy = e["topics"][0] == BUY_EV
@@ -1198,7 +1217,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.3, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 4.4, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
