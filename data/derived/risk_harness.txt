@@ -1,0 +1,579 @@
+risk_harness.py outputs (round 15). FIT = Aug 30-Sep 2 windows, TEST = Sep 3-6. P(stop) = resampled chance of the -50% daily stop from the start bankroll (1,000 shuffles of all rule-passing trades per window, no switch); own = compounding on the window's own ordering with the engine's defaults, summed over the half.
+
+== final configuration and small starts (risk_harness.py final start --windows)
+FINAL: wait 0.3 s, hold 5, TP 50%, 15%/$25   FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  11,512 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  23,471 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=155 ROI  +8.9% tail  13% net1   3,800 own  1,497 (150 trades) med  1,598 p10 1,448 P(stop)   0%
+   08-31 12-18 n=251 ROI  +9.7% tail  14% net1   6,146 own  3,717 (216 trades) med  4,631 p10 4,368 P(stop)   0%
+   09-01 12-18 n=184 ROI  +8.7% tail  16% net1   4,376 own  1,805 (171 trades) med  2,105 p10 1,876 P(stop)   0%
+   09-02 12-18 n=169 ROI +16.1% tail  15% net1   7,677 own  5,693 (165 trades) med  5,720 p10 5,420 P(stop)   0%
+   09-03 0-6   n= 51 ROI +16.6% tail   8% net1   2,418 own    894 ( 50 trades) med    936 p10   911 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.9% tail   9% net1  10,022 own  7,658 (169 trades) med  7,900 p10 7,730 P(stop)   0%
+   09-03 18-24 n=284 ROI +18.0% tail  11% net1  14,293 own 12,367 (265 trades) med 12,395 p10 12,164 P(stop)   0%
+   09-04 12-18 n= 66 ROI  +9.5% tail   0% net1   1,779 own    632 ( 65 trades) med    645 p10   633 P(stop)   0%
+   09-05 0-6   n= 43 ROI +16.0% tail   5% net1   2,077 own    728 ( 43 trades) med    724 p10   693 P(stop)   0%
+   09-05 12-18 n=105 ROI +16.3% tail   6% net1   5,085 own  2,722 (103 trades) med  2,689 p10 2,560 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +7.6% tail   7% net1   1,730 own    571 ( 88 trades) med    657 p10   609 P(stop)   0%
+FINAL at 20%/$50                             FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  14,975 P(stop)  0.4% max   1% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  27,174 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=155 ROI  +8.9% tail  13% net1   3,800 own  2,187 (150 trades) med  2,540 p10 2,316 P(stop)   0%
+   08-31 12-18 n=251 ROI  +9.7% tail  14% net1   6,146 own  4,610 (216 trades) med  5,530 p10 5,287 P(stop)   0%
+   09-01 12-18 n=184 ROI  +8.7% tail  16% net1   4,376 own  2,825 (170 trades) med  2,993 p10 2,785 P(stop)   1%
+   09-02 12-18 n=169 ROI +16.1% tail  15% net1   7,677 own  6,553 (165 trades) med  6,586 p10 6,355 P(stop)   0%
+   09-03 0-6   n= 51 ROI +16.6% tail   8% net1   2,418 own  1,212 ( 50 trades) med  1,308 p10 1,248 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.9% tail   9% net1  10,022 own  8,726 (169 trades) med  8,866 p10 8,705 P(stop)   0%
+   09-03 18-24 n=284 ROI +18.0% tail  11% net1  14,293 own 13,354 (265 trades) med 13,371 p10 13,183 P(stop)   0%
+   09-04 12-18 n= 66 ROI  +9.5% tail   0% net1   1,779 own    812 ( 65 trades) med    813 p10   790 P(stop)   0%
+   09-05 0-6   n= 43 ROI +16.0% tail   5% net1   2,077 own    917 ( 43 trades) med    921 p10   859 P(stop)   0%
+   09-05 12-18 n=105 ROI +16.3% tail   6% net1   5,085 own  3,453 (103 trades) med  3,706 p10 3,584 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +7.6% tail   7% net1   1,730 own    800 ( 88 trades) med    821 p10   747 P(stop)   0%
+FINAL without the take-profit                FIT  n  759 ROI +10.4% worst  +8.0% tail 15.3% net1  21,152 own  10,764 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +15.6% worst  +6.8% tail 11.1% net1  34,962 own  21,292 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=155 ROI  +8.0% tail  14% net1   3,366 own  1,030 (142 trades) med  1,380 p10 1,204 P(stop)   0%
+   08-31 12-18 n=251 ROI  +9.8% tail  14% net1   6,158 own  3,619 (216 trades) med  4,614 p10 4,394 P(stop)   0%
+   09-01 12-18 n=184 ROI  +8.5% tail  17% net1   4,310 own  2,413 (168 trades) med  2,063 p10 1,820 P(stop)   0%
+   09-02 12-18 n=169 ROI +15.3% tail  17% net1   7,319 own  4,902 (162 trades) med  5,090 p10 4,853 P(stop)   0%
+   09-03 0-6   n= 51 ROI +12.1% tail  12% net1   1,734 own    681 ( 50 trades) med    701 p10   664 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.2% tail  13% net1   9,625 own  7,113 (169 trades) med  7,471 p10 7,290 P(stop)   0%
+   09-03 18-24 n=284 ROI +15.2% tail  15% net1  11,578 own  9,212 (253 trades) med  9,936 p10 9,645 P(stop)   0%
+   09-04 12-18 n= 66 ROI  +7.5% tail   2% net1   1,424 own    534 ( 65 trades) med    524 p10   508 P(stop)   0%
+   09-05 0-6   n= 43 ROI +15.5% tail   7% net1   2,015 own    701 ( 43 trades) med    725 p10   689 P(stop)   0%
+   09-05 12-18 n=105 ROI +23.1% tail   7% net1   7,018 own  4,623 (102 trades) med  4,802 p10 4,662 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +6.8% tail   8% net1   1,569 own    528 ( 88 trades) med    594 p10   547 P(stop)   0%
+FINAL from $50                               FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own   1,774 P(stop) 19.1% max  25% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  14,711 P(stop)  6.1% max  19% +win 7/7
+   08-30 12-18 n=155 ROI  +8.9% tail  13% net1   3,800 own    298 (150 trades) med    350 p10    19 P(stop)  23%
+   08-31 12-18 n=251 ROI  +9.7% tail  14% net1   6,146 own  1,238 (216 trades) med  1,578 p10    21 P(stop)  19%
+   09-01 12-18 n=184 ROI  +8.7% tail  16% net1   4,376 own    415 (171 trades) med    447 p10    19 P(stop)  25%
+   09-02 12-18 n=169 ROI +16.1% tail  15% net1   7,677 own     23 (  2 trades) med  2,848 p10 2,208 P(stop)   9%
+   09-03 0-6   n= 51 ROI +16.6% tail   8% net1   2,418 own    246 ( 50 trades) med    255 p10   247 P(stop)   1%
+   09-03 12-18 n=171 ROI +20.9% tail   9% net1  10,022 own  4,788 (169 trades) med  5,022 p10 4,675 P(stop)   5%
+   09-03 18-24 n=284 ROI +18.0% tail  11% net1  14,293 own  8,938 (265 trades) med  9,341 p10 8,883 P(stop)   8%
+   09-04 12-18 n= 66 ROI  +9.5% tail   0% net1   1,779 own    166 ( 65 trades) med    165 p10   165 P(stop)   0%
+   09-05 0-6   n= 43 ROI +16.0% tail   5% net1   2,077 own    198 ( 43 trades) med    198 p10   198 P(stop)   3%
+   09-05 12-18 n=105 ROI +16.3% tail   6% net1   5,085 own    712 (103 trades) med    666 p10   613 P(stop)   5%
+   09-06 12-18 n= 89 ROI  +7.6% tail   7% net1   1,730 own     13 ( 34 trades) med    161 p10    21 P(stop)  19%
+FINAL from $100                              FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own   5,321 P(stop)  4.2% max   7% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  16,325 P(stop)  0.7% max   2% +win 7/7
+   08-30 12-18 n=155 ROI  +8.9% tail  13% net1   3,800 own    395 (150 trades) med    472 p10   429 P(stop)   6%
+   08-31 12-18 n=251 ROI  +9.7% tail  14% net1   6,146 own  1,301 (216 trades) med  2,221 p10 1,788 P(stop)   3%
+   09-01 12-18 n=184 ROI  +8.7% tail  16% net1   4,376 own    505 (171 trades) med    612 p10   512 P(stop)   7%
+   09-02 12-18 n=169 ROI +16.1% tail  15% net1   7,677 own  3,520 (166 trades) med  3,487 p10 3,141 P(stop)   2%
+   09-03 0-6   n= 51 ROI +16.6% tail   8% net1   2,418 own    340 ( 50 trades) med    346 p10   331 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.9% tail   9% net1  10,022 own  5,279 (169 trades) med  5,638 p10 5,393 P(stop)   0%
+   09-03 18-24 n=284 ROI +18.0% tail  11% net1  14,293 own  9,983 (265 trades) med 10,006 p10 9,688 P(stop)   2%
+   09-04 12-18 n= 66 ROI  +9.5% tail   0% net1   1,779 own    216 ( 65 trades) med    215 p10   215 P(stop)   0%
+   09-05 0-6   n= 43 ROI +16.0% tail   5% net1   2,077 own    258 ( 43 trades) med    248 p10   242 P(stop)   0%
+   09-05 12-18 n=105 ROI +16.3% tail   6% net1   5,085 own    901 (103 trades) med    900 p10   850 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +7.6% tail   7% net1   1,730 own     48 ( 40 trades) med    211 p10   211 P(stop)   2%
+FINAL from $150                              FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own   6,685 P(stop)  0.9% max   2% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  17,771 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=155 ROI  +8.9% tail  13% net1   3,800 own    593 (150 trades) med    664 p10   577 P(stop)   1%
+   08-31 12-18 n=251 ROI  +9.7% tail  14% net1   6,146 own  2,031 (216 trades) med  2,877 p10 2,508 P(stop)   1%
+   09-01 12-18 n=184 ROI  +8.7% tail  16% net1   4,376 own    858 (171 trades) med    882 p10   775 P(stop)   2%
+   09-02 12-18 n=169 ROI +16.1% tail  15% net1   7,677 own  3,803 (166 trades) med  4,101 p10 3,753 P(stop)   0%
+   09-03 0-6   n= 51 ROI +16.6% tail   8% net1   2,418 own    438 ( 50 trades) med    450 p10   436 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.9% tail   9% net1  10,022 own  5,927 (169 trades) med  6,253 p10 6,023 P(stop)   0%
+   09-03 18-24 n=284 ROI +18.0% tail  11% net1  14,293 own 10,515 (265 trades) med 10,663 p10 10,367 P(stop)   0%
+   09-04 12-18 n= 66 ROI  +9.5% tail   0% net1   1,779 own    275 ( 65 trades) med    274 p10   268 P(stop)   0%
+   09-05 0-6   n= 43 ROI +16.0% tail   5% net1   2,077 own    349 ( 43 trades) med    334 p10   320 P(stop)   0%
+   09-05 12-18 n=105 ROI +16.3% tail   6% net1   5,085 own  1,249 (103 trades) med  1,185 p10 1,105 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +7.6% tail   7% net1   1,730 own     68 ( 48 trades) med    266 p10   251 P(stop)   0%
+FINAL from $200                              FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own   7,954 P(stop)  0.1% max   0% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  19,404 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=155 ROI  +8.9% tail  13% net1   3,800 own    709 (150 trades) med    916 p10   820 P(stop)   0%
+   08-31 12-18 n=251 ROI  +9.7% tail  14% net1   6,146 own  2,285 (216 trades) med  3,535 p10 3,195 P(stop)   0%
+   09-01 12-18 n=184 ROI  +8.7% tail  16% net1   4,376 own  1,272 (171 trades) med  1,181 p10 1,011 P(stop)   0%
+   09-02 12-18 n=169 ROI +16.1% tail  15% net1   7,677 own  4,489 (166 trades) med  4,700 p10 4,353 P(stop)   0%
+   09-03 0-6   n= 51 ROI +16.6% tail   8% net1   2,418 own    559 ( 50 trades) med    579 p10   548 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.9% tail   9% net1  10,022 own  6,340 (169 trades) med  6,870 p10 6,649 P(stop)   0%
+   09-03 18-24 n=284 ROI +18.0% tail  11% net1  14,293 own 11,197 (265 trades) med 11,309 p10 11,040 P(stop)   0%
+   09-04 12-18 n= 66 ROI  +9.5% tail   0% net1   1,779 own    401 ( 65 trades) med    391 p10   377 P(stop)   0%
+   09-05 0-6   n= 43 ROI +16.0% tail   5% net1   2,077 own    457 ( 43 trades) med    446 p10   429 P(stop)   0%
+   09-05 12-18 n=105 ROI +16.3% tail   6% net1   5,085 own  1,516 (103 trades) med  1,632 p10 1,521 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +7.6% tail   7% net1   1,730 own    335 ( 88 trades) med    381 p10   352 P(stop)   0%
+
+== variants (risk_harness.py wait table hold tp size gate --windows)
+wait 0.2 s for a rival, hold 7               FIT  n  775 ROI  +6.4% worst  +2.0% tail 22.6% net1  13,827 own   7,702 P(stop) 12.2% max  25% +win 4/4
+                                             TEST n  867 ROI +15.0% worst  +8.1% tail 16.0% net1  35,452 own  23,974 P(stop)  0.7% max   2% +win 7/7
+   08-30 12-18 n=159 ROI  +4.1% tail  22% net1   1,557 own    538 (137 trades) med    668 p10   145 P(stop)  14%
+   08-31 12-18 n=258 ROI  +5.7% tail  22% net1   3,888 own  2,661 (199 trades) med  2,457 p10 1,848 P(stop)   8%
+   09-01 12-18 n=186 ROI  +2.0% tail  24% net1   1,400 own    353 (164 trades) med    377 p10   137 P(stop)  25%
+   09-02 12-18 n=172 ROI +14.5% tail  22% net1   6,982 own  5,351 (160 trades) med  5,615 p10 5,294 P(stop)   1%
+   09-03 0-6   n= 53 ROI +14.1% tail  17% net1   2,073 own  1,044 ( 52 trades) med  1,076 p10   963 P(stop)   0%
+   09-03 12-18 n=178 ROI +17.4% tail  17% net1   8,650 own  6,951 (173 trades) med  7,384 p10 7,131 P(stop)   1%
+   09-03 18-24 n=301 ROI +15.5% tail  21% net1  12,250 own 10,384 (256 trades) med 11,850 p10 11,468 P(stop)   2%
+   09-04 12-18 n= 70 ROI +10.2% tail   4% net1   1,887 own    856 ( 67 trades) med    934 p10   864 P(stop)   0%
+   09-05 0-6   n= 44 ROI +12.5% tail  11% net1   1,657 own    704 ( 44 trades) med    736 p10   690 P(stop)   0%
+   09-05 12-18 n=107 ROI +21.1% tail  12% net1   6,648 own  5,180 (103 trades) med  5,157 p10 4,952 P(stop)   0%
+   09-06 12-18 n=114 ROI  +8.1% tail  14% net1   2,288 own    955 (108 trades) med  1,199 p10 1,030 P(stop)   1%
+wait 0.2 s for a rival, hold 5               FIT  n  775 ROI  +9.4% worst  +6.9% tail 16.3% net1  19,484 own  11,842 P(stop)  1.0% max   2% +win 4/4
+                                             TEST n  867 ROI +14.6% worst  +5.8% tail 11.7% net1  34,530 own  24,611 P(stop)  0.1% max   1% +win 7/7
+   08-30 12-18 n=159 ROI  +6.9% tail  15% net1   2,959 own  1,122 (146 trades) med  1,680 p10 1,414 P(stop)   2%
+   08-31 12-18 n=258 ROI  +8.8% tail  15% net1   5,436 own  3,939 (221 trades) med  4,949 p10 4,716 P(stop)   1%
+   09-01 12-18 n=186 ROI  +7.8% tail  17% net1   3,995 own  2,548 (170 trades) med  2,603 p10 2,366 P(stop)   1%
+   09-02 12-18 n=172 ROI +14.2% tail  18% net1   7,095 own  5,433 (164 trades) med  5,593 p10 5,333 P(stop)   0%
+   09-03 0-6   n= 53 ROI +11.7% tail  13% net1   1,739 own    754 ( 52 trades) med    863 p10   789 P(stop)   0%
+   09-03 12-18 n=178 ROI +19.7% tail  13% net1   9,784 own  8,312 (176 trades) med  8,585 p10 8,390 P(stop)   0%
+   09-03 18-24 n=301 ROI +14.8% tail  15% net1  11,980 own 10,499 (266 trades) med 11,357 p10 11,065 P(stop)   1%
+   09-04 12-18 n= 70 ROI  +5.8% tail   4% net1   1,074 own    545 ( 68 trades) med    567 p10   526 P(stop)   0%
+   09-05 0-6   n= 44 ROI +13.5% tail   9% net1   1,803 own    822 ( 44 trades) med    774 p10   727 P(stop)   0%
+   09-05 12-18 n=107 ROI +21.4% tail   8% net1   6,309 own  4,967 (103 trades) med  5,342 p10 5,177 P(stop)   0%
+   09-06 12-18 n=114 ROI  +6.7% tail   8% net1   1,842 own    812 (110 trades) med    948 p10   836 P(stop)   0%
+wait 0.3 s for a rival, hold 7               FIT  n  759 ROI  +7.3% worst  +2.6% tail 21.7% net1  15,006 own   8,340 P(stop)  9.6% max  21% +win 4/4
+                                             TEST n  809 ROI +15.6% worst  +5.6% tail 15.4% net1  35,179 own  24,516 P(stop)  0.9% max   3% +win 7/7
+   08-30 12-18 n=155 ROI  +5.1% tail  21% net1   1,948 own    608 (133 trades) med    854 p10   634 P(stop)   9%
+   08-31 12-18 n=251 ROI  +6.6% tail  21% net1   4,133 own  2,894 (195 trades) med  3,124 p10 2,541 P(stop)   7%
+   09-01 12-18 n=184 ROI  +2.6% tail  23% net1   1,715 own    487 (162 trades) med    509 p10   139 P(stop)  21%
+   09-02 12-18 n=169 ROI +15.6% tail  21% net1   7,211 own  5,550 (158 trades) med  6,080 p10 5,821 P(stop)   1%
+   09-03 0-6   n= 51 ROI +12.3% tail  16% net1   1,708 own    765 ( 50 trades) med    872 p10   791 P(stop)   0%
+   09-03 12-18 n=171 ROI +18.3% tail  17% net1   8,718 own  7,032 (166 trades) med  7,476 p10 7,241 P(stop)   0%
+   09-03 18-24 n=284 ROI +16.1% tail  20% net1  11,969 own 10,376 (248 trades) med 11,528 p10 11,126 P(stop)   2%
+   09-04 12-18 n= 66 ROI +11.8% tail   2% net1   2,229 own  1,089 ( 64 trades) med  1,065 p10 1,006 P(stop)   0%
+   09-05 0-6   n= 43 ROI +14.4% tail   9% net1   1,870 own    825 ( 43 trades) med    835 p10   776 P(stop)   0%
+   09-05 12-18 n=105 ROI +22.8% tail  11% net1   7,374 own  5,934 (102 trades) med  5,598 p10 5,408 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +5.6% tail  15% net1   1,311 own    594 ( 88 trades) med    618 p10   536 P(stop)   3%
+wait 0.3 s for a rival, hold 5               FIT  n  759 ROI +10.4% worst  +8.0% tail 15.3% net1  21,152 own  13,464 P(stop)  0.7% max   1% +win 4/4
+                                             TEST n  809 ROI +15.6% worst  +6.8% tail 11.1% net1  34,962 own  25,141 P(stop)  0.2% max   1% +win 7/7
+   08-30 12-18 n=155 ROI  +8.0% tail  14% net1   3,366 own  1,435 (142 trades) med  2,153 p10 1,907 P(stop)   1%
+   08-31 12-18 n=251 ROI  +9.8% tail  14% net1   6,158 own  4,613 (216 trades) med  5,547 p10 5,330 P(stop)   1%
+   09-01 12-18 n=184 ROI  +8.5% tail  17% net1   4,310 own  2,873 (168 trades) med  2,945 p10 2,729 P(stop)   1%
+   09-02 12-18 n=169 ROI +15.3% tail  17% net1   7,319 own  5,743 (162 trades) med  6,049 p10 5,813 P(stop)   1%
+   09-03 0-6   n= 51 ROI +12.1% tail  12% net1   1,734 own    762 ( 50 trades) med    858 p10   790 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.2% tail  13% net1   9,625 own  8,177 (169 trades) med  8,432 p10 8,239 P(stop)   0%
+   09-03 18-24 n=284 ROI +15.2% tail  15% net1  11,578 own 10,253 (253 trades) med 10,943 p10 10,668 P(stop)   1%
+   09-04 12-18 n= 66 ROI  +7.5% tail   2% net1   1,424 own    688 ( 65 trades) med    660 p10   633 P(stop)   0%
+   09-05 0-6   n= 43 ROI +15.5% tail   7% net1   2,015 own    961 ( 43 trades) med    902 p10   833 P(stop)   0%
+   09-05 12-18 n=105 ROI +23.1% tail   7% net1   7,018 own  5,676 (102 trades) med  5,766 p10 5,617 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +6.8% tail   8% net1   1,569 own    724 ( 88 trades) med    739 p10   687 P(stop)   0%
+wait 0.4 s for a rival, hold 7               FIT  n  742 ROI  +7.6% worst  +2.4% tail 21.6% net1  14,961 own   8,629 P(stop)  9.3% max  22% +win 4/4
+                                             TEST n  769 ROI +16.2% worst  +7.9% tail 15.1% net1  34,675 own  23,695 P(stop)  0.8% max   4% +win 7/7
+   08-30 12-18 n=150 ROI  +5.4% tail  21% net1   1,987 own    728 (129 trades) med    883 p10   682 P(stop)   8%
+   08-31 12-18 n=244 ROI  +7.0% tail  21% net1   4,324 own  3,165 (188 trades) med  3,314 p10 2,842 P(stop)   6%
+   09-01 12-18 n=182 ROI  +2.4% tail  23% net1   1,412 own    353 (161 trades) med    466 p10   138 P(stop)  22%
+   09-02 12-18 n=166 ROI +16.0% tail  21% net1   7,238 own  5,583 (155 trades) med  6,110 p10 5,853 P(stop)   1%
+   09-03 0-6   n= 51 ROI +12.3% tail  16% net1   1,708 own    765 ( 50 trades) med    872 p10   791 P(stop)   0%
+   09-03 12-18 n=164 ROI +18.3% tail  17% net1   8,431 own  6,665 (160 trades) med  7,070 p10 6,818 P(stop)   0%
+   09-03 18-24 n=275 ROI +16.0% tail  21% net1  11,285 own  9,684 (239 trades) med 11,046 p10 10,624 P(stop)   4%
+   09-04 12-18 n= 64 ROI +13.4% tail   0% net1   2,461 own  1,264 ( 62 trades) med  1,233 p10 1,191 P(stop)   0%
+   09-05 0-6   n= 43 ROI +14.4% tail   9% net1   1,870 own    825 ( 43 trades) med    835 p10   776 P(stop)   0%
+   09-05 12-18 n= 95 ROI +25.0% tail  10% net1   7,297 own  5,956 ( 92 trades) med  5,526 p10 5,363 P(stop)   0%
+   09-06 12-18 n= 77 ROI  +7.9% tail  13% net1   1,623 own    636 ( 72 trades) med    724 p10   663 P(stop)   1%
+wait 0.4 s for a rival, hold 5               FIT  n  742 ROI +10.7% worst  +8.3% tail 15.2% net1  21,251 own  13,753 P(stop)  0.7% max   1% +win 4/4
+                                             TEST n  769 ROI +15.8% worst  +6.8% tail 11.1% net1  33,439 own  23,380 P(stop)  0.3% max   2% +win 7/7
+   08-30 12-18 n=150 ROI  +8.3% tail  15% net1   3,394 own  1,435 (135 trades) med  2,190 p10 1,958 P(stop)   0%
+   08-31 12-18 n=244 ROI +10.3% tail  13% net1   6,384 own  4,808 (209 trades) med  5,793 p10 5,583 P(stop)   0%
+   09-01 12-18 n=182 ROI  +8.4% tail  17% net1   4,020 own  2,629 (167 trades) med  2,844 p10 2,624 P(stop)   1%
+   09-02 12-18 n=166 ROI +15.9% tail  17% net1   7,453 own  6,081 (161 trades) med  6,195 p10 5,969 P(stop)   0%
+   09-03 0-6   n= 51 ROI +12.1% tail  12% net1   1,734 own    762 ( 50 trades) med    858 p10   790 P(stop)   0%
+   09-03 12-18 n=164 ROI +20.5% tail  13% net1   9,338 own  8,012 (162 trades) med  8,150 p10 7,967 P(stop)   0%
+   09-03 18-24 n=275 ROI +15.2% tail  15% net1  11,038 own  9,798 (245 trades) med 10,592 p10 10,307 P(stop)   2%
+   09-04 12-18 n= 64 ROI  +9.0% tail   0% net1   1,656 own    763 ( 63 trades) med    741 p10   728 P(stop)   0%
+   09-05 0-6   n= 43 ROI +15.5% tail   7% net1   2,015 own    961 ( 43 trades) med    902 p10   833 P(stop)   0%
+   09-05 12-18 n= 95 ROI +23.2% tail   7% net1   6,340 own  4,640 ( 92 trades) med  5,081 p10 4,932 P(stop)   0%
+   09-06 12-18 n= 77 ROI  +6.8% tail   8% net1   1,318 own    545 ( 71 trades) med    654 p10   605 P(stop)   0%
+wait 0.5 s for a rival, hold 7               FIT  n  726 ROI  +8.2% worst  +2.4% tail 21.0% net1  15,788 own   9,239 P(stop)  9.1% max  22% +win 4/4
+                                             TEST n  731 ROI +16.2% worst  +7.3% tail 15.0% net1  32,853 own  21,966 P(stop)  0.5% max   2% +win 7/7
+   08-30 12-18 n=144 ROI  +5.9% tail  21% net1   2,187 own    963 (125 trades) med    972 p10   691 P(stop)   9%
+   08-31 12-18 n=238 ROI  +7.8% tail  20% net1   4,546 own  3,363 (183 trades) med  3,781 p10 3,347 P(stop)   4%
+   09-01 12-18 n=182 ROI  +2.4% tail  23% net1   1,412 own    353 (161 trades) med    466 p10   138 P(stop)  22%
+   09-02 12-18 n=162 ROI +17.2% tail  19% net1   7,642 own  5,760 (151 trades) med  6,549 p10 6,297 P(stop)   0%
+   09-03 0-6   n= 51 ROI +12.3% tail  16% net1   1,708 own    765 ( 50 trades) med    872 p10   791 P(stop)   0%
+   09-03 12-18 n=154 ROI +19.9% tail  16% net1   8,642 own  6,992 (150 trades) med  7,301 p10 7,097 P(stop)   0%
+   09-03 18-24 n=266 ROI +15.6% tail  21% net1  10,492 own  8,916 (232 trades) med 10,291 p10 9,879 P(stop)   2%
+   09-04 12-18 n= 61 ROI +11.3% tail   0% net1   1,968 own    913 ( 59 trades) med    907 p10   876 P(stop)   0%
+   09-05 0-6   n= 43 ROI +14.4% tail   9% net1   1,870 own    825 ( 43 trades) med    835 p10   776 P(stop)   0%
+   09-05 12-18 n= 89 ROI +24.9% tail  10% net1   6,914 own  5,525 ( 86 trades) med  5,138 p10 4,972 P(stop)   0%
+   09-06 12-18 n= 67 ROI  +7.3% tail  14% net1   1,260 own    128 ( 28 trades) med    623 p10   559 P(stop)   1%
+wait 0.5 s for a rival, hold 5               FIT  n  726 ROI +11.2% worst  +8.4% tail 14.6% net1  21,665 own  14,601 P(stop)  0.5% max   1% +win 4/4
+                                             TEST n  731 ROI +16.2% worst  +7.3% tail 10.8% net1  32,618 own  22,927 P(stop)  0.1% max   0% +win 7/7
+   08-30 12-18 n=144 ROI  +8.9% tail  14% net1   3,477 own  1,705 (131 trades) med  2,309 p10 2,092 P(stop)   0%
+   08-31 12-18 n=238 ROI +11.1% tail  12% net1   6,591 own  5,090 (204 trades) med  6,192 p10 5,998 P(stop)   0%
+   09-01 12-18 n=182 ROI  +8.4% tail  17% net1   4,020 own  2,629 (167 trades) med  2,844 p10 2,624 P(stop)   1%
+   09-02 12-18 n=162 ROI +16.5% tail  16% net1   7,577 own  6,376 (157 trades) med  6,339 p10 6,134 P(stop)   0%
+   09-03 0-6   n= 51 ROI +12.1% tail  12% net1   1,734 own    762 ( 50 trades) med    858 p10   790 P(stop)   0%
+   09-03 12-18 n=154 ROI +22.3% tail  11% net1   9,612 own  8,145 (152 trades) med  8,435 p10 8,265 P(stop)   0%
+   09-03 18-24 n=266 ROI +15.1% tail  15% net1  10,439 own  9,222 (238 trades) med 10,085 p10 9,798 P(stop)   0%
+   09-04 12-18 n= 61 ROI  +7.7% tail   0% net1   1,355 own    640 ( 60 trades) med    635 p10   618 P(stop)   0%
+   09-05 0-6   n= 43 ROI +15.5% tail   7% net1   2,015 own    961 ( 43 trades) med    902 p10   833 P(stop)   0%
+   09-05 12-18 n= 89 ROI +24.1% tail   8% net1   6,247 own  4,760 ( 86 trades) med  4,996 p10 4,841 P(stop)   0%
+   09-06 12-18 n= 67 ROI  +7.3% tail   8% net1   1,216 own    538 ( 65 trades) med    635 p10   585 P(stop)   0%
+wait 0.3 s, hold 5, 15%/$25                  FIT  n  759 ROI +10.4% worst  +8.0% tail 15.3% net1  21,152 own  10,764 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +15.6% worst  +6.8% tail 11.1% net1  34,962 own  21,292 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=155 ROI  +8.0% tail  14% net1   3,366 own  1,030 (142 trades) med  1,380 p10 1,204 P(stop)   0%
+   08-31 12-18 n=251 ROI  +9.8% tail  14% net1   6,158 own  3,619 (216 trades) med  4,614 p10 4,394 P(stop)   0%
+   09-01 12-18 n=184 ROI  +8.5% tail  17% net1   4,310 own  2,413 (168 trades) med  2,063 p10 1,820 P(stop)   0%
+   09-02 12-18 n=169 ROI +15.3% tail  17% net1   7,319 own  4,902 (162 trades) med  5,090 p10 4,853 P(stop)   0%
+   09-03 0-6   n= 51 ROI +12.1% tail  12% net1   1,734 own    681 ( 50 trades) med    701 p10   664 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.2% tail  13% net1   9,625 own  7,113 (169 trades) med  7,471 p10 7,290 P(stop)   0%
+   09-03 18-24 n=284 ROI +15.2% tail  15% net1  11,578 own  9,212 (253 trades) med  9,936 p10 9,645 P(stop)   0%
+   09-04 12-18 n= 66 ROI  +7.5% tail   2% net1   1,424 own    534 ( 65 trades) med    524 p10   508 P(stop)   0%
+   09-05 0-6   n= 43 ROI +15.5% tail   7% net1   2,015 own    701 ( 43 trades) med    725 p10   689 P(stop)   0%
+   09-05 12-18 n=105 ROI +23.1% tail   7% net1   7,018 own  4,623 (102 trades) med  4,802 p10 4,662 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +6.8% tail   8% net1   1,569 own    528 ( 88 trades) med    594 p10   547 P(stop)   0%
+wait 0.3 s, hold 5 + TP 50%                  FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  14,975 P(stop)  0.4% max   1% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  27,174 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=155 ROI  +8.9% tail  13% net1   3,800 own  2,187 (150 trades) med  2,540 p10 2,316 P(stop)   0%
+   08-31 12-18 n=251 ROI  +9.7% tail  14% net1   6,146 own  4,610 (216 trades) med  5,530 p10 5,287 P(stop)   0%
+   09-01 12-18 n=184 ROI  +8.7% tail  16% net1   4,376 own  2,825 (170 trades) med  2,993 p10 2,785 P(stop)   1%
+   09-02 12-18 n=169 ROI +16.1% tail  15% net1   7,677 own  6,553 (165 trades) med  6,586 p10 6,355 P(stop)   0%
+   09-03 0-6   n= 51 ROI +16.6% tail   8% net1   2,418 own  1,212 ( 50 trades) med  1,308 p10 1,248 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.9% tail   9% net1  10,022 own  8,726 (169 trades) med  8,866 p10 8,705 P(stop)   0%
+   09-03 18-24 n=284 ROI +18.0% tail  11% net1  14,293 own 13,354 (265 trades) med 13,371 p10 13,183 P(stop)   0%
+   09-04 12-18 n= 66 ROI  +9.5% tail   0% net1   1,779 own    812 ( 65 trades) med    813 p10   790 P(stop)   0%
+   09-05 0-6   n= 43 ROI +16.0% tail   5% net1   2,077 own    917 ( 43 trades) med    921 p10   859 P(stop)   0%
+   09-05 12-18 n=105 ROI +16.3% tail   6% net1   5,085 own  3,453 (103 trades) med  3,706 p10 3,584 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +7.6% tail   7% net1   1,730 own    800 ( 88 trades) med    821 p10   747 P(stop)   0%
+wait 0.3 s, hold 5 + TP 50%, 15%/$25         FIT  n  759 ROI +10.7% worst  +8.7% tail 14.4% net1  21,998 own  11,512 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  809 ROI +16.4% worst  +7.6% tail  8.0% net1  37,405 own  23,471 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=155 ROI  +8.9% tail  13% net1   3,800 own  1,497 (150 trades) med  1,598 p10 1,448 P(stop)   0%
+   08-31 12-18 n=251 ROI  +9.7% tail  14% net1   6,146 own  3,717 (216 trades) med  4,631 p10 4,368 P(stop)   0%
+   09-01 12-18 n=184 ROI  +8.7% tail  16% net1   4,376 own  1,805 (171 trades) med  2,105 p10 1,876 P(stop)   0%
+   09-02 12-18 n=169 ROI +16.1% tail  15% net1   7,677 own  5,693 (165 trades) med  5,720 p10 5,420 P(stop)   0%
+   09-03 0-6   n= 51 ROI +16.6% tail   8% net1   2,418 own    894 ( 50 trades) med    936 p10   911 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.9% tail   9% net1  10,022 own  7,658 (169 trades) med  7,900 p10 7,730 P(stop)   0%
+   09-03 18-24 n=284 ROI +18.0% tail  11% net1  14,293 own 12,367 (265 trades) med 12,395 p10 12,164 P(stop)   0%
+   09-04 12-18 n= 66 ROI  +9.5% tail   0% net1   1,779 own    632 ( 65 trades) med    645 p10   633 P(stop)   0%
+   09-05 0-6   n= 43 ROI +16.0% tail   5% net1   2,077 own    728 ( 43 trades) med    724 p10   693 P(stop)   0%
+   09-05 12-18 n=105 ROI +16.3% tail   6% net1   5,085 own  2,722 (103 trades) med  2,689 p10 2,560 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +7.6% tail   7% net1   1,730 own    571 ( 88 trades) med    657 p10   609 P(stop)   0%
+wait 0.3 s, hold 4                           FIT  n  759 ROI +11.7% worst  +8.7% tail 10.9% net1  23,979 own  17,879 P(stop)  0.1% max   0% +win 4/4
+                                             TEST n  809 ROI +13.7% worst  +3.1% tail  9.3% net1  31,095 own  21,954 P(stop)  0.1% max   0% +win 7/7
+   08-30 12-18 n=155 ROI  +8.7% tail  10% net1   3,690 own  2,556 (151 trades) med  2,554 p10 2,368 P(stop)   0%
+   08-31 12-18 n=251 ROI +10.8% tail  10% net1   7,009 own  5,480 (228 trades) med  6,318 p10 6,158 P(stop)   0%
+   09-01 12-18 n=184 ROI +10.2% tail  13% net1   5,051 own  3,934 (177 trades) med  3,767 p10 3,618 P(stop)   0%
+   09-02 12-18 n=169 ROI +17.4% tail  11% net1   8,229 own  7,109 (165 trades) med  7,178 p10 7,010 P(stop)   0%
+   09-03 0-6   n= 51 ROI  +8.0% tail  12% net1   1,143 own    562 ( 50 trades) med    618 p10   573 P(stop)   0%
+   09-03 12-18 n=171 ROI +19.7% tail  10% net1   9,466 own  8,007 (170 trades) med  8,247 p10 8,077 P(stop)   0%
+   09-03 18-24 n=284 ROI +14.3% tail  12% net1  11,044 own  9,717 (269 trades) med 10,235 p10 10,008 P(stop)   0%
+   09-04 12-18 n= 66 ROI  +6.8% tail   2% net1   1,276 own    627 ( 65 trades) med    609 p10   581 P(stop)   0%
+   09-05 0-6   n= 43 ROI +12.8% tail   7% net1   1,669 own    759 ( 43 trades) med    732 p10   692 P(stop)   0%
+   09-05 12-18 n=105 ROI +18.6% tail   6% net1   5,728 own  4,236 (103 trades) med  4,384 p10 4,262 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +3.1% tail   8% net1     770 own    146 ( 47 trades) med    397 p10   363 P(stop)   0%
+wait 0.3 s, hold 6                           FIT  n  759 ROI  +9.1% worst  +4.5% tail 19.2% net1  18,574 own  10,345 P(stop)  3.4% max   8% +win 4/4
+                                             TEST n  809 ROI +16.2% worst  +8.1% tail 12.8% net1  36,236 own  25,649 P(stop)  0.3% max   1% +win 7/7
+   08-30 12-18 n=155 ROI  +8.0% tail  17% net1   3,359 own    990 (141 trades) med  2,094 p10 1,779 P(stop)   2%
+   08-31 12-18 n=251 ROI  +8.8% tail  18% net1   5,565 own  4,087 (199 trades) med  4,800 p10 4,443 P(stop)   2%
+   09-01 12-18 n=184 ROI  +4.5% tail  21% net1   2,252 own    952 (168 trades) med    925 p10   706 P(stop)   8%
+   09-02 12-18 n=169 ROI +15.7% tail  20% net1   7,398 own  5,515 (160 trades) med  6,161 p10 5,892 P(stop)   1%
+   09-03 0-6   n= 51 ROI  +8.1% tail  16% net1   1,086 own    618 ( 50 trades) med    624 p10   573 P(stop)   0%
+   09-03 12-18 n=171 ROI +20.4% tail  14% net1   9,691 own  8,060 (169 trades) med  8,507 p10 8,287 P(stop)   0%
+   09-03 18-24 n=284 ROI +17.0% tail  18% net1  12,382 own 11,022 (251 trades) med 12,356 p10 12,052 P(stop)   1%
+   09-04 12-18 n= 66 ROI  +8.7% tail   2% net1   1,634 own    765 ( 65 trades) med    736 p10   709 P(stop)   0%
+   09-05 0-6   n= 43 ROI +15.5% tail   7% net1   2,024 own    935 ( 43 trades) med    909 p10   849 P(stop)   0%
+   09-05 12-18 n=105 ROI +23.2% tail   9% net1   7,508 own  6,201 (102 trades) med  5,748 p10 5,579 P(stop)   0%
+   09-06 12-18 n= 89 ROI  +8.1% tail  10% net1   1,911 own    148 ( 48 trades) med    889 p10   780 P(stop)   0%
+E2 0.3 s behind hold 7.0 FIT: rows = creation position in its second, columns = first outsider's lag behind the T+2 boundary (n, mean ROI, share < -40%)
+                              none                 <0.10             0.10-0.30             0.30-0.60                >=0.60
+0.00-0.25    170   +8.0%  23%     17   +3.3%  24%      9   -8.0%  33%      7  -49.4%  86%      4  +41.0%   0%   
+0.25-0.50    174   +9.5%  18%     18  -16.8%  33%     11  -20.0%  45%     13   +4.5%   8%      9  -24.2%  44%   
+0.50-0.75    154  +13.5%  18%      7   -3.1%  14%      9  -39.3%  67%     16   +2.5%  31%     17  -12.7%  35%   
+0.75-1.01    154  +10.1%  20%      1  -51.4% 100%      3  -19.1%  33%      8   -9.7%  38%     32   -8.7%  28%   
+   all: n 833 mean +5.7%
+E2 0.3 s behind hold 7.0 TEST: rows = creation position in its second, columns = first outsider's lag behind the T+2 boundary (n, mean ROI, share < -40%)
+                              none                 <0.10             0.10-0.30             0.30-0.60                >=0.60
+0.00-0.25    109  +24.6%  16%     72   -4.2%  35%     31   +3.2%  29%     21  +15.5%  14%     11   +2.8%   9%   
+0.25-0.50    125  +18.7%  11%     56   +6.4%  25%     31  +14.2%  16%     38   +4.0%  24%     28  +16.3%  18%   
+0.50-0.75    114  +16.3%  13%     20   -1.6%  30%     25   +0.8%  28%     27  +12.6%  19%     61  +19.2%  15%   
+0.75-1.01    138  +19.2%  10%      7   -8.1%  29%     22   +9.6%  23%     28   +6.0%  25%     87   +4.6%  25%   
+   all: n 1051 mean +12.7%
+E2 0.3 s behind hold 5.0 FIT: rows = creation position in its second, columns = first outsider's lag behind the T+2 boundary (n, mean ROI, share < -40%)
+                              none                 <0.10             0.10-0.30             0.30-0.60                >=0.60
+0.00-0.25    170  +12.4%  16%     17   -2.0%  24%      9  -11.8%  33%      7  -38.9%  57%      4  +33.5%   0%   
+0.25-0.50    174  +12.3%  13%     18  -11.1%  28%     11  -20.5%  45%     13   +2.2%   8%      9  -23.2%  44%   
+0.50-0.75    154  +15.7%  12%      7  +12.9%   0%      9  -38.6%  56%     16  +10.6%  19%     17  -12.7%  35%   
+0.75-1.01    154  +12.9%  12%      1  +21.3%   0%      3  -27.9%  33%      8  -11.4%  38%     32   -4.1%  25%   
+   all: n 833 mean +8.6%
+E2 0.3 s behind hold 5.0 TEST: rows = creation position in its second, columns = first outsider's lag behind the T+2 boundary (n, mean ROI, share < -40%)
+                              none                 <0.10             0.10-0.30             0.30-0.60                >=0.60
+0.00-0.25    109  +28.8%   8%     72   -0.1%  28%     31   -2.1%  26%     21  +13.1%  14%     11   +4.3%   9%   
+0.25-0.50    125  +17.4%   9%     56   +6.8%  20%     31   +7.4%  13%     38   +6.3%  18%     28  +14.6%  14%   
+0.50-0.75    114  +14.3%  10%     20   +4.1%  25%     25   -5.3%  28%     27  +20.4%   7%     61  +17.3%  10%   
+0.75-1.01    138  +17.3%   7%      7   -4.3%  29%     22   +1.7%  18%     28   -3.5%  25%     87   +8.1%  20%   
+   all: n 1051 mean +12.4%
+hold 6                                       FIT  n  832 ROI  +7.1% worst  +3.3% tail 20.5% net1  14,984 own   7,810 P(stop)  6.5% max  13% +win 4/4
+                                             TEST n 1084 ROI +12.6% worst  +5.1% tail 16.0% net1  37,219 own  24,555 P(stop)  1.8% max   8% +win 7/7
+   08-30 12-18 n=175 ROI  +6.1% tail  18% net1   2,792 own  1,024 (158 trades) med  1,467 p10 1,196 P(stop)   4%
+   08-31 12-18 n=276 ROI  +6.5% tail  20% net1   4,327 own  2,994 (216 trades) med  3,448 p10 2,905 P(stop)   7%
+   09-01 12-18 n=197 ROI  +3.3% tail  23% net1   1,687 own    430 (178 trades) med    669 p10   147 P(stop)  13%
+   09-02 12-18 n=184 ROI +13.0% tail  22% net1   6,179 own  4,562 (172 trades) med  5,342 p10 4,998 P(stop)   2%
+   09-03 0-6   n= 68 ROI  +8.0% tail  16% net1   1,481 own    680 ( 65 trades) med    743 p10   682 P(stop)   1%
+   09-03 12-18 n=211 ROI +17.0% tail  15% net1  10,003 own  8,238 (199 trades) med  8,680 p10 8,430 P(stop)   1%
+   09-03 18-24 n=339 ROI +12.8% tail  21% net1  11,649 own  9,159 (294 trades) med 10,911 p10 10,457 P(stop)   3%
+   09-04 12-18 n= 87 ROI +11.0% tail   6% net1   2,612 own  1,384 ( 85 trades) med  1,373 p10 1,267 P(stop)   0%
+   09-05 0-6   n= 51 ROI +10.8% tail  12% net1   1,635 own    678 ( 51 trades) med    712 p10   656 P(stop)   0%
+   09-05 12-18 n=136 ROI +19.4% tail  13% net1   7,878 own  6,391 (127 trades) med  6,326 p10 6,100 P(stop)   0%
+   09-06 12-18 n=192 ROI  +5.1% tail  15% net1   1,961 own    126 ( 71 trades) med  1,119 p10   817 P(stop)   8%
+hold 5                                       FIT  n  832 ROI  +8.3% worst  +6.0% tail 16.8% net1  17,955 own  10,512 P(stop)  2.1% max   2% +win 4/4
+                                             TEST n 1084 ROI +12.0% worst  +3.4% tail 14.1% net1  35,671 own  24,442 P(stop)  1.7% max   9% +win 7/7
+   08-30 12-18 n=175 ROI  +6.0% tail  15% net1   2,760 own    898 (156 trades) med  1,483 p10 1,223 P(stop)   2%
+   08-31 12-18 n=276 ROI  +8.0% tail  15% net1   5,358 own  3,807 (238 trades) med  4,795 p10 4,519 P(stop)   2%
+   09-01 12-18 n=197 ROI  +6.9% tail  19% net1   3,663 own  2,255 (177 trades) med  2,315 p10 2,051 P(stop)   2%
+   09-02 12-18 n=184 ROI +12.5% tail  19% net1   6,174 own  4,752 (175 trades) med  5,122 p10 4,836 P(stop)   2%
+   09-03 0-6   n= 68 ROI  +9.0% tail  13% net1   1,715 own    811 ( 67 trades) med    853 p10   773 P(stop)   0%
+   09-03 12-18 n=211 ROI +17.6% tail  14% net1  10,288 own  8,615 (201 trades) med  9,009 p10 8,790 P(stop)   1%
+   09-03 18-24 n=339 ROI +11.9% tail  18% net1  11,252 own  9,479 (301 trades) med 10,054 p10 9,656 P(stop)   2%
+   09-04 12-18 n= 87 ROI  +8.8% tail   6% net1   2,103 own    853 ( 85 trades) med    989 p10   902 P(stop)   0%
+   09-05 0-6   n= 51 ROI +10.3% tail  12% net1   1,575 own    660 ( 51 trades) med    683 p10   637 P(stop)   0%
+   09-05 12-18 n=136 ROI +19.9% tail  11% net1   7,608 own  5,997 (129 trades) med  6,568 p10 6,368 P(stop)   0%
+   09-06 12-18 n=192 ROI  +3.4% tail  13% net1   1,130 own    127 ( 80 trades) med    672 p10   506 P(stop)   9%
+hold 4                                       FIT  n  832 ROI +10.0% worst  +6.5% tail 12.4% net1  21,626 own  14,818 P(stop)  0.3% max   0% +win 4/4
+                                             TEST n 1084 ROI +10.9% worst  +1.5% tail 11.6% net1  32,762 own  24,134 P(stop)  2.7% max  17% +win 7/7
+   08-30 12-18 n=175 ROI  +6.5% tail  11% net1   3,028 own  1,112 (166 trades) med  1,820 p10 1,604 P(stop)   0%
+   08-31 12-18 n=276 ROI  +9.2% tail  11% net1   6,511 own  5,133 (249 trades) med  5,827 p10 5,625 P(stop)   0%
+   09-01 12-18 n=197 ROI  +8.6% tail  14% net1   4,519 own  3,312 (189 trades) med  3,253 p10 3,060 P(stop)   0%
+   09-02 12-18 n=184 ROI +15.7% tail  13% net1   7,568 own  6,460 (177 trades) med  6,921 p10 6,739 P(stop)   0%
+   09-03 0-6   n= 68 ROI  +4.2% tail  13% net1     760 own    498 ( 67 trades) med    483 p10   429 P(stop)   0%
+   09-03 12-18 n=211 ROI +18.3% tail  10% net1  10,689 own  9,225 (206 trades) med  9,525 p10 9,348 P(stop)   0%
+   09-03 18-24 n=339 ROI +11.2% tail  15% net1  10,759 own  9,390 (312 trades) med  9,378 p10 9,010 P(stop)   1%
+   09-04 12-18 n= 87 ROI  +9.2% tail   4% net1   2,180 own  1,017 ( 85 trades) med  1,072 p10   990 P(stop)   0%
+   09-05 0-6   n= 51 ROI  +7.8% tail  12% net1   1,192 own    594 ( 51 trades) med    556 p10   497 P(stop)   0%
+   09-05 12-18 n=136 ROI +17.4% tail   9% net1   6,774 own  5,376 (131 trades) med  5,609 p10 5,425 P(stop)   0%
+   09-06 12-18 n=192 ROI  +1.5% tail  11% net1     408 own    134 ( 70 trades) med    335 p10   145 P(stop)  17%
+hold 7 + take-profit +50%                    FIT  n  832 ROI  +7.6% worst  +3.9% tail 19.7% net1  17,075 own   9,427 P(stop)  3.9% max   8% +win 4/4
+                                             TEST n 1084 ROI +14.1% worst  +5.0% tail 13.2% net1  41,499 own  30,454 P(stop)  1.4% max   9% +win 7/7
+   08-30 12-18 n=175 ROI  +7.1% tail  17% net1   3,258 own  1,049 (162 trades) med  1,973 p10 1,628 P(stop)   1%
+   08-31 12-18 n=276 ROI  +5.7% tail  21% net1   4,094 own  2,760 (215 trades) med  3,098 p10 2,581 P(stop)   6%
+   09-01 12-18 n=197 ROI  +3.9% tail  23% net1   2,390 own    973 (179 trades) med    912 p10   694 P(stop)   8%
+   09-02 12-18 n=184 ROI +14.9% tail  18% net1   7,333 own  5,845 (170 trades) med  6,450 p10 6,180 P(stop)   0%
+   09-03 0-6   n= 68 ROI +13.9% tail  12% net1   2,669 own  1,414 ( 67 trades) med  1,578 p10 1,453 P(stop)   0%
+   09-03 12-18 n=211 ROI +19.4% tail  12% net1  11,187 own  9,750 (201 trades) med 10,273 p10 10,073 P(stop)   0%
+   09-03 18-24 n=339 ROI +14.6% tail  17% net1  13,657 own 12,773 (307 trades) med 13,006 p10 12,672 P(stop)   0%
+   09-04 12-18 n= 87 ROI +12.8% tail   6% net1   2,897 own  1,649 ( 83 trades) med  1,847 p10 1,727 P(stop)   0%
+   09-05 0-6   n= 51 ROI +12.5% tail  10% net1   1,877 own    719 ( 51 trades) med    790 p10   736 P(stop)   0%
+   09-05 12-18 n=136 ROI +18.5% tail   9% net1   7,144 own  6,099 (131 trades) med  6,127 p10 5,942 P(stop)   0%
+   09-06 12-18 n=192 ROI  +5.0% tail  16% net1   2,068 own    148 ( 69 trades) med  1,064 p10   740 P(stop)   9%
+hold 5 + take-profit +50%                    FIT  n  832 ROI  +9.0% worst  +6.8% tail 15.8% net1  19,659 own  12,343 P(stop)  0.9% max   1% +win 4/4
+                                             TEST n 1084 ROI +12.7% worst  +4.1% tail 11.3% net1  38,085 own  27,991 P(stop)  0.9% max   6% +win 7/7
+   08-30 12-18 n=175 ROI  +6.8% tail  14% net1   3,194 own  1,145 (161 trades) med  1,874 p10 1,605 P(stop)   1%
+   08-31 12-18 n=276 ROI  +8.6% tail  15% net1   5,866 own  4,150 (238 trades) med  5,312 p10 5,029 P(stop)   1%
+   09-01 12-18 n=197 ROI  +7.0% tail  18% net1   3,724 own  2,447 (183 trades) med  2,355 p10 2,112 P(stop)   1%
+   09-02 12-18 n=184 ROI +13.7% tail  17% net1   6,875 own  5,802 (177 trades) med  5,942 p10 5,664 P(stop)   0%
+   09-03 0-6   n= 68 ROI +12.3% tail  10% net1   2,387 own  1,213 ( 67 trades) med  1,276 p10 1,197 P(stop)   0%
+   09-03 12-18 n=211 ROI +18.4% tail  11% net1  10,820 own  9,450 (204 trades) med  9,582 p10 9,383 P(stop)   0%
+   09-03 18-24 n=339 ROI +14.4% tail  14% net1  13,731 own 12,810 (312 trades) med 12,679 p10 12,417 P(stop)   0%
+   09-04 12-18 n= 87 ROI  +9.4% tail   5% net1   2,224 own  1,089 ( 85 trades) med  1,121 p10 1,038 P(stop)   0%
+   09-05 0-6   n= 51 ROI +10.8% tail  10% net1   1,637 own    657 ( 51 trades) med    690 p10   646 P(stop)   0%
+   09-05 12-18 n=136 ROI +15.0% tail   9% net1   5,805 own  4,725 (132 trades) med  4,713 p10 4,499 P(stop)   0%
+   09-06 12-18 n=192 ROI  +4.1% tail  12% net1   1,481 own    147 ( 78 trades) med    802 p10   675 P(stop)   6%
+hold 5 + take-profit +35%                    FIT  n  832 ROI +10.1% worst  +6.7% tail 12.5% net1  22,559 own  16,011 P(stop)  0.4% max   1% +win 4/4
+                                             TEST n 1084 ROI +11.0% worst  +2.4% tail 10.0% net1  32,720 own  23,544 P(stop)  2.0% max  14% +win 7/7
+   08-30 12-18 n=175 ROI  +6.7% tail  12% net1   3,191 own  1,547 (166 trades) med  1,963 p10 1,675 P(stop)   0%
+   08-31 12-18 n=276 ROI  +9.1% tail  13% net1   6,330 own  4,917 (246 trades) med  5,607 p10 5,401 P(stop)   1%
+   09-01 12-18 n=197 ROI +11.6% tail  12% net1   6,045 own  5,109 (189 trades) med  5,015 p10 4,862 P(stop)   0%
+   09-02 12-18 n=184 ROI +13.4% tail  13% net1   6,993 own  5,638 (179 trades) med  5,666 p10 5,457 P(stop)   0%
+   09-03 0-6   n= 68 ROI +10.4% tail  10% net1   2,002 own  1,106 ( 67 trades) med  1,202 p10 1,123 P(stop)   0%
+   09-03 12-18 n=211 ROI +15.7% tail   9% net1   9,212 own  8,008 (205 trades) med  7,975 p10 7,812 P(stop)   0%
+   09-03 18-24 n=339 ROI +13.6% tail  12% net1  12,818 own 11,571 (311 trades) med 11,846 p10 11,580 P(stop)   0%
+   09-04 12-18 n= 87 ROI  +7.2% tail   5% net1   1,702 own    743 ( 85 trades) med    756 p10   716 P(stop)   0%
+   09-05 0-6   n= 51 ROI  +8.5% tail   8% net1   1,302 own    582 ( 51 trades) med    595 p10   547 P(stop)   0%
+   09-05 12-18 n=136 ROI +12.8% tail   7% net1   5,037 own  3,495 (132 trades) med  3,708 p10 3,527 P(stop)   0%
+   09-06 12-18 n=192 ROI  +2.4% tail  12% net1     647 own    139 ( 77 trades) med    417 p10   146 P(stop)  14%
+hold 7 + take-profit +60%                    FIT  n  832 ROI  +7.0% worst  +3.7% tail 21.1% net1  15,421 own   8,138 P(stop)  7.8% max  14% +win 4/4
+                                             TEST n 1084 ROI +15.0% worst  +6.8% tail 14.2% net1  44,470 own  32,128 P(stop)  1.0% max   6% +win 7/7
+   08-30 12-18 n=175 ROI  +6.3% tail  18% net1   2,779 own    946 (155 trades) med  1,530 p10 1,202 P(stop)   4%
+   08-31 12-18 n=276 ROI  +4.8% tail  22% net1   3,311 own  2,160 (211 trades) med  2,170 p10   148 P(stop)  12%
+   09-01 12-18 n=197 ROI  +3.7% tail  24% net1   2,291 own    822 (173 trades) med    699 p10   143 P(stop)  14%
+   09-02 12-18 n=184 ROI +14.6% tail  19% net1   7,040 own  5,410 (172 trades) med  6,163 p10 5,900 P(stop)   1%
+   09-03 0-6   n= 68 ROI +14.5% tail  12% net1   2,804 own  1,648 ( 67 trades) med  1,762 p10 1,622 P(stop)   0%
+   09-03 12-18 n=211 ROI +21.0% tail  13% net1  12,057 own 10,319 (201 trades) med 11,191 p10 11,000 P(stop)   0%
+   09-03 18-24 n=339 ROI +14.1% tail  19% net1  13,459 own 11,684 (304 trades) med 12,187 p10 11,773 P(stop)   2%
+   09-04 12-18 n= 87 ROI +13.8% tail   6% net1   3,127 own  1,817 ( 83 trades) med  2,047 p10 1,924 P(stop)   0%
+   09-05 0-6   n= 51 ROI +15.5% tail  10% net1   2,326 own  1,110 ( 51 trades) med  1,064 p10   980 P(stop)   0%
+   09-05 12-18 n=136 ROI +20.6% tail  10% net1   7,896 own  6,526 (130 trades) med  6,874 p10 6,702 P(stop)   0%
+   09-06 12-18 n=192 ROI  +6.8% tail  16% net1   2,802 own  1,125 (170 trades) med  1,851 p10 1,317 P(stop)   6%
+hold 5, 15%/$25                              FIT  n  832 ROI  +8.3% worst  +6.0% tail 16.8% net1  17,955 own   7,541 P(stop)  0.2% max   0% +win 4/4
+                                             TEST n 1084 ROI +12.0% worst  +3.4% tail 14.1% net1  35,671 own  21,236 P(stop)  0.5% max   3% +win 7/7
+   08-30 12-18 n=175 ROI  +6.0% tail  15% net1   2,760 own    852 (156 trades) med    988 p10   887 P(stop)   0%
+   08-31 12-18 n=276 ROI  +8.0% tail  15% net1   5,358 own  2,738 (238 trades) med  3,822 p10 3,505 P(stop)   0%
+   09-01 12-18 n=197 ROI  +6.9% tail  19% net1   3,663 own  1,479 (177 trades) med  1,512 p10 1,315 P(stop)   0%
+   09-02 12-18 n=184 ROI +12.5% tail  19% net1   6,174 own  3,672 (175 trades) med  4,160 p10 3,870 P(stop)   0%
+   09-03 0-6   n= 68 ROI  +9.0% tail  13% net1   1,715 own    694 ( 67 trades) med    705 p10   655 P(stop)   0%
+   09-03 12-18 n=211 ROI +17.6% tail  14% net1  10,288 own  7,390 (201 trades) med  8,048 p10 7,820 P(stop)   0%
+   09-03 18-24 n=339 ROI +11.9% tail  18% net1  11,252 own  8,676 (301 trades) med  9,043 p10 8,655 P(stop)   0%
+   09-04 12-18 n= 87 ROI  +8.8% tail   6% net1   2,103 own    759 ( 85 trades) med    767 p10   722 P(stop)   0%
+   09-05 0-6   n= 51 ROI +10.3% tail  12% net1   1,575 own    577 ( 51 trades) med    563 p10   518 P(stop)   0%
+   09-05 12-18 n=136 ROI +19.9% tail  11% net1   7,608 own  4,939 (129 trades) med  5,595 p10 5,403 P(stop)   0%
+   09-06 12-18 n=192 ROI  +3.4% tail  13% net1   1,130 own    300 (169 trades) med    505 p10   408 P(stop)   3%
+hold 5 + TP 50%, 15%/$25                     FIT  n  832 ROI  +9.0% worst  +6.8% tail 15.8% net1  19,659 own   9,421 P(stop)  0.1% max   0% +win 4/4
+                                             TEST n 1084 ROI +12.7% worst  +4.1% tail 11.3% net1  38,085 own  24,833 P(stop)  0.2% max   2% +win 7/7
+   08-30 12-18 n=175 ROI  +6.8% tail  14% net1   3,194 own    892 (161 trades) med  1,153 p10 1,002 P(stop)   0%
+   08-31 12-18 n=276 ROI  +8.6% tail  15% net1   5,866 own  3,293 (238 trades) med  4,381 p10 4,090 P(stop)   0%
+   09-01 12-18 n=197 ROI  +7.0% tail  18% net1   3,724 own  1,547 (183 trades) med  1,546 p10 1,341 P(stop)   0%
+   09-02 12-18 n=184 ROI +13.7% tail  17% net1   6,875 own  4,889 (177 trades) med  5,071 p10 4,728 P(stop)   0%
+   09-03 0-6   n= 68 ROI +12.3% tail  10% net1   2,387 own    921 ( 67 trades) med    930 p10   894 P(stop)   0%
+   09-03 12-18 n=211 ROI +18.4% tail  11% net1  10,820 own  8,480 (204 trades) med  8,626 p10 8,437 P(stop)   0%
+   09-03 18-24 n=339 ROI +14.4% tail  14% net1  13,731 own 12,096 (312 trades) med 11,738 p10 11,431 P(stop)   0%
+   09-04 12-18 n= 87 ROI  +9.4% tail   5% net1   2,224 own    797 ( 85 trades) med    830 p10   792 P(stop)   0%
+   09-05 0-6   n= 51 ROI +10.8% tail  10% net1   1,637 own    588 ( 51 trades) med    564 p10   529 P(stop)   0%
+   09-05 12-18 n=136 ROI +15.0% tail   9% net1   5,805 own  3,658 (132 trades) med  3,775 p10 3,515 P(stop)   0%
+   09-06 12-18 n=192 ROI  +4.1% tail  12% net1   1,481 own    394 (174 trades) med    625 p10   482 P(stop)   2%
+hold 7, 15%/$25                              FIT  n  832 ROI  +5.4% worst  +1.8% tail 23.1% net1  11,481 own   3,574 P(stop)  8.8% max  18% +win 4/4
+                                             TEST n 1084 ROI +12.3% worst  +5.4% tail 18.5% net1  36,308 own  20,557 P(stop)  0.8% max   4% +win 7/7
+   08-30 12-18 n=175 ROI  +3.7% tail  21% net1   1,433 own    509 (153 trades) med    515 p10   398 P(stop)   7%
+   08-31 12-18 n=276 ROI  +4.1% tail  23% net1   3,041 own  1,015 (211 trades) med    930 p10   485 P(stop)  10%
+   09-01 12-18 n=197 ROI  +1.8% tail  25% net1   1,264 own    398 (172 trades) med    339 p10   146 P(stop)  18%
+   09-02 12-18 n=184 ROI +12.8% tail  23% net1   5,742 own  2,853 (171 trades) med  4,189 p10 3,868 P(stop)   0%
+   09-03 0-6   n= 68 ROI +14.0% tail  16% net1   2,685 own  1,097 ( 67 trades) med  1,048 p10   974 P(stop)   0%
+   09-03 12-18 n=211 ROI +14.1% tail  19% net1   8,299 own  5,761 (195 trades) med  5,914 p10 5,579 P(stop)   0%
+   09-03 18-24 n=339 ROI +12.2% tail  23% net1  11,291 own  8,602 (278 trades) med  9,139 p10 8,563 P(stop)   1%
+   09-04 12-18 n= 87 ROI +13.8% tail   7% net1   3,136 own  1,058 ( 83 trades) med  1,320 p10 1,233 P(stop)   0%
+   09-05 0-6   n= 51 ROI  +9.9% tail  14% net1   1,487 own    568 ( 51 trades) med    551 p10   507 P(stop)   0%
+   09-05 12-18 n=136 ROI +18.6% tail  16% net1   7,491 own  5,166 (128 trades) med  4,988 p10 4,721 P(stop)   0%
+   09-06 12-18 n=192 ROI  +5.4% tail  18% net1   1,919 own    406 (165 trades) med    897 p10   700 P(stop)   4%
+hold 5, 20%/$25                              FIT  n  832 ROI  +8.3% worst  +6.0% tail 16.8% net1  17,955 own  10,512 P(stop)  1.4% max   2% +win 4/4
+                                             TEST n 1084 ROI +12.0% worst  +3.4% tail 14.1% net1  35,671 own  24,444 P(stop)  1.4% max   8% +win 7/7
+   08-30 12-18 n=175 ROI  +6.0% tail  15% net1   2,760 own    898 (156 trades) med  1,461 p10 1,218 P(stop)   2%
+   08-31 12-18 n=276 ROI  +8.0% tail  15% net1   5,358 own  3,807 (238 trades) med  4,779 p10 4,518 P(stop)   2%
+   09-01 12-18 n=197 ROI  +6.9% tail  19% net1   3,663 own  2,255 (177 trades) med  2,297 p10 2,040 P(stop)   1%
+   09-02 12-18 n=184 ROI +12.5% tail  19% net1   6,174 own  4,752 (175 trades) med  5,111 p10 4,830 P(stop)   1%
+   09-03 0-6   n= 68 ROI  +9.0% tail  13% net1   1,715 own    811 ( 67 trades) med    851 p10   773 P(stop)   0%
+   09-03 12-18 n=211 ROI +17.6% tail  14% net1  10,288 own  8,598 (201 trades) med  9,006 p10 8,788 P(stop)   0%
+   09-03 18-24 n=339 ROI +11.9% tail  18% net1  11,252 own  9,479 (301 trades) med 10,041 p10 9,636 P(stop)   2%
+   09-04 12-18 n= 87 ROI  +8.8% tail   6% net1   2,103 own    853 ( 85 trades) med    988 p10   902 P(stop)   0%
+   09-05 0-6   n= 51 ROI +10.3% tail  12% net1   1,575 own    660 ( 51 trades) med    682 p10   637 P(stop)   0%
+   09-05 12-18 n=136 ROI +19.9% tail  11% net1   7,608 own  5,997 (129 trades) med  6,567 p10 6,363 P(stop)   0%
+   09-06 12-18 n=192 ROI  +3.4% tail  13% net1   1,130 own    146 ( 83 trades) med    659 p10   493 P(stop)   8%
+gate NE (Opus), hold 7                       FIT  n  724 ROI  +7.9% worst  +2.3% tail 21.2% net1  15,186 own   9,841 P(stop)  9.7% max  24% +win 4/4
+                                             TEST n  735 ROI +17.2% worst  +8.1% tail 14.1% net1  35,263 own  24,830 P(stop)  0.3% max   2% +win 7/7
+   08-30 12-18 n=141 ROI  +5.3% tail  21% net1   1,808 own    673 (121 trades) med    798 p10   149 P(stop)  10%
+   08-31 12-18 n=238 ROI  +7.9% tail  20% net1   4,810 own  3,670 (182 trades) med  3,835 p10 3,409 P(stop)   4%
+   09-01 12-18 n=181 ROI  +2.3% tail  24% net1   1,272 own    488 (159 trades) med    435 p10   138 P(stop)  24%
+   09-02 12-18 n=164 ROI +16.2% tail  20% net1   7,296 own  6,209 (157 trades) med  6,174 p10 5,922 P(stop)   1%
+   09-03 0-6   n= 48 ROI +12.4% tail  17% net1   1,591 own    746 ( 47 trades) med    811 p10   743 P(stop)   0%
+   09-03 12-18 n=155 ROI +21.8% tail  14% net1   9,508 own  7,936 (153 trades) med  8,311 p10 8,113 P(stop)   0%
+   09-03 18-24 n=270 ROI +16.4% tail  21% net1  11,537 own 10,004 (236 trades) med 11,231 p10 10,835 P(stop)   2%
+   09-04 12-18 n= 61 ROI  +8.1% tail   3% net1   1,422 own    690 ( 59 trades) med    660 p10   628 P(stop)   0%
+   09-05 0-6   n= 42 ROI +14.0% tail  10% net1   1,770 own    773 ( 42 trades) med    785 p10   736 P(stop)   0%
+   09-05 12-18 n= 92 ROI +25.4% tail   8% net1   7,282 own  5,892 ( 89 trades) med  5,540 p10 5,393 P(stop)   0%
+   09-06 12-18 n= 67 ROI +12.0% tail   8% net1   2,153 own    889 ( 65 trades) med  1,046 p10   948 P(stop)   0%
+gate NE, hold 5                              FIT  n  724 ROI +10.7% worst  +8.0% tail 14.9% net1  20,731 own  13,501 P(stop)  0.6% max   1% +win 4/4
+                                             TEST n  735 ROI +16.7% worst  +4.8% tail 10.2% net1  33,882 own  24,477 P(stop)  0.1% max   1% +win 7/7
+   08-30 12-18 n=141 ROI  +8.8% tail  13% net1   3,360 own  1,475 (128 trades) med  2,183 p10 1,959 P(stop)   0%
+   08-31 12-18 n=238 ROI +10.9% tail  13% net1   6,672 own  5,216 (204 trades) med  5,976 p10 5,775 P(stop)   0%
+   09-01 12-18 n=181 ROI  +8.0% tail  17% net1   3,735 own  2,278 (167 trades) med  2,581 p10 2,361 P(stop)   1%
+   09-02 12-18 n=164 ROI +15.0% tail  17% net1   6,964 own  5,732 (159 trades) med  5,695 p10 5,454 P(stop)   1%
+   09-03 0-6   n= 48 ROI +12.7% tail  12% net1   1,690 own    757 ( 47 trades) med    842 p10   777 P(stop)   0%
+   09-03 12-18 n=155 ROI +23.3% tail  10% net1  10,211 own  8,801 (154 trades) med  8,980 p10 8,826 P(stop)   0%
+   09-03 18-24 n=270 ROI +15.2% tail  16% net1  10,623 own  9,450 (248 trades) med 10,410 p10 10,139 P(stop)   1%
+   09-04 12-18 n= 61 ROI  +4.8% tail   3% net1     842 own    436 ( 60 trades) med    446 p10   418 P(stop)   0%
+   09-05 0-6   n= 42 ROI +15.2% tail   7% net1   1,936 own    910 ( 42 trades) med    860 p10   797 P(stop)   0%
+   09-05 12-18 n= 92 ROI +25.8% tail   4% net1   6,946 own  5,481 ( 89 trades) med  5,717 p10 5,601 P(stop)   0%
+   09-06 12-18 n= 67 ROI  +9.5% tail   3% net1   1,633 own    742 ( 65 trades) med    782 p10   741 P(stop)   0%
+gate NE, hold 4                              FIT  n  724 ROI +12.2% worst  +9.8% tail 10.2% net1  23,812 own  17,899 P(stop)  0.0% max   0% +win 4/4
+                                             TEST n  735 ROI +14.4% worst  +5.1% tail  8.6% net1  29,800 own  21,323 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=141 ROI  +9.8% tail   9% net1   3,770 own  2,634 (137 trades) med  2,668 p10 2,499 P(stop)   0%
+   08-31 12-18 n=238 ROI +11.9% tail   8% net1   7,452 own  6,037 (216 trades) med  6,687 p10 6,559 P(stop)   0%
+   09-01 12-18 n=181 ROI +10.0% tail  12% net1   4,634 own  3,654 (175 trades) med  3,552 p10 3,403 P(stop)   0%
+   09-02 12-18 n=164 ROI +17.4% tail  11% net1   7,956 own  6,774 (160 trades) med  6,907 p10 6,743 P(stop)   0%
+   09-03 0-6   n= 48 ROI  +7.8% tail  12% net1   1,014 own    514 ( 47 trades) med    577 p10   534 P(stop)   0%
+   09-03 12-18 n=155 ROI +21.4% tail   9% net1   9,374 own  8,009 (154 trades) med  8,159 p10 8,024 P(stop)   0%
+   09-03 18-24 n=270 ROI +14.2% tail  13% net1  10,337 own  9,085 (257 trades) med  9,697 p10 9,455 P(stop)   0%
+   09-04 12-18 n= 61 ROI  +5.7% tail   2% net1     989 own    483 ( 60 trades) med    501 p10   478 P(stop)   0%
+   09-05 0-6   n= 42 ROI +12.6% tail   7% net1   1,604 own    731 ( 42 trades) med    710 p10   670 P(stop)   0%
+   09-05 12-18 n= 92 ROI +20.3% tail   4% net1   5,545 own  4,135 ( 90 trades) med  4,226 p10 4,113 P(stop)   0%
+   09-06 12-18 n= 67 ROI  +5.1% tail   3% net1     937 own    466 ( 66 trades) med    475 p10   444 P(stop)   0%
+gate first-block rival, hold 7               FIT  n  790 ROI  +6.1% worst  +2.1% tail 22.8% net1  13,467 own   7,358 P(stop) 13.8% max  26% +win 4/4
+                                             TEST n  920 ROI +14.5% worst  +8.4% tail 16.4% net1  36,712 own  24,303 P(stop)  1.1% max   5% +win 7/7
+   08-30 12-18 n=162 ROI  +4.0% tail  22% net1   1,550 own    482 (140 trades) med    671 p10   143 P(stop)  14%
+   08-31 12-18 n=262 ROI  +5.2% tail  23% net1   3,718 own  2,575 (200 trades) med  2,076 p10   145 P(stop)  13%
+   09-01 12-18 n=190 ROI  +2.1% tail  24% net1   1,360 own    353 (168 trades) med    391 p10   137 P(stop)  26%
+   09-02 12-18 n=176 ROI +13.8% tail  22% net1   6,838 own  5,147 (165 trades) med  5,447 p10 5,125 P(stop)   1%
+   09-03 0-6   n= 61 ROI +13.9% tail  18% net1   2,378 own  1,015 ( 60 trades) med  1,221 p10 1,097 P(stop)   0%
+   09-03 12-18 n=184 ROI +16.9% tail  18% net1   8,663 own  6,825 (177 trades) med  7,373 p10 7,126 P(stop)   1%
+   09-03 18-24 n=312 ROI +14.4% tail  22% net1  11,922 own 10,048 (266 trades) med 11,321 p10 10,800 P(stop)   5%
+   09-04 12-18 n= 73 ROI +12.1% tail   4% net1   2,376 own  1,198 ( 70 trades) med  1,254 p10 1,181 P(stop)   0%
+   09-05 0-6   n= 45 ROI +13.1% tail  11% net1   1,779 own    747 ( 45 trades) med    779 p10   731 P(stop)   0%
+   09-05 12-18 n=111 ROI +20.9% tail  12% net1   6,831 own  5,377 (107 trades) med  5,351 p10 5,169 P(stop)   0%
+   09-06 12-18 n=134 ROI  +8.4% tail  14% net1   2,763 own  1,194 (127 trades) med  1,666 p10 1,412 P(stop)   2%
+gate first-block rival, hold 5               FIT  n  790 ROI  +9.0% worst  +6.8% tail 16.5% net1  18,906 own  11,321 P(stop)  1.0% max   2% +win 4/4
+                                             TEST n  920 ROI +13.7% worst  +6.8% tail 12.3% net1  34,440 own  23,957 P(stop)  0.3% max   2% +win 7/7
+   08-30 12-18 n=162 ROI  +6.8% tail  15% net1   2,952 own  1,072 (148 trades) med  1,683 p10 1,414 P(stop)   1%
+   08-31 12-18 n=262 ROI  +8.2% tail  15% net1   5,153 own  3,561 (225 trades) med  4,640 p10 4,363 P(stop)   2%
+   09-01 12-18 n=190 ROI  +7.6% tail  18% net1   3,860 own  2,457 (174 trades) med  2,541 p10 2,317 P(stop)   1%
+   09-02 12-18 n=176 ROI +13.5% tail  18% net1   6,942 own  5,431 (168 trades) med  5,417 p10 5,164 P(stop)   0%
+   09-03 0-6   n= 61 ROI  +8.6% tail  15% net1   1,446 own    653 ( 60 trades) med    726 p10   672 P(stop)   0%
+   09-03 12-18 n=184 ROI +19.0% tail  13% net1   9,764 own  8,114 (180 trades) med  8,558 p10 8,367 P(stop)   0%
+   09-03 18-24 n=312 ROI +13.6% tail  17% net1  11,388 own  9,903 (277 trades) med 10,727 p10 10,396 P(stop)   2%
+   09-04 12-18 n= 73 ROI  +6.9% tail   4% net1   1,347 own    626 ( 71 trades) med    663 p10   625 P(stop)   0%
+   09-05 0-6   n= 45 ROI +13.9% tail   9% net1   1,899 own    878 ( 45 trades) med    824 p10   760 P(stop)   0%
+   09-05 12-18 n=111 ROI +20.8% tail   8% net1   6,355 own  4,799 (106 trades) med  5,376 p10 5,207 P(stop)   0%
+   09-06 12-18 n=134 ROI  +6.8% tail   8% net1   2,240 own  1,083 (126 trades) med  1,206 p10 1,095 P(stop)   0%
+gate any rival (look-ahead), hold 7          FIT  n  653 ROI  +9.9% worst  +4.4% tail 19.9% net1  17,309 own  10,851 P(stop)  4.3% max   8% +win 4/4
+                                             TEST n  498 ROI +19.2% worst  +7.2% tail 12.3% net1  26,840 own  18,191 P(stop)  0.2% max   1% +win 7/7
+   08-30 12-18 n=127 ROI  +5.9% tail  22% net1   1,901 own    579 (114 trades) med    827 p10   663 P(stop)   8%
+   08-31 12-18 n=210 ROI  +9.8% tail  20% net1   5,199 own  3,893 (167 trades) med  4,550 p10 4,253 P(stop)   2%
+   09-01 12-18 n=164 ROI  +4.4% tail  20% net1   2,171 own    918 (147 trades) med    780 p10   643 P(stop)   8%
+   09-02 12-18 n=152 ROI +19.1% tail  18% net1   8,038 own  6,661 (145 trades) med  6,935 p10 6,705 P(stop)   0%
+   09-03 0-6   n= 36 ROI +13.6% tail  17% net1   1,297 own    652 ( 35 trades) med    689 p10   652 P(stop)   0%
+   09-03 12-18 n=113 ROI +24.6% tail  12% net1   7,642 own  6,172 (111 trades) med  6,466 p10 6,304 P(stop)   0%
+   09-03 18-24 n=168 ROI +20.2% tail  19% net1   9,265 own  7,615 (160 trades) med  8,364 p10 8,068 P(stop)   1%
+   09-04 12-18 n= 45 ROI  +7.2% tail   0% net1     940 own    514 ( 43 trades) med    494 p10   481 P(stop)   0%
+   09-05 0-6   n= 38 ROI +13.5% tail   8% net1   1,547 own    731 ( 38 trades) med    713 p10   678 P(stop)   0%
+   09-05 12-18 n= 61 ROI +29.5% tail   5% net1   5,521 own  4,227 ( 59 trades) med  4,022 p10 3,917 P(stop)   0%
+   09-06 12-18 n= 37 ROI  +7.4% tail  11% net1     627 own    380 ( 36 trades) med    439 p10   401 P(stop)   0%
+gate any rival (look-ahead), hold 5          FIT  n  653 ROI +12.9% worst  +9.6% tail 13.3% net1  22,554 own  15,904 P(stop)  0.1% max   0% +win 4/4
+                                             TEST n  498 ROI +18.9% worst  +3.7% tail  8.2% net1  25,993 own  17,630 P(stop)  0.1% max   0% +win 7/7
+   08-30 12-18 n=127 ROI  +9.6% tail  14% net1   3,280 own  1,781 (118 trades) med  2,130 p10 1,923 P(stop)   0%
+   08-31 12-18 n=210 ROI +13.2% tail  11% net1   7,018 own  5,412 (185 trades) med  6,665 p10 6,503 P(stop)   0%
+   09-01 12-18 n=164 ROI +10.4% tail  14% net1   4,506 own  3,280 (156 trades) med  3,386 p10 3,223 P(stop)   0%
+   09-02 12-18 n=152 ROI +18.0% tail  15% net1   7,750 own  6,631 (149 trades) med  6,532 p10 6,345 P(stop)   0%
+   09-03 0-6   n= 36 ROI +15.1% tail  11% net1   1,510 own    708 ( 35 trades) med    749 p10   714 P(stop)   0%
+   09-03 12-18 n=113 ROI +26.9% tail   7% net1   8,459 own  7,237 (112 trades) med  7,246 p10 7,126 P(stop)   0%
+   09-03 18-24 n=168 ROI +18.0% tail  13% net1   8,221 own  6,553 (161 trades) med  7,380 p10 7,153 P(stop)   0%
+   09-04 12-18 n= 45 ROI  +3.7% tail   0% net1     484 own    364 ( 44 trades) med    362 p10   360 P(stop)   0%
+   09-05 0-6   n= 38 ROI +15.3% tail   5% net1   1,764 own    839 ( 38 trades) med    781 p10   742 P(stop)   0%
+   09-05 12-18 n= 61 ROI +29.0% tail   3% net1   4,949 own  3,616 ( 59 trades) med  3,931 p10 3,839 P(stop)   0%
+   09-06 12-18 n= 37 ROI  +7.5% tail   6% net1     606 own    412 ( 36 trades) med    443 p10   412 P(stop)   0%
+gate creation late in second (>0.5), hold 7  FIT  n  432 ROI  +4.4% worst  -3.2% tail 23.6% net1   4,146 own   1,086 P(stop) 32.5% max  97% +win 3/4
+                                             TEST n  541 ROI +12.5% worst  +4.9% tail 19.5% net1  19,829 own   9,411 P(stop)  3.2% max  11% +win 7/7
+   08-30 12-18 n= 94 ROI  -3.2% tail  24% net1  -1,182 own    149 ( 70 trades) med    139 p10   123 P(stop)  97%
+   08-31 12-18 n=133 ROI  +5.9% tail  23% net1   1,936 own    737 (106 trades) med    883 p10   712 P(stop)   6%
+   09-01 12-18 n=109 ROI  +1.2% tail  26% net1     284 own    128 ( 61 trades) med    307 p10   137 P(stop)  26%
+   09-02 12-18 n= 96 ROI +13.7% tail  21% net1   3,108 own  1,273 ( 92 trades) med  2,234 p10 1,985 P(stop)   2%
+   09-03 0-6   n= 33 ROI +18.5% tail  15% net1   1,793 own    901 ( 33 trades) med    829 p10   760 P(stop)   0%
+   09-03 12-18 n=118 ROI +18.7% tail  17% net1   6,505 own  5,121 (115 trades) med  4,884 p10 4,645 P(stop)   1%
+   09-03 18-24 n=165 ROI +10.4% tail  25% net1   5,369 own  2,437 (148 trades) med  3,070 p10   149 P(stop)  11%
+   09-04 12-18 n= 50 ROI  +9.7% tail  13% net1   1,345 own    643 ( 50 trades) med    625 p10   572 P(stop)   0%
+   09-05 0-6   n= 26 ROI +11.9% tail  16% net1     891 own    508 ( 26 trades) med    487 p10   443 P(stop)   0%
+   09-05 12-18 n= 55 ROI +17.1% tail  15% net1   2,814 own  1,389 ( 54 trades) med  1,431 p10 1,285 P(stop)   0%
+   09-06 12-18 n= 94 ROI  +4.9% tail  22% net1   1,112 own    512 ( 91 trades) med    530 p10   149 P(stop)  11%
+gate creation late in second (>0.5), hold 5  FIT  n  432 ROI  +7.5% worst  +5.1% tail 17.5% net1   8,310 own   2,212 P(stop)  1.7% max   2% +win 4/4
+                                             TEST n  541 ROI +12.9% worst  +2.6% tail 14.9% net1  20,483 own  11,815 P(stop)  1.6% max   8% +win 7/7
+   08-30 12-18 n= 94 ROI  +5.1% tail  14% net1   1,182 own    461 ( 84 trades) med    612 p10   532 P(stop)   2%
+   08-31 12-18 n=133 ROI  +7.1% tail  17% net1   2,570 own    870 (114 trades) med  1,279 p10 1,124 P(stop)   2%
+   09-01 12-18 n=109 ROI  +7.7% tail  18% net1   2,073 own  1,036 (104 trades) med  1,092 p10   950 P(stop)   1%
+   09-02 12-18 n= 96 ROI +10.1% tail  21% net1   2,485 own  1,045 ( 95 trades) med  1,281 p10 1,113 P(stop)   2%
+   09-03 0-6   n= 33 ROI  +9.9% tail  15% net1     948 own    554 ( 33 trades) med    538 p10   492 P(stop)   0%
+   09-03 12-18 n=118 ROI +23.2% tail  13% net1   7,813 own  6,310 (113 trades) med  6,341 p10 6,168 P(stop)   0%
+   09-03 18-24 n=165 ROI +10.3% tail  19% net1   5,429 own  3,546 (155 trades) med  3,252 p10 2,856 P(stop)   3%
+   09-04 12-18 n= 50 ROI  +6.1% tail  11% net1     846 own    437 ( 50 trades) med    444 p10   404 P(stop)   0%
+   09-05 0-6   n= 26 ROI +16.6% tail  12% net1   1,250 own    631 ( 26 trades) med    612 p10   567 P(stop)   0%
+   09-05 12-18 n= 55 ROI +22.5% tail   9% net1   3,688 own  2,302 ( 55 trades) med  2,327 p10 2,182 P(stop)   0%
+   09-06 12-18 n= 94 ROI  +2.6% tail  16% net1     509 own    135 ( 37 trades) med    363 p10   316 P(stop)   8%
+gate first-block rival + TP 50%, hold 5      FIT  n  790 ROI  +9.6% worst  +7.6% tail 15.5% net1  20,272 own  13,560 P(stop)  0.5% max   1% +win 4/4
+                                             TEST n  920 ROI +14.4% worst  +7.3% tail  9.5% net1  37,185 own  26,387 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=162 ROI  +7.6% tail  14% net1   3,386 own  1,651 (156 trades) med  2,072 p10 1,821 P(stop)   1%
+   08-31 12-18 n=262 ROI  +8.6% tail  15% net1   5,465 own  3,972 (225 trades) med  4,968 p10 4,704 P(stop)   1%
+   09-01 12-18 n=190 ROI  +7.7% tail  17% net1   3,926 own  2,674 (176 trades) med  2,593 p10 2,362 P(stop)   0%
+   09-02 12-18 n=176 ROI +14.8% tail  16% net1   7,496 own  6,463 (171 trades) med  6,200 p10 5,955 P(stop)   0%
+   09-03 0-6   n= 61 ROI +12.2% tail  11% net1   2,118 own    957 ( 60 trades) med  1,090 p10   999 P(stop)   0%
+   09-03 12-18 n=184 ROI +19.7% tail  10% net1  10,179 own  8,569 (180 trades) med  9,012 p10 8,844 P(stop)   0%
+   09-03 18-24 n=312 ROI +16.3% tail  12% net1  14,242 own 13,328 (290 trades) med 13,284 p10 13,061 P(stop)   0%
+   09-04 12-18 n= 73 ROI  +8.6% tail   3% net1   1,683 own    786 ( 71 trades) med    805 p10   764 P(stop)   0%
+   09-05 0-6   n= 45 ROI +14.4% tail   7% net1   1,961 own    842 ( 45 trades) med    842 p10   776 P(stop)   0%
+   09-05 12-18 n=111 ROI +14.3% tail   7% net1   4,579 own  2,811 (108 trades) med  3,310 p10 3,158 P(stop)   0%
+   09-06 12-18 n=134 ROI  +7.3% tail   8% net1   2,422 own  1,195 (126 trades) med  1,365 p10 1,237 P(stop)   0%
+gate first-block rival, hold 5, 15%/$25      FIT  n  790 ROI  +9.0% worst  +6.8% tail 16.5% net1  18,906 own   8,535 P(stop)  0.1% max   0% +win 4/4
+                                             TEST n  920 ROI +13.7% worst  +6.8% tail 12.3% net1  34,440 own  20,242 P(stop)  0.0% max   0% +win 7/7
+   08-30 12-18 n=162 ROI  +6.8% tail  15% net1   2,952 own    880 (148 trades) med  1,083 p10   950 P(stop)   0%
+   08-31 12-18 n=262 ROI  +8.2% tail  15% net1   5,153 own  2,864 (225 trades) med  3,676 p10 3,383 P(stop)   0%
+   09-01 12-18 n=190 ROI  +7.6% tail  18% net1   3,860 own  1,685 (174 trades) med  1,686 p10 1,517 P(stop)   0%
+   09-02 12-18 n=176 ROI +13.5% tail  18% net1   6,942 own  4,306 (168 trades) med  4,452 p10 4,193 P(stop)   0%
+   09-03 0-6   n= 61 ROI  +8.6% tail  15% net1   1,446 own    569 ( 60 trades) med    604 p10   557 P(stop)   0%
+   09-03 12-18 n=184 ROI +19.0% tail  13% net1   9,764 own  6,916 (180 trades) med  7,602 p10 7,392 P(stop)   0%
+   09-03 18-24 n=312 ROI +13.6% tail  17% net1  11,388 own  9,052 (277 trades) med  9,707 p10 9,372 P(stop)   0%
+   09-04 12-18 n= 73 ROI  +6.9% tail   4% net1   1,347 own    506 ( 71 trades) med    525 p10   504 P(stop)   0%
+   09-05 0-6   n= 45 ROI +13.9% tail   9% net1   1,899 own    663 ( 45 trades) med    677 p10   634 P(stop)   0%
+   09-05 12-18 n=111 ROI +20.8% tail   8% net1   6,355 own  3,927 (106 trades) med  4,415 p10 4,254 P(stop)   0%
+   09-06 12-18 n=134 ROI  +6.8% tail   8% net1   2,240 own    710 (126 trades) med    881 p10   806 P(stop)   0%

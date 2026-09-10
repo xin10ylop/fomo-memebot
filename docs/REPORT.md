@@ -24,6 +24,7 @@ Everything below was computed from data collected in this session; scripts are i
 18. **Round 12 audited the sniper with three independent auditors and an exact rebuild of the bonding curve (section 20), and the answer changed.** The curve is constant-product with 1.68 ETH / 1e9 virtual reserves (exact to 1e-15); every token has a creator-set 1–5% fee on both legs; the snipe tax is keyed to whole seconds (93–98% in the creation second, +6.18% the next, +0.19% the one after) and **wallets the creator names in the creation calldata are exempt**: all sampled untaxed first-block buyers are on their launch's list. The first-in-line seat of sections 14 and 19 (+36% a trade on the exact curve on Sep 3) is therefore the launch team's own bundle, not a seat an outsider can take. The first legal outside seat (next second, +6.18%) is −5% to +3% across the five windows and negative 0.3 s behind; filtered to launches whose bundle bought with three or more wallets it earns +5% to +10% a trade on the two peak days from Ohio latency (about $8k in six hours on $300 stakes, in-sample filter), about zero otherwise, and from $50 all-in it reaches $300 one time in three at best. Engine v2 shares the curve, fee, seat, filter, sizing and scoring with the simulator, sells the receipt's balance, and refuses the creation-second seat without the exemption.
 19. **Round 13 answered the reader's three questions (section 21): more days, the machine, the chain.** Sep 4 and Sep 5, never looked at before, confirm the bundle filter out of sample (E2 seat 0.3 s behind: +9.6% and +4.2% a trade on bundled launches, $2.7k and $4.3k switched net in six hours; the unfiltered outsider seat stays near zero), with more windows landing in `sniper_oos.txt`. The engine's critical path no longer needs an RPC call: the creator's exempted wallets, listed in the creation calldata, buy the new curve inside the creation second, and matching feed buyers to that list gives the curve address exactly. The machine is a small EC2 in Ohio on the public feed with a provider RPC for bookkeeping, not a full node. The seat exists on Robinhood Chain because ordering is first-come with no priority fee and the tax is per second; on Solana the same slot is bought with Jito tips by sub-50 ms bare-metal bots and was not tested.
 20. **Round 14 put the whole thing in front of two independent auditors with one brief (section 22).** They agreed on the essentials: the mechanism is real and the tables reproduce, but the engine only saw about 40% of the buyers whose absence is the rule's main gate, the rule is in-sample, the compounding paths were single orderings, one gas-gate constant had been swallowed by a comment, and the setup had a dozen operational holes. Engine v3 decodes every transaction type and router buys and checks its own feed readings against the chain at score time (they match); state is persisted and an open position is closed on restart; the setup script is hardened; the simulator's universe on the newer windows was corrected (the event's fee field is the protocol fee, not the token's tax). The corrected rule stays positive on all eleven windows (+1.8% to +18.6% per trade), but the planning number is now +5% to +8% per trade on busy windows with a 10–34% chance of a −50% day on flat ones, +$100 to +$800 per busy six hours from $300, and nothing has been sent live.
+21. **Round 15 asked two things of four researchers (section 23): lose less, and land where the tables assume.** Both risk researchers found the same fat left tail (one trade in five ends near −70%, no clustering) and the same remedies: hold 5 s instead of 7, a +50% take-profit, 15% sizing with a $25 floor, and, from one of them, a gate that skips launches where a rival is already in the seat. The gate's threshold turned out to be an artefact of the replay's interpolated clock, but the signal under it is real and executable (launches nobody else takes earn +10%/+20%, launches a rival took lose), so the rule now sends 0.3 s into second two only if no outsider has bought. Fit half +10.7% a trade, test half +16.4%, every window above +7.6%, one-at-a-time $22.0k and $37.4k, and a resampled chance of the −50% stop of zero at either sizing; from $100 the stop odds stay under 7%. The speed engineers found a signing landmine (lowercase addresses), a feed loop busy 17% of the time, a curve state rebuilt after the boundary, polling wakes and cold sockets; engine v4 fixes all of it (0.26 ms per frame, 0.5 µs of post-boundary work) and the new rule makes the send a fixed 300 ms after the second opens, which the first live receipts must confirm.
 12. **Round 6 found the treasure's real owner and measured its seat: the first-block sniper.** The 185 sniper-bot wallets that pay the creators are not all losers. Reconstructing the dollar P&L of the fifteen busiest from their transfers, curve trades and pool swaps: the bots that buy 0.3–3 seconds after launch and sell 3–21 seconds later are net positive (the fastest: +$30.8k on $107k of turnover in six hours, +28.7% per trade, 175 launches, nothing left unsold); every bot that holds minutes or hours loses (−44% to −94%). Simulating that seat on every launch of the window with launch-time filters (creator's first launch of the day, ETH-quoted, stake min(3% of supply, $300), sell 7 s later into whoever bought next, exact curve exits, 1% fees each way) gives +27% on $97k in the fitting hours and +32% on $98k in the holdout hours, per-launch mean +27%/+33% with confidence intervals of +20% to +41%, median −2%, 46–48% of launches positive, worst case one stake. That is $26k and $31k of profit per three hours on a working capital of a few thousand dollars, and it reproduces the fastest real bot's holdout result (+31%). The sensitivity analysis says what it is: paying 10% more than first-in-line still earns +18–23%, paying 25% more earns +6–10%, paying 50% more or landing half a second late loses. It is a latency race for the first block after creation, on a chain with 100 ms blocks, sponsored gas and a first-come sequencer; the winner takes +30% a trade several hundred times a day and everyone behind them pays. Out of sample on Sep 2 (a lower-flow day) the same untouched rule made +0.4% in the first three hours and +15% in the next three. Three further windows across the fee cycle (section 14.2) then showed the seat is a peak-flow phenomenon: −13% in Pons V2's second week (Aug 12), flat at the trough (Aug 20) and on the ramp (Aug 27), positive only on the two peak days. It is not a structural edge. Section 14 has the tables and a live shadow tester that scores every new launch against the rule without capital.
 
 ## 1. Data access and what was analysed
@@ -1390,3 +1391,158 @@ busy window, not the fitted +10% to +14%, with the un-gated +3.6% as the floor; 
 of ending at the daily stop; profit does not scale past a $300 stake and roughly halves if one other bot takes the
 same seat. Nothing has been sent live. The two auditors' own expectations for a $300 start were +$100 to +$800 per
 busy six-hour window and −$150 to +$100 per quiet one, and those are the numbers this report now carries forward.
+
+## 23. Round 15: losing less, and landing where the tables assume
+
+Two questions, each put to two independent researchers with the same brief (one Fable 5.1, one Opus 5): how does the
+strategy lose less without giving up its return, and how does a retail box in Ohio land where the backtest assumes.
+Both risk researchers and one speed engineer delivered in full; the other speed engineer was cut off by an API limit
+and re-run. Everything they claimed was re-derived here before it changed anything: the verification harness is
+`src/analysis/risk_harness.py` (outputs in `data/derived/risk_harness.txt`), the rival analysis
+`src/analysis/risk_blocks.py` (`data/derived/risk_blocks.txt`), and the four deliverables are kept verbatim under
+`data/derived/audit_risk_*.md` and `audit_speed_*.md`.
+
+### 23.1 The harness, corrected before anything else
+
+The first thing the reconciliation found was a bug in this project's own verification harness, not in the auditors'
+work. Its resampled stop probability shuffled only the trades its own compounding path had taken; when that path hit
+the stop early (Sep 6 at a 5 s hold), the pool it shuffled was the losing subset, and it reported a 74% chance of the
+−50% stop where the plan script's method (shuffle every rule-passing trade) gives 9%. The harness now uses the plan
+script's resampler and reproduces `sniper_plan.txt` window for window (Sep 6: 11% against the plan's 10%); its local
+replay is equal to `sniper_exact.replay` on 504 checks, and its take-profit is a single pass over the event grid. The
+earlier "shorter holds raise the stop risk on Sep 6" conclusion from the old harness was the artefact and is withdrawn.
+
+### 23.2 What the risk researchers found, and what a triple check made of it
+
+| finding | who | checked here | outcome |
+|---|---|---|---|
+| The loss is a fat left tail, not a run of small losses: 18–23% of trades end below −40% with p5 near −70%, and the blow-ups do not cluster in time (longest run 2.6 vs 2.7 in shuffles) | both | reproduced (tail 23.1% fit, 18.5% test) | consecutive-loss caps, cooldowns and per-hour caps cannot help; confirmed by both and here |
+| Hold 7 s → 5 s | both | fit +5.4% → +8.3%, stop odds 18% → 2%; test +12.3% → +12.0%, 2.8% → 1.7%; leave-one-window-out picks 5 s in 11 of 11 folds (Opus) | adopted. Hold 4 s (Opus's in-sample pick) is fragile out of sample: worst window +1.5%, stop odds up to 17% |
+| Take-profit at +50% over the entry price, computed from the feed | Fable (+50%), Opus (+35/+50%) | at hold 5: fit +8.3% → +9.0%, test +12.0% → +12.7%, tail 14.1% → 11.3%; at hold 7 test +14.1% | adopted; it needs the engine to price the curve live, which v4 does by folding every feed buy and sell (router buys over-count, so a wrong trigger exits earlier, never later) |
+| Sizing 15% of bankroll with a $25 floor instead of 20% / $50 | Fable | stop odds 2.1% → 0.2% fit, 1.7% → 0.5% test at hold 5; compounding −28% (own-path gains $10.5k → $7.5k fit, $24.4k → $21.2k test) | adopted as the default for a small bankroll; 20% / $50 stays a documented option |
+| "Seat-clear gate": skip the launch if any surcharge-paying buy is stamped before 2.0 s after the creation | Opus | see below | adopted in its executable form |
+| Daily stop −30%, tighter switch, E1 seat, 10 s hold, price stop-loss, reactive dump exit, hour-of-day, creator ≥ 8% or tier gates | both (rejected) | reproduced where re-run: −30% stop raises stop-outs to 37% fit; switch variants cost gains and buy nothing; E1 worse on both axes; feature gates keep 15–40% of trades | rejected |
+
+The seat-clear gate needed the most work, because its threshold is not what it looks like. The replay's clock is
+interpolated between block-timestamp anchors that are a median 36 s apart, so "2.0 s after the creation" is not a
+chain-time boundary; and of the 357 surcharged buys the gate keys on (four sample windows), 352 are in the +0.19% band,
+that is outsiders who already sit in second two, our own seat. Counting blocks instead of seconds
+(`risk_blocks.txt`) shows the gate is the same as "an outsider bought within 20 blocks of the creation" (100% of those
+launches skipped, 3% of the rest), and that the creation's own position inside its second does nothing on its own
+(gating on it alone leaves fit stop odds at 32%). What the gate finds is a rival ahead of us:
+
+| first outsider in second two | fit n | fit ROI (7 s) | test n | test ROI (7 s) |
+|---|---|---|---|---|
+| none | 652 | +10.2% | 486 | +19.6% |
+| within 12–16 blocks of the creation | 39 | −12.3% | 121 | +1.5% |
+| 16–20 blocks | 61 | −8.4% | 191 | +2.1% |
+| 20–24 blocks | 57 | −15.0% | 177 | +8.8% |
+| 24–30 blocks | 20 | +1.6% | 60 | +25.2% |
+
+Only what is seen before our own transaction leaves the box can gate it. The executable form is to send a fixed
+0.3 s into second two and only if no outsider has bought by then; that is already the replay's entry for launches
+nobody else took (2.0 s plus the 0.3 s latency it charges), so the kept launches are modelled exactly, and a launch
+whose first outsider lands later than 0.3 s is still modelled with us behind that outsider, which is pessimistic.
+Waiting longer keeps helping in the tables (0.5 s: fit +11.2%) but every extra tenth is time for the launch team's
+dump, so 0.3 s, the replay's own assumption, is the rule:
+
+| rule (all at 20% / $50 unless stated) | fit ROI | fit stop odds (max) | test ROI | test stop odds (max) | one at a time fit / test |
+|---|---|---|---|---|---|
+| current: hold 7 | +5.4% | 18.1% (32) | +12.3% | 2.8% (11) | $11,481 / $36,308 |
+| hold 5 | +8.3% | 2.1% (2) | +12.0% | 1.7% (9) | $17,955 / $35,671 |
+| wait 0.3 s for a rival, hold 7 | +7.3% | 9.6% (21) | +15.6% | 0.9% (3) | $15,006 / $35,179 |
+| wait 0.3 s, hold 5 | +10.4% | 0.7% (1) | +15.6% | 0.2% (1) | $21,152 / $34,962 |
+| wait 0.3 s, hold 5, take-profit +50% | +10.7% | 0.4% (1) | +16.4% | 0.0% (0) | $21,998 / $37,405 |
+| the same at 15% / $25 | +10.7% | 0.0% (0) | +16.4% | 0.0% (0) | $21,998 / $37,405 |
+| wait 0.3 s, hold 4 | +11.7% | 0.1% (0) | +13.7% | 0.1% (0) | $23,979 / $31,095 |
+| skip any launch an outsider ever takes (look-ahead, not executable) | +12.9% | 0.1% | +18.9% | 0.1% | $22,554 / $25,993 |
+
+### 23.3 The rule after this round
+
+Bundled launch (three or more named wallets buying at least 0.3 ETH in the creation second), creator's launch buy at
+least 1% of supply, no outsider in second one; **0.3 s into second two, send only if no outsider has bought the curve
+yet**; 3% of supply capped by the stake; sell after 5 s, or as soon as the curve price is 50% above our entry; one
+position at a time; 15% of the bankroll per trade, stakes $25–$300; daily stop −50%; safety switch off when the last
+15 scores average below −10%. Engine v4 implements every piece (`OUT2_MAX=0`, `SEAT_WAIT_MS=300`, `HOLD_S=5`,
+`TAKE_PROFIT=0.5`, `FRAC=0.15`, `STAKE_MIN=25`).
+
+| window | rule-passing | mean ROI | trades below −40% | one at a time, $300 stakes | from $300, engine defaults | stop odds (resampled) |
+|---|---|---|---|---|---|---|
+| Aug 30 | 155 | +8.9% | 13% | $3,800 | $1,497 | 0% |
+| Aug 31 | 251 | +9.7% | 14% | $6,146 | $3,717 | 0% |
+| Sep 1 | 184 | +8.7% | 16% | $4,376 | $1,805 | 0% |
+| Sep 2 | 169 | +16.1% | 15% | $7,677 | $5,693 | 0% |
+| Sep 3 night | 51 | +16.6% | 8% | $2,418 | $894 | 0% |
+| Sep 3 day | 171 | +20.9% | 9% | $10,022 | $7,658 | 0% |
+| Sep 3 evening | 284 | +18.0% | 11% | $14,293 | $12,367 | 0% |
+| Sep 4 | 66 | +9.5% | 0% | $1,779 | $632 | 0% |
+| Sep 5 night | 43 | +16.0% | 5% | $2,077 | $728 | 0% |
+| Sep 5 | 105 | +16.3% | 6% | $5,085 | $2,722 | 0% |
+| Sep 6 | 89 | +7.6% | 7% | $1,730 | $571 | 0% |
+
+Fit half (Aug 30–Sep 2): 759 trades, +10.7% per trade, worst window +8.7%. Test half (Sep 3–6): 809 trades, +16.4%,
+worst +7.6%. Against the section 22 rule the one-at-a-time net rises from $11.5k to $22.0k on the fit half and from
+$36.3k to $37.4k on the test half, the compounding paths from $300 go from $5.6k / $24.0k to $11.5k / $23.5k at the
+safer sizing ($15.0k / $27.2k at 20% / $50), and the resampled chance of the −50% stop is zero in every window at
+either sizing (at most 1% at 20% / $50). The trade count falls by 9% fit and 25% test: those are the launches a rival
+had already entered.
+
+Smaller starts, same rule, 1,000 resampled orderings per window: from $50 the stop is hit 19% of the time on the fit
+windows and 6% on the test windows (25% on the worst), because a $25 floor is half the bankroll; from $100 it is 4.2%
+fit and 0.7% test (7% on the worst window), with own-path gains of $5.3k over the four fit windows and $16.3k over the
+seven test windows; from $150 it is 0.9% and 0.0%; from $200 and above 0.1% or less. $100 is the floor, $150–$300 is
+comfortable.
+
+What is in-sample here: the 5 s hold and the +50% take-profit were chosen on the earlier half (Fable's grid, Opus's
+hold sweep) and only confirmed on the later one; the 0.3 s wait was not tuned (it is the replay's existing entry); the
+data is still eleven six-hour windows over 26 days of one launchpad. What the replay cannot know: its clock is
+interpolated, so the seat's timing carries about ±0.2 s of noise; rivals may adapt to a wallet that stands down; and
+the take-profit relies on the engine's live price, which router buys over-state. What is pessimistic: every launch
+whose first outsider arrives after our send is scored as if we were 0.3 s behind that outsider.
+
+### 23.4 Speed: what the engineers found, and what was verified
+
+| claim | verified here | done in engine v4 |
+|---|---|---|
+| The buy as built cannot be signed: `eth_account` rejects a lowercase `to` address | reproduced (`TypeError: Transaction had invalid fields`); a checksummed `to` with the same hex fields signs | every address in a built transaction is checksummed; the docstring says so for the operator's signer |
+| Sender recovery costs 5.5 ms without coincurve, 0.41 ms with it, 0.11 ms straight from coincurve; 89% of recoveries are router transactions whose sender is never used | reproduced on the same 300 transactions | direct coincurve recovery with a start-up self-test against `eth_account` (falls back if it fails); router senders recovered lazily, only when the transaction names a curve being traded; `REQUIRE_COINCURVE=1` refuses to run slow |
+| The feed loop as written is busy 17% of the time without coincurve and delays its own arrival stamps (median 11.1 ms per frame, p99 79 ms) | reproduced; v4 on the same 7-minute capture without coincurve: median 0.26 ms per frame, busy 3.5% | as above, plus the flip is published after the message's transactions are indexed, so a wake never reads a half-indexed block |
+| The curve state is rebuilt twice after the boundary by scanning 4,000 calldatas (2.2–2.6 ms) | reproduced (1.1 ms per scan, 2.8 ms on this box) | reserves and gate counters are folded incrementally as each buy and sell arrives; the send path reads two floats (0.5 µs measured) |
+| Polling with `sleep(0.001–0.002)` wakes 0.85–1.2 ms late at the median and up to 16–20 ms late | reproduced by the engineer's benchmark | one `Condition` notified per feed message; predicted boundaries sleep to 4 ms before and spin the rest |
+| Cold TLS costs 87–133 ms here (4–10 ms in Ohio, inferred); connections lived in per-thread locals and every launch ran in a new thread | reproduced | `SENDER` keeps warm keep-alive sockets to the sequencer and the provider, pings them every 5 s and logs their round trips (`sender_rtt`) |
+| The boundary estimator used only the upper side of each second's bracket; a two-sided midpoint is inside the bracket 75% of the time against 66%, early 14% against 32%, and needs a 15–20 ms margin instead of 40 | reproduced on the capture (the 75% ceiling is this sandbox's proxy jitter) | two-sided bracket estimator, cached, with its width logged (`boundary` events) |
+| `tune_margin` only ever went up (a first-block landing changed nothing) | confirmed in the code | one-sided quantile controller targeting 1% early landings, floor 8 ms, cap 45 ms, run off the trade thread; landings log the transaction index |
+| A log write and a thread start sat between the boundary and the send; `max_queue` let stale frames carry fresh stamps; a dead feed took up to 40 s to notice; wall-clock stamps move with chrony steps | confirmed | log writes on a queue, scorer thread started after the send, `max_queue=4`, no compression, a 2 s watchdog, monotonic clock on the critical path, the collector off while anything is in flight |
+| The two-sided midpoint estimator (the first engineer's proposal, adopted in v4) is a tail statistic: on the second engineer's captures it swings 75–146 ms at 30 flips and 21–116 ms at 60 and sits 12–59 ms late, so it would land in the first block only 45–58% of the time at zero margin; an interval vote (each bracket votes for the milliseconds it covers) is stable to 6–25 ms at 30 flips and 1.5–24 ms at 60 with 86–92% first-block landings | reproduced: the auditor's script re-run on both captures, then the engine's own implementation replayed on them (sd 25.3 / 23.3 ms and 6.5 / 1.4 ms at 30 / 60 flips, first block 88–93%) | v4.1 uses the interval vote on reference-relative brackets, needs 30 brackets, logs its confidence (peak votes over brackets) and falls back to react below 0.5 |
+| The v4 margin controller (+12 early, −12/99 first block, −6 later block) has its equilibrium at 6–8% early landings, not 1%, because a later-block landing happens 10–15% of the time on the sequencer's own timer even at a perfect margin | confirmed by the arithmetic | +15 ms on an early landing; every 20 landings without one, −2 ms if fewer than 80% were first-block; floor 5 ms, cap 60, start 15 |
+| Every creation the feed cannot resolve (88–95% of them, no bundle) polled the RPC for 3 s at 20 ms, which is where the public endpoint's 429s came from; and the feed resolution waited for the whole creation second when the bundle is visible after a few blocks | confirmed in the logs (v15: 158 of 167 creations resolved by RPC) | a launch the calldata already rules out is not resolved at all; a bundled one is resolved the moment `BUNDLE_MIN` named wallets have bought one curve |
+| The 5 s warm-up timer after a connect discards live seconds and would accept a slow replay; brackets were kept across reconnects although the route (and theta) may change; a reconnect waited 2 s; every reconnect rebuilt a TLS context (21–25 ms) | confirmed | replay detected per message from its timestamp, brackets and the estimate cleared on reconnect, 0.2 s reconnect, one shared TLS context |
+| The feed message's `sequenceNumber` is the L2 block number (checked against the RPC, offset 0) | taken from the auditor's check; not re-run here | `landing` logs `blocks_after_flip` from the feed's own numbering, no RPC needed to place the transaction |
+
+Where the two engineers disagreed, the data decided: the first proposed the midpoint estimator and measured it best on
+one long capture; the second measured it at the sample sizes an engine actually has after a reconnect and found it the
+worst of the bracket-based estimators; the second's protocol (estimate on 30 or 60 flips, judge on the next 60) is the
+one that matches how the estimator is used, and its verdict was reproduced with the engine's own code, so the vote is
+what v4.1 runs. The second engineer's other claim, that predicting the boundary would put this operator in the first
+block of second two on 80–90% of launches, is an inference from the captures and stays untested; with the rule of 23.3
+it is not needed.
+
+The rule change of 23.3 reorders the priorities. The send now happens 300 ms into second two, so predicting the
+boundary and shaving milliseconds off it is no longer the point; what matters is that an outsider's buy in the first
+three blocks of the second is decoded and indexed before the send (v4: about 0.3 ms per frame), and that the send
+itself is one warm round trip. The expected landing is the fourth or fifth block of second two, 350–450 ms after the
+boundary, which is the replay's 2.3 s entry. The proof is in the first live receipts: `trade_decision` logs
+`seat_flip_to_send_ms` (should read about 300) and `blocks_to_seat`, and `landing` logs the block, its timestamp
+against the seat's second and the transaction index. Predict mode, the margin controller and the estimator stay for
+E1 or for an operator who wants to be first in the block.
+
+### 23.5 Verdict
+
+The strategy loses less by not trading when someone faster is already in the seat, by holding five seconds instead of
+seven, and by taking a +50% gift when the curve hands it over; each of those was found by two researchers
+independently, re-derived here, and holds on the half of the data it was not chosen on. Per trade the planning number
+is +9% to +12% (fit +10.7%, test +16.4%, none of the eleven windows under +7.6%); from $300 the windows end between
+$571 and $12,367 on their own orderings (median about $1,800), with no window below the start and a resampled chance
+of the daily stop of zero; from $100 the same rule ends between $148 and $10,083 with the stop hit at most 7% of the
+time. Nothing has been sent live; engine v4 is running as a dry run, and the runbook says which log lines have to match
+these tables before the first real transaction.

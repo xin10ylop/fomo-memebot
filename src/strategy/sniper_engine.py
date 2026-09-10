@@ -1,50 +1,70 @@
 #!/usr/bin/env python3
-"""First-block sniper engine v3, dry-run by design (report sections 20-22, docs/SNIPER_RUNBOOK.md).
+"""First-block sniper engine v4, dry-run by design (report sections 20-23, docs/SNIPER_RUNBOOK.md).
 
 Live, it listens to the Robinhood Chain sequencer feed, decodes legacy, type-1 and type-2 transactions, detects Pons V2
 creations (factory 0xe33e..., selectors 0xf85f8e41 and 0x3f707e6b), reads the creator, the quote asset, the initial buy
 and the creator's exempt (named) wallets from the calldata, and resolves the new curve from the feed itself: the named
 wallets buy it inside the creation second and the address they buy is the curve. Buys of a curve are recognised whether
 they call the curve directly or go through a router (any value-carrying transaction whose calldata names the curve).
-Gates (section 21.6): bundle of >= BUNDLE_MIN named wallets and >= BUNDLE_MIN_ETH, creator's launch buy >=
-MIN_CREATOR_SUPPLY of supply, and no non-named buyer of the curve during second one. Seat: E2 (second whole second after
-the creation's timestamp, +0.19%), E1 (+6.18%), E0 only for an exempt wallet. Sizing on the curve as the feed shows it
-at send time, minOut at SLIP below the sized tokens (a wrong-second landing reverts for gas). Sends in react mode (when
-the feed shows the seat's second) or predict mode (at the seat's boundary derived from the creation's own second plus
-MARGIN_MS). Live: reads the tokens received from the buy's event, approves at once, sells the balance HOLD s after the
-buy landed (or at once if a dump is seen and STOP_SELL_FRAC > 0), tunes MARGIN_MS from where the buy landed. Every
-rule-passing launch is scored 25 s after creation with the simulator's exact-curve replay; the dry-run bankroll
-follows those scores; the feed's gate readings are checked against the chain's at score time. State (bankroll, day,
-scores, open position) is persisted next to the log and recovered on restart.
+Gates (sections 21.6, 23): bundle of >= BUNDLE_MIN named wallets and >= BUNDLE_MIN_ETH, creator's launch buy >=
+MIN_CREATOR_SUPPLY of supply, no non-named buyer of the curve during second one, and (OUT2_MAX, SEAT_WAIT_MS) no
+non-named buyer of the curve in the seat's second before our send, which in react mode happens SEAT_WAIT_MS after the
+feed opened that second: the replay's "0.3 s into second two, alone" entry. Seat: E2 (second whole second after the creation's timestamp,
++0.19%), E1 (+6.18%), E0 only for an exempt wallet. Sizing on the curve as the feed shows it at send time (the curve's
+reserves are folded incrementally as the feed delivers each buy and sell, so nothing is rebuilt after the boundary),
+minOut at SLIP below the sized tokens (a wrong-second landing reverts for gas). Sends in react mode (woken by the feed
+message that opens the seat's second, after that message's transactions are indexed) or predict mode (at the seat's
+boundary from the two-sided bracket estimator plus MARGIN_MS). Live: reads the tokens received from the buy's event,
+approves at once, sells the balance HOLD s after the buy landed, or earlier when the curve price is up TAKE_PROFIT over
+our entry (if > 0) or a dump is seen (STOP_SELL_FRAC > 0); learns MARGIN_MS from where the buy landed. Every
+rule-passing launch is scored 25 s after creation with the simulator's exact-curve replay; the dry-run bankroll follows
+those scores; the feed's gate readings are checked against the chain's at score time. State (bankroll, day, scores,
+open position, margin) is persisted next to the log and recovered on restart.
+
+Latency (section 23): monotonic clock on the critical path, senders recovered with coincurve (router transactions
+lazily, only when they name a curve we trade), no resolution at all for launches the calldata already rules out, the
+curve resolved the moment the bundle is visible, one Condition wake per feed message instead of polling, sleep-then-spin
+for a predicted boundary (interval-vote estimator), log writes on a queue, warm keep-alive sockets to the sequencer and
+the provider (SENDER, one shared TLS context), the collector off while anything is in flight, a 2 s feed watchdog.
 
 What it does not do: sign or broadcast. submit(tx, label) logs the transaction and returns None; replace it with a
-function that signs with your key, sends through your provider endpoint (and the sequencer as a second endpoint) and
-returns the hash. The runbook says what to verify on the first live trade.
+function that signs with your key (to-addresses are checksummed; eth_account refuses lowercase ones) and posts the raw
+transaction through SENDER.fire(body) (the sequencer and the provider, same hash); return the transaction hash. The
+runbook says what to verify on the first live trade.
 """
-import asyncio, base64, json, os, time, math, threading, http.client, urllib.parse, urllib.request, collections, statistics as st, datetime
+import asyncio, base64, json, os, sys, time, math, threading, queue, http.client, ssl, urllib.parse, urllib.request, collections, statistics as st, datetime, gc
 import rlp
 from eth_account import Account
+from eth_utils import keccak, to_checksum_address
 
 RPC_URL = os.environ.get("RPC_URL", "https://rpc.mainnet.chain.robinhood.com")
+SEQ_URL = os.environ.get("SEQ_URL", "https://sequencer.mainnet.chain.robinhood.com")
 FEED_URL = os.environ.get("FEED_URL", "wss://feed.mainnet.chain.robinhood.com")
 LOG_PATH = os.environ.get("LOG_PATH", "sniper_engine.jsonl"); STATE_PATH = LOG_PATH + ".state.json"
 WALLET = os.environ.get("WALLET", "0x0000000000000000000000000000000000000000").lower()
 ETH_USD = float(os.environ.get("ETH_USD", "2445")); ETH_USD_URL = os.environ.get("ETH_USD_URL", "https://api.coinbase.com/v2/prices/ETH-USD/spot")
 BANKROLL = float(os.environ.get("BANKROLL_USD", "300"))
-FRAC = float(os.environ.get("FRAC", "0.2")); STAKE_MIN = float(os.environ.get("STAKE_MIN", "50")); STAKE_MAX = float(os.environ.get("STAKE_MAX", "300"))
-HOLD = float(os.environ.get("HOLD_S", "7")); SUPPLY_FRAC = float(os.environ.get("SUPPLY_FRAC", "0.03")); SLIP = float(os.environ.get("SLIP", "0.25"))
+FRAC = float(os.environ.get("FRAC", "0.15")); STAKE_MIN = float(os.environ.get("STAKE_MIN", "25")); STAKE_MAX = float(os.environ.get("STAKE_MAX", "300"))
+HOLD = float(os.environ.get("HOLD_S", "5")); SUPPLY_FRAC = float(os.environ.get("SUPPLY_FRAC", "0.03")); SLIP = float(os.environ.get("SLIP", "0.25"))
+TAKE_PROFIT = float(os.environ.get("TAKE_PROFIT", "0.5"))                # sell when the curve price is up this fraction over our entry (0 = off)
 SEAT = os.environ.get("SEAT", "E2").upper(); EXEMPT = os.environ.get("EXEMPT", "0") == "1"
 BUNDLE_MIN = int(os.environ.get("BUNDLE_MIN", "3" if SEAT in ("E1", "E2") else "0"))
 BUNDLE_MIN_ETH = float(os.environ.get("BUNDLE_MIN_ETH", "0.3"))
 OUT1_MAX = int(os.environ.get("OUT1_MAX", "0"))
+OUT2_MAX = int(os.environ.get("OUT2_MAX", "0"))                          # non-named buys visible in the seat's second before we send
+SEAT_WAIT_MS = float(os.environ.get("SEAT_WAIT_MS", "300"))              # react mode: watch the seat's second this long for an outsider before sending (section 23)
 TIER_ASSUMED = float(os.environ.get("TIER_ASSUMED", "0.05"))
 STOP_SELL_FRAC = float(os.environ.get("STOP_SELL_FRAC", "0"))
-SEND_MODE = os.environ.get("SEND_MODE", "react"); MARGIN_MS = float(os.environ.get("MARGIN_MS", "25"))
-MAX_LATE_S = float(os.environ.get("MAX_LATE_S", "0.5"))              # do not send more than this far into the seat's second
-MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.01")); MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
+SEND_MODE = os.environ.get("SEND_MODE", "react"); MARGIN_MS = float(os.environ.get("MARGIN_MS", "15"))
+MARGIN_MIN_MS = float(os.environ.get("MARGIN_MIN_MS", "5")); MARGIN_MAX_MS = float(os.environ.get("MARGIN_MAX_MS", "60"))
+MAX_LATE_S = float(os.environ.get("MAX_LATE_S", "0.5"))                  # do not send more than this far into the seat's second
+MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.01"))
+MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
 SWITCH_N = int(os.environ.get("SWITCH_N", "15")); SWITCH = float(os.environ.get("SWITCH", "-0.10")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.50"))
 MAX_RESOLVE_MS = int(os.environ.get("MAX_RESOLVE_MS", "1500"))
-GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.03"))
+GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.05"))
+REQUIRE_COINCURVE = os.environ.get("REQUIRE_COINCURVE", "0") == "1"
+PIN_CPU = os.environ.get("PIN_CPU", "")                                   # e.g. "1": keep the process off core 0 (interrupts) on a 2-vCPU box
 GAS_BUY, GAS_APPROVE, GAS_SELL = 500_000, 80_000, 200_000
 FACTORY = bytes.fromhex("e33e9e479df8802cb0866d5d05258bec4cf62948"); CREATE_SELS = {bytes.fromhex("f85f8e41"), bytes.fromhex("3f707e6b")}
 FACTORY_HEX = "0x" + FACTORY.hex()
@@ -54,12 +74,75 @@ UA = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (X11; Linux
 X0, Y0 = 1.68, 1e9
 SURCHARGE = {"E0": 0.0, "E1": 0.0618, "E2": 0.0019}; SEAT_SECONDS = {"E0": 0, "E1": 1, "E2": 2}
 ZERO = "0x" + "0" * 40
+mono = time.monotonic
+
+
+# ----------------------------------------------------------------------------------------------------------------- logging
+_logq = queue.SimpleQueue()
+
+
+def _log_writer():
+    while True:
+        ev = _logq.get()
+        try:
+            with open(LOG_PATH, "a") as f:
+                f.write(json.dumps(ev) + "\n")
+        except Exception:
+            pass
 
 
 def log(ev):
-    ev["t"] = time.time()
-    with open(LOG_PATH, "a") as f:
-        f.write(json.dumps(ev) + "\n")
+    """never blocks the caller: the record goes on a queue and one thread writes it"""
+    ev["t"] = time.time(); _logq.put(ev)
+
+
+threading.Thread(target=_log_writer, daemon=True).start()
+
+
+# ------------------------------------------------------------------------------------------------------- sender recovery
+def _sender_slow(t):
+    return Account.recover_transaction(t).lower()
+
+
+try:
+    from coincurve import PublicKey as _PK
+
+    def _sender_fast(t):
+        """sender of a legacy / type-1 / type-2 envelope straight from coincurve (about 0.1 ms; eth_account takes 0.4 ms with
+        coincurve and 5.5 ms without)"""
+        if t[0] >= 0xc0:
+            b = rlp.decode(t); v = int.from_bytes(b[6], "big")
+            if v >= 35:
+                cid = (v - 35) // 2; rec = (v - 35) % 2
+                unsigned = rlp.encode(b[:6] + [cid.to_bytes((cid.bit_length() + 7) // 8 or 1, "big"), b"", b""])
+            else:
+                rec = v - 27; unsigned = rlp.encode(b[:6])
+            h = keccak(unsigned); r, s = b[7], b[8]
+        else:
+            b = rlp.decode(t[1:]); r, s = b[-2], b[-1]; rec = int.from_bytes(b[-3], "big") if b[-3] else 0
+            h = keccak(bytes([t[0]]) + rlp.encode(b[:-3]))
+        sig = r.rjust(32, b"\0") + s.rjust(32, b"\0") + bytes([rec])
+        return "0x" + keccak(_PK.from_signature_and_message(sig, h, hasher=None).format(compressed=False)[1:])[-20:].hex()
+
+    def _selftest():
+        a = Account.create()
+        for tx in ({"to": to_checksum_address("0x" + "ab" * 20), "value": 1, "data": b"\x01\x02", "gas": 21000, "gasPrice": 7, "nonce": 3, "chainId": 4663},
+                   {"to": to_checksum_address("0x" + "cd" * 20), "value": 5, "data": b"", "gas": 21000, "maxFeePerGas": 9, "maxPriorityFeePerGas": 1, "nonce": 0, "chainId": 4663, "type": 2}):
+            raw = bytes(a.sign_transaction(tx).raw_transaction)
+            if _sender_fast(raw) != a.address.lower() or _sender_slow(raw) != a.address.lower():
+                return False
+        return True
+
+    sender_of = _sender_fast if _selftest() else _sender_slow
+    SENDER_BACKEND = "coincurve-direct" if sender_of is _sender_fast else "eth_account"
+except Exception:
+    sender_of = _sender_slow; SENDER_BACKEND = "eth_account"
+if REQUIRE_COINCURVE and SENDER_BACKEND != "coincurve-direct":
+    raise SystemExit("coincurve is not usable: signature recovery would take 5 ms per transaction. pip install coincurve (deploy/ohio_setup.sh does).")
+
+
+# ------------------------------------------------------------------------------------------------------------- transport
+_CTX = ssl.create_default_context()                    # one TLS context for every connection: building one costs 20-25 ms
 
 
 class Rpc:
@@ -72,7 +155,7 @@ class Rpc:
             try:
                 c = getattr(self.local, "c", None)
                 if c is None:
-                    c = http.client.HTTPSConnection(self.host, timeout=10); self.local.c = c
+                    c = http.client.HTTPSConnection(self.host, timeout=10, context=_CTX); self.local.c = c
                 c.request("POST", self.path, body=body, headers=UA); r = c.getresponse(); d = json.loads(r.read())
                 if "error" in d:
                     raise RuntimeError(d["error"])
@@ -84,15 +167,76 @@ class Rpc:
                 time.sleep(0.03)
 
 
+class Sender:
+    """pre-opened, keep-alive TLS sockets to the send endpoints (the sequencer first: it is the admission point; the provider
+    forwards to it). fire(body) posts the same signed transaction to every endpoint and returns the first answer. Live only:
+    the dry run keeps the sockets warm and measures them, and sends nothing."""
+    PING = b'{"jsonrpc":"2.0","id":0,"method":"eth_chainId","params":[]}'
+
+    def __init__(self, urls):
+        self.eps = []
+        for u in urls:
+            if not u:
+                continue
+            p = urllib.parse.urlparse(u); self.eps.append({"url": u, "host": p.netloc, "path": p.path or "/", "c": None, "lock": threading.Lock(), "rtt_ms": None, "ok": False})
+        threading.Thread(target=self._keepalive, daemon=True).start()
+
+    def _ping(self, e):
+        with e["lock"]:
+            try:
+                if e["c"] is None:
+                    e["c"] = http.client.HTTPSConnection(e["host"], timeout=5, context=_CTX)
+                t0 = mono(); e["c"].request("POST", e["path"], body=self.PING, headers=UA); e["c"].getresponse().read(); e["rtt_ms"] = round(1000 * (mono() - t0), 1); e["ok"] = True
+            except Exception:
+                e["c"] = None; e["ok"] = False
+
+    def _keepalive(self):
+        n = 0
+        while True:
+            for e in self.eps:
+                self._ping(e)
+            if n % 20 == 0:
+                log({"ev": "sender_rtt", "endpoints": [{"host": e["host"], "warm_rtt_ms": e["rtt_ms"], "ok": e["ok"]} for e in self.eps]})
+            n += 1; time.sleep(5)
+
+    def _one(self, e, body, out):
+        with e["lock"]:
+            try:
+                if e["c"] is None:
+                    e["c"] = http.client.HTTPSConnection(e["host"], timeout=5, context=_CTX)
+                e["c"].request("POST", e["path"], body=body, headers=UA); d = json.loads(e["c"].getresponse().read()); out.append((e["host"], d))
+            except Exception as ex:
+                e["c"] = None; out.append((e["host"], {"error": str(ex)[:120]}))
+
+    def fire(self, body, wait_s=2.0):
+        """post the same body to every endpoint at once; returns (result, per-endpoint answers)"""
+        out = []; ths = [threading.Thread(target=self._one, args=(e, body, out), daemon=True) for e in self.eps]
+        for th in ths:
+            th.start()
+        t0 = mono()
+        while mono() - t0 < wait_s:
+            for host, d in out:
+                if "result" in d:
+                    return d["result"], out
+            if len(out) == len(ths):
+                break
+            time.sleep(0.0001)
+        return None, out
+
+
 rpc = Rpc(RPC_URL)
+SENDER = Sender([SEQ_URL, RPC_URL if RPC_URL != SEQ_URL else None])
 state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": False, "busy_until": 0.0, "scores": collections.deque(maxlen=SWITCH_N),
          "launched_today": collections.Counter(), "seeded": False, "feed_ts": 0, "last_seen_ts": 0, "traded": {}, "eth_usd": ETH_USD,
          "buys": collections.defaultdict(list),        # curve -> [(ts, sender, value_eth, seen)] direct buys
          "sells": collections.defaultdict(list),       # curve -> [(seen, tokens)] direct sells
-         "valtx": collections.deque(maxlen=4000),      # (seen, ts, sender, value_eth, data) value-carrying non-direct txs: router buys
-         "known_curves": {}, "flips": collections.deque(maxlen=600), "flip_at": {}, "connected_at": 0.0,
-         "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "decisions": {}}
+         "valtx": collections.deque(maxlen=4000),      # [seen, ts, sender_or_None, value_eth, data, raw] value-carrying non-direct txs: router buys, sender recovered lazily
+         "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
+         "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "connected_at": 0.0,
+         "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "decisions": {},
+         "landings": {"since_early": 0, "first": 0}}
 lock = threading.Lock()
+cond = threading.Condition()                           # notified by the feed loop after every message is fully indexed
 
 
 def save_state():
@@ -125,18 +269,20 @@ def abi_word(x):
 
 
 def submit(tx, label):
-    """DRY RUN: logs the exact unsigned transaction and returns None. Replace with signing + eth_sendRawTransaction through the
-    provider endpoint with the sequencer as a second endpoint; return the transaction hash."""
+    """DRY RUN: logs the exact unsigned transaction and returns None. Live: sign it (Account.sign_transaction(tx) works as
+    built: checksummed to, hex fields), then SENDER.fire(json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction",
+    "params": ["0x" + raw.hex()]}).encode()) and return the hash."""
     log({"ev": "unsigned_tx", "label": label, "tx": tx})
     return None
 
 
+# ---------------------------------------------------------------------------------------------------------- background
 def chain_loop():
     """nonce, gas price and the ETH price, refreshed in the background so the critical path never waits on the RPC"""
     n = 0
     while True:
         try:
-            state["nonce"] = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); state["gas_price"] = int(rpc.call("eth_gasPrice", []), 16); state["chain_at"] = time.time()
+            state["nonce"] = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); state["gas_price"] = int(rpc.call("eth_gasPrice", []), 16); state["chain_at"] = mono()
         except Exception as e:
             if n % 20 == 0:
                 log({"ev": "error", "stage": "chain_loop", "err": str(e)[:160]})
@@ -147,65 +293,101 @@ def chain_loop():
                     state["eth_usd"] = px
             except Exception:
                 pass
-            ph = boundary_phase()
-            if ph is not None:
-                log({"ev": "boundary", "phase_local_s": round(ph, 4), "flips": len(state["flips"]), "margin_ms": MARGIN_MS})
+            b = boundary()
+            if b:
+                log({"ev": "boundary", "theta_ms": round(1000 * b[0], 1), "confidence": round(b[1], 3), "bracket_width_ms": round(1000 * b[2], 1), "samples": len(state["brackets"]), "margin_ms": round(MARGIN_MS, 2)})
         n += 1; time.sleep(3)
 
 
-def boundary_phase():
-    """the sequencer's second boundary in local wall-clock phase: the low edge (2nd percentile) of the phases at which the
-    feed's L2 timestamp was seen to flip (flips are visible at block granularity, so the true boundary is the low edge)"""
-    ph = sorted(t % 1.0 for t in state["flips"])
-    if len(ph) < 30:
-        return None
-    gaps = [(ph[(i + 1) % len(ph)] - ph[i]) % 1.0 for i in range(len(ph))]
-    k = max(range(len(ph)), key=lambda i: gaps[i]); base = ph[(k + 1) % len(ph)]
-    rot = sorted((x - base) % 1.0 for x in ph)
-    return (base + rot[int(0.02 * len(rot))]) % 1.0
+_bcache = {"at": -1e9, "v": None}
 
 
-def wait_for_second(feed_ts, seconds, seen_at, deadline=3.5):
-    """block until it is time to send for the seat. react: when the feed shows the seat's second. predict: at the seat's
-    boundary derived from the creation's own second (the local time the feed first showed feed_ts + 1, snapped to the
-    estimated boundary edge) plus MARGIN_MS. Returns the mode used, or None when the seat's second is already more than
-    MAX_LATE_S old or was never seen (do not send on stale data)."""
+def boundary():
+    """interval-vote estimator of theta, the sequencer's second boundary on the local monotonic clock relative to the
+    reference flip (state['ref']): every second gives a bracket (arrival of the last block stamped s-1, arrival of the first
+    block stamped s], both minus s; each bracket votes for the 1 ms bins it covers and theta is the centre of the most-voted
+    run. One stalled delivery cannot move it (it only votes elsewhere), and 30 brackets are enough. Returns (theta,
+    confidence = peak votes / brackets, median bracket width) or None; cached for a second."""
+    if mono() - _bcache["at"] < 1.0:
+        return _bcache["v"]
+    br = [(lo, hi) for lo, hi in state["brackets"] if 0 < hi - lo < 0.35]
+    v = None
+    if len(br) >= 30:
+        base = min(lo for lo, hi in br); span = int((max(hi for lo, hi in br) - base) * 1000) + 2; votes = [0] * span
+        for lo, hi in br:
+            for k in range(int((lo - base) * 1000) + 1, int((hi - base) * 1000) + 1):
+                votes[k] += 1
+        m = max(votes); idx = [k for k, x in enumerate(votes) if x == m]
+        v = (base + ((idx[0] + idx[-1]) / 2 + 0.5) / 1000.0, m / len(br), st.median(hi - lo for lo, hi in br))
+    _bcache["at"] = mono(); _bcache["v"] = v
+    return v
+
+
+def wait_for_second(feed_ts, seconds, seen_at, deadline=3.5, watch=None):
+    """block until it is time to send for the seat. react: woken by the feed message that opens the seat's second (its
+    transactions are already indexed). predict: at seat_second + theta + MARGIN_MS on the monotonic clock, sleeping until
+    4 ms before and spinning the rest. Returns the mode used, or None when the seat's second is already more than MAX_LATE_S
+    old or was never seen (do not send on stale data)."""
     target_ts = feed_ts + seconds
     if SEND_MODE == "predict" and seconds >= 1:
-        ph = boundary_phase()
-        while feed_ts + 1 not in state["flip_at"] and time.time() - seen_at < deadline and state["feed_ts"] < target_ts:
-            time.sleep(0.002)
-        if feed_ts + 1 in state["flip_at"] and ph is not None:
-            f1 = state["flip_at"][feed_ts + 1]; edge = f1 - ((f1 - ph) % 1.0)          # the boundary of second feed_ts+1 in local time
-            target = edge + (seconds - 1) + MARGIN_MS / 1000.0
-            while time.time() < target and state["feed_ts"] < target_ts and time.time() - seen_at < deadline:
-                time.sleep(0.001)
+        b = boundary(); ref = state["ref"]
+        if b is not None and b[1] >= 0.5 and ref is not None:                 # a low-confidence estimate (a stalled or jittery feed) falls back to react
+            target = ref[0] + (target_ts - ref[1]) + b[0] + MARGIN_MS / 1000.0
+            with cond:
+                while state["feed_ts"] < target_ts and mono() - seen_at < deadline:
+                    d = target - mono()
+                    if d <= 0.0:
+                        break
+                    if d > 0.004:
+                        cond.wait(min(d - 0.004, 0.5))
+                    else:
+                        cond.release()
+                        try:
+                            while mono() < target and state["feed_ts"] < target_ts:
+                                pass
+                        finally:
+                            cond.acquire()
+                        break
             if state["feed_ts"] > target_ts:
                 return None
-            if state["feed_ts"] == target_ts and time.time() - state["flip_at"].get(target_ts, time.time()) > MAX_LATE_S:
+            if state["feed_ts"] == target_ts and mono() - state["flip_at"].get(target_ts, mono()) > MAX_LATE_S:
                 return None
             return "predict" if state["feed_ts"] < target_ts else "predict-late"
-    while state["feed_ts"] < target_ts and time.time() - seen_at < deadline:
-        time.sleep(0.002)
-    if state["feed_ts"] != target_ts or time.time() - state["flip_at"].get(target_ts, time.time()) > MAX_LATE_S:
+    with cond:
+        while state["feed_ts"] < target_ts and mono() - seen_at < deadline:
+            cond.wait(0.25)
+    if state["feed_ts"] != target_ts or mono() - state["flip_at"].get(target_ts, mono()) > MAX_LATE_S:
         return None
+    if SEAT_WAIT_MS > 0 and watch is not None:                       # the seat rule: send SEAT_WAIT_MS into the second unless an outsider has already bought
+        until = state["flip_at"][target_ts] + SEAT_WAIT_MS / 1000.0
+        with cond:
+            while mono() < until and watch["out2"] <= OUT2_MAX and state["feed_ts"] == target_ts:
+                cond.wait(max(0.0, min(until - mono(), 0.05)))
+        if state["feed_ts"] != target_ts:
+            return None
     return "react"
 
 
 def tune_margin(receipt, seat_ts):
-    """live only: learn MARGIN_MS from where the buy landed (reverted and stamped before the seat's second: +20 ms; landed
-    in the seat's second but not its first block: -5 ms; first block: keep)"""
+    """live only, off the trade path. Early (stamped before the seat's second, paid +6.18%): MARGIN_MS +15 at once. Otherwise
+    every 20 landings without an early one: -2 ms if fewer than 80% of them were first-block landings (a later block is a
+    noisy signal, the sequencer drains on its own timer). Floor MARGIN_MIN_MS, cap MARGIN_MAX_MS. Logs the landing position
+    from the receipt: block, timestamp against the seat's second, transaction index, blocks after the feed's flip."""
     global MARGIN_MS
     try:
         b = int(receipt["blockNumber"], 16); ts = int(rpc.call("eth_getBlockByNumber", [hex(b), False])["timestamp"], 16)
-        prev = int(rpc.call("eth_getBlockByNumber", [hex(b - 1), False])["timestamp"], 16)
+        prev = int(rpc.call("eth_getBlockByNumber", [hex(b - 1), False])["timestamp"], 16); L = state["landings"]
         if ts < seat_ts:
-            MARGIN_MS += 20; where = "early"
-        elif prev < ts:
-            where = "first block"
+            MARGIN_MS = min(MARGIN_MAX_MS, MARGIN_MS + 15.0); where = "early"; L["since_early"] = 0; L["first"] = 0
         else:
-            MARGIN_MS = max(5.0, MARGIN_MS - 5); where = "later block"
-        log({"ev": "landing", "block": b, "block_ts": ts, "seat_ts": seat_ts, "where": where, "margin_ms": MARGIN_MS, "status": receipt.get("status")}); save_state()
+            where = "first block" if prev < ts else "later block"; L["since_early"] += 1; L["first"] += where == "first block"
+            if L["since_early"] >= 20:
+                if L["first"] / L["since_early"] < 0.8:
+                    MARGIN_MS = max(MARGIN_MIN_MS, MARGIN_MS - 2.0)
+                L["since_early"] = 0; L["first"] = 0
+        fb = state["flip_block"].get(seat_ts)
+        log({"ev": "landing", "block": b, "block_ts": ts, "seat_ts": seat_ts, "where": where, "tx_index": int(receipt.get("transactionIndex", "0x0"), 16),
+             "blocks_after_flip": (b - fb) if fb is not None else None, "margin_ms": round(MARGIN_MS, 2), "status": receipt.get("status")}); save_state()
     except Exception as e:
         log({"ev": "error", "stage": "tune_margin", "err": str(e)[:200]})
 
@@ -244,28 +426,59 @@ def seed_launched_today():
             log({"ev": "error", "stage": "seed", "attempt": attempt, "err": str(e)[:160]}); time.sleep(20 * (attempt + 1))
 
 
+# ------------------------------------------------------------------------------------------------- curve bookkeeping
 def curve_buys(curve, since_ts=None):
-    """every buy of the curve seen on the feed: direct calls and value-carrying transactions whose calldata names the curve"""
+    """every buy of the curve seen on the feed so far: direct calls and value-carrying transactions whose calldata names the
+    curve (their senders recovered now, only for the few that match). Used once, when a curve is resolved; afterwards the
+    feed loop folds new buys into state['watch'][curve] as they arrive."""
     cb = bytes.fromhex(curve[2:]); out = list(state["buys"].get(curve, []))
-    for seen, ts_, snd, val, data in list(state["valtx"]):
-        if cb in data:
-            out.append((ts_, snd, val, seen))
+    for e in state["valtx"]:
+        if cb in e[4]:
+            if e[2] is None:
+                try:
+                    e[2] = sender_of(e[5])
+                except Exception:
+                    e[2] = "?"
+            out.append((e[1], e[2], e[3], e[0]))
     if since_ts is not None:
         out = [b for b in out if b[0] >= since_ts]
     return out
 
 
-def curve_state(curve, tk0, feed_ts):
-    """the curve's reserves at send time, rebuilt from the feed: the creator's launch buy (from the calldata), every buy seen
-    (ETH value net of a 1% fee; router buys carry their whole value, an over-estimate) and every direct sell"""
-    net0 = X0 * tk0 / (Y0 - tk0); X = X0 + net0; Y = Y0 - tk0
+def watch_curve(curve, tk0, feed_ts, named, creator):
+    """register the curve for incremental folding and build its state from what the feed has shown so far"""
+    net0 = X0 * tk0 / (Y0 - tk0); w = {"X": X0 + net0, "Y": Y0 - tk0, "cb": bytes.fromhex(curve[2:]), "ts0": feed_ts, "named": named, "creator": creator,
+                                       "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "buys": 0, "sells": 0, "since": mono(), "dump": None}
     for ts_, snd, val, seen in curve_buys(curve, feed_ts):
-        if val > 0:
-            net = val * 0.99; tk = Y - X * Y / (X + net); X += net; Y -= tk
+        fold_buy(w, ts_, snd, val)
     for seen, tk in state["sells"].get(curve, []):
-        if 0 < tk < Y0:
-            g = X - X * Y / (Y + tk); X -= g; Y += tk
-    return X, Y
+        fold_sell(w, tk)
+    state["watch"][curve] = w
+    return w
+
+
+def fold_buy(w, ts_, snd, val):
+    if val > 0:
+        net = val * 0.99; X, Y = w["X"], w["Y"]; tk = Y - X * Y / (X + net); w["X"] = X + net; w["Y"] = Y - tk
+    w["buys"] += 1
+    if snd in w["named"]:
+        if ts_ == w["ts0"]:
+            w["bundle"] += 1
+        if ts_ <= w["ts0"] + 1:
+            w["bundle_eth"] += val
+    elif snd != w["creator"] and snd != WALLET:
+        if ts_ == w["ts0"] + 1:
+            w["out1"] += 1
+        elif ts_ == w["ts0"] + 2:
+            w["out2"] += 1
+
+
+def fold_sell(w, tk):
+    w["sells"] += 1
+    if 0 < tk < Y0:
+        X, Y = w["X"], w["Y"]; g = X - X * Y / (Y + tk); w["X"] = X - g; w["Y"] = Y + tk
+    if STOP_SELL_FRAC > 0 and tk >= STOP_SELL_FRAC * Y0:
+        w["dump"] = tk
 
 
 def size_buy(X, Y, stake_eth, seat):
@@ -276,9 +489,10 @@ def size_buy(X, Y, stake_eth, seat):
     return tk, net, gross, fee
 
 
-def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold=HOLD, frac=SUPPLY_FRAC, gated=True, stop_sell_frac=None):
-    """the simulator's replay (sniper_exact.replay) on the curve's own Buy/Sell events. Returns (pnl_usd, cost_usd, t_in, tier,
-    label_bundle, label_bundle_eth, label_out1) or "filtered" or None."""
+# ------------------------------------------------------------------------------------------------------------ scoring
+def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold=HOLD, frac=SUPPLY_FRAC, gated=True, stop_sell_frac=None, tp=None):
+    """the simulator's replay (sniper_exact.replay plus the take-profit of risk_harness.replay) on the curve's own Buy/Sell
+    events. Returns (pnl_usd, cost_usd, t_in, tier, label_bundle, label_bundle_eth, label_out1) or "filtered" or None."""
     rows = []; X, Y = X0, Y0; tier = None
     for i, (b, li, buy, q, tk, fee) in enumerate(events):
         t = (b - b_create) / 9.9
@@ -317,7 +531,7 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
     tk_bot = frac * Y0; net = X * tk_bot / (Y - tk_bot); gross = net / (1 - fee)
     if gross > stake_eth:
         gross = stake_eth; net = gross * (1 - fee); tk_bot = Y * net / (X + net)
-    X += net; Y -= tk_bot; held = Y0 - Y - tk_bot; phantom = 0.0; t_exit = t_in + hold + slip
+    X += net; Y -= tk_bot; held = Y0 - Y - tk_bot; phantom = 0.0; t_exit = t_in + hold + slip; p_in = X / Y
     for r in rows[idx:]:
         t, k, q, tk, net_obs, tax = r
         if t >= t_exit:
@@ -332,14 +546,16 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
         else:
             share = held / (held + phantom) if held + phantom > 0 else 1.0
             s = min(tk * share, held); g = X - X * Y / (Y + s); X -= g; Y += s; held -= s; phantom = max(0.0, phantom - (tk - s))
+        if tp is not None and X / Y >= p_in * (1 + tp) and t_exit > t + slip:
+            t_exit = t + slip
     out = (X - X * Y / (Y + tk_bot)) * (1 - tier)
     return ((out - gross) * state["eth_usd"] - 1.0, gross * state["eth_usd"], t_in, tier) + lab
 
 
 def resolve_rpc(creator, deadline=3.0, lookback=40):
     """the curve from the factory's event: (token, curve, tk0, b_create) or None"""
-    t0 = time.time()
-    while time.time() - t0 < deadline:
+    t0 = mono()
+    while mono() - t0 < deadline:
         try:
             head = int(rpc.call("eth_blockNumber", []), 16)
             for l in rpc.call("eth_getLogs", [{"fromBlock": hex(head - lookback), "toBlock": hex(head), "address": FACTORY_HEX}]):
@@ -370,7 +586,7 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
             d = e["data"][2:]; w = [int(d[i:i + 64], 16) / 1e18 for i in range(0, len(d), 64)]; buy = e["topics"][0] == BUY_EV
             events.append((int(e["blockNumber"], 16), int(e["logIndex"], 16), buy, w[0] if buy else w[1], w[1] if buy else w[0], w[2] if len(w) > 2 else 0.0))
         events.sort(key=lambda x: (x[0], x[1]))
-        r = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, gated=BUNDLE_MIN > 0, stop_sell_frac=STOP_SELL_FRAC if STOP_SELL_FRAC > 0 else None)
+        r = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, gated=BUNDLE_MIN > 0, stop_sell_frac=STOP_SELL_FRAC if STOP_SELL_FRAC > 0 else None, tp=TAKE_PROFIT if TAKE_PROFIT > 0 else None)
         if r is None:
             log({"ev": "score", "curve": curve, "result": "no usable launch-block buy"}); return
         if decision is not None:                                        # what the feed said at decision time vs what the chain says
@@ -389,11 +605,14 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
              "n_scores": len(sc), "rolling_mean": round(st.mean(sc), 4), "switch_on": on, "traded_dry_run": traded is not None, "bankroll": round(state["bankroll"], 2)})
     except Exception as e:
         log({"ev": "error", "stage": "score", "err": str(e)[:200]})
+    finally:
+        state["watch"].pop(curve, None)
 
 
+# ------------------------------------------------------------------------------------------------------------- trading
 def wait_receipt(h, timeout=10.0):
-    t0 = time.time()
-    while time.time() - t0 < timeout:
+    t0 = mono()
+    while mono() - t0 < timeout:
         try:
             r = rpc.call("eth_getTransactionReceipt", [h])
             if r:
@@ -408,25 +627,39 @@ def close_position(pos, why):
     """approve (if not yet) and sell the position's balance; used by the hold and by crash recovery"""
     gp = state["gas_price"] or 0; nonce = pos["nonce"]
     if not pos.get("approved"):
-        approve = {"to": pos["token"], "value": "0x0", "data": "0x" + APPROVE_SEL + abi_word(pos["curve"]) + abi_word(2 ** 256 - 1), "gas": hex(GAS_APPROVE), "gasPrice": hex(gp), "nonce": hex(nonce + 1), "chainId": 4663}
+        approve = {"to": to_checksum_address(pos["token"]), "value": "0x0", "data": "0x" + APPROVE_SEL + abi_word(pos["curve"]) + abi_word(2 ** 256 - 1), "gas": hex(GAS_APPROVE), "gasPrice": hex(gp), "nonce": hex(nonce + 1), "chainId": 4663}
         ha = submit(approve, "approve"); pos["approved"] = True; pos["approve_hash"] = ha
-    sell = {"to": pos["curve"], "value": "0x0", "data": "0x" + SELL_SEL.hex() + abi_word(int(pos["tokens"] * 1e18)) + abi_word(0) + abi_word(WALLET), "gas": hex(GAS_SELL), "gasPrice": hex(gp), "nonce": hex(nonce + 2), "chainId": 4663}
+    sell = {"to": to_checksum_address(pos["curve"]), "value": "0x0", "data": "0x" + SELL_SEL.hex() + abi_word(int(pos["tokens"] * 1e18)) + abi_word(0) + abi_word(WALLET), "gas": hex(GAS_SELL), "gasPrice": hex(gp), "nonce": hex(nonce + 2), "chainId": 4663}
     hs = submit(sell, "sell")
-    log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": pos["tokens"], "held_s": round(time.time() - pos["t_buy"], 2), "exit": why, "dry_run": hs is None and pos.get("buy_hash") is None, "sell_hash": hs})
+    log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": pos["tokens"], "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": hs is None and pos.get("buy_hash") is None, "sell_hash": hs})
     state["open"] = None; save_state()
 
 
-def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named):
+def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0):
     """resolve the curve, apply the gates, size on the feed-tracked curve, take the seat, build the buy, then approve and sell"""
     curve = token = None; tk0 = None; b_create = None; src = None; named = set(named)
-    if SEAT in ("E1", "E2") and BUNDLE_MIN > 0 and quote == ZERO and len(named) >= BUNDLE_MIN:
-        while state["feed_ts"] <= feed_ts and time.time() - seen_at < 1.5:
-            time.sleep(0.003)
+    new_day_check()
+    with lock:
+        prior = state["launched_today"][creator]; state["launched_today"][creator] += 1
+    if SEAT in ("E1", "E2") and BUNDLE_MIN > 0 and (quote != ZERO or len(named) < BUNDLE_MIN):
+        log({"ev": "skip", "why": ["cannot pass the rule from the calldata (quote or named wallets): not resolved"], "creator": creator, "named_wallets": len(named), "quote": quote}); return
+
+    def count_cands():
         cands = collections.Counter()
-        for cv, lst in list(state["buys"].items()):
-            if cv in state["known_curves"]:
-                continue
-            cands[cv] += sum(1 for ts_, snd, val, seen in lst if snd in named and ts_ >= feed_ts)
+        try:
+            for cv, lst in list(state["buys"].items()):
+                if cv in state["known_curves"]:
+                    continue
+                cands[cv] += sum(1 for ts_, snd, val, seen in list(lst) if snd in named and ts_ >= feed_ts)
+        except RuntimeError:
+            pass
+        return cands
+    if SEAT in ("E1", "E2") and BUNDLE_MIN > 0:
+        cands = count_cands()                                              # the moment BUNDLE_MIN named wallets have bought one curve, that is the curve
+        while (not cands or cands.most_common(1)[0][1] < BUNDLE_MIN) and state["feed_ts"] <= feed_ts and mono() - seen_at < 1.5:
+            with cond:
+                cond.wait(0.25)
+            cands = count_cands()
         if cands:
             a, c = cands.most_common(1)[0]
             if c >= BUNDLE_MIN:
@@ -436,13 +669,10 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named):
         r = resolve_rpc(creator)
         if r:
             token, curve, tk0, b_create = r; src = "rpc"
-    resolve_ms = round((time.time() - seen_at) * 1000)
+    resolve_ms = round((mono() - seen_at) * 1000)
     if not curve:
         log({"ev": "skip", "why": "curve not resolved in 3 s", "creator": creator, "named_wallets": len(named)}); return
-    state["known_curves"][curve] = time.time()
-    new_day_check()
-    with lock:
-        prior = state["launched_today"][creator]; state["launched_today"][creator] += 1
+    state["known_curves"][curve] = mono()
     reasons = []
     if prior > 0:
         reasons.append(f"creator launched {prior} times today")
@@ -456,29 +686,30 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named):
         reasons.append("creator buy too large")
     if reasons:
         log({"ev": "skip", "why": reasons, "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named)}); return
+    w = watch_curve(curve, tk0, feed_ts, named, creator)                 # from here the feed loop folds every buy and sell of this curve as it arrives
+    curve_cs = to_checksum_address(curve)
     # the seat's wait: the bundle and second one must be fully visible before the gates are read
     send_mode = None
     if SEAT in ("E1", "E2"):
-        send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at)
-    buys = curve_buys(curve, feed_ts)
-    bundle = sum(1 for ts_, snd, val, seen in buys if snd in named and ts_ == feed_ts)
-    bundle_eth = sum(val for ts_, snd, val, seen in buys if snd in named and ts_ <= feed_ts + 1)
-    out1 = sum(1 for ts_, snd, val, seen in buys if snd not in named and snd != creator and ts_ == feed_ts + 1)
-    decision = {"bundle": bundle, "bundle_eth": round(bundle_eth, 4), "out1": out1}
+        send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at, watch=w)
+    t_wake = mono()
+    decision = {"bundle": w["bundle"], "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "blocks_to_seat": state["blocks"] - blk0}
     with lock:
         sc = list(state["scores"]); on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []
-        if bundle < BUNDLE_MIN:
-            gates.append(f"bundle {bundle} < {BUNDLE_MIN}")
-        if bundle_eth < BUNDLE_MIN_ETH:
-            gates.append(f"bundle {bundle_eth:.3f} ETH < {BUNDLE_MIN_ETH}")
-        if SEAT == "E2" and out1 > OUT1_MAX:
-            gates.append(f"{out1} outsider buys in second one > {OUT1_MAX}")
+        if w["bundle"] < BUNDLE_MIN:
+            gates.append(f"bundle {w['bundle']} < {BUNDLE_MIN}")
+        if w["bundle_eth"] < BUNDLE_MIN_ETH:
+            gates.append(f"bundle {w['bundle_eth']:.3f} ETH < {BUNDLE_MIN_ETH}")
+        if SEAT == "E2" and w["out1"] > OUT1_MAX:
+            gates.append(f"{w['out1']} outsider buys in second one > {OUT1_MAX}")
+        if SEAT == "E2" and w["out2"] > OUT2_MAX:
+            gates.append(f"{w['out2']} outsider buys in the seat's second before our send > {OUT2_MAX}")
         if not on:
             gates.append(f"safety switch off (rolling {st.mean(sc):+.3f} over {len(sc)} < {SWITCH:+.2f})")
         if state["stopped"] or state["bankroll"] < (1 - DAILY_STOP) * state["day_start"]:
             state["stopped"] = True; gates.append("daily stop")
-        if time.time() < state["busy_until"] or state["open"] is not None:
+        if mono() < state["busy_until"] or state["open"] is not None:
             gates.append("position open")
         if resolve_ms > MAX_RESOLVE_MS:
             gates.append(f"resolved in {resolve_ms} ms > {MAX_RESOLVE_MS}")
@@ -486,37 +717,40 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named):
             gates.append("bankroll below the minimum stake")
         if send_mode is None and SEAT in ("E1", "E2"):
             gates.append("seat's second not seen in time (stale feed): not sending")
-        if state["nonce"] is None or time.time() - state["chain_at"] > 30:
+        if state["nonce"] is None or mono() - state["chain_at"] > 30:
             gates.append("nonce/gas not fresh (RPC)")
-        gc = gas_cost_usd()
-        if gc is not None and gc > GAS_MAX_SHARE * stake_usd:
-            gates.append(f"gas ${gc:.2f} per round trip > {100 * GAS_MAX_SHARE:.0f}% of stake")
+        gc_usd = gas_cost_usd()
+        if gc_usd is not None and gc_usd > GAS_MAX_SHARE * stake_usd:
+            gates.append(f"gas ${gc_usd:.2f} per round trip > {100 * GAS_MAX_SHARE:.0f}% of stake")
         if not gates:
-            state["busy_until"] = time.time() + HOLD + 3; nonce = state["nonce"]; state["nonce"] += 3; gas_price = state["gas_price"]
-    threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
+            state["busy_until"] = mono() + HOLD + 3; nonce = state["nonce"]; state["nonce"] += 3; gas_price = state["gas_price"]
     if gates:
+        threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
         log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
-    X, Y = curve_state(curve, tk0, feed_ts); stake_eth = stake_usd / state["eth_usd"]
+    X, Y = w["X"], w["Y"]; stake_eth = stake_usd / state["eth_usd"]
     tk, net, gross, fee = size_buy(X, Y, stake_eth, SEAT)
     amount_in = int(gross * 1e18); min_out = int(tk * (1 - SLIP) * 1e18)
-    buy = {"to": curve, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
+    buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
+    h = submit(buy, "buy"); t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk)
+    state["traded"][curve] = min(stake_usd, gross * state["eth_usd"]); state["decisions"][curve] = decision
+    threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
     p_creator = (X0 + X0 * tk0 / (Y0 - tk0)) / (Y0 - tk0)
     log({"ev": "trade_decision", "seat": SEAT, "curve": curve, "token": token, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision,
-         "sent_ms": round((time.time() - seen_at) * 1000), "send_mode": send_mode, "feed_ts_at_send": state["feed_ts"], "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0), "stake_usd": stake_usd,
-         "amount_in_eth": amount_in / 1e18, "tokens_target": tk, "supply_share": tk / Y0, "min_out_tokens": min_out / 1e18, "fee_assumed": fee, "price_vs_creator": round((X / Y) / p_creator, 3)})
-    h = submit(buy, "buy"); t_buy = time.time(); tokens = tk
-    state["traded"][curve] = min(stake_usd, gross * state["eth_usd"]); state["decisions"][curve] = decision
+         "sent_ms": round((t_buy - seen_at) * 1000), "wake_to_send_ms": round((t_buy - t_wake) * 1000, 2), "send_mode": send_mode, "feed_ts_at_send": state["feed_ts"], "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0),
+         "seat_flip_to_send_ms": round((t_buy - state["flip_at"][feed_ts + SEAT_SECONDS[SEAT]]) * 1000, 1) if (feed_ts + SEAT_SECONDS.get(SEAT, 0)) in state["flip_at"] else None,
+         "stake_usd": stake_usd, "amount_in_eth": amount_in / 1e18, "tokens_target": tk, "supply_share": tk / Y0, "min_out_tokens": min_out / 1e18, "fee_assumed": fee, "price_vs_creator": round((X / Y) / p_creator, 3),
+         "margin_ms": MARGIN_MS if send_mode and send_mode.startswith("predict") else None})
     if h:                                                            # live: the tokens actually received, from the buy's own event
         rec = wait_receipt(h)
         if rec:
             if SEAT in ("E1", "E2"):
-                tune_margin(rec, feed_ts + SEAT_SECONDS[SEAT])
+                threading.Thread(target=tune_margin, args=(rec, feed_ts + SEAT_SECONDS[SEAT]), daemon=True).start()
             if rec.get("status") != "0x1":
                 log({"ev": "buy_reverted", "curve": curve, "hash": h}); state["traded"].pop(curve, None); state["busy_until"] = 0.0; return
             for l in rec.get("logs", []):
                 if l["topics"][0] == BUY_EV and l["address"].lower() == curve:
                     tokens = int(l["data"][2 + 64:2 + 128], 16) / 1e18
-            t_buy = time.time()
+            t_buy = mono()
         else:
             log({"ev": "receipt_timeout", "curve": curve, "hash": h, "note": "assuming the buy landed: approving and selling the sized amount"})
     if token is None:
@@ -524,18 +758,20 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named):
     pos = {"curve": curve, "token": token, "tokens": tokens, "nonce": nonce, "t_buy": t_buy, "buy_hash": h, "approved": False, "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0)}
     state["open"] = pos; save_state()
     gp = gas_price or 0
-    approve = {"to": token, "value": "0x0", "data": "0x" + APPROVE_SEL + abi_word(curve) + abi_word(2 ** 256 - 1), "gas": hex(GAS_APPROVE), "gasPrice": hex(gp), "nonce": hex(nonce + 1), "chainId": 4663}
+    approve = {"to": to_checksum_address(token), "value": "0x0", "data": "0x" + APPROVE_SEL + abi_word(curve) + abi_word(2 ** 256 - 1), "gas": hex(GAS_APPROVE), "gasPrice": hex(gp), "nonce": hex(nonce + 1), "chainId": 4663}
     pos["approve_hash"] = submit(approve, "approve"); pos["approved"] = True; save_state()
     why = "hold"
-    while time.time() - t_buy < HOLD:
-        if STOP_SELL_FRAC > 0:
-            dump = next((tk_ for at, tk_ in reversed(state["sells"].get(curve, [])) if at > t_buy and tk_ >= STOP_SELL_FRAC * Y0), None)
-            if dump is not None:
-                why = f"dump {100 * dump / Y0:.1f}% of supply"; break
-        time.sleep(0.005)
+    with cond:
+        while mono() - t_buy < HOLD:
+            if STOP_SELL_FRAC > 0 and w["dump"] is not None:
+                why = f"dump {100 * w['dump'] / Y0:.1f}% of supply"; break
+            if TAKE_PROFIT > 0 and w["X"] / w["Y"] >= p_in * (1 + TAKE_PROFIT):
+                why = f"take-profit: curve price {w['X'] / w['Y'] / p_in:.2f}x our entry"; break
+            cond.wait(min(0.25, max(0.0, HOLD - (mono() - t_buy))))
     close_position(pos, why)
 
 
+# ------------------------------------------------------------------------------------------------------------- feed
 def parse_tx(t):
     """(type, to, value_wei, data) for legacy, type-1 and type-2 envelopes; None for anything else"""
     try:
@@ -570,73 +806,113 @@ def prune(now):
         if cv not in state["known_curves"] and state["buys"][cv] and now - state["buys"][cv][-1][3] > 120:
             state["buys"].pop(cv, None)
     for ts_ in [k for k in state["flip_at"] if k < state["feed_ts"] - 120]:
-        state["flip_at"].pop(ts_, None)
+        state["flip_at"].pop(ts_, None); state["flip_block"].pop(ts_, None)
+    if not state["watch"] and state["open"] is None:
+        gc.collect()                                                     # the collector is off (main); run it only when nothing is in flight
+
+
+def index_message(inner, ts, seen):
+    """index one L2 message's transactions: direct buys and sells, creations, router buys (sender lazily), and the fold of
+    everything that touches a watched curve"""
+    watched = state["watch"]
+    for t in decode_batch(inner.get("l2Msg", "")):
+        p = parse_tx(t)
+        if p is None:
+            continue
+        ty, to, value, data = p
+        if len(to) != 20:
+            continue
+        val = int.from_bytes(value, "big") / 1e18 if value else 0.0; sel = data[:4]; to_hex = "0x" + to.hex()
+        try:
+            if sel == BUY_SEL:                                                       # direct curve buy
+                snd = sender_of(t)
+                state["buys"][to_hex].append((ts, snd, val, seen))
+                if to_hex in watched:
+                    fold_buy(watched[to_hex], ts, snd, val)
+                continue
+            if sel == SELL_SEL and len(data) >= 36:                                 # direct curve sell
+                tk = int.from_bytes(data[4:36], "big") / 1e18; state["sells"][to_hex].append((seen, tk))
+                if to_hex in watched:
+                    fold_sell(watched[to_hex], tk)
+                continue
+            if to == FACTORY and sel in CREATE_SELS:                                 # creation
+                creator = sender_of(t)
+                words = [data[4 + 32 * i: 4 + 32 * (i + 1)] for i in range((len(data) - 4) // 32)]
+                quote = "0x" + data[4 + 32 * 2 + 12: 4 + 32 * 3].hex() if len(data) >= 4 + 32 * 4 else ZERO
+                init_buy = int.from_bytes(data[4 + 32 * 3: 4 + 32 * 4], "big") if len(data) >= 4 + 32 * 4 else 0
+                if quote != ZERO and int(quote, 16) < 2 ** 100:                     # unknown layout: not an address, let the RPC path decide
+                    quote = ZERO
+                named = {"0x" + w[12:].hex() for w in words if w[:12] == b"\0" * 12 and int.from_bytes(w[12:], "big") > 2 ** 100} - {creator, quote}
+                log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named), "selector": sel.hex(), "tx_type": ty})
+                threading.Thread(target=handle_creation, args=(creator, quote, init_buy, seen, ts, named, state["blocks"]), daemon=True).start(); continue
+            if val > 0 and len(data) >= 36:                                         # a router buy of some curve: sender recovered only if it names a curve we trade
+                e = [seen, ts, None, val, data, t]; state["valtx"].append(e)
+                for cv, w in watched.items():
+                    if w["cb"] in data:
+                        e[2] = sender_of(t); fold_buy(w, ts, e[2], val)
+                continue
+            if watched and val == 0 and sel not in (BUY_SEL, SELL_SEL):
+                for cv, w in watched.items():
+                    if w["cb"] in data:                                             # router sell touching a curve we hold
+                        fold_sell(w, float("inf") if STOP_SELL_FRAC > 0 else 0.0)
+        except Exception as e:
+            log({"ev": "error", "stage": "decode", "err": str(e)[:200]})
 
 
 async def main():
     import websockets
     if SEAT == "E0" and not EXEMPT:
         raise SystemExit("SEAT=E0 needs an address exempt from the snipe surcharge (EXEMPT=1); anyone else pays 93-98% in the creation second. Use SEAT=E2 (runbook).")
+    if PIN_CPU:
+        try:
+            os.sched_setaffinity(0, {int(c) for c in PIN_CPU.split(",")})
+        except Exception as e:
+            log({"ev": "error", "stage": "pin_cpu", "err": str(e)[:100]})
+    sys.setswitchinterval(0.0005)
     load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY, "stop_sell_frac": STOP_SELL_FRAC,
-         "send_mode": SEND_MODE, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "dry_run": True})
-    last_prune = time.time()
+    log({"ev": "start", "version": 4.1, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+         "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": True})
+    gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
+    last_prune = mono()
     while True:
         try:
-            async with websockets.connect(FEED_URL, open_timeout=15, max_size=None, ping_interval=20) as ws:
-                log({"ev": "feed_connected"}); state["connected_at"] = time.time()
+            async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=None) as ws:
+                log({"ev": "feed_connected"}); state["connected_at"] = mono(); state["prev_seen"] = None
+                state["brackets"].clear(); state["ref"] = None; _bcache["at"] = -1e9              # the route, hence theta, may have changed
                 while True:
-                    d = json.loads(await ws.recv()); seen = time.time()
-                    warm = seen - state["connected_at"] < 5.0            # the feed replays a backlog on connect: no flips, no trades from it
+                    try:
+                        raw = await asyncio.wait_for(ws.recv(), timeout=2.0)
+                    except asyncio.TimeoutError:
+                        log({"ev": "feed_stall", "note": "no message for 2 s: reconnecting"}); break
+                    seen = mono(); wall = time.time(); d = json.loads(raw)
                     if seen - last_prune > 30:
                         prune(seen); last_prune = seen
                     for m in d.get("messages", []):
                         inner = m["message"]["message"]; hdr = inner.get("header", {})
                         ts = int(hdr.get("timestamp", 0) or 0) if int(hdr.get("kind", 0) or 0) == 3 else 0   # L2 messages only: batch reports carry L1 time
-                        if ts:
-                            if ts > state["last_seen_ts"] and state["last_seen_ts"] and not warm:
-                                state["flips"].append(seen); state["flip_at"].setdefault(ts, seen)
-                            state["last_seen_ts"] = max(state["last_seen_ts"], ts); state["feed_ts"] = max(state["feed_ts"], ts)
-                        if warm:
+                        if not ts:
                             continue
-                        for t in decode_batch(inner.get("l2Msg", "")):
-                            p = parse_tx(t)
-                            if p is None:
-                                continue
-                            ty, to, value, data = p
-                            if len(to) != 20:
-                                continue
-                            val = int.from_bytes(value, "big") / 1e18 if value else 0.0; sel = data[:4]; to_hex = "0x" + to.hex()
-                            try:
-                                if sel == BUY_SEL:                                                       # direct curve buy
-                                    snd = Account.recover_transaction(t).lower()
-                                    state["buys"][to_hex].append((ts, snd, val, seen)); continue
-                                if sel == SELL_SEL and len(data) >= 36:                                 # direct curve sell
-                                    state["sells"][to_hex].append((seen, int.from_bytes(data[4:36], "big") / 1e18)); continue
-                                if to == FACTORY and sel in CREATE_SELS:                                 # creation
-                                    creator = Account.recover_transaction(t).lower()
-                                    words = [data[4 + 32 * i: 4 + 32 * (i + 1)] for i in range((len(data) - 4) // 32)]
-                                    quote = "0x" + data[4 + 32 * 2 + 12: 4 + 32 * 3].hex() if len(data) >= 4 + 32 * 4 else ZERO
-                                    init_buy = int.from_bytes(data[4 + 32 * 3: 4 + 32 * 4], "big") if len(data) >= 4 + 32 * 4 else 0
-                                    if quote != ZERO and int(quote, 16) < 2 ** 100:                     # unknown layout: not an address, let the RPC path decide
-                                        quote = ZERO
-                                    named = {"0x" + w[12:].hex() for w in words if w[:12] == b"\0" * 12 and int.from_bytes(w[12:], "big") > 2 ** 100} - {creator, quote}
-                                    log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named), "selector": sel.hex(), "tx_type": ty})
-                                    threading.Thread(target=handle_creation, args=(creator, quote, init_buy, seen, ts, named), daemon=True).start(); continue
-                                if val > 0 and len(data) >= 36:                                         # a router buy of some curve: matched by calldata at decision time
-                                    snd = Account.recover_transaction(t).lower(); state["valtx"].append((seen, ts, snd, val, bytes(data)))
-                                    if state["open"] is None:
-                                        continue
-                                if state["open"] is not None and val == 0 and bytes.fromhex(state["open"]["curve"][2:]) in data and sel not in (BUY_SEL, SELL_SEL):
-                                    state["sells"][state["open"]["curve"]].append((seen, float("inf")))   # router sell touching our curve during the hold
-                            except Exception as e:
-                                log({"ev": "error", "stage": "decode", "err": str(e)[:200]})
+                        warm = wall - ts > 2.0                            # a backlog replay (the feed sends one on connect): index nothing, trade nothing
+                        state["blocks"] += 1
+                        if not warm:
+                            index_message(inner, ts, seen)
+                        with cond:
+                            if ts > state["last_seen_ts"] and state["last_seen_ts"] and not warm:
+                                state["flip_at"].setdefault(ts, seen); state["flip_block"].setdefault(ts, m.get("sequenceNumber"))
+                                if state["ref"] is None:
+                                    state["ref"] = (seen, ts)
+                                if state["prev_seen"] is not None and state["prev_ts"] == ts - 1 and seen - state["prev_seen"] < 0.5:
+                                    r0, t0 = state["ref"]; state["brackets"].append(((state["prev_seen"] - r0) - (ts - t0), (seen - r0) - (ts - t0)))
+                            state["last_seen_ts"] = max(state["last_seen_ts"], ts); state["feed_ts"] = max(state["feed_ts"], ts)
+                            state["prev_seen"] = seen; state["prev_ts"] = ts
+                            cond.notify_all()
         except Exception as e:
-            log({"ev": "feed_error", "err": str(e)[:200]}); await asyncio.sleep(2)
+            log({"ev": "feed_error", "err": str(e)[:200]}); await asyncio.sleep(0.2)
 
 
 if __name__ == "__main__":
-    print("sniper engine v3: DRY RUN (submit() logs unsigned transactions and sends nothing); seat", SEAT, "log", LOG_PATH)
+    print("sniper engine v4: DRY RUN (submit() logs unsigned transactions and sends nothing); seat", SEAT, "log", LOG_PATH, "sender backend", SENDER_BACKEND)
     asyncio.run(main())

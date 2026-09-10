@@ -1,0 +1,46 @@
+launches with a rival in the seat: 772 of 1926
+blocks from the creation to the first T+2 outsider: deciles [13.0, 15.0, 16.0, 17.0, 19.0, 20.0, 21.0, 22.0, 24.0]
+
+NE gate vs blocks-to-rival (rival launches): share skipped by NE per block bin
+FIT
+  blocks   0- 12: n    4  NE-skipped 100%  ROI hold7  -20.6%  hold5   -6.1%  tail7  50%  mean pos 0.34
+  blocks  12- 16: n   39  NE-skipped 100%  ROI hold7  -12.3%  hold5  -10.9%  tail7  33%  mean pos 0.49
+  blocks  16- 20: n   61  NE-skipped 100%  ROI hold7   -8.4%  hold5   -5.3%  tail7  33%  mean pos 0.55
+  blocks  20- 24: n   57  NE-skipped   5%  ROI hold7  -15.0%  hold5  -13.6%  tail7  37%  mean pos 0.52
+  blocks  24- 30: n   20  NE-skipped   0%  ROI hold7   +1.6%  hold5   +3.6%  tail7  25%  mean pos 0.51
+  no rival     : n  652  ROI hold7  +10.2%  hold5  +13.3%  tail7  20%
+TEST
+  blocks   0- 12: n   16  NE-skipped 100%  ROI hold7   +7.8%  hold5  +13.0%  tail7  12%  mean pos 0.48
+  blocks  12- 16: n  121  NE-skipped 100%  ROI hold7   +1.5%  hold5   -1.4%  tail7  30%  mean pos 0.53
+  blocks  16- 20: n  191  NE-skipped 100%  ROI hold7   +2.1%  hold5   +4.1%  tail7  28%  mean pos 0.50
+  blocks  20- 24: n  177  NE-skipped   2%  ROI hold7   +8.8%  hold5   +8.7%  tail7  21%  mean pos 0.49
+  blocks  24- 30: n   60  NE-skipped   3%  ROI hold7  +25.2%  hold5  +21.9%  tail7  10%  mean pos 0.50
+  no rival     : n  486  ROI hold7  +19.6%  hold5  +19.2%  tail7  12%
+
+within the NE-skipped set and the NE-kept set, ROI by creation position (rival launches)
+  FIT NE-skip=True  pos 0.0-0.5: n   52 ROI7   -9.2% ROI5   -9.6%
+  FIT NE-skip=True  pos 0.5-1.0: n   55 ROI7  -12.7% ROI5   -6.8%
+  FIT NE-skip=False pos 0.0-0.5: n   36 ROI7  -11.2% ROI5  -10.7%
+  FIT NE-skip=False pos 0.5-1.0: n   38 ROI7   -8.3% ROI5   -5.7%
+  TEST NE-skip=True  pos 0.0-0.5: n  172 ROI7   +3.5% ROI5   +3.1%
+  TEST NE-skip=True  pos 0.5-1.0: n  161 ROI7   +0.5% ROI5   +1.2%
+  TEST NE-skip=False pos 0.0-0.5: n  116 ROI7   +8.3% ROI5   +8.4%
+  TEST NE-skip=False pos 0.5-1.0: n  116 ROI7  +18.5% ROI5  +17.0%
+
+gate: skip when a rival exists and blocks(creation -> rival) < K
+skip rival within 12 blocks, hold 7          FIT  n  829 ROI  +5.5% worst  +1.8% tail 22.9% net1  11,778 own   5,835 P(stop) 16.9% max  32% +win 4/4
+                                             TEST n 1068 ROI +12.4% worst  +5.6% tail 18.6% net1  36,158 own  23,594 P(stop)  2.6% max   9% +win 7/7
+skip rival within 12 blocks, hold 5          FIT  n  829 ROI  +8.4% worst  +6.4% tail 16.7% net1  18,047 own  10,440 P(stop)  1.7% max   2% +win 4/4
+                                             TEST n 1068 ROI +12.0% worst  +3.5% tail 14.1% net1  35,211 own  24,087 P(stop)  1.7% max   9% +win 7/7
+skip rival within 16 blocks, hold 7          FIT  n  791 ROI  +6.4% worst  +2.7% tail 22.4% net1  13,522 own   7,150 P(stop) 11.0% max  20% +win 4/4
+                                             TEST n  940 ROI +13.8% worst  +6.0% tail 17.1% net1  36,562 own  24,641 P(stop)  1.4% max   5% +win 7/7
+skip rival within 16 blocks, hold 5          FIT  n  791 ROI  +9.4% worst  +7.3% tail 16.1% net1  19,559 own  12,074 P(stop)  0.9% max   1% +win 4/4
+                                             TEST n  940 ROI +13.8% worst  +5.5% tail 12.5% net1  36,351 own  25,532 P(stop)  0.4% max   2% +win 7/7
+skip rival within 20 blocks, hold 7          FIT  n  729 ROI  +7.7% worst  +2.3% tail 21.5% net1  15,077 own   9,671 P(stop)  9.8% max  24% +win 4/4
+                                             TEST n  742 ROI +17.0% worst  +8.1% tail 14.2% net1  35,268 own  24,944 P(stop)  0.5% max   3% +win 7/7
+skip rival within 20 blocks, hold 5          FIT  n  729 ROI +10.6% worst  +8.0% tail 15.1% net1  20,688 own  13,418 P(stop)  0.4% max   1% +win 4/4
+                                             TEST n  742 ROI +16.5% worst  +4.8% tail 10.4% net1  33,694 own  24,424 P(stop)  0.1% max   0% +win 7/7
+skip rival within 24 blocks, hold 7          FIT  n  674 ROI  +9.6% worst  +3.5% tail 20.1% net1  17,561 own  11,260 P(stop)  5.2% max  12% +win 4/4
+                                             TEST n  561 ROI +19.8% worst  +6.7% tail 12.1% net1  31,189 own  22,041 P(stop)  0.1% max   1% +win 7/7
+skip rival within 24 blocks, hold 5          FIT  n  674 ROI +12.6% worst  +9.6% tail 13.5% net1  22,945 own  16,265 P(stop)  0.3% max   0% +win 4/4
+                                             TEST n  561 ROI +19.1% worst  +3.8% tail  8.1% net1  29,790 own  21,077 P(stop)  0.0% max   0% +win 7/7

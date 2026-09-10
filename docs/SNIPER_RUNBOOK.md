@@ -6,6 +6,29 @@ dollar is sent.
 
 ## 0. What changed
 
+**v3 (round 15, report section 23).** Four researchers, two per question, then a triple check of everything:
+
+- **The rule loses less by not trading behind a rival.** Launches nobody else enters in second two earn +10% (fit half)
+  and +20% (test half) a trade; launches where an outsider is already in the seat lose. So the engine now sends a fixed
+  0.3 s into second two and only if no outsider has bought the curve yet (`SEAT_WAIT_MS=300`, `OUT2_MAX=0`). That is
+  exactly the entry the tables always assumed for launches nobody took; the gate keys only on what the feed shows
+  before your transaction leaves the box.
+- **Hold 5 s instead of 7, sell earlier at +50%.** Both researchers found the exposure, not the entry, is the risk:
+  hold 5 s (fit +5.4% → +8.3% at the old rule), and a take-profit when the curve price is 50% above your entry
+  (`TAKE_PROFIT=0.5`, priced live from the feed).
+- **Sizing 15% of the bankroll, stakes $25–$300** (`FRAC=0.15`, `STAKE_MIN=25`): with the new rule the resampled
+  chance of the −50% day is zero in every window at this sizing (at most 1% at the old 20% / $50).
+- **Engine v4** (speed track): every built address is checksummed (the old build could not be signed by `eth_account`),
+  sender recovery straight from coincurve and only when needed, no RPC call at all for launches the calldata rules out,
+  the curve resolved the moment the bundle is visible, one wake per feed message, the curve's reserves folded as the
+  feed arrives (nothing rebuilt after the boundary), warm keep-alive sockets to the sequencer and the provider, an
+  interval-vote boundary estimator, a margin controller that can come down, a feed watchdog, monotonic clock. Section 3b.
+- **Expect** +9% to +12% per trade (fit +10.7%, test +16.4%, no window under +7.6%), from $300 between +$270 and
+  +$12,000 per six-hour window on its own ordering (median about +$1,500), and a $100 start with the stop hit at most
+  7% of the time. Section 2c.
+
+**v2 (rounds 12–14).**
+
 - The curve is exactly constant-product (1.68 ETH / 1e9 virtual reserves). Every token has its own 1–5% fee on both
   legs, implied by the launch-block Buy event (the tokens it delivers against the exact curve; the event's `fee`
   field is only the 1% protocol fee) or read from the curve getter `0x24a9d853` (basis points).
@@ -25,8 +48,10 @@ dollar is sent.
 
 Accounts and tools, all standard, no colocation and no custom node:
 
-1. **AWS account** and one EC2 instance in **us-east-2 (Ohio)**, Ubuntu 24.04, t3.small (about $15–20 a month; the engine
-   uses a fraction of a core). Open no inbound ports; connect by SSH key only.
+1. **AWS account** and one EC2 instance in **us-east-2 (Ohio)**, Ubuntu 24.04. t3.small (about $15–20 a month) is
+   enough for the dry run; for live, c6i.large or c7i.large (about $60–70 a month) gives two dedicated cores with no
+   CPU credits to run out of, and `PIN_CPU=1` keeps the engine off the core that takes the network interrupts. Open no
+   inbound ports; connect by SSH key only.
 2. **A provider RPC key** with Robinhood Chain (Alchemy, QuickNode or Chainstack; free tiers cover the nonce, receipt
    and scoring calls). The public RPC rate-limits and is a fallback, not the plan.
 3. **A fresh wallet** generated on the box (any standard Ethereum key tool), used for nothing else. Keep the key in
@@ -119,6 +144,28 @@ sizing: +$100 to +$800 per busy six-hour window as the median outcome with a rig
 +$100 per quiet window, and on flat days about one chance in three of ending at the −50% daily stop. Nothing has been
 sent live; the first month's real fills are the information.
 
+### 2c. With the round-15 rule (section 23): wait 0.3 s for a rival, hold 5 s, take-profit +50%, 15% sizing
+
+E2 seat, send 0.3 s into second two only if no outsider has bought, 3% of supply, sell after 5 s or at +50%, minOut
+refusals included (`data/derived/risk_harness.txt`):
+
+| window | Aug 30 | Aug 31 | Sep 1 | Sep 2 | Sep 3 night | Sep 3 day | Sep 3 eve | Sep 4 | Sep 5 night | Sep 5 | Sep 6 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| launches kept in 6 h | 155 | 251 | 184 | 169 | 51 | 171 | 284 | 66 | 43 | 105 | 89 |
+| mean ROI per trade | +8.9% | +9.7% | +8.7% | +16.1% | +16.6% | +20.9% | +18.0% | +9.5% | +16.0% | +16.3% | +7.6% |
+| trades ending below −40% | 13% | 14% | 16% | 15% | 8% | 9% | 11% | 0% | 5% | 6% | 7% |
+| one at a time, $300 stakes | $3,800 | $6,146 | $4,376 | $7,677 | $2,418 | $10,022 | $14,293 | $1,779 | $2,077 | $5,085 | $1,730 |
+| from $300, engine defaults (15% / $25) | $1,497 | $3,717 | $1,805 | $5,693 | $894 | $7,658 | $12,367 | $632 | $728 | $2,722 | $571 |
+| from $100, engine defaults | $395 | $1,301 | $505 | $3,520 | $340 | $5,279 | $9,983 | $216 | $258 | $901 | $148 |
+| chance of the −50% stop from $300 (resampled) | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+| chance of the −50% stop from $100 | 6% | 3% | 7% | 2% | 0% | 0% | 2% | 0% | 0% | 0% | 2% |
+
+The hold and the take-profit were chosen on the first four windows and confirmed on the last seven (which are the
+better half by +5.7 points); the 0.3 s wait was not tuned. Plan on +9% to +12% per trade. From $300: +$270 to
++$12,000 per six-hour window on the window's own ordering, median about +$1,500, no window below start, and a
+resampled chance of the daily stop of zero. From $100: +$50 to +$10,000, median about +$400, stop odds at most 7%.
+From $50 the $25 floor is half the bankroll and the stop is hit one time in five on the weaker windows: do not.
+
 ## 3. The machine
 
 - EC2 in **us-east-2 (Ohio)**, where the sequencer lives; the smallest general-purpose instance is enough (the feed
@@ -136,32 +183,42 @@ sent live; the first month's real fills are the information.
   boundary: use one to place a manual test buy if you want to see the fee tier and the tax with your own wallet, not to
   run the rule.
 
-## 3b. The latency, in numbers (section 21.5)
+## 3b. The latency, in numbers (sections 21.5 and 23.4)
 
 - Ordering is first come, first served at the sequencer; no priority fee, no express lane.
-- The fastest outsiders land in the very first block of the seat's second on a third of bundled launches and within
-  two blocks on two thirds; that block holds one or two outsider buys. They predict the boundary; a sender that reacts
-  to seeing the new second on the feed lands one to two blocks (100–200 ms) later.
-- `SEND_MODE=react` is the default and the recommended mode at E2: it sends when the feed shows the seat's second, which
-  lands one or two blocks after the boundary, exactly the "0.3 s behind" the tables assume, and it can never land in
-  second one (which at E2 costs +6.18%, paid, not reverted). `predict` with `MARGIN_MS` is for a later stage, once the
-  `landing` events show where react-mode buys land. Live, the engine tunes the margin from each receipt (`landing` events): early landings revert on minOut and
-  cost gas, so the margin only ever creeps toward the boundary from the late side.
-- Before anything else run the probe: `deploy/ohio_setup.sh` installs it as a service. A sequencer round trip above
-  10 ms or a flip spread far above one block means the box is in the wrong place or its clock is off.
+- With the round-15 rule the engine does not race for the first block. It waits for the feed to show second two, keeps
+  watching the curve for 300 ms, and sends only if no outsider has bought; it lands in the fourth or fifth block of the
+  second, 350–450 ms after the boundary, which is the tables' entry. What has to be fast is seeing: an outsider's buy in
+  the first three blocks must be decoded and indexed before the send (engine v4: about 0.3 ms per feed frame, measured
+  on a seven-minute capture, against 11 ms for v3 without coincurve), and the send itself must be one warm round trip
+  (`SENDER` keeps the sockets to the sequencer and the provider open and logs their round trips every 100 s as
+  `sender_rtt`; in Ohio expect a few milliseconds).
+- The proof is in the log, not in the sandbox: `trade_decision` carries `seat_flip_to_send_ms` (should read about 300)
+  and `wake_to_send_ms` (should read under 1), and every live `landing` carries the block's timestamp against the
+  seat's second and the transaction's index in the block.
+- `SEND_MODE=predict` with `MARGIN_MS` (start 15, floor 5), the interval-vote boundary estimator (`boundary` events log
+  its confidence and bracket width; below 0.5 confidence the engine sends in react mode) and the margin controller stay
+  for E1 or for an operator who wants to be first in the block; at E2 with the rule they are not needed. Run the probe once anyway (`deploy/ohio_setup.sh` installs it): a sequencer round trip above 10 ms or a
+  bracket width far above one block (100 ms) means the box is in the wrong place or its clock is off.
+- The engine refuses to start without a working coincurve when `REQUIRE_COINCURVE=1` (the setup sets it): without it
+  every signature recovery costs 5 ms and the feed loop falls behind at busy times.
 
 ## 4. Configure
 
 ```
-SEAT=E2 BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.3 OUT1_MAX=0 MIN_CREATOR_SUPPLY=0.01 STOP_SELL_FRAC=0 SUPPLY_FRAC=0.03 SLIP=0.25 HOLD_S=7 BANKROLL_USD=300 FRAC=0.2 STAKE_MIN=50 STAKE_MAX=300 \
-SWITCH_N=15 SWITCH=-0.10 DAILY_STOP=0.50 MAX_RESOLVE_MS=1500 GAS_MAX_SHARE=0.03 TIER_ASSUMED=0.05 SEND_MODE=react MARGIN_MS=25 \
-WALLET=0x… RPC_URL=https://… FEED_URL=wss://feed.mainnet.chain.robinhood.com LOG_PATH=engine.jsonl \
+SEAT=E2 BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.3 OUT1_MAX=0 OUT2_MAX=0 SEAT_WAIT_MS=300 MIN_CREATOR_SUPPLY=0.01 STOP_SELL_FRAC=0 SUPPLY_FRAC=0.03 SLIP=0.25 \
+HOLD_S=5 TAKE_PROFIT=0.5 BANKROLL_USD=300 FRAC=0.15 STAKE_MIN=25 STAKE_MAX=300 SWITCH_N=15 SWITCH=-0.10 DAILY_STOP=0.50 MAX_RESOLVE_MS=1500 GAS_MAX_SHARE=0.05 \
+TIER_ASSUMED=0.05 SEND_MODE=react MARGIN_MS=25 REQUIRE_COINCURVE=1 PIN_CPU=1 \
+WALLET=0x… RPC_URL=https://… SEQ_URL=https://sequencer.mainnet.chain.robinhood.com FEED_URL=wss://feed.mainnet.chain.robinhood.com LOG_PATH=engine.jsonl \
 python3 src/strategy/sniper_engine.py
 ```
 
 `SEAT=E2` waits two seconds past the creation's timestamp (+0.19%); `SEAT=E1` waits one (+6.18%, in front of the
 second-one bots, only worth it if your `sent_ms` is consistently first). `SEAT=E0` refuses to start without `EXEMPT=1`,
-and `EXEMPT=1` is only true for a wallet the creator named. Do not set it.
+and `EXEMPT=1` is only true for a wallet the creator named. Do not set it. `SEAT_WAIT_MS=300` with `OUT2_MAX=0` is
+the round-15 rule (send 0.3 s into the seat's second unless an outsider has bought); `TAKE_PROFIT=0.5` sells when the
+curve price is 50% above the entry, `0` turns it off; `FRAC=0.2 STAKE_MIN=50` is the older, faster-compounding sizing
+(stop odds at most 1% under the rule); `PIN_CPU` only on a box with two or more cores.
 
 ## 5. Dry run first, then the send step
 
@@ -172,8 +229,11 @@ rolling mean, the switch state, and the dry-run bankroll). Go/no-go from that lo
 
 - `resolve_src` is `feed` on bundled launches and `feed_resolution_ok` follows every one of them 25 s later
   (a `feed_resolution_mismatch` means the engine would have bought the wrong curve: stop);
-- `sent_ms` (feed to send) equal to the wait for the seat's second plus a few milliseconds, otherwise the machine is in
-  the wrong place;
+- `seat_flip_to_send_ms` about 300 and `wake_to_send_ms` under 1 on every `trade_decision`, `sender_rtt` a few
+  milliseconds to both endpoints, `sender_backend` `coincurve-direct` in the `start` line; otherwise the machine is in
+  the wrong place or the environment is incomplete;
+- `eligible_not_traded` with `outsider buys in the seat's second before our send` on some launches and not on most: the
+  rival gate is reading the feed (about a quarter of bundled launches on the busy days);
 - rolling mean of the scores positive over at least one full peak day, and the dry-run bankroll path matching the
   compounding table within its confidence interval;
 - the switch turning on and off as the flow changes rather than sitting on.
@@ -181,8 +241,8 @@ rolling mean, the switch state, and the dry-run bankroll). Go/no-go from that lo
 The send step is yours: replace `submit()` with a function that signs with your key and calls
 `eth_sendRawTransaction`, returning the hash. Sign the sell as soon as the buy's receipt is in (the engine builds it
 with the next nonce) and keep a second endpoint to send it through if the first fails: a token held past the dump is
-the one loss the tables do not contain. On the first live trade verify, from the receipt: the block's timestamp is the seat's second (the engine's `landing`
-event says early / first block / later block; "early" at E2 means you paid the +6.18% of second one, and a revert
+the one loss the tables do not contain. On the first live trade verify, from the receipt: the block's timestamp is the seat's second and `tx_index` puts you
+in the fourth or fifth block of it (the engine's `landing` event says early / first block / later block; "early" at E2 means you paid the +6.18% of second one, and a revert
 means the creation second); tokens received within `SLIP` of the engine's `tokens_target` (the event's `fee` field is
 only the 1% protocol fee, the token's own 1–5% tax is a separate deduction, so compare tokens, not fees); the approve
 landed before the hold ended; the sell moved exactly the balance. Then compare the first 30 live scores with the first 30 engine scores of the same
@@ -195,17 +255,19 @@ the engine's scores for the same launches are above +5% (you are not getting the
 ever above 6.18% on a next-second landing, or if the bundled-launch count falls under ten a day (the flow that pays
 is gone).
 
-## 7. Starting with $50
+## 7. Starting small
 
-Gas is $1 a round trip, so a $50 stake pays 2% before anything else, and the trade's median outcome is a small loss with
-a fat right tail. On the exact-curve trades, all-in from $50 reaches $300 before dropping under $25 33% of the time on
-Sep 3, 23% on Sep 2, 5% on Aug 27 and never on Aug 20. Start at $300 or save to it; below that the bankroll is a lottery
-ticket on the day's flow.
+Under the round-15 rule with 15% sizing and a $25 floor (section 2c): from **$100** the resampled chance of the −50%
+daily stop is at most 7% on the weakest window and under 3% on most, and the windows end between $148 and $10,083 on
+their own orderings; from **$150** it is under 2% everywhere; from **$200** it is 0.1% or less. From **$50** the floor is
+half the bankroll and the stop is hit one time in five on the weaker windows: save to $100 first. Gas is about $1 a
+round trip, 4% of a $25 stake, which the `GAS_MAX_SHARE=0.05` gate allows; if gas rises the engine stops trading the
+small stakes by itself.
 
 ## 8. What this is not
 
 It is not the +30% a trade of sections 14 and 19; that is the launch team's seat. It is not proven out of sample: the
 bundle filter was chosen on the five windows. It is not available from a phone or a Telegram bot. It is a peak-day,
-Ohio-latency, seven-second ride on other people's pumps, sized at $150 a trade, with a switch that keeps quiet days
-near zero and a stop that caps a bad one. The chain's terms of use have an automated-trading clause whose scope is
+Ohio-latency, five-second ride on other people's pumps, taken only when no faster bot is already in the seat, sized at
+$25–$300 a trade, with a switch that keeps quiet days near zero and a stop that caps a bad one. The chain's terms of use have an automated-trading clause whose scope is
 unclear; that is the operator's call.
