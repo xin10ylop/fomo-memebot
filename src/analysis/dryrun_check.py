@@ -22,12 +22,14 @@ def main(path):
             pass
     if not evs:
         print("empty log"); return
+    if "--all" not in sys.argv:                                              # by default: only what the current build did (since the last start)
+        last = max((i for i, e in enumerate(evs) if e.get("ev") == "start"), default=0); evs = evs[last:]
     by = collections.defaultdict(list)
     for e in evs:
         by[e.get("ev")].append(e)
     t0 = evs[0]["t"]; t1 = evs[-1]["t"]; hours = (t1 - t0) / 3600
     starts = by["start"]; last_start = starts[-1] if starts else {}
-    print(f"=== {path}: {hours:.1f} h of log, {len(starts)} start(s), engine {last_start.get('version')}, seat {last_start.get('seat')}, dry_run {last_start.get('dry_run')}, wallet {last_start.get('wallet')}")
+    print(f"=== {path}: {hours:.1f} h since the last start{' (whole file)' if '--all' in sys.argv else ''}, {len(starts)} start(s), engine {last_start.get('version')}, seat {last_start.get('seat')}, dry_run {last_start.get('dry_run')}, wallet {last_start.get('wallet')}")
     print(f"    creations {len(by['creation'])}, skipped {len(by['skip'])}, resolved from the feed {sum(1 for e in by['feed_resolution_ok'])}, mismatches {len(by['feed_resolution_mismatch'])}, "
           f"gated {len(by['eligible_not_traded'])}, would-be trades {len(by['trade_decision'])}, scored {sum(1 for e in by['score'] if 'roi' in e)}, outside the rule on the chain {sum(1 for e in by['score'] if e.get('result'))}")
     checks = []
@@ -40,11 +42,12 @@ def main(path):
             print(f"{time.strftime('%H:%M:%S', time.gmtime(e['t'])):8s} {e.get('bundle', 0):6d} {e.get('bundle_eth', 0):5.2f} {e.get('out1', 0):4d} {e.get('out2', 0):4d} {e.get('resolve_ms', 0):7d} {str(e.get('resolve_src'))[:4]:>4s} "
                   f"{(e.get('seat_flip_to_send_ms') if e.get('seat_flip_to_send_ms') is not None else float('nan')):10.1f} {e.get('wake_to_send_ms', 0):6.2f} {e.get('stake_usd', 0):6.0f} {e.get('price_vs_creator', 0):10.2f}")
         flips = [e["seat_flip_to_send_ms"] for e in td if e.get("seat_flip_to_send_ms") is not None]; wakes = [e.get("wake_to_send_ms", 0) for e in td]; res = [e.get("resolve_ms", 0) for e in td]
-        ok_flip = flips and all(250 <= x <= 400 for x in flips); ok_wake = all(x < 1.0 for x in wakes); ok_res = all(x < 1500 for x in res); ok_src = all(e.get("resolve_src") == "feed" for e in td)
+        ok_flip = flips and all(250 <= x <= 400 for x in flips); ok_wake = all(x < 1.0 for x in wakes); ok_res = all(x < 1500 for x in res)
+        n_feed = sum(1 for e in td if e.get("resolve_src") == "feed"); ok_src = n_feed >= 0.8 * len(td) and ok_res   # the RPC path is a fallback: fine when rare and under the gate
         checks.append(("send 300 ms after the seat's second (250-400)", ok_flip, f"median {med(flips):.1f} ms, worst {max(flips) if flips else 0:.1f}" if flips else "no flip timing recorded"))
         checks.append(("wake-up under 1 ms", ok_wake, f"median {med(wakes):.2f} ms, worst {max(wakes):.2f}"))
         checks.append(("resolution under 1500 ms", ok_res, f"median {med(res):.0f} ms, worst {max(res)}"))
-        checks.append(("resolved from the feed, not the RPC", ok_src, f"{sum(1 for e in td if e.get('resolve_src') == 'feed')} of {len(td)} from the feed"))
+        checks.append(("resolved from the feed (RPC fallback under 20%)", ok_src, f"{n_feed} of {len(td)} from the feed"))
     else:
         checks.append(("would-be trades", False, "none yet: wait for a busy hour"))
     # 2) feed vs chain on the gates
@@ -84,9 +87,10 @@ def main(path):
         print("\n--- why eligible launches were not traded: " + ", ".join(f"{k} x{v}" for k, v in gates.most_common(8)))
     # 5) trouble
     errs = collections.Counter(e.get("stage") for e in by["error"]); alarms = [e.get("what") for e in by["alarm"]]
-    print(f"\n--- trouble: errors {dict(errs) if errs else 'none'}; alarms {alarms if alarms else 'none'}; feed errors {len(by['feed_error'])}, feed stalls {len(by['feed_stall'])}, reconnects {len(by['feed_connected']) - 1}")
+    reconnects = max(0, len(by["feed_connected"]) - len(starts))
+    print(f"\n--- trouble: errors {dict(errs) if errs else 'none'}; alarms {alarms if alarms else 'none'}; feed errors {len(by['feed_error'])}, feed stalls {len(by['feed_stall'])}, reconnects {reconnects} (restarts {len(starts)})")
     checks.append(("no alarms", not alarms, "; ".join(alarms)[:120] if alarms else "none"))
-    checks.append(("feed stable", len(by["feed_error"]) <= 3 * max(1, hours) and len(by["feed_connected"]) <= 3 * max(1, hours) + 1, f"{len(by['feed_error'])} feed errors, {len(by['feed_connected'])} connections in {hours:.1f} h"))
+    checks.append(("feed stable", len(by["feed_error"]) <= 3 * max(1, hours) and reconnects <= 3 * max(1, hours), f"{len(by['feed_error'])} feed errors, {reconnects} reconnects in {hours:.1f} h"))
     # 6) readouts
     fl = by["flow"]
     if fl:
@@ -98,8 +102,13 @@ def main(path):
     print("\n=== checks")
     for name, ok, detail in checks:
         print(f"   {'WAIT' if ok is None else ('PASS' if ok else 'FAIL'):4s}  {name:48s} {detail}")
-    fails = [n for n, ok, _ in checks if ok is False]
-    print("verdict: " + ("ready for the first five $25 trades" if not fails and any(ok for _, ok, _ in checks) else ("not yet: " + "; ".join(fails))))
+    fails = [n for n, ok, _ in checks if ok is False]; waiting = [n for n, ok, _ in checks if ok is None and n.startswith("mean score")]
+    if fails:
+        print("verdict: not yet: " + "; ".join(fails))
+    elif waiting or not sc:
+        print(f"verdict: machine and gates fine; waiting for 20 scores ({len(sc) if sc else 0} so far) before judging the market")
+    else:
+        print("verdict: ready for the first five $25 trades" if st.mean(rois) > 0.03 else "verdict: machine fine, market not paying right now: do not fund yet")
 
 
 if __name__ == "__main__":

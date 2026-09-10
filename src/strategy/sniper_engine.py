@@ -571,10 +571,12 @@ def fold_buy(w, ts_, snd, val, blk=None, to=None, sel=None):
         net = val * 0.99; X, Y = w["X"], w["Y"]; tk = Y - X * Y / (X + net); w["X"] = X + net; w["Y"] = Y - tk
     w["buys"] += 1
     in_creation = (blk - w["blk0"] <= 9) if (blk is not None and w.get("blk0") is not None) else (ts_ == w["ts0"])
-    if snd in w["named"]:
-        if in_creation:
+    if snd in w["named"] or snd == w["creator"]:
+        if in_creation and not w.get("bundle_closed"):
             w["bundle"] += 1; w["wallets"].add(snd); w["bundle_eth"] += val   # buys and distinct wallets: the tables count buys (no sender in the event data)
-    elif snd != w["creator"] and snd != WALLET:
+    elif snd != WALLET:
+        if in_creation and not w.get("bundle_closed"):                          # the tables end the bundle at the first taxed buy (an outsider paying 93-98% in the creation second)
+            w["bundle_closed"] = True
         sec = ts_ - w["ts0"]
         if sec in (1, 2):
             ignored = state["reverters"].get(snd, 0) >= 3
@@ -1217,7 +1219,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.5, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 4.6, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
