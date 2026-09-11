@@ -11,7 +11,7 @@ for k in WINS:
         kept = f["out1_n"] == 0 and not RH.G_WAIT(0.3)(f)
         by = {}
         for stk in RH.STAKES:
-            x = RH.replay(L, stk / PX, hold=5.0, tp=0.5); by[stk] = (x[0] * PX - 1.0, x[1] * PX, L["ts"] + x[2], L["ts"] + x[3], x[4])
+            x = RH.replay(L, stk / PX, hold=5.0, tp=0.5); by[stk] = (x[0] * PX - 0.10, x[1] * PX, L["ts"] + x[2], L["ts"] + x[3], x[4])   # gas $0.10 a round trip as measured, not the $1 planning figure
         recs.append(dict(k=k, t=by[25][2], t_score=by[25][3] + 20, kept=kept and by[25][4] != "reverted", roi=by[25][0] / by[25][1] if by[25][1] > 1e-6 else 0.0, by=by, hour=f["hour"], bundle=f["bundle_n"], beth=f["bundle_eth"]))
 recs.sort(key=lambda x: x["t"])
 for i, x in enumerate(recs):

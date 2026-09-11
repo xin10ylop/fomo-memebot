@@ -1,30 +1,30 @@
 === yesterday: 590 bundled launches in the three windows, 90 pass the rule
 window             kept     ROI  median <-40% net $25 stakes
-09-10 12-18        35   +0.0%   -3.0%    6%            +0
-09-10 18-24        41  +11.6%  +16.8%    2%          +119
-09-11 0-6          14   +3.4%   -0.6%    7%           +12
+09-10 12-18        35   +3.6%   +0.6%    6%           +32
+09-10 18-24        41  +15.2%  +20.4%    2%          +156
+09-11 0-6          14   +7.0%   +3.0%    7%           +24
 
 --- by hour (UTC), kept launches
-   00:00  n   2  mean   -1.5%  <-40% 0
-   01:00  n   7  mean   -3.9%  <-40% 1
-   03:00  n   5  mean  +15.6%  <-40% 0
-   12:00  n   5  mean   -5.0%  <-40% 0
-   13:00  n   4  mean   -7.9%  <-40% 0
-   14:00  n   4  mean   -7.1%  <-40% 0
-   15:00  n   4  mean  +18.0%  <-40% 0
-   16:00  n   9  mean   -1.8%  <-40% 1
-   17:00  n   9  mean   +3.4%  <-40% 1
-   18:00  n  12  mean   +9.6%  <-40% 0
-   19:00  n   6  mean   +3.4%  <-40% 0
-   20:00  n   4  mean  +33.5%  <-40% 0
-   21:00  n  12  mean  +13.7%  <-40% 1
-   22:00  n   2  mean  +23.9%  <-40% 0
-   23:00  n   5  mean   -1.4%  <-40% 0
+   00:00  n   2  mean   +2.1%  <-40% 0
+   01:00  n   7  mean   -0.3%  <-40% 1
+   03:00  n   5  mean  +19.2%  <-40% 0
+   12:00  n   5  mean   -1.4%  <-40% 0
+   13:00  n   4  mean   -4.3%  <-40% 0
+   14:00  n   4  mean   -3.5%  <-40% 0
+   15:00  n   4  mean  +21.6%  <-40% 0
+   16:00  n   9  mean   +1.8%  <-40% 1
+   17:00  n   9  mean   +7.0%  <-40% 1
+   18:00  n  12  mean  +13.2%  <-40% 0
+   19:00  n   6  mean   +7.0%  <-40% 0
+   20:00  n   4  mean  +37.1%  <-40% 0
+   21:00  n  12  mean  +17.3%  <-40% 1
+   22:00  n   2  mean  +27.5%  <-40% 0
+   23:00  n   5  mean   +2.2%  <-40% 0
 
 --- own path from $92, one position at a time
-   rule as before (any hour, any stretch)                                 cap $ 25:  89 trades, mean  +6.0%, losers <-40%: 4, end $225 (+133), worst drawdown 30%
-   rule as before (any hour, any stretch)                                 cap $300:  89 trades, mean  +6.0%, losers <-40%: 4, end $225 (+133), worst drawdown 30%
-   engine 4.7: hours 12-06 and a rule-passing launch in the previous hour cap $ 25:  86 trades, mean  +5.5%, losers <-40%: 4, end $210 (+118), worst drawdown 36%
-   engine 4.7: hours 12-06 and a rule-passing launch in the previous hour cap $300:  86 trades, mean  +5.5%, losers <-40%: 4, end $210 (+118), worst drawdown 36%
+   rule as before (any hour, any stretch)                                 cap $ 25:  89 trades, mean  +9.6%, losers <-40%: 4, end $305 (+213), worst drawdown 21%
+   rule as before (any hour, any stretch)                                 cap $300:  89 trades, mean  +9.6%, losers <-40%: 4, end $342 (+250), worst drawdown 21%
+   engine 4.7: hours 12-06 and a rule-passing launch in the previous hour cap $ 25:  86 trades, mean  +9.1%, losers <-40%: 4, end $288 (+196), worst drawdown 23%
+   engine 4.7: hours 12-06 and a rule-passing launch in the previous hour cap $300:  86 trades, mean  +9.1%, losers <-40%: 4, end $308 (+216), worst drawdown 23%
 
---- the new gates would have skipped 3 rule-passing launches yesterday: mean +19.9%, 12:08 -5%, 15:32 +35%, 03:08 +29%
+--- the new gates would have skipped 3 rule-passing launches yesterday: mean +23.5%, 12:08 -1%, 15:32 +39%, 03:08 +33%
