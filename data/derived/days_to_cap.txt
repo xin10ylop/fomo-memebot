@@ -1,0 +1,50 @@
+=== 2400 rule-passing launches on 14 measured trading days (12:00 -> 05:00 UTC); stake = 15% of bankroll, $25 floor, $300 cap
+the $300 stake is reached at a bankroll of $2,000
+
+day    blocks measured        trades  ROI@$25  ROI@$300  $25 flat  from $92  from $500 from $2,000
+08-20  12-18                       1    -2.4%     -2.0%        -1        -1         -2          -6
+08-27  12-18                       6    +4.8%     +2.9%        +7        +7        +19         +52
+08-30  12-18                     151    +9.6%     +8.6%      +364      +643      +2306       +3710
+08-31  12-18                     240   +11.6%    +10.0%      +698     +2091      +4866       +6127
+09-01  12-18                     180    +9.8%     +8.6%      +441     +1019      +3394       +4705
+09-02  0-6, 12-18                219   +18.6%    +15.9%     +1019     +6454      +9033      +10070
+09-03  12-18, 18-24              422   +20.4%    +18.4%     +2155    +18349     +20994      +22287
+09-04  0-6, 12-18                 94   +12.7%    +11.4%      +298      +501      +2061       +3207
+09-05  12-18                      97   +20.5%    +19.2%      +496     +1777      +4316       +5632
+09-06  0-6, 12-18                205    +9.1%     +7.9%      +468     +1121      +3274       +4568
+09-07  0-6, 12-18, 18-24         328    +7.2%     +6.0%      +593     +2205      +4644       +5890
+09-08  0-6, 12-18, 18-24         282    +5.9%     +5.2%      +418      +880      +2782       +4147
+09-09  0-6, 12-18, 18-24          85   +10.7%     +9.5%      +228      +303      +1223       +2401
+09-10  0-6, 12-18, 18-24          90    +9.4%     +8.7%      +212      +279      +1159       +2354
+
+--- yesterday (09-10, all three blocks) repeated: reaches $2,000 on day 3; path $92 -> $371 -> $1,245 -> $3,382
+
+--- the measured days in order from $92 (a day with only the afternoon measured counts only the afternoon):
+   08-20: $92 -> $91 (1 trades)
+   08-27: $91 -> $99 (6 trades)
+   08-30: $99 -> $755 (147 trades)
+   08-31: $755 -> $6,140 (220 trades)
+   cap reached on 08-31
+
+--- block-days available: 0-6: 7, 12-18: 14, 18-24: 5
+
+--- bootstrapped full days from $92: days to $2,000: median 2, 10th-90th pct 1-3, worst of 3000 runs 7; never within 60 days: 0
+    bankroll after 7 days: median $6,400, 10th pct $2,607, 90th pct $15,996
+
+--- a day at the cap ($2,000, $300 stakes): mean +5,367 across the measured (partial) days, best +22,287, worst -6
+    full days only: 09-07 +5,890, 09-08 +4,147, 09-09 +2,401, 09-10 +2,354
+=== each recent full day repeated (12:00 -> 05:00 UTC), from $92:
+   09-07 x1: $92 -> $2,297
+   09-08 x2: $92 -> $972 -> $4,659
+   09-09 x3: $92 -> $395 -> $1,374 -> $3,665
+   09-10 x3: $92 -> $371 -> $1,245 -> $3,382
+
+=== replay of the paper night (Sep 10 18:20 -> Sep 11 04:00): 50 rule-passing launches, 49 one-at-a-time trades at $25, mean +12.9%; the engine scored 50 and took 36 paper trades
+=== last four full days bootstrapped, 0% of launches missed by the engine: days to $2,000 median 2, 10th-90th 1-3, worst 3; after 7 days median $3,454 (10th $2,297, 90th $6,439)
+=== last four full days bootstrapped, 35% of launches missed by the engine: days to $2,000 median 3, 10th-90th 2-4, worst 61; after 7 days median $3,214 (10th $2,245, 90th $5,062)
+
+=== a day at the cap ($300 stakes) on the recent days, all launches / two thirds of them:
+   09-07: +5,890 / +3,809
+   09-08: +4,147 / +2,773
+   09-09: +2,401 / +1,546
+   09-10: +2,354 / +1,527
