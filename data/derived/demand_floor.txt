@@ -1,11 +1,38 @@
 kept trades by the 60-launch demand reading at decision time (needs 20 scored launches), all windows:
    [0.00-0.05)  n     0  mean   +0.0%  sum at $25       +0 $  share <-40% 0%
-   [0.05-0.10)  n     0  mean   +0.0%  sum at $25       +0 $  share <-40% 0%
-   [0.10-0.15)  n     0  mean   +0.0%  sum at $25       +0 $  share <-40% 0%
-   [0.15-0.20)  n     0  mean   +0.0%  sum at $25       +0 $  share <-40% 0%
-   [0.20-0.30)  n     0  mean   +0.0%  sum at $25       +0 $  share <-40% 0%
-   [0.30-9.00)  n     0  mean   +0.0%  sum at $25       +0 $  share <-40% 0%
+   [0.05-0.10)  n     8  mean   -3.9%  sum at $25       -8 $  share <-40% 0%
+   [0.10-0.15)  n     4  mean  +21.6%  sum at $25      +22 $  share <-40% 0%
+   [0.15-0.20)  n     8  mean   +3.0%  sum at $25       +6 $  share <-40% 0%
+   [0.20-0.30)  n   107  mean   +5.1%  sum at $25     +135 $  share <-40% 10%
+   [0.30-9.00)  n  2115  mean  +12.7%  sum at $25    +6729 $  share <-40% 10%
 
 per window: kept trades and $25 profit, and what a floor at 0.10 / 0.15 would have removed
+   2026-08-12 12-18  kept    0 $     +0 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading nan
+   2026-08-20 12-18  kept    1 $     -1 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading nan
+   2026-08-27 12-18  kept    6 $     +7 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading nan
+   2026-08-30 12-18  kept  151 $   +364 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.282
+   2026-08-31 12-18  kept  240 $   +698 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.262
+   2026-09-01 12-18  kept  180 $   +441 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.290
+   2026-09-02 12-18  kept  167 $   +763 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.325
+   2026-09-03 0-6    kept   53 $   +255 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.496
+   2026-09-03 12-18  kept  160 $   +963 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.445
+   2026-09-03 18-24  kept  262 $  +1192 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.439
+   2026-09-04 12-18  kept   62 $   +119 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.308
+   2026-09-05 0-6    kept   43 $   +155 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.412
+   2026-09-05 12-18  kept   97 $   +496 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.216
+   2026-09-06 12-18  kept   81 $   +130 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.218
+   2026-09-07 0-6    kept  131 $   +365 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.324
+   2026-09-07 12-18  kept   73 $     +4 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.154
+   2026-09-07 18-24  kept  199 $   +377 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.331
+   2026-09-08 0-6    kept   60 $   +210 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.361
+   2026-09-08 12-18  kept   75 $    +84 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.254
+   2026-09-08 18-24  kept  139 $   +216 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.157
+   2026-09-09 0-6    kept   71 $   +117 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.165
+   2026-09-09 12-18  kept   43 $    +94 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.237
+   2026-09-09 18-24  kept   21 $    +13 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.291
+   2026-09-10 0-6    kept   28 $   +123 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.200
+   2026-09-10 12-18  kept   35 $    +32 | floor 0.10 removes   8 ($    -8) | floor 0.15 removes  12 ($   +14) | lowest reading 0.062
+   2026-09-10 18-24  kept   41 $   +156 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.210
+   2026-09-11 0-6    kept   14 $    +24 | floor 0.10 removes   0 ($    +0) | floor 0.15 removes   0 ($    +0) | lowest reading 0.198
 
-floor 0.10: removes 0 trades worth $+0 over all windows; floor 0.15: removes 0 trades worth $+0
+floor 0.10: removes 8 trades worth $-8 over all windows; floor 0.15: removes 12 trades worth $+14
