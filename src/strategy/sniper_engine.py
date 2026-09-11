@@ -62,6 +62,15 @@ OUT2_MAX = int(os.environ.get("OUT2_MAX", "0"))                          # non-n
 SEAT_WAIT_MS = float(os.environ.get("SEAT_WAIT_MS", "300"))              # react mode: watch the seat's second this long for an outsider before sending (section 23)
 TIER_ASSUMED = float(os.environ.get("TIER_ASSUMED", "0.05"))
 STOP_SELL_FRAC = float(os.environ.get("STOP_SELL_FRAC", "0"))
+TRADE_HOURS = os.environ.get("TRADE_HOURS", "12-06")                 # UTC hours the tables cover (start-end, wraps midnight); "" = always. 06-12 UTC was never measured
+MIN_RULE_PASSING_1H = int(os.environ.get("MIN_RULE_PASSING_1H", "1"))  # do not take the first trade of a dead stretch: a rule-passing launch with none in the previous hour averaged -7.8% in the tables
+
+
+def hours_ok(now=None):
+    if not TRADE_HOURS:
+        return True
+    a, b = (int(x) for x in TRADE_HOURS.split("-")); h = datetime.datetime.utcfromtimestamp(now or time.time()).hour
+    return (a <= h < b) if a < b else (h >= a or h < b)
 SEND_MODE = os.environ.get("SEND_MODE", "react"); MARGIN_MS = float(os.environ.get("MARGIN_MS", "15"))
 MARGIN_MIN_MS = float(os.environ.get("MARGIN_MIN_MS", "5")); MARGIN_MAX_MS = float(os.environ.get("MARGIN_MAX_MS", "60"))
 MAX_LATE_S = float(os.environ.get("MAX_LATE_S", "0.5"))                  # do not send more than this far into the seat's second
@@ -978,6 +987,10 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
             gates.append(f"resolved in {resolve_ms} ms > {MAX_RESOLVE_MS}")
         if state["bankroll"] < STAKE_MIN:
             gates.append("bankroll below the minimum stake")
+        if not hours_ok():
+            gates.append(f"outside trading hours {TRADE_HOURS} UTC (hours the tables never measured)")
+        if MIN_RULE_PASSING_1H > 0 and sum(1 for t in state["rule_passing"] if time.time() - t < 3600) < MIN_RULE_PASSING_1H:
+            gates.append(f"fewer than {MIN_RULE_PASSING_1H} rule-passing launch scored in the last hour (dead stretch)")
         if send_mode is None and SEAT in ("E1", "E2"):
             gates.append("seat's second not seen in time (stale feed): not sending")
         if state["nonce"] is None or mono() - state["chain_at"] > 30:
@@ -1219,8 +1232,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.6, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 4.7, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
