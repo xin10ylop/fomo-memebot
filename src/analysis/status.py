@@ -47,13 +47,11 @@ def main():
             continue
         ev = e.get("ev")
         if ev == "start":
-            wallet = wallet or e.get("wallet")
+            wallet = wallet or e.get("wallet"); paper = []; start_t = e["t"]
             if e.get("dry_run") is False and live_since is None:
                 live_since = e["t"]
         elif ev == "trade_done" and e.get("dry_run") is False:
             dones.append(e)
-        elif ev == "start":
-            paper = []; start_t = e["t"]
         elif ev == "score" and e.get("traded_dry_run"):
             paper.append(e)
         elif ev == "flow":
