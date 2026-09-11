@@ -67,8 +67,8 @@ def main():
         print(f"live since {datetime.datetime.fromtimestamp(live_since, datetime.timezone.utc).strftime('%b %d %H:%M')} UTC; first balance seen {fw[0]['wallet_eth']:.5f} ETH" if fw else f"live since {datetime.datetime.fromtimestamp(live_since, datetime.timezone.utc).strftime('%b %d %H:%M')} UTC")
     print(f"real trades: {len(dones)} in total, {sum(1 for d in dones if d['t'] >= day0)} since 12:00 UTC today\n")
     if flows:
-        f = flows[-1]; print("market, last readout: " + ", ".join(f"{k} {f.get(k)}" for k in ("rule_passing_last_1h", "out1_share_last_60", "follow_eth_last_60", "follow_eth_all_60", "mean_score_last_60") if k in f)
-              + "\n  (clean launches an hour; share of team launches with a bot in second one; ETH buyers bring after a clean seat / after any team launch; mean paper score of the last 60)\n")
+        f = flows[-1]; print("market, last readout: " + ", ".join(f"{k} {f.get(k)}" for k in ("rule_passing_last_1h", "out1_share_last_60", "follow_eth_last_60", "follow_eth_all_60", "mean_score_last_60", "mean_score_e1_last_60", "race_first_rival_ms_median", "race_first_block_share") if k in f)
+              + "\n  (clean launches an hour; share of team launches with a bot in second one; ETH buyers bring after a clean seat / after any team launch; mean paper score of the last 60 for our E2 seat and for the E1 front; how many ms after second one opens the first bot lands, and the share landing in its first block)\n")
     if not dones:
         return
     print(f"{'time UTC':9s} {'ETH in':>8s} {'ETH out':>8s} {'gas':>8s} {'P&L $':>8s} {'return':>7s}  exit")

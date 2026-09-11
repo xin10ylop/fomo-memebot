@@ -341,7 +341,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
          "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "connected_at": 0.0,
          "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "decisions": {},
-         "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
+         "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "scores_e1": collections.deque(maxlen=60), "race_lags": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
 lock = threading.Lock()
 cond = threading.Condition()                           # notified by the feed loop after every message is fully indexed
 
@@ -432,7 +432,7 @@ def chain_loop():
                  "mean_score_last_60": round(st.mean(list(state["scores"])[-60:]), 4) if state["scores"] else None, "creations_seen": state["creations"],
                  "median_first_sell_s": round(st.median(fs), 2) if fs else None, "share_dumped_inside_hold": round(st.mean(b for a, b, c in tm), 4) if tm else None,
                  "follow_eth_last_20": round(st.mean([c for a, b, c in tm][-20:]), 3) if tm else None, "follow_eth_last_60": round(st.mean(c for a, b, c in tm), 3) if tm else None, "follow_eth_all_60": round(st.mean(state["timing_all"]), 3) if state["timing_all"] else None,
-                 "out1_share_last_60": round(st.mean(state["out1_flags"]), 2) if state["out1_flags"] else None,
+                 "out1_share_last_60": round(st.mean(state["out1_flags"]), 2) if state["out1_flags"] else None, "mean_score_e1_last_60": round(st.mean(state["scores_e1"]), 4) if state["scores_e1"] else None, "race_first_rival_ms_median": round(st.median(state["race_lags"]), 1) if state["race_lags"] else None, "race_first_block_share": round(sum(1 for x in state["race_lags"] if x < 15) / len(state["race_lags"]), 2) if state["race_lags"] else None,
                  "bankroll_usd": round(state["bankroll"], 2), "wallet_eth": round(state["wallet_eth"], 5) if state.get("wallet_eth") is not None else None,
                  "silent_min": round((mono() - state["last_creation_at"]) / 60, 1) if state["last_creation_at"] else None})
             if state["last_creation_at"] and mono() - state["last_creation_at"] > 1800 and mono() - state["connected_at"] > 1800:
@@ -628,6 +628,8 @@ def fold_buy(w, ts_, snd, val, blk=None, to=None, sel=None):
             if ignored:
                 return
             w["rivals"].append([sec, snd])
+            if sec == 1 and w.get("race_ms") is None:
+                fa = state["flip_at"].get(ts_); w["race_ms"] = round((mono() - fa) * 1000, 1) if fa else None
             if sec == 1 and val >= OUT1_MIN_ETH:
                 w["out1"] += 1
             elif sec == 2:
@@ -651,7 +653,7 @@ def size_buy(X, Y, stake_eth, seat):
 
 
 # ------------------------------------------------------------------------------------------------------------ scoring
-def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold=HOLD, frac=SUPPLY_FRAC, gated=True, stop_sell_frac=None, tp=None):
+def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold=HOLD, frac=SUPPLY_FRAC, gated=True, stop_sell_frac=None, tp=None, front=False, readouts=True):
     """the simulator's replay (sniper_exact.replay plus the take-profit of risk_harness.replay) on the curve's own Buy/Sell
     events. Returns (pnl_usd, cost_usd, t_in, tier, label_bundle, label_bundle_eth, label_out1) or "filtered" or None."""
     rows = []; X, Y = X0, Y0; tier = None
@@ -677,8 +679,9 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
     # 5-7.5%, second two 0.12-0.35%); a launch where most surcharged buys fall outside them is anomalous, a run of them means the rules changed
     sur = [r[5] - tier for r in rows[1:] if r[1] == "B" and r[0] <= 3.0 and r[5] - tier > 0.001]
     odd = sum(1 for x in sur if not (0.85 <= x <= 0.995 or 0.05 <= x <= 0.075 or 0.0012 <= x <= 0.0035))
-    state["schedule"].append(1 if (sur and odd / len(sur) > 0.5) else 0)
-    if lab[0] >= BUNDLE_MIN and lab[1] >= BUNDLE_MIN_ETH:
+    if readouts:
+        state["schedule"].append(1 if (sur and odd / len(sur) > 0.5) else 0)
+    if readouts and lab[0] >= BUNDLE_MIN and lab[1] >= BUNDLE_MIN_ETH:
         state["out1_flags"].append(1 if lab[2] > 0 else 0)                              # crowding readout: share of bundled launches with an outsider in second one
         state["timing_all"].append(sum(r[2] for r in rows[1:] if r[1] == "B" and 2.3 <= r[0] < 7.6))   # demand over every bundled launch, crowded or not (the tables' gauge); the floor reads the clean ones only
     if gated and (lab[0] < BUNDLE_MIN or lab[1] < BUNDLE_MIN_ETH or rows[0][3] < MIN_CREATOR_SUPPLY * Y0 or (seat == "E2" and lab[2] > OUT1_MAX)):
@@ -690,7 +693,10 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
         idx = next((i for i in range(1, len(rows)) if rows[i][0] >= fb), len(rows)); t_in = fb
     else:
         t_in = rows[idx][0]
-    t_in += 0.3; idx = next((i for i in range(1, len(rows)) if rows[i][0] >= t_in), len(rows))       # 0.3 s behind the first buyer of the seat, as the tables assume
+    if front:                                                                                      # the front of the seat's second: ahead of every buyer in it (the E1 plan's assumption)
+        t_in = fb; idx = next((i for i in range(1, len(rows)) if rows[i][0] >= fb), len(rows))
+    else:
+        t_in += 0.3; idx = next((i for i in range(1, len(rows)) if rows[i][0] >= t_in), len(rows))   # 0.3 s behind the first buyer of the seat, as the tables assume
     for r in rows[1:idx]:
         if r[1] == "B":
             X += r[4]; Y -= r[3]
@@ -721,7 +727,8 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
     first_sell = next((r[0] - t_in for r in rows if r[1] == "S" and r[0] >= t_in), None)
     dumped = sum(r[3] for r in rows if r[1] == "S" and t_in <= r[0] < t_in + hold + slip) / Y0
     follow_eth = sum(r[2] for r in rows if r[1] == "B" and t_in <= r[0] < t_exit)       # demand readout: ETH later buyers brought while we held (section 23.11)
-    state["timing"].append((first_sell, dumped, follow_eth))
+    if readouts:
+        state["timing"].append((first_sell, dumped, follow_eth))
     return ((out - gross) * state["eth_usd"] - 1.0, gross * state["eth_usd"], t_in, tier) + lab
 
 
@@ -771,13 +778,22 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
         r = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, gated=BUNDLE_MIN > 0, stop_sell_frac=STOP_SELL_FRAC if STOP_SELL_FRAC > 0 else None, tp=TAKE_PROFIT if TAKE_PROFIT > 0 else None)
         if r is None:
             log({"ev": "score", "curve": curve, "result": "no usable launch-block buy"}); return
+        roi_e1 = None                                                   # paper score of the E1 seat (the front of second one, every bundled launch), for the E1 plan
+        try:
+            r1 = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], "E1", gated=True, front=True, readouts=False, tp=TAKE_PROFIT if TAKE_PROFIT > 0 else None)
+            if r1 is not None and r1[0] != "filtered" and r1[1] > 0:
+                roi_e1 = round(r1[0] / r1[1], 4); state["scores_e1"].append(roi_e1)
+        except Exception:
+            pass
+        if decision is not None and decision.get("race_ms") is not None:
+            state["race_lags"].append(decision["race_ms"])
         if decision is not None:                                        # what the feed said at decision time vs what the chain says
             lab = r[-3:]
             log({"ev": "gate_check", "curve": curve, "feed": decision, "chain": {"bundle": lab[0], "bundle_eth": round(lab[1], 4), "out1": lab[2]}, "src": src})
         if len(state["schedule"]) >= 20 and sum(state["schedule"]) >= 10 and not state["rules_changed"]:
             state["rules_changed"] = True; log({"ev": "alarm", "what": "tax schedule changed: half of the last 20 scored launches show surcharges outside the known bands; trading stopped until restarted"})
         if r[0] == "filtered":
-            log({"ev": "score", "curve": curve, "result": "outside the rule on the chain's reading"}); state["traded"].pop(curve, None); return
+            log({"ev": "score", "curve": curve, "result": "outside the rule on the chain's reading", "roi_e1": roi_e1}); state["traded"].pop(curve, None); return
         state["rule_passing"].append(time.time())
         pnl, cost, t_in, tier = r[:4]; roi = pnl / cost
         with lock:
@@ -786,7 +802,7 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
             if traded is not None and SEND is None:                     # dry run: the paper bankroll follows the scores; live: the wallet balance (chain_loop)
                 state["bankroll"] += min(traded, cost) * roi
         save_state()
-        log({"ev": "score", "curve": curve, "roi": round(roi, 4), "pnl_usd": round(pnl, 2), "cost_usd": round(cost, 2), "tier": round(tier, 4), "t_in_s": round(t_in, 2),
+        log({"ev": "score", "curve": curve, "roi": round(roi, 4), "roi_e1": roi_e1, "pnl_usd": round(pnl, 2), "cost_usd": round(cost, 2), "tier": round(tier, 4), "t_in_s": round(t_in, 2),
              "n_scores": len(sc), "rolling_mean": round(st.mean(sc), 4), "switch_on": on, "traded_dry_run": traded is not None, "bankroll": round(state["bankroll"], 2)})
     except Exception as e:
         log({"ev": "error", "stage": "score", "err": str(e)[:200]})
@@ -1010,7 +1026,7 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
     if SEAT in ("E1", "E2"):
         send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at, watch=w)
     t_wake = mono()
-    decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"])}
+    decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "race_ms": w.get("race_ms"), "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"])}
     with lock:
         sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []
@@ -1332,7 +1348,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.95, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 4.96, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
