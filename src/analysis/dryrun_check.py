@@ -59,6 +59,9 @@ def main(path):
         print(f"\n--- feed against chain on {len(gc)} feed-resolved launches: rival missed by the feed {len(blind)}, rival counted that never landed {len(cautious)}, bundle count off by more than one {len(bundle_off)}")
         if blind:
             print(f"    missed e.g. feed {blind[0]['feed']} chain {blind[0]['chain']}")
+        if bundle_off:
+            hi = sum(1 for e in bundle_off if e["feed"].get("bundle", 0) > e["chain"].get("bundle", 0)); lo = len(bundle_off) - hi
+            print(f"    bundle count: feed higher on {hi}, chain higher on {lo}; pairs (feed n/ETH vs chain n/ETH): " + ", ".join(f"{e['feed'].get('bundle')}/{e['feed'].get('bundle_eth')} vs {e['chain'].get('bundle')}/{e['chain'].get('bundle_eth')}" for e in bundle_off[:8]))
         checks.append(("feed misses no rival the chain saw (under 10%)", len(blind) <= 0.1 * len(gc), f"{len(blind)} of {len(gc)}"))
         checks.append(("feed's bundle count matches the chain (under 10% off)", len(bundle_off) <= 0.1 * len(gc), f"{len(bundle_off)} of {len(gc)} off by more than one"))
         if cautious:
@@ -87,6 +90,8 @@ def main(path):
         print("\n--- why eligible launches were not traded: " + ", ".join(f"{k} x{v}" for k, v in gates.most_common(8)))
     # 5) trouble
     errs = collections.Counter(e.get("stage") for e in by["error"]); alarms = [e.get("what") for e in by["alarm"]]
+    if by["error"]:
+        print(f"    last error: {by['error'][-1].get('stage')}: {str(by['error'][-1].get('err'))[:160]}")
     reconnects = max(0, len(by["feed_connected"]) - len(starts))
     print(f"\n--- trouble: errors {dict(errs) if errs else 'none'}; alarms {alarms if alarms else 'none'}; feed errors {len(by['feed_error'])}, feed stalls {len(by['feed_stall'])}, reconnects {reconnects} (restarts {len(starts)})")
     checks.append(("no alarms", not alarms, "; ".join(alarms)[:120] if alarms else "none"))
