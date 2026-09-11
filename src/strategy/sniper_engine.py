@@ -63,7 +63,8 @@ SEAT_WAIT_MS = float(os.environ.get("SEAT_WAIT_MS", "300"))              # react
 TIER_ASSUMED = float(os.environ.get("TIER_ASSUMED", "0.05"))
 STOP_SELL_FRAC = float(os.environ.get("STOP_SELL_FRAC", "0"))
 TRADE_HOURS = os.environ.get("TRADE_HOURS", "12-05")                 # UTC hours the tables cover and that pay (start-end, wraps midnight); "" = always. 06-12 never measured, 05-06 +0.4% on 33 launches
-MIN_RULE_PASSING_1H = int(os.environ.get("MIN_RULE_PASSING_1H", "0"))  # optional dead-stretch guard; off: the tables' n=7 at -7.8% and yesterday's n=3 at +19.9% pool to nothing
+MIN_RULE_PASSING_1H = int(os.environ.get("MIN_RULE_PASSING_1H", "0"))
+MIN_FOLLOW_ETH_60 = float(os.environ.get("MIN_FOLLOW_ETH_60", "0.10"))  # demand floor: no new trade while the mean follow-on ETH of the last 60 scored launches is below this. The tables never read below 0.15 except Sep 10 12-18 (0.06, those trades lost); costs nothing there, and Sep 11 read 0.01-0.03 all morning  # optional dead-stretch guard; off: the tables' n=7 at -7.8% and yesterday's n=3 at +19.9% pool to nothing
 
 
 def hours_ok(now=None):
@@ -317,7 +318,7 @@ cond = threading.Condition()                           # notified by the feed lo
 def save_state():
     try:
         d = {"bankroll": state["bankroll"], "day": str(state["day"]), "day_start": state["day_start"], "stopped": state["stopped"], "scores": list(state["scores"]),
-             "open": state["open"], "margin_ms": MARGIN_MS, "saved_at": time.time()}
+             "open": state["open"], "margin_ms": MARGIN_MS, "saved_at": time.time(), "timing": list(state["timing"])}
         tmp = STATE_PATH + ".tmp"; json.dump(d, open(tmp, "w")); os.replace(tmp, STATE_PATH)
     except Exception as e:
         log({"ev": "error", "stage": "save_state", "err": str(e)[:200]})
@@ -332,6 +333,9 @@ def load_state():
         for x in d.get("scores", []):
             state["scores"].append(x)
         state["open"] = d.get("open"); MARGIN_MS = float(d.get("margin_ms", MARGIN_MS))
+        if time.time() - d.get("saved_at", 0) < 3600:                          # the demand readout survives a restart (it gates the first trades); stale after an hour
+            for x in d.get("timing", []):
+                state["timing"].append(tuple(x))
         log({"ev": "state_loaded", "bankroll": state["bankroll"], "scores": len(state["scores"]), "open": state["open"] is not None, "margin_ms": MARGIN_MS})
     except FileNotFoundError:
         pass
@@ -991,6 +995,10 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
             gates.append(f"outside trading hours {TRADE_HOURS} UTC (hours the tables never measured)")
         if MIN_RULE_PASSING_1H > 0 and sum(1 for t in state["rule_passing"] if time.time() - t < 3600) < MIN_RULE_PASSING_1H:
             gates.append(f"fewer than {MIN_RULE_PASSING_1H} rule-passing launch scored in the last hour (dead stretch)")
+        if MIN_FOLLOW_ETH_60 > 0 and len(state["timing"]) >= 20:
+            fe = st.mean(c for a, b, c in list(state["timing"]))
+            if fe < MIN_FOLLOW_ETH_60:
+                gates.append(f"demand {fe:.3f} ETH over the last {len(state['timing'])} scored launches < {MIN_FOLLOW_ETH_60} (below the tables' range)")
         if send_mode is None and SEAT in ("E1", "E2"):
             gates.append("seat's second not seen in time (stale feed): not sending")
         if state["nonce"] is None or mono() - state["chain_at"] > 30:
@@ -1232,8 +1240,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.9, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 4.91, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":

@@ -44,6 +44,8 @@ STOP_SELL_FRAC=0
 # hours the tables cover (UTC, wraps midnight); the dead-stretch guard is off (no evidence either way)
 TRADE_HOURS=12-05
 MIN_RULE_PASSING_1H=0
+# demand floor: no new trade while the last 60 scored launches drew under 0.10 ETH of buyers on average (the tables never paid there)
+MIN_FOLLOW_ETH_60=0.10
 SUPPLY_FRAC=0.03
 SLIP=0.25
 HOLD_S=5
