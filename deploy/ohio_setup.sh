@@ -41,9 +41,9 @@ OUT2_MAX=0
 SEAT_WAIT_MS=300
 MIN_CREATOR_SUPPLY=0.01
 STOP_SELL_FRAC=0
-# hours the tables cover (UTC, wraps midnight) and the dead-stretch guard: section 23.11 addendum
+# hours the tables cover (UTC, wraps midnight); the dead-stretch guard is off (no evidence either way)
 TRADE_HOURS=12-06
-MIN_RULE_PASSING_1H=1
+MIN_RULE_PASSING_1H=0
 SUPPLY_FRAC=0.03
 SLIP=0.25
 HOLD_S=5
