@@ -505,7 +505,7 @@ def wait_for_second(feed_ts, seconds, seen_at, deadline=3.5, watch=None):
     if SEAT_WAIT_MS > 0 and watch is not None:                       # the seat rule: send SEAT_WAIT_MS into the second unless an outsider has already bought
         until = state["flip_at"][target_ts] + SEAT_WAIT_MS / 1000.0
         with cond:
-            while mono() < until and watch["out2"] <= OUT2_MAX and state["feed_ts"] == target_ts:
+            while mono() < until and watch["out2"] + watch["out2_chain"] <= OUT2_MAX and state["feed_ts"] == target_ts:
                 cond.wait(max(0.0, min(until - mono(), 0.05)))
         if state["feed_ts"] != target_ts:
             return None
@@ -594,7 +594,7 @@ def curve_buys(curve, since_ts=None):
 def watch_curve(curve, tk0, feed_ts, named, creator, blk0=None):
     """register the curve for incremental folding and build its state from what the feed has shown so far"""
     net0 = X0 * tk0 / (Y0 - tk0); w = {"X": X0 + net0, "Y": Y0 - tk0, "cb": bytes.fromhex(curve[2:]), "ts0": feed_ts, "blk0": blk0, "named": named, "creator": creator, "curve": curve,
-                                       "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "buys": 0, "sells": 0, "since": mono(), "dump": None, "wallets": set(), "rivals": []}
+                                       "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "out1_chain": 0, "out2_chain": 0, "tb": None, "buys": 0, "sells": 0, "since": mono(), "dump": None, "wallets": set(), "rivals": []}
     for b in curve_buys(curve, feed_ts):
         ts_, snd, val, seen = b[:4]; blk = b[4] if len(b) > 4 else None
         fold_buy(w, ts_, snd, val, blk, b[5] if len(b) > 5 else None, b[6] if len(b) > 6 else None)
@@ -996,13 +996,21 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
     if reasons:
         log({"ev": "skip", "why": reasons, "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named)}); return
     w = watch_curve(curve, tk0, feed_ts, named, creator, blk0)           # from here the feed loop folds every buy and sell of this curve as it arrives
+    if token:
+        w["tb"] = bytes.fromhex(token[2:])
+    else:
+        def learn_token():
+            r = resolve_rpc(creator, deadline=1.5, lookback=40)
+            if r and r[1].lower() == curve:
+                w["tb"] = bytes.fromhex(r[0][2:])
+        threading.Thread(target=learn_token, daemon=True).start()
     curve_cs = to_checksum_address(curve)
     # the seat's wait: the bundle and second one must be fully visible before the gates are read
     send_mode = None
     if SEAT in ("E1", "E2"):
         send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at, watch=w)
     t_wake = mono()
-    decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"])}
+    decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"])}
     with lock:
         sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []
@@ -1010,10 +1018,10 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
             gates.append(f"bundle {w['bundle']} < {BUNDLE_MIN}")
         if w["bundle_eth"] < BUNDLE_MIN_ETH:
             gates.append(f"bundle {w['bundle_eth']:.3f} ETH < {BUNDLE_MIN_ETH}")
-        if SEAT == "E2" and w["out1"] > OUT1_MAX:
-            gates.append(f"{w['out1']} outsider buys in second one > {OUT1_MAX}")
-        if SEAT == "E2" and w["out2"] > OUT2_MAX:
-            gates.append(f"{w['out2']} outsider buys in the seat's second before our send > {OUT2_MAX}")
+        if SEAT == "E2" and w["out1"] + w["out1_chain"] > OUT1_MAX:
+            gates.append(f"{w['out1']} outsider buys in second one > {OUT1_MAX}" + (f" (+{w['out1_chain']} seen on the chain)" if w["out1_chain"] else ""))
+        if SEAT == "E2" and w["out2"] + w["out2_chain"] > OUT2_MAX:
+            gates.append(f"{w['out2']} outsider buys in the seat's second before our send > {OUT2_MAX}" + (f" (+{w['out2_chain']} seen on the chain)" if w["out2_chain"] else ""))
         if not on:
             gates.append(f"safety switch off (rolling {st.mean(sc):+.3f} over {len(sc)} < {SWITCH:+.2f})")
         if state["stopped"] or state["bankroll"] < (1 - DAILY_STOP) * state["day_start"]:
@@ -1175,17 +1183,60 @@ def index_message(inner, ts, seen):
             if val > 0 and len(data) >= 36:                                         # a router buy of some curve: sender recovered only if it names a curve we trade
                 e = [seen, ts, None, val, data, t, state["blocks"], to_hex, sel.hex()]; state["valtx"].append(e)
                 for cv, w in list(watched.items()):                                  # a snapshot: the score and creation threads add and pop watched curves while this loop runs
-                    if w["cb"] in data:
+                    if w["cb"] in data or (w["tb"] is not None and w["tb"] in data):    # a router names the curve or the token (Sep 11: a router buying by token was invisible)
                         e[2] = sender_of(t); fold_buy(w, ts, e[2], val, state["blocks"], to_hex, sel.hex())
                 continue
             if watched and val == 0 and sel not in (BUY_SEL, SELL_SEL):
                 for cv, w in list(watched.items()):                                  # a snapshot: the score and creation threads add and pop watched curves while this loop runs
-                    if w["cb"] in data:                                             # a value-less call naming a curve we watch: a router sell, or a router buy paid in tokens
+                    if w["cb"] in data or (w["tb"] is not None and w["tb"] in data):    # a value-less call naming a curve we watch: a router sell, or a router buy paid in tokens
                         if sel.hex() != APPROVE_SEL and to_hex != cv and ts - w["ts0"] in (1, 2):
                             fold_buy(w, ts, sender_of(t), 0.0, state["blocks"], to_hex, sel.hex())   # counted as a rival (section 23.11: a 0.001 ETH router buy the feed missed)
                         fold_sell(w, float("inf") if STOP_SELL_FRAC > 0 else 0.0)
         except Exception as e:
             log({"ev": "error", "stage": "decode", "err": str(e)[:200]})
+
+
+async def chain_rivals_loop(websockets):
+    """sequencer mode, PROVIDER_WS set: the provider's Buy events on watched curves are a second source of rivals. A landed buy by a
+    wallet that is not the team's, in second one or two, counts whatever router sent it: the feed decoder only sees routers that
+    name the curve or the token in their calldata (Sep 11 21:47: a router buying by token hid a second-one bot, -68%)."""
+    backoff = 0.2
+    while True:
+        try:
+            async with websockets.connect(PROVIDER_WS, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=16, compression=None) as ws:
+                subs = {}
+                for i, (name, params) in enumerate((("heads", ["newHeads"]), ("curve", ["logs", {"topics": [[BUY_EV]]}]))):
+                    await ws.send(json.dumps({"jsonrpc": "2.0", "id": i + 1, "method": "eth_subscribe", "params": params}))
+                    r = json.loads(await asyncio.wait_for(ws.recv(), timeout=10)); subs[name] = r.get("result")
+                log({"ev": "chain_rivals_connected", "subscriptions": subs}); backoff = 0.2; blk_ts = {}
+                while True:
+                    d = json.loads(await asyncio.wait_for(ws.recv(), timeout=30.0))
+                    if d.get("method") != "eth_subscription":
+                        continue
+                    sub = d["params"]["subscription"]; res = d["params"]["result"]
+                    if sub == subs["heads"]:
+                        blk_ts[int(res["number"], 16)] = int(res["timestamp"], 16)
+                        if len(blk_ts) > 600:
+                            for k in sorted(blk_ts)[:-300]:
+                                blk_ts.pop(k, None)
+                        continue
+                    if sub != subs["curve"] or len(res.get("topics", [])) < 3:
+                        continue
+                    curve = res["address"].lower(); w = state["watch"].get(curve)
+                    if w is None:
+                        continue
+                    who = "0x" + res["topics"][2][-40:].lower()
+                    if who in w["named"] or who == w["creator"] or who == WALLET.lower():
+                        continue
+                    bn = int(res["blockNumber"], 16); ts = blk_ts.get(bn) or state["feed_ts"]; sec = ts - w["ts0"]
+                    if sec not in (1, 2):
+                        continue
+                    val = int(res["data"][2:66], 16) / 1e18
+                    with cond:
+                        w["out%d_chain" % sec] += 1; cond.notify_all()
+                    log({"ev": "rival_chain", "curve": curve, "second": sec, "buyer": who, "value": round(val, 4), "block": bn, "feed_out": w["out1"] if sec == 1 else w["out2"]})
+        except Exception as e:
+            log({"ev": "feed_error", "source": "chain_rivals", "err": str(e)[:200], "retry_s": backoff}); await asyncio.sleep(backoff); backoff = min(5.0, backoff * 2)
 
 
 async def provider_loop(websockets):
@@ -1281,7 +1332,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.94, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 4.95, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
@@ -1289,6 +1340,8 @@ async def main():
         if not PROVIDER_WS:
             raise SystemExit("FEED_SOURCE=provider needs PROVIDER_WS (a third-party node's WebSocket endpoint)")
         last_prune_holder[0] = mono(); await provider_loop(websockets); return
+    if PROVIDER_WS:
+        asyncio.ensure_future(chain_rivals_loop(websockets))            # the chain's Buy events as a second rival source next to the feed
     last_prune = mono(); backoff = 0.2; refused = 0
     while True:
         try:
