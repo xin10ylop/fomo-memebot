@@ -34,6 +34,7 @@ runbook says what to verify on the first live trade.
 """
 import asyncio, base64, json, os, sys, time, math, threading, queue, http.client, ssl, socket, urllib.parse, urllib.request, collections, statistics as st, datetime, gc
 import rlp
+sys.setswitchinterval(0.001)                                                # one-core boxes: the send path must not wait 5 ms slices behind the feed decoder
 from eth_account import Account
 from eth_utils import keccak, to_checksum_address
 
@@ -202,6 +203,7 @@ class Sender:
             if not u:
                 continue
             p = urllib.parse.urlparse(u); self.eps.append({"url": u, "host": p.netloc, "path": p.path or "/", "c": None, "lock": threading.Lock(), "rtt_ms": None, "ok": False, "ip": None, "ips": {}})
+        self._meta = {}; self.last = []
         threading.Thread(target=self._keepalive, daemon=True).start()
 
     def _connect(self, e):
@@ -257,29 +259,58 @@ class Sender:
                 log({"ev": "sender_rtt", "endpoints": [{"host": e["host"], "address": e["ip"], "warm_rtt_ms": e["rtt_ms"], "ok": e["ok"]} for e in self.eps]})
             n += 1; time.sleep(5)
 
-    def _one(self, e, body, out):
-        with e["lock"]:
+    def _read(self, e, out, meta):
+        """background: the endpoint's reply to a fired transaction; releases the endpoint's lock taken by fire()"""
+        try:
+            d = json.loads(e["c"].getresponse().read())
+        except Exception as ex:
+            e["c"] = None; d = {"error": str(ex)[:120]}
+        finally:
+            e["lock"].release()
+        out.append((e["host"], d)); meta["replies"].append((e["host"], round(1000 * (mono() - meta["t0"]), 1)))
+        if len(out) >= meta["pending"]:
+            meta["done"].set(); self._meta.pop(id(out), None)
+            log({"ev": "send_answers", "hash": meta["hash"], "write_ms": meta["write_ms"], "reply_ms": meta["replies"], "answers": [(h, str(d)[:120]) for h, d in out]})
+
+    def fire(self, body, wait_s=2.0):
+        """post the same signed transaction to every endpoint, sequencer first, from the calling thread: the request is written
+        and the call returns; the replies are read by background threads (send_answers event). The hash is computed locally
+        from the raw transaction, so the critical path ends at the socket write (Sep 11: waiting for the reply on a one-core
+        box put the buy 170 ms late). Returns (hash, answers); answers fills in as the endpoints reply (answers(), rejected())."""
+        out = []; self.last = out; t0 = mono()
+        try:
+            h = "0x" + keccak(bytes.fromhex(json.loads(body)["params"][0][2:])).hex()
+        except Exception:
+            h = None
+        meta = {"pending": 0, "done": threading.Event(), "t0": t0, "hash": h, "replies": [], "write_ms": None}; self._meta[id(out)] = meta; fired = []
+        for e in self.eps:
+            e["lock"].acquire()
             try:
                 if e["c"] is None:
                     e["c"] = self._connect(e)
-                e["c"].request("POST", e["path"], body=body, headers=UA); d = json.loads(e["c"].getresponse().read()); out.append((e["host"], d))
+                e["c"].request("POST", e["path"], body=body, headers=UA)
             except Exception as ex:
-                e["c"] = None; out.append((e["host"], {"error": str(ex)[:120]}))
+                e["c"] = None; e["lock"].release(); out.append((e["host"], {"error": str(ex)[:120]})); continue
+            meta["pending"] += 1; fired.append(e)
+        meta["write_ms"] = round(1000 * (mono() - t0), 2)
+        for e in fired:
+            threading.Thread(target=self._read, args=(e, out, meta), daemon=True).start()
+        if meta["pending"] == 0:
+            meta["done"].set(); self._meta.pop(id(out), None)
+            log({"ev": "send_answers", "hash": h, "write_ms": meta["write_ms"], "reply_ms": [], "answers": [(hh, str(d)[:120]) for hh, d in out]})
+            return None, out
+        return h, out
 
-    def fire(self, body, wait_s=2.0):
-        """post the same body to every endpoint at once; returns (result, per-endpoint answers)"""
-        out = []; self.last = out; ths = [threading.Thread(target=self._one, args=(e, body, out), daemon=True) for e in self.eps]
-        for th in ths:
-            th.start()
-        t0 = mono()
-        while mono() - t0 < wait_s:
-            for host, d in out:
-                if "result" in d:
-                    return d["result"], out
-            if len(out) == len(ths):
-                break
-            time.sleep(0.0001)
-        return None, out
+    def answers(self, out, timeout=0.5):
+        """wait up to timeout for every endpoint's reply to the fire() that returned out; returns out"""
+        meta = self._meta.get(id(out)) if out is not None else None
+        if meta is not None:
+            meta["done"].wait(timeout)
+        return out if out is not None else []
+
+    def rejected(self, out):
+        """True when every endpoint has replied and none accepted the transaction"""
+        return bool(out) and id(out) not in self._meta and all("result" not in d for _, d in out)
 
 
 rpc = Rpc(RPC_URL); rpc_logs = Rpc(LOGS_RPC_URL)
@@ -763,9 +794,12 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
 
 
 # ------------------------------------------------------------------------------------------------------------- trading
-def wait_receipt(h, timeout=10.0):
+def wait_receipt(h, timeout=10.0, ans=None):
+    """the receipt of h within timeout; None sooner when ans (the fire() answers) shows every endpoint refused the transaction"""
     t0 = mono()
     while mono() - t0 < timeout:
+        if ans is not None and SENDER.rejected(ans):
+            return None
         try:
             r = rpc.call("eth_getTransactionReceipt", [h])
             if r:
@@ -811,18 +845,18 @@ def send_confirmed(build, label, max_s):
     fetched. Returns (receipt, hash), (None, last hash) after max_s."""
     t0 = mono(); cap = (state.get("base_fee") or state["gas_price"] or 10 ** 8) * SELL_GAS_HEADROOM; hashes = []; attempt = 0
     while mono() - t0 < max_s:
-        attempt += 1; h = submit(build(cap, next_nonce()), label)
+        attempt += 1; h = submit(build(cap, next_nonce()), label); ans = getattr(SENDER, "last", None) or []
         if h:
-            hashes.append(h); rec = wait_receipt(h, SELL_CONFIRM_S)
+            hashes.append(h); rec = wait_receipt(h, SELL_CONFIRM_S, ans)
             if rec:
                 return rec, h
-        else:
-            ans = " ".join(str(d) for _, d in (getattr(SENDER, "last", None) or []))
-            if "nonce too low" in ans or "already known" in ans:
-                for hh in hashes:
-                    rec = wait_receipt(hh, 1.0)
-                    if rec:
-                        return rec, hh
+        txt = " ".join(str(d) for _, d in SENDER.answers(ans, 0.2))
+        if "nonce too low" in txt or "already known" in txt:                 # an earlier attempt landed: its receipt
+            for hh in hashes:
+                rec = wait_receipt(hh, 1.0)
+                if rec:
+                    return rec, hh
+        if not h:
             time.sleep(0.2)
         cap = min(cap * 2, 10 ** 12)
         log({"ev": "resend", "label": label, "attempt": attempt + 1, "cap_gwei": round(cap / 1e9, 4), "hashes": len(hashes)})
@@ -1015,7 +1049,7 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
     tk, net, gross, fee = size_buy(X, Y, stake_eth, SEAT)
     amount_in = int(gross * 1e18); min_out = int(tk * (1 - SLIP) * 1e18)
     buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
-    h = submit(buy, "buy"); t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk)
+    h = submit(buy, "buy"); t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk); buy_ans = getattr(SENDER, "last", None)
     state["traded"][curve] = min(stake_usd, gross * state["eth_usd"]); state["decisions"][curve] = decision
     threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
     p_creator = (X0 + X0 * tk0 / (Y0 - tk0)) / (Y0 - tk0)
@@ -1025,7 +1059,9 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
          "stake_usd": stake_usd, "amount_in_eth": amount_in / 1e18, "tokens_target": tk, "supply_share": tk / Y0, "min_out_tokens": min_out / 1e18, "fee_assumed": fee, "price_vs_creator": round((X / Y) / p_creator, 3),
          "margin_ms": MARGIN_MS if send_mode and send_mode.startswith("predict") else None})
     if h:                                                            # live: the tokens actually received, from the buy's own event
-        rec = wait_receipt(h)
+        rec = wait_receipt(h, ans=buy_ans)
+        if rec is None and buy_ans and SENDER.rejected(buy_ans):
+            log({"ev": "buy_rejected", "curve": curve, "hash": h, "answers": [(hh, str(d)[:120]) for hh, d in buy_ans]}); state["traded"].pop(curve, None); state["busy_until"] = 0.0; return
         if rec:
             if SEAT in ("E1", "E2"):
                 threading.Thread(target=tune_margin, args=(rec, feed_ts + SEAT_SECONDS[SEAT]), daemon=True).start()
@@ -1240,7 +1276,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.91, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 4.92, "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
