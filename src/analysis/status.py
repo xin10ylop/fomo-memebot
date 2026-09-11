@@ -39,7 +39,7 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("log", nargs="?", default="/var/log/sniper/engine.jsonl"); ap.add_argument("--rpc"); ap.add_argument("--wallet"); ap.add_argument("--env", default="/etc/sniper/engine.env")
     a = ap.parse_args(); env = env_file(a.env)
     rpc_url = a.rpc or env.get("RPC_URL") or "https://rpc.mainnet.chain.robinhood.com"
-    wallet = a.wallet or env.get("WALLET"); dones = []; flows = []; live_since = None; px_log = None
+    wallet = a.wallet or env.get("WALLET"); dones = []; flows = []; live_since = None; px_log = None; paper = []; start_t = None
     for line in open(a.log):
         try:
             e = json.loads(line)
@@ -52,10 +52,18 @@ def main():
                 live_since = e["t"]
         elif ev == "trade_done" and e.get("dry_run") is False:
             dones.append(e)
+        elif ev == "start":
+            paper = []; start_t = e["t"]
+        elif ev == "score" and e.get("traded_dry_run"):
+            paper.append(e)
         elif ev == "flow":
             flows.append(e)
             if e.get("bankroll_usd") and e.get("wallet_eth"):
                 px_log = e["bankroll_usd"] / e["wallet_eth"]
+    if paper or start_t:
+        import statistics as st
+        hrs = (time.time() - start_t) / 3600
+        print(f"paper since the last start ({hrs:.1f} h): {len(paper)} paper trades" + (f", mean {100*st.mean(p['roi'] for p in paper):+.1f}%, sum at the stake ${sum(p['pnl_usd'] for p in paper):+.0f}, worst {100*min(p['roi'] for p in paper):+.0f}%" if paper else ""))
     rpc = LC.Rpc(rpc_url); px = eth_price(px_log or 2445.0)
     bal = int(rpc.call("eth_getBalance", [wallet, "latest"]), 16) / 1e18 if wallet else None
     now = time.time(); day0 = now - (now % 86400) + 12 * 3600
