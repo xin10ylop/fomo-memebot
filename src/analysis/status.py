@@ -52,9 +52,9 @@ def main():
                 live_since = e["t"]
         elif ev == "trade_done" and e.get("dry_run") is False:
             dones.append(e)
-        elif ev == "flow" and e.get("wallet_eth"):
+        elif ev == "flow":
             flows.append(e)
-            if e.get("bankroll_usd"):
+            if e.get("bankroll_usd") and e.get("wallet_eth"):
                 px_log = e["bankroll_usd"] / e["wallet_eth"]
     rpc = LC.Rpc(rpc_url); px = eth_price(px_log or 2445.0)
     bal = int(rpc.call("eth_getBalance", [wallet, "latest"]), 16) / 1e18 if wallet else None
@@ -63,14 +63,18 @@ def main():
         day0 -= 86400
     print(f"wallet {wallet}: {bal:.5f} ETH = ${bal * px:,.2f}  (ETH ${px:,.0f})" if bal is not None else "wallet unknown: pass --wallet")
     if live_since:
-        print(f"live since {datetime.datetime.utcfromtimestamp(live_since).strftime('%b %d %H:%M')} UTC; first balance seen {flows[0]['wallet_eth']:.5f} ETH" if flows else f"live since {datetime.datetime.utcfromtimestamp(live_since).strftime('%b %d %H:%M')} UTC")
+        fw = [f for f in flows if f.get('wallet_eth')]
+        print(f"live since {datetime.datetime.fromtimestamp(live_since, datetime.timezone.utc).strftime('%b %d %H:%M')} UTC; first balance seen {fw[0]['wallet_eth']:.5f} ETH" if fw else f"live since {datetime.datetime.fromtimestamp(live_since, datetime.timezone.utc).strftime('%b %d %H:%M')} UTC")
     print(f"real trades: {len(dones)} in total, {sum(1 for d in dones if d['t'] >= day0)} since 12:00 UTC today\n")
+    if flows:
+        f = flows[-1]; print("market, last readout: " + ", ".join(f"{k} {f.get(k)}" for k in ("rule_passing_last_1h", "out1_share_last_60", "follow_eth_last_60", "follow_eth_all_60", "mean_score_last_60") if k in f)
+              + "\n  (clean launches an hour; share of team launches with a bot in second one; ETH buyers bring after a clean seat / after any team launch; mean paper score of the last 60)\n")
     if not dones:
         return
     print(f"{'time UTC':9s} {'ETH in':>8s} {'ETH out':>8s} {'gas':>8s} {'P&L $':>8s} {'return':>7s}  exit")
     tot = 0.0; tot_day = 0.0; gas_tot = 0.0
     for d in dones:
-        t = datetime.datetime.utcfromtimestamp(d["t"]).strftime("%d %H:%M")
+        t = datetime.datetime.fromtimestamp(d["t"], datetime.timezone.utc).strftime("%d %H:%M")
         if not (d.get("buy_hash") and d.get("sell_hash")):
             print(f"{t:9s} no hashes in the log ({d.get('note') or d.get('exit')})"); continue
         rb = rpc.call("eth_getTransactionReceipt", [d["buy_hash"]]); rs = rpc.call("eth_getTransactionReceipt", [d["sell_hash"]])
@@ -92,8 +96,9 @@ def main():
             tot_day += pnl
         print(f"{t:9s} {eth_in:8.5f} {eth_out:8.5f} {gas:8.5f} {pnl:+8.2f} {100 * (eth_out - eth_in - gas) / eth_in:+6.1f}%  {d.get('exit')}{'' if rs.get('status') == '0x1' else '  SELL REVERTED'}")
     print(f"\nP&L of the real trades: {tot:+,.2f} $ in total, {tot_day:+,.2f} $ since 12:00 UTC today; gas paid {gas_tot * px:.2f} $")
-    if flows and bal is not None:
-        print(f"wallet change since the first live balance ({flows[0]['wallet_eth']:.5f} ETH): {(bal - flows[0]['wallet_eth']) * px:+,.2f} $ (differs from the trades' P&L if you added or withdrew money)")
+    fw = [f for f in flows if f.get('wallet_eth')]
+    if fw and bal is not None:
+        print(f"wallet change since the first live balance ({fw[0]['wallet_eth']:.5f} ETH): {(bal - fw[0]['wallet_eth']) * px:+,.2f} $ (differs from the trades' P&L if you added or withdrew money)")
 
 
 if __name__ == "__main__":
