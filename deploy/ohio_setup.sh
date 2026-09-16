@@ -74,14 +74,8 @@ chmod 600 /etc/sniper/engine.env                                  # this file wi
 cat > /etc/logrotate.d/sniper <<'ROT'
 /var/log/sniper/*.jsonl { daily rotate 14 compress missingok notifempty copytruncate }
 ROT
-cat > /usr/local/bin/sniper-check <<'CHK'
-#!/bin/sh
-# alerts (stdout -> cron mail, or set ALERT_CMD to e.g. a Telegram curl) when the engine log stalls or the clock drifts
-LOG=/var/log/sniper/engine.jsonl; ALERT_CMD=${ALERT_CMD:-cat}
-if [ ! -f "$LOG" ] || [ $(( $(date +%s) - $(stat -c %Y "$LOG") )) -gt 600 ]; then echo "sniper: engine log has not grown for 10 minutes" | $ALERT_CMD; fi
-OFF=$(chronyc tracking 2>/dev/null | awk '/System time/ {print $4}'); if [ -n "$OFF" ] && [ "$(echo "$OFF > 0.02" | bc)" = "1" ]; then echo "sniper: clock offset ${OFF}s" | $ALERT_CMD; fi
-CHK
-chmod +x /usr/local/bin/sniper-check; apt-get install -y bc >/dev/null 2>&1 || true
+install -m 755 "$REPO_DIR/deploy/sniper-check.sh" /usr/local/bin/sniper-check   # log growth, clock drift, and a blind gauge (a node that refuses getLogs while the engine keeps running)
+apt-get install -y bc >/dev/null 2>&1 || true
 ( crontab -l 2>/dev/null | grep -v sniper-check || true; echo "*/5 * * * * /usr/local/bin/sniper-check" ) | crontab -   # a fresh machine has no crontab: without the || true, set -e ended the script here
 cat > /etc/systemd/system/sniper-engine.service <<UNIT
 [Unit]

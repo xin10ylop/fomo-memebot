@@ -13,7 +13,13 @@ BLOCKS = [(12, 18, "12-18"), (18, 24, "18-24"), (0, 6, "00-06"), (6, 12, "06-12"
 
 def read(path):
     """the log and its rotations, oldest first"""
-    names = sorted(glob.glob(path + ".*"), key=lambda p: -int("".join(c for c in os.path.basename(p).split(".")[-2] if c.isdigit()) or 0)) + [path]
+    def age(p):
+        parts = os.path.basename(p).split(".")
+        for x in reversed(parts):
+            if x.isdigit():
+                return -int(x)
+        return 0
+    names = sorted([p for p in glob.glob(path + ".*") if "state" not in p], key=age) + [path]
     for p in names:
         if not os.path.exists(p):
             continue
@@ -46,7 +52,7 @@ def main():
     scores = []            # rule-passing launches: (t, roi, traded_paper, pnl_usd)
     e1 = []                # every scored team launch: (t, roi_e1)
     flows = []; starts = []; alarms = collections.Counter(); errors = collections.Counter()
-    gates = collections.Counter(); rivals_chain = 0; creations = 0
+    gates = collections.Counter(); rivals_chain = 0; creations = 0; last_event = [0.0]
     for e in read(path):
         ev = e.get("ev"); t = e.get("t")
         if ev == "start":
@@ -69,6 +75,8 @@ def main():
             alarms[str(e.get("what"))[:70]] += 1
         elif ev == "error":
             errors[str(e.get("stage")) + ": " + str(e.get("err"))[:60]] += 1
+        if t:
+            last_event[0] = max(last_event[0], t)
     if not scores and not e1:
         print("no scored launches in the log: is the engine running? (systemctl status sniper-engine)"); return
     t0 = min([s[0] for s in scores] + [x[0] for x in e1]); t1 = max([s[0] for s in scores] + [x[0] for x in e1])
@@ -79,6 +87,13 @@ def main():
           + (f"; versions {sorted({v for _, v, _ in starts if v})}" if starts else ""))
     if any(d is False for _, _, d in starts):
         print("  WARNING: the log contains a live start (dry_run false): some of this was real money")
+    blind = (last_event[0] - t1) / 3600 if last_event[0] else 0.0
+    if blind > 1:
+        print(f"  *** SCORING STOPPED {blind:.0f} h BEFORE THE END OF THE LOG: the engine kept running to "
+              f"{datetime.datetime.fromtimestamp(last_event[0], datetime.timezone.utc).strftime('%b %d %H:%M')} UTC but scored nothing after "
+              f"{datetime.datetime.fromtimestamp(t1, datetime.timezone.utc).strftime('%b %d %H:%M')} UTC.")
+        print(f"  *** Everything below covers only up to then. Read the error lines: a node that refuses "
+              f"eth_getLogs (rate limit, monthly cap, key revoked) blinds the gauge without stopping the engine.")
 
     def line(label, rows, e1rows, fl):
         if not rows and not e1rows:
