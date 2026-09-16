@@ -1917,3 +1917,26 @@ more per trade but doubles the drawdown in combination, so it stays at 5.
 
 **The E1 front seat is dead.** Scored on every team launch of every day, it is negative on all of them, −4.8% to −13.7%.
 No Ohio machine, no race test. The seat that pays is the one the engine already sits in.
+
+**The code audit, and why the go-live was held back a day.** An adversarial read of the whole engine (an independent
+pass, every finding then verified line by line against the file) found five defects that could each have ended with a
+token bought and never sold, the wallet stuck holding it, and the `position open` gate blocking every later trade with
+no alarm:
+
+1. the launch thread was started bare; any exception after the buy killed it silently, before the sell;
+2. a position saved while it was being sold kept an in-flight `closing` flag, and the restart recovery path returned
+   immediately on it, so the recovered position was never sold;
+3. a lost or slow reply from one endpoint was read as a refusal, and the buy was abandoned without approving or selling
+   (`already known` and `nonce too low` mean the opposite of refused);
+4. the exit's retries took a new nonce each time, so the doubling fee cap never replaced the stuck transaction, every
+   attempt eventually landed, and the cap could climb to a fee worth multiples of the position;
+5. a nonce reserved for a buy that was rejected or reverted was never given back, leaving a gap that strands every later
+   transaction in the pool.
+
+Four more could stop trading with no alarm: the readout block in `chain_loop` sat outside every `try` and iterated
+deques that other threads append to, so one `RuntimeError` ended the nonce refresh for good; the daily stop measured
+against `BANKROLL_USD` instead of the wallet and could latch on the first launch; our own approve names the curve in its
+calldata and was folded as a sell, which would fire the dump exit instantly; and a "learned reverter" could never be
+un-learned, so the crowding gates decayed the longer the engine ran. Sells and watched curves were also never pruned,
+with the garbage collector off. All are fixed in engine 4.98 and covered by fourteen tests in `tests/test_safety.py`,
+alongside the five exit-path tests and the eight gate tests.
