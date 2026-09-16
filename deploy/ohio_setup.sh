@@ -34,12 +34,15 @@ LOGS_RPC_URL=https://rpc.mainnet.chain.robinhood.com
 SEQ_URL=https://sequencer.mainnet.chain.robinhood.com
 WALLET=0x0000000000000000000000000000000000000000
 SEAT=E2
-BUNDLE_MIN=3
+# the launch filter, re-fitted Sep 16 on three periods (docs/REPORT.md 24): at least five team wallets, the team's ETH
+# between 0.3 and 1.2, and the creator holding 3% of supply. Each one helps in all three periods, not just the newest.
+BUNDLE_MIN=5
 BUNDLE_MIN_ETH=0.3
+BUNDLE_MAX_ETH=1.2
 OUT1_MAX=0
 OUT2_MAX=0
 SEAT_WAIT_MS=300
-MIN_CREATOR_SUPPLY=0.01
+MIN_CREATOR_SUPPLY=0.03
 STOP_SELL_FRAC=0
 # hours the tables cover (UTC, wraps midnight); the dead-stretch guard is off (no evidence either way)
 TRADE_HOURS=12-05

@@ -57,6 +57,7 @@ TAKE_PROFIT = float(os.environ.get("TAKE_PROFIT", "0.5"))                # sell 
 SEAT = os.environ.get("SEAT", "E2").upper(); EXEMPT = os.environ.get("EXEMPT", "0") == "1"
 BUNDLE_MIN = int(os.environ.get("BUNDLE_MIN", "3" if SEAT in ("E1", "E2") else "0"))
 BUNDLE_MIN_ETH = float(os.environ.get("BUNDLE_MIN_ETH", "0.3"))
+BUNDLE_MAX_ETH = float(os.environ.get("BUNDLE_MAX_ETH", "0"))     # 0 = no cap. A team that puts in more than this has already taken the move: Sep 12-16 those launches paid -0.7%, the rest +8.5% (audit_combo)
 OUT1_MAX = int(os.environ.get("OUT1_MAX", "0"))
 OUT1_MIN_ETH = float(os.environ.get("OUT1_MIN_ETH", "0"))                 # second-one outsider buys below this size do not count (0 = all count; 0.01 makes the gate immune to planted dust)
 OUT2_MAX = int(os.environ.get("OUT2_MAX", "0"))                          # non-named buys visible in the seat's second before we send
@@ -684,7 +685,7 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
     if readouts and lab[0] >= BUNDLE_MIN and lab[1] >= BUNDLE_MIN_ETH:
         state["out1_flags"].append(1 if lab[2] > 0 else 0)                              # crowding readout: share of bundled launches with an outsider in second one
         state["timing_all"].append(sum(r[2] for r in rows[1:] if r[1] == "B" and 2.3 <= r[0] < 7.6))   # demand over every bundled launch, crowded or not (the tables' gauge); the floor reads the clean ones only
-    if gated and (lab[0] < BUNDLE_MIN or lab[1] < BUNDLE_MIN_ETH or rows[0][3] < MIN_CREATOR_SUPPLY * Y0 or (seat == "E2" and lab[2] > OUT1_MAX)):
+    if gated and (lab[0] < BUNDLE_MIN or lab[1] < BUNDLE_MIN_ETH or (BUNDLE_MAX_ETH > 0 and lab[1] > BUNDLE_MAX_ETH) or rows[0][3] < MIN_CREATOR_SUPPLY * Y0 or (seat == "E2" and lab[2] > OUT1_MAX)):
         return ("filtered",) + lab
     X, Y = X0, Y0; X += rows[0][4]; Y -= rows[0][3]
     lo, hi, fb = {"E0": (-1.0, 0.0008, 0.1), "E1": (0.05, 0.075, 1.0), "E2": (0.0012, 0.0035, 2.0)}[seat]
@@ -1034,6 +1035,8 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
             gates.append(f"bundle {w['bundle']} < {BUNDLE_MIN}")
         if w["bundle_eth"] < BUNDLE_MIN_ETH:
             gates.append(f"bundle {w['bundle_eth']:.3f} ETH < {BUNDLE_MIN_ETH}")
+        if BUNDLE_MAX_ETH > 0 and w["bundle_eth"] > BUNDLE_MAX_ETH:
+            gates.append(f"bundle {w['bundle_eth']:.3f} ETH > {BUNDLE_MAX_ETH}")
         if SEAT == "E2" and w["out1"] + w["out1_chain"] > OUT1_MAX:
             gates.append(f"{w['out1']} outsider buys in second one > {OUT1_MAX}" + (f" (+{w['out1_chain']} seen on the chain)" if w["out1_chain"] else ""))
         if SEAT == "E2" and w["out2"] + w["out2_chain"] > OUT2_MAX:
@@ -1348,7 +1351,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.96, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 4.97, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

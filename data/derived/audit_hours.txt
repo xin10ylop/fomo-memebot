@@ -1,0 +1,16 @@
+
+=== the rule as it runs now
+block     old: n    mean |  NEW: n    mean   win         95% interval
+12-18          0   +0.0% |       0   +0.0%    0%              too few
+18-24          0   +0.0% |       0   +0.0%    0%              too few
+00-06          0   +0.0% |       0   +0.0%    0%              too few
+hour     12  13  14  15  16  17  18  19  20  21  22  23  00  01  02  03  04  05
+NEW mean   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+=== the filtered rule (5 wallets, ETH<=1.2, creator>=3%)
+block     old: n    mean |  NEW: n    mean   win         95% interval
+12-18          0   +0.0% |       0   +0.0%    0%              too few
+18-24          0   +0.0% |       0   +0.0%    0%              too few
+00-06          0   +0.0% |       0   +0.0%    0%              too few
+hour     12  13  14  15  16  17  18  19  20  21  22  23  00  01  02  03  04  05
+NEW mean   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
