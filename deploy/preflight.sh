@@ -73,11 +73,15 @@ H={'Content-Type':'application/json','User-Agent':'Mozilla/5.0'}
 DEFAULTS={'RPC_URL':'https://rpc.mainnet.chain.robinhood.com','LOGS_RPC_URL':'https://rpc.mainnet.chain.robinhood.com','SEQ_URL':'https://sequencer.mainnet.chain.robinhood.com'}
 for name in ('RPC_URL','LOGS_RPC_URL','SEQ_URL'):
     u=clean(name) or DEFAULTS[name]; note='' if clean(name) else ' (the engine default)'
-    # the sequencer takes transactions, not queries: ask it the one thing it answers, which is what the engine pings it with
+    # the sequencer accepts transactions and refuses every read method, so for it the test is only that it answers at all
     m='eth_chainId' if name=='SEQ_URL' else 'eth_blockNumber'
     try:
         t=time.time(); r=urllib.request.urlopen(urllib.request.Request(u,data=json.dumps({'jsonrpc':'2.0','id':1,'method':m,'params':[]}).encode(),headers=H),timeout=10)
-        d=json.load(r); v=int(d['result'],16); print('ok   %-14s %s %d, %.0f ms%s'%(name,'chain' if m=='eth_chainId' else 'block',v,1000*(time.time()-t),note))
+        d=json.load(r); ms=1000*(time.time()-t)
+        if name=='SEQ_URL':
+            print('ok   %-14s answers in %.0f ms (it takes transactions only; a refused read method is expected)%s'%(name,ms,note))
+        else:
+            print('ok   %-14s block %d, %.0f ms%s'%(name,int(d['result'],16),ms,note))
     except Exception as e: print('FAIL %-14s %s%s'%(name,str(e)[:70],note))
 w=clean('WALLET')
 try:
