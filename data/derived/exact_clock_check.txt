@@ -1,0 +1,13 @@
+
+150 launches rebuilt on the exact clock
+E2 clean, $25: exact clock mean +6.6%  |  cache clock mean +8.2%  |  mean difference -1.5 pts, |diff| > 5 pts on 28 of 150
+still clean on the exact clock (the engine would have sent): 100 of 150 = 67% (+-8 pts); on those, exact clock mean +5.9% [+1.5%, +10.3%], cache clock mean +6.7%
+of those, passing the re-fitted filter: 40, exact clock mean +10.3%
+not clean on the exact clock (a rival inside the 0.3 s wait: the engine would not have sent): 50; their cache-clock returns: -4%, -2%, +41%, -5%, +55%, +23%, -58%, -2%, -2%, +30%, -16%, -10%, +47%, -0%, +53%, +6%, +10%, +9%, -2%, -4%, -7%, +8%, +14%, +50%, +11%, -2%, -2%, +20%, +30%, +59%, -3%, +16%, -3%, -2%, +33%, -12%, +54%, -10%, -2%, +44%, +13%, -10%, -4%, -59%, +7%, -4%, -10%, +43%, +69%, +53%
+worst disagreements (day, curve, exact, cache, clean_exact, rival_lag cache -> exact):
+   2026-09-15 0xc85058b1 exact   -0.4%  cache  +69.3%  clean False  lag 1.07 -> 0.3
+   2026-09-14 0x34ba16fc exact  -60.2%  cache   -2.6%  clean True  lag None -> None
+   2026-09-12 0x7bf2425a exact  +12.9%  cache  -19.0%  clean True  lag None -> None
+   2026-09-13 0x56c4132c exact   +1.8%  cache  +30.8%  clean True  lag None -> None
+   2026-09-15 0xb4b8443a exact  -25.0%  cache   -0.5%  clean False  lag 0.37 -> 0.2
+   2026-09-15 0x0e6e0dcb exact   +7.5%  cache  +30.4%  clean False  lag 0.87 -> 0.1

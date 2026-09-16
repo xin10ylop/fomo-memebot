@@ -377,6 +377,11 @@ single thinnest September window), gains of $1.8k over the ten September windows
 12% / 3% / 16% (66% on the thinnest window): not advised. So $100 is the floor again, $300 is comfortable, and the
 `GAS_MAX_SHARE=0.05` gate stops the small stakes by itself if gas ever climbs toward the old assumption.
 
+One correction to every trade count quoted from the replay (section 24.8): the replay's clock is interpolated, and on
+the exact clock only about two thirds of its "clean" launches are clean — the engine, which watches the real feed, sends
+on fewer launches than the replay counts. Read the replay's trades per day and dollars per day at two thirds; the return
+per trade, the filter and the hours are unchanged.
+
 ## 8. What this is not
 
 It is not the +30% a trade of sections 14 and 19; that is the launch team's seat. It is not proven out of sample: the

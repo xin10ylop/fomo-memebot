@@ -1966,3 +1966,55 @@ The rest of the day's diff held: the seat wait, the gates, the E1 paper score, t
 the state file, the daily stop and the demand floor were read again and left as they were. `test_safety` (18),
 `test_gates` (8), `test_close_position` (5), `test_rivals` (11) and `test_fire` (live endpoints) all pass on 5.0, and a
 60 s dry-run start on the real feed and the real Alchemy socket came up clean.
+
+### 24.8 The analysis re-derived, independently of the harness
+
+The user asked whether the day's *analysis* had been checked, not only the code: the chain replay of the four blind
+days, the E1/E2 check, the re-fitted filter. It had not — the scripts were run once, when written. Three checks
+follow, none of which reuses `risk_harness.replay`.
+
+**1. The rows are the chain.** Three launches from the blind days (Sep 13 12:32, Sep 14 00:01, Sep 15 13:09) were
+compared event by event with Alchemy's logs: every buy and sell amount, every token count and every event count is
+identical (26/16, 111/140, 54/54 buys/sells).
+
+**2. An independent simulator agrees with the harness on the same rows.** `src/analysis/indep_replay.py` is ~80 lines
+written from the curve's arithmetic (x·y = k from (1.68 ETH, 1e9), tier plus the seat's surcharge on the buy, tier on
+the sell, 3% of supply capped at the stake, 0.3 s into the seat's second, hold 5 s or +50%, later buyers' 10% minOut,
+our own 25% minOut quoted at send time) and classifies the seconds by the surcharge alone. It agrees with the harness
+on which launches are clean (100%) and on the numbers (`data/derived/indep_replay.txt`):
+
+| Sep 12–16, E2, $25 | harness (24.3) | independent |
+|---|---|---|
+| every clean seat | n 484, +6.8% [+4.7, +9.0] | n 490, +7.5% [+5.5, +9.6]; anchored like the harness +6.9% |
+| crowded seats | negative | n 1863, −6.1% [−7.5, −4.9] |
+| clean + re-fitted filter | +14.7% | n 171, +15.9% [+12.1, +19.9]; hours 12–05 only +15.3% |
+| from $62 at $25, filter, hours | +$554, dd 6% | 156 trades, +$599, dd 6% |
+
+Every hour bucket is positive on the whole data set (00–05 +19.8%, 05–12 +13.5% on 28, 12–18 +16.4%, 18–24 +18.2%),
+the crowding rise reproduces (28% Aug 30 → 88% Sep 11 → 67–77% Sep 12–15), and Sep 11 is the one negative day.
+
+**3. The clock, and a real correction.** The cache's row times are interpolated between block anchors; the spot check
+found a buy the chain places 2 s after creation sitting at 1.34 s in the cache. So for 150 random "clean" launches
+of Sep 12–15 every block from the creation to +8 s was read (12,000 timestamps) and the rows rebuilt on the exact
+clock (`src/analysis/exact_clock_check.py`, `data/derived/exact_clock_check.txt`). The return per taken trade is
+unchanged: +6.6% exact vs +8.2% interpolated on all 150; on the 100 the engine would actually take, +5.9%
+[+1.5%, +10.3%] vs +6.7%; on the 40 of those that pass the filter, +10.3%. But **only 67% (±8) of the launches the
+harness calls clean are clean on the true clock**: on the other third the first outsider of second two landed inside
+the 0.3 s wait (the interpolated clock had it 0.36–1.07 s in; the chain has it at 0.0–0.3 s), and the engine, which
+watches the real feed, does not send. The harness therefore overstates the trade count by about a third; every
+dollar figure from the replay (the +$554 / +$599 over four days, the days-to-$300 estimate in 24.4) should be read
+at two thirds. The per-trade edge, the filter, the hours, the stop and the sizing are unaffected, and the engine
+itself never was: it has never used the interpolated clock. Two launches also show why the exact clock matters per
+trade — one that the cache scores −2.6% is −60% on the chain (a dump the interpolated clock put outside the hold),
+another the cache scores +69% is a no-send on the chain (rival at 0.3 s) — but they cancel in the mean.
+
+**4. E1, worded precisely.** The line "the E1 front seat is dead, −4.8% to −13.7%" is the harness's E1 seat landing
+0.3 s after the first second-one buyer — the executable seat, not the front. The theoretical front of second one
+(ahead of every buyer, no wait) pays +1% to +3% in the harness's model and +11% to +17% in the independent one
+(which also goes ahead of the team's own second-one buys, which is not achievable); the executable E1 is not: on
+Sep 12–16 the harness has it at −4.8% to −13.7% and the independent simulator at −1.6% to +1.1% (−9.1% on Sep 16's
+49 launches). E1 stays off, and the race data (23.11) is why the front cannot be had.
+
+**5. Housekeeping.** `data/derived/oos_sep12_16.txt` had been committed empty; regenerated, and it reproduces
+(n 484, +6.8% [+4.7%, +9.0%]). The "reshuffle" at the end of `oos_test.py` uses a flat stake, so its 5th/50th/95th
+percentiles are the same number by construction; only its ruin count (2.0% unfiltered at $25 from $62) says anything.

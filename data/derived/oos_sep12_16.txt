@@ -1,0 +1,33 @@
+=== 1. Sep 12-16, every clean seat, never looked at before today: n 484, mean +6.8%, median -1.8%, win 47%, 95% interval [+4.7%, +9.0%] -> the edge is there
+    for comparison, the fit period (to Sep 11): n 2449, mean +12.0%
+
+=== 2. the engine as it stands, Sep 12-16, $25 stakes from $62: 444 trades, mean +6.5%, end $780 (+718), worst drawdown 20%
+    launches it would have skipped: hours 20, floor not armed 10, switch off 4, position open 3, demand floor 3
+      09-12:  77 trades    +250 $ at a flat $25
+      09-13: 111 trades    +117 $ at a flat $25
+      09-14: 158 trades    +213 $ at a flat $25
+      09-15:  23 trades     +76 $ at a flat $25
+      09-16:   0 trades      +0 $ at a flat $25
+
+=== 3. filters found on Sep 9-11, tested on Sep 12-16 (all candidates shown, none picked afterwards)
+filter                                                 fit Sep 9-11        OUT OF SAMPLE Sep 12-16
+                                                  n    mean    win      n    mean    win       95% interval
+no filter (the rule as it is)                   269   +7.7%    47%    484   +6.8%    47%     [+4.7%, +9.0%]
+team ETH under 0.8                              108   +9.2%    50%    233   +7.7%    48%    [+4.4%, +11.2%]
+team ETH 0.3 to 0.8                             108   +9.2%    50%    233   +7.7%    48%    [+4.4%, +11.2%]
+team ETH under 1.2                              201  +10.1%    50%    409   +8.5%    52%    [+5.9%, +10.9%]
+at most 12 team wallets                         130  +10.2%    49%    253   +8.3%    48%    [+5.1%, +11.5%]
+creator holds 3% or more                        136  +11.7%    54%    233   +9.4%    50%    [+6.6%, +12.4%]
+team ETH under 0.8 and at most 12 wallets        94   +9.6%    52%    214   +7.9%    48%    [+4.2%, +11.5%]
+
+=== 4. the four days as money, from $62 at a flat $25, one position at a time
+configuration                                 trades    mean    end $   profit  worst drawdown
+no filter (the rule as it is)                    444   +6.5%      780     +718             20%
+team ETH under 0.8                               213   +7.4%      456     +394             20%
+team ETH 0.3 to 0.8                              213   +7.4%      456     +394             20%
+team ETH under 1.2                               376   +8.2%      835     +773             22%
+at most 12 team wallets                          228   +7.7%      501     +439             21%
+creator holds 3% or more                         209   +9.3%      546     +484              6%
+team ETH under 0.8 and at most 12 wallets        196   +7.5%      430     +368             20%
+
+reshuffling the same four days 2000 times from $62 at $25: ends $883 median, $883 at the 5th percentile, $883 at the 95th; ran out of money 2.0% of the time
