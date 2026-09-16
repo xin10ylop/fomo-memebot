@@ -2018,3 +2018,25 @@ Sep 12–16 the harness has it at −4.8% to −13.7% and the independent simula
 **5. Housekeeping.** `data/derived/oos_sep12_16.txt` had been committed empty; regenerated, and it reproduces
 (n 484, +6.8% [+4.7%, +9.0%]). The "reshuffle" at the end of `oos_test.py` uses a flat stake, so its 5th/50th/95th
 percentiles are the same number by construction; only its ruin count (2.0% unfiltered at $25 from $62) says anything.
+
+### 24.9 The first live afternoon reconciled with the chain, launch by launch
+
+Engine 5.0/5.01 ran live at $10 from 12:00 UTC on Sep 16 and took nothing. The same hours (12:00–17:14) were pulled from
+the chain and replayed with the current rule (`src/analysis/replay_live_hours.py`, `data/derived/replay_live_hours_0916.txt`):
+37 bundled launches, **35 with a bot in second one (95%)**, two clean. One of the two fails the 3% creator floor. The other,
+13:19:00 (8 wallets, 0.537 ETH, creator 3.4%), the replay trades at +14.7% — and the engine's log shows why it did not:
+the feed resolved it in 111 ms, counted the bundle exactly as the chain did, and then saw a 0.005 ETH outsider buy land
+**0.16 s into second two**, before the 0.3 s send; the chain confirmed the buy (block 64538690). The replay's interpolated
+clock had placed that buy at 0.54 s, after the send — the very error 24.8 measured on 150 launches. On the true clock the
+afternoon had zero tradeable seats, and the engine took zero. Live and backtest agree once the backtest is read on the
+chain's clock.
+
+Three more launches the replay lists with bundles of 7–8 wallets (16:11, 16:18, 16:31) reached the engine as `bundle 0`:
+their wallets bought through a helper contract whose calldata names neither the curve nor the token, so the feed cannot
+attribute the buys and the launch is refused. All three were crowded on the chain (1–3 bots in second one), so nothing
+was lost today, but it is a blind spot that costs opportunities: about one bundled launch in ten today. The fix is to read
+the creation block's Buy events from the provider at resolution time (one call, ~150 ms) and count the bundle from the
+chain, as the tables do — queued for the next engine version, not changed on a live day.
+
+The rest of the engine's afternoon: 653 creations in two hours, 50 reaching the decision, every refusal accounted for
+by a gate the chain confirms, no alarms, no socket errors, one process, the wallet untouched.
