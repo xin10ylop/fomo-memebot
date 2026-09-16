@@ -1873,3 +1873,47 @@ E1 at 10% while `out1_share_last_60` is above 55% and E2 otherwise. Nothing in t
 sends; it adds the two readouts, and `src/analysis/live_check.py` (runbook section 5), which pulls the receipts of every
 live trade and puts the live return next to the engine's score of the same launch, so the first thirty live trades
 settle whether the box lands where the tables assume.
+
+## 24. Round 16: six live trades, four blind days, and the rule re-fitted on what is left
+
+The engine went live on Sep 11 with $109 and was stopped that night after six losing trades (−$50). It then ran in
+paper mode for four days that produced nothing, because the node's monthly quota ran out on Sep 12 at 01:07 and the
+engine kept running blind: it saw launches and scored none. The watchdog only checked that the log grew, and it grew,
+full of errors. `deploy/sniper-check.sh` now alerts when launches keep arriving and nothing is scored for two hours, and
+`src/analysis/paper_report.py` refuses to be read as valid when scoring stopped before the log ends.
+
+**The four days were recoverable from the chain, and they change the conclusion.** Sep 12 to 16 pulled and replayed
+(`src/analysis/oos_test.py`, `data/derived/oos_sep12_16.txt`): 484 clean seats, **+6.8% a trade, 95% interval +4.7% to
++9.0%**, on days nothing was fitted to. The engine as it then stood would have made **+$718 from $62** over those four
+days. The strategy was switched off while it was working.
+
+**What actually happened on Sep 11.** Not a sudden death: the share of team launches with a bot ahead of our seat rose
+from 24% on Sep 2 to 88% on Sep 11 and fell back to 67-77% afterwards, and Sep 11 was the worst day in the whole record
+(1.7 clean seats an hour, 23% win rate). Five clean trades all losing has probability 27% on such a day, against 0.5%
+under the old distribution. The machine was right; the day was bad and my sample to judge it was worse.
+
+**The rule re-fitted, and tested in all three periods** (`src/analysis/audit_combo.py`, `data/derived/audit_combo.txt`).
+A change was only kept if it helped on the days the rule was built on, the days in between, and the four new days:
+
+| rule | to Sep 8 | Sep 9-11 | Sep 12-16 |
+|---|---|---|---|
+| as it ran | +12.5% | +7.7% | +6.8% |
+| at least 5 team wallets | +13.3% | +8.5% | +8.1% |
+| team ETH capped at 1.2 | +12.8% | +9.9% | +8.5% |
+| creator holds 3% of supply | +14.0% | +11.7% | +9.4% |
+| all three | **+15.4%** | **+15.4%** | **+14.7%** |
+
+The team-ETH cap is new (`BUNDLE_MAX_ETH`, engine 4.97): a team that puts in more than 1.2 ETH has already taken the
+move, and those launches paid −0.7% on the new days. The creator-supply floor went from 1% to 3% and the wallet count
+from 3 to 5. On the four new days the filtered rule takes 152 trades instead of 461, pays +14.6% instead of +6.5%, and
+its worst drawdown is 6% instead of 14%; from $62 at $25 a trade the chance of running the wallet down goes from 1.9% to
+0.0% over those days. Eight synthetic launches test every threshold (`tests/test_gates.py`).
+
+**Hours need no change.** The afternoon block was the weak one on the new days (+2.7%, interval spanning zero) but the
+filtered rule repairs it (+6.5%, interval +2.3% to +11.1%); evening +20.0% and night +17.3%. 06:00-12:00 UTC still has no
+measured launches at all and stays blocked. Hold, take-profit, seat wait and the supply fraction were all swept out of
+sample and none beat the current setting by enough to touch (`data/derived/audit_params_oos.txt`); a 7-second hold pays
+more per trade but doubles the drawdown in combination, so it stays at 5.
+
+**The E1 front seat is dead.** Scored on every team launch of every day, it is negative on all of them, −4.8% to −13.7%.
+No Ohio machine, no race test. The seat that pays is the one the engine already sits in.

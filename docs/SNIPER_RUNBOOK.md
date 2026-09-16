@@ -333,6 +333,14 @@ only the 1% protocol fee, the token's own 1–5% tax is a separate deduction, so
 landed before the hold ended; the sell moved exactly the balance. Then compare the first 30 live scores with the first 30 engine scores of the same
 launches: they are computed the same way, and a gap is a latency or a seat problem, not a market problem.
 
+## 5b. Before every live start
+
+Run `sudo sh deploy/preflight.sh` on the machine. It prints one line per check and a verdict: the settings as they will
+be used, whether the key matches `WALLET`, the file modes, whether the feed is delivering, the round trip to each node,
+the wallet's balance, the clock offset, disk, the watchdog, and the signature backend. Do not set `SEND_MODULE` until it
+says PREFLIGHT PASSED. The launch filter it should show (round 16): `BUNDLE_MIN=5`, `BUNDLE_MIN_ETH=0.3`,
+`BUNDLE_MAX_ETH=1.2`, `MIN_CREATOR_SUPPLY=0.03`, `TRADE_HOURS=12-05`, `STAKE_MAX=25` until five receipts check out.
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while
