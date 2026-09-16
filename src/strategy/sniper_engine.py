@@ -171,23 +171,23 @@ _CTX = ssl.create_default_context()                    # one TLS context for eve
 
 
 class Rpc:
-    def __init__(self, url):
-        u = urllib.parse.urlparse(url); self.host = u.netloc; self.path = u.path or "/"; self.local = threading.local()
+    def __init__(self, url, timeout=10):
+        u = urllib.parse.urlparse(url); self.host = u.netloc; self.path = u.path or "/"; self.local = threading.local(); self.timeout = timeout
 
-    def call(self, method, params):
+    def call(self, method, params, tries=3):
         body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params})
-        for i in range(3):
+        for i in range(tries):
             try:
                 c = getattr(self.local, "c", None)
                 if c is None:
-                    c = http.client.HTTPSConnection(self.host, timeout=10, context=_CTX); self.local.c = c
+                    c = http.client.HTTPSConnection(self.host, timeout=self.timeout, context=_CTX); self.local.c = c
                 c.request("POST", self.path, body=body, headers=UA); r = c.getresponse(); d = json.loads(r.read())
                 if "error" in d:
                     raise RuntimeError(d["error"])
                 return d["result"]
             except Exception:
                 self.local.c = None
-                if i == 2:
+                if i == tries - 1:
                     raise
                 time.sleep(0.03)
 
@@ -341,25 +341,36 @@ class Sender:
         return True
 
 
-rpc = Rpc(RPC_URL); rpc_logs = Rpc(LOGS_RPC_URL)
+rpc = Rpc(RPC_URL); rpc_logs = Rpc(LOGS_RPC_URL); rpc_seat = Rpc(RPC_URL, timeout=2.0)   # rpc_seat: the resolver's node on the seat path, nothing may hang there
 
 
-def get_logs(filt, tries=3):
-    """eth_getLogs with the public node first (any range; backs off on 429), then the provider in ten-block chunks (Alchemy's
-    free tier) if the public node fails. Both failing raises."""
-    last = None
-    for i in range(tries):
-        try:
-            return rpc_logs.call("eth_getLogs", [filt])
-        except Exception as e:
-            last = e; time.sleep(0.5 * (i + 1))
-    a = int(filt["fromBlock"], 16); b = int(rpc.call("eth_blockNumber", []), 16) if filt["toBlock"] == "latest" else int(filt["toBlock"], 16); out = []
+def get_logs(filt, tries=3, seat=False):
+    """eth_getLogs: the provider first, over the whole range in one call (a paid plan takes 10,000 blocks in 200-500 ms; a free
+    tier refuses more than ten, and then the same range is fetched in ten-block chunks), and the public node last. On the seat
+    path (seat=True) every call is a single try on a 2 s timeout, because the resolver's own loop is the retry: the public node
+    hung for 3-7 s on getLogs on Sep 16 and cost 13 seats in 90 minutes as "stale feed" refusals."""
+    node = rpc_seat if seat else rpc; t = 1 if seat else tries; errs = []
     try:
-        for x in range(a, b + 1, 10):
-            out += rpc.call("eth_getLogs", [dict(filt, fromBlock=hex(x), toBlock=hex(min(b, x + 9)))])
-        return out
+        return node.call("eth_getLogs", [filt], tries=t)
     except Exception as e:
-        raise RuntimeError(f"logs: public node {str(last)[:80]}; provider {str(e)[:80]}")
+        errs.append("provider " + str(e)[:80])
+        try:
+            a = int(filt["fromBlock"], 16); b = int(node.call("eth_blockNumber", [], tries=t), 16) if filt["toBlock"] == "latest" else int(filt["toBlock"], 16)
+            if b - a >= 10:
+                out = []
+                for x in range(a, b + 1, 10):
+                    out += node.call("eth_getLogs", [dict(filt, fromBlock=hex(x), toBlock=hex(min(b, x + 9)))], tries=t)
+                return out
+        except Exception as e2:
+            errs.append("provider chunks " + str(e2)[:80])
+    for i in range(t):
+        try:
+            return rpc_logs.call("eth_getLogs", [filt], tries=t)
+        except Exception as e:
+            errs.append("public " + str(e)[:80])
+            if i < t - 1:
+                time.sleep(0.5 * (i + 1))
+    raise RuntimeError("logs: " + "; ".join(errs))
 SENDER = Sender([SEQ_URL, RPC_URL if RPC_URL != SEQ_URL else None])
 state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": False, "busy_until": 0.0, "scores": collections.deque(maxlen=max(SWITCH_N, 60)),
          "launched_today": collections.Counter(), "seeded": False, "feed_ts": 0, "last_seen_ts": 0, "traded": {}, "eth_usd": ETH_USD,
@@ -778,8 +789,12 @@ def resolve_rpc(creator, deadline=3.0, lookback=40):
     while mono() - t0 < deadline:
         try:
             if head is None or mono() - head_at > 0.15:                  # blocks are 100 ms apart: asking every 20 ms was fifty calls a launch (Sep 16 bill)
-                head = int(rpc.call("eth_blockNumber", []), 16); head_at = mono()
-            for l in get_logs({"fromBlock": hex(head - lookback), "toBlock": "latest", "address": FACTORY_HEX}):   # "latest": a cached head must not hide the newest block
+                try:
+                    head = int(rpc_seat.call("eth_blockNumber", [], tries=1), 16)
+                except Exception:
+                    head = int(rpc_logs.call("eth_blockNumber", [], tries=1), 16)   # the provider down: the public node's head, and get_logs falls through to it too
+                head_at = mono()
+            for l in get_logs({"fromBlock": hex(head - lookback), "toBlock": "latest", "address": FACTORY_HEX}, seat=True):   # one try per node, 2 s timeout: this loop is the retry
                 if len(l["topics"]) > 3 and ("0x" + l["topics"][3][-40:]).lower() == creator:
                     d = l["data"][2:]; w = [int(d[i:i + 64], 16) for i in range(0, len(d), 64)]
                     return "0x" + l["topics"][1][-40:], "0x" + l["topics"][2][-40:], w[2] / 1e18, int(l["blockNumber"], 16)
@@ -1478,7 +1493,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.0, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.01, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
