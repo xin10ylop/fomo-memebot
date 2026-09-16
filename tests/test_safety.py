@@ -25,10 +25,14 @@ check("a transaction already in the pool is not a refusal",
 check("'nonce too low' (already mined) is not a refusal",
       not E.SENDER.rejected(answers({"error": {"message": "nonce too low"}}, {"error": "boom"})))
 check("a real refusal from every endpoint is a refusal",
-      E.SENDER.rejected(answers({"error": "insufficient funds"}, {"error": "insufficient funds"})))
+      E.SENDER.rejected(answers({"error": {"code": -32000, "message": "insufficient funds"}}, {"error": {"code": -32000, "message": "insufficient funds"}})))
+check("a transport failure (timeout, dropped socket) is not a refusal: the node may have taken it",
+      not E.SENDER.rejected(answers({"error": "timeout"}, {"error": "connection reset"})))
+check("a node refusal on one endpoint and a transport failure on the other is not a refusal",
+      not E.SENDER.rejected(answers({"error": {"code": -32000, "message": "insufficient funds"}}, {"error": "timeout"})))
 check("an accepted transaction is not a refusal", not E.SENDER.rejected(answers({"result": "0xabc"}, {"error": "x"})))
 check("replies still outstanding are never read as a refusal",
-      not E.SENDER.rejected(answers({"error": "insufficient funds"}, complete=False)))
+      not E.SENDER.rejected(answers({"error": {"code": -32000, "message": "insufficient funds"}}, complete=False)))
 
 # 2. the answers a thread reads are its own, not another thread's
 E.SENDER._local.last = answers({"result": "0xmine"})

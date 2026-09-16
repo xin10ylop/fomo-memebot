@@ -1940,3 +1940,29 @@ calldata and was folded as a sell, which would fire the dump exit instantly; and
 un-learned, so the crowding gates decayed the longer the engine ran. Sells and watched curves were also never pruned,
 with the garbage collector off. All are fixed in engine 4.98 and covered by fourteen tests in `tests/test_safety.py`,
 alongside the five exit-path tests and the eight gate tests.
+
+### 24.7 The second audit of Sep 16, and engine 5.0
+
+The user asked for every change made on Sep 16 to be audited a second time before the first $10 trade landed. The whole
+day's engine diff (394 lines, 4.9 → 4.99) was re-read line by line, the analysis scripts and the preflight were re-run,
+and the fixes below were made, each with a test. The one that mattered for the bill: engine 4.95 had added the provider's
+Buy events as a second source of rivals by subscribing to **every Buy on the chain plus every block head** (measured
+from the sandbox: 323 Buys and 291 heads in 30 s, 1.0 MB, i.e. 1.7 million messages and 2.9 GB a day), which is what
+ran the free Alchemy plan dry on Sep 12 and what the user saw as "usage very high" on the paid one. Nothing was stuck:
+the subscription was doing exactly what it was written to do.
+
+| # | what was wrong (4.99) | 5.0 | test |
+|---|---|---|---|
+| 1 | one Buy-log subscription for the whole chain, plus block heads | one subscription per **watched curve** (`address` filter), opened when the watch starts and dropped when it ends; no head subscription: a Buy's second comes from the feed's own bookkeeping (`flip_block`, and `sequenceNumber` = the L2 block number, checked at 40 second boundaries) | `tests/test_rivals.py` (11 checks against a scripted socket; the real socket showed the subscribe and unsubscribe round trips) |
+| 2 | a Buy whose block time was not known yet was assigned to the **current** feed second | it waits up to 2 s for the feed to pass its block, then is dropped, never guessed | same |
+| 3 | `rejected()` treated a transport error string ("timeout", "connection reset") like a node refusal, so a buy the sequencer had taken could be marked rejected and its nonce released | only a JSON-RPC error **dict** from every endpoint is a refusal; a transport failure is "unknown", and the receipt decides | `tests/test_safety.py` (two new checks) |
+| 4 | `SELL_FEE_MAX_USD` defaulted to $0.50, below the first cap (~$0.70), so the doubling never happened | default $2.00 | existing fee-cap test |
+| 5 | the exit's token address fell back to the **curve** when the RPC lookup failed, and an approve on the curve reverts for ever | `learn_token`'s address is used first; the curve stays only as a marker, and `close_position` re-resolves it on every retry with an alarm | — (path exercised by the close-position tests) |
+| 6 | `fire()` waited without limit for an endpoint's lock, held by the keep-alive ping | 0.1 s, then that endpoint is skipped for this send | `tests/test_fire.py` |
+| 7 | `resolve_rpc` asked the node for the head every 20 ms (fifty calls a launch) | the head is cached 150 ms, the loop runs ten times a second, `toBlock: latest` so the cache hides nothing (83–95 ms to resolve, unchanged) | probe on live creations |
+| 8 | the wallet balance was read every 3 s | every 30 s (it changes only on trades) | — |
+
+The rest of the day's diff held: the seat wait, the gates, the E1 paper score, the token matching, the crash wrapper,
+the state file, the daily stop and the demand floor were read again and left as they were. `test_safety` (18),
+`test_gates` (8), `test_close_position` (5), `test_rivals` (11) and `test_fire` (live endpoints) all pass on 5.0, and a
+60 s dry-run start on the real feed and the real Alchemy socket came up clean.

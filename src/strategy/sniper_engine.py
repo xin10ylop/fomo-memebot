@@ -86,7 +86,7 @@ GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.05"))
 GAS_HEADROOM = float(os.environ.get("GAS_HEADROOM", "2.0"))
 SELL_GAS_HEADROOM = float(os.environ.get("SELL_GAS_HEADROOM", "8.0"))   # cap on the approve and the sell: receipts show only the base fee is charged, so a high cap is free and a fee spike cannot refuse the exit
 SELL_CONFIRM_S = float(os.environ.get("SELL_CONFIRM_S", "1.5")); SELL_MAX_S = float(os.environ.get("SELL_MAX_S", "20"))
-SELL_FEE_MAX_USD = float(os.environ.get("SELL_FEE_MAX_USD", "0.50"))  # the exit's fee ceiling: the doubling cap stops here. Receipts pay about $0.02; an unbounded cap could spend multiples of the position (audit, Sep 16)                # gasPrice sent = this x eth_gasPrice: the quote equals the base fee, a tick up refuses the tx (23.7)
+SELL_FEE_MAX_USD = float(os.environ.get("SELL_FEE_MAX_USD", "2.00"))  # the exit's fee ceiling: the doubling cap stops here. Receipts pay about $0.02; an unbounded cap could spend multiples of the position (audit, Sep 16)                # gasPrice sent = this x eth_gasPrice: the quote equals the base fee, a tick up refuses the tx (23.7)
 GAS_EST_BUY, GAS_EST_APPROVE, GAS_EST_SELL = 100_000, 50_000, 80_000        # measured gas used by direct curve calls (receipts, Sep 9): the cost estimate; limits below are higher
 REQUIRE_COINCURVE = os.environ.get("REQUIRE_COINCURVE", "0") == "1"
 PIN_CPU = os.environ.get("PIN_CPU", "")                                   # e.g. "1": keep the process off core 0 (interrupts) on a 2-vCPU box
@@ -292,7 +292,8 @@ class Sender:
             h = None
         meta = {"pending": 0, "done": threading.Event(), "t0": t0, "hash": h, "replies": [], "write_ms": None}; out.meta = meta; fired = []
         for e in self.eps:
-            e["lock"].acquire()
+            if not e["lock"].acquire(timeout=0.1):                        # a keep-alive ping holds the socket for one round trip; a hung one must not hold the buy
+                out.append((e["host"], {"error": "endpoint busy: skipped"})); continue
             try:
                 if e["c"] is None:
                     e["c"] = self._connect(e)
@@ -331,7 +332,10 @@ class Sender:
         for _, d in out:
             if "result" in d:
                 return False
-            t = str(d).lower()
+            err = d.get("error")
+            if not isinstance(err, dict):                                 # a timeout or a dropped socket is not a verdict: the sequencer may well have taken it
+                return False
+            t = str(err).lower()
             if "already known" in t or "nonce too low" in t or "already imported" in t or "known transaction" in t:
                 return False
         return True
@@ -349,7 +353,7 @@ def get_logs(filt, tries=3):
             return rpc_logs.call("eth_getLogs", [filt])
         except Exception as e:
             last = e; time.sleep(0.5 * (i + 1))
-    a, b = int(filt["fromBlock"], 16), int(filt["toBlock"], 16); out = []
+    a = int(filt["fromBlock"], 16); b = int(rpc.call("eth_blockNumber", []), 16) if filt["toBlock"] == "latest" else int(filt["toBlock"], 16); out = []
     try:
         for x in range(a, b + 1, 10):
             out += rpc.call("eth_getLogs", [dict(filt, fromBlock=hex(x), toBlock=hex(min(b, x + 9)))])
@@ -363,7 +367,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "sells": collections.defaultdict(list),       # curve -> [(seen, tokens)] direct sells
          "valtx": collections.deque(maxlen=4000),      # [seen, ts, sender_or_None, value_eth, data, raw] value-carrying non-direct txs: router buys, sender recovered lazily
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
-         "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "connected_at": 0.0,
+         "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "feed_seq": 0, "connected_at": 0.0,
          "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "decisions": {},
          "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "day_start_real": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "scores_e1": collections.deque(maxlen=60), "race_lags": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
 lock = threading.Lock()
@@ -439,7 +443,7 @@ def chain_loop():
     while True:
         try:
             state["nonce"] = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); state["base_fee"] = int(rpc.call("eth_gasPrice", []), 16); state["gas_price"] = int(state["base_fee"] * GAS_HEADROOM); state["chain_at"] = mono()
-            if SEND is not None and state["open"] is None:            # live: the bankroll is the wallet's ETH, so every profit is staked again and the daily stop reads real money
+            if SEND is not None and state["open"] is None and (n % 10 == 0 or not state["day_start_real"]):   # live: the bankroll is the wallet's ETH; it changes only on trades, so every 30 s is enough
                 bal = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18; state["wallet_eth"] = bal
                 with lock:
                     state["bankroll"] = bal * state["eth_usd"]
@@ -770,17 +774,18 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
 
 def resolve_rpc(creator, deadline=3.0, lookback=40):
     """the curve from the factory's event: (token, curve, tk0, b_create) or None"""
-    t0 = mono()
+    t0 = mono(); head = None; head_at = -1.0
     while mono() - t0 < deadline:
         try:
-            head = int(rpc.call("eth_blockNumber", []), 16)
-            for l in get_logs({"fromBlock": hex(head - lookback), "toBlock": hex(head), "address": FACTORY_HEX}):
+            if head is None or mono() - head_at > 0.15:                  # blocks are 100 ms apart: asking every 20 ms was fifty calls a launch (Sep 16 bill)
+                head = int(rpc.call("eth_blockNumber", []), 16); head_at = mono()
+            for l in get_logs({"fromBlock": hex(head - lookback), "toBlock": "latest", "address": FACTORY_HEX}):   # "latest": a cached head must not hide the newest block
                 if len(l["topics"]) > 3 and ("0x" + l["topics"][3][-40:]).lower() == creator:
                     d = l["data"][2:]; w = [int(d[i:i + 64], 16) for i in range(0, len(d), 64)]
                     return "0x" + l["topics"][1][-40:], "0x" + l["topics"][2][-40:], w[2] / 1e18, int(l["blockNumber"], 16)
         except Exception:
             pass
-        time.sleep(0.02)
+        time.sleep(0.1)
     return None
 
 
@@ -966,6 +971,12 @@ def close_position(pos, why):
             return
         pos["closing"] = True
     try:
+        if pos["token"] == pos["curve"]:                                  # the token was unknown at the buy: find it now, an approve on the curve reverts
+            r = resolve_rpc(pos.get("creator", ""), deadline=2.0, lookback=400)
+            if r:
+                pos["token"] = r[0]; log({"ev": "token_resolved_at_exit", "curve": pos["curve"], "token": r[0]})
+            else:
+                log({"ev": "alarm", "what": "token still unknown at the exit: the sell will revert until it is found (every retry re-resolves)", "curve": pos["curve"]})
         t0 = mono(); bal = token_balance(pos["token"]); amount = bal if bal else int(pos["tokens"] * 1e18)
         if bal == 0 and pos.get("sell_hash"):
             log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": pos["tokens"], "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": False, "note": "balance already zero: an earlier sell landed",
@@ -1169,8 +1180,14 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         else:
             log({"ev": "receipt_timeout", "curve": curve, "hash": h, "note": "assuming the buy landed: approving and selling the sized amount"})
     if token is None:
-        r = resolve_rpc(creator, deadline=HOLD - 1, lookback=120); token = r[0] if r else curve
-    pos = {"curve": curve, "token": token, "tokens": tokens, "nonce": nonce, "t_buy": t_buy, "buy_hash": h, "approved": False, "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0)}
+        tb = w.get("tb")
+        if tb is not None:
+            token = "0x" + tb.hex()                                       # learn_token already found it
+        else:
+            r = resolve_rpc(creator, deadline=HOLD - 1, lookback=120); token = r[0] if r else curve
+            if not r:
+                log({"ev": "alarm", "what": "token address unknown at the exit: approving on the curve will revert; close_position re-resolves on every retry", "curve": curve})
+    pos = {"curve": curve, "token": token, "creator": creator, "tokens": tokens, "nonce": nonce, "t_buy": t_buy, "buy_hash": h, "approved": False, "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0)}
     state["open"] = pos; save_state()
     cap = (state.get("base_fee") or gas_price or 0) * SELL_GAS_HEADROOM if h else (gas_price or 0)
     pos["approve_hash"] = submit(tx_approve(pos, nonce + 1, cap), "approve"); pos["approved"] = True; save_state()
@@ -1288,45 +1305,82 @@ def index_message(inner, ts, seen):
             log({"ev": "error", "stage": "decode", "err": str(e)[:200]})
 
 
+def second_of_block(bn):
+    """the chain second a block belongs to, from the feed's own bookkeeping: flip_block[ts] is the first block of second ts
+    (the feed's sequenceNumber is the L2 block number, checked at 40 second boundaries on Sep 16). None while the feed has
+    not passed the block yet, or when the second is older than what is kept."""
+    if bn > state["feed_seq"]:
+        return None
+    best = None
+    for t, b in list(state["flip_block"].items()):
+        if b is not None and b <= bn and (best is None or t > best):
+            best = t
+    return best
+
+
 async def chain_rivals_loop(websockets):
     """sequencer mode, PROVIDER_WS set: the provider's Buy events on watched curves are a second source of rivals. A landed buy by a
     wallet that is not the team's, in second one or two, counts whatever router sent it: the feed decoder only sees routers that
-    name the curve or the token in their calldata (Sep 11 21:47: a router buying by token hid a second-one bot, -68%)."""
+    name the curve or the token in their calldata (Sep 11 21:47: a router buying by token hid a second-one bot, -68%).
+    One log subscription per watched curve, opened when the watch starts and dropped when it ends, and no block heads: the first
+    version (4.95-4.99) subscribed to every Buy on the chain plus every head, 1.7 million messages and 2.9 GB a day, which is
+    what ran the Sep 12 Alchemy plan dry. The second a Buy landed in comes from the feed's flip bookkeeping (second_of_block);
+    a Buy the feed has not passed yet waits up to 2 s and is dropped, never assigned to the current second."""
     backoff = 0.2
+    def count(res, sec):
+        curve = res["address"].lower(); w = state["watch"].get(curve)
+        if w is None or sec not in (1, 2):
+            return
+        who = "0x" + res["topics"][2][-40:].lower()
+        if who in w["named"] or who == w["creator"] or who == WALLET.lower():
+            return
+        val = int(res["data"][2:66], 16) / 1e18
+        with cond:
+            w["out%d_chain" % sec] += 1; cond.notify_all()
+        log({"ev": "rival_chain", "curve": curve, "second": sec, "buyer": who, "value": round(val, 4), "block": int(res["blockNumber"], 16), "feed_out": w["out1"] if sec == 1 else w["out2"]})
+    def place(res):
+        w = state["watch"].get(res["address"].lower())
+        if w is None:
+            return True
+        ts = second_of_block(int(res["blockNumber"], 16))
+        if ts is None:
+            return False
+        count(res, ts - w["ts0"]); return True
     while True:
         try:
             async with websockets.connect(PROVIDER_WS, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=16, compression=None) as ws:
-                subs = {}
-                for i, (name, params) in enumerate((("heads", ["newHeads"]), ("curve", ["logs", {"topics": [[BUY_EV]]}]))):
-                    await ws.send(json.dumps({"jsonrpc": "2.0", "id": i + 1, "method": "eth_subscribe", "params": params}))
-                    r = json.loads(await asyncio.wait_for(ws.recv(), timeout=10)); subs[name] = r.get("result")
-                log({"ev": "chain_rivals_connected", "subscriptions": subs}); backoff = 0.2; blk_ts = {}
+                log({"ev": "chain_rivals_connected"}); backoff = 0.2
+                subs = {}; pending = {}; held = collections.deque(); rid = 1
                 while True:
-                    d = json.loads(await asyncio.wait_for(ws.recv(), timeout=30.0))
+                    want = set(state["watch"])                            # one subscription per watched curve, while it is watched
+                    for cv in want - set(subs):
+                        rid += 1; pending[rid] = cv; subs[cv] = None
+                        await ws.send(json.dumps({"jsonrpc": "2.0", "id": rid, "method": "eth_subscribe", "params": ["logs", {"address": cv, "topics": [[BUY_EV]]}]}))
+                    for cv in [c for c in subs if c not in want]:
+                        sid = subs.pop(cv)
+                        if sid:
+                            rid += 1
+                            await ws.send(json.dumps({"jsonrpc": "2.0", "id": rid, "method": "eth_unsubscribe", "params": [sid]}))
+                    for _ in range(len(held)):                            # Buys the feed had not passed yet
+                        t, r = held.popleft()
+                        if not place(r) and mono() - t < 2.0:
+                            held.append((t, r))
+                    try:
+                        d = json.loads(await asyncio.wait_for(ws.recv(), timeout=0.1))
+                    except asyncio.TimeoutError:
+                        continue
+                    if "id" in d:
+                        cv = pending.pop(d["id"], None)
+                        if cv is not None and cv in subs:
+                            subs[cv] = d.get("result")
+                        continue
                     if d.get("method") != "eth_subscription":
                         continue
-                    sub = d["params"]["subscription"]; res = d["params"]["result"]
-                    if sub == subs["heads"]:
-                        blk_ts[int(res["number"], 16)] = int(res["timestamp"], 16)
-                        if len(blk_ts) > 600:
-                            for k in sorted(blk_ts)[:-300]:
-                                blk_ts.pop(k, None)
+                    res = d["params"]["result"]
+                    if len(res.get("topics", [])) < 3 or "blockNumber" not in res:
                         continue
-                    if sub != subs["curve"] or len(res.get("topics", [])) < 3:
-                        continue
-                    curve = res["address"].lower(); w = state["watch"].get(curve)
-                    if w is None:
-                        continue
-                    who = "0x" + res["topics"][2][-40:].lower()
-                    if who in w["named"] or who == w["creator"] or who == WALLET.lower():
-                        continue
-                    bn = int(res["blockNumber"], 16); ts = blk_ts.get(bn) or state["feed_ts"]; sec = ts - w["ts0"]
-                    if sec not in (1, 2):
-                        continue
-                    val = int(res["data"][2:66], 16) / 1e18
-                    with cond:
-                        w["out%d_chain" % sec] += 1; cond.notify_all()
-                    log({"ev": "rival_chain", "curve": curve, "second": sec, "buyer": who, "value": round(val, 4), "block": bn, "feed_out": w["out1"] if sec == 1 else w["out2"]})
+                    if not place(res):
+                        held.append((mono(), res))
         except Exception as e:
             log({"ev": "feed_error", "source": "chain_rivals", "err": str(e)[:200], "retry_s": backoff}); await asyncio.sleep(backoff); backoff = min(5.0, backoff * 2)
 
@@ -1424,7 +1478,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.99, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.0, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
@@ -1465,6 +1519,8 @@ async def main():
                                 if state["prev_seen"] is not None and state["prev_ts"] == ts - 1 and seen - state["prev_seen"] < 0.5:
                                     r0, t0 = state["ref"]; state["brackets"].append(((state["prev_seen"] - r0) - (ts - t0), (seen - r0) - (ts - t0)))
                             state["last_seen_ts"] = max(state["last_seen_ts"], ts); state["feed_ts"] = max(state["feed_ts"], ts)
+                            if not warm:
+                                state["feed_seq"] = max(state["feed_seq"], int(m.get("sequenceNumber") or 0))   # = the L2 block number
                             state["prev_seen"] = seen; state["prev_ts"] = ts
                             cond.notify_all()
         except Exception as e:

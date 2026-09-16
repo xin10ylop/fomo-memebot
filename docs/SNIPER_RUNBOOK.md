@@ -341,6 +341,22 @@ the wallet's balance, the clock offset, disk, the watchdog, and the signature ba
 says PREFLIGHT PASSED. The launch filter it should show (round 16): `BUNDLE_MIN=5`, `BUNDLE_MIN_ETH=0.3`,
 `BUNDLE_MAX_ETH=1.2`, `MIN_CREATOR_SUPPLY=0.03`, `TRADE_HOURS=12-05`, `STAKE_MAX=25` until five receipts check out.
 
+## 5c. What the engine asks the provider, and what it costs
+
+Engine 5.0 keeps the provider traffic small: the sequencer feed (Robinhood's, free) carries every block; the provider
+socket carries only the Buy events of the curves being watched (one subscription per curve, a few at a time, dropped
+after 180 s), and the HTTP side does the nonce, the balance every 30 s, the receipts, and the factory lookup for a
+launch the feed could not resolve. That is thousands of requests a day, not millions. If a provider's dashboard shows
+millions, something is subscribed to the whole chain again (engine 4.95–4.99 did this: every Buy and every head,
+1.7 million messages a day) — check the version on the start line, and that exactly one engine runs:
+
+    grep '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print("version", d["version"], "chain_rivals", d["chain_rivals"])'
+    pgrep -af sniper_engine.py | grep -v pgrep          # exactly one line
+    ss -tnp state established | grep -c python           # its sockets: feed, sequencer, RPCs — under ten
+
+`PROVIDER_WS=` (empty) switches the chain rivals off altogether; the feed decoder's token matching still covers the
+router blind spot that made trade 6.
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while
