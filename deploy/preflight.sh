@@ -6,9 +6,22 @@ ENV=/etc/sniper/engine.env; LOG=/var/log/sniper/engine.jsonl; PY=/opt/sniper-ven
 fail=0
 say() { printf '%-4s %s\n' "$1" "$2"; [ "$1" = "FAIL" ] && fail=$((fail+1)); return 0; }
 val() { grep -E "^$1=" "$ENV" 2>/dev/null | head -1 | cut -d= -f2- | sed 's/ #.*//'; }
+has() { grep -qE "^$1=" "$ENV" 2>/dev/null; }
+# what the engine actually used, from the line it logged when it started: the settings file may simply not mention a key,
+# in which case the engine's own default applies and an empty value here would be misleading.
+START=$(grep '"ev": "start"' "$LOG" 2>/dev/null | tail -1)
+eff() { echo "$START" | grep -o "\"$1\": [^,}]*" | head -1 | cut -d: -f2- | tr -d ' "'; }
 echo "=== settings"
 for k in SEAT FEED_SOURCE TRADE_HOURS BUNDLE_MIN BUNDLE_MIN_ETH BUNDLE_MAX_ETH MIN_CREATOR_SUPPLY OUT1_MAX OUT2_MAX SEAT_WAIT_MS HOLD_S TAKE_PROFIT SUPPLY_FRAC SLIP FRAC STAKE_MIN STAKE_MAX DAILY_STOP SWITCH_N SWITCH MIN_FOLLOW_ETH_60 GAS_HEADROOM MAX_RESOLVE_MS; do
-  printf '     %-20s %s\n' "$k" "$(val $k)"
+  if has "$k"; then printf '     %-20s %s\n' "$k" "$(val $k)"
+  else
+    case "$k" in
+      TRADE_HOURS) e=$(eff trade_hours);; BUNDLE_MIN) e=$(eff bundle_min);; BUNDLE_MIN_ETH) e=$(eff bundle_min_eth);;
+      BUNDLE_MAX_ETH) e=$(eff bundle_max_eth);; MIN_CREATOR_SUPPLY) e=$(eff min_creator_supply);; HOLD_S) e=$(eff hold_s);;
+      TAKE_PROFIT) e=$(eff take_profit);; SUPPLY_FRAC) e=$(eff supply_frac);; MIN_FOLLOW_ETH_60) e=$(eff min_follow_eth_60);; *) e="";;
+    esac
+    printf '     %-20s %s\n' "$k" "${e:-?}  (not in the file: the engine's own default)"
+  fi
 done
 printf '     %-20s %s\n' "WALLET" "$(val WALLET)"
 printf '     %-20s %s\n' "RPC_URL" "$(val RPC_URL | sed 's#/v2/.*#/v2/(key hidden)#')"
@@ -57,13 +70,15 @@ import json,urllib.request,time,ssl
 env=dict(l.strip().split('=',1) for l in open('/etc/sniper/engine.env') if '=' in l and not l.startswith('#'))
 def clean(k): return env.get(k,'').split(' #')[0].strip()
 H={'Content-Type':'application/json','User-Agent':'Mozilla/5.0'}
+DEFAULTS={'RPC_URL':'https://rpc.mainnet.chain.robinhood.com','LOGS_RPC_URL':'https://rpc.mainnet.chain.robinhood.com','SEQ_URL':'https://sequencer.mainnet.chain.robinhood.com'}
 for name in ('RPC_URL','LOGS_RPC_URL','SEQ_URL'):
-    u=clean(name)
-    if not u: print('     %-14s (not set)'%name); continue
+    u=clean(name) or DEFAULTS[name]; note='' if clean(name) else ' (the engine default)'
+    # the sequencer takes transactions, not queries: ask it the one thing it answers, which is what the engine pings it with
+    m='eth_chainId' if name=='SEQ_URL' else 'eth_blockNumber'
     try:
-        t=time.time(); r=urllib.request.urlopen(urllib.request.Request(u,data=json.dumps({'jsonrpc':'2.0','id':1,'method':'eth_blockNumber','params':[]}).encode(),headers=H),timeout=10)
-        d=json.load(r); print('ok   %-14s block %d, %.0f ms'%(name,int(d['result'],16),1000*(time.time()-t)))
-    except Exception as e: print('FAIL %-14s %s'%(name,str(e)[:70]))
+        t=time.time(); r=urllib.request.urlopen(urllib.request.Request(u,data=json.dumps({'jsonrpc':'2.0','id':1,'method':m,'params':[]}).encode(),headers=H),timeout=10)
+        d=json.load(r); v=int(d['result'],16); print('ok   %-14s %s %d, %.0f ms%s'%(name,'chain' if m=='eth_chainId' else 'block',v,1000*(time.time()-t),note))
+    except Exception as e: print('FAIL %-14s %s%s'%(name,str(e)[:70],note))
 w=clean('WALLET')
 try:
     r=urllib.request.urlopen(urllib.request.Request(clean('RPC_URL'),data=json.dumps({'jsonrpc':'2.0','id':1,'method':'eth_getBalance','params':[w,'latest']}).encode(),headers=H),timeout=10)
@@ -80,6 +95,11 @@ D=$(df -P / | awk 'NR==2{print $5}' | tr -d '%'); [ "$D" -lt 90 ] && say ok "dis
 [ -x /usr/local/bin/sniper-check ] && grep -q "scored none" /usr/local/bin/sniper-check 2>/dev/null && say ok "the watchdog is the current one (catches a blind gauge)" || say FAIL "old or missing watchdog: install -m 755 deploy/sniper-check.sh /usr/local/bin/sniper-check"
 crontab -l 2>/dev/null | grep -q sniper-check && say ok "the watchdog runs from cron" || say FAIL "the watchdog is not in cron"
 $PY -c "import coincurve, eth_keys; b=eth_keys.KeyAPI().backend.__class__.__name__; print(('ok   ' if 'CoinCurve' in b else 'FAIL ')+'signature backend '+b)"
-logrotate -d /etc/logrotate.d/sniper >/dev/null 2>&1 && say ok "log rotation is configured" || say FAIL "log rotation is not configured"
+if [ -f /etc/logrotate.d/sniper ]; then
+  N=$(ls /var/log/sniper/engine.jsonl.* 2>/dev/null | grep -c '[0-9]$')
+  say ok "log rotation is configured ($N rotated file(s) present)"
+else
+  say FAIL "log rotation is not configured: no /etc/logrotate.d/sniper"
+fi
 echo
 [ "$fail" = "0" ] && echo "PREFLIGHT PASSED: nothing is blocking a live start" || echo "PREFLIGHT: $fail check(s) failed above - fix them before going live"
