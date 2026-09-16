@@ -34,6 +34,7 @@ runbook says what to verify on the first live trade.
 """
 import asyncio, base64, json, os, sys, time, math, threading, queue, http.client, ssl, socket, urllib.parse, urllib.request, collections, statistics as st, datetime, gc
 import rlp
+import traceback
 sys.setswitchinterval(0.001)                                                # one-core boxes: the send path must not wait 5 ms slices behind the feed decoder
 from eth_account import Account
 from eth_utils import keccak, to_checksum_address
@@ -84,7 +85,8 @@ MAX_RESOLVE_MS = int(os.environ.get("MAX_RESOLVE_MS", "1500"))
 GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.05"))
 GAS_HEADROOM = float(os.environ.get("GAS_HEADROOM", "2.0"))
 SELL_GAS_HEADROOM = float(os.environ.get("SELL_GAS_HEADROOM", "8.0"))   # cap on the approve and the sell: receipts show only the base fee is charged, so a high cap is free and a fee spike cannot refuse the exit
-SELL_CONFIRM_S = float(os.environ.get("SELL_CONFIRM_S", "1.5")); SELL_MAX_S = float(os.environ.get("SELL_MAX_S", "20"))                # gasPrice sent = this x eth_gasPrice: the quote equals the base fee, a tick up refuses the tx (23.7)
+SELL_CONFIRM_S = float(os.environ.get("SELL_CONFIRM_S", "1.5")); SELL_MAX_S = float(os.environ.get("SELL_MAX_S", "20"))
+SELL_FEE_MAX_USD = float(os.environ.get("SELL_FEE_MAX_USD", "0.50"))  # the exit's fee ceiling: the doubling cap stops here. Receipts pay about $0.02; an unbounded cap could spend multiples of the position (audit, Sep 16)                # gasPrice sent = this x eth_gasPrice: the quote equals the base fee, a tick up refuses the tx (23.7)
 GAS_EST_BUY, GAS_EST_APPROVE, GAS_EST_SELL = 100_000, 50_000, 80_000        # measured gas used by direct curve calls (receipts, Sep 9): the cost estimate; limits below are higher
 REQUIRE_COINCURVE = os.environ.get("REQUIRE_COINCURVE", "0") == "1"
 PIN_CPU = os.environ.get("PIN_CPU", "")                                   # e.g. "1": keep the process off core 0 (interrupts) on a 2-vCPU box
@@ -190,6 +192,11 @@ class Rpc:
                 time.sleep(0.03)
 
 
+class _Answers(list):
+    """a list of (host, answer) that also carries the state of the send that produced it"""
+    meta = None
+
+
 class Sender:
     """pre-opened, keep-alive TLS sockets to the send endpoints (the sequencer first: it is the admission point; the provider
     forwards to it). The sequencer name resolves to one address per availability zone; each is measured and the socket is
@@ -204,7 +211,7 @@ class Sender:
             if not u:
                 continue
             p = urllib.parse.urlparse(u); self.eps.append({"url": u, "host": p.netloc, "path": p.path or "/", "c": None, "lock": threading.Lock(), "rtt_ms": None, "ok": False, "ip": None, "ips": {}})
-        self._meta = {}; self.last = []
+        self._local = threading.local(); self.last = []
         threading.Thread(target=self._keepalive, daemon=True).start()
 
     def _connect(self, e):
@@ -270,7 +277,7 @@ class Sender:
             e["lock"].release()
         out.append((e["host"], d)); meta["replies"].append((e["host"], round(1000 * (mono() - meta["t0"]), 1)))
         if len(out) >= meta["pending"]:
-            meta["done"].set(); self._meta.pop(id(out), None)
+            meta["done"].set(); meta["complete"] = True
             log({"ev": "send_answers", "hash": meta["hash"], "write_ms": meta["write_ms"], "reply_ms": meta["replies"], "answers": [(h, str(d)[:120]) for h, d in out]})
 
     def fire(self, body, wait_s=2.0):
@@ -278,12 +285,12 @@ class Sender:
         and the call returns; the replies are read by background threads (send_answers event). The hash is computed locally
         from the raw transaction, so the critical path ends at the socket write (Sep 11: waiting for the reply on a one-core
         box put the buy 170 ms late). Returns (hash, answers); answers fills in as the endpoints reply (answers(), rejected())."""
-        out = []; self.last = out; t0 = mono()
+        out = _Answers(); self.last = out; self._local.last = out; t0 = mono()
         try:
             h = "0x" + keccak(bytes.fromhex(json.loads(body)["params"][0][2:])).hex()
         except Exception:
             h = None
-        meta = {"pending": 0, "done": threading.Event(), "t0": t0, "hash": h, "replies": [], "write_ms": None}; self._meta[id(out)] = meta; fired = []
+        meta = {"pending": 0, "done": threading.Event(), "t0": t0, "hash": h, "replies": [], "write_ms": None}; out.meta = meta; fired = []
         for e in self.eps:
             e["lock"].acquire()
             try:
@@ -297,21 +304,37 @@ class Sender:
         for e in fired:
             threading.Thread(target=self._read, args=(e, out, meta), daemon=True).start()
         if meta["pending"] == 0:
-            meta["done"].set(); self._meta.pop(id(out), None)
+            meta["done"].set(); meta["complete"] = True
             log({"ev": "send_answers", "hash": h, "write_ms": meta["write_ms"], "reply_ms": [], "answers": [(hh, str(d)[:120]) for hh, d in out]})
             return None, out
         return h, out
 
+    def mine(self):
+        """the answers of the last transaction this thread fired (never another thread's: self.last is shared)"""
+        return getattr(self._local, "last", None)
+
     def answers(self, out, timeout=0.5):
         """wait up to timeout for every endpoint's reply to the fire() that returned out; returns out"""
-        meta = self._meta.get(id(out)) if out is not None else None
-        if meta is not None:
-            meta["done"].wait(timeout)
+        meta = getattr(out, "meta", None) if out is not None else None
+        ev = meta.get("done") if isinstance(meta, dict) else None        # never raise on the exit path
+        if ev is not None:
+            ev.wait(timeout)
         return out if out is not None else []
 
     def rejected(self, out):
-        """True when every endpoint has replied and none accepted the transaction"""
-        return bool(out) and id(out) not in self._meta and all("result" not in d for _, d in out)
+        """True only when every endpoint has answered and every answer is a real refusal. 'already known' and 'nonce too
+        low' mean the transaction is in the pool or already mined, which is the opposite of refused: reading those as a
+        refusal would abandon a buy whose tokens we own (audit, Sep 16)."""
+        meta = getattr(out, "meta", None)
+        if not out or meta is None or not meta.get("complete"):
+            return False
+        for _, d in out:
+            if "result" in d:
+                return False
+            t = str(d).lower()
+            if "already known" in t or "nonce too low" in t or "already imported" in t or "known transaction" in t:
+                return False
+        return True
 
 
 rpc = Rpc(RPC_URL); rpc_logs = Rpc(LOGS_RPC_URL)
@@ -342,7 +365,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
          "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "connected_at": 0.0,
          "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "decisions": {},
-         "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "scores_e1": collections.deque(maxlen=60), "race_lags": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
+         "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "day_start_real": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "scores_e1": collections.deque(maxlen=60), "race_lags": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
 lock = threading.Lock()
 cond = threading.Condition()                           # notified by the feed loop after every message is fully indexed
 
@@ -350,7 +373,8 @@ cond = threading.Condition()                           # notified by the feed lo
 def save_state():
     try:
         d = {"bankroll": state["bankroll"], "day": str(state["day"]), "day_start": state["day_start"], "stopped": state["stopped"], "scores": list(state["scores"]),
-             "open": state["open"], "margin_ms": MARGIN_MS, "saved_at": time.time(), "timing": list(state["timing"])}
+             "open": {k: v for k, v in state["open"].items() if k != "closing"} if isinstance(state["open"], dict) else state["open"],
+             "margin_ms": MARGIN_MS, "saved_at": time.time(), "timing": list(state["timing"])}
         tmp = STATE_PATH + ".tmp"; json.dump(d, open(tmp, "w")); os.replace(tmp, STATE_PATH)
     except Exception as e:
         log({"ev": "error", "stage": "save_state", "err": str(e)[:200]})
@@ -365,6 +389,8 @@ def load_state():
         for x in d.get("scores", []):
             state["scores"].append(x)
         state["open"] = d.get("open"); MARGIN_MS = float(d.get("margin_ms", MARGIN_MS))
+        if isinstance(state["open"], dict):
+            state["open"].pop("closing", None)                          # a position saved mid-sell must be sellable again after a restart (audit, Sep 16)
         if time.time() - d.get("saved_at", 0) < 3600:                          # the demand readout survives a restart (it gates the first trades); stale after an hour
             for x in d.get("timing", []):
                 state["timing"].append(tuple(x))
@@ -417,30 +443,38 @@ def chain_loop():
                 bal = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18; state["wallet_eth"] = bal
                 with lock:
                     state["bankroll"] = bal * state["eth_usd"]
+                    if not state["day_start_real"]:                       # until the wallet is read, day_start is BANKROLL_USD from the env; a wallet under half of it would latch the daily stop on the first launch (audit, Sep 16)
+                        state["day_start"] = state["bankroll"]; state["day_start_real"] = True
+                        log({"ev": "day_start", "bankroll_usd": round(state["bankroll"], 2), "stop_at_usd": round((1 - DAILY_STOP) * state["bankroll"], 2)})
         except Exception as e:
             if n % 20 == 0:
                 log({"ev": "error", "stage": "chain_loop", "err": str(e)[:160]})
         if n % 100 == 0:
             try:
-                d = json.load(urllib.request.urlopen(urllib.request.Request(ETH_USD_URL, headers={"User-Agent": UA["User-Agent"]}), timeout=10)); px = float(d["data"]["amount"])
-                if 100 < px < 100000:
-                    state["eth_usd"] = px
-            except Exception:
-                pass
-            rp = state["rule_passing"]; now = time.time()
-            tm = list(state["timing"]); fs = [a for a, b, c in tm if a is not None]
-            log({"ev": "flow", "rule_passing_last_6h": sum(1 for t in rp if now - t < 21600), "rule_passing_last_1h": sum(1 for t in rp if now - t < 3600),
-                 "mean_score_last_60": round(st.mean(list(state["scores"])[-60:]), 4) if state["scores"] else None, "creations_seen": state["creations"],
-                 "median_first_sell_s": round(st.median(fs), 2) if fs else None, "share_dumped_inside_hold": round(st.mean(b for a, b, c in tm), 4) if tm else None,
-                 "follow_eth_last_20": round(st.mean([c for a, b, c in tm][-20:]), 3) if tm else None, "follow_eth_last_60": round(st.mean(c for a, b, c in tm), 3) if tm else None, "follow_eth_all_60": round(st.mean(state["timing_all"]), 3) if state["timing_all"] else None,
-                 "out1_share_last_60": round(st.mean(state["out1_flags"]), 2) if state["out1_flags"] else None, "mean_score_e1_last_60": round(st.mean(state["scores_e1"]), 4) if state["scores_e1"] else None, "race_first_rival_ms_median": round(st.median(state["race_lags"]), 1) if state["race_lags"] else None, "race_first_block_share": round(sum(1 for x in state["race_lags"] if x < 15) / len(state["race_lags"]), 2) if state["race_lags"] else None,
-                 "bankroll_usd": round(state["bankroll"], 2), "wallet_eth": round(state["wallet_eth"], 5) if state.get("wallet_eth") is not None else None,
-                 "silent_min": round((mono() - state["last_creation_at"]) / 60, 1) if state["last_creation_at"] else None})
-            if state["last_creation_at"] and mono() - state["last_creation_at"] > 1800 and mono() - state["connected_at"] > 1800:
-                log({"ev": "alarm", "what": "no creation seen from the factory for 30 minutes while the feed is connected: the launchpad moved, stopped or changed its factory"})
-            b = boundary()
-            if b:
-                log({"ev": "boundary", "theta_ms": round(1000 * b[0], 1), "confidence": round(b[1], 3), "bracket_width_ms": round(1000 * b[2], 1), "samples": len(state["brackets"]), "margin_ms": round(MARGIN_MS, 2)})
+                try:
+                    d = json.load(urllib.request.urlopen(urllib.request.Request(ETH_USD_URL, headers={"User-Agent": UA["User-Agent"]}), timeout=10)); px = float(d["data"]["amount"])
+                    if 100 < px < 100000:
+                        state["eth_usd"] = px
+                except Exception:
+                    pass
+                rp = list(state["rule_passing"]); now = time.time()          # snapshots: these deques are appended by the score threads while this reduces them (audit, Sep 16)
+                tm = list(state["timing"]); fs = [a for a, b, c in tm if a is not None]
+                o1 = list(state["out1_flags"]); ta = list(state["timing_all"]); se1 = list(state["scores_e1"]); rl = list(state["race_lags"]); sc = list(state["scores"])
+                log({"ev": "flow", "rule_passing_last_6h": sum(1 for t in rp if now - t < 21600), "rule_passing_last_1h": sum(1 for t in rp if now - t < 3600),
+                     "mean_score_last_60": round(st.mean(sc[-60:]), 4) if sc else None, "creations_seen": state["creations"],
+                     "median_first_sell_s": round(st.median(fs), 2) if fs else None, "share_dumped_inside_hold": round(st.mean(b for a, b, c in tm), 4) if tm else None,
+                     "follow_eth_last_20": round(st.mean([c for a, b, c in tm][-20:]), 3) if tm else None, "follow_eth_last_60": round(st.mean(c for a, b, c in tm), 3) if tm else None, "follow_eth_all_60": round(st.mean(ta), 3) if ta else None,
+                     "out1_share_last_60": round(st.mean(o1), 2) if o1 else None, "mean_score_e1_last_60": round(st.mean(se1), 4) if se1 else None, "race_first_rival_ms_median": round(st.median(rl), 1) if rl else None, "race_first_block_share": round(sum(1 for x in rl if x < 15) / len(rl), 2) if rl else None,
+                     "bankroll_usd": round(state["bankroll"], 2), "wallet_eth": round(state["wallet_eth"], 5) if state.get("wallet_eth") is not None else None,
+                     "silent_min": round((mono() - state["last_creation_at"]) / 60, 1) if state["last_creation_at"] else None})
+                if state["last_creation_at"] and mono() - state["last_creation_at"] > 1800 and mono() - state["connected_at"] > 1800:
+                    log({"ev": "alarm", "what": "no creation seen from the factory for 30 minutes while the feed is connected: the launchpad moved, stopped or changed its factory"})
+                b = boundary()
+                if b:
+                    log({"ev": "boundary", "theta_ms": round(1000 * b[0], 1), "confidence": round(b[1], 3), "bracket_width_ms": round(1000 * b[2], 1), "samples": len(state["brackets"]), "margin_ms": round(MARGIN_MS, 2)})
+            except Exception as e:
+                if n % 20 == 0:                                              # the readout block used to sit outside every try: one raise stopped the nonce refresh for good and every launch was gated "nonce/gas not fresh" (audit, Sep 16)
+                    log({"ev": "error", "stage": "chain_loop_readouts", "err": str(e)[:200]})
         n += 1; time.sleep(3)
 
 
@@ -501,10 +535,11 @@ def wait_for_second(feed_ts, seconds, seen_at, deadline=3.5, watch=None):
     with cond:
         while state["feed_ts"] < target_ts and mono() - seen_at < deadline:
             cond.wait(0.25)
-    if state["feed_ts"] != target_ts or mono() - state["flip_at"].get(target_ts, mono()) > MAX_LATE_S:
-        return None
+    flip = state["flip_at"].get(target_ts)
+    if state["feed_ts"] != target_ts or flip is None or mono() - flip > MAX_LATE_S:
+        return None                                                  # no recorded flip for this second (a reconnect replaying a backlog): send nothing rather than raise
     if SEAT_WAIT_MS > 0 and watch is not None:                       # the seat rule: send SEAT_WAIT_MS into the second unless an outsider has already bought
-        until = state["flip_at"][target_ts] + SEAT_WAIT_MS / 1000.0
+        until = flip + SEAT_WAIT_MS / 1000.0
         with cond:
             while mono() < until and watch["out2"] + watch["out2_chain"] <= OUT2_MAX and state["feed_ts"] == target_ts:
                 cond.wait(max(0.0, min(until - mono(), 0.05)))
@@ -547,7 +582,7 @@ def gas_cost_usd():
 def new_day_check():
     d = datetime.datetime.utcnow().date()
     if state["day"] != d:
-        state["day"] = d; state["day_start"] = state["bankroll"]; state["stopped"] = False; state["launched_today"].clear(); state["seeded"] = False
+        state["day"] = d; state["day_start"] = state["bankroll"]; state["day_start_real"] = SEND is None; state["stopped"] = False; state["launched_today"].clear(); state["seeded"] = False
         threading.Thread(target=seed_launched_today, daemon=True).start(); save_state()
 
 
@@ -579,7 +614,7 @@ def curve_buys(curve, since_ts=None):
     curve (their senders recovered now, only for the few that match). Used once, when a curve is resolved; afterwards the
     feed loop folds new buys into state['watch'][curve] as they arrive."""
     cb = bytes.fromhex(curve[2:]); out = list(state["buys"].get(curve, []))
-    for e in state["valtx"]:
+    for e in list(state["valtx"]):                                    # a snapshot: the feed appends (and evicts) while this scans (audit, Sep 16)
         if cb in e[4]:
             if e[2] is None:
                 try:
@@ -626,9 +661,9 @@ def fold_buy(w, ts_, snd, val, blk=None, to=None, sel=None):
         if sec in (1, 2):
             ignored = state["reverters"].get(snd, 0) >= 3
             log({"ev": "rival", "curve": w.get("curve"), "second": sec, "sender": snd, "to": to, "selector": sel, "value": round(val, 5), "ignored": ignored})
+            w["rivals"].append([sec, snd])                            # recorded even when ignored, so scoring can un-learn a sender that starts landing again (audit, Sep 16)
             if ignored:
                 return
-            w["rivals"].append([sec, snd])
             if sec == 1 and w.get("race_ms") is None:
                 fa = state["flip_at"].get(ts_); w["race_ms"] = round((mono() - fa) * 1000, 1) if fa else None
             if sec == 1 and val >= OUT1_MIN_ETH:
@@ -862,22 +897,27 @@ def send_confirmed(build, label, max_s):
     with a doubled cap at the next free nonce. 'nonce too low' from the sequencer means an earlier attempt landed: its receipt is
     fetched. Returns (receipt, hash), (None, last hash) after max_s."""
     t0 = mono(); cap = (state.get("base_fee") or state["gas_price"] or 10 ** 8) * SELL_GAS_HEADROOM; hashes = []; attempt = 0
+    nonce = next_nonce()                                                 # the SAME nonce every attempt: a fee bump replaces the stuck transaction; a new nonce would queue behind it and both would land (audit, Sep 16)
+    cap_max = max(cap, int(SELL_FEE_MAX_USD / max(state["eth_usd"], 1.0) * 1e18 / max(GAS_SELL, 1)))
     while mono() - t0 < max_s:
-        attempt += 1; h = submit(build(cap, next_nonce()), label); ans = getattr(SENDER, "last", None) or []
+        attempt += 1; h = submit(build(min(cap, cap_max), nonce), label); ans = SENDER.mine() or []
         if h:
             hashes.append(h); rec = wait_receipt(h, SELL_CONFIRM_S, ans)
             if rec:
                 return rec, h
         txt = " ".join(str(d) for _, d in SENDER.answers(ans, 0.2))
-        if "nonce too low" in txt or "already known" in txt:                 # an earlier attempt landed: its receipt
+        if "nonce too low" in txt:                                       # an earlier attempt is already mined: find its receipt, and move on if it was not ours
             for hh in hashes:
                 rec = wait_receipt(hh, 1.0)
                 if rec:
                     return rec, hh
+            nonce = next_nonce()
+        elif "already known" in txt:                                     # the same transaction is still in the pool: raise the fee and re-send at the same nonce
+            pass
         if not h:
             time.sleep(0.2)
-        cap = min(cap * 2, 10 ** 12)
-        log({"ev": "resend", "label": label, "attempt": attempt + 1, "cap_gwei": round(cap / 1e9, 4), "hashes": len(hashes)})
+        cap = min(cap * 2, cap_max)
+        log({"ev": "resend", "label": label, "attempt": attempt + 1, "nonce": nonce, "cap_gwei": round(cap / 1e9, 4), "max_fee_usd": round(cap * GAS_SELL / 1e18 * state["eth_usd"], 3), "hashes": len(hashes)})
     return None, (hashes[-1] if hashes else None)
 
 
@@ -962,6 +1002,28 @@ def close_position(pos, why):
 
 
 def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0):
+    """the launch thread, guarded: an exception here used to kill the thread silently, and if it happened after the buy the
+    tokens were never sold and the 'position open' gate blocked every later trade for good (audit, Sep 16)."""
+    try:
+        _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
+    except Exception as e:
+        pos = state["open"]
+        log({"ev": "alarm", "what": "the launch thread crashed", "err": str(e)[:200], "where": traceback.format_exc().strip().splitlines()[-2][:160],
+             "creator": creator, "position_open": pos is not None})
+        if pos is not None and not pos.get("closing"):
+            threading.Thread(target=close_position, args=(pos, "the launch thread crashed after the buy"), daemon=True).start()
+        else:
+            release_reservation()
+
+
+def release_reservation():
+    """give the nonce back and make the next launch wait for a fresh one from the chain, so a reserved-but-unused nonce
+    cannot leave a gap that strands every later transaction in the pool (audit, Sep 16)."""
+    with lock:
+        state["nonce"] = None; state["chain_at"] = 0.0; state["busy_until"] = 0.0
+
+
+def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0):
     """resolve the curve, apply the gates, size on the feed-tracked curve, take the seat, build the buy, then approve and sell"""
     curve = token = None; tk0 = None; b_create = None; src = None; named = set(named)
     new_day_check()
@@ -1081,7 +1143,7 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
     tk, net, gross, fee = size_buy(X, Y, stake_eth, SEAT)
     amount_in = int(gross * 1e18); min_out = int(tk * (1 - SLIP) * 1e18)
     buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
-    h = submit(buy, "buy"); t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk); buy_ans = getattr(SENDER, "last", None)
+    h = submit(buy, "buy"); t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk); buy_ans = SENDER.mine()
     state["traded"][curve] = min(stake_usd, gross * state["eth_usd"]); state["decisions"][curve] = decision
     threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
     p_creator = (X0 + X0 * tk0 / (Y0 - tk0)) / (Y0 - tk0)
@@ -1093,12 +1155,13 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
     if h:                                                            # live: the tokens actually received, from the buy's own event
         rec = wait_receipt(h, ans=buy_ans)
         if rec is None and buy_ans and SENDER.rejected(buy_ans):
-            log({"ev": "buy_rejected", "curve": curve, "hash": h, "answers": [(hh, str(d)[:120]) for hh, d in buy_ans]}); state["traded"].pop(curve, None); state["busy_until"] = 0.0; return
+            log({"ev": "buy_rejected", "curve": curve, "hash": h, "answers": [(hh, str(d)[:120]) for hh, d in buy_ans]})
+            state["traded"].pop(curve, None); release_reservation(); return
         if rec:
             if SEAT in ("E1", "E2"):
                 threading.Thread(target=tune_margin, args=(rec, feed_ts + SEAT_SECONDS[SEAT]), daemon=True).start()
             if rec.get("status") != "0x1":
-                log({"ev": "buy_reverted", "curve": curve, "hash": h}); state["traded"].pop(curve, None); state["busy_until"] = 0.0; return
+                log({"ev": "buy_reverted", "curve": curve, "hash": h}); state["traded"].pop(curve, None); release_reservation(); return
             for l in rec.get("logs", []):
                 if l["topics"][0] == BUY_EV and l["address"].lower() == curve:
                     tokens = int(l["data"][2 + 64:2 + 128], 16) / 1e18
@@ -1158,6 +1221,13 @@ def prune(now):
     for cv in list(state["buys"]):
         if cv not in state["known_curves"] and state["buys"][cv] and now - state["buys"][cv][-1][3] > 120:
             state["buys"].pop(cv, None)
+    for cv in list(state["sells"]):                                      # the same age-out for sells: only traded curves were pruned before, so the rest grew for ever (audit, Sep 16)
+        if cv not in state["known_curves"] and state["sells"][cv] and now - state["sells"][cv][-1][0] > 120:
+            state["sells"].pop(cv, None)
+    held = (state["open"] or {}).get("curve")
+    for cv, w in list(state["watch"].items()):                           # a launch thread that died before scoring used to leave its curve watched for ever, and every watched curve is scanned against every transaction
+        if cv != held and now - w["since"] > 180:
+            state["watch"].pop(cv, None); state["decisions"].pop(cv, None)
     for ts_ in [k for k in state["flip_at"] if k < state["feed_ts"] - 120]:
         state["flip_at"].pop(ts_, None); state["flip_block"].pop(ts_, None)
     if not state["watch"] and state["open"] is None:
@@ -1208,9 +1278,12 @@ def index_message(inner, ts, seen):
             if watched and val == 0 and sel not in (BUY_SEL, SELL_SEL):
                 for cv, w in list(watched.items()):                                  # a snapshot: the score and creation threads add and pop watched curves while this loop runs
                     if w["cb"] in data or (w["tb"] is not None and w["tb"] in data):    # a value-less call naming a curve we watch: a router sell, or a router buy paid in tokens
-                        if sel.hex() != APPROVE_SEL and to_hex != cv and ts - w["ts0"] in (1, 2):
+                        if sel.hex() == APPROVE_SEL or to_hex == cv:
+                            continue                                                             # our own approve names the curve in its calldata: reading it as a sell fired the dump exit instantly (audit, Sep 16)
+                        if ts - w["ts0"] in (1, 2):
                             fold_buy(w, ts, sender_of(t), 0.0, state["blocks"], to_hex, sel.hex())   # counted as a rival (section 23.11: a 0.001 ETH router buy the feed missed)
-                        fold_sell(w, float("inf") if STOP_SELL_FRAC > 0 else 0.0)
+                        if sender_of(t) != WALLET.lower():
+                            fold_sell(w, float("inf") if STOP_SELL_FRAC > 0 else 0.0)
         except Exception as e:
             log({"ev": "error", "stage": "decode", "err": str(e)[:200]})
 
@@ -1351,7 +1424,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 4.97, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 4.98, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
