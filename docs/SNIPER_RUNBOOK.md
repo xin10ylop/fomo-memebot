@@ -373,7 +373,9 @@ scan as the fallback. Opt in explicitly:
 When Robinhood's feed refuses connections the engine detects from the provider for `PROVIDER_FALLBACK_S` (120 s) and then
 tries the feed again, for ever. On the provider path the seat is refused unless `E0_ALLOW_PROVIDER=1` with the measured
 `PROVIDER_LAG_MS`: run `sudo bash deploy/provider_enable.sh` once on the box (60 s); it enables the seat there only if the
-median lag is under 300 ms. The provider path is lean (factory events only, 24.17); the E1/E2 seats do not run on it.
+median lag is under 300 ms against the sequencer feed. When the feed is down the absolute lag cannot be measured; the script
+then enables the seat for PAPER with a pessimistic 300 ms added to every score, and LIVE on the provider path waits for a
+feed-referenced measurement. The provider path is lean (factory events only, 24.17); the E1/E2 seats do not run on it.
 
 Dry-run it for a session and read it with `deploy/speed_readout.py` (rotation-safe, everything since the last start):
 every `trade_decision`'s `bundle_wait_ms` (creation seen to bundle visible), `sent_ms` (creation seen to send) and
