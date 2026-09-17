@@ -47,6 +47,24 @@ cases = [
     ("a bot bought in second one", dict(creator_share=0.05, team_n=8, team_eth=0.8, out1=1), "FILTERED"),
 ]
 bad = 0
+# the creation-second seat's label (engine 5.41): a taxed outsider ahead of the team's bundle ends the bundle for the tables' E2 rule but
+# not for the E0 seat, whose gate is the named wallets' transactions inside nine blocks whatever bought first
+def launch_bot_first(tier=0.01):
+    ev = []; X, Y = X0, Y0; b = 1000
+    tk = 0.05 * Y0; net = X * tk / (Y - tk); ev.append((b, 0, True, net / (1 - tier), tk, 0.0)); X += net; Y -= tk; tk0 = tk
+    q = 0.03; net = q * (1 - tier - 0.0618); t = Y - X * Y / (X + net); ev.append((b + 1, 0, True, q, t, 0.0)); X += net; Y -= t   # a bot, 6.18%
+    for i in range(8):
+        q = 0.1; net = q * (1 - tier); t = Y - X * Y / (X + net); ev.append((b + 4, i, True, q, t, 0.0)); X += net; Y -= t      # the team, exempt
+    for i in range(4):
+        q = 0.08; net = q * (1 - tier - 0.0618); t = Y - X * Y / (X + net); ev.append((b + 6 + i, 0, True, q, t, 0.0)); X += net; Y -= t
+    return ev, tk0
+ev, tk0 = launch_bot_first()
+r0 = E.exact_score(ev, 1000, tk0, 10 / 2500.0, "E0", gated=True, tp=None, readouts=False)
+r2 = E.exact_score(ev, 1000, tk0, 25 / 2500.0, "E2", gated=True, tp=0.5, readouts=False)
+ok0 = r0 is not None and r0[0] != "filtered"; ok2 = r2 is not None and r2[0] == "filtered"
+bad += (not ok0) + (not ok2)
+print(f"{'ok ' if ok0 else 'FAIL'} {'bot ahead of the bundle: E0 seat is scored':44s} got {'scored' if ok0 else str(r0)}")
+print(f"{'ok ' if ok2 else 'FAIL'} {'bot ahead of the bundle: E2 rule filters it':44s} got {'FILTERED' if ok2 else str(r2)}")
 for name, kw, want in cases:
     got = verdict(**kw)
     ok = got == want

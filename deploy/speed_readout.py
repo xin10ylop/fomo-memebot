@@ -49,8 +49,9 @@ if traded:
     rs = [x["roi"] for x in traded]; pn = [x["pnl_usd"] for x in traded]
     print(f"\npaper scores on the seats taken (scorer assumes a 0.3 s landing): n {len(rs)} mean roi {100*st.mean(rs):+.1f}% median {100*st.median(rs):+.1f}% wins {sum(r>0 for r in rs)} losses {sum(r<=0 for r in rs)} pnl ${sum(pn):+.2f} worst {100*min(rs):+.1f}% best {100*max(rs):+.1f}%")
     for x in traded: print(f"  {u(x['t'])} roi {100*x['roi']:+6.1f}% pnl ${x['pnl_usd']:+6.2f} cost ${x['cost_usd']} tier {x.get('tier')} t_in {x.get('t_in_s')} rolling_mean {x.get('rolling_mean')} switch_on {x.get('switch_on')}")
+ref = {e["curve"]: e for e in ev if e["ev"] == "score" and "roi" not in e}
 un = [e for e in td if e["curve"] not in sc]
-if un: print(f"decisions without a score yet: {len(un)}")
+if un: print(f"decisions without a numeric score: {len(un)}" + "".join(f"\n  {u(e['t'])} {e['curve'][:12]}: " + (str(ref[e["curve"]].get("result")) if e["curve"] in ref else "not scored yet") for e in un))
 b = [e for e in ev if e["ev"] == "boundary"]
 if b: print(f"\nboundary (feed's second boundary on our clock): theta_ms {b[-1].get('theta_ms')} confidence {b[-1].get('confidence')} bracket_width_ms {b[-1].get('bracket_width_ms')} samples {b[-1].get('samples')}")
 r = [e for e in ev if e["ev"] == "sender_rtt"]

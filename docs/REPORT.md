@@ -2377,3 +2377,17 @@ second one: the crowd is heaviest exactly where the token is good. On the cache,
 Sep 12–15 (26% clean), −4.3% on Sep 16 (15% clean), and +10.2% with a −2.4% median on the six clean launches of Sep 17
 0–6. The engine's refusals of helper-bundle launches under E2 were wrong for the wrong reason and right in effect: those
 seats were crowded.
+
+**The first seat taken (engine 5.4, Sep 17 12:50:10 UTC).** Creation at block 65379790, 0.90 into its second, a 2% token,
+three named wallets. Block 1: a bot through a helper contract at the 6.18% surcharge. Block 4: the team's three wallets,
+0.37 ETH, exempt. Block 5: fifteen bots, 0.9 ETH, at 8.18% all-in. Block 7: 0.43 ETH sold, the team flipping into the
+crowd. Block 9: four more bots, 0.8 ETH. The engine saw the bundle 390 ms after the creation and sent 2 ms later from
+the feed's own resolution, 4 blocks after the creation. In the replay the seat pays +245% at a 0.3–0.4 s entry, +103% at
+0.5 s and +6% at 0.6 s: the block-5 flood is the whole trade, and a 100 ms later landing is the difference between a
+tripling and nothing. The scorer refused to grade it, "outside the rule on the chain's reading": the tables end a bundle at
+the first taxed buy, the bot at block 1, and the engine's gate does not, because a helper call that does not name the
+curve is invisible to the feed. On today's two-hour universe no launch of this shape exists at all (0 of 289 with an ETH
+quote and a creator above 1%; the ten bundled launches all had the bundle first), so the class is rare and the tables'
+figures stand. Engine 5.41 grades the creation-second seat on its own window, the named wallets' transactions inside
+nine blocks whatever bought first, so the paper result of every seat taken is recorded, and counts the bots-before-bundle
+launches in the state for the record.
