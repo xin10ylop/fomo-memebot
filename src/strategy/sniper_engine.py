@@ -1108,36 +1108,81 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             if c >= BUNDLE_MIN:
                 curve = a; src = "feed"
                 net0 = init_buy_wei / 1e18 * 0.99; tk0 = Y0 - X0 * Y0 / (X0 + net0) if net0 > 0 else 0.0
-    bundle_wait_ms = None
+    bundle_wait_ms = None; helper_folded = 0
+
+    def named_txs():
+        """the named wallets' transactions from the creation block on, whatever contract they call: direct curve buys (state['buys'])
+        and value-carrying calls to helper contracts (state['valtx'], sender recovered here and cached). On Sep 17 every bundle went
+        through a helper contract, invisible to a count of direct curve buys (report 24.16). [(ts, sender, val, blk, to, sel, data, helper)]"""
+        out = []
+        try:
+            for cv, lst in list(state["buys"].items()):
+                for x in list(lst):
+                    if x[1] in named and x[0] >= feed_ts and (blk0 is None or len(x) < 5 or x[4] is None or blk0 <= x[4] <= blk0 + 9):
+                        out.append((x[0], x[1], x[2], x[4] if len(x) > 4 else None, x[5] if len(x) > 5 else None, x[6] if len(x) > 6 else None, None, False))
+            for e in list(state["valtx"]):
+                blk = e[6] if len(e) > 6 else None
+                if e[1] < feed_ts or e[3] < 0.005 or (blk0 is not None and blk is not None and not blk0 <= blk <= blk0 + 9):
+                    continue
+                if e[2] is None:
+                    try:
+                        e[2] = sender_of(e[5])
+                    except Exception:
+                        e[2] = "?"
+                if e[2] in named:
+                    out.append((e[1], e[2], e[3], blk, e[7] if len(e) > 7 else None, e[8] if len(e) > 8 else None, e[4], True))
+        except RuntimeError:
+            pass
+        return out
+
     if SEAT == "E0" and BUNDLE_MIN > 0:
-        # 5.3: the creation-second seat enters only once the bundle is VISIBLE on the feed (the named wallets' buys, which also name
-        # the curve): the 5.1-5.2 path read the gates before any bundle buy had arrived ('bundle 0 < 3' on every launch, dry run of
-        # Sep 17), and a fixed entry ahead of the team's own bundle is the look-ahead of report 24.15, not a seat anyone can take
-        def bundle_seen():
-            """the curve the named wallets are buying: the first candidate meeting both floors, else the best by (buys, ETH)"""
-            best = (None, 0, 0.0)
-            for a, c in count_cands().most_common():
-                try:
-                    eth = sum(b[2] for b in list(state["buys"].get(a, [])) if b[1] in named and b[0] >= feed_ts)
-                except RuntimeError:
-                    eth = 0.0
-                if c >= BUNDLE_MIN and eth >= BUNDLE_MIN_ETH:
-                    return a, c, eth
-                if (c, eth) > (best[1], best[2]):
-                    best = (a, c, eth)
-            return best
-        a, c, eth = bundle_seen()
+        # 5.3-5.4: the creation-second seat enters only once the bundle is VISIBLE on the feed, never ahead of it (report 24.15); the bundle
+        # is the named wallets' transactions in the creation block and the next nine, direct or through a helper contract (24.16). The chain
+        # resolve of the curve starts in the first millisecond and runs while the bundle is awaited; the send goes out when both are in hand.
+        box = {}
+
+        def resolve_bg():
+            try:
+                box["r"] = resolve_rpc(creator)
+            except Exception as e:
+                box["r"] = None; log({"ev": "error", "stage": "e0_resolve", "err": str(e)[:200]})
+            with cond:
+                cond.notify_all()
+        threading.Thread(target=resolve_bg, daemon=True).start()
+        def bundle_view():
+            """(count, ETH, the curve the direct buys name or None): the helper calls plus the direct buys of ONE curve, the first meeting
+            both floors, else the best by (buys, ETH); stale buys of the same wallets on an earlier, unresolved curve are not mixed in"""
+            tx = named_txs(); helpers = [t for t in tx if t[7]]; by = collections.defaultdict(lambda: [0, 0.0])
+            for t in tx:
+                if not t[7] and t[4] is not None and t[4] not in state["known_curves"]:
+                    by[t[4]][0] += 1; by[t[4]][1] += t[2]
+            best = None
+            for cv_, (n_, e_) in by.items():
+                if n_ >= BUNDLE_MIN and e_ >= BUNDLE_MIN_ETH:
+                    best = (cv_, n_, e_); break
+                if best is None or (n_, e_) > (best[1], best[2]):
+                    best = (cv_, n_, e_)
+            return len(helpers) + (best[1] if best else 0), sum(t[2] for t in helpers) + (best[2] if best else 0.0), best
+        c, eth, best = bundle_view()
         while (c < BUNDLE_MIN or eth < BUNDLE_MIN_ETH) and mono() - seen_at < E0_BUNDLE_WAIT_S:
             with cond:
                 cond.wait(0.02)
-            a, c, eth = bundle_seen()
-        if a is not None and c >= BUNDLE_MIN and eth >= BUNDLE_MIN_ETH:
-            curve = a; src = "feed"; bundle_wait_ms = round((mono() - seen_at) * 1000)
+            c, eth, best = bundle_view()
+        if c < BUNDLE_MIN or eth < BUNDLE_MIN_ETH:
+            log({"ev": "skip", "why": [f"bundle not visible on the feed within {1000 * E0_BUNDLE_WAIT_S:.0f} ms ({c} named transactions, {eth:.3f} ETH)"], "creator": creator,
+                 "named_wallets": len(named), "tax_bps": tax_bps, "wait_ms": round((mono() - seen_at) * 1000)}); return
+        bundle_wait_ms = round((mono() - seen_at) * 1000)
+        if best is not None and best[1] >= BUNDLE_MIN:
+            curve = best[0]; src = "feed"                                     # a direct bundle names the curve: no need to wait for the chain
             net0 = init_buy_wei / 1e18 * 0.99; tk0 = Y0 - X0 * Y0 / (X0 + net0) if net0 > 0 else 0.0
         else:
-            log({"ev": "skip", "why": [f"bundle not visible on the feed within {1000 * E0_BUNDLE_WAIT_S:.0f} ms ({c} named buys, {eth:.3f} ETH)"], "creator": creator,
-                 "named_wallets": len(named), "tax_bps": tax_bps, "wait_ms": round((mono() - seen_at) * 1000)}); return
-    if curve is None:
+            while "r" not in box and mono() - seen_at < E0_BUNDLE_WAIT_S + 1.5:
+                with cond:
+                    cond.wait(0.02)
+            r = box.get("r")
+            if r:
+                token, curve, tk0, b_create = r; src = "rpc"
+    elif curve is None:
         r = resolve_rpc(creator)
         if r:
             token, curve, tk0, b_create = r; src = "rpc"
@@ -1159,6 +1204,9 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     if reasons:
         log({"ev": "skip", "why": reasons, "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named)}); return
     w = watch_curve(curve, tk0, feed_ts, named, creator, blk0, tax_bps)  # from here the feed loop folds every buy and sell of this curve as it arrives
+    for t in named_txs():                                                # the named wallets' helper-contract calls: the bundle a direct-buy count cannot see (24.16)
+        if t[7] and not (t[6] is not None and w["cb"] in t[6]):              # a helper that names the curve was already seeded by curve_buys
+            fold_buy(w, t[0], t[1], t[2], t[3], t[4], t[5]); helper_folded += 1
     if token:
         w["tb"] = bytes.fromhex(token[2:])
     else:
@@ -1176,7 +1224,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         send_mode = "e0"                                                  # the creation second: no wait, every 100 ms costs 3-5 points
     t_wake = mono()
     decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "race_ms": w.get("race_ms"), "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"]),
-                "tax_bps": w.get("tax_bps"), "team_share": round((Y0 - w["Y"]) / Y0, 4), "bundle_wait_ms": bundle_wait_ms}
+                "tax_bps": w.get("tax_bps"), "team_share": round((Y0 - w["Y"]) / Y0, 4), "bundle_wait_ms": bundle_wait_ms, "bundle_helper": helper_folded}
     with lock:
         sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []
@@ -1565,7 +1613,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.3, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.4, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

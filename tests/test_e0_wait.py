@@ -103,5 +103,43 @@ c6, cv6 = "0x" + "66" * 20, "0x" + "a6" * 20
 W = wallets(3); E.state["busy_until"] = 0.0; run(c6, cv6, W, [(w, 0.15) for w in W], 0.05)
 d = events(c6, "trade_decision")
 check("stale buys of the same wallets on another curve are not taken for the bundle", bool(d) and d[0].get("curve") == cv6 and d[0].get("bundle_eth") and abs(d[0]["bundle_eth"] - 0.45) < 1e-6, str([(e.get("curve"), e.get("bundle_eth")) for e in d]) if d else str([e.get("why") for e in events(c6, "skip", wait=0.5)]))
+# 7-9. helper-contract bundles (engine 5.4): the named wallets call a helper that buys for them; the feed sees value-carrying
+# transactions to another address, the curve comes from the chain resolve started in parallel
+SENDERS = {}
+E.sender_of = lambda raw: SENDERS[raw]
+def helper_bundle(k, curve, wallets, eth=0.15, name_curve=False, delay_s=0.05, resolved=True):
+    tok = "0x" + ("b%d" % k) * 20
+    def feed():
+        time.sleep(delay_s)
+        for i, w in enumerate(wallets):
+            raw = ("h%d-%d" % (k, i)).encode(); SENDERS[raw] = w
+            data = bytes.fromhex("9f56b0c8") + bytes(12) + bytes.fromhex((curve if name_curve else tok)[2:]) + bytes(64)
+            E.state["valtx"].append([E.mono(), T, None, eth, data, raw, 1000, "0x" + "5e" * 20, "9f56b0c8"])
+        with E.cond:
+            E.cond.notify_all()
+    threading.Thread(target=feed, daemon=True).start()
+    E.resolve_rpc = (lambda *a, **kw: (tok, curve, 0.02 * E.Y0, 1000)) if resolved else (lambda *a, **kw: None)
+c7, cv7 = "0x" + "77" * 20, "0x" + "a7" * 20
+W = wallets(7); E.state["busy_until"] = 0.0; helper_bundle(7, cv7, W)
+E._handle_creation(c7, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
+d = events(c7, "trade_decision")
+check("helper bundle in the creation block: traded", bool(d), str([e.get("why") for e in events(c7, "skip", wait=0.3)]) + str([e.get("gates") for e in events(c7, "eligible_not_traded", wait=0.3)]))
+if d:
+    d = d[0]
+    check("helper bundle: the curve came from the chain resolve", d.get("resolve_src") == "rpc", d.get("resolve_src"))
+    check("helper bundle: the gates saw 3 buys and 0.45 ETH", d.get("bundle") == 3 and abs(d.get("bundle_eth", 0) - 0.45) < 1e-6, f"{d.get('bundle')} {d.get('bundle_eth')}")
+    check("helper bundle: folded as helper calls (bundle_helper 3)", d.get("bundle_helper") == 3, str(d.get("bundle_helper")))
+    check("helper bundle: the team's share of supply reflects 0.45 ETH", 0.15 < (d.get("team_share") or 0) < 0.35, str(d.get("team_share")))
+c8, cv8 = "0x" + "88" * 20, "0x" + "a8" * 20
+W = wallets(8); E.state["busy_until"] = 0.0; helper_bundle(8, cv8, W, name_curve=True)
+E._handle_creation(c8, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
+d = events(c8, "trade_decision")
+check("helper that names the curve in its calldata: counted once (bundle 3, not 6)", bool(d) and d[0].get("bundle") == 3 and abs(d[0].get("bundle_eth", 0) - 0.45) < 1e-6, str([(e.get("bundle"), e.get("bundle_eth")) for e in d]))
+c9, cv9 = "0x" + "99" * 20, "0x" + "a9" * 20
+W = wallets(9); E.state["busy_until"] = 0.0; helper_bundle(9, cv9, wallets(19))        # helper calls from wallets the calldata did not name
+E._handle_creation(c9, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
+s9 = events(c9, "skip", wait=1.0)
+check("helper calls from unnamed wallets are not a bundle: skipped", bool(s9) and any("0 named transactions" in str(e.get("why")) for e in s9), str([e.get("why") for e in s9]))
+E.resolve_rpc = lambda *a, **kw: None
 print("all creation-second wait tests pass" if not fails else f"{len(fails)} TESTS FAILED: {fails}")
 raise SystemExit(1 if fails else 0)

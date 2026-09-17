@@ -1,0 +1,33 @@
+Chain probe, Sep 17 10:38-12:37 UTC (src/analysis/today_probe.py): every V2 creation, the calldata's tier and named wallets,
+every Buy/Sell on the curve for 40 blocks, the bundle (exempt buys within a second) and whether each bundle buy went
+through a helper contract.
+
+creations: 575 in 120 min
+bundled (3 exempt buys, 0.3 ETH, within 1 s; creator >= 1%; ETH quote): 10 = 5.0/h; of them 2-3% tier: 3
+bundle complete at block offset: 0: 4, 1: 5, 2: 1
+bundles with at least one buy through a helper contract: 10 of 10; every buy's sender a calldata-named wallet: 9 of 10
+named wallets on the bundled launches: 3 wallets: 8, 5 wallets: 1, 25 wallets: 1; bundle ETH median 0.800
+
+creation-second seat on these ten (hold 1.5 s, no take-profit, $10):
+  all tiers  n 10: entry 0.2 s mean +99.4% median -8.5% win 30% | 0.3 s +2.5% / -8.5% / 20% | 0.4 s -2.4% | 0.5 s -2.7%
+  2-3% tier  n  3: entry 0.2 s mean +31.3% median +37.0% win 67% | 0.3 s +28.6% / +28.8% / 67% | 0.4 s +11.8% | 0.5 s +10.7%
+
+per bundled launch: tax_bps, named, bundle buys (block:d direct / r helper), ETH, seat at 0.3 s
+  0xee2f7b8812 11:01 tax    0 named  3 | 0r 0r 0r          | 0.800 ETH | -8.5%
+  0x9f226096fe 11:03 tax    0 named  3 | 1r 1r 1r          | 0.800 ETH | -8.5%
+  0x038afd4c6e 11:06 tax    0 named  3 | 0r 0r 0r          | 0.800 ETH | -8.5%
+  0x11cdf22a1e 11:32 tax    0 named  3 | 1r 1r 1r          | 0.800 ETH | -8.8%
+  0x7e01025997 11:49 tax    0 named 25 | 2r x23            | 4.192 ETH | -9.2%
+  0x4d57e5322f 11:53 tax  200 named  3 | 1r 1r 1r          | 0.656 ETH | +28.8%
+  0xe9c77a7b91 12:04 tax  180 named  5 | 1r 1r 1r 1r 1r    | 0.604 ETH | +60.7%
+  0x626f13d223 12:23 tax    0 named  3 | 0r 0r 0r          | 0.800 ETH | -8.5%
+  0xb1ab87dd0e 12:29 tax    0 named  3 | 0r 0r 0r          | 0.800 ETH | -8.9%
+  0x2889a35741 12:36 tax  180 named  3 | 1r 1r 1r          | 0.315 ETH | -3.8%
+
+The earlier 25-minute probe (bundle_probe.py, 12:00-12:25): 126 creations, 28 naming 3+ wallets; on 15 the named wallets
+never bought in 40 blocks; on 9 they bought 1.1-1.7 s later (blocks 11-17, ten wallets, under 0.3 ETH in total); 3 real
+bundles, all through helper contracts inside the creation block. Named-wallet buys: 94, of which 75 direct calls to the
+curve, but every one of the direct ones was a second-one buy, not a bundle.
+
+The cache's clock against the chain (ten Sep 16-17 launches): a cache row at 0.0 s is the creation block itself, 0.1 s the
+next block, 0.3 s the third; helper-contract bundles ('rrrr') were already common on Sep 16-17.

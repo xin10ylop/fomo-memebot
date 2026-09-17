@@ -2329,3 +2329,51 @@ follows, about −12%), where p is the share of launches naming three wallets wh
 near p = 0.3 at a 0.3 s entry, and p is unmeasured. The 5.3 dry run measures it for free (the readout prints "calldata
 pre-check passed / bundle visible in time"); the decision waits for that number. Until then the seat is the visible
 bundle, and the daily expectation in `data/derived/e0_expectation.txt` is corrected to it.
+
+### 24.16 The bundle the engine could not see (engine 5.4)
+
+**The 5.3 dry run.** Sep 17 12:00–12:30 UTC: 169 creations, 36 passed the calldata check, and on all 36 the engine saw
+"0 named buys" inside its 450 ms wait. Not a timing tail: a blind spot. The chain for the same half hour
+(`src/analysis/bundle_probe.py`): of 28 launches naming three or more wallets, 15 never saw those wallets buy at all, 9 saw
+them buy 1.1–1.7 s after the creation (blocks 11–17, ten wallets, under 0.3 ETH together: the team's second-one round,
+not a bundle), and 3 had a real bundle, every one bought through a helper contract inside the creation block. The
+engine counted direct calls to the curve only; a named wallet calling a helper contract that buys for it is a
+value-carrying transaction to another address, which the feed loop stores but the bundle count never read.
+
+**Two hours, scored in the cache's format** (`src/analysis/today_probe.py`, 10:38–12:37 UTC,
+`data/derived/today_probe_0917.txt`): 575 creations, 10 bundled launches by the tables' definition (5 an hour, the cache's
+Sep 16–17 rate), all 10 through helper contracts in the creation block or the next one, and on 9 of 10 every bundle buy's
+sender is a wallet named in the creation calldata. So the calldata check is right, the count behind it was blind. Seven
+of the ten are one template: three wallets, 0.800 ETH, 1%-tier token, and each pays the seat −8.5 to −9.2% at 0.3 s
+(nothing follows; the surcharge and fees are the loss). The three 2–3%-tier launches pay +28.8, +60.7 and −3.8%. The tier
+filter of 24.14 is not a refinement in this regime, it is the difference between a losing and a paying seat.
+
+**The cache's clock, verified against the chain** on ten Sep 16–17 launches: a row at 0.0 s is the creation block, 0.1 s
+the next block, 0.3 s the third. Helper-contract bundles were already common then. The honest table of 24.15 stands.
+
+**Engine 5.4.** The bundle is the named wallets' transactions in the creation block and the next nine, whatever contract
+they call: direct curve buys as before, plus value-carrying calls to any other address, with the sender recovered on
+demand and cached. On the creation-second path the chain resolve of the curve starts in the first millisecond and runs
+while the bundle is awaited; a direct bundle names the curve and needs no chain read; otherwise the send waits for the
+resolve. After the watch is built the helper calls are folded into it as the team's buys (a helper that named the curve
+in its calldata was already seeded and is not counted twice), so the price our size and minimum output are computed
+on includes the bundle; without that fold a 0.8 ETH bundle would have moved the curve twofold under a 25% slip and
+the buy would have reverted. This fold applies to every seat, so the E2 and E1 readouts of bundles are corrected as well.
+Every decision records `bundle_helper`, the count folded this way. `tests/test_e0_wait.py` adds the helper-bundle cases: a
+helper bundle in the creation block traded with the bundle and its ETH read and the curve from the chain; a helper that
+names the curve counted once; helper calls from wallets not named in the calldata not counted.
+
+**What this regime pays.** Five bundled launches an hour, a third of them 2–3% tier: about 35 seats a day at the honest
+entry. On the cache's Sep 16–17 rows with the bundle complete at 0.0–0.1 s the seat paid +15% at 0.3 s; today's three
+paid +28.6% on average with n = 3. At $10 that is $30–60 a day. It is a small, positive, verifiable edge, and the first
+thing 5.4 has to prove is that it takes the seat at all.
+
+**Does the blind spot revive E2?** No. The E2 verdict of 24.7–24.13 came from the chain replay, which classified bundles by
+their exemption from the surcharge and never depended on the engine's count, so helper bundles were always in it. Scored
+with the independent simulator of 24.8 (second two on the wall clock, 0.3 s after its boundary, hold 5 s, take-profit
++50%), today's ten bundled launches give E2 −4.9% a trade; two of ten had no bot in second one and those two paid −2.6%
+(nothing followed). The two 2–3%-tier launches that paid the creation-second seat +28.8% and +60.7% had 11 and 21 bots in
+second one: the crowd is heaviest exactly where the token is good. On the cache, E2 on the clean launches was +6.3% on
+Sep 12–15 (26% clean), −4.3% on Sep 16 (15% clean), and +10.2% with a −2.4% median on the six clean launches of Sep 17
+0–6. The engine's refusals of helper-bundle launches under E2 were wrong for the wrong reason and right in effect: those
+seats were crowded.
