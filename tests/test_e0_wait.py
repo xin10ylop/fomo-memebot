@@ -94,13 +94,13 @@ check("1%-tier token with a full bundle: refused by the tier gate", bool(g) and 
 
 # 5. the bundle shows at 350 ms: over MAX_RESOLVE_MS=300 but inside the E0 limit (wait + 150 ms), still traded
 c5, cv5 = "0x" + "55" * 20, "0x" + "a5" * 20
-W = wallets(5); time.sleep(3.5); run(c5, cv5, W, [(w, 0.15) for w in W], 0.35)   # after the first trade's busy window (hold + 3 s)
+W = wallets(5); E.state["busy_until"] = 0.0; run(c5, cv5, W, [(w, 0.15) for w in W], 0.35)   # outside the previous trade's busy window (hold + 3 s)
 d = events(c5, "trade_decision")
 check("bundle at 350 ms: the resolve limit includes the wait, traded", bool(d) and 330 <= (d[0].get("bundle_wait_ms") or 0) <= 450, str([e.get("bundle_wait_ms") for e in d]) if d else str([e.get("gates") for e in events(c5, "eligible_not_traded", wait=0.5)]))
 
 # 6. the same wallets launch again while their earlier, too-small bundle is still in the feed state: the new curve wins
 c6, cv6 = "0x" + "66" * 20, "0x" + "a6" * 20
-W = wallets(3); run(c6, cv6, W, [(w, 0.15) for w in W], 0.05)
+W = wallets(3); E.state["busy_until"] = 0.0; run(c6, cv6, W, [(w, 0.15) for w in W], 0.05)
 d = events(c6, "trade_decision")
 check("stale buys of the same wallets on another curve are not taken for the bundle", bool(d) and d[0].get("curve") == cv6 and d[0].get("bundle_eth") and abs(d[0]["bundle_eth"] - 0.45) < 1e-6, str([(e.get("curve"), e.get("bundle_eth")) for e in d]) if d else str([e.get("why") for e in events(c6, "skip", wait=0.5)]))
 print("all creation-second wait tests pass" if not fails else f"{len(fails)} TESTS FAILED: {fails}")
