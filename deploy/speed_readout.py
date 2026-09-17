@@ -36,9 +36,9 @@ if pre:
     ws = sorted(e.get("wait_ms") for e in nb if isinstance(e.get("wait_ms"), (int, float)))
     if ws: print(f"  waits that expired: median {ws[len(ws)//2]} ms")
 td = [e for e in ev if e["ev"] == "trade_decision"]
-print(f"\ntrade decisions ({len(td)}): time UTC | bundle_wait_ms (creation seen -> bundle visible) | resolve_ms | sent_ms (creation seen -> send) | flip_to_send_ms (creation second's first block -> send) | src | tax_bps | team_share | wallets | bundle_eth | blocks_to_seat | stake")
+print(f"\ntrade decisions ({len(td)}): time UTC | bundle_wait_ms (creation seen -> bundle visible) | resolve_ms | sent_ms (creation seen -> send) | flip_to_send_ms (creation second's first block -> send) | src | tax_bps | team_share | wallets | bundle_eth | blocks_to_seat | helper buys | stake")
 for e in td:
-    print(f"  {u(e['t'])} | {str(e.get('bundle_wait_ms')):>5} | {e.get('resolve_ms'):>5} | {e.get('sent_ms'):>5} | {str(e.get('seat_flip_to_send_ms')):>7} | {str(e.get('resolve_src'))[:8]:8s} | {str(e.get('tax_bps')):>4} | {e.get('team_share')} | {e.get('bundle_wallets')} | {e.get('bundle_eth')} | {e.get('blocks_to_seat')} | ${e.get('stake_usd')}")
+    print(f"  {u(e['t'])} | {str(e.get('bundle_wait_ms')):>5} | {e.get('resolve_ms'):>5} | {e.get('sent_ms'):>5} | {str(e.get('seat_flip_to_send_ms')):>7} | {str(e.get('resolve_src'))[:8]:8s} | {str(e.get('tax_bps')):>4} | {e.get('team_share')} | {e.get('bundle_wallets')} | {e.get('bundle_eth')} | {e.get('blocks_to_seat')} | h{e.get('bundle_helper')} | ${e.get('stake_usd')}")
 def q(xs, p): xs = sorted(xs); return xs[min(len(xs) - 1, int(p * len(xs)))] if xs else None
 for k in ("bundle_wait_ms", "resolve_ms", "sent_ms", "seat_flip_to_send_ms"):
     xs = [e[k] for e in td if isinstance(e.get(k), (int, float))]

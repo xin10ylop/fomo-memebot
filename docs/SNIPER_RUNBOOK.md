@@ -366,7 +366,7 @@ the look-ahead of report 24.15, not a seat. The bundle is the named wallets' tra
 next nine, direct or through a helper contract (since Sep 17 every bundle goes through one, 24.16); the chain resolve of the
 curve runs in parallel from the first millisecond. Opt in explicitly:
 
-    SEAT=E0 E0_OUTSIDER=1 HOLD_S=1.5 TAKE_PROFIT=0 TIER_MIN_BPS=100 TIER_MAX_BPS=200 E0_BUNDLE_WAIT_S=0.45
+    SEAT=E0 E0_OUTSIDER=1 HOLD_S=1.5 TAKE_PROFIT=0 TIER_MIN_BPS=100 TIER_MAX_BPS=200 E0_BUNDLE_WAIT_S=0.45 E0_BUNDLE_MAX_BLOCKS=3
     MAX_RESOLVE_MS=600 MIN_FOLLOW_ETH_60=0 BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.3 BUNDLE_MAX_ETH=0 MIN_CREATOR_SUPPLY=0.01
 
 Dry-run it for a session and read it with `deploy/speed_readout.py` (rotation-safe, everything since the last start):

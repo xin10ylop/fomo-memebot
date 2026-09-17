@@ -7,7 +7,7 @@ without a send. Driven on a scripted feed state, no network.
 import os, sys, json, time, threading, tempfile
 LOG = tempfile.mkdtemp() + "/t.jsonl"; os.environ["LOG_PATH"] = LOG
 for k, v in (("SEAT", "E0"), ("E0_OUTSIDER", "1"), ("BUNDLE_MIN", "3"), ("BUNDLE_MIN_ETH", "0.3"), ("BUNDLE_MAX_ETH", "0"), ("MIN_CREATOR_SUPPLY", "0.01"),
-             ("TIER_MIN_BPS", "100"), ("TIER_MAX_BPS", "200"), ("E0_BUNDLE_WAIT_S", "0.4"), ("MAX_RESOLVE_MS", "300"), ("HOLD_S", "0.3"), ("TAKE_PROFIT", "0"),
+             ("TIER_MIN_BPS", "100"), ("TIER_MAX_BPS", "200"), ("E0_BUNDLE_WAIT_S", "0.4"), ("E0_BUNDLE_MAX_BLOCKS", "3"), ("MAX_RESOLVE_MS", "300"), ("HOLD_S", "0.3"), ("TAKE_PROFIT", "0"),
              ("SEND_MODULE", ""), ("PRIVATE_KEY", ""), ("TRADE_HOURS", ""), ("MIN_FOLLOW_ETH_60", "0"), ("BANKROLL_USD", "300"), ("STAKE_MIN", "10"), ("STAKE_MAX", "10")):
     os.environ[k] = v
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "strategy"))
@@ -140,6 +140,21 @@ W = wallets(9); E.state["busy_until"] = 0.0; helper_bundle(9, cv9, wallets(19)) 
 E._handle_creation(c9, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
 s9 = events(c9, "skip", wait=1.0)
 check("helper calls from unnamed wallets are not a bundle: skipped", bool(s9) and any("0 named transactions" in str(e.get("why")) for e in s9), str([e.get("why") for e in s9]))
+# 10. a helper bundle that lands 5 blocks after the creation, past E0_BUNDLE_MAX_BLOCKS=3: not the seat's bundle (the honest table's 0.3 s)
+c10, cv10 = "0x" + "aa" * 20, "0x" + "b0" * 20
+W = wallets(10); E.state["busy_until"] = 0.0
+def late_feed():
+    time.sleep(0.05)
+    for i, w in enumerate(W):
+        raw = ("late-%d" % i).encode(); SENDERS[raw] = w
+        E.state["valtx"].append([E.mono(), T, None, 0.15, bytes.fromhex("9f56b0c8") + bytes(96), raw, 1005, "0x" + "5e" * 20, "9f56b0c8"])
+    with E.cond:
+        E.cond.notify_all()
+threading.Thread(target=late_feed, daemon=True).start()
+E.resolve_rpc = lambda *a, **kw: ("0x" + "b0" * 20, cv10, 0.02 * E.Y0, 1000)
+E._handle_creation(c10, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
+s10 = events(c10, "skip", wait=1.0)
+check("bundle 5 blocks after the creation, cap 3 blocks: skipped", bool(s10) and any("3 blocks (0 named" in str(e.get("why")) for e in s10), str([e.get("why") for e in s10]))
 E.resolve_rpc = lambda *a, **kw: None
 print("all creation-second wait tests pass" if not fails else f"{len(fails)} TESTS FAILED: {fails}")
 raise SystemExit(1 if fails else 0)

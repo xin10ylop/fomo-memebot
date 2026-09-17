@@ -2391,3 +2391,13 @@ quote and a creator above 1%; the ten bundled launches all had the bundle first)
 figures stand. Engine 5.41 grades the creation-second seat on its own window, the named wallets' transactions inside
 nine blocks whatever bought first, so the paper result of every seat taken is recorded, and counts the bots-before-bundle
 launches in the state for the record.
+
+**First paper session on the seat (engine 5.41, Sep 17 13:00–15:25 UTC, 2.4 h).** 1,129 creations (467 an hour), 207 passed
+the calldata check, 31 bundles visible in time (15%), 19 of them the 1%-tier template refused by the tier gate, 7 seats
+taken. Speed: bundles inside the creation block were visible at 6–10 ms, the chain resolve took 58–177 ms, and the send
+went out 7–12 ms after the later of the two; four of seven sends left 67–184 ms after the creation was seen. Paper on the
+seven: mean −0.9%, median +0.1%, −$0.63 at $10. The four bundles visible at 6–95 ms paid +0.6, +1.1, +0.1 and +14.4%; the
+three visible at 282–378 ms paid −12.4, −6.8 and −3.2%, the late bundles the honest table (complete by 0.3 s) had left
+out and the 450 ms cap let in. Engine 5.42 adds `E0_BUNDLE_MAX_BLOCKS` (3 = the table's 0.3 s on the cache's clock) so
+paper and backtest gate on the same rule. Seven seats decide nothing; the day does. Live waits for a positive paper mean
+over at least twenty seats under the same rule.

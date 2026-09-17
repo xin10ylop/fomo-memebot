@@ -100,7 +100,8 @@ X0, Y0 = 1.68, 1e9
 E0_OUTSIDER = os.environ.get("E0_OUTSIDER", "0") == "1"                # explicit opt-in: take the creation second as a wallet that is NOT exempt from the surcharge
 TIER_MIN_BPS = int(os.environ.get("TIER_MIN_BPS", "0")); TIER_MAX_BPS = int(os.environ.get("TIER_MAX_BPS", "0"))   # the token's own tax (creation calldata word 13, bps on top of the 1% protocol fee): 0 = no gate. 24.14: 100-200 bps tokens pay +34/+43/+36/+27%
 SKIP_TIER1_TEAM_SHARE = float(os.environ.get("SKIP_TIER1_TEAM_SHARE", "0"))
-E0_BUNDLE_WAIT_S = float(os.environ.get("E0_BUNDLE_WAIT_S", "0.45"))   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
+E0_BUNDLE_WAIT_S = float(os.environ.get("E0_BUNDLE_WAIT_S", "0.45"))
+E0_BUNDLE_MAX_BLOCKS = int(os.environ.get("E0_BUNDLE_MAX_BLOCKS", "9"))   # the creation-second seat counts the bundle inside this many blocks of the creation; 3 = the honest table's "complete by 0.3 s" (24.15), the 5.41 paper run lost on later ones   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
 
 
 def tax_bps_of(sel, words):
@@ -1116,7 +1117,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                 net0 = init_buy_wei / 1e18 * 0.99; tk0 = Y0 - X0 * Y0 / (X0 + net0) if net0 > 0 else 0.0
     bundle_wait_ms = None; helper_folded = 0
 
-    def named_txs():
+    def named_txs(within=9):
         """the named wallets' transactions from the creation block on, whatever contract they call: direct curve buys (state['buys'])
         and value-carrying calls to helper contracts (state['valtx'], sender recovered here and cached). On Sep 17 every bundle went
         through a helper contract, invisible to a count of direct curve buys (report 24.16). [(ts, sender, val, blk, to, sel, data, helper)]"""
@@ -1124,11 +1125,11 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         try:
             for cv, lst in list(state["buys"].items()):
                 for x in list(lst):
-                    if x[1] in named and x[0] >= feed_ts and (blk0 is None or len(x) < 5 or x[4] is None or blk0 <= x[4] <= blk0 + 9):
+                    if x[1] in named and x[0] >= feed_ts and (blk0 is None or len(x) < 5 or x[4] is None or blk0 <= x[4] <= blk0 + within):
                         out.append((x[0], x[1], x[2], x[4] if len(x) > 4 else None, x[5] if len(x) > 5 else None, x[6] if len(x) > 6 else None, None, False))
             for e in list(state["valtx"]):
                 blk = e[6] if len(e) > 6 else None
-                if e[1] < feed_ts or e[3] < 0.005 or (blk0 is not None and blk is not None and not blk0 <= blk <= blk0 + 9):
+                if e[1] < feed_ts or e[3] < 0.005 or (blk0 is not None and blk is not None and not blk0 <= blk <= blk0 + within):
                     continue
                 if e[2] is None:
                     try:
@@ -1158,7 +1159,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         def bundle_view():
             """(count, ETH, the curve the direct buys name or None): the helper calls plus the direct buys of ONE curve, the first meeting
             both floors, else the best by (buys, ETH); stale buys of the same wallets on an earlier, unresolved curve are not mixed in"""
-            tx = named_txs(); helpers = [t for t in tx if t[7]]; by = collections.defaultdict(lambda: [0, 0.0])
+            tx = named_txs(E0_BUNDLE_MAX_BLOCKS); helpers = [t for t in tx if t[7]]; by = collections.defaultdict(lambda: [0, 0.0])
             for t in tx:
                 if not t[7] and t[4] is not None and t[4] not in state["known_curves"]:
                     by[t[4]][0] += 1; by[t[4]][1] += t[2]
@@ -1175,7 +1176,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                 cond.wait(0.02)
             c, eth, best = bundle_view()
         if c < BUNDLE_MIN or eth < BUNDLE_MIN_ETH:
-            log({"ev": "skip", "why": [f"bundle not visible on the feed within {1000 * E0_BUNDLE_WAIT_S:.0f} ms ({c} named transactions, {eth:.3f} ETH)"], "creator": creator,
+            log({"ev": "skip", "why": [f"bundle not visible on the feed within {1000 * E0_BUNDLE_WAIT_S:.0f} ms and {E0_BUNDLE_MAX_BLOCKS} blocks ({c} named transactions, {eth:.3f} ETH)"], "creator": creator,
                  "named_wallets": len(named), "tax_bps": tax_bps, "wait_ms": round((mono() - seen_at) * 1000)}); return
         bundle_wait_ms = round((mono() - seen_at) * 1000)
         if best is not None and best[1] >= BUNDLE_MIN:
@@ -1619,8 +1620,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.41, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.42, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
