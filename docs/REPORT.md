@@ -2040,3 +2040,51 @@ chain, as the tables do — queued for the next engine version, not changed on a
 
 The rest of the engine's afternoon: 653 creations in two hours, 50 reaching the decision, every refusal accounted for
 by a gate the chain confirms, no alarms, no socket errors, one process, the wallet untouched.
+
+### 24.10 "Why does it only lose when we go live?" — answered launch by launch, and two corrections
+
+The user's challenge on the morning of Sep 17 was the right one, and answering it properly required matching what the
+engine saw and did against the chain replay **on the same launches** rather than comparing day averages. The engine's
+131 logged paper scores (Sep 10 15:58 to Sep 16 23:17) and its six real trades were matched by curve address to the
+replay (`src/analysis/match_engine_replay.py`, input `data/derived/engine_scores_0910_0916.txt`; Sep 11 06–12 UTC was
+pulled from the chain for the one trade outside the windows). Two things came out that earlier sections had wrong.
+
+**Correction 1 — the Sep 11 loss was the code, not the day.** Section 24 said five of the six live trades were clean seats
+lost to a bad day. On the chain, four of the six had a rival the engine of that day could not see:
+
+| trade (UTC) | replay, same launch | on the chain | today's engine |
+|---|---|---|---|
+| 07:25 | −71.8% | second-two rival at 0.0 s; bundle 1.38 ETH; creator 2.6% | refused three ways (rival, cap, creator floor) |
+| 14:30 | −7.3% | outsider in second one | refused |
+| 14:45 | −3.4% | clean | traded, small loss (fees, no demand) |
+| 14:49 | −52.5% | outsider in second one | refused |
+| 14:54 | −3.4% | clean | traded, small loss |
+| 21:47 | −68.1% | router bot buying by token (the 4.95 fix) | refused |
+
+About $51 of the $53 lost came from the four seats the old feed decoder misread as clean; the two genuinely clean seats
+lost $1.70 between them. Every one of the four is refused by engine 4.95+ (token matching, chain-side rivals, the
+second-two rival gate, the 1.2 ETH cap, the 3% creator floor). The day was also bad — 97% crowded in the morning, 88–90%
+after — but that is not what lost the money.
+
+**Correction 2 — the engine's own paper scores were 4–10 points too low.** `exact_score` deducted a flat **$1.00** of gas
+from every score; four Sep 11 receipts show a round trip (buy, approve, sell) costs $0.06–0.14 at 0.1–0.2 gwei. At $25
+that is 4 points off every score, at $10 it is 10 points, and the bias fed the switch (rolling 15 below −10%: at $10, a
+seat that truly returned zero was scored −10%) and every readout the user was shown (`mean_score_last_60 −10%`). Engine
+5.02 prices the real gas (`gas_usd()`, 230,000 gas at the chain's base fee, clamped $0.05–1.00). Section 24.9's line
+"9 rule-passing seats scored today, mean −1.8%" was this bias: with the real gas those 14 seats of Sep 16 average about
++1.6% — flat, on a day with 8 clean seats in total.
+
+**What the match shows once the gas is right.** 93 of the 131 scores fall inside the replay's windows: engine as logged
++1.4%, engine with the real gas **+4.8%**, harness +5.5%, independent simulator +4.9%; per launch the engine and the
+harness differ by a median of 0.04 points and are within one point on 87% of launches (the rest are launches where a
+dump lands on one side of the 5 s hold on one clock and the other side on the other). Sep 10 evening: engine +11.4% vs
+harness +12.4%; Sep 11: −3.0% vs −2.8%; the Sep 16 seat: +20.9% vs +21.0%. The engine, live on the real feed, sees the
+same seats and the same returns as the replay. The replay's profitable days are not an artefact of the replay.
+
+**So why did the two live days show nothing?** Sep 11: the loss was the decoder's blind spots, fixed since, on the
+second-worst day for clean seats in the record (31 of 414). Sep 16: 8 clean seats in the whole day (of 86 bundled
+launches, a fifth of the usual count, 88–100% crowded), the engine took none because every one had a rival inside the
+0.3 s wait or failed the filter, and their paper return was flat. Two draws that were the two worst days of eighteen
+is a 1-in-150 coincidence; the honest reading is a mix of bad luck and a trend the report has flagged since 23.11 —
+crowding rising, and now the supply of bundled launches thinning. The engine's account of it is now verified against
+the chain to within a point; what it cannot do is create seats that are not there.
