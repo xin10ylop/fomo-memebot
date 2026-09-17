@@ -2154,3 +2154,43 @@ activity (17,000 curve events an hour against 41,000–89,000 on every other day
 per seat has not moved: +11% to +22% on every day but Sep 11 since the filter was fitted. What the user remembers as
 "a lot of trades" was the Sep 2–3 level, gone by Sep 9; Sep 12–15 was 25–30 trades a trading day on the true clock,
 worth about +$100–150 a day at $25; Sep 16 offered three.
+
+### 24.13 The seat that still pays, and the assumption that hid it
+
+The user's challenge — "the seat cannot close only when I go live; there is a mistake in your logic" — was right in a
+way the day-table audit did not reach. The engine has refused the creation second since round 11 on the belief that
+"anyone else pays 93–98% in the creation second" (its own start-up guard). The chain says otherwise, on every day of
+the record: an outsider buying in the creation second *after* the creation block pays the second-one surcharge,
+**6.18%**, on 94–98% of such buys from Sep 2 to Sep 17 (`src/analysis/e0_seat.py`); the 96–98% cases are contract
+callers, routers and 0.001 ETH dust probes (`e0_seat2.py`), which a direct buy with a minOut never joins — it reverts
+instead, for the gas. So the fastest bots' seat was open to us all along, at a cost we already pay in second one.
+
+**What it pays.** Entering the creation second 0.3 s after the creation block, 6.18% surcharge, 3% of supply capped at
+the stake, hold 2 s or +50%, on *every* bundled launch (no clean requirement — this seat is ahead of the team's second
+round and of every bot, so crowding is what it sells into):
+
+| period | launches | at 0.2 s | at 0.3 s | at 0.4 s | at 0.5 s | at 0.7 s |
+|---|---|---|---|---|---|---|
+| Sep 7–10 | 3,452 | +34.8% | +25.1% | — | +14.3% | +7.0% |
+| Sep 11 (the day we lost) | 525 | +32.9% | +22.6% | +14.4% | +8.6% | +2.7% |
+| Sep 12–15 | 2,477 | +27.3% | +15.3% | +10.4% | +7.2% | +1.8% |
+| **Sep 16–17 (the new regime)** | 175 | **+14.0%** | **+6.5%** | +3.7% | +2.9% | −3.5% |
+
+Positive in every period including the two live days; it decays 3–5 points per 100 ms of delay, because the profit is
+being ahead of the team's own exempt second-one buys (34–44% of launches, median 200–233 ms into second one, 0.26–0.39
+ETH) and of the bot wave (first outsider at a median 300–400 ms into second one): entering right *after* the team's buys
+pays −4 to −5% (`front_seat.py`). Win rate 45–74% by period, median +8%, p5 −14%, p1 −48%, worst −69%; 60 trades from
+$60 at $10 reshuffled 3,000 times never hit the −50% daily stop (median end $147). Money per day at $25, one position
+at a time: Sep 12–15 +$1,500–2,800 a day at 0.3 s (+$1,000–2,100 at 0.4 s); Sep 16 +$258; Sep 17's first six hours +$31.
+The bundle filter neither helps nor hurts it (Sep 12–15: +15.3% all, +14.7% filter-passing).
+
+**Why this is the same game the bots play, and why we can play it:** ordering is first come, first served at the
+sequencer; the fastest bots land 0.2–0.3 s after the creation block; our box is 20 ms from the sequencer and the feed
+resolves a bundled launch from the creation message itself in 59–150 ms on the fast path. The seat is worth taking
+at 0.3–0.4 s in every regime measured; at 0.7 s it is not. What decides it is our own seeing-to-landing time, which a
+dry run measures directly (`resolve_ms`, `seat_flip_to_send_ms` on each decision).
+
+**Engine 5.1** adds the seat for a non-exempt wallet behind an explicit opt-in (`SEAT=E0 E0_OUTSIDER=1`, with
+`HOLD_S=2`, `MAX_RESOLVE_MS=300`, `MIN_FOLLOW_ETH_60=0`, `BUNDLE_MIN=3`, `MIN_CREATOR_SUPPLY=0.01`): the surcharge is
+6.18%, there is no seat wait, the send goes out the moment the curve is resolved, and the buy's minOut (25%) is what
+refuses the 96–98% tokens. The old guard stays for anyone who does not opt in.

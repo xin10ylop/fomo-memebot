@@ -97,7 +97,13 @@ BUY_EV = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"; S
 BUY_SEL = bytes.fromhex("59a87bc1"); SELL_SEL = bytes.fromhex("d04c6983"); APPROVE_SEL = "095ea7b3"
 UA = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) fomo-memebot/engine"}
 X0, Y0 = 1.68, 1e9
-SURCHARGE = {"E0": 0.0, "E1": 0.0618, "E2": 0.0019}; SEAT_SECONDS = {"E0": 0, "E1": 1, "E2": 2}
+E0_OUTSIDER = os.environ.get("E0_OUTSIDER", "0") == "1"                # explicit opt-in: take the creation second as a wallet that is NOT exempt from the surcharge
+SURCHARGE = {"E0": 0.0 if EXEMPT else 0.0618, "E1": 0.0618, "E2": 0.0019}; SEAT_SECONDS = {"E0": 0, "E1": 1, "E2": 2}
+# E0 for a wallet that is not exempt: the creation second after the creation block costs the second-one surcharge, 6.18%, on
+# 94-98% of outsider buys from Sep 2 to Sep 17 (the rest, 96-98%, are contract callers, routers and dust probes: our direct
+# buy with its minOut simply reverts on those tokens). The seat is 0.2-0.4 s after the creation block, ahead of the team's
+# second-one round and of every bot; it pays +25% (Sep 7-10), +23% (Sep 11), +15% (Sep 12-15), +6.5% (Sep 16-17) at 0.3 s
+# on every bundled launch, hold 2 s, take-profit +50%, and loses 3-5 points per 100 ms of delay (report 24.13).
 ZERO = "0x" + "0" * 40
 mono = time.monotonic
 
@@ -1065,7 +1071,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     new_day_check()
     with lock:
         prior = state["launched_today"][creator]; state["launched_today"][creator] += 1
-    if SEAT in ("E1", "E2") and BUNDLE_MIN > 0 and (quote != ZERO or len(named) < BUNDLE_MIN):
+    if SEAT in ("E0", "E1", "E2") and BUNDLE_MIN > 0 and (quote != ZERO or len(named) < BUNDLE_MIN):
         log({"ev": "skip", "why": ["cannot pass the rule from the calldata (quote or named wallets): not resolved"], "creator": creator, "named_wallets": len(named), "quote": quote}); return
 
     def count_cands():
@@ -1124,6 +1130,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     send_mode = None
     if SEAT in ("E1", "E2"):
         send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at, watch=w)
+    elif SEAT == "E0":
+        send_mode = "e0"                                                  # the creation second: no wait, every 100 ms costs 3-5 points
     t_wake = mono()
     decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "race_ms": w.get("race_ms"), "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"])}
     with lock:
@@ -1492,8 +1500,10 @@ last_prune_holder = [0.0]
 
 async def main():
     import websockets
-    if SEAT == "E0" and not EXEMPT:
-        raise SystemExit("SEAT=E0 needs an address exempt from the snipe surcharge (EXEMPT=1); anyone else pays 93-98% in the creation second. Use SEAT=E2 (runbook).")
+    if SEAT == "E0" and not EXEMPT and not E0_OUTSIDER:
+        raise SystemExit("SEAT=E0 as an outsider pays the 6.18% surcharge in the creation second (not the 93-98% assumed before Sep 17, report 24.13): set E0_OUTSIDER=1 to opt in explicitly, with HOLD_S=2 and MAX_RESOLVE_MS=300, or EXEMPT=1 for an exempt address.")
+    if SEAT == "E0" and E0_OUTSIDER and not EXEMPT:
+        log({"ev": "note", "what": "SEAT=E0 as an outsider (E0_OUTSIDER=1): 6.18% surcharge in the creation second, no seat wait, the send goes out the moment the curve is resolved; every 100 ms of delay costs 3-5 points (report 24.13)"})
     if PIN_CPU:
         try:
             os.sched_setaffinity(0, {int(c) for c in PIN_CPU.split(",")})
@@ -1503,7 +1513,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.02, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.1, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

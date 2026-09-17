@@ -1,0 +1,28 @@
+
+=== NEW Sep 16-17: 175 bundled launches
+(a) first OUTSIDER buy in second one: on 117 launches; lands at median 300 ms, 25th pct 120 ms, 10th pct 0 ms after the second opens
+(b) the TEAM buys in second one on 59 launches (34%): first team buy at median 200 ms; team puts a median 0.261 ETH into second one
+(c) the seat's return by how fast we land in second one (ahead of everything that lands later), $25, hold 2 s, take-profit +50%:
+     land at  ALL mean               95%  median   win   worst  <-30% |  clean-s1  crowded >=3 bots
+         0ms    +12.9% [  +3.8%, +25.8%]   -0.8%   37%    -56%   3.4% |    +39.2%    +7.7%    +8.8%
+        30ms     +8.5% [  -0.1%, +21.9%]   -3.2%   31%    -56%   3.4% |    +39.0%    +2.4%    +3.6%
+        60ms     +6.5% [  -1.7%, +18.6%]   -6.2%   30%    -56%   3.4% |    +38.4%    +0.2%    +0.7%
+       100ms     -0.2% [  -3.9%,  +4.2%]   -7.1%   27%    -56%   3.4% |     -0.6%    -0.1%    +0.4%
+       150ms     +0.3% [  -3.6%,  +5.0%]   -8.0%   30%    -56%   3.4% |     -0.6%    +0.5%    +1.6%
+       200ms     -0.2% [  -4.1%,  +4.5%]   -8.0%   30%    -56%   3.4% |     -2.7%    +0.3%    +1.4%
+       300ms     -5.2% [  -7.9%,  -2.7%]   -8.1%   19%    -56%   3.4% |     -7.3%    -4.8%    -4.3%
+(d) if the team's second-one buys always land before us (we enter right after the last of them): mean -5.2% [-7.7%, -2.6%], win 15%
+
+=== Sep 12-15: 2477 bundled launches
+(a) first OUTSIDER buy in second one: on 1347 launches; lands at median 400 ms, 25th pct 200 ms, 10th pct 53 ms after the second opens
+(b) the TEAM buys in second one on 1095 launches (44%): first team buy at median 233 ms; team puts a median 0.385 ETH into second one
+(c) the seat's return by how fast we land in second one (ahead of everything that lands later), $25, hold 2 s, take-profit +50%:
+     land at  ALL mean               95%  median   win   worst  <-30% |  clean-s1  crowded >=3 bots
+         0ms    +14.2% [ +12.6%, +16.0%]   -0.4%   44%    -75%   2.3% |    +12.0%   +15.1%   +17.7%
+        30ms     +9.1% [  +7.6%, +10.5%]   -0.4%   41%    -75%   2.4% |     +6.6%   +10.0%   +12.6%
+        60ms     +7.3% [  +6.0%,  +8.7%]   -0.4%   40%    -75%   2.5% |     +5.2%    +8.1%   +11.1%
+       100ms     +4.3% [  +3.2%,  +5.4%]   -0.4%   37%    -75%   2.7% |     +2.8%    +4.8%    +7.2%
+       150ms     +3.9% [  +2.9%,  +5.0%]   -3.3%   39%    -75%   2.9% |     +2.4%    +4.5%    +7.1%
+       200ms     +3.2% [  +2.2%,  +4.3%]   -5.2%   41%    -75%   3.2% |     +1.5%    +3.8%    +6.7%
+       300ms     +0.6% [  -0.4%,  +1.5%]   -7.2%   36%    -75%   3.7% |     -0.9%    +1.1%    +3.6%
+(d) if the team's second-one buys always land before us (we enter right after the last of them): mean -4.1% [-4.8%, -3.5%], win 12%

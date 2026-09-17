@@ -357,6 +357,21 @@ millions, something is subscribed to the whole chain again (engine 4.95–4.99 d
 `PROVIDER_WS=` (empty) switches the chain rivals off altogether; the feed decoder's token matching still covers the
 router blind spot that made trade 6.
 
+## 5d. The creation-second seat (engine 5.1, report 24.13)
+
+The seat the fastest bots take: 0.2–0.4 s after the creation block, 6.18% surcharge, ahead of the team's second-one round
+and of every bot, on every bundled launch. Opt in explicitly:
+
+    SEAT=E0 E0_OUTSIDER=1 HOLD_S=2 TAKE_PROFIT=0.5 MAX_RESOLVE_MS=300 MIN_FOLLOW_ETH_60=0
+    BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.3 BUNDLE_MAX_ETH=1.2 MIN_CREATOR_SUPPLY=0.01
+
+Dry-run it first for a session and read every `trade_decision`'s `resolve_ms` (feed message to send) and
+`seat_flip_to_send_ms` (from the creation second's first block to the send): the seat pays +15–25% at 0.3 s and about
+nothing past 0.6 s in the replay, so the distribution of those two numbers is the forecast. Go live only if the median
+send is under ~350 ms after the creation second opens; keep `MAX_RESOLVE_MS` tight so a slow resolution is refused
+rather than sent late. Expect roughly half the trades to lose 5–10% (the surcharge and fees when nothing follows) and
+the winners to carry the mean; the −50% daily stop and the switch stay on.
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while
