@@ -2239,3 +2239,10 @@ a day the market would see us, and nothing here models the bots adapting. Read t
 **What the engine can and cannot read before the send.** The team's share of supply it has (from the bundle it folds);
 the token's tax tier it does not on the fast path (it assumes 1% until the chain's first Buy event is read), unless the
 tier is a parameter in the creation calldata — checked next.
+
+**The tier is in the calldata.** Word 13 of the creation call (selector `f85f8e41`) is the token's own tax in basis
+points on top of the 1% protocol fee — 0 for the 1% tier, 100 for 2%, 200 for 3%, 300 for 4% — and matched the chain's
+tier on 117 of 120 launches. Engine 5.2 reads it before the send at zero latency: `TIER_MIN_BPS` / `TIER_MAX_BPS` gate on
+it (100–200 = the 2–3% tokens), `SKIP_TIER1_TEAM_SHARE=0.35` drops the worst class, both fail closed on an unknown
+layout, the watch folds buys with the token's real tax instead of a flat 1%, and every decision logs `tax_bps` and
+`team_share`. Recommended live settings for the seat: `HOLD_S=1.5 TAKE_PROFIT=0 TIER_MIN_BPS=100 TIER_MAX_BPS=200`.

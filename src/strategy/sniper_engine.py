@@ -98,6 +98,17 @@ BUY_SEL = bytes.fromhex("59a87bc1"); SELL_SEL = bytes.fromhex("d04c6983"); APPRO
 UA = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) fomo-memebot/engine"}
 X0, Y0 = 1.68, 1e9
 E0_OUTSIDER = os.environ.get("E0_OUTSIDER", "0") == "1"                # explicit opt-in: take the creation second as a wallet that is NOT exempt from the surcharge
+TIER_MIN_BPS = int(os.environ.get("TIER_MIN_BPS", "0")); TIER_MAX_BPS = int(os.environ.get("TIER_MAX_BPS", "0"))   # the token's own tax (creation calldata word 13, bps on top of the 1% protocol fee): 0 = no gate. 24.14: 100-200 bps tokens pay +34/+43/+36/+27%
+SKIP_TIER1_TEAM_SHARE = float(os.environ.get("SKIP_TIER1_TEAM_SHARE", "0"))   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
+
+
+def tax_bps_of(sel, words):
+    """the token's own tax in basis points, from the creation calldata: word 13 of selector f85f8e41 (0 = the 1% tier, 100 = 2%,
+    200 = 3%, 300 = 4%; matched the chain on 117 of 120 launches, Sep 17). None for another layout: the gates then fail closed."""
+    if sel.hex() != "f85f8e41" or len(words) <= 13:
+        return None
+    v = int.from_bytes(words[13], "big")
+    return v if v <= 2000 else None
 SURCHARGE = {"E0": 0.0 if EXEMPT else 0.0618, "E1": 0.0618, "E2": 0.0019}; SEAT_SECONDS = {"E0": 0, "E1": 1, "E2": 2}
 # E0 for a wallet that is not exempt: the creation second after the creation block costs the second-one surcharge, 6.18%, on
 # 94-98% of outsider buys from Sep 2 to Sep 17 (the rest, 96-98%, are contract callers, routers and dust probes: our direct
@@ -648,9 +659,10 @@ def curve_buys(curve, since_ts=None):
     return out
 
 
-def watch_curve(curve, tk0, feed_ts, named, creator, blk0=None):
+def watch_curve(curve, tk0, feed_ts, named, creator, blk0=None, tax_bps=None):
     """register the curve for incremental folding and build its state from what the feed has shown so far"""
     net0 = X0 * tk0 / (Y0 - tk0); w = {"X": X0 + net0, "Y": Y0 - tk0, "cb": bytes.fromhex(curve[2:]), "ts0": feed_ts, "blk0": blk0, "named": named, "creator": creator, "curve": curve,
+                                       "tax_bps": tax_bps, "tax": 0.01 + (tax_bps or 0) / 10000.0,             # the buyers' tax on this token: the 1% protocol fee plus the token's own (calldata word 13)
                                        "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "out1_chain": 0, "out2_chain": 0, "tb": None, "buys": 0, "sells": 0, "since": mono(), "dump": None, "wallets": set(), "rivals": []}
     for b in curve_buys(curve, feed_ts):
         ts_, snd, val, seen = b[:4]; blk = b[4] if len(b) > 4 else None
@@ -669,7 +681,7 @@ def fold_buy(w, ts_, snd, val, blk=None, to=None, sel=None):
     value-less router call (a router buy paid in tokens). A sender whose counted attempts never land (a bot whose second-one buys
     revert on the surcharge) is learned from the chain at scoring time and ignored after three misses."""
     if val > 0:
-        net = val * 0.99; X, Y = w["X"], w["Y"]; tk = Y - X * Y / (X + net); w["X"] = X + net; w["Y"] = Y - tk
+        net = val * (1 - w.get("tax", 0.01)); X, Y = w["X"], w["Y"]; tk = Y - X * Y / (X + net); w["X"] = X + net; w["Y"] = Y - tk   # the token's own tax from the calldata, not a flat 1%
     w["buys"] += 1
     in_creation = (blk - w["blk0"] <= 9) if (blk is not None and w.get("blk0") is not None) else (ts_ == w["ts0"])
     if snd in w["named"] or snd == w["creator"]:
@@ -1043,11 +1055,11 @@ def close_position(pos, why):
         pos["closing"] = False
 
 
-def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0):
+def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None):
     """the launch thread, guarded: an exception here used to kill the thread silently, and if it happened after the buy the
     tokens were never sold and the 'position open' gate blocked every later trade for good (audit, Sep 16)."""
     try:
-        _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0)
+        _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps)
     except Exception as e:
         pos = state["open"]
         log({"ev": "alarm", "what": "the launch thread crashed", "err": str(e)[:200], "where": traceback.format_exc().strip().splitlines()[-2][:160],
@@ -1065,7 +1077,7 @@ def release_reservation():
         state["nonce"] = None; state["chain_at"] = 0.0; state["busy_until"] = 0.0
 
 
-def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0):
+def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None):
     """resolve the curve, apply the gates, size on the feed-tracked curve, take the seat, build the buy, then approve and sell"""
     curve = token = None; tk0 = None; b_create = None; src = None; named = set(named)
     new_day_check()
@@ -1116,7 +1128,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         reasons.append("creator buy too large")
     if reasons:
         log({"ev": "skip", "why": reasons, "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named)}); return
-    w = watch_curve(curve, tk0, feed_ts, named, creator, blk0)           # from here the feed loop folds every buy and sell of this curve as it arrives
+    w = watch_curve(curve, tk0, feed_ts, named, creator, blk0, tax_bps)  # from here the feed loop folds every buy and sell of this curve as it arrives
     if token:
         w["tb"] = bytes.fromhex(token[2:])
     else:
@@ -1133,7 +1145,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     elif SEAT == "E0":
         send_mode = "e0"                                                  # the creation second: no wait, every 100 ms costs 3-5 points
     t_wake = mono()
-    decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "race_ms": w.get("race_ms"), "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"])}
+    decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "race_ms": w.get("race_ms"), "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"]),
+                "tax_bps": w.get("tax_bps"), "team_share": round((Y0 - w["Y"]) / Y0, 4)}
     with lock:
         sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []
@@ -1143,6 +1156,13 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             gates.append(f"bundle {w['bundle_eth']:.3f} ETH < {BUNDLE_MIN_ETH}")
         if BUNDLE_MAX_ETH > 0 and w["bundle_eth"] > BUNDLE_MAX_ETH:
             gates.append(f"bundle {w['bundle_eth']:.3f} ETH > {BUNDLE_MAX_ETH}")
+        team_share = (Y0 - w["Y"]) / Y0; tb = w.get("tax_bps")           # the team's share of supply after its launch-block buys; the token's own tax (24.14)
+        if TIER_MIN_BPS > 0 and (tb is None or tb < TIER_MIN_BPS):
+            gates.append(f"token tax {tb} bps < {TIER_MIN_BPS}" if tb is not None else "token tax unknown (calldata layout)")
+        if TIER_MAX_BPS > 0 and (tb is None or tb > TIER_MAX_BPS):
+            gates.append(f"token tax {tb} bps > {TIER_MAX_BPS}" if tb is not None else "token tax unknown (calldata layout)")
+        if SKIP_TIER1_TEAM_SHARE > 0 and (tb or 0) == 0 and team_share >= SKIP_TIER1_TEAM_SHARE:
+            gates.append(f"1%-tier token with the team holding {100*team_share:.0f}% >= {100*SKIP_TIER1_TEAM_SHARE:.0f}% (the worst class, 24.14)")
         if SEAT == "E2" and w["out1"] + w["out1_chain"] > OUT1_MAX:
             gates.append(f"{w['out1']} outsider buys in second one > {OUT1_MAX}" + (f" (+{w['out1_chain']} seen on the chain)" if w["out1_chain"] else ""))
         if SEAT == "E2" and w["out2"] + w["out2_chain"] > OUT2_MAX:
@@ -1317,8 +1337,9 @@ def index_message(inner, ts, seen):
                     quote = ZERO
                 named = {"0x" + w[12:].hex() for w in words if w[:12] == b"\0" * 12 and int.from_bytes(w[12:], "big") > 2 ** 100} - {creator, quote}
                 state["creations"] += 1; state["last_creation_at"] = mono()
-                log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named), "selector": sel.hex(), "tx_type": ty})
-                threading.Thread(target=handle_creation, args=(creator, quote, init_buy, seen, ts, named, state["blocks"]), daemon=True).start(); continue
+                tax_bps = tax_bps_of(sel, words)
+                log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named), "selector": sel.hex(), "tx_type": ty, "tax_bps": tax_bps})
+                threading.Thread(target=handle_creation, args=(creator, quote, init_buy, seen, ts, named, state["blocks"]), kwargs={"tax_bps": tax_bps}, daemon=True).start(); continue
             if val > 0 and len(data) >= 36:                                         # a router buy of some curve: sender recovered only if it names a curve we trade
                 e = [seen, ts, None, val, data, t, state["blocks"], to_hex, sel.hex()]; state["valtx"].append(e)
                 for cv, w in list(watched.items()):                                  # a snapshot: the score and creation threads add and pop watched curves while this loop runs
@@ -1490,7 +1511,7 @@ def provider_creation(creator, txh, seen, ts, blk0):
         named = {"0x" + w[12:].hex() for w in words if w[:12] == b"\0" * 12 and int.from_bytes(w[12:], "big") > 2 ** 100} - {creator, quote}
         state["creations"] += 1; state["last_creation_at"] = mono()
         log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named), "selector": sel.hex(), "source": "provider", "calldata_ms": round(1000 * (mono() - seen))})
-        handle_creation(creator, quote, init_buy, seen, ts, named, blk0)
+        handle_creation(creator, quote, init_buy, seen, ts, named, blk0, tax_bps=tax_bps_of(sel, words))
     except Exception as e:
         log({"ev": "error", "stage": "provider_creation", "err": str(e)[:200]})
 
@@ -1513,8 +1534,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.1, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.2, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
