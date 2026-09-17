@@ -104,7 +104,10 @@ E0_BUNDLE_WAIT_S = float(os.environ.get("E0_BUNDLE_WAIT_S", "0.45"))
 E0_BUNDLE_MAX_BLOCKS = int(os.environ.get("E0_BUNDLE_MAX_BLOCKS", "9"))
 PROVIDER_FALLBACK_S = float(os.environ.get("PROVIDER_FALLBACK_S", "120"))
 E0_ALLOW_PROVIDER = os.environ.get("E0_ALLOW_PROVIDER", "0") == "1"   # take the creation-second seat on the provider path too (after deploy/provider_lag_probe.py shows the lag is small)
-PROVIDER_LAG_MS = float(os.environ.get("PROVIDER_LAG_MS", "0"))        # the measured lag of the provider path behind the sequencer: added to the paper landing of seats taken on it   # after the sequencer feed refuses us, run on the provider this long, then try the feed again (24.17: the fallback was a one-way door)   # the creation-second seat counts the bundle inside this many blocks of the creation; 3 = the honest table's "complete by 0.3 s" (24.15), the 5.41 paper run lost on later ones   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
+try:
+    PROVIDER_LAG_MS = float(os.environ.get("PROVIDER_LAG_MS", "0") or 0)   # the measured lag of the provider path behind the sequencer: added to the paper landing of seats taken on it
+except ValueError:
+    PROVIDER_LAG_MS = 0.0; E0_ALLOW_PROVIDER = False                   # a placeholder left in the env file: the seat stays off the provider path until a number is set   # after the sequencer feed refuses us, run on the provider this long, then try the feed again (24.17: the fallback was a one-way door)   # the creation-second seat counts the bundle inside this many blocks of the creation; 3 = the honest table's "complete by 0.3 s" (24.15), the 5.41 paper run lost on later ones   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
 
 
 def tax_bps_of(sel, words):
