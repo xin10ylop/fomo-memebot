@@ -2401,3 +2401,10 @@ three visible at 282–378 ms paid −12.4, −6.8 and −3.2%, the late bundles
 out and the 450 ms cap let in. Engine 5.42 adds `E0_BUNDLE_MAX_BLOCKS` (3 = the table's 0.3 s on the cache's clock) so
 paper and backtest gate on the same rule. Seven seats decide nothing; the day does. Live waits for a positive paper mean
 over at least twenty seats under the same rule.
+
+**Engine 5.43: the resolve by receipt.** On the seats that matter, bundles inside the creation block, the 5.41 run spent
+58–177 ms in the chain resolve, a log scan over the factory's recent blocks; the bundle itself was visible at 6–10 ms.
+5.43 resolves the curve from the creation transaction's own receipt, a direct lookup by hash computed from the feed's
+raw transaction, polled every 15 ms until the provider has indexed the block, with the log scan as the fallback. Every
+decision records which path answered (`resolve_src` receipt, rpc or feed). On the replay's sensitivity, 2–3 points a
+trade on the honest seat and far more on a flood launch (24.16: +245% at 0.4 s, +103% at 0.5 s).

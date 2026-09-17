@@ -840,6 +840,26 @@ def resolve_rpc(creator, deadline=3.0, lookback=40):
     return None
 
 
+def resolve_receipt(txh, creator, deadline=0.35):
+    """5.43: the curve from the creation transaction's own receipt, a direct lookup by hash instead of a log scan (the 5.41 paper run
+    spent 58-177 ms in the scan on the seats that matter, the same-block bundles). Polls the provider every 15 ms until the block is
+    indexed; (token, curve, tk0, b_create) or None, and the caller falls back to resolve_rpc."""
+    t0 = mono()
+    while mono() - t0 < deadline:
+        try:
+            rec = rpc_seat.call("eth_getTransactionReceipt", [txh], tries=1)
+        except Exception:
+            rec = None
+        if rec:
+            for l in rec.get("logs", []):
+                if l.get("address", "").lower() == FACTORY_HEX and len(l["topics"]) > 3 and ("0x" + l["topics"][3][-40:]).lower() == creator:
+                    d = l["data"][2:]; w = [int(d[i:i + 64], 16) for i in range(0, len(d), 64)]
+                    return "0x" + l["topics"][1][-40:], "0x" + l["topics"][2][-40:], w[2] / 1e18, int(rec["blockNumber"], 16)
+            return None                                                    # the receipt exists but carries no creation by this creator: not ours
+        time.sleep(0.015)
+    return None
+
+
 def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
     """25 s after creation: the regime signal, the dry-run bankroll update, and the check of the feed's gate readings against the chain's"""
     time.sleep(25)
@@ -1063,11 +1083,11 @@ def close_position(pos, why):
         pos["closing"] = False
 
 
-def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None):
+def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None, txh=None):
     """the launch thread, guarded: an exception here used to kill the thread silently, and if it happened after the buy the
     tokens were never sold and the 'position open' gate blocked every later trade for good (audit, Sep 16)."""
     try:
-        _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps)
+        _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps, txh)
     except Exception as e:
         pos = state["open"]
         log({"ev": "alarm", "what": "the launch thread crashed", "err": str(e)[:200], "where": traceback.format_exc().strip().splitlines()[-2][:160],
@@ -1085,7 +1105,7 @@ def release_reservation():
         state["nonce"] = None; state["chain_at"] = 0.0; state["busy_until"] = 0.0
 
 
-def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None):
+def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None, txh=None):
     """resolve the curve, apply the gates, size on the feed-tracked curve, take the seat, build the buy, then approve and sell"""
     curve = token = None; tk0 = None; b_create = None; src = None; named = set(named)
     new_day_check()
@@ -1150,7 +1170,9 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
 
         def resolve_bg():
             try:
-                box["r"] = resolve_rpc(creator)
+                r = resolve_receipt(txh, creator) if txh else None
+                box["src"] = "receipt" if r else "rpc"
+                box["r"] = r or resolve_rpc(creator)
             except Exception as e:
                 box["r"] = None; log({"ev": "error", "stage": "e0_resolve", "err": str(e)[:200]})
             with cond:
@@ -1188,7 +1210,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                     cond.wait(0.02)
             r = box.get("r")
             if r:
-                token, curve, tk0, b_create = r; src = "rpc"
+                token, curve, tk0, b_create = r; src = box.get("src", "rpc")
     elif curve is None:
         r = resolve_rpc(creator)
         if r:
@@ -1425,7 +1447,7 @@ def index_message(inner, ts, seen):
                 state["creations"] += 1; state["last_creation_at"] = mono()
                 tax_bps = tax_bps_of(sel, words)
                 log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named), "selector": sel.hex(), "tx_type": ty, "tax_bps": tax_bps})
-                threading.Thread(target=handle_creation, args=(creator, quote, init_buy, seen, ts, named, state["blocks"]), kwargs={"tax_bps": tax_bps}, daemon=True).start(); continue
+                threading.Thread(target=handle_creation, args=(creator, quote, init_buy, seen, ts, named, state["blocks"]), kwargs={"tax_bps": tax_bps, "txh": "0x" + keccak(t).hex()}, daemon=True).start(); continue
             if val > 0 and len(data) >= 36:                                         # a router buy of some curve: sender recovered only if it names a curve we trade
                 e = [seen, ts, None, val, data, t, state["blocks"], to_hex, sel.hex()]; state["valtx"].append(e)
                 for cv, w in list(watched.items()):                                  # a snapshot: the score and creation threads add and pop watched curves while this loop runs
@@ -1620,7 +1642,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.42, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.43, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

@@ -357,14 +357,15 @@ millions, something is subscribed to the whole chain again (engine 4.95–4.99 d
 `PROVIDER_WS=` (empty) switches the chain rivals off altogether; the feed decoder's token matching still covers the
 router blind spot that made trade 6.
 
-## 5d. The creation-second seat (engine 5.4, report 24.13–24.16)
+## 5d. The creation-second seat (engine 5.43, report 24.13–24.16)
 
 The seat 0.2–0.4 s after the creation block, 6.18% surcharge, ahead of the team's second round and of every bot. It is
 taken only once the bundle is VISIBLE on the feed: the named wallets' buys name the curve and fill the gates; a launch
 whose bundle is not visible within `E0_BUNDLE_WAIT_S` is skipped. Entering ahead of the bundle on the calldata alone is
 the look-ahead of report 24.15, not a seat. The bundle is the named wallets' transactions in the creation block and the
 next nine, direct or through a helper contract (since Sep 17 every bundle goes through one, 24.16); the chain resolve of the
-curve runs in parallel from the first millisecond. Opt in explicitly:
+curve runs in parallel from the first millisecond, the creation transaction's receipt first (a lookup by hash), the log
+scan as the fallback. Opt in explicitly:
 
     SEAT=E0 E0_OUTSIDER=1 HOLD_S=1.5 TAKE_PROFIT=0 TIER_MIN_BPS=100 TIER_MAX_BPS=200 E0_BUNDLE_WAIT_S=0.45 E0_BUNDLE_MAX_BLOCKS=3
     MAX_RESOLVE_MS=600 MIN_FOLLOW_ETH_60=0 BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.3 BUNDLE_MAX_ETH=0 MIN_CREATOR_SUPPLY=0.01

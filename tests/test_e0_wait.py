@@ -155,6 +155,26 @@ E.resolve_rpc = lambda *a, **kw: ("0x" + "b0" * 20, cv10, 0.02 * E.Y0, 1000)
 E._handle_creation(c10, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
 s10 = events(c10, "skip", wait=1.0)
 check("bundle 5 blocks after the creation, cap 3 blocks: skipped", bool(s10) and any("3 blocks (0 named" in str(e.get("why")) for e in s10), str([e.get("why") for e in s10]))
+# 11. the creation transaction's receipt resolves the curve before the log scan (engine 5.43): the provider answers null twice
+# (block not indexed yet), then the receipt; the log scan is never needed
+c11, cv11, tok11 = "0x" + "bb" * 20, "0x" + "c1" * 20, "0x" + "d1" * 20
+W = wallets(11); E.state["busy_until"] = 0.0
+calls = []
+def fake_call(method, params, tries=3):
+    calls.append(method)
+    if method == "eth_getTransactionReceipt":
+        if calls.count("eth_getTransactionReceipt") < 3: return None
+        return {"blockNumber": hex(1000), "logs": [{"address": E.FACTORY_HEX, "topics": ["0x" + "ee" * 32, "0x" + "0" * 24 + tok11[2:], "0x" + "0" * 24 + cv11[2:], "0x" + "0" * 24 + c11[2:]],
+                                                    "data": "0x" + "%064x" % 0 + "%064x" % 0 + "%064x" % int(0.02 * E.Y0 * 1e18)}]}
+    raise RuntimeError("no other RPC in this test")
+E.rpc_seat.call = fake_call
+E.resolve_rpc = lambda *a, **kw: (_ for _ in ()).throw(AssertionError("the log scan must not run when the receipt resolves"))
+helper_bundle(11, cv11, W, resolved=False)
+E.resolve_rpc = lambda *a, **kw: (_ for _ in ()).throw(AssertionError("the log scan must not run when the receipt resolves"))
+E._handle_creation(c11, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100, txh="0x" + "ab" * 32)
+d = events(c11, "trade_decision")
+check("receipt resolve: traded from the receipt, no log scan", bool(d) and d[0].get("resolve_src") == "receipt", str([e.get("resolve_src") for e in d]) + str([e.get("stage") for e in events(c11, "error", wait=0.2)]))
+check("receipt resolve: the token is known at the decision", bool(d) and d[0].get("token") == tok11, str([e.get("token") for e in d]))
 E.resolve_rpc = lambda *a, **kw: None
 print("all creation-second wait tests pass" if not fails else f"{len(fails)} TESTS FAILED: {fails}")
 raise SystemExit(1 if fails else 0)
