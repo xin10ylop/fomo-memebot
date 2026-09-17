@@ -2117,3 +2117,40 @@ other and with real money to within a point. What is left is not a fault: the re
 true clock allows (24.8), the feed cannot attribute helper-contract bundles (24.9), the second-two rival gate may be
 stricter than it needs to be (24.9), and the tape since Sep 16 has offered few seats. None of those can lose money;
 they decide how often it trades.
+
+### 24.12 The day table, audited
+
+The day table given to the user on Sep 17 (bundled launches, clean seats and clean-seat return per day) was audited on
+request. Three faults, none changing the conclusion, all corrected in `data/derived/day_table_audit.txt`:
+
+1. **Unequal coverage.** The replay's windows cover 6 to 22 hours per day (Sep 12 is 12 h, Sep 16 is 14.2 h, most days
+   18 h, Sep 11 22 h), so the day totals were not comparable. The audited table is per hour.
+2. **Sep 11 was stale.** Its row predated the 06–12 UTC pull; with it the day is 23.9 bundled launches an hour and 1.5
+   clean, not 18.8 and 1.4.
+3. **"Clean" was on the interpolated clock.** The column the engine can act on is filter-passing clean seats × 0.67 (24.8).
+
+The pulls themselves are complete: four 10-minute block ranges (Sep 11, 14, 16 morning, 16 afternoon) hold exactly the
+Buy logs Alchemy returns for them today.
+
+| day | h | chain events/h | bundled/h | clean/h | filter-passing clean/h | true-clock/h | return per filter-passing seat |
+|---|---|---|---|---|---|---|---|
+| Sep 2 | 6 | 56,700 | 40.5 | 28.3 | 21.7 | 14.5 | +22.1% |
+| Sep 3 | 18 | 61,400 | 55.2 | 27.4 | 16.9 | 11.4 | +22.9% |
+| Sep 5 | 12 | 74,500 | 49.2 | 11.8 | 5.0 | 3.4 | +19.3% |
+| Sep 7 | 18 | 63,600 | 63.6 | 22.8 | 7.9 | 5.3 | +11.0% |
+| Sep 8 | 18 | 61,100 | 53.1 | 15.6 | 5.5 | 3.7 | +18.3% |
+| Sep 9 | 18 | 46,900 | 37.6 | 7.6 | 2.4 | 1.6 | +16.1% |
+| Sep 10 | 18 | 44,600 | 37.6 | 5.8 | 2.8 | 1.9 | +17.8% |
+| **Sep 11 (live)** | 22 | 46,800 | 23.9 | 1.5 | 0.5 | 0.3 | −4.3% |
+| Sep 12 | 12 | 54,100 | 53.2 | 7.3 | 2.2 | 1.5 | +22.4% |
+| Sep 13 | 18 | 50,600 | 45.0 | 7.8 | 2.9 | 1.9 | +19.3% |
+| Sep 14 | 18 | 50,900 | 35.3 | 9.7 | 2.3 | 1.6 | +10.9% |
+| Sep 15 | 18 | 41,000 | 21.8 | 4.4 | 2.7 | 1.8 | +13.9% |
+| **Sep 16 (live)** | 14.2 | 17,300 | 6.0 | 0.6 | 0.3 | 0.2 | +7.0% (n 4) |
+
+Read per hour, the history is a staircase, not a cliff: 11–15 tradeable seats an hour on Sep 2–3 (the days the rule
+was found on), 3–5 on Sep 5–8, 1.5–2 from Sep 9 to Sep 15 with Sep 11 at 0.3, and 0.2 on Sep 16 — whose whole-chain
+activity (17,000 curve events an hour against 41,000–89,000 on every other day) was a quarter of normal. The return
+per seat has not moved: +11% to +22% on every day but Sep 11 since the filter was fitted. What the user remembers as
+"a lot of trades" was the Sep 2–3 level, gone by Sep 9; Sep 12–15 was 25–30 trades a trading day on the true clock,
+worth about +$100–150 a day at $25; Sep 16 offered three.
