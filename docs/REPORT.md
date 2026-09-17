@@ -2194,3 +2194,9 @@ dry run measures directly (`resolve_ms`, `seat_flip_to_send_ms` on each decision
 `HOLD_S=2`, `MAX_RESOLVE_MS=300`, `MIN_FOLLOW_ETH_60=0`, `BUNDLE_MIN=3`, `MIN_CREATOR_SUPPLY=0.01`): the surcharge is
 6.18%, there is no seat wait, the send goes out the moment the curve is resolved, and the buy's minOut (25%) is what
 refuses the 96–98% tokens. The old guard stays for anyone who does not opt in.
+
+**Checked on the exact clock.** Because this seat lives inside the first half-second, the 150 launches of 24.8 whose
+every block time was fetched were re-scored with the creation-second seat on exact times (`src/analysis/exact_clock_e0.py`,
+`data/derived/exact_clock_e0.txt`): +25.4% at 0.2 s, +9.1% at 0.3 s, +9.1% at 0.4 s, +7.2% at 0.5 s, +4.0% at 0.7 s,
+against +23.0 / +10.0 / +6.1 / +2.2 / −2.0% on the interpolated clock for the same launches. The seat is not a clock
+artefact; if anything the true clock is kinder to a slightly late landing.
