@@ -27,8 +27,18 @@ sk = collections.Counter()
 for e in ev:
     if e["ev"] == "skip":
         w = e.get("why"); w = w if isinstance(w, str) else "; ".join(map(str, w))
-        sk[w[:70]] += 1
+        sk[w[:120]] += 1
 print("skip reasons:", dict(sk.most_common(8)))
+nt = [e for e in ev if e["ev"] == "eligible_not_traded"]
+if nt:
+    print("refused after the bundle was seen (last 6):")
+    for e in nt[-6:]:
+        print(f"  {u(e['t'])} {str(e.get('curve'))[:12]} src {e.get('resolve_src')} wait {e.get('bundle_wait_ms')} ms bundle {e.get('bundle')} / {e.get('bundle_eth')} ETH helper {e.get('bundle_helper')} tax {e.get('tax_bps')} | {'; '.join(str(g)[:70] for g in e.get('gates', []))}")
+nb3 = [e for e in ev if e["ev"] == "skip" and "bundle not visible" in str(e.get("why")) and "(0 named" not in str(e.get("why")) and "(1 named" not in str(e.get("why"))]
+if nb3:
+    print("bundles that showed 2+ named transactions but missed the floor or the block cap (last 6):")
+    for e in nb3[-6:]:
+        print(f"  {u(e['t'])} named_wallets {e.get('named_wallets')} tax {e.get('tax_bps')} wait {e.get('wait_ms')} ms | {str(e.get('why'))[:140]}")
 pre = [e for e in ev if e["ev"] in ("skip", "eligible_not_traded", "trade_decision") and not (e["ev"] == "skip" and "calldata" in str(e.get("why")))]
 nb = [e for e in ev if e["ev"] == "skip" and "bundle not visible" in str(e.get("why"))]
 if pre:
