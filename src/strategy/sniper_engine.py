@@ -101,7 +101,8 @@ E0_OUTSIDER = os.environ.get("E0_OUTSIDER", "0") == "1"                # explici
 TIER_MIN_BPS = int(os.environ.get("TIER_MIN_BPS", "0")); TIER_MAX_BPS = int(os.environ.get("TIER_MAX_BPS", "0"))   # the token's own tax (creation calldata word 13, bps on top of the 1% protocol fee): 0 = no gate. 24.14: 100-200 bps tokens pay +34/+43/+36/+27%
 SKIP_TIER1_TEAM_SHARE = float(os.environ.get("SKIP_TIER1_TEAM_SHARE", "0"))
 E0_BUNDLE_WAIT_S = float(os.environ.get("E0_BUNDLE_WAIT_S", "0.45"))
-E0_BUNDLE_MAX_BLOCKS = int(os.environ.get("E0_BUNDLE_MAX_BLOCKS", "9"))   # the creation-second seat counts the bundle inside this many blocks of the creation; 3 = the honest table's "complete by 0.3 s" (24.15), the 5.41 paper run lost on later ones   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
+E0_BUNDLE_MAX_BLOCKS = int(os.environ.get("E0_BUNDLE_MAX_BLOCKS", "9"))
+PROVIDER_FALLBACK_S = float(os.environ.get("PROVIDER_FALLBACK_S", "120"))   # after the sequencer feed refuses us, run on the provider this long, then try the feed again (24.17: the fallback was a one-way door)   # the creation-second seat counts the bundle inside this many blocks of the creation; 3 = the honest table's "complete by 0.3 s" (24.15), the 5.41 paper run lost on later ones   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
 
 
 def tax_bps_of(sel, words):
@@ -1278,7 +1279,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         send_mode = "e0"                                                  # the creation second: no wait, every 100 ms costs 3-5 points
     t_wake = mono()
     decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "race_ms": w.get("race_ms"), "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"]),
-                "tax_bps": w.get("tax_bps"), "team_share": round((Y0 - w["Y"]) / Y0, 4), "bundle_wait_ms": bundle_wait_ms, "bundle_helper": helper_folded}
+                "tax_bps": w.get("tax_bps"), "team_share": round((Y0 - w["Y"]) / Y0, 4), "bundle_wait_ms": bundle_wait_ms, "bundle_helper": helper_folded, "detect": state.get("detect", "sequencer")}
     with lock:
         sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []
@@ -1326,6 +1327,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                     gates.append(f"demand {fe:.3f} ETH over the last {len(tm)} scored launches < {MIN_FOLLOW_ETH_60} (below the tables' range)")
         if send_mode is None and SEAT in ("E1", "E2"):
             gates.append("seat's second not seen in time (stale feed): not sending")
+        if SEAT == "E0" and state.get("detect") == "provider":
+            gates.append("detection on the provider path (the sequencer feed is down): a send this late is second one, not the seat")
         if state["nonce"] is None or mono() - state["chain_at"] > 30:
             gates.append("nonce/gas not fresh (RPC)")
         gc_usd = gas_cost_usd()
@@ -1573,15 +1576,17 @@ async def chain_rivals_loop(websockets):
             log({"ev": "feed_error", "source": "chain_rivals", "err": str(e)[:200], "retry_s": backoff}); await asyncio.sleep(backoff); backoff = min(5.0, backoff * 2)
 
 
-async def provider_loop(websockets):
+async def provider_loop(websockets, until=None):
     """detection from a third-party node's WebSocket instead of the sequencer feed: newHeads gives the chain's second (the flip),
     the curve Buy/Sell logs carry the curve and the buyer in their topics and the amounts in their data, the factory's log
     marks a creation and one RPC call fetches its calldata (the named wallets). Everything downstream (the seat wait, the
     gates, the fold, the scorer) is unchanged. Lags the sequencer feed by the node's own processing (measured 100-300 ms on
     the replay as 10-30% fewer trades at the same return, section 23.10); E1 in predict mode is not meaningful on it."""
     global _bcache
-    SUB = {"heads": None, "curve": None, "factory": None}; backoff = 0.2
+    SUB = {"heads": None, "curve": None, "factory": None}; backoff = 0.2; state["detect"] = "provider"
     while True:
+        if until is not None and mono() > until:
+            return                                                       # back to the caller, which tries the sequencer feed again
         try:
             async with websockets.connect(PROVIDER_WS, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=None) as ws:
                 for i, (name, params) in enumerate((("heads", ["newHeads"]), ("curve", ["logs", {"topics": [[BUY_EV, SELL_EV]]}]), ("factory", ["logs", {"address": FACTORY_HEX}]))):
@@ -1590,6 +1595,8 @@ async def provider_loop(websockets):
                 log({"ev": "feed_connected", "source": "provider", "subscriptions": SUB}); state["connected_at"] = mono(); backoff = 0.2
                 blk_ts = {}
                 while True:
+                    if until is not None and mono() > until:
+                        return
                     try:
                         raw = await asyncio.wait_for(ws.recv(), timeout=2.0)
                     except asyncio.TimeoutError:
@@ -1668,8 +1675,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.44, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.45, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "provider_fallback_s": PROVIDER_FALLBACK_S, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
@@ -1682,7 +1689,7 @@ async def main():
     while True:
         try:
             async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=None) as ws:
-                log({"ev": "feed_connected"}); state["connected_at"] = mono(); state["prev_seen"] = None; backoff = 0.2
+                log({"ev": "feed_connected"}); state["connected_at"] = mono(); state["prev_seen"] = None; backoff = 0.2; state["detect"] = "sequencer"
                 state["brackets"].clear(); state["ref"] = None; _bcache["at"] = -1e9              # the route, hence theta, may have changed
                 while True:
                     try:
@@ -1716,8 +1723,9 @@ async def main():
         except Exception as e:
             refused = refused + 1 if ("rejected WebSocket connection" in str(e) or "HTTP 4" in str(e)) else 0        # an HTTP refusal, not a network drop
             if refused >= 5 and PROVIDER_WS:                              # Robinhood's feed has shut the door: carry on from the provider's node (posture B)
-                log({"ev": "alarm", "what": "the sequencer feed refused five connections in a row: switching detection to the provider WebSocket"})
-                last_prune_holder[0] = mono(); await provider_loop(websockets); return
+                log({"ev": "alarm", "what": f"the sequencer feed refused five connections in a row: detection on the provider WebSocket for {PROVIDER_FALLBACK_S:.0f} s, then the feed is tried again"})
+                last_prune_holder[0] = mono(); await provider_loop(websockets, until=mono() + PROVIDER_FALLBACK_S)
+                log({"ev": "note", "what": "trying the sequencer feed again"}); refused = 0; backoff = 0.2; continue
             log({"ev": "feed_error", "err": str(e)[:200], "retry_s": backoff}); await asyncio.sleep(backoff); backoff = min(5.0, backoff * 2)   # 0.2 s after a drop, slower if the network is gone
 
 

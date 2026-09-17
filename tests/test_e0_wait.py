@@ -168,13 +168,29 @@ def fake_call(method, params, tries=3):
                                                     "data": "0x" + "%064x" % 0 + "%064x" % 0 + "%064x" % int(0.02 * E.Y0 * 1e18)}]}
     raise RuntimeError("no other RPC in this test")
 E.rpc_seat.call = fake_call
-E.resolve_rpc = lambda *a, **kw: (_ for _ in ()).throw(AssertionError("the log scan must not run when the receipt resolves"))
+scans = []
 helper_bundle(11, cv11, W, resolved=False)
-E.resolve_rpc = lambda *a, **kw: (_ for _ in ()).throw(AssertionError("the log scan must not run when the receipt resolves"))
+E.resolve_rpc = lambda *a, **kw: (scans.append(E.mono()), None)[1]      # the log scan: must not be needed before the decision
 E._handle_creation(c11, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100, txh="0x" + "ab" * 32)
 d = events(c11, "trade_decision")
-check("receipt resolve: traded from the receipt, no log scan", bool(d) and d[0].get("resolve_src") == "receipt", str([e.get("resolve_src") for e in d]) + str([e.get("stage") for e in events(c11, "error", wait=0.2)]))
+check("receipt resolve: traded from the receipt, no log scan before the decision", bool(d) and d[0].get("resolve_src") == "receipt" and not any(x < d[0]["t"] - (time.time() - E.mono()) for x in scans), str([e.get("resolve_src") for e in d]))
 check("receipt resolve: the token is known at the decision", bool(d) and d[0].get("token") == tok11, str([e.get("token") for e in d]))
+# 12. detection on the provider path (the sequencer feed down): the seat is refused, and recorded as such (engine 5.45)
+c12, cv12 = "0x" + "cc" * 20, "0x" + "c2" * 20
+W = wallets(12); E.state["busy_until"] = 0.0; E.state["detect"] = "provider"
+run(c12, cv12, W, [(w, 0.15) for w in W], 0.05)
+g12 = events(c12, "eligible_not_traded", wait=1.0)
+check("provider path: the creation-second seat is refused", bool(g12) and any("provider path" in x for x in g12[0].get("gates", [])) and g12[0].get("detect") == "provider", str([(e.get("gates"), e.get("detect")) for e in g12]))
+E.state["detect"] = "sequencer"
+# 13. the provider fallback returns to the caller after its window even when the provider refuses every connection
+import asyncio
+class _Refusing:
+    def connect(self, *a, **k):
+        raise ConnectionRefusedError("provider down in this test")
+E.PROVIDER_WS = "wss://example.invalid"
+t0 = E.mono(); asyncio.run(E.provider_loop(_Refusing(), until=E.mono() + 0.5)); el = E.mono() - t0
+check("provider fallback: returns after its window (0.5-1.5 s)", 0.45 <= el <= 1.5, f"{el:.2f} s")
+E.state["detect"] = "sequencer"
 E.resolve_rpc = lambda *a, **kw: None
 print("all creation-second wait tests pass" if not fails else f"{len(fails)} TESTS FAILED: {fails}")
 raise SystemExit(1 if fails else 0)

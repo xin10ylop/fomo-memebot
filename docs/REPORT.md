@@ -2419,3 +2419,31 @@ bankroll and the safety switch follow the landing score; the table score stays o
 comparison with the replay. Each score also records whether a taxed outsider landed ahead of the bundle. The readout
 prints the landing mean, the revert count, the bot-first count and the table mean on the same seats, so tomorrow's
 decision reads paper the way live would have paid it.
+
+### 24.17 The feed outage, the fallback that never came back, and the helper-created launches
+
+**What happened at 19:44 UTC.** The sequencer feed went silent for 2 s at 19:29, the engine reconnected, and at 19:44 the
+feed refused five connections in a row (the endpoint answered HTTP 520 from outside as well: an origin failure, not a
+block on our address). The engine did what it was built to do and switched detection to the provider's WebSocket, and
+then did what it should not: it stayed there. The fallback was written as a one-way door. The four seats of 19:57–20:00
+were taken on the provider path, whose block stream trails the sequencer by an amount the boundary estimator put at
+about 1.3 s; their paper landing was scored as if taken on the feed and is not comparable. Engine 5.45 makes the door
+swing both ways: the provider path runs for `PROVIDER_FALLBACK_S` (120 s) and the feed is tried again, indefinitely;
+every decision records the detection path; and on the creation-second seat the provider path is a gate, not a seat,
+because a send a second late is second one at 6.18% with the crowd, not the seat the tables priced. The readout names
+the detection path, the seats taken on the provider path, and excludes them from the decision count.
+
+**The paper session so far (Sep 17 15:42–20:11 UTC, 4.5 h).** 2,244 creations, 554 past the calldata check, 125 bundles
+visible in time, 31 of them the 1%-tier template refused, 6 seats taken, 2 on the sequencer feed (+8.4%, −1.5%) and 4 on
+the provider path (−10.5, −0.7, +23.1, +20.7%, not comparable). No revert on any, no bot ahead of any bundle, sends 8–11 ms
+behind the bundle, the receipt resolve answering on the one seat that needed a chain read.
+
+**The helper-created launches.** 181 creations of the session carried no readable tax layout and 69 came from selectors
+the engine does not know: since this evening a fifth of creations (197 of 1,046 in two hours) go through launch-helper
+contracts (`0x6319141d…` with three selectors, six others) that create the token and buy in the same transaction. The
+chain says they are not the seat's business: 139 of 197 hold a single buy inside the creation transaction, median 0.062
+ETH, and the helper's own buy pays the contract caller's 90–99% surcharge, so neither the tier nor the bundle can be
+read the way the rule reads them. By the tables' rule 22 of 197 are bundled and the seat pays −33.6% on them (n 22; +13.4%
+mean, −4.4% median on the four 2–3%-tier ones), against +19.1% mean and +11.0% median on the 14 direct 2–3%-tier bundled
+launches of the same two hours. The engine ignoring them is the right default; they are recorded here so a change in
+their share or their behaviour is noticed.
