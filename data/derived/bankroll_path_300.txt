@@ -1,0 +1,59 @@
+#### FULL PERIOD (Sep 2-8 are the days the rule was fitted on)
+
+=== A. every clean seat (replay clock): from $300, 15% of the bankroll per trade ($25-$300), hours 12-05, filter, switch, daily stop
+day     hours trades   start $     end $   day P&L worst in day       avg stake switch-off
+09-02     6.0    124       300     3,628    +3,328          -8%       119/trade        0
+09-03    18.0    293     3,628    12,948    +9,320          +0%       151/trade        0
+09-04     6.0     26    12,948    13,207      +258          -1%       142/trade        0
+09-05    12.0     58    13,207    14,904    +1,697          -1%       163/trade        0
+09-06     6.0     47    14,904    15,617      +713          -1%       156/trade        0
+09-07    18.0    136    15,617    17,591    +1,974          +0%       162/trade        0
+09-08    18.0     95    17,591    20,582    +2,991          -0%       163/trade        0
+09-09    18.0     43    20,582    21,735    +1,154          -0%       151/trade        0
+09-10    18.0     44    21,735    23,056    +1,320          +0%       149/trade        0
+09-11    22.0     11    23,056    22,988       -67          -0%       139/trade        0
+09-12    12.0     26    22,988    23,883      +895          +0%       158/trade        0
+09-13    18.0     38    23,883    24,989    +1,106          +0%       170/trade        0
+09-14    18.0     42    24,989    25,697      +708          +0%       156/trade        0
+09-15    18.0     48    25,697    26,984    +1,287          -0%       168/trade        0
+09-16    14.2      3    26,984    27,021       +36          +0%       150/trade        0
+end: $27,021 (90.1x)
+
+=== B. a third of the clean seats dropped (true clock): from $300, 15% of the bankroll per trade ($25-$300), hours 12-05, filter, switch, daily stop
+day     hours trades   start $     end $   day P&L worst in day       avg stake switch-off
+09-02     6.0     76       300     1,801    +1,501          -8%       103/trade        0
+09-03    18.0    204     1,801     8,369    +6,568          -1%       150/trade        0
+09-04     6.0     15     8,369     8,459       +90          -1%       143/trade        0
+09-05    12.0     46     8,459     9,845    +1,386          -1%       161/trade        0
+09-06     6.0     32     9,845    10,406      +561          -0%       159/trade        0
+09-07    18.0     94    10,406    11,805    +1,399          +0%       164/trade        0
+09-08    18.0     62    11,805    14,558    +2,753          +0%       170/trade        0
+09-09    18.0     28    14,558    15,342      +784          -0%       153/trade        0
+09-10    18.0     27    15,342    16,218      +877          +0%       151/trade        0
+09-11    22.0      8    16,218    16,096      -123          -1%       138/trade        0
+09-12    12.0     19    16,096    16,619      +523          +0%       155/trade        0
+09-13    18.0     24    16,619    17,292      +674          +0%       173/trade        0
+09-14    18.0     32    17,292    17,918      +626          +0%       153/trade        0
+09-15    18.0     30    17,918    18,890      +972          +0%       166/trade        0
+09-16    14.2      2    18,890    18,916       +26          +0%       137/trade        0
+end: $18,916 (63.1x)
+
+#### OUT OF SAMPLE ONLY, Sep 12-16, from $300
+
+=== A. every clean seat (replay clock): from $300, 15% of the bankroll per trade ($25-$300), hours 12-05, filter, switch, daily stop
+day     hours trades   start $     end $   day P&L worst in day       avg stake switch-off
+09-12    12.0     26       300       696      +396          +0%        63/trade        0
+09-13    18.0     38       696     1,682      +986          +0%       154/trade        0
+09-14    18.0     42     1,682     2,393      +711          +0%       156/trade        0
+09-15    18.0     48     2,393     3,680    +1,287          -0%       168/trade        0
+09-16    14.2      3     3,680     3,717       +36          +0%       150/trade        0
+end: $3,717 (12.4x)
+
+=== B. a third of the clean seats dropped (true clock): from $300, 15% of the bankroll per trade ($25-$300), hours 12-05, filter, switch, daily stop
+day     hours trades   start $     end $   day P&L worst in day       avg stake switch-off
+09-12    12.0     16       300       451      +151          +0%        52/trade        0
+09-13    18.0     23       451       804      +353          +0%        94/trade        0
+09-14    18.0     24       804     1,100      +296          +0%       135/trade        0
+09-15    18.0     28     1,100     1,988      +889          +0%       165/trade        0
+09-16    14.2      3     1,988     2,025       +36          +0%       150/trade        0
+end: $2,025 (6.7x)
