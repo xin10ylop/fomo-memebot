@@ -2200,3 +2200,42 @@ every block time was fetched were re-scored with the creation-second seat on exa
 `data/derived/exact_clock_e0.txt`): +25.4% at 0.2 s, +9.1% at 0.3 s, +9.1% at 0.4 s, +7.2% at 0.5 s, +4.0% at 0.7 s,
 against +23.0 / +10.0 / +6.1 / +2.2 / −2.0% on the interpolated clock for the same launches. The seat is not a clock
 artefact; if anything the true clock is kinder to a slightly late landing.
+
+### 24.14 The creation-second seat optimised: what loses, what wins, filters, exits, sizing, risk
+
+Fitted on Sep 7–10, judged on Sep 11, Sep 12–15 and Sep 16–17 untouched; every candidate reported
+(`src/analysis/e0_optimize.py`, `e0_optimize2.py`; `data/derived/e0_optimize*.txt`). Entry 0.3 s, $25.
+
+**What loses.** Trades worse than −30% are 0.8% of the fit period and look exactly like the winners before the send
+(same tier, bundle, wallet count, creator share): they are the launches the team or a bot dumps inside the hold, and
+nothing observable before the send tells them apart. Winners (34%) leave by the take-profit; the middle (65%) leave by
+the hold with a few percent either way. So the tail is managed by the *exit*, not by a filter.
+
+**Exits.** Hold 1.5 s with no take-profit is the best mix: +26.5 / +24.7 / +18.5 / +10.5% across the four periods, 5th
+percentile −8.5 to −12.3%, trades below −30% at 0.6–1.1%, against 0.8–3.4% at hold 2 s. Hold 1.0 s cuts the tail
+further (0.3–0.6% below −30%, worst −39% in the new regime) at a cost of 1–2 points. The +50% take-profit costs 2–3
+points and protects nothing the hold does not. A stop-loss or a dump stop does nothing: by the time the sell lands
+(0.3 s) the dump is over.
+
+**Pre-entry filters (better in all four periods).** Tokens with a 2–3% tax: +34 / +43 / +36 / +27% (a higher tax
+punishes the flippers behind us, not us); team share under 25% of supply: +42 / +39 / +24 / +13%; largest bundle wallet
+under 5%: +32 / +32 / +16 / +10%; 3–4 wallet bundles: +35 / +32 / +25 / +19%. The worst class is a 1%-tax token whose
+team holds 35% or more; dropping only that keeps 63–82% of launches at +32 / +30 / +21 / +13.5% and 76–105% of the money.
+Hard filters raise the return per trade but cut the trade count more, so total money falls on good days (tier 2–3%:
+a third of the launches, 30–50% of the money) and holds or rises on thin days. A sizing tilt (full stake on 2–3% tax or
+team under 25%, half on the rest) keeps every trade, 78–98% of the money, and halves the drawdown.
+
+**Sizing.** At the $150 cap, 2% of supply per trade is as good as 3% (+$18 vs +$21 a trade on Sep 12–17); 1% halves it.
+
+**Speed, again.** With the chosen exit: +38.9 / +36.5 / +33.4 / +18.8% at 0.2 s, +26.5 / +24.7 / +18.5 / +10.5% at
+0.3 s, +20.7 / +15.9 / +12.2 / +7.0% at 0.4 s, +14.8 / +9.3 / +8.4 / +4.7% at 0.5 s.
+
+**Money and risk at the cap.** At $150 a trade, no filter, hold 1.5 s, no take-profit, one position at a time: Sep 12–15
++$62,756 (2,382 trades), Sep 11 +$18,004, the thin Sep 16–17 +$2,621 (171 trades); maximum drawdown −$98 to −$348,
+longest losing streak 7–12 trades, no losing day in the record. These are the model's numbers at a size no real trade
+has yet tested; the impact model is the same one that matched six real trades within a point at $25, but at 400 trades
+a day the market would see us, and nothing here models the bots adapting. Read the new-regime rows as the base case.
+
+**What the engine can and cannot read before the send.** The team's share of supply it has (from the bundle it folds);
+the token's tax tier it does not on the fast path (it assumes 1% until the chain's first Buy event is read), unless the
+tier is a parameter in the creation calldata — checked next.
