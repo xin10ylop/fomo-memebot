@@ -78,5 +78,10 @@ if r:
     print("sender rtt, last 20 samples:", {h: f"median {st.median(v):.0f} max {max(v):.0f} ms" for h, v in hosts.items()}, "| latest:", [(x.get("host"), x.get("warm_rtt_ms"), x.get("ok")) for x in r[-1].get("endpoints", [])])
 fl = [e for e in ev if e["ev"] == "flow"]
 if fl: print(f"flow: creations_seen {fl[-1].get('creations_seen')} rule_passing_last_6h {fl[-1].get('rule_passing_last_6h')} silent_min {fl[-1].get('silent_min')} wallet_eth {fl[-1].get('wallet_eth')} bankroll {fl[-1].get('bankroll_usd')}")
+al = [e for e in ev if e["ev"] in ("alarm", "feed_stall", "feed_error", "note")]
+for e in al[-5:]:
+    print(f"{e['ev']} {u(e['t'])}: {str(e.get('what') or e.get('err') or e.get('note') or {k: v for k, v in e.items() if k not in ('ev', 't')})[:220]}")
+if any(e["ev"] == "alarm" and "tax schedule" in str(e.get("what")) for e in al):
+    print("!! the tax-schedule alarm has fired: the engine refuses every seat until it is restarted")
 er = collections.Counter((e.get("stage"), str(e.get("err"))[:50]) for e in ev if e["ev"] == "error")
 if er: print("errors:", er.most_common(5))
