@@ -54,17 +54,18 @@ for k in ("bundle_wait_ms", "resolve_ms", "sent_ms", "seat_flip_to_send_ms"):
     xs = [e[k] for e in td if isinstance(e.get(k), (int, float))]
     if xs: print(f"{k:22s}: n {len(xs)} median {st.median(xs):.0f} p75 {q(xs,0.75):.0f} p90 {q(xs,0.9):.0f} max {max(xs):.0f}")
 sc = {e["curve"]: e for e in ev if e["ev"] == "score" and "roi" in e}
-traded = [sc[e["curve"]] for e in td if e["curve"] in sc and e.get("detect", "sequencer") != "provider"]
+lag_ok = (s0.get("provider_lag_ms") or 0) > 0 and s0.get("e0_allow_provider")      # 5.46: provider-path seats are scored with the measured lag, so they count
+traded = [sc[e["curve"]] for e in td if e["curve"] in sc and (lag_ok or e.get("detect", "sequencer") != "provider")]
 srcs = collections.Counter(e.get("resolve_src") for e in td)
 if td: print("resolve source of the seats taken:", dict(srcs), "| detection path of the seats taken:", dict(collections.Counter(e.get("detect", "sequencer") for e in td)))
 fc = [e for e in ev if e["ev"] == "feed_connected"]
 if fc: print(f"detection now: {fc[-1].get('source', 'sequencer')} feed, connected {u(fc[-1]['t'])} UTC ({(time.time() - fc[-1]['t'])/60:.0f} min ago); connections this run: {dict(collections.Counter(e.get('source', 'sequencer') for e in fc))}")
 prov = [e for e in td if e.get("detect") == "provider"]
-if prov: print(f"!! {len(prov)} seat(s) taken on the provider path (the sequencer feed was down): their timing is not the seat's, excluded from the decision count")
+if prov: print(f"!! {len(prov)} seat(s) taken on the provider path (the sequencer feed was down): " + (f"scored with the measured lag of {s0.get('provider_lag_ms')} ms, counted" if lag_ok else "their timing is not the seat's, excluded from the decision count"))
 if traded:
     rs = [x["roi"] for x in traded]; pn = [x["pnl_usd"] for x in traded]; tb = [x.get("roi_table", x["roi"]) for x in traded]
     rv = sum(1 for x in traded if x.get("would_revert")); bf = sum(1 for x in traded if x.get("bot_first"))
-    print(f"\npaper on the seats taken on the sequencer feed, scored at OUR estimated landing (5.44): n {len(rs)} mean {100*st.mean(rs):+.1f}% median {100*st.median(rs):+.1f}% wins {sum(r>0 for r in rs)} losses {sum(r<=0 for r in rs)} pnl ${sum(pn):+.2f} worst {100*min(rs):+.1f}% best {100*max(rs):+.1f}%")
+    print(f"\npaper on the seats taken{'' if lag_ok else ' on the sequencer feed'}, scored at OUR estimated landing (5.44): n {len(rs)} mean {100*st.mean(rs):+.1f}% median {100*st.median(rs):+.1f}% wins {sum(r>0 for r in rs)} losses {sum(r<=0 for r in rs)} pnl ${sum(pn):+.2f} worst {100*min(rs):+.1f}% best {100*max(rs):+.1f}%")
     print(f"  would have reverted on our minimum output: {rv} of {len(rs)} | a bot ahead of the bundle: {bf} | the tables' 0.3 s assumption on the same seats: mean {100*st.mean(tb):+.1f}%")
     print(f"  sorted returns: {' '.join(f'{100*v:+.0f}' for v in sorted(rs))}")
     for x in traded: print(f"  {u(x['t'])} landing {100*x['roi']:+6.1f}% (table {100*x.get('roi_table', x['roi']):+6.1f}%) pnl ${x['pnl_usd']:+6.2f} t_land {x.get('t_landing', x.get('t_in_s'))} revert {x.get('would_revert')} got/min {x.get('got_vs_min')} bot_first {x.get('bot_first')} tier {x.get('tier')} rolling {x.get('rolling_mean')} switch {x.get('switch_on')}")
