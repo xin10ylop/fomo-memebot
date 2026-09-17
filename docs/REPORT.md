@@ -2265,3 +2265,16 @@ no take-profit against the first version (hold 2 s, take-profit +50%) gives the 
 +25.1 vs +23.3%), the same p5, and a quarter to a seventh of the trades below −30% (0.2 vs 0.7%, 0.3 vs 2.1%). Six
 periods out of six, on two independent simulators' mechanics, is as far as the record can take the filter; the
 one thing still unmeasured is our own landing time on the droplet, which the E0 dry run is collecting now.
+
+**The public snipers, checked.** Two products advertise sniping Pons launches; neither is ours and neither has code
+we can read. `github.com/Trustdev-eth/pons-sniper-bot-v1-v2` is a README and nothing else (two commits, both Sep 8,
+one star, no fork, no release, no source file in its history) by a freelancer who sells custom bots and lists 125
+repositories, among them a `fomo-copy-trading-bot` and a `Robinhood-Bundler`, also README-only. The README is a
+specification for sale: a V2 entry that polls the address-specific opening tax and buys only when the effective tax is
+at or under a configured cap, 1% in its example, with a 100 ms poll. That is a description of the crowd we measured at
+second two: a bot that waits for the surcharge to reach zero and then races. Its default never takes the creation
+second at 6.18%, so the seat we run is not the one this design targets, though any buyer can raise the cap. The
+second product is the browser-based sniper at ponssniperbot.com announced on Sep 16, the day the second-two crowd
+doubled; its press release says it "fires the moment there is something to trade", which is the same second-two
+race. Nothing in either mentions the tax tier in the creation calldata, the team's share, or the creation-second
+surcharge schedule.
