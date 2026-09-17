@@ -1,0 +1,25 @@
+Expectation from the replay for the chosen set (E0 outsider, 2-3% tokens, hold 1.5 s, no take-profit), one trade per
+eligible launch, gas $0.11 per trade included, stake fully spent at $10/$25, 3% supply cap binds only at $150.
+
+landing 0.3 s after the creation block
+  period           | hours | launches/h | trades/h | trades/day | mean/trade |  median |  win% |      p5 | $/day @$10 |     @$25 |    @$150 | worst window $/h @$25
+  Sep 7-10         |    72 |       47.9 |    11.04 |        265 |     +34.3% |  +14.4% |   62% |  -12.2% |       +900 |    +2275 |   +12794 | +12.54  09-08 0-6
+  Sep 11           |    22 |       23.9 |     7.18 |        172 |     +43.0% |  +18.7% |   77% |   -9.9% |       +736 |    +1854 |   +10415 | +56.18  09-11 0-6
+  Sep 12-15        |    66 |       37.5 |     9.95 |        239 |     +36.4% |  +12.4% |   69% |  -12.3% |       +862 |    +2174 |   +12056 | +15.14  09-15 0-6
+  Sep 16-17 (now)  |    28 |        6.1 |     2.29 |         55 |     +26.6% |  +11.5% |   62% |  -12.0% |       +144 |     +365 |    +2055 |  +8.61  09-17 0-6
+
+landing 0.4 s after the creation block
+  Sep 7-10         |    72 |       47.9 |    11.04 |        265 |     +25.0% |   +4.7% |   55% |  -12.3% |       +649 |    +1654 |    +9372 | +11.18  09-08 0-6
+  Sep 11           |    22 |       23.9 |     7.18 |        172 |     +26.1% |  +10.1% |   67% |  -10.9% |       +441 |    +1123 |    +6360 | +39.91  09-11 15-22
+  Sep 12-15        |    66 |       37.5 |     9.95 |        239 |     +22.4% |   +8.7% |   63% |  -12.3% |       +524 |    +1339 |    +7579 | +15.30  09-15 0-6
+  Sep 16-17 (now)  |    28 |        6.1 |     2.29 |         55 |     +18.0% |   +8.9% |   56% |  -12.3% |        +96 |     +246 |    +1406 |  +4.01  09-16 0-9
+
+per window in the current regime, 0.3 s, $25
+  2026-09-16 0-9  : eligible  49, 2-3% tokens  12, mean  +31.5%, $     +95 over 9 h =  +10.5/h, losers 5, worst -39%
+  2026-09-16 12-18: eligible  37, 2-3% tokens  11, mean  +24.0%, $     +66 over 6 h =  +11.0/h, losers 2, worst -10%
+  2026-09-16 17-24: eligible  66, 2-3% tokens  31, mean  +27.5%, $    +213 over 7 h =  +30.5/h, losers 12, worst -10%
+  2026-09-17 0-6  : eligible  23, 2-3% tokens  10, mean  +20.7%, $     +52 over 6 h =   +8.6/h, losers 5, worst -21%
+
+Haircuts not in the table: the engine's own take rate (helper-contract bundles, resolve timeouts, feed lag) is
+unmeasured and the E2 record suggested two thirds; the landing time decides which row applies; the current-regime
+sample is 28 h and 64 trades (mean interval +14% to +41%); nothing models bots adapting to us.
