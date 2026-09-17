@@ -102,7 +102,9 @@ TIER_MIN_BPS = int(os.environ.get("TIER_MIN_BPS", "0")); TIER_MAX_BPS = int(os.e
 SKIP_TIER1_TEAM_SHARE = float(os.environ.get("SKIP_TIER1_TEAM_SHARE", "0"))
 E0_BUNDLE_WAIT_S = float(os.environ.get("E0_BUNDLE_WAIT_S", "0.45"))
 E0_BUNDLE_MAX_BLOCKS = int(os.environ.get("E0_BUNDLE_MAX_BLOCKS", "9"))
-PROVIDER_FALLBACK_S = float(os.environ.get("PROVIDER_FALLBACK_S", "120"))   # after the sequencer feed refuses us, run on the provider this long, then try the feed again (24.17: the fallback was a one-way door)   # the creation-second seat counts the bundle inside this many blocks of the creation; 3 = the honest table's "complete by 0.3 s" (24.15), the 5.41 paper run lost on later ones   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
+PROVIDER_FALLBACK_S = float(os.environ.get("PROVIDER_FALLBACK_S", "120"))
+E0_ALLOW_PROVIDER = os.environ.get("E0_ALLOW_PROVIDER", "0") == "1"   # take the creation-second seat on the provider path too (after deploy/provider_lag_probe.py shows the lag is small)
+PROVIDER_LAG_MS = float(os.environ.get("PROVIDER_LAG_MS", "0"))        # the measured lag of the provider path behind the sequencer: added to the paper landing of seats taken on it   # after the sequencer feed refuses us, run on the provider this long, then try the feed again (24.17: the fallback was a one-way door)   # the creation-second seat counts the bundle inside this many blocks of the creation; 3 = the honest table's "complete by 0.3 s" (24.15), the 5.41 paper run lost on later ones   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
 
 
 def tax_bps_of(sel, words):
@@ -927,7 +929,7 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
             # 5.44: the same launch scored at OUR estimated landing: the feed had shown blocks_to_seat blocks after the creation when we sent,
             # the feed trails the sequencer by about one block and the sequencer includes us in the block after the one it is building, so
             # two blocks past the last one seen; with the transaction's own amount and minimum output, so a buy the curve outran is a revert
-            li = {}; t_land = (decision["blocks_to_seat"] + 2) / 9.9
+            li = {}; t_land = (decision["blocks_to_seat"] + 2) / 9.9 + (PROVIDER_LAG_MS / 1000.0 if decision.get("detect") == "provider" else 0.0)
             r2 = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, gated=False, tp=TAKE_PROFIT if TAKE_PROFIT > 0 else None, readouts=False,
                              t_entry=t_land, min_out=decision.get("min_out_tokens"), amount_in=decision["amount_in_eth"], info=li)
             if r2 is not None and r2[0] != "filtered":
@@ -1327,8 +1329,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                     gates.append(f"demand {fe:.3f} ETH over the last {len(tm)} scored launches < {MIN_FOLLOW_ETH_60} (below the tables' range)")
         if send_mode is None and SEAT in ("E1", "E2"):
             gates.append("seat's second not seen in time (stale feed): not sending")
-        if SEAT == "E0" and state.get("detect") == "provider":
-            gates.append("detection on the provider path (the sequencer feed is down): a send this late is second one, not the seat")
+        if SEAT == "E0" and state.get("detect") == "provider" and not E0_ALLOW_PROVIDER:
+            gates.append("detection on the provider path (the sequencer feed is down): a send this late is second one, not the seat (E0_ALLOW_PROVIDER=1 after measuring the lag)")
         if state["nonce"] is None or mono() - state["chain_at"] > 30:
             gates.append("nonce/gas not fresh (RPC)")
         gc_usd = gas_cost_usd()
@@ -1593,6 +1595,7 @@ async def provider_loop(websockets, until=None):
                     await ws.send(json.dumps({"jsonrpc": "2.0", "id": i + 1, "method": "eth_subscribe", "params": params}))
                     r = json.loads(await asyncio.wait_for(ws.recv(), timeout=10)); SUB[name] = r.get("result")
                 log({"ev": "feed_connected", "source": "provider", "subscriptions": SUB}); state["connected_at"] = mono(); backoff = 0.2
+                state["brackets"].clear(); state["ref"] = None; state["prev_seen"] = None; _bcache["at"] = -1e9   # a new clock: the estimator restarts (24.17: it mixed two and printed -1.3 s)
                 blk_ts = {}
                 while True:
                     if until is not None and mono() > until:
@@ -1675,8 +1678,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.45, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "provider_fallback_s": PROVIDER_FALLBACK_S, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.46, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":

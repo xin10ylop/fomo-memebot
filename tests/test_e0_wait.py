@@ -182,6 +182,13 @@ run(c12, cv12, W, [(w, 0.15) for w in W], 0.05)
 g12 = events(c12, "eligible_not_traded", wait=1.0)
 check("provider path: the creation-second seat is refused", bool(g12) and any("provider path" in x for x in g12[0].get("gates", [])) and g12[0].get("detect") == "provider", str([(e.get("gates"), e.get("detect")) for e in g12]))
 E.state["detect"] = "sequencer"
+# 12b. the same with E0_ALLOW_PROVIDER: taken, and the decision says which path
+c12b, cv12b = "0x" + "cd" * 20, "0x" + "c3" * 20
+W = wallets(13); E.state["busy_until"] = 0.0; E.state["detect"] = "provider"; E.E0_ALLOW_PROVIDER = True
+run(c12b, cv12b, W, [(w, 0.15) for w in W], 0.05)
+d12 = events(c12b, "trade_decision")
+check("provider path allowed: the seat is taken and recorded on the provider path", bool(d12) and d12[0].get("detect") == "provider", str([e.get("detect") for e in d12]))
+E.E0_ALLOW_PROVIDER = False; E.state["detect"] = "sequencer"
 # 13. the provider fallback returns to the caller after its window even when the provider refuses every connection
 import asyncio
 class _Refusing:
