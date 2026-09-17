@@ -357,7 +357,7 @@ millions, something is subscribed to the whole chain again (engine 4.95–4.99 d
 `PROVIDER_WS=` (empty) switches the chain rivals off altogether; the feed decoder's token matching still covers the
 router blind spot that made trade 6.
 
-## 5d. The creation-second seat (engine 5.43, report 24.13–24.16)
+## 5d. The creation-second seat (engine 5.47, report 24.13–24.17)
 
 The seat 0.2–0.4 s after the creation block, 6.18% surcharge, ahead of the team's second round and of every bot. It is
 taken only once the bundle is VISIBLE on the feed: the named wallets' buys name the curve and fill the gates; a launch
@@ -369,6 +369,11 @@ scan as the fallback. Opt in explicitly:
 
     SEAT=E0 E0_OUTSIDER=1 HOLD_S=1.5 TAKE_PROFIT=0 TIER_MIN_BPS=100 TIER_MAX_BPS=200 E0_BUNDLE_WAIT_S=0.45 E0_BUNDLE_MAX_BLOCKS=3
     MAX_RESOLVE_MS=600 MIN_FOLLOW_ETH_60=0 BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.3 BUNDLE_MAX_ETH=0 MIN_CREATOR_SUPPLY=0.01
+
+When Robinhood's feed refuses connections the engine detects from the provider for `PROVIDER_FALLBACK_S` (120 s) and then
+tries the feed again, for ever. On the provider path the seat is refused unless `E0_ALLOW_PROVIDER=1` with the measured
+`PROVIDER_LAG_MS`: run `sudo bash deploy/provider_enable.sh` once on the box (60 s); it enables the seat there only if the
+median lag is under 300 ms. The provider path is lean (factory events only, 24.17); the E1/E2 seats do not run on it.
 
 Dry-run it for a session and read it with `deploy/speed_readout.py` (rotation-safe, everything since the last start):
 every `trade_decision`'s `bundle_wait_ms` (creation seen to bundle visible), `sent_ms` (creation seen to send) and

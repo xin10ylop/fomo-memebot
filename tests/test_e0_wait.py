@@ -198,6 +198,36 @@ E.PROVIDER_WS = "wss://example.invalid"
 t0 = E.mono(); asyncio.run(E.provider_loop(_Refusing(), until=E.mono() + 0.5)); el = E.mono() - t0
 check("provider fallback: returns after its window (0.5-1.5 s)", 0.45 <= el <= 1.5, f"{el:.2f} s")
 E.state["detect"] = "sequencer"
+# 14-15. the lean provider path (engine 5.47): the factory event names the curve, the bundle is read from the curve's Buy events
+BUY_EV = E.BUY_EV
+def chain_events(b0, creator, exempt, taxed, tier=0.02):
+    """Buy events as get_logs returns them: the creator's buy, then exempt buys (the bundle) and taxed outsiders, priced on the curve"""
+    ev = []; X, Y = E.X0, E.Y0
+    def add(blk, who, q, sur):
+        nonlocal X, Y
+        net = q * (1 - tier - sur); tk = Y - X * Y / (X + net); X += net; Y -= tk
+        ev.append({"blockNumber": hex(blk), "logIndex": hex(len(ev)), "topics": [BUY_EV, "0x" + "0" * 64, "0x" + "0" * 24 + who[2:]], "data": "0x" + "%064x" % int(q * 1e18) + "%064x" % int(tk * 1e18) + "%064x" % 0})
+    add(b0, creator, 0.035, 0.0)
+    for blk, who, q in exempt: add(blk, who, q, 0.0)
+    for blk, who, q in taxed: add(blk, who, q, 0.0618)
+    return ev
+c14, cv14, tok14 = "0x" + "dd" * 20, "0x" + "c4" * 20, "0x" + "d4" * 20
+W = wallets(14); E.state["busy_until"] = 0.0; E.state["detect"] = "provider"; E.E0_ALLOW_PROVIDER = True
+E.get_logs = lambda filt, tries=3, seat=False: chain_events(1000, c14, [(1001, W[0], 0.15), (1001, W[1], 0.15), (1001, W[2], 0.15)], [(1002, "0x" + "ee" * 20, 0.05)])
+E._handle_creation(c14, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100, txh="0x" + "ab" * 32, known=(tok14, cv14, 0.02 * E.Y0, 1000))
+d = events(c14, "trade_decision")
+check("lean provider path: traded from the factory event and the curve's logs", bool(d) and d[0].get("resolve_src") == "log" and d[0].get("detect") == "provider", str([(e.get("resolve_src"), e.get("detect")) for e in d]) + str([e.get("why") for e in events(c14, "skip", wait=0.3)]) + str([e.get("gates") for e in events(c14, "eligible_not_traded", wait=0.3)]))
+if d:
+    check("lean provider path: the bundle is the chain's exempt buys (3, 0.45 ETH)", d[0].get("bundle") == 3 and abs(d[0].get("bundle_eth", 0) - 0.45) < 1e-6, f"{d[0].get('bundle')} {d[0].get('bundle_eth')}")
+    check("lean provider path: blocks_to_seat from the chain's progress (2)", d[0].get("blocks_to_seat") == 2, str(d[0].get("blocks_to_seat")))
+    check("lean provider path: the outsider's buy is not in the bundle but is in the price", d[0].get("bundle") == 3 and (d[0].get("team_share") or 0) < 0.35, str(d[0].get("team_share")))
+c15, cv15, tok15 = "0x" + "de" * 20, "0x" + "c5" * 20, "0x" + "d5" * 20
+W = wallets(15); E.state["busy_until"] = 0.0
+E.get_logs = lambda filt, tries=3, seat=False: chain_events(1000, c15, [(1001, W[0], 0.15)], [])
+E._handle_creation(c15, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100, txh="0x" + "ab" * 32, known=(tok15, cv15, 0.02 * E.Y0, 1000))
+s15 = events(c15, "skip", wait=1.5)
+check("lean provider path: one exempt buy only: skipped at the deadline", bool(s15) and any("provider path: 1 exempt buys" in str(e.get("why")) for e in s15), str([e.get("why") for e in s15]))
+E.E0_ALLOW_PROVIDER = False; E.state["detect"] = "sequencer"
 E.resolve_rpc = lambda *a, **kw: None
 print("all creation-second wait tests pass" if not fails else f"{len(fails)} TESTS FAILED: {fails}")
 raise SystemExit(1 if fails else 0)

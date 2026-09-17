@@ -2447,3 +2447,16 @@ read the way the rule reads them. By the tables' rule 22 of 197 are bundled and 
 mean, −4.4% median on the four 2–3%-tier ones), against +19.1% mean and +11.0% median on the 14 direct 2–3%-tier bundled
 launches of the same two hours. The engine ignoring them is the right default; they are recorded here so a change in
 their share or their behaviour is noticed.
+
+**Engine 5.47: the provider path made lean.** The fallback path subscribed to every Buy and Sell on the chain and to every
+block header, the firehose of Sep 16 again (millions of messages a day on a chain doing 500 creations an hour); the
+sequencer feed never needed it because it carries raw transactions. 5.47 subscribes to the factory's events only. A
+creation's factory event already names the token, the curve and the creator's buy, so nothing is resolved; the calldata
+comes from one transaction read, the block's timestamp from one block read, and the bundle from one log read on the
+curve, polled every 80 ms until it is complete or the wait runs out. There are no raw transactions on this path, so the
+bundle is the tables' definition, exempt buys inside the block window, the same one the scorer applies, and the chain's
+outsider buys are folded into the price our size is computed on. The E1 and E2 seats, which need the block clock, do not
+run on this path. Usage: a few hundred calls an hour instead of tens of thousands of messages. The seat runs on the
+provider path only behind `E0_ALLOW_PROVIDER=1` with `PROVIDER_LAG_MS` set from `deploy/provider_lag_probe.py`
+(`deploy/provider_enable.sh` measures and applies it, under 300 ms only); the measured lag is added to those seats'
+paper landing.

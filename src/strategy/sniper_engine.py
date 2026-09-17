@@ -103,6 +103,7 @@ SKIP_TIER1_TEAM_SHARE = float(os.environ.get("SKIP_TIER1_TEAM_SHARE", "0"))
 E0_BUNDLE_WAIT_S = float(os.environ.get("E0_BUNDLE_WAIT_S", "0.45"))
 E0_BUNDLE_MAX_BLOCKS = int(os.environ.get("E0_BUNDLE_MAX_BLOCKS", "9"))
 PROVIDER_FALLBACK_S = float(os.environ.get("PROVIDER_FALLBACK_S", "120"))
+PROVIDER_HEADS = os.environ.get("PROVIDER_HEADS", "0") == "1"           # also subscribe to newHeads on the provider path (a message every 100 ms; the E1/E2 seats need it, the E0 seat does not)
 E0_ALLOW_PROVIDER = os.environ.get("E0_ALLOW_PROVIDER", "0") == "1"   # take the creation-second seat on the provider path too (after deploy/provider_lag_probe.py shows the lag is small)
 try:
     PROVIDER_LAG_MS = float(os.environ.get("PROVIDER_LAG_MS", "0") or 0)   # the measured lag of the provider path behind the sequencer: added to the paper landing of seats taken on it
@@ -1114,11 +1115,11 @@ def close_position(pos, why):
         pos["closing"] = False
 
 
-def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None, txh=None):
+def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None, txh=None, known=None):
     """the launch thread, guarded: an exception here used to kill the thread silently, and if it happened after the buy the
     tokens were never sold and the 'position open' gate blocked every later trade for good (audit, Sep 16)."""
     try:
-        _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps, txh)
+        _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps, txh, known)
     except Exception as e:
         pos = state["open"]
         log({"ev": "alarm", "what": "the launch thread crashed", "err": str(e)[:200], "where": traceback.format_exc().strip().splitlines()[-2][:160],
@@ -1136,7 +1137,7 @@ def release_reservation():
         state["nonce"] = None; state["chain_at"] = 0.0; state["busy_until"] = 0.0
 
 
-def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None, txh=None):
+def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None, txh=None, known=None):
     """resolve the curve, apply the gates, size on the feed-tracked curve, take the seat, build the buy, then approve and sell"""
     curve = token = None; tk0 = None; b_create = None; src = None; named = set(named)
     new_day_check()
@@ -1193,7 +1194,47 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             pass
         return out
 
-    if SEAT == "E0" and BUNDLE_MIN > 0:
+    chain_rows = None
+
+    def chain_bundle(cv, b0):
+        """the lean provider path (5.47): the curve's Buy events since the creation, one log read; exempt buys inside the block window are
+        the bundle (the tables' definition), the rest are outsiders. (count, eth, exempt rows, taxed rows, tier, last block); rows are
+        (ts, sender, val, blk, fee)"""
+        ev = get_logs({"fromBlock": hex(b0), "toBlock": "latest", "address": cv, "topics": [[BUY_EV]]}, seat=True)
+        ev = sorted(ev, key=lambda e: (int(e["blockNumber"], 16), int(e.get("logIndex", "0x0"), 16)))
+        X, Y = X0, Y0; tier = None; ex = []; tx = []; last = b0
+        for i, e in enumerate(ev):
+            d = e["data"][2:]; w = [int(d[k:k + 64], 16) / 1e18 for k in range(0, len(d), 64)]; blk = int(e["blockNumber"], 16); last = max(last, blk)
+            q, tk = w[0], w[1]
+            if tk <= 0 or tk >= Y or q <= 0:
+                continue
+            net = X * tk / (Y - tk); fee = 1 - net / q; X += net; Y -= tk
+            if i == 0:
+                tier = fee; continue                                       # the creator's own buy: the token's tier
+            snd = ("0x" + e["topics"][2][-40:].lower()) if len(e["topics"]) > 2 else creator
+            (ex if (abs(fee - tier) <= 0.0008 and blk - b0 <= E0_BUNDLE_MAX_BLOCKS) else tx).append((feed_ts, snd, q, blk, fee))
+        return len(ex), sum(r[2] for r in ex), ex, tx, tier, last
+
+    if SEAT == "E0" and BUNDLE_MIN > 0 and known is not None:
+        # 5.47: the lean provider path. The factory event already names the curve; the bundle is read from the curve's own Buy events,
+        # polled until it is complete or the wait runs out. No raw transactions here, so the named wallets are not the test: the tables'
+        # exempt-buy definition is, the same one the scorer applies.
+        token, curve, tk0, b_create = known; src = "log"; c = 0; eth = 0.0
+        while mono() - seen_at < E0_BUNDLE_WAIT_S + (PROVIDER_LAG_MS / 1000.0):
+            try:
+                c, eth, ex, tx, tier_seen, last = chain_bundle(curve, b_create); chain_rows = (ex, tx, last)
+            except Exception as e:
+                c, eth = 0, 0.0
+            if c >= BUNDLE_MIN and eth >= BUNDLE_MIN_ETH:
+                break
+            time.sleep(0.08)
+        if c < BUNDLE_MIN or eth < BUNDLE_MIN_ETH:
+            log({"ev": "skip", "why": [f"bundle not on the chain within {1000 * E0_BUNDLE_WAIT_S:.0f} ms and {E0_BUNDLE_MAX_BLOCKS} blocks (provider path: {c} exempt buys, {eth:.3f} ETH)"], "creator": creator,
+                 "named_wallets": len(named), "tax_bps": tax_bps, "wait_ms": round((mono() - seen_at) * 1000), "detect": "provider"}); return
+        bundle_wait_ms = round((mono() - seen_at) * 1000)
+        with cond:
+            state["blocks"] = max(state["blocks"], chain_rows[2])           # the chain's progress as the log read saw it: blocks_to_seat is real
+    elif SEAT == "E0" and BUNDLE_MIN > 0:
         # 5.3-5.4: the creation-second seat enters only once the bundle is VISIBLE on the feed, never ahead of it (report 24.15); the bundle
         # is the named wallets' transactions in the creation block and the next nine, direct or through a helper contract (24.16). The chain
         # resolve of the curve starts in the first millisecond and runs while the bundle is awaited; the send goes out when both are in hand.
@@ -1242,6 +1283,10 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             r = box.get("r")
             if r:
                 token, curve, tk0, b_create = r; src = box.get("src", "rpc")
+    elif curve is None and known is not None:
+        token, curve, tk0, b_create = known; src = "log"
+        if SEAT in ("E1", "E2"):
+            log({"ev": "skip", "why": "provider path: only the creation-second seat runs on it (no block clock for the seat's second)", "creator": creator}); return
     elif curve is None:
         r = resolve_rpc(creator)
         if r:
@@ -1267,6 +1312,11 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     for t in named_txs():                                                # the named wallets' helper-contract calls: the bundle a direct-buy count cannot see (24.16)
         if t[7] and not (t[6] is not None and w["cb"] in t[6]):              # a helper that names the curve was already seeded by curve_buys
             fold_buy(w, t[0], t[1], t[2], t[3], t[4], t[5]); helper_folded += 1
+    if chain_rows is not None:                                            # the lean provider path: the chain's exempt buys are the bundle, the taxed ones outsiders
+        for ts_, snd, val, blk, fee in chain_rows[0]:
+            fold_buy(w, ts_, creator, val, blk, curve, None); helper_folded += 1
+        for ts_, snd, val, blk, fee in chain_rows[1]:
+            fold_buy(w, ts_, snd, val, blk, curve, None)
     if token:
         w["tb"] = bytes.fromhex(token[2:])
     else:
@@ -1594,7 +1644,10 @@ async def provider_loop(websockets, until=None):
             return                                                       # back to the caller, which tries the sequencer feed again
         try:
             async with websockets.connect(PROVIDER_WS, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=None) as ws:
-                for i, (name, params) in enumerate((("heads", ["newHeads"]), ("curve", ["logs", {"topics": [[BUY_EV, SELL_EV]]}]), ("factory", ["logs", {"address": FACTORY_HEX}]))):
+                # 5.47: factory events only. The chain-wide Buy/Sell stream and newHeads were the firehose of Sep 16 (millions of messages a
+                # day); the creation-second seat needs the creation, its calldata and one log read on its curve, a few hundred calls an hour
+                subs = [("factory", ["logs", {"address": FACTORY_HEX}])] + ([("heads", ["newHeads"])] if PROVIDER_HEADS else [])
+                for i, (name, params) in enumerate(subs):
                     await ws.send(json.dumps({"jsonrpc": "2.0", "id": i + 1, "method": "eth_subscribe", "params": params}))
                     r = json.loads(await asyncio.wait_for(ws.recv(), timeout=10)); SUB[name] = r.get("result")
                 log({"ev": "feed_connected", "source": "provider", "subscriptions": SUB}); state["connected_at"] = mono(); backoff = 0.2
@@ -1604,7 +1657,7 @@ async def provider_loop(websockets, until=None):
                     if until is not None and mono() > until:
                         return
                     try:
-                        raw = await asyncio.wait_for(ws.recv(), timeout=2.0)
+                        raw = await asyncio.wait_for(ws.recv(), timeout=2.0 if PROVIDER_HEADS else 120.0)   # creations come a few a minute; only heads tick every 100 ms
                     except asyncio.TimeoutError:
                         log({"ev": "feed_stall", "note": "no message for 2 s: reconnecting"}); break
                     seen = mono(); d = json.loads(raw)
@@ -1638,14 +1691,23 @@ async def provider_loop(websockets, until=None):
                                 fold_sell(state["watch"][curve], tk)
                     elif sub == SUB["factory"] and len(topics) >= 4:
                         creator = "0x" + topics[3][-40:].lower(); txh = res["transactionHash"]
-                        threading.Thread(target=provider_creation, args=(creator, txh, seen, ts, state["blocks"]), daemon=True).start()
+                        known = ("0x" + topics[1][-40:].lower(), "0x" + topics[2][-40:].lower(), (w[2] / 1e18 if len(w) > 2 else 0.0), bn)   # token, curve, tk0, block: the log says it all
+                        threading.Thread(target=provider_creation, args=(creator, txh, seen, ts, bn, known), daemon=True).start()
         except Exception as e:
             log({"ev": "feed_error", "source": "provider", "err": str(e)[:200], "retry_s": backoff}); await asyncio.sleep(backoff); backoff = min(5.0, backoff * 2)
 
 
-def provider_creation(creator, txh, seen, ts, blk0):
-    """the creation's calldata (quote, initial buy, named wallets) from the node, then the normal path"""
+def provider_creation(creator, txh, seen, ts, blk0, known=None):
+    """the creation's calldata (quote, initial buy, named wallets) from the node, then the normal path; on the lean provider path
+    (no newHeads) the block clock is set from the creation's own block"""
     try:
+        if not ts:
+            try:
+                ts = int(rpc_seat.call("eth_getBlockByNumber", [hex(blk0), False], tries=1)["timestamp"], 16)
+            except Exception:
+                ts = int(time.time())
+            with cond:
+                state["blocks"] = max(state["blocks"], blk0); state["last_seen_ts"] = max(state["last_seen_ts"], ts); state["feed_ts"] = max(state["feed_ts"], ts); cond.notify_all()
         t = rpc.call("eth_getTransactionByHash", [txh])
         data = bytes.fromhex(t["input"][2:]); sel = data[:4]
         if sel not in CREATE_SELS:
@@ -1658,7 +1720,7 @@ def provider_creation(creator, txh, seen, ts, blk0):
         named = {"0x" + w[12:].hex() for w in words if w[:12] == b"\0" * 12 and int.from_bytes(w[12:], "big") > 2 ** 100} - {creator, quote}
         state["creations"] += 1; state["last_creation_at"] = mono()
         log({"ev": "creation", "creator": creator, "quote": quote, "init_buy_eth": init_buy / 1e18, "feed_ts": ts, "named_wallets": len(named), "selector": sel.hex(), "source": "provider", "calldata_ms": round(1000 * (mono() - seen))})
-        handle_creation(creator, quote, init_buy, seen, ts, named, blk0, tax_bps=tax_bps_of(sel, words))
+        handle_creation(creator, quote, init_buy, seen, ts, named, blk0, tax_bps=tax_bps_of(sel, words), txh=txh, known=known)
     except Exception as e:
         log({"ev": "error", "stage": "provider_creation", "err": str(e)[:200]})
 
@@ -1681,8 +1743,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.46, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.47, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
