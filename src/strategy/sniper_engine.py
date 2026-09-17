@@ -734,7 +734,7 @@ def gas_usd():
         return 0.15
 
 
-def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold=HOLD, frac=SUPPLY_FRAC, gated=True, stop_sell_frac=None, tp=None, front=False, readouts=True):
+def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold=HOLD, frac=SUPPLY_FRAC, gated=True, stop_sell_frac=None, tp=None, front=False, readouts=True, t_entry=None, min_out=None, amount_in=None, info=None):
     """the simulator's replay (sniper_exact.replay plus the take-profit of risk_harness.replay) on the curve's own Buy/Sell
     events. Returns (pnl_usd, cost_usd, t_in, tier, label_bundle, label_bundle_eth, label_out1) or "filtered" or None."""
     rows = []; X, Y = X0, Y0; tier = None
@@ -759,6 +759,8 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
     # paper result of every seat taken is recorded (24.16: a bot at block 1, the team at block 4, the seat +245% in the replay, unscored)
     cut = 1.0 if seat == "E0" else min(1.0, first_taxed)
     bundle_rows = [r for r in rows[1:] if r[1] == "B" and r[0] < cut and r[5] - tier <= 0.0008]
+    if info is not None:
+        info["bot_first"] = bool(bundle_rows) and first_taxed < bundle_rows[-1][0]      # a taxed outsider landed before the bundle was complete
     if readouts and seat == "E0" and bundle_rows and first_taxed < bundle_rows[-1][0]:
         state["bot_before_bundle"] = state.get("bot_before_bundle", 0) + 1
     lab = (len(bundle_rows), sum(r[2] for r in bundle_rows), sum(1 for r in rows[1:] if r[1] == "B" and 0.05 <= r[5] - tier <= 0.075 and r[2] >= OUT1_MIN_ETH))
@@ -784,6 +786,8 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
         t_in = fb; idx = next((i for i in range(1, len(rows)) if rows[i][0] >= fb), len(rows))
     else:
         t_in += 0.3; idx = next((i for i in range(1, len(rows)) if rows[i][0] >= t_in), len(rows))   # 0.3 s behind the first buyer of the seat, as the tables assume
+    if t_entry is not None:                                                                        # 5.44: our own estimated landing instead of the tables' assumption
+        t_in = t_entry; idx = next((i for i in range(1, len(rows)) if rows[i][0] >= t_in), len(rows))
     for r in rows[1:idx]:
         if r[1] == "B":
             X += r[4]; Y -= r[3]
@@ -793,6 +797,14 @@ def exact_score(events, b_create, tk0, stake_eth, seat, tol=0.10, slip=0.3, hold
     tk_bot = frac * Y0; net = X * tk_bot / (Y - tk_bot); gross = net / (1 - fee)
     if gross > stake_eth:
         gross = stake_eth; net = gross * (1 - fee); tk_bot = Y * net / (X + net)
+    if amount_in is not None:                                                                      # the exact transaction the engine built: its amount and its minimum output
+        gross = amount_in; net = gross * (1 - fee); tk_bot = Y * net / (X + net)
+        if min_out is not None and tk_bot < min_out:                                               # the curve moved past our tolerance before we landed: the buy reverts, gas is the loss
+            if info is not None:
+                info["reverted"] = True; info["got_vs_min"] = round(tk_bot / min_out, 3)
+            return (-gas_usd(), gross * state["eth_usd"], t_in, tier) + lab
+    if info is not None:
+        info["t_in"] = t_in
     X += net; Y -= tk_bot; held = Y0 - Y - tk_bot; phantom = 0.0; t_exit = t_in + hold + slip; p_in = X / Y
     for r in rows[idx:]:
         t, k, q, tk, net_obs, tax = r
@@ -887,7 +899,8 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
                 state["reverters"][snd] += 1
                 if state["reverters"][snd] == 3:
                     log({"ev": "reverter_learned", "sender": snd, "note": "three counted attempts that never landed: this sender's attempts are no longer rivals"})
-        r = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, gated=BUNDLE_MIN > 0, stop_sell_frac=STOP_SELL_FRAC if STOP_SELL_FRAC > 0 else None, tp=TAKE_PROFIT if TAKE_PROFIT > 0 else None)
+        info = {}
+        r = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, gated=BUNDLE_MIN > 0, stop_sell_frac=STOP_SELL_FRAC if STOP_SELL_FRAC > 0 else None, tp=TAKE_PROFIT if TAKE_PROFIT > 0 else None, info=info)
         if r is None:
             log({"ev": "score", "curve": curve, "result": "no usable launch-block buy"}); return
         roi_e1 = None                                                   # paper score of the E1 seat (the front of second one, every bundled launch), for the E1 plan
@@ -908,13 +921,25 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
             log({"ev": "score", "curve": curve, "result": "outside the rule on the chain's reading", "roi_e1": roi_e1}); state["traded"].pop(curve, None); return
         state["rule_passing"].append(time.time())
         pnl, cost, t_in, tier = r[:4]; roi = pnl / cost
+        landing = {}
+        if SEAT == "E0" and decision is not None and decision.get("blocks_to_seat") is not None and decision.get("amount_in_eth"):
+            # 5.44: the same launch scored at OUR estimated landing: the feed had shown blocks_to_seat blocks after the creation when we sent,
+            # the feed trails the sequencer by about one block and the sequencer includes us in the block after the one it is building, so
+            # two blocks past the last one seen; with the transaction's own amount and minimum output, so a buy the curve outran is a revert
+            li = {}; t_land = (decision["blocks_to_seat"] + 2) / 9.9
+            r2 = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, gated=False, tp=TAKE_PROFIT if TAKE_PROFIT > 0 else None, readouts=False,
+                             t_entry=t_land, min_out=decision.get("min_out_tokens"), amount_in=decision["amount_in_eth"], info=li)
+            if r2 is not None and r2[0] != "filtered":
+                landing = {"roi_landing": round(r2[0] / r2[1], 4), "pnl_landing_usd": round(r2[0], 2), "t_landing": round(t_land, 2), "would_revert": bool(li.get("reverted")), "got_vs_min": li.get("got_vs_min")}
+                roi = r2[0] / r2[1]; pnl = r2[0]; cost = r2[1]                        # the paper bankroll and the switch follow the landing score
         with lock:
             state["scores"].append(roi); sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
             traded = state["traded"].pop(curve, None)
             if traded is not None and SEND is None:                     # dry run: the paper bankroll follows the scores; live: the wallet balance (chain_loop)
                 state["bankroll"] += min(traded, cost) * roi
         save_state()
-        log({"ev": "score", "curve": curve, "roi": round(roi, 4), "roi_e1": roi_e1, "pnl_usd": round(pnl, 2), "cost_usd": round(cost, 2), "tier": round(tier, 4), "t_in_s": round(t_in, 2),
+        log({"ev": "score", "curve": curve, "roi": round(roi, 4), "roi_table": round(r[0] / r[1], 4), "roi_e1": roi_e1, "pnl_usd": round(pnl, 2), "cost_usd": round(cost, 2), "tier": round(tier, 4), "t_in_s": round(t_in, 2),
+             "bot_first": bool(info.get("bot_first")), **landing,
              "n_scores": len(sc), "rolling_mean": round(st.mean(sc), 4), "switch_on": on, "traded_dry_run": traded is not None, "bankroll": round(state["bankroll"], 2)})
     except Exception as e:
         log({"ev": "error", "stage": "score", "err": str(e)[:200]})
@@ -1316,13 +1341,14 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     amount_in = int(gross * 1e18); min_out = int(tk * (1 - SLIP) * 1e18)
     buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
     h = submit(buy, "buy"); t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk); buy_ans = SENDER.mine()
+    decision["amount_in_eth"] = amount_in / 1e18; decision["min_out_tokens"] = min_out / 1e18        # for the scorer's revert check (5.44)
     state["traded"][curve] = min(stake_usd, gross * state["eth_usd"]); state["decisions"][curve] = decision
     threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
     p_creator = (X0 + X0 * tk0 / (Y0 - tk0)) / (Y0 - tk0)
     log({"ev": "trade_decision", "seat": SEAT, "curve": curve, "token": token, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision,
          "sent_ms": round((t_buy - seen_at) * 1000), "wake_to_send_ms": round((t_buy - t_wake) * 1000, 2), "send_mode": send_mode, "feed_ts_at_send": state["feed_ts"], "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0),
          "seat_flip_to_send_ms": round((t_buy - state["flip_at"][feed_ts + SEAT_SECONDS[SEAT]]) * 1000, 1) if (feed_ts + SEAT_SECONDS.get(SEAT, 0)) in state["flip_at"] else None,
-         "stake_usd": stake_usd, "amount_in_eth": amount_in / 1e18, "tokens_target": tk, "supply_share": tk / Y0, "min_out_tokens": min_out / 1e18, "fee_assumed": fee, "price_vs_creator": round((X / Y) / p_creator, 3),
+         "stake_usd": stake_usd, "tokens_target": tk, "supply_share": tk / Y0, "fee_assumed": fee, "price_vs_creator": round((X / Y) / p_creator, 3),
          "margin_ms": MARGIN_MS if send_mode and send_mode.startswith("predict") else None})
     if h:                                                            # live: the tokens actually received, from the buy's own event
         rec = wait_receipt(h, ans=buy_ans)
@@ -1642,7 +1668,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.43, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.44, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

@@ -65,6 +65,16 @@ ok0 = r0 is not None and r0[0] != "filtered"; ok2 = r2 is not None and r2[0] == 
 bad += (not ok0) + (not ok2)
 print(f"{'ok ' if ok0 else 'FAIL'} {'bot ahead of the bundle: E0 seat is scored':44s} got {'scored' if ok0 else str(r0)}")
 print(f"{'ok ' if ok2 else 'FAIL'} {'bot ahead of the bundle: E2 rule filters it':44s} got {'FILTERED' if ok2 else str(r2)}")
+# 5.44: the score at our own landing, with the transaction's minimum output: a buy the curve outran is a revert that costs gas only
+ev, tk0 = launch(creator_share=0.05, team_n=8, team_eth=0.8)
+E.state["eth_usd"] = 2500.0; E.state["base_fee"] = 10 ** 8
+i1 = {}; r_ok = E.exact_score(ev, 1000, tk0, 10 / 2500.0, "E0", gated=False, tp=None, readouts=False, t_entry=0.25, amount_in=10 / 2500.0, min_out=1.0, info=i1)
+i2 = {}; r_rv = E.exact_score(ev, 1000, tk0, 10 / 2500.0, "E0", gated=False, tp=None, readouts=False, t_entry=0.25, amount_in=10 / 2500.0, min_out=1e12, info=i2)
+ok_a = r_ok is not None and not i1.get("reverted") and abs(i1.get("t_in", 0) - 0.25) < 1e-9
+ok_b = r_rv is not None and i2.get("reverted") and r_rv[0] < 0 and abs(r_rv[0]) < 1.0 and r_rv[1] > 0
+bad += (not ok_a) + (not ok_b)
+print(f"{'ok ' if ok_a else 'FAIL'} {'landing score: entry override honoured, no revert':44s} got {i1}")
+print(f"{'ok ' if ok_b else 'FAIL'} {'landing score: minimum output missed -> gas loss':44s} got {i2} {r_rv[:2] if r_rv else r_rv}")
 for name, kw, want in cases:
     got = verdict(**kw)
     ok = got == want

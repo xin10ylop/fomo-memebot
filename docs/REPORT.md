@@ -2408,3 +2408,14 @@ over at least twenty seats under the same rule.
 raw transaction, polled every 15 ms until the provider has indexed the block, with the log scan as the fallback. Every
 decision records which path answered (`resolve_src` receipt, rpc or feed). On the replay's sensitivity, 2–3 points a
 trade on the honest seat and far more on a flood launch (24.16: +245% at 0.4 s, +103% at 0.5 s).
+
+**Engine 5.44: the paper score at our own landing, with the revert check.** The scorer graded every seat at the tables'
+assumption, 0.3 s behind the first buyer of the seat, whatever the engine had done. 5.44 grades each seat a second time at
+our estimated landing: the feed had shown `blocks_to_seat` blocks after the creation when the send left, the feed trails
+the sequencer by about a block and the sequencer includes us in the block after the one it is building, so two blocks
+past the last one seen. That score uses the transaction the engine actually built, its amount and its minimum output;
+if the curve had moved past the 25% tolerance by the landing block, the buy reverts and the score is the gas. The paper
+bankroll and the safety switch follow the landing score; the table score stays on the record as `roi_table` for
+comparison with the replay. Each score also records whether a taxed outsider landed ahead of the bundle. The readout
+prints the landing mean, the revert count, the bot-first count and the table mean on the same seats, so tomorrow's
+decision reads paper the way live would have paid it.

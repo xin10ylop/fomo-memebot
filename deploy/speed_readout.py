@@ -45,17 +45,27 @@ for k in ("bundle_wait_ms", "resolve_ms", "sent_ms", "seat_flip_to_send_ms"):
     if xs: print(f"{k:22s}: n {len(xs)} median {st.median(xs):.0f} p75 {q(xs,0.75):.0f} p90 {q(xs,0.9):.0f} max {max(xs):.0f}")
 sc = {e["curve"]: e for e in ev if e["ev"] == "score" and "roi" in e}
 traded = [sc[e["curve"]] for e in td if e["curve"] in sc]
+srcs = collections.Counter(e.get("resolve_src") for e in td)
+if td: print("resolve source of the seats taken:", dict(srcs))
 if traded:
-    rs = [x["roi"] for x in traded]; pn = [x["pnl_usd"] for x in traded]
-    print(f"\npaper scores on the seats taken (scorer assumes a 0.3 s landing): n {len(rs)} mean roi {100*st.mean(rs):+.1f}% median {100*st.median(rs):+.1f}% wins {sum(r>0 for r in rs)} losses {sum(r<=0 for r in rs)} pnl ${sum(pn):+.2f} worst {100*min(rs):+.1f}% best {100*max(rs):+.1f}%")
-    for x in traded: print(f"  {u(x['t'])} roi {100*x['roi']:+6.1f}% pnl ${x['pnl_usd']:+6.2f} cost ${x['cost_usd']} tier {x.get('tier')} t_in {x.get('t_in_s')} rolling_mean {x.get('rolling_mean')} switch_on {x.get('switch_on')}")
+    rs = [x["roi"] for x in traded]; pn = [x["pnl_usd"] for x in traded]; tb = [x.get("roi_table", x["roi"]) for x in traded]
+    rv = sum(1 for x in traded if x.get("would_revert")); bf = sum(1 for x in traded if x.get("bot_first"))
+    print(f"\npaper on the seats taken, scored at OUR estimated landing (5.44): n {len(rs)} mean {100*st.mean(rs):+.1f}% median {100*st.median(rs):+.1f}% wins {sum(r>0 for r in rs)} losses {sum(r<=0 for r in rs)} pnl ${sum(pn):+.2f} worst {100*min(rs):+.1f}% best {100*max(rs):+.1f}%")
+    print(f"  would have reverted on our minimum output: {rv} of {len(rs)} | a bot ahead of the bundle: {bf} | the tables' 0.3 s assumption on the same seats: mean {100*st.mean(tb):+.1f}%")
+    print(f"  sorted returns: {' '.join(f'{100*v:+.0f}' for v in sorted(rs))}")
+    for x in traded: print(f"  {u(x['t'])} landing {100*x['roi']:+6.1f}% (table {100*x.get('roi_table', x['roi']):+6.1f}%) pnl ${x['pnl_usd']:+6.2f} t_land {x.get('t_landing', x.get('t_in_s'))} revert {x.get('would_revert')} got/min {x.get('got_vs_min')} bot_first {x.get('bot_first')} tier {x.get('tier')} rolling {x.get('rolling_mean')} switch {x.get('switch_on')}")
 ref = {e["curve"]: e for e in ev if e["ev"] == "score" and "roi" not in e}
 un = [e for e in td if e["curve"] not in sc]
 if un: print(f"decisions without a numeric score: {len(un)}" + "".join(f"\n  {u(e['t'])} {e['curve'][:12]}: " + (str(ref[e["curve"]].get("result")) if e["curve"] in ref else "not scored yet") for e in un))
 b = [e for e in ev if e["ev"] == "boundary"]
 if b: print(f"\nboundary (feed's second boundary on our clock): theta_ms {b[-1].get('theta_ms')} confidence {b[-1].get('confidence')} bracket_width_ms {b[-1].get('bracket_width_ms')} samples {b[-1].get('samples')}")
 r = [e for e in ev if e["ev"] == "sender_rtt"]
-if r: print("sender rtt:", [(x.get("host"), x.get("warm_rtt_ms"), x.get("ok")) for x in r[-1].get("endpoints", [])])
+if r:
+    hosts = collections.defaultdict(list)
+    for e in r[-20:]:
+        for x in e.get("endpoints", []):
+            if isinstance(x.get("warm_rtt_ms"), (int, float)): hosts[x.get("host")].append(x["warm_rtt_ms"])
+    print("sender rtt, last 20 samples:", {h: f"median {st.median(v):.0f} max {max(v):.0f} ms" for h, v in hosts.items()}, "| latest:", [(x.get("host"), x.get("warm_rtt_ms"), x.get("ok")) for x in r[-1].get("endpoints", [])])
 fl = [e for e in ev if e["ev"] == "flow"]
 if fl: print(f"flow: creations_seen {fl[-1].get('creations_seen')} rule_passing_last_6h {fl[-1].get('rule_passing_last_6h')} silent_min {fl[-1].get('silent_min')} wallet_eth {fl[-1].get('wallet_eth')} bankroll {fl[-1].get('bankroll_usd')}")
 er = collections.Counter((e.get("stage"), str(e.get("err"))[:50]) for e in ev if e["ev"] == "error")
