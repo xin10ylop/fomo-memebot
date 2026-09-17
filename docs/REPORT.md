@@ -2246,3 +2246,22 @@ tier on 117 of 120 launches. Engine 5.2 reads it before the send at zero latency
 it (100–200 = the 2–3% tokens), `SKIP_TIER1_TEAM_SHARE=0.35` drops the worst class, both fail closed on an unknown
 layout, the watch folds buys with the token's real tax instead of a flat 1%, and every decision logs `tax_bps` and
 `team_share`. Recommended live settings for the seat: `HOLD_S=1.5 TAKE_PROFIT=0 TIER_MIN_BPS=100 TIER_MAX_BPS=200`.
+
+**Audit of the optimisation on periods it never used.** The filter and exit above were chosen on Sep 7–10 and judged
+on Sep 11, 12–15 and 16–17. Two more periods sit in the record that no analysis today touched, Sep 2–3 and Sep 5–6.
+On both the chosen set beats the unfiltered seat, and the bootstrap intervals of the two rows do not overlap:
+
+| period | no filter (95% interval) | 2–3% tokens (95% interval) | 1% tokens |
+|---|---|---|---|
+| Sep 2–3 (untouched) | +28.1% [+24.7, +32.0], n 2,110 | +97.7% [+85.4, +112.4], n 447 | +6.0% |
+| Sep 5–6 (untouched) | +25.1% [+22.2, +28.7], n 910 | +37.3% [+29.4, +45.7], n 183 | +20.9% |
+| Sep 7–10 (fit) | +26.5% [+24.8, +28.1], n 3,452 | +34.3% [+30.6, +38.4], n 795 | +22.4% |
+| Sep 11 | +24.7% [+20.8, +28.6], n 525 | +43.0% [+34.4, +51.9], n 158 | +16.1% |
+| Sep 12–15 | +18.5% [+16.6, +20.7], n 2,477 | +36.4% [+30.8, +43.4], n 657 | +11.8% |
+| Sep 16–17 | +10.5% [+6.2, +16.7], n 175 | +26.6% [+14.3, +41.1], n 64 | +1.2% |
+
+Entry 0.3 s, hold 1.5 s, no take-profit, $25. The exit choice holds on the untouched periods as well: hold 1.5 s with
+no take-profit against the first version (hold 2 s, take-profit +50%) gives the same or better mean (+28.1 vs +26.9%,
++25.1 vs +23.3%), the same p5, and a quarter to a seventh of the trades below −30% (0.2 vs 0.7%, 0.3 vs 2.1%). Six
+periods out of six, on two independent simulators' mechanics, is as far as the record can take the filter; the
+one thing still unmeasured is our own landing time on the droplet, which the E0 dry run is collecting now.
