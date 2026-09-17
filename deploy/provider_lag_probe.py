@@ -10,11 +10,11 @@ def env(k, default=None):
             if line.startswith(k + "="): return line.split("=", 1)[1].strip()
     except Exception: pass
     return default
-PROVIDER_WS = env("PROVIDER_WS"); ALCH_HTTP = env("RPC_URL")
+PROVIDER_WS = env("PROVIDER_WS"); ALCH_HTTP = env("RPC_URL"); FEED_URL = env("FEED_URL", "wss://feed.mainnet.chain.robinhood.com")
 REF = env("PUBLIC_RPC", "https://rpc.mainnet.chain.robinhood.com")      # Robinhood's own node as the reference clock (the sequencer endpoint serves transactions only)
 SECONDS = float(sys.argv[1]) if len(sys.argv) > 1 else 60
 if not PROVIDER_WS: raise SystemExit("PROVIDER_WS not set")
-mono = time.monotonic; seq_seen = {}; ws_seen = {}; http_seen = {}; stop = mono() + SECONDS
+mono = time.monotonic; seq_seen = {}; ws_seen = {}; http_seen = {}; feed_seen = {}; ts_of = {}; stop = mono() + SECONDS
 H = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) fomo-memebot/probe"}
 def poll(url, store):
     body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_blockNumber", "params": []}).encode()
@@ -35,12 +35,30 @@ async def ws():
             except asyncio.TimeoutError:
                 continue
             if d.get("method") == "eth_subscription":
-                ws_seen.setdefault(int(d["params"]["result"]["number"], 16), mono())
+                n = int(d["params"]["result"]["number"], 16); ws_seen.setdefault(n, mono()); ts_of[n] = (int(d["params"]["result"]["timestamp"], 16), time.time())
+async def feed():
+    # the sequencer feed itself, when it answers: sequenceNumber is the L2 block number
+    import websockets
+    try:
+        async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, compression=None) as w:
+            while mono() < stop:
+                try:
+                    d = json.loads(await asyncio.wait_for(w.recv(), timeout=2.0))
+                except asyncio.TimeoutError:
+                    continue
+                t = mono()
+                for m in d.get("messages", []):
+                    n = m.get("sequenceNumber")
+                    if n is not None: feed_seen.setdefault(int(n), t)
+    except Exception as e:
+        print("sequencer feed not reachable:", str(e)[:120])
+async def both():
+    await asyncio.gather(ws(), feed())
 threads = [threading.Thread(target=poll, args=(REF, seq_seen), daemon=True)]
 if ALCH_HTTP: threads.append(threading.Thread(target=poll, args=(ALCH_HTTP, http_seen), daemon=True))
 for t in threads: t.start()
 try:
-    asyncio.run(ws())
+    asyncio.run(both())
 except Exception as e:
     print("provider websocket failed:", str(e)[:160])
 for t in threads: t.join(timeout=5)
@@ -49,7 +67,19 @@ def report(name, store):
     if not lags: print(f"{name}: no common blocks"); return
     q = lambda p: lags[min(len(lags) - 1, int(p * len(lags)))]
     print(f"{name}: n {len(lags)} blocks | lag behind Robinhood's node: median {st.median(lags):+.0f} ms, p10 {q(0.1):+.0f}, p90 {q(0.9):+.0f}, max {lags[-1]:+.0f} ms")
-print(f"blocks seen: Robinhood RPC {len(seq_seen)}, provider WS {len(ws_seen)}, provider HTTP {len(http_seen)} over {SECONDS:.0f} s")
+print(f"blocks seen: sequencer feed {len(feed_seen)}, Robinhood RPC {len(seq_seen)}, provider WS {len(ws_seen)}, provider HTTP {len(http_seen)} over {SECONDS:.0f} s")
+if feed_seen:
+    lags = sorted(1000 * (ws_seen[n] - feed_seen[n]) for n in ws_seen if n in feed_seen)
+    if lags:
+        q = lambda p: lags[min(len(lags) - 1, int(p * len(lags)))]
+        print(f"provider WebSocket vs the sequencer feed: n {len(lags)} blocks | lag behind the sequencer feed: median {st.median(lags):+.0f} ms, p10 {q(0.1):+.0f}, p90 {q(0.9):+.0f} ms   <- the number that matters")
 report("provider WebSocket newHeads", ws_seen)
 if http_seen: report("provider HTTP polling", http_seen)
+if ts_of:
+    dd = sorted(1000 * (wall - ts) for n, (ts, wall) in ts_of.items())
+    print(f"provider push minus the block's own timestamp (1 s resolution, needs a synced clock): p10 {dd[int(0.1 * len(dd))]:+.0f} ms, median {st.median(dd):+.0f} ms; the p10 is roughly the delivery delay of the first block of each second")
+try:
+    import subprocess; print("box clock:", subprocess.run(["timedatectl", "show", "-p", "NTPSynchronized", "-p", "SystemClockSynchronized"], capture_output=True, text=True, timeout=5).stdout.strip().replace(chr(10), " "))
+except Exception:
+    pass
 print("reading: Robinhood's node is itself a few tens of ms behind the sequencer, and the poll adds up to 20 ms; a provider WebSocket lag under ~300 ms keeps the seat inside the replay's paying range; a negative lag means the provider is ahead of Robinhood's public node")

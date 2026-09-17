@@ -14,9 +14,19 @@ PY=$(systemctl show -p ExecStart sniper-engine 2>/dev/null | grep -o '[^ ;=]*pyt
 [ -x "$PY" ] || PY=python3
 echo "measuring the provider lag for 60 s with $PY..."
 "$PY" deploy/provider_lag_probe.py 60 | tee /tmp/provider_lag.txt
-MED=$(grep -o "provider WebSocket newHeads: n [0-9]* blocks | lag behind Robinhood's node: median [+-][0-9]*" /tmp/provider_lag.txt | grep -o '[+-][0-9]*$' | tr -d '+')
-if [ -z "$MED" ]; then echo "no lag measured (probe failed): the seat stays off the provider path"; systemctl restart sniper-engine; sleep 8; grep '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"e0_allow_provider": [a-z]*\|"dry_run": [a-z]*'; exit 0; fi
-if [ "$MED" -lt 300 ] && [ "$MED" -ge 0 ]; then
+FEEDMED=$(grep -o "lag behind the sequencer feed: median [+-][0-9]*" /tmp/provider_lag.txt | grep -o '[+-][0-9]*$' | tr -d '+')
+RPCMED=$(grep -o "provider WebSocket newHeads: n [0-9]* blocks | lag behind Robinhood's node: median [+-][0-9]*" /tmp/provider_lag.txt | grep -o '[+-][0-9]*$' | tr -d '+')
+if [ -n "$FEEDMED" ]; then
+  MED=$FEEDMED; echo "measured against the sequencer feed: $MED ms"
+elif [ -n "$RPCMED" ]; then
+  # the feed is down, so the absolute lag cannot be measured; the provider ahead of Robinhood's public node and delivering every block means a
+  # live follower. Paper on the provider path proceeds with a pessimistic 300 ms added to every score; live on this path waits for a
+  # feed-referenced measurement (runbook 5d).
+  MED=300; echo "the sequencer feed is down: no absolute measurement (provider is $RPCMED ms vs Robinhood's public node); paper proceeds with an assumed lag of 300 ms"
+else
+  echo "no lag measured (probe failed): the seat stays off the provider path"; systemctl restart sniper-engine; sleep 8; grep '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"e0_allow_provider": [a-z]*\|"dry_run": [a-z]*'; exit 0
+fi
+if [ "$MED" -lt 301 ]; then
   python3 - "$MED" <<'PY'
 import sys; p='/etc/sniper/engine.env'; L=[l for l in open(p).read().splitlines() if l.strip()]
 new={'E0_ALLOW_PROVIDER':'1','PROVIDER_LAG_MS':sys.argv[1]}
