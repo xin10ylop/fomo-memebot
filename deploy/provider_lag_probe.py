@@ -40,7 +40,7 @@ async def feed():
     # the sequencer feed itself, when it answers: sequenceNumber is the L2 block number
     import websockets
     try:
-        async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, compression=None) as w:
+        async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, compression="deflate") as w:
             while mono() < stop:
                 try:
                     d = json.loads(await asyncio.wait_for(w.recv(), timeout=2.0))

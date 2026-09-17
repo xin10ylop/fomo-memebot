@@ -2460,3 +2460,15 @@ run on this path. Usage: a few hundred calls an hour instead of tens of thousand
 provider path only behind `E0_ALLOW_PROVIDER=1` with `PROVIDER_LAG_MS` set from `deploy/provider_lag_probe.py`
 (`deploy/provider_enable.sh` measures and applies it, under 300 ms only); the measured lag is added to those seats'
 paper landing.
+
+**The outage was a protocol change (engine 5.48).** A raw WebSocket upgrade to the feed at 21:40 UTC answered
+`400 Bad Request` with the body "Compression is required: offer permessage-deflate (or Arbitrum-permessage-deflate)",
+and `/feed` answered `403 Blocked for 1 hour after sustained feed connection rejections`. Since about 19:30 UTC
+Robinhood's feed refuses a connection that does not offer compression; the engine had connected with compression off
+since 4.x to spare the one-core box, so every reconnect since then was refused and read as an outage, and the
+two-minute retry loop was walking the address toward their hour-long block. 5.48 offers permessage-deflate on the feed
+(`FEED_COMPRESSION`, default deflate; a compressed connection from the sandbox delivered 61 messages in 6 s), and on a
+403 stays on the provider path for the hour their edge names instead of feeding the block. The provider path remains the
+fallback, lean since 5.47, with the seat allowed there in paper at an assumed 300 ms, pessimistic by about 100 ms against
+the probe's delivery estimate (215 ms after the first block of each second on an NTP-synced clock, blocks produced up to
+100 ms into their second).
