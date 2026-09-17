@@ -2278,3 +2278,54 @@ second product is the browser-based sniper at ponssniperbot.com announced on Sep
 doubled; its press release says it "fires the moment there is something to trade", which is the same second-two
 race. Nothing in either mentions the tax tier in the creation calldata, the team's share, or the creation-second
 surcharge schedule.
+
+### 24.15 The creation-second seat, corrected: no entry ahead of the bundle (engine 5.3)
+
+**What the dry run showed.** Engine 5.2 in E0 paper mode, Sep 17 11:15–11:29 UTC: 60 creations (245 an hour, most of
+them one-wallet launches), 46 skipped on the calldata (fewer than three named wallets), 7 passed the calldata check,
+and all 7 were refused at the gates with `bundle 0 < 3, 0.000 ETH < 0.3`. The E0 path of 5.1–5.2 read the gates the
+moment the curve was resolved, before a single bundle buy had arrived on the feed; the E1/E2 paths never had this
+problem because their wait for the seat's second let the bundle arrive first. Zero trade decisions in a day of E0 paper
+was this, not the market.
+
+**What the replay had assumed.** The E0 tables of 24.13–24.14 entered at a fixed 0.3 s on every launch the hindsight
+filter called bundled. On the tables' clock the bundle (three named-wallet buys, 0.3 ETH) is complete by 0.1 s on
+15–30% of launches, by 0.2 s on 58–67%, by 0.3 s on 73–80%, and after 0.3 s on a fifth to a quarter. On that last
+group a fixed 0.3 s entry sat ahead of the team's own bundle, which then bought into our position: Sep 12–15, bundle
+complete by 0.2 s, 509 launches, +14.9% a trade; bundle complete after 0.2 s, 148 launches, +110%. Sep 7–10: +15.5% on
+519 against +69.7% on 276. Sep 16–17: +14.4% on 47 against +60.2% on 17. The tables' +27–36% mean was those launches.
+Nobody can take that entry: at 0.3 s the calldata says the wallets exist, not that they will buy.
+
+**The seat that can be taken.** Enter once the bundle is visible on the feed (complete plus 0.15 s of delivery and
+processing), only if it completed within 0.3 s of the creation, 2–3% tokens, hold 1.5 s, no take-profit, $25:
+
+| period | n | share of bundled launches | mean | median | win | p5 | below −30% | worst | trades/day | $/day at $10 | at $25 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Sep 2–3 | 153 | 34% | +13.0% | +1.7% | 52% | −12.0% | 0.0% | −13% | | | |
+| Sep 5–6 | 136 | 74% | +5.7% | −2.9% | 40% | −12.2% | 0.7% | −52% | | | |
+| Sep 7–10 | 633 | 80% | +13.1% | −1.9% | 47% | −12.3% | 0.3% | −58% | 211 | +$276 | +$690 |
+| Sep 11 | 129 | 82% | +19.1% | +8.5% | 67% | −10.9% | 0.0% | −12% | 141 | +$269 | +$671 |
+| Sep 12–15 | 558 | 85% | +14.6% | +7.1% | 62% | −12.3% | 0.9% | −59% | 203 | +$297 | +$743 |
+| Sep 16–17 | 53 | 83% | +15.9% | +1.9% | 57% | −11.6% | 0.0% | −12% | 45 | +$72 | +$181 |
+
+Positive in six periods of six, about half the earlier claim, with a low median: the mean is carried by the launches
+where the team's second round and the bots follow. Waiting for bundles that complete later than 0.3 s adds trades and
+subtracts return (T = 1.0 s: +9.9 / +15.7 / +13.0 / +11.2%), and a bundle completing at 0.5 s or later loses money
+(−6% and −12% in the two judged periods), so the wait is capped. The tier filter still earns its place on the honest
+entry: all tiers +15.1 / +11.8 / +9.8 / +5.5%, 1%-tier tokens +16.0 / +9.2 / +9.0 / −0.6%, the 2–3% tokens above.
+
+**Engine 5.3.** The E0 path waits for the bundle on the feed up to `E0_BUNDLE_WAIT_S` (0.45 s) after the creation:
+the named wallets' buys name the curve, so the curve is resolved from the feed with no RPC call, the watch is seeded
+from those buys and the gates read a real bundle; a launch whose bundle is not visible in time is skipped with the
+reason and the wait, again with no RPC call. The decision records `bundle_wait_ms`; the resolve limit on this path is
+the wait plus 150 ms, so a stale `MAX_RESOLVE_MS=300` cannot refuse every launch silently. `tests/test_e0_wait.py`
+drives the path on a scripted feed state: bundle at 120 ms traded from the feed with the gates filled, no bundle
+skipped at the deadline with no send and no RPC, a bundle under the ETH floor skipped, a 1%-tier token refused by the
+tier gate, a bundle at 350 ms still inside the limit, stale buys of the same wallets on an earlier curve not taken.
+
+**The entry not taken.** Sending at the resolve on the calldata's named-wallet count alone would sit ahead of the
+bundle on purpose. Its value is p × (the fixed-entry return) − (1 − p) × (the 6.18% surcharge and fees when nothing
+follows, about −12%), where p is the share of launches naming three wallets whose bundle then arrives; break-even is
+near p = 0.3 at a 0.3 s entry, and p is unmeasured. The 5.3 dry run measures it for free (the readout prints "calldata
+pre-check passed / bundle visible in time"); the decision waits for that number. Until then the seat is the visible
+bundle, and the daily expectation in `data/derived/e0_expectation.txt` is corrected to it.

@@ -1,25 +1,22 @@
-Expectation from the replay for the chosen set (E0 outsider, 2-3% tokens, hold 1.5 s, no take-profit), one trade per
-eligible launch, gas $0.11 per trade included, stake fully spent at $10/$25, 3% supply cap binds only at $150.
+Expectation from the replay for the creation-second seat AS ENGINE 5.3 TAKES IT (report 24.15): entry once the bundle
+(3 named-wallet buys, 0.3 ETH) is visible on the feed, i.e. complete + 0.15 s, only if complete within 0.3 s of the
+creation; 2-3% tokens; hold 1.5 s; no take-profit; gas $0.11 a trade included; stake fully spent at $10/$25.
+The earlier table in this file (fixed 0.3 s entry, +27-36% a trade) entered ahead of the team's own bundle on a fifth to
+a quarter of launches with hindsight and is withdrawn.
 
-landing 0.3 s after the creation block
-  period           | hours | launches/h | trades/h | trades/day | mean/trade |  median |  win% |      p5 | $/day @$10 |     @$25 |    @$150 | worst window $/h @$25
-  Sep 7-10         |    72 |       47.9 |    11.04 |        265 |     +34.3% |  +14.4% |   62% |  -12.2% |       +900 |    +2275 |   +12794 | +12.54  09-08 0-6
-  Sep 11           |    22 |       23.9 |     7.18 |        172 |     +43.0% |  +18.7% |   77% |   -9.9% |       +736 |    +1854 |   +10415 | +56.18  09-11 0-6
-  Sep 12-15        |    66 |       37.5 |     9.95 |        239 |     +36.4% |  +12.4% |   69% |  -12.3% |       +862 |    +2174 |   +12056 | +15.14  09-15 0-6
-  Sep 16-17 (now)  |    28 |        6.1 |     2.29 |         55 |     +26.6% |  +11.5% |   62% |  -12.0% |       +144 |     +365 |    +2055 |  +8.61  09-17 0-6
+  period     |    n | share of bundled |    mean |  median | win% |      p5 | <-30% |  worst | trades/day | $/day@10 | $/day@25
+  Sep 2-3    |  153 |   34% |  +13.0% |   +1.7% |  52% |  -12.0% |  0.0% |   -13% |            |          |
+  Sep 5-6    |  136 |   74% |   +5.7% |   -2.9% |  40% |  -12.2% |  0.7% |   -52% |            |          |
+  Sep 7-10   |  633 |   80% |  +13.1% |   -1.9% |  47% |  -12.3% |  0.3% |   -58% |        211 |     +276 |     +690
+  Sep 11     |  129 |   82% |  +19.1% |   +8.5% |  67% |  -10.9% |  0.0% |   -12% |        141 |     +269 |     +671
+  Sep 12-15  |  558 |   85% |  +14.6% |   +7.1% |  62% |  -12.3% |  0.9% |   -59% |        203 |     +297 |     +743
+  Sep 16-17  |   53 |   83% |  +15.9% |   +1.9% |  57% |  -11.6% |  0.0% |   -12% |         45 |      +72 |     +181
 
-landing 0.4 s after the creation block
-  Sep 7-10         |    72 |       47.9 |    11.04 |        265 |     +25.0% |   +4.7% |   55% |  -12.3% |       +649 |    +1654 |    +9372 | +11.18  09-08 0-6
-  Sep 11           |    22 |       23.9 |     7.18 |        172 |     +26.1% |  +10.1% |   67% |  -10.9% |       +441 |    +1123 |    +6360 | +39.91  09-11 15-22
-  Sep 12-15        |    66 |       37.5 |     9.95 |        239 |     +22.4% |   +8.7% |   63% |  -12.3% |       +524 |    +1339 |    +7579 | +15.30  09-15 0-6
-  Sep 16-17 (now)  |    28 |        6.1 |     2.29 |         55 |     +18.0% |   +8.9% |   56% |  -12.3% |        +96 |     +246 |    +1406 |  +4.01  09-16 0-9
+Where the old table's edge came from (fixed 0.3 s entry, split by when the bundle completed on the chain):
+  Sep 7-10 : bundle complete by 0.2 s n 519 +15.5% | after 0.2 s n 276 +69.7%
+  Sep 12-15: bundle complete by 0.2 s n 509 +14.9% | after 0.2 s n 148 +110.4%
+  Sep 16-17: bundle complete by 0.2 s n  47 +14.4% | after 0.2 s n  17 +60.2%
 
-per window in the current regime, 0.3 s, $25
-  2026-09-16 0-9  : eligible  49, 2-3% tokens  12, mean  +31.5%, $     +95 over 9 h =  +10.5/h, losers 5, worst -39%
-  2026-09-16 12-18: eligible  37, 2-3% tokens  11, mean  +24.0%, $     +66 over 6 h =  +11.0/h, losers 2, worst -10%
-  2026-09-16 17-24: eligible  66, 2-3% tokens  31, mean  +27.5%, $    +213 over 7 h =  +30.5/h, losers 12, worst -10%
-  2026-09-17 0-6  : eligible  23, 2-3% tokens  10, mean  +20.7%, $     +52 over 6 h =   +8.6/h, losers 5, worst -21%
-
-Haircuts not in the table: the engine's own take rate (helper-contract bundles, resolve timeouts, feed lag) is
-unmeasured and the E2 record suggested two thirds; the landing time decides which row applies; the current-regime
-sample is 28 h and 64 trades (mean interval +14% to +41%); nothing models bots adapting to us.
+Haircuts: the engine's own take rate (feed delivery, the 0.45 s wait, resolve) is what the 5.3 dry run measures; the
+current-regime sample is 53 trades; nothing models the bots adapting. Honest expectation at the $10 start in the
+current regime: $40-70 a day, half the trades losing about a dollar, no losing day in the record.

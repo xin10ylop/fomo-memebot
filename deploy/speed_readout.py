@@ -29,12 +29,18 @@ for e in ev:
         w = e.get("why"); w = w if isinstance(w, str) else "; ".join(map(str, w))
         sk[w[:70]] += 1
 print("skip reasons:", dict(sk.most_common(8)))
+pre = [e for e in ev if e["ev"] in ("skip", "eligible_not_traded", "trade_decision") and not (e["ev"] == "skip" and "calldata" in str(e.get("why")))]
+nb = [e for e in ev if e["ev"] == "skip" and "bundle not visible" in str(e.get("why"))]
+if pre:
+    print(f"calldata pre-check passed {len(pre)}: bundle visible on the feed in time {len(pre) - len(nb)}, not visible {len(nb)} ({100*(len(pre)-len(nb))/len(pre):.0f}% seen)")
+    ws = sorted(e.get("wait_ms") for e in nb if isinstance(e.get("wait_ms"), (int, float)))
+    if ws: print(f"  waits that expired: median {ws[len(ws)//2]} ms")
 td = [e for e in ev if e["ev"] == "trade_decision"]
-print(f"\ntrade decisions ({len(td)}): time UTC | resolve_ms | sent_ms (creation seen -> send) | flip_to_send_ms (creation second's first block -> send) | src | tax_bps | team_share | wallets | bundle_eth | blocks_to_seat | stake")
+print(f"\ntrade decisions ({len(td)}): time UTC | bundle_wait_ms (creation seen -> bundle visible) | resolve_ms | sent_ms (creation seen -> send) | flip_to_send_ms (creation second's first block -> send) | src | tax_bps | team_share | wallets | bundle_eth | blocks_to_seat | stake")
 for e in td:
-    print(f"  {u(e['t'])} | {e.get('resolve_ms'):>5} | {e.get('sent_ms'):>5} | {str(e.get('seat_flip_to_send_ms')):>7} | {str(e.get('resolve_src'))[:8]:8s} | {str(e.get('tax_bps')):>4} | {e.get('team_share')} | {e.get('bundle_wallets')} | {e.get('bundle_eth')} | {e.get('blocks_to_seat')} | ${e.get('stake_usd')}")
+    print(f"  {u(e['t'])} | {str(e.get('bundle_wait_ms')):>5} | {e.get('resolve_ms'):>5} | {e.get('sent_ms'):>5} | {str(e.get('seat_flip_to_send_ms')):>7} | {str(e.get('resolve_src'))[:8]:8s} | {str(e.get('tax_bps')):>4} | {e.get('team_share')} | {e.get('bundle_wallets')} | {e.get('bundle_eth')} | {e.get('blocks_to_seat')} | ${e.get('stake_usd')}")
 def q(xs, p): xs = sorted(xs); return xs[min(len(xs) - 1, int(p * len(xs)))] if xs else None
-for k in ("resolve_ms", "sent_ms", "seat_flip_to_send_ms"):
+for k in ("bundle_wait_ms", "resolve_ms", "sent_ms", "seat_flip_to_send_ms"):
     xs = [e[k] for e in td if isinstance(e.get(k), (int, float))]
     if xs: print(f"{k:22s}: n {len(xs)} median {st.median(xs):.0f} p75 {q(xs,0.75):.0f} p90 {q(xs,0.9):.0f} max {max(xs):.0f}")
 sc = {e["curve"]: e for e in ev if e["ev"] == "score" and "roi" in e}

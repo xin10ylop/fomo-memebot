@@ -99,7 +99,8 @@ UA = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (X11; Linux
 X0, Y0 = 1.68, 1e9
 E0_OUTSIDER = os.environ.get("E0_OUTSIDER", "0") == "1"                # explicit opt-in: take the creation second as a wallet that is NOT exempt from the surcharge
 TIER_MIN_BPS = int(os.environ.get("TIER_MIN_BPS", "0")); TIER_MAX_BPS = int(os.environ.get("TIER_MAX_BPS", "0"))   # the token's own tax (creation calldata word 13, bps on top of the 1% protocol fee): 0 = no gate. 24.14: 100-200 bps tokens pay +34/+43/+36/+27%
-SKIP_TIER1_TEAM_SHARE = float(os.environ.get("SKIP_TIER1_TEAM_SHARE", "0"))   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
+SKIP_TIER1_TEAM_SHARE = float(os.environ.get("SKIP_TIER1_TEAM_SHARE", "0"))
+E0_BUNDLE_WAIT_S = float(os.environ.get("E0_BUNDLE_WAIT_S", "0.45"))   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
 
 
 def tax_bps_of(sel, words):
@@ -1107,6 +1108,35 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             if c >= BUNDLE_MIN:
                 curve = a; src = "feed"
                 net0 = init_buy_wei / 1e18 * 0.99; tk0 = Y0 - X0 * Y0 / (X0 + net0) if net0 > 0 else 0.0
+    bundle_wait_ms = None
+    if SEAT == "E0" and BUNDLE_MIN > 0:
+        # 5.3: the creation-second seat enters only once the bundle is VISIBLE on the feed (the named wallets' buys, which also name
+        # the curve): the 5.1-5.2 path read the gates before any bundle buy had arrived ('bundle 0 < 3' on every launch, dry run of
+        # Sep 17), and a fixed entry ahead of the team's own bundle is the look-ahead of report 24.15, not a seat anyone can take
+        def bundle_seen():
+            """the curve the named wallets are buying: the first candidate meeting both floors, else the best by (buys, ETH)"""
+            best = (None, 0, 0.0)
+            for a, c in count_cands().most_common():
+                try:
+                    eth = sum(b[2] for b in list(state["buys"].get(a, [])) if b[1] in named and b[0] >= feed_ts)
+                except RuntimeError:
+                    eth = 0.0
+                if c >= BUNDLE_MIN and eth >= BUNDLE_MIN_ETH:
+                    return a, c, eth
+                if (c, eth) > (best[1], best[2]):
+                    best = (a, c, eth)
+            return best
+        a, c, eth = bundle_seen()
+        while (c < BUNDLE_MIN or eth < BUNDLE_MIN_ETH) and mono() - seen_at < E0_BUNDLE_WAIT_S:
+            with cond:
+                cond.wait(0.02)
+            a, c, eth = bundle_seen()
+        if a is not None and c >= BUNDLE_MIN and eth >= BUNDLE_MIN_ETH:
+            curve = a; src = "feed"; bundle_wait_ms = round((mono() - seen_at) * 1000)
+            net0 = init_buy_wei / 1e18 * 0.99; tk0 = Y0 - X0 * Y0 / (X0 + net0) if net0 > 0 else 0.0
+        else:
+            log({"ev": "skip", "why": [f"bundle not visible on the feed within {1000 * E0_BUNDLE_WAIT_S:.0f} ms ({c} named buys, {eth:.3f} ETH)"], "creator": creator,
+                 "named_wallets": len(named), "tax_bps": tax_bps, "wait_ms": round((mono() - seen_at) * 1000)}); return
     if curve is None:
         r = resolve_rpc(creator)
         if r:
@@ -1146,7 +1176,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         send_mode = "e0"                                                  # the creation second: no wait, every 100 ms costs 3-5 points
     t_wake = mono()
     decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "race_ms": w.get("race_ms"), "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"]),
-                "tax_bps": w.get("tax_bps"), "team_share": round((Y0 - w["Y"]) / Y0, 4)}
+                "tax_bps": w.get("tax_bps"), "team_share": round((Y0 - w["Y"]) / Y0, 4), "bundle_wait_ms": bundle_wait_ms}
     with lock:
         sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
         stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []
@@ -1175,8 +1205,9 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             gates.append("tax schedule changed (alarm): not trading")
         if mono() < state["busy_until"] or state["open"] is not None:
             gates.append("position open")
-        if resolve_ms > MAX_RESOLVE_MS:
-            gates.append(f"resolved in {resolve_ms} ms > {MAX_RESOLVE_MS}")
+        resolve_lim = max(MAX_RESOLVE_MS, int(1000 * E0_BUNDLE_WAIT_S) + 150) if SEAT == "E0" else MAX_RESOLVE_MS   # the E0 resolve includes the wait for the bundle
+        if resolve_ms > resolve_lim:
+            gates.append(f"resolved in {resolve_ms} ms > {resolve_lim}")
         if state["bankroll"] < STAKE_MIN:
             gates.append("bankroll below the minimum stake")
         if not hours_ok():
@@ -1522,9 +1553,9 @@ last_prune_holder = [0.0]
 async def main():
     import websockets
     if SEAT == "E0" and not EXEMPT and not E0_OUTSIDER:
-        raise SystemExit("SEAT=E0 as an outsider pays the 6.18% surcharge in the creation second (not the 93-98% assumed before Sep 17, report 24.13): set E0_OUTSIDER=1 to opt in explicitly, with HOLD_S=2 and MAX_RESOLVE_MS=300, or EXEMPT=1 for an exempt address.")
+        raise SystemExit("SEAT=E0 as an outsider pays the 6.18% surcharge in the creation second (not the 93-98% assumed before Sep 17, report 24.13): set E0_OUTSIDER=1 to opt in explicitly (runbook 5d), or EXEMPT=1 for an exempt address.")
     if SEAT == "E0" and E0_OUTSIDER and not EXEMPT:
-        log({"ev": "note", "what": "SEAT=E0 as an outsider (E0_OUTSIDER=1): 6.18% surcharge in the creation second, no seat wait, the send goes out the moment the curve is resolved; every 100 ms of delay costs 3-5 points (report 24.13)"})
+        log({"ev": "note", "what": "SEAT=E0 as an outsider (E0_OUTSIDER=1): 6.18% surcharge in the creation second, no seat wait, the send goes out the moment the bundle is visible on the feed (E0_BUNDLE_WAIT_S), never ahead of it (report 24.15)"})
     if PIN_CPU:
         try:
             os.sched_setaffinity(0, {int(c) for c in PIN_CPU.split(",")})
@@ -1534,8 +1565,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.2, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.3, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
