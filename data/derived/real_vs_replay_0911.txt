@@ -1,0 +1,10 @@
+trade  curve          in ETH  out ETH  gas $     REAL   replay    indep  land s hold s  note
+07:25:01 0x140c6c7fc0  0.01012  0.00292  0.056   -71.4%   -71.8%   -71.8%     2.0    5.1  crowded (out1 0, rival lag 0.0)
+14:30:44 0x1e64b67cb6  0.00954  0.00896  0.092    -6.5%    -7.3%    -7.3%     1.9    5.1  crowded (out1 0, rival lag 0.12)
+14:45:53 0xbfc79278d2  0.00959  0.00938  0.048    -2.4%    -3.4%    -1.8%     2.0    5.1  clean
+14:49:44 0xdd62b9df06  0.00959  0.00463  0.047   -51.9%   -52.5%   -52.5%     1.7    5.1  crowded (out1 0, rival lag 0.11)
+14:54:53 0x4e144eab53  0.00961  0.00940  0.048    -2.4%    -3.4%    -2.6%     1.8    3.7  clean
+21:47:49 0xf621240bd7  0.00986  0.00321  0.049   -67.7%   -68.1%   -68.1%     1.6    5.1  crowded (out1 1, rival lag -0.26)
+
+matched 6: REAL mean -33.7%  replay -34.4%  independent -34.0%;  real minus replay per trade: +0.5, +0.9, +1.0, +0.6, +1.0, +0.4 pts
+real money: -50.56 $ on 6 trades

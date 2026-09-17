@@ -2088,3 +2088,32 @@ launches, a fifth of the usual count, 88–100% crowded), the engine took none b
 is a 1-in-150 coincidence; the honest reading is a mix of bad luck and a trend the report has flagged since 23.11 —
 crowding rising, and now the supply of bundled launches thinning. The engine's account of it is now verified against
 the chain to within a point; what it cannot do is create seats that are not there.
+
+### 24.11 The six real trades, rebuilt from their receipts
+
+Asked to make sure the two Sep 17 fixes were the whole problem, the last thing left to test was execution itself: not
+the engine's model of a trade against the replay's model, but the chain's record of what the six real trades cost and
+returned against what the replay predicts for those launches (`src/analysis/real_vs_replay.py`,
+`data/derived/real_vs_replay_0911.txt`). From the buy and sell receipts: ETH in (the transaction's value), ETH out (the
+curve's Sell event), gas, the landing block relative to the creation block, and the hold.
+
+| trade | in ETH | out ETH | gas | **real** | replay | landed | held | the seat on the chain |
+|---|---|---|---|---|---|---|---|---|
+| 07:25 | 0.01012 | 0.00292 | $0.06 | **−71.4%** | −71.8% | 2.0 s | 5.1 s | rival in second two at 0.0 s |
+| 14:30 | 0.00954 | 0.00896 | $0.09 | **−6.5%** | −7.3% | 1.9 s | 5.1 s | rival at 0.12 s |
+| 14:45 | 0.00959 | 0.00938 | $0.05 | **−2.4%** | −3.4% | 2.0 s | 5.1 s | clean |
+| 14:49 | 0.00959 | 0.00463 | $0.05 | **−51.9%** | −52.5% | 1.7 s | 5.1 s | rival at 0.11 s |
+| 14:54 | 0.00961 | 0.00940 | $0.05 | **−2.4%** | −3.4% | 1.8 s | 3.7 s | clean (dump exit fired) |
+| 21:47 | 0.00986 | 0.00321 | $0.05 | **−67.7%** | −68.1% | 1.6 s | 5.1 s | bot in second one + rival at −0.26 s |
+
+Real mean −33.7%, replay −34.4%, independent simulator −34.0%; per trade the chain is 0.4–1.0 points *better* than the
+replay (the replay's $0.10 gas and 0.3 s slip are slightly conservative). Real money: −$50.56. Every buy landed 1.6–2.0 s
+after the creation block (the seat's second, as designed), every exit closed in 5.1 s, and the one early exit (3.7 s) is
+the dump stop doing its job. The four large losses are four seats a rival reached first — 0.0, 0.11, 0.12 and −0.26 s
+into the seat's second — which the engine of that day could not see and today's engine refuses.
+
+That closes the audit. The chain, the replay, the independent simulator and the engine's own scorer now agree with each
+other and with real money to within a point. What is left is not a fault: the replay counts a third more seats than the
+true clock allows (24.8), the feed cannot attribute helper-contract bundles (24.9), the second-two rival gate may be
+stricter than it needs to be (24.9), and the tape since Sep 16 has offered few seats. None of those can lose money;
+they decide how often it trades.
