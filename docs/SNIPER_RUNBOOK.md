@@ -441,6 +441,17 @@ on Ohio, from the first calibration burst there (index 2 of the first block, abo
 
 Re-run the calibration burst whenever the box, the region or the feed route changes: the lead is a property of the box.
 
+**The slot model (engine 5.7).** `deploy/grid_probe.py` showed the sequencer creates a block every ~101.6 ms on a steady timer:
+the first block of each second walks forward 16 ms a second in a clean sawtooth, and what jitters is the feed's delivery,
+about 30 ms a block. The flip vote averages one noisy point a second; the slot model folds every block's wall-clock arrival
+on the slot grid (period searched 101.2–102.0 ms, phase as the circular mean of 900 arrivals) and predicts the arrival of a
+second's first block as the first slot whose creation (arrival minus `FEED_LAG_MS`, the probe's p5–p10) is at or after
+the second. It scores itself on every flip without a send: `slot_shadow` every 30 flips, the slot model's and the vote's
+error on the flip's arrival (`abs_median` is the number; the slot model should read a few ms, the vote tens). Once that
+holds, `SLOT_SEND=1` aims the burst at the prediction minus `SLOT_LEAD_MS` (the feed's lag plus the block's window; the
+first calibration burst under the slot model is 13 shots 10 ms apart from `SLOT_LEAD_MS=200`, `BURST_LEAD_MS=0`), and
+every landing then logs `flip_minus_first_fill_ms`, the constant that sets `SLOT_LEAD_MS` for a narrow burst.
+
 Ten launches; then `ALCHEMY_KEY=... python3 src/analysis/landing_check.py --log /var/log/sniper/engine.jsonl`: every
 included shot with its block, second, index and the other buys before and after it. The number that decides: the share of
 contested launches whose filled shot is first in the next second's first block. Above three in four, production at $250 with
