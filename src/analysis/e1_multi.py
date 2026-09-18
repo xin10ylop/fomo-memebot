@@ -6,7 +6,7 @@ RPC = os.environ.get("RPC_URL", "https://rpc.mainnet.chain.robinhood.com")   # t
 H = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) curl/8"}
 BUY = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"; SELL = "0x8113d738abdcb6b38357e9d53a54a7157861a09031b453651f0fe7fe151f59df"; V2F = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"
 X0, Y0 = 1.68, 1e9; ETH_USD = 2500.0; SUR = {1: 0.0618, 2: 0.0019}; CAP = 0.03
-HOURS = float(sys.argv[1]); BACK_H = float(sys.argv[2]); TIER_LO, TIER_HI = 0.02, 0.03; OUT = sys.argv[3]
+HOURS = float(sys.argv[1]); BACK_H = float(sys.argv[2]); OUT = sys.argv[3]; TIER_LO = float(sys.argv[4]) if len(sys.argv) > 4 else 0.02; TIER_HI = float(sys.argv[5]) if len(sys.argv) > 5 else 0.03
 if os.path.exists(OUT): print("exists, skipping", OUT); sys.exit(0)
 def post(payload, tries=6):
     for i in range(tries):
