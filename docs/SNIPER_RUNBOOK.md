@@ -419,6 +419,20 @@ losing bucket of section 20.8), after an hour of paper there to fill the boundar
     BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.5 BUNDLE_MAX_ETH=0 MIN_CREATOR_SUPPLY=0.01 E0_BUNDLE_WAIT_S=0.9 E0_BUNDLE_MAX_BLOCKS=9
     SEND_MODULE=/etc/sniper/send_step.py
 
+**Calibrating the lead (engine 5.61).** The first three live bursts from New York (Sep 18 13:50–13:57 UTC, $10, 1% tier
+tokens, five shots each) all landed in the SECOND block of the new second, every shot in the same block: the margin came
+back as 25 ms from the saved state, 26 ms passed between the boundary wake and the first shot (gates, sizing, build and
+signing ran after the wait on a one-core box), and the boundary estimate is in feed-arrival time while the feed trails
+the sequencer's tick by 50–150 ms. 5.61 builds and signs the shots before the boundary and fires them on the estimate
+(`send_mode predict-prebuilt`, `prebuilt_ms` on the decision), keeps the env's `MARGIN_MS` in burst mode (the lead is the
+knob, the margin is not tuned), and adds `deploy/feed_lag_probe.py` (run with the engine's interpreter, two minutes: the
+p5–p10 of flip arrival minus its second is the feed's lag on the box). The calibration burst, three launches at $5:
+
+    BURST_N=12 BURST_STEP_MS=10 BURST_LEAD_MS=120 MARGIN_MS=0 STAKE_MIN=5 STAKE_MAX=5 MAX_LIVE_TRADES=3 TIER_MIN_BPS=0
+
+spans 120 to 10 ms before the estimate; the first filled shot's index gives the true lead for the box (shot k filled first:
+lead = 120 − 10k ms puts the first shot on the tick), and the next run narrows to five shots 4 ms apart around it.
+
 Ten launches; then `ALCHEMY_KEY=... python3 src/analysis/landing_check.py --log /var/log/sniper/engine.jsonl`: every
 included shot with its block, second, index and the other buys before and after it. The number that decides: the share of
 contested launches whose filled shot is first in the next second's first block. Above three in four, production at $250 with

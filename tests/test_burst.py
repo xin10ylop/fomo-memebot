@@ -80,7 +80,8 @@ if calls:
     _, txs, at, _ = calls[0]
     check("burst: consecutive nonces from the reserved one (5..8), state nonce advanced by 6", [int(t["nonce"], 16) for t in txs] == [5, 6, 7, 8] and E.state["nonce"] == 11, f"{[int(t['nonce'],16) for t in txs]} {E.state['nonce']}")
     check("burst: shots 4 ms apart", all(abs((at[i + 1] - at[i]) * 1000 - 4) < 0.01 for i in range(3)), str([round((at[i+1]-at[i])*1000, 2) for i in range(3)]))
-    check("burst: the first shot planned 8 ms before the boundary less the signing budget (6 ms): within -6..+2 ms of it", -6 <= (at[0] - t_boundary) * 1000 <= 2, f"{(at[0]-t_boundary)*1000:.1f} ms")
+    check("burst: the first shot planned 8 ms before the boundary estimate (prebuilt: no signing budget)", -9.5 <= (at[0] - t_boundary) * 1000 <= -6.5, f"{(at[0]-t_boundary)*1000:.1f} ms")
+    check("burst: the shots were built and handed to the send step before the boundary (prebuilt_ms > 100)", d[0].get("send_mode") == "predict-prebuilt" and (d[0].get("prebuilt_ms") or 0) > 100, f"{d[0].get('send_mode')} {d[0].get('prebuilt_ms')}")
     mo = int(txs[0]["data"][10 + 64:10 + 128], 16) / 1e18
     check("burst: the minOut is 7% below the sized tokens (BURST_SLIP), same in every shot", abs(mo / d[0]["tokens_target"] - 0.93) < 1e-6 and all(t["data"] == txs[0]["data"] for t in txs), f"{mo / d[0]['tokens_target']:.4f}")
     check("burst: every shot carries the same value and calldata, only the nonce differs", len({t["value"] for t in txs}) == 1 and len({t["nonce"] for t in txs}) == 4)

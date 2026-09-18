@@ -9,7 +9,7 @@ transaction exactly as before (checksummed 'to', hex fields, the next nonce, GAS
 with the key from the environment and fires it through the engine's warm sockets, sequencer first and provider second,
 and returns the hash. It was run against the engine's own transaction with an unfunded key: the sequencer's only
 complaint was the missing funds. Do not improvise on it at the boundary."""
-import os, json
+import os, json, time
 from eth_account import Account
 
 
@@ -39,6 +39,8 @@ def make_burst(engine):
         bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + bytes(key.sign_transaction(tx).raw_transaction).hex()]}).encode() for tx in txs]
         t_signed = mono(); out = []; fired_at = []
         for i, body in enumerate(bodies):
+            while mono() < at[i] - 0.004:                               # a prebuilt burst waits for the boundary here: sleep, then spin the last 4 ms
+                time.sleep(0.0005)
             while mono() < at[i]:
                 pass
             fired_at.append(mono()); out.append(engine.SENDER.fire_slot(body, i))
