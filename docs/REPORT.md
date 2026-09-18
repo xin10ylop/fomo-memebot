@@ -2635,3 +2635,28 @@ five-day table pays +25% for, and the test that follows counts how often it repe
 
 Money: the wallet went from 0.02458 ETH at the start of the day to 0.02695 after twelve real trades, about +$6, on
 launches of the wrong class and mostly in the wrong position; the number says the machinery works, nothing about the edge.
+
+### 24.22 What the sequencer's clock actually does, and the ramp model (engines 5.7–5.91)
+
+Two burst attempts on real launches (tax 200, bundles 0.56 and 0.72 ETH) fired 184 to 160 ms before the vote's estimate
+and both landed a full block early, all shots reverted on the 98% price for three cents; a wider 21-shot window did the
+same twice more. The estimate itself was the problem, so the clock was probed rather than the lead re-guessed.
+
+- `deploy/feed_lag_probe.py`: the feed delivers a second's first block 81–93 ms after that second at best on the Ohio box
+  (67–73 in New York), with a spread of 140 ms behind it.
+- `deploy/grid_probe.py` (90 s): 882 blocks, a period of 101.58 ms, and the first block of each second walking forward
+  16 ms a second in a clean sawtooth that wraps by 86: ten blocks a second, sometimes nine.
+- `deploy/timer_probe.py` (180 s): consecutive block numbers, seconds holding 10 blocks 155 times, 9 blocks 20 times, 8
+  twice, 6 once; **no period fits all the flips** (the admissible origin is empty at every candidate), and a least-squares
+  line leaves a 386 ms residual against the 30 ms a strict timer would leave. The block clock is regular for a few
+  seconds and wanders over ten.
+
+Three estimators were built and scored on the feed alone (`slot_shadow`, every 30 flips, no send): the vote (5.4x) sits
++55 ms late with a 20 to 130 ms spread; a phase model folding every arrival on the period (5.7) is no better, because
+the delivery jitter it averages is also what it must predict; a strict-timer model on flip block numbers (5.8) finds no
+fit at all. The **ramp model** (5.9) fits a line through the last thirty block arrivals and predicts the next second's
+first block ten blocks after the last one: median error −10 ms, tails ±70 ms that are mostly the flip's own delivery
+jitter, and it names the block nine times in ten, the tenth being the 9-block catch-up 86 ms early. That is the target,
+and the burst is sized to it: 50 shots 3 ms apart from 100 ms before the predicted block window to 47 ms after, about
+18 cents of reverts a launch, `SLOT_SEND=1 SLOT_LEAD_MS=100 FEED_LAG_MS=85`. Every landing logs the flip's arrival against
+the first shot and the first fill, the constants that narrow the window once they repeat.
