@@ -82,9 +82,10 @@ MAX_LATE_S = float(os.environ.get("MAX_LATE_S", "0.5"))
 BURST_N = max(1, int(os.environ.get("BURST_N", "1")))                    # 5.6: shots per buy, consecutive nonces, BURST_STEP_MS apart, the first one BURST_LEAD_MS before the predicted
 BURST_STEP_MS = float(os.environ.get("BURST_STEP_MS", "4")); BURST_LEAD_MS = float(os.environ.get("BURST_LEAD_MS", "8"))   # boundary: shots that land in the creation second revert for the gas,
 BURST_SLIP = float(os.environ.get("BURST_SLIP", "0.07"))
+RAMP_BLOCKS = int(os.environ.get("RAMP_BLOCKS", "30")); RAMP_MAX_RES_MS = float(os.environ.get("RAMP_MAX_RES_MS", "60"))   # 5.9 ramp model: fit window and confidence
 SLOT_SEND = os.environ.get("SLOT_SEND", "0") == "1"                     # 5.7: aim the burst with the slot model (every block's arrival folded on the 101.6 ms slot grid) instead of the flip vote
-SLOT_LEAD_MS = float(os.environ.get("SLOT_LEAD_MS", "0"))               # send this long before the predicted CREATION of the seat second's first block (its window's opening plus our 1 ms, calibrated from fills)
-FEED_LAG_MS = float(os.environ.get("FEED_LAG_MS", "85"))                # the feed's delivery lag on this box (deploy/feed_lag_probe.py p5-p10); informational since 5.8                 # the first one past the boundary fills; the minOut must reject a SECOND fill of our own (about 8% fewer tokens at 3% of supply) and no more: a fill behind a big crowd still pays (24.20)
+SLOT_LEAD_MS = float(os.environ.get("SLOT_LEAD_MS", "100"))             # send this long before the predicted CREATION of the seat second's first block: its window opened one block (~101.6 ms) earlier (calibrated from fills)
+FEED_LAG_MS = float(os.environ.get("FEED_LAG_MS", "85"))                # the feed's delivery lag on this box (deploy/feed_lag_probe.py p5-p10): predicted arrival minus this is the creation                 # the first one past the boundary fills; the minOut must reject a SECOND fill of our own (about 8% fewer tokens at 3% of supply) and no more: a fill behind a big crowd still pays (24.20)
 if BURST_N > 1 and not (SEND_MODE == "predict" and SEAT in ("E1", "E2")):
     BURST_N = 1                                                          # a burst only makes sense aimed at a predicted boundary                  # do not send more than this far into the seat's second
 MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.01"))
@@ -461,7 +462,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "valtx": collections.deque(maxlen=4000),      # [seen, ts, sender_or_None, value_eth, data, raw] value-carrying non-direct txs: router buys, sender recovered lazily
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
          "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "feed_seq": 0, "connected_at": 0.0,
-         "arrivals": collections.deque(maxlen=900), "flip_wall": {}, "slot_pred": {}, "slot_err": collections.deque(maxlen=120), "vote_err": collections.deque(maxlen=120),   # 5.7 slot model
+         "arrivals": collections.deque(maxlen=900), "flip_wall": {}, "slot_pred": {}, "slot_err": collections.deque(maxlen=120), "vote_err": collections.deque(maxlen=120), "slot_hits": collections.deque(maxlen=120),   # 5.9 ramp model
          "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "decisions": {},
          "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "day_start_real": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "scores_e1": collections.deque(maxlen=60), "race_lags": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
 lock = threading.Lock()
@@ -610,54 +611,55 @@ _scache = {"at": -1e9, "v": None}
 
 
 def slot_model():
-    """5.8: the sequencer creates a block every P = ~101.58 ms on a strict timer, so a block's creation time is c0 + n * P for its
-    number n (deploy/grid_probe.py, Sep 18: the first block of each second walks forward 16 ms a second, wrapping by 86, i.e. 10
-    or 9 blocks a second on a 101.58 ms timer). The feed's arrival times jitter by 30-40 ms and are not used at all: only the
-    block NUMBER of each second's first block (state['flip_block']) and the second itself. For each candidate P the set of
-    admissible c0 is the intersection of [S - n_S P, S - n_S P + P) over the flips; the P with the widest intersection is the
-    timer, and c0 its midpoint. Returns (P, c0, width_s, n_flips) or None; cached for a second."""
-    if mono() - _scache["at"] < 1.0:
+    """5.9: the ramp model. deploy/timer_probe.py (Sep 18): blocks come every ~101.6 ms locally, a second holds 10 of them most of
+    the time and 9 one time in nine at irregular moments, and over ten seconds the number-to-time relation wanders by 100 ms:
+    no global timer fits. Locally it does: a least-squares line through the last RAMP_BLOCKS block arrivals (wall time on block
+    number) predicts the next blocks to about the fit's residual over the square root of its size. Returns (slope_s_per_block,
+    intercept, residual_std_s, n) or None; cached for 0.25 s."""
+    if mono() - _scache["at"] < 0.25:
         return _scache["v"]
-    fl = sorted((ts_, n) for ts_, n in state["flip_block"].items() if n)[-150:]
+    arr = list(state["arrivals"])[-RAMP_BLOCKS:]
     v = None
-    if len(fl) >= 40:
-        best = None
-        for i in range(0, 81):
-            P = 0.1013 + 0.00001 * i                                    # 101.3 .. 102.1 ms in 10 us steps
-            xs = sorted(ts_ - n * P for ts_, n in fl); k = max(1, len(xs) // 40)   # drop the 2.5% at each end: a missed feed message shifts one flip by a block
-            lo, hi = xs[-1 - k], xs[k] + P                              # c0 in [lo, hi): narrow when P is the timer, empty when it is not
-            width = hi - lo
-            if best is None or width > best[0]:
-                best = (width, P, lo, hi)
-        width, P, lo, hi = best
-        if width > 0.0:
-            v = (P, (lo + hi) / 2, width, len(fl))                        # a strict timer gives a width of a few ms: precision, not doubt
+    if len(arr) >= 15:
+        xs = [n for _, n in arr]; ys = [w for w, _ in arr]; mx = sum(xs) / len(xs); my = sum(ys) / len(ys)
+        den = sum((x - mx) ** 2 for x in xs)
+        if den > 0:
+            b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / den; a = my - b * mx
+            res = [y - (a + b * x) for x, y in zip(xs, ys)]
+            v = (b, a, (sum(r * r for r in res) / len(res)) ** 0.5, len(arr))
     _scache["at"] = mono(); _scache["v"] = v
     return v
 
 
 def slot_predict(second):
-    """the predicted creation time (sequencer clock = NTP wall clock) and number of the first block stamped `second`: the first
-    n with c0 + n P >= second. Returns (t_wall, n) or None without a confident model (width under 60 ms)."""
+    """the predicted wall-clock ARRIVAL of the first block stamped `second`, assuming ten blocks a second from the last flip seen
+    (the 9-block catch-up, one second in nine, puts it 86 ms earlier: the burst window covers that), and that block's number.
+    Returns (t_wall, n) or None without a confident ramp (fewer than 15 blocks, residual over RAMP_MAX_RES_MS, or the last
+    flip older than 3 s)."""
     m = slot_model()
-    if m is None or not (0.0 < m[2] < 0.030):                            # feasible and pinned to under 30 ms
+    if m is None or m[2] * 1000 > RAMP_MAX_RES_MS:
         return None
-    P, c0, width, nf = m
-    n = math.ceil((second - c0) / P)
-    return (c0 + n * P, n)
+    b, a, res, n = m
+    if not state["flip_block"]:
+        return None
+    s_last = max(state["flip_block"]); n_last = state["flip_block"][s_last]
+    if not n_last or second - s_last > 3 or second <= s_last:
+        return None
+    n_pred = n_last + 10 * (second - s_last)
+    return (a + b * n_pred, n_pred)
 
 
 def score_flip(ts, wall, seen):
-    """at every flip: did the timer model name this flip's block number (an exact hit is a prediction good to the block's creation
-    time; a miss is one slot, 101 ms), and the vote's timing error; then predict the next flip. slot_shadow every 30 flips."""
+    """at every flip: the ramp model's error on this flip's arrival and whether it named the block (10 blocks after the last
+    flip, or the 9-block catch-up), the vote's timing error; then predict the next flip. slot_shadow every 30 flips."""
     try:
         pred = state["slot_pred"].pop(ts, None)
         if pred is not None:
             if pred[0] is not None:
-                state["slot_err"].append(0 if pred[0][1] == state["flip_block"].get(ts) else (pred[0][1] - (state["flip_block"].get(ts) or 0)))
+                state["slot_err"].append(1000 * (wall - pred[0][0])); state["slot_hits"].append(1 if pred[0][1] == state["flip_block"].get(ts) else 0)
             if pred[1] is not None:
                 state["vote_err"].append(1000 * (seen - pred[1]))
-        _scache["at"] = -1e9                                             # a new flip: refit
+        _scache["at"] = -1e9
         sp = slot_predict(ts + 1)
         b = boundary(); ref = state["ref"]
         vp = ref[0] + (ts + 1 - ref[1]) + b[0] if (b is not None and b[1] >= 0.5 and ref is not None) else None
@@ -666,12 +668,12 @@ def score_flip(ts, wall, seen):
             state["slot_pred"].pop(k, None)
         state["flips_scored"] = state.get("flips_scored", 0) + 1
         if state["flips_scored"] % 30 == 0:
-            se = list(state["slot_err"]); ve = sorted(state["vote_err"]); m = slot_model()
+            se = sorted(state["slot_err"]); ve = sorted(state["vote_err"]); m = slot_model(); hits = list(state["slot_hits"])
             q = lambda xs, p: xs[min(len(xs) - 1, int(p * len(xs)))]
-            vs = {"n": len(ve), "median": round(st.median(ve), 1), "p10": round(q(ve, 0.1), 1), "p90": round(q(ve, 0.9), 1), "abs_median": round(st.median(abs(x) for x in ve), 1)} if ve else {"n": 0}
-            log({"ev": "slot_shadow", "flips": state["flips_scored"], "block_hits": sum(1 for x in se if x == 0), "block_misses": sum(1 for x in se if x != 0), "miss_slots": [x for x in se if x != 0][-8:],
-                 "vote_err_ms": vs, "period_ms": round(1000 * m[0], 3) if m else None, "c0_width_ms": round(1000 * m[2], 1) if m else None, "flips_fit": m[3] if m else len(state["flip_block"]),
-                 "model": "confident" if (m and 0.0 < m[2] < 0.030) else ("weak" if m else "none"), "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS})
+            stats = lambda xs: {"n": len(xs), "median": round(st.median(xs), 1), "p10": round(q(xs, 0.1), 1), "p90": round(q(xs, 0.9), 1), "abs_median": round(st.median(abs(x) for x in xs), 1)} if xs else {"n": 0}
+            log({"ev": "slot_shadow", "flips": state["flips_scored"], "ramp_err_ms": stats(se), "ten_block_hits": sum(hits), "nine_block_misses": len(hits) - sum(hits), "vote_err_ms": stats(ve),
+                 "slope_ms": round(1000 * m[0], 2) if m else None, "residual_ms": round(1000 * m[2], 1) if m else None, "blocks": m[3] if m else len(state["arrivals"]),
+                 "model": "confident" if (m and m[2] * 1000 <= RAMP_MAX_RES_MS) else ("weak" if m else "none"), "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS})
     except Exception as e:
         log({"ev": "error", "stage": "score_flip", "err": str(e)[:160]})
 
@@ -687,7 +689,7 @@ def seat_target(feed_ts, seconds):
         sp = slot_predict(target_ts)
         if sp is None:
             return None
-        return mono() + (sp[0] - time.time()) - SLOT_LEAD_MS / 1000.0 - (BURST_LEAD_MS / 1000.0 if BURST_N > 1 else 0.0)
+        return mono() + (sp[0] - time.time()) - FEED_LAG_MS / 1000.0 - SLOT_LEAD_MS / 1000.0 - (BURST_LEAD_MS / 1000.0 if BURST_N > 1 else 0.0)
     b = boundary(); ref = state["ref"]
     if b is None or b[1] < 0.5 or ref is None:
         return None
@@ -2004,7 +2006,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.8, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.9, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
@@ -2036,7 +2038,7 @@ async def main():
                         warm = wall - ts > 2.0                            # a backlog replay (the feed sends one on connect): index nothing, trade nothing
                         state["blocks"] += 1
                         if not warm:
-                            state["arrivals"].append(wall)                # 5.7: every block's arrival, for the slot model
+                            state["arrivals"].append((wall, int(m.get("sequenceNumber") or 0)))   # 5.9: every block's arrival and number, for the ramp model
                             index_message(inner, ts, seen)
                         with cond:
                             if ts > state["last_seen_ts"] and state["last_seen_ts"] and not warm:
