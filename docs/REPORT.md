@@ -2579,7 +2579,9 @@ launches, median +33%). Behind the whole crowd it still pays +6.8% on contested 
 Sep 13). The bots that buy in that block are the demand we sell into 1.5 s later; the eight most frequent occupants are
 each present on 8–15% of launches and the three most frequent together on 25%, a rotating cast rather than one shop.
 Bundles of 0.3–0.5 ETH draw a crowd on 62% of launches and pay +8.7% first, nothing behind; 0.5 ETH and above draw one on
-70–78% and pay +17% to +27% first. Tokens at the 2.0–2.25% tier pay +11.8% first, the rest +18–21%. 04:00–08:00 UTC pays
+70–78% and pay +17% to +27% first. Tokens at the 2.0–2.25% tier pay +11.8% first, the rest +18–21%. The 1% tier class (tax under 100 bps), scored the
+same way on Sep 16–18 (257 launches), is dead: −0.0% first in the block, −1.2% behind, 33% win, median −7%, and the bots
+leave half of them alone (0.9 other buys a block against 2.6); the tier gate stays. 04:00–08:00 UTC pays
 best (+38% first on 30 launches) and 02:00–04:00 worst (−2% on 18); no hour filter is warranted on these counts.
 
 **Position, not tolerance.** A tight minOut as a "fill only if first" rule is wrong for this seat: behind the crowd, a 3%

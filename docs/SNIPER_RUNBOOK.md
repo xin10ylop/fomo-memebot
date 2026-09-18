@@ -397,6 +397,9 @@ stakes), +3.7% behind the block's other buys, +0.8% one block late; the second-t
 behind). The value is the crowd: alone in the block −3.2%, first ahead of one bot +5%, ahead of two or more +19% to +49%,
 and behind a big crowd still +6.8%. Bundles under 0.5 ETH draw fewer bots and pay +8.7% first, nothing behind. Hold 1.5 s
 and 3 s score alike; 6 s and a +50% take-profit score worse. 02:00–04:00 UTC is the one negative stretch (small sample).
+The 1% tier class (tax under 100 bps), scored the same way on Sep 16–18 (257 launches), is dead: −0.0% first, −1.2% behind,
+33% win, bots leave half of them alone; `TIER_MIN_BPS=100` stays. On Sep 18 13:00–14:00 UTC nearly every bundle seen in
+time was one of these, so a slow hour on the 2–3% band is the gate working, not a fault.
 
 **The burst.** `BURST_N` shots at consecutive nonces, `BURST_STEP_MS` apart, the first `BURST_LEAD_MS` before the predicted
 boundary (predict mode only; the sender keeps one warm socket per shot to the sequencer; the send step signs all shots
