@@ -8,7 +8,7 @@ LOG = tempfile.mkdtemp() + "/t.jsonl"; os.environ["LOG_PATH"] = LOG
 for k, v in (("SEAT", "E1"), ("SEND_MODE", "predict"), ("MARGIN_MS", "0"), ("BURST_N", "4"), ("BURST_STEP_MS", "4"), ("BURST_LEAD_MS", "8"), ("BURST_SLIP", "0.07"),
              ("BUNDLE_MIN", "3"), ("BUNDLE_MIN_ETH", "0.3"), ("BUNDLE_MAX_ETH", "0"), ("MIN_CREATOR_SUPPLY", "0.01"), ("TIER_MIN_BPS", "100"), ("TIER_MAX_BPS", "200"),
              ("MAX_RESOLVE_MS", "600"), ("HOLD_S", "0.3"), ("TAKE_PROFIT", "0"), ("SEND_MODULE", ""), ("PRIVATE_KEY", ""), ("TRADE_HOURS", ""), ("MIN_FOLLOW_ETH_60", "0"),
-             ("BANKROLL_USD", "300"), ("STAKE_MIN", "10"), ("STAKE_MAX", "10")):
+             ("BANKROLL_USD", "300"), ("STAKE_MIN", "10"), ("STAKE_MAX", "10"), ("WALLET_STAKE", "0")):
     os.environ[k] = v
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "strategy"))
 import sniper_engine as E
@@ -28,6 +28,7 @@ E.SENDER.rejected = lambda ans: False
 E.get_logs = lambda filt, tries=3, seat=False: []
 E.resolve_receipt = lambda *a, **k: None
 E.tune_margin = lambda rec, seat_ts: None
+E.refresh_wallet = lambda why="": None
 T = 1_800_000_000
 E.state.update({"nonce": 5, "chain_at": E.mono(), "eth_usd": 2500.0, "gas_price": 2 * 10 ** 8, "base_fee": 10 ** 8, "feed_ts": T, "blocks": 1000, "bankroll": 300.0, "day_start": 300.0, "open": None, "stopped": False})
 E.state["flip_at"][T] = E.mono()
@@ -64,7 +65,7 @@ def launch(k, eth=0.6, flip_after_s=0.9):
 calls = []
 def burst(txs, at, label): calls.append((E.mono(), txs, at, label)); return [("0x%064x" % (i + 1), None) for i in range(len(txs))]
 E.SEND = object(); E.SEND_BURST = burst
-def receipt(h, timeout=10.0, ans=None):
+def receipt(h, timeout=10.0, ans=None, stop=None):
     i = int(h, 16)
     if i == 2:
         return {"status": "0x1", "blockNumber": "0x11", "transactionIndex": "0x0", "logs": [{"topics": [E.BUY_EV], "address": CV, "data": "0x" + ("%064x" % int(0.004e18)) + ("%064x" % int(1_000_000e18))}]}
@@ -94,7 +95,7 @@ check("the decision records burst 4", d and d[0].get("burst") == 4)
 
 # 2. no shot fills: buy_reverted, no position
 calls.clear(); captured.clear(); E.state["nonce"] = 5; E.state["chain_at"] = E.mono()
-E.wait_receipt = lambda h, timeout=10.0, ans=None: {"status": "0x0", "blockNumber": "0x10", "transactionIndex": "0x1", "logs": []}
+E.wait_receipt = lambda h, timeout=10.0, ans=None, stop=None: {"status": "0x0", "blockNumber": "0x10", "transactionIndex": "0x1", "logs": []}
 c, CV, _ = launch(2)
 d = events("trade_decision", c); r = events("buy_reverted", wait=3.0)
 check("all shots revert: buy_reverted logged, no position", bool(d) and any(e.get("curve") == CV for e in r) and E.state["open"] is None and not captured)

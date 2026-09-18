@@ -2,7 +2,7 @@
 import os, sys, json, time, threading
 os.environ["LOG_PATH"] = "/tmp/claude-0/-home-user-fomo-memebot/a7a59693-7c2d-5b6c-b7df-e43fdbe7d612/scratchpad/test_close.jsonl"
 os.environ["WALLET"] = "0xE0686DC72b04c12CeEFeea75E286E4Ef7C056f01"; os.environ["PIN_CPU"] = ""
-sys.path.insert(0, "src/strategy"); import sniper_engine as E
+sys.path.insert(0, "src/strategy"); import sniper_engine as E; E.refresh_wallet = lambda why="": None
 E.SELL_CONFIRM_S = 0.3; E.SELL_MAX_S = 3.0
 class Chain:
     def __init__(s, allowance=2**200, balance=10**21, approve_lands=True, sell_plan=None, refuse_until=0.0):

@@ -459,6 +459,32 @@ contested launches whose filled shot is first in the next second's first block. 
 landing share stays high: they pay +8.7% first and nothing behind). Around half, the seat pays about +8% a trade and is
 worth running with the same care. Below one in four, it pays nothing and the strategy stops there.
 
+### 5f. One fill per launch: the wallet is the stake (engine 5.93)
+
+The night of Sep 18 (report 24.24): at $15 the 3% guard cannot see our own fill, so every shot of the burst after the
+first one also filled, until the wallet could not fund one more; the bet was the whole wallet on every launch that filled,
+and one launch at −56% took $42. Engine 5.93 makes the sequencer's insufficient-funds drop the cap: live, every buy is
+the wallet less a gas reserve (`WALLET_STAKE=1`, the default; `GAS_RESERVE_USD=2.5` or the burst's reverts plus the exit's
+fee ceiling, whichever is more), so a second shot can never be funded, whatever the guard sees.
+
+The operating rule: **what sits in the wallet is what one launch can lose, plus about $3 of gas.** `STAKE_MAX` is the most
+the wallet may hold; above it the engine refuses every launch and logs "withdraw the excess or raise STAKE_MAX"; below
+`STAKE_MIN` it logs "top up". Profits accumulate in the wallet, so a run of wins walks the stake up until the ceiling
+stops it: withdraw down to the stake (Phantom) or raise the ceiling. A balance older than a minute refuses (read every
+10 s when idle and after every landing and exit). A launch on which the 3% supply cap would make the buy less than half
+the wallet is skipped: the remainder could fund a second fill. The hold clock now starts at the fill (`fill_seen_ms`),
+so `HOLD_S=1.3` lands the sell about 15 blocks after the buy, the tables' exit; the 5.92 sells landed at 31–36 blocks.
+
+    WALLET_STAKE=1 STAKE_MIN=15 STAKE_MAX=60 HOLD_S=1.3        # the wallet holds $15-60: every launch bets what is there
+
+After any run, the accounting of every hash the engine sent since its start, reconciled against the wallet:
+
+    sudo python3 src/analysis/night_readout.py --start-eth <wallet ETH at the start>
+
+It prints, per launch, the shots by block (creation second, seat, later), the buys on the curve ahead of our first shot,
+the fills, ETH in and out, gas, net, the exit and the blocks held; for a multi-fill, the first fill's own return; totals;
+alarms; the open position; and the part of the wallet's change the receipts do not explain (it should be cents).
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while

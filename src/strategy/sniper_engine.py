@@ -54,6 +54,9 @@ WALLET = os.environ.get("WALLET", "0x0000000000000000000000000000000000000000").
 ETH_USD = float(os.environ.get("ETH_USD", "2445")); ETH_USD_URL = os.environ.get("ETH_USD_URL", "https://api.coinbase.com/v2/prices/ETH-USD/spot")
 BANKROLL = float(os.environ.get("BANKROLL_USD", "300"))
 FRAC = float(os.environ.get("FRAC", "0.15")); STAKE_MIN = float(os.environ.get("STAKE_MIN", "25")); STAKE_MAX = float(os.environ.get("STAKE_MAX", "300"))
+WALLET_STAKE = os.environ.get("WALLET_STAKE", "1") == "1"                # 5.93: live, every buy is sized to the wallet minus GAS_RESERVE_USD, so a second shot of the burst can never be
+GAS_RESERVE_USD = float(os.environ.get("GAS_RESERVE_USD", "2.5"))        # funded: the sequencer drops it for insufficient funds. The night of Sep 18 filled 6 and 5 shots at $15 (own
+WALLET_MAX_AGE_S = float(os.environ.get("WALLET_MAX_AGE_S", "60"))       # impact below the 3% guard) and put the whole wallet on one launch (-56%). STAKE_MAX is now the most the
 HOLD = float(os.environ.get("HOLD_S", "5")); SUPPLY_FRAC = float(os.environ.get("SUPPLY_FRAC", "0.03")); SLIP = float(os.environ.get("SLIP", "0.25"))
 TAKE_PROFIT = float(os.environ.get("TAKE_PROFIT", "0.5"))                # sell when the curve price is up this fraction over our entry (0 = off)
 SEAT = os.environ.get("SEAT", "E2").upper(); EXEMPT = os.environ.get("EXEMPT", "0") == "1"
@@ -544,8 +547,8 @@ def chain_loop():
     while True:
         try:
             state["nonce"] = int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16); state["base_fee"] = int(rpc.call("eth_gasPrice", []), 16); state["gas_price"] = int(state["base_fee"] * GAS_HEADROOM); state["chain_at"] = mono()
-            if SEND is not None and state["open"] is None and (n % 10 == 0 or not state["day_start_real"]):   # live: the bankroll is the wallet's ETH; it changes only on trades, so every 30 s is enough
-                bal = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18; state["wallet_eth"] = bal
+            if SEND is not None and state["open"] is None and (n % (3 if WALLET_STAKE else 10) == 0 or not state["day_start_real"]):   # live: the bankroll is the wallet's ETH; it changes only on trades (every 10 s when it sizes the stake, else 30)
+                bal = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18; state["wallet_eth"] = bal; state["wallet_at"] = mono()
                 with lock:
                     state["bankroll"] = bal * state["eth_usd"]
                     if not state["day_start_real"]:                       # until the wallet is read, day_start is BANKROLL_USD from the env; a wallet under half of it would latch the daily stop on the first launch (audit, Sep 16)
@@ -1126,11 +1129,13 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
 
 
 # ------------------------------------------------------------------------------------------------------------- trading
-def wait_receipt(h, timeout=10.0, ans=None):
-    """the receipt of h within timeout; None sooner when ans (the fire() answers) shows every endpoint refused the transaction"""
+def wait_receipt(h, timeout=10.0, ans=None, stop=None):
+    """the receipt of h within timeout; None sooner when ans (the fire() answers) shows every endpoint refused the transaction, or stop is set"""
     t0 = mono()
     while mono() - t0 < timeout:
         if ans is not None and SENDER.rejected(ans):
+            return None
+        if stop is not None and stop.is_set():
             return None
         try:
             r = rpc.call("eth_getTransactionReceipt", [h])
@@ -1145,24 +1150,25 @@ def wait_receipt(h, timeout=10.0, ans=None):
 def burst_receipts(shots, timeout=10.0, settle_s=0.6):
     """the receipts of a burst's shots, read in parallel: returns [(hash, receipt or None, answers)] in shot order as soon as a
     filled shot is in and the rest have had settle_s to land, or when every shot has a receipt or a refusal, or at timeout"""
-    res = [[hh, None, a] for hh, a in shots]; done = [False] * len(shots)
+    res = [[hh, None, a] for hh, a in shots]; done = [False] * len(shots); stop = threading.Event(); fill_at = [None]
     def one(i):
         if res[i][0]:
-            res[i][1] = wait_receipt(res[i][0], timeout=timeout, ans=res[i][2])
+            res[i][1] = wait_receipt(res[i][0], timeout=timeout, ans=res[i][2], stop=stop)
+            if res[i][1] and res[i][1].get("status") == "0x1" and fill_at[0] is None:
+                fill_at[0] = mono()                                        # the fill's time, stamped by the poller that saw it (the loop below is 20 ms coarse and may exit first)
         done[i] = True
     ths = [threading.Thread(target=one, args=(i,), daemon=True) for i in range(len(shots))]
     for t in ths:
         t.start()
-    t0 = mono(); t_fill = None
+    t0 = mono()
     while mono() - t0 < timeout:
         if all(done):
             break
-        if t_fill is None and any(r[1] and r[1].get("status") == "0x1" for r in res):
-            t_fill = mono()
-        if t_fill is not None and mono() - t_fill > settle_s:
+        if fill_at[0] is not None and mono() - fill_at[0] > settle_s:
             break
         time.sleep(0.02)
-    return [tuple(r) for r in res]
+    stop.set(); state["t_fill"] = fill_at[0]                                   # 5.93: the pollers stop here (a shot the sequencer dropped was polled for the full timeout), and the
+    return [tuple(r) for r in res]                                         # hold clock starts at the fill, not after the settle (the sells landed 31-36 blocks after the buy, Sep 18)
 
 
 def next_nonce():
@@ -1289,7 +1295,7 @@ def close_position(pos, why):
             if rec and rec.get("status") == "0x1":
                 log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": amount / 1e18, "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": False, "sell_confirm_s": round(mono() - t0, 2),
                      "buy_hash": pos.get("buy_hash"), "approve_hash": pos.get("approve_hash"), "sell_hash": hs, "seat_ts": pos.get("seat_ts")})
-                state["open"] = None; save_state(); return
+                state["open"] = None; save_state(); refresh_wallet("exit"); return
             if rec:                                                  # landed and reverted: find out why and fix it
                 bal = token_balance(pos["token"]); al = token_allowance(pos["token"], pos["curve"])
                 log({"ev": "sell_reverted", "curve": pos["curve"], "hash": hs, "balance": bal, "allowance": al})
@@ -1322,6 +1328,26 @@ def handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0,
             threading.Thread(target=close_position, args=(pos, "the launch thread crashed after the buy"), daemon=True).start()
         else:
             release_reservation()
+
+
+def wallet_reserve_eth():
+    """what the wallet must keep out of the stake: the burst's reverted shots, the approve and the exit's fee ceiling, plus the upfront
+    gas the sequencer checks on the filling shot (limit x price, refunded after execution); measured shots cost about a cent"""
+    gp = state.get("gas_price") or 2e8; px = max(state["eth_usd"], 1.0)
+    upfront = GAS_BUY * gp / 1e18; shots = BURST_N * GAS_EST_BUY * (state.get("base_fee") or gp / GAS_HEADROOM) / 1e18
+    return max(GAS_RESERVE_USD / px, shots + upfront + (SELL_FEE_MAX_USD + 0.10) / px)
+
+
+def refresh_wallet(why=""):
+    """live: read the wallet now (after a landing or an exit) so the next stake is sized on what is really there"""
+    if SEND is None:
+        return
+    try:
+        bal = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18
+        with lock:
+            state["wallet_eth"] = bal; state["wallet_at"] = mono(); state["bankroll"] = bal * state["eth_usd"]
+    except Exception as e:
+        log({"ev": "error", "stage": "refresh_wallet", "why": why, "err": str(e)[:160]})
 
 
 def release_reservation():
@@ -1544,7 +1570,19 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                 "tax_bps": w.get("tax_bps"), "team_share": round((Y0 - w["Y"]) / Y0, 4), "bundle_wait_ms": bundle_wait_ms, "bundle_helper": helper_folded, "detect": state.get("detect", "sequencer")}
     with lock:
         sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
-        stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []
+        stake_usd = min(STAKE_MAX, max(STAKE_MIN, state["bankroll"] * FRAC)); gates = []; reserve_eth = 0.0
+        if WALLET_STAKE and SEND is not None:                             # 5.93: the stake is the wallet less the gas reserve, so a second fill cannot be funded
+            reserve_eth = wallet_reserve_eth(); we = state.get("wallet_eth")
+            if we is None or mono() - state.get("wallet_at", -1e9) > WALLET_MAX_AGE_S:
+                gates.append("wallet balance not read in the last minute (RPC): the stake cannot be sized")
+            else:
+                stake_usd = max(0.0, we - reserve_eth) * state["eth_usd"]
+                if stake_usd < STAKE_MIN:
+                    gates.append(f"wallet ${we * state['eth_usd']:.2f} less the ${reserve_eth * state['eth_usd']:.2f} gas reserve is below the minimum stake ${STAKE_MIN:.0f}: top up")
+                if stake_usd > STAKE_MAX * 1.05:
+                    gates.append(f"wallet ${we * state['eth_usd']:.2f} holds more than STAKE_MAX ${STAKE_MAX:.0f}: a burst could fill twice at a smaller stake; withdraw the excess or raise STAKE_MAX")
+                if stake_usd <= 2 * reserve_eth * state["eth_usd"]:
+                    gates.append("stake below twice the gas reserve: a second shot could be funded")
         if w["bundle"] < BUNDLE_MIN:
             gates.append(f"bundle {w['bundle']} < {BUNDLE_MIN}")
         if w["bundle_eth"] < BUNDLE_MIN_ETH:
@@ -1611,6 +1649,12 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     X, Y = w["X"], w["Y"]; stake_eth = stake_usd / state["eth_usd"]
     tk, net, gross, fee = size_buy(X, Y, stake_eth, SEAT)
     amount_in = int(gross * 1e18); min_out = int(tk * (1 - (BURST_SLIP if BURST_N > 1 else SLIP)) * 1e18)
+    if WALLET_STAKE and SEND is not None and BURST_N > 1 and gross < stake_eth * 0.999:   # 5.93: the supply cap shrank the stake; if what is left could fund a second fill, this launch is not taken
+        left = state["wallet_eth"] - gross - reserve_eth; upfront = GAS_BUY * gas_price / 1e18
+        if left >= gross + upfront:
+            release_reservation(); gates = [f"supply cap sizes the buy at {gross:.5f} ETH and leaves {left:.5f} ETH: a second shot could fill; not taking this launch"]
+            threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
+            log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
     buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
     shots = None
     if BURST_N > 1:                                                     # 5.6: BURST_N shots at consecutive nonces, BURST_STEP_MS apart, straddling the predicted boundary
@@ -1668,7 +1712,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                 log({"ev": "buy_rejected", "curve": curve, "hash": h, "answers": [(hh, str(d)[:120]) for _, _, a in recs if a for hh, d in a][:8]})
             else:
                 log({"ev": "buy_reverted", "curve": curve, "hash": included[0][0], "note": f"{len(included)} shots included, none filled (all in the creation second, or behind the crowd past BURST_SLIP)"})
-            state["traded"].pop(curve, None); release_reservation(); return
+            state["traded"].pop(curve, None); release_reservation(); threading.Thread(target=refresh_wallet, args=("no fill",), daemon=True).start(); return
         h, rec = filled[0]
         if len(filled) > 1:
             log({"ev": "alarm", "what": f"burst double fill: {len(filled)} shots filled (BURST_SLIP too loose for this stake); selling all of them", "curve": curve})
@@ -1679,7 +1723,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             for l in r.get("logs", []):
                 if l["topics"][0] == BUY_EV and l["address"].lower() == curve:
                     tokens += int(l["data"][2 + 64:2 + 128], 16) / 1e18
-        t_buy = mono()
+        t_buy = state.get("t_fill") or mono(); decision["fill_seen_ms"] = round((mono() - t_buy) * 1000, 1)
     elif h:                                                          # live: the tokens actually received, from the buy's own event
         rec = wait_receipt(h, ans=buy_ans)
         if rec is None and buy_ans and SENDER.rejected(buy_ans):
@@ -2014,8 +2058,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.92, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.93, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":

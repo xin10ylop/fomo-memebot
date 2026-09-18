@@ -28,6 +28,7 @@ Everything below was computed from data collected in this session; scripts are i
 22. **Why the edge thinned (section 23.11).** The September return, taken apart on the exact curve: fees and the teams' dumps are unchanged; the buyers who come after us bring 28% less ETH per hold, and that alone is the drop in return per trade (+0.88 correlation across twenty-one windows; the competition does not correlate with a kept launch's return). The competition costs trades instead: clean launches fell from 67% to 29% of bundled launches. It depends on the day and the hour: September's US-morning hours pay +3% a trade, its nights +10%, where the earlier windows paid +15% at any hour. Sizing to a live demand gauge, reacting to dumps and changing the exit were tested and rejected; 20% sizing is the most the September windows allow under 1% stop odds; and the seat the crowd moved to, first in second one, pays +8.7% a trade on every bundled launch in September (twelve times the E2 gain, stop odds 1.3%) if the box lands first, loses to E2 on the August windows, and collapses one block late. The engine now prints the demand and the crowding as `follow_eth_last_60` and `out1_share_last_60`.
 23. **The first live trade (Sep 18, $10) reverted on its minOut and closed the creation-second seat (section 24.19).** The curve offered 1.1% of the fair tokens: the snipe tax is keyed to the block's clock second, so a buy in any block carrying the creation block's timestamp pays ~98%, whatever the block offset; 24.13 had measured time in block offsets and mistaken next-second buys for creation-second buys. With real timestamps every outsider buy at 6.2% on Sep 18 sat in a later second. The next-second seat scored honestly on the engine's filters pays +8% (today) to +20% (two days ago) a trade if our buy is first in the next second's first block and −4.6% to +5% behind the two or three bots that queue for it; the position is the edge and only real sends can measure it. Engine 5.51 refuses the creation-second seat without the exemption again.
 24. **Five days on the true clock (section 24.20).** The next-second seat pays +16.1% a trade first in its block (+3.7% median, 56% win, 148 launches a day, about $5,900 a day at $250), +3.7% behind the block's other buys, and the second-two seat is dead. The value is the crowd: alone in the block −3.2%, ahead of two or more bots +19% to +49%, behind a big crowd still +6.8%; a tight minOut as a position filter destroys that. Engine 5.6 adds the burst send, several shots at consecutive nonces straddling the predicted boundary so the first past the tick fills without a safety margin, tested on the scripted feed; the share of contested blocks it wins is measured by a ten-launch landing test on an Ohio box, and decides whether the seat pays +4%, +10% or +16% a trade.
+25. **The burst filled six and five times at $15 and the wallet, not the stake, was the bet (section 24.24).** The 3% guard cannot see a $15 fill's own impact, so every shot after the first also fills until the wallet cannot fund one more; one launch at −56% on the whole wallet cost $42 of the night's $54. Engine 5.93 sizes every buy to the wallet less a gas reserve so the sequencer itself drops a second fill, makes `STAKE_MAX` the wallet's ceiling, and starts the hold clock at the fill (the sells had landed 31–36 blocks after the buy instead of 15). Nine live fills so far, four wins, a mean near +1%: too few to judge the seat's +16% either way.
 12. **Round 6 found the treasure's real owner and measured its seat: the first-block sniper.** The 185 sniper-bot wallets that pay the creators are not all losers. Reconstructing the dollar P&L of the fifteen busiest from their transfers, curve trades and pool swaps: the bots that buy 0.3–3 seconds after launch and sell 3–21 seconds later are net positive (the fastest: +$30.8k on $107k of turnover in six hours, +28.7% per trade, 175 launches, nothing left unsold); every bot that holds minutes or hours loses (−44% to −94%). Simulating that seat on every launch of the window with launch-time filters (creator's first launch of the day, ETH-quoted, stake min(3% of supply, $300), sell 7 s later into whoever bought next, exact curve exits, 1% fees each way) gives +27% on $97k in the fitting hours and +32% on $98k in the holdout hours, per-launch mean +27%/+33% with confidence intervals of +20% to +41%, median −2%, 46–48% of launches positive, worst case one stake. That is $26k and $31k of profit per three hours on a working capital of a few thousand dollars, and it reproduces the fastest real bot's holdout result (+31%). The sensitivity analysis says what it is: paying 10% more than first-in-line still earns +18–23%, paying 25% more earns +6–10%, paying 50% more or landing half a second late loses. It is a latency race for the first block after creation, on a chain with 100 ms blocks, sponsored gas and a first-come sequencer; the winner takes +30% a trade several hundred times a day and everyone behind them pays. Out of sample on Sep 2 (a lower-flow day) the same untouched rule made +0.4% in the first three hours and +15% in the next three. Three further windows across the fee cycle (section 14.2) then showed the seat is a peak-flow phenomenon: −13% in Pons V2's second week (Aug 12), flat at the trough (Aug 20) and on the ramp (Aug 27), positive only on the two peak days. It is not a structural edge. Section 14 has the tables and a live shadow tester that scores every new launch against the rule without capital.
 
 ## 1. Data access and what was analysed
@@ -2682,3 +2683,57 @@ shot the sequencer was asked to take, it took (all fifty answers carried the has
 mined after the ten-second receipt wait, harmless. At test stakes the 3% guard refuses a fill behind one bot, which the
 five-day table says is still worth taking; at production stakes the guard is 7% and our own fill is what protects the
 burst, so that fill goes through.
+
+### 24.24 The night of Sep 18: the burst filled five and six times, and the fix is the wallet (engine 5.93)
+
+Engine 5.92 ran on Ohio from 19:54 UTC with the production burst (35 shots 3 ms apart, ramp-aimed, 3% guard, $15 stakes,
+cap ten sends, bundles of 0.5 ETH and more, 2–3% tier). `src/analysis/night_readout.py` reads every receipt of every
+hash the engine sent since its start and reconciles them against the wallet; the night, from its output:
+
+| time (UTC) | shots landed | where our shots sat | fills | ETH in | ETH out | net |
+|---|---|---|---|---|---|---|
+| 20:12 | 35 of 35 | 17 in the creation second, 18 in the seat block from index 1 | 1 (index 1) | 0.00571 | 0.00538 | −0.00046 (−8.0%) |
+| 21:10 | 35 | 19 creation second, 16 seat block from index 2 | none | | | gas 0.00012 |
+| 21:11 | 22 | 13 and 9, from index 12 and 19 | none | | | gas 0.00008 |
+| 21:19 | 35 | 2 and 33, from index 23 and 1 | none | | | gas 0.00012 |
+| 21:35 | 35 | 29 and 6, from index 5 and 4 | none | | | gas 0.00012 |
+| 21:47 | 35 | 7 and 28, from index 31 and 7 | none | | | gas 0.00013 |
+| 21:52 | **6 of 35** | one block, fills at index 4, 32, 38, 39, 40, 41 | **6** | 0.03426 | 0.03018 | −0.00413 (−12%) |
+| 21:57 | **26 of 35** | 21 creation second; seat block from index 1, fills at 1, 21, 28, 29, 30 | **5** | 0.02856 | 0.01277 | −0.01590 (−55.7%) |
+
+Receipts explain −0.02106 ETH; the wallet moved from 0.03573 to 0.01512 ETH (−0.02061, about −$54); the difference is a
+rounding of the starting figure. No position is open, no sell reverted, no alarm other than the two double fills.
+
+**What happened.** The burst's shots are independent transactions at consecutive nonces. The design relied on the 3%
+guard to refuse every shot after the first fill: our own buy moves the price, and the next shot's minOut is then out of
+reach. That holds at $150 and above (own impact 5–8%) and fails at $15, where a fill moves the price by well under 1%;
+24.23 had noted a four-fill at $15 as noise. It is not noise: every shot after the fill also fills, and the run stops only
+when the wallet can no longer fund a shot: the sequencer drops the rest for insufficient funds (the "6 of 35" and
+"26 of 35" landed). The stake was therefore never $15; it was the whole wallet on every launch that filled, and one
+launch at −56% took the night. The first fill of the 21:57 launch sat at index 1 of the seat block, exactly the seat the
+tables price at +16% a trade on average: the loss is the launch's, the size is the bug's.
+
+**The fix (engine 5.93, `WALLET_STAKE=1`, on by default live).** The sequencer's insufficient-funds drop is made the cap
+on purpose: every buy is sized to the wallet less a gas reserve (`GAS_RESERVE_USD`, $2.50 or the burst's reverts plus the
+approve, the exit's $2 fee ceiling and the upfront gas of the filling shot, whichever is more), so after the first fill
+what is left cannot fund a second shot, whatever the guard sees. `STAKE_MAX` becomes the most the wallet may hold: above
+it the engine refuses to trade and says to withdraw the excess or raise the cap; below `STAKE_MIN` it says to top up; a
+balance older than a minute refuses (the wallet is read every 10 s when idle and right after every landing and exit);
+and a launch on which the 3% supply cap would shrink the buy to less than half of the wallet is not taken, because the
+remainder could fund a second fill. `tests/test_wallet_stake.py` runs the six cases on the scripted feed. The rule for
+the operator is one line: what sits in the wallet is what one launch can lose, plus $3 of gas.
+
+**Two more things the receipts showed.** The sells landed 31–36 blocks after the buy while the tables hold 15: the hold
+clock started after the receipt reader's 0.6 s settle and a wait of up to 0.5 s for the flip message, not at the fill.
+5.93 stamps the fill's time in the receipt poller and starts the hold there (`fill_seen_ms` on the decision), and stops
+the other 34 pollers once the burst is resolved (a dropped shot was polled for the full ten seconds, about 200 RPC calls
+each). With the clock on the fill, `HOLD_S=1.3` lands the sell about 15 blocks after the buy. And the five bursts that
+did not fill: the readout now labels each block creation-second, seat or later and lists the buys on the curve ahead of
+our first shot with their ETH, so a refusal behind the crowd (the guard working) is told from a burst that missed the
+seat block; those five are to be read that way on the next run of the readout.
+
+**The tally so far.** Nine fills on real launches from Ohio at $15 to the wallet: +24%, −3%, +7.5%, −15% (four fills),
++49% (four fills), +22%, −8%, −12% (six fills), −56% (five fills). Four wins in nine, a mean near +1% before separating the
+first fill from the ones the bug added; the readout's `first-fill returns` line is that separation. Against the tables'
++16% mean and 56% win share this is too few trades to judge either way (the per-trade spread is about 30 points, so nine
+trades resolve the mean to ±10), and the size bug means the dollar result of the night says nothing about the seat.
