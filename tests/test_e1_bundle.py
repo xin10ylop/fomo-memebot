@@ -87,7 +87,7 @@ if not d:
     print("   log tail:", [ (e.get("ev"), str(e)[:160]) for e in [json.loads(l) for l in open(LOG)][-6:]])
 if d:
     check("E1 predict: bundle 3, 0.45 ETH, send_mode predict (sent before the feed's flip)", d[0].get("bundle") == 3 and abs(d[0].get("bundle_eth", 0) - 0.45) < 1e-6 and d[0].get("send_mode") == "predict", f"{d[0].get('bundle')} {d[0].get('bundle_eth')} {d[0].get('send_mode')}")
-    check("E1 predict: sent within 60 ms of the estimated boundary (0.5 s - 15 ms)", 0.40 <= el <= 0.56, f"{el:.3f}s")
+    check("E1 predict: sent within 60 ms of the estimated boundary (0.5 s - 15 ms), per the decision's sent_ms", 400 <= (d[0].get("sent_ms") or 0) <= 560, f"sent_ms {d[0].get('sent_ms')} (handler {el:.3f}s incl. the 0.3 s hold)")
 
 # 3. one named wallet alone in the helper call: not a bundle, skipped
 E.SEND_MODE = "react"
