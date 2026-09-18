@@ -103,6 +103,7 @@ TIER_MIN_BPS = int(os.environ.get("TIER_MIN_BPS", "0")); TIER_MAX_BPS = int(os.e
 SKIP_TIER1_TEAM_SHARE = float(os.environ.get("SKIP_TIER1_TEAM_SHARE", "0"))
 E0_BUNDLE_WAIT_S = float(os.environ.get("E0_BUNDLE_WAIT_S", "0.45"))
 E0_BUNDLE_MAX_BLOCKS = int(os.environ.get("E0_BUNDLE_MAX_BLOCKS", "9"))
+MAX_LIVE_TRADES = int(os.environ.get("MAX_LIVE_TRADES", "0"))     # live: stop taking seats after this many real buys have been sent since the start (0 = no cap); a controlled first trade
 PROVIDER_FALLBACK_S = float(os.environ.get("PROVIDER_FALLBACK_S", "120"))
 PROVIDER_HEADS = os.environ.get("PROVIDER_HEADS", "0") == "1"           # also subscribe to newHeads on the provider path (a message every 100 ms; the E1/E2 seats need it, the E0 seat does not)
 E0_ALLOW_PROVIDER = os.environ.get("E0_ALLOW_PROVIDER", "0") == "1"   # take the creation-second seat on the provider path too (after deploy/provider_lag_probe.py shows the lag is small)
@@ -1406,6 +1407,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             gates.append("detection on the provider path (the sequencer feed is down): a send this late is second one, not the seat (E0_ALLOW_PROVIDER=1 after measuring the lag)")
         if state["nonce"] is None or mono() - state["chain_at"] > 30:
             gates.append("nonce/gas not fresh (RPC)")
+        if SEND is not None and MAX_LIVE_TRADES > 0 and state.get("live_trades", 0) >= MAX_LIVE_TRADES:
+            gates.append(f"live trade cap reached ({state.get('live_trades', 0)} of {MAX_LIVE_TRADES} since the start): not sending")
         gc_usd = gas_cost_usd()
         if gc_usd is not None and gc_usd > GAS_MAX_SHARE * stake_usd:
             gates.append(f"gas ${gc_usd:.2f} per round trip > {100 * GAS_MAX_SHARE:.0f}% of stake")
@@ -1419,6 +1422,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     amount_in = int(gross * 1e18); min_out = int(tk * (1 - SLIP) * 1e18)
     buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
     h = submit(buy, "buy"); t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk); buy_ans = SENDER.mine()
+    if h:
+        state["live_trades"] = state.get("live_trades", 0) + 1                # a real buy left the box (the cap counts sends, not fills)
     decision["amount_in_eth"] = amount_in / 1e18; decision["min_out_tokens"] = min_out / 1e18        # for the scorer's revert check (5.44)
     state["traded"][curve] = min(stake_usd, gross * state["eth_usd"]); state["decisions"][curve] = decision
     threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
@@ -1764,8 +1769,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.49, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.5, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":

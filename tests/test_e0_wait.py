@@ -257,6 +257,13 @@ W = wallets(18); E.state["busy_until"] = 0.0; one_tx_bundle(18, cv18, W[0], [], 
 E._handle_creation(c18, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
 s18 = events(c18, "skip", wait=1.0)
 check("one named wallet alone with 1.5 ETH: skipped (1 named buyer)", bool(s18) and any("1 named buyers" in str(e.get("why")) for e in s18), str([e.get("why") for e in s18]))
+# 19. the live trade cap (engine 5.5): with a send step and the cap reached, the seat is refused before anything leaves the box
+c19, cv19 = "0x" + "19" * 20, "0x" + "c9" * 20
+W = wallets(19); E.state["busy_until"] = 0.0; E.MAX_LIVE_TRADES = 1; E.state["live_trades"] = 1; E.SEND = lambda tx, label: "0xdead"
+run(c19, cv19, W, [(w, 0.15) for w in W], 0.05)
+g19 = events(c19, "eligible_not_traded", wait=1.0)
+check("live cap reached: the seat is refused, nothing sent", bool(g19) and any("live trade cap" in x for x in g19[0].get("gates", [])) and not events(c19, "trade_decision", wait=0.2), str([e.get("gates") for e in g19]))
+E.SEND = None; E.MAX_LIVE_TRADES = 0; E.state["live_trades"] = 0
 E.resolve_rpc = lambda *a, **kw: None
 print("all creation-second wait tests pass" if not fails else f"{len(fails)} TESTS FAILED: {fails}")
 raise SystemExit(1 if fails else 0)
