@@ -27,6 +27,7 @@ Everything below was computed from data collected in this session; scripts are i
 21. **Round 15 asked two things of four researchers (section 23): lose less, and land where the tables assume.** Both risk researchers found the same fat left tail (one trade in five ends near −70%, no clustering) and the same remedies: hold 5 s instead of 7, a +50% take-profit, 15% sizing with a $25 floor, and, from one of them, a gate that skips launches where a rival is already in the seat. The gate's threshold turned out to be an artefact of the replay's interpolated clock, but the signal under it is real and executable (launches nobody else takes earn +10%/+20%, launches a rival took lose), so the rule now sends 0.3 s into second two only if no outsider has bought. Fit half +10.7% a trade, test half +16.4%, every window above +7.6%, one-at-a-time $22.0k and $37.4k, and a resampled chance of the −50% stop of zero at either sizing; from $100 the stop odds stay under 7%. The speed engineers found a signing landmine (lowercase addresses), a feed loop busy 17% of the time, a curve state rebuilt after the boundary, polling wakes and cold sockets; engine v4 fixes all of it (0.26 ms per frame, 0.5 µs of post-boundary work) and the new rule makes the send a fixed 300 ms after the second opens, which the first live receipts must confirm. Ten more windows (Sep 7–10) that no choice ever touched keep the rule positive (nine of ten, +6.2% a trade, stop odds 0.1%) at a third of the earlier level, because two thirds of bundled launches now carry a bot in second one; the money moved to the first-in-second-one seat (+13% a trade on 2,970 launches, but +4% one block late and zero 0.3 s late), which only live receipts can test. Section 23.7 then measured the nine ways it could die: real gas is $0.10 a round trip (a $100 start is back), the sequencer takes raw transactions from unknown senders, the contracts carry no blacklist, a fee-headroom landmine that would have refused the first live buy is fixed, and alarms for a changed tax schedule, a silent factory and a thinning flow are in the engine.
 22. **Why the edge thinned (section 23.11).** The September return, taken apart on the exact curve: fees and the teams' dumps are unchanged; the buyers who come after us bring 28% less ETH per hold, and that alone is the drop in return per trade (+0.88 correlation across twenty-one windows; the competition does not correlate with a kept launch's return). The competition costs trades instead: clean launches fell from 67% to 29% of bundled launches. It depends on the day and the hour: September's US-morning hours pay +3% a trade, its nights +10%, where the earlier windows paid +15% at any hour. Sizing to a live demand gauge, reacting to dumps and changing the exit were tested and rejected; 20% sizing is the most the September windows allow under 1% stop odds; and the seat the crowd moved to, first in second one, pays +8.7% a trade on every bundled launch in September (twelve times the E2 gain, stop odds 1.3%) if the box lands first, loses to E2 on the August windows, and collapses one block late. The engine now prints the demand and the crowding as `follow_eth_last_60` and `out1_share_last_60`.
 23. **The first live trade (Sep 18, $10) reverted on its minOut and closed the creation-second seat (section 24.19).** The curve offered 1.1% of the fair tokens: the snipe tax is keyed to the block's clock second, so a buy in any block carrying the creation block's timestamp pays ~98%, whatever the block offset; 24.13 had measured time in block offsets and mistaken next-second buys for creation-second buys. With real timestamps every outsider buy at 6.2% on Sep 18 sat in a later second. The next-second seat scored honestly on the engine's filters pays +8% (today) to +20% (two days ago) a trade if our buy is first in the next second's first block and −4.6% to +5% behind the two or three bots that queue for it; the position is the edge and only real sends can measure it. Engine 5.51 refuses the creation-second seat without the exemption again.
+24. **Five days on the true clock (section 24.20).** The next-second seat pays +16.1% a trade first in its block (+3.7% median, 56% win, 148 launches a day, about $5,900 a day at $250), +3.7% behind the block's other buys, and the second-two seat is dead. The value is the crowd: alone in the block −3.2%, ahead of two or more bots +19% to +49%, behind a big crowd still +6.8%; a tight minOut as a position filter destroys that. Engine 5.6 adds the burst send, several shots at consecutive nonces straddling the predicted boundary so the first past the tick fills without a safety margin, tested on the scripted feed; the share of contested blocks it wins is measured by a ten-launch landing test on an Ohio box, and decides whether the seat pays +4%, +10% or +16% a trade.
 12. **Round 6 found the treasure's real owner and measured its seat: the first-block sniper.** The 185 sniper-bot wallets that pay the creators are not all losers. Reconstructing the dollar P&L of the fifteen busiest from their transfers, curve trades and pool swaps: the bots that buy 0.3–3 seconds after launch and sell 3–21 seconds later are net positive (the fastest: +$30.8k on $107k of turnover in six hours, +28.7% per trade, 175 launches, nothing left unsold); every bot that holds minutes or hours loses (−44% to −94%). Simulating that seat on every launch of the window with launch-time filters (creator's first launch of the day, ETH-quoted, stake min(3% of supply, $300), sell 7 s later into whoever bought next, exact curve exits, 1% fees each way) gives +27% on $97k in the fitting hours and +32% on $98k in the holdout hours, per-launch mean +27%/+33% with confidence intervals of +20% to +41%, median −2%, 46–48% of launches positive, worst case one stake. That is $26k and $31k of profit per three hours on a working capital of a few thousand dollars, and it reproduces the fastest real bot's holdout result (+31%). The sensitivity analysis says what it is: paying 10% more than first-in-line still earns +18–23%, paying 25% more earns +6–10%, paying 50% more or landing half a second late loses. It is a latency race for the first block after creation, on a chain with 100 ms blocks, sponsored gas and a first-come sequencer; the winner takes +30% a trade several hundred times a day and everyone behind them pays. Out of sample on Sep 2 (a lower-flow day) the same untouched rule made +0.4% in the first three hours and +15% in the next three. Three further windows across the fee cycle (section 14.2) then showed the seat is a peak-flow phenomenon: −13% in Pons V2's second week (Aug 12), flat at the trough (Aug 20) and on the ramp (Aug 27), positive only on the two peak days. It is not a structural edge. Section 14 has the tables and a live shadow tester that scores every new launch against the rule without capital.
 
 ## 1. Data access and what was analysed
@@ -2549,4 +2550,54 @@ belongs to whoever is first in the block.
 **What the $10 bought.** The revert cost the gas and answered the question the paper could not: the seat the engine
 was built around since 24.13 is inside the creation second, and the creation second is closed. Nothing else was lost;
 the wallet holds what it held. The engine stays capped and refuses the seat.
+
+### 24.20 Five days on the true clock, the crowd, and the burst (engine 5.6)
+
+`src/analysis/e1_multi.py` scores both legal outside seats on five full days (Sep 13 11:23 – Sep 18 11:17 UTC, 38,000
+creations, 740 qualifying launches: >= 3 named wallets, bundle >= 0.3 ETH inside the creation's clock second, tier 2–3%,
+ETH quote) with real block timestamps, from the public RPC: fold everything stamped with the creation's second, enter in
+the first block of the next second first or behind that block's other buys, or one block late, 6.18% plus the tier, 3% of
+supply cap, sell 15 blocks later at the tier fee with our own impact; the second-two seat the same way at +0.19%.
+`data/derived/e1_five_days_0918.txt`.
+
+| day (UTC) | n | first in the block | behind the block's buys | one block late | E2 first | E2 behind |
+|---|---|---|---|---|---|---|
+| Sep 13 | 225 | +17.3% (med +7.2%, 61% win) | +8.2% | +5.3% | +3.0% | −2.6% |
+| Sep 14 | 189 | +18.5% (+1.6%, 51%) | +5.3% | +3.0% | +1.8% | −2.3% |
+| Sep 15 | 124 | +15.2% (+3.5%, 58%) | +1.2% | −2.3% | −1.8% | −3.7% |
+| Sep 16 | 74 | +16.4% (−1.9%, 49%) | +2.7% | −2.6% | +0.0% | −1.7% |
+| Sep 17 | 128 | +10.8% (+1.5%, 54%) | −3.6% | −5.3% | −2.4% | −3.4% |
+| pooled | 740 (148/day) | **+16.1% (+3.7%, 56%, 1% dead)** | +3.7% | +0.8% | +0.6% | −2.7% |
+
+At $250 capped at 3% of supply (36% of launches cap below it, mean stake $241) first in the block is $39 a trade and about
+$5,900 a day; the $10 stake scores +15.4%, so the seat is not capacity-bound at this size. Hold 15 and 30 blocks score
+alike (+16.1%, +16.2%); 60 blocks +14.6% and a +50% take-profit +12.6% score worse.
+
+**The value is the crowd.** Alone in the next second's first block (231 of 740 launches, 31%) the seat loses 3.2% (21%
+win). First ahead of one other buy +5.2%; ahead of two +23%; three +19%; four +23%; five +31%; six or more +49% (124
+launches, median +33%). Behind the whole crowd it still pays +6.8% on contested launches (−1.3% on Sep 17, +12.6% on
+Sep 13). The bots that buy in that block are the demand we sell into 1.5 s later; the eight most frequent occupants are
+each present on 8–15% of launches and the three most frequent together on 25%, a rotating cast rather than one shop.
+Bundles of 0.3–0.5 ETH draw a crowd on 62% of launches and pay +8.7% first, nothing behind; 0.5 ETH and above draw one on
+70–78% and pay +17% to +27% first. Tokens at the 2.0–2.25% tier pay +11.8% first, the rest +18–21%. 04:00–08:00 UTC pays
+best (+38% first on 30 launches) and 02:00–04:00 worst (−2% on 18); no hour filter is warranted on these counts.
+
+**Position, not tolerance.** A tight minOut as a "fill only if first" rule is wrong for this seat: behind the crowd, a 3%
+tolerance fills 26% of the time and turns +6.8% into +0.4%, because the launches where a big crowd is ahead are the ones
+that pump. The tolerance's only job is to reject a second fill of our own inside a burst: at $250 a second identical shot
+gets about 8% fewer tokens, so 7%; at $100 about 3.4%, so 3%.
+
+**The burst (engine 5.6).** The sequencer takes transactions in arrival order and there is no priority fee, so the seat
+belongs to whoever arrives first after the tick. A single send needs a safety margin for its clock error or it lands in
+the creation second at 98%. The burst removes the margin: `BURST_N` shots at consecutive nonces, `BURST_STEP_MS` apart, the
+first `BURST_LEAD_MS` before the predicted boundary, each on its own warm socket to the sequencer, all signed before the
+first leaves. Shots before the tick revert on their minOut for about $0.008 each; the first past the tick fills; the later
+ones revert on the same minOut once our own fill has moved the price. Against a single-shot sender it arrives one step
+after the tick instead of a margin after it; against a bursting sender in the same zone it is a coin flip. Twelve tests
+on the scripted feed (`tests/test_burst.py`): four shots 4 ms apart at nonces 5–8 with the state nonce advanced by six,
+the first planned 8 ms before the boundary less the signing budget, identical value and calldata, the filled shot's receipt
+becoming the position with the sell at the nonce after the last shot, a burst with no fill logged as reverted with no
+position, and the dry run's four unsigned shots. The expected value by the share of contested blocks we win, alone
+always ours: 0% → +3.7% a trade (the "behind" column), 50% → +9.9%, 100% → +16.1%. The share is measured by the landing
+test of runbook 5e on the Ohio box, ten launches at $100, position read from every included shot's receipt.
 

@@ -78,7 +78,12 @@ def hours_ok(now=None):
     return (a <= h < b) if a < b else (h >= a or h < b)
 SEND_MODE = os.environ.get("SEND_MODE", "react"); MARGIN_MS = float(os.environ.get("MARGIN_MS", "15"))
 MARGIN_MIN_MS = float(os.environ.get("MARGIN_MIN_MS", "5")); MARGIN_MAX_MS = float(os.environ.get("MARGIN_MAX_MS", "60"))
-MAX_LATE_S = float(os.environ.get("MAX_LATE_S", "0.5"))                  # do not send more than this far into the seat's second
+MAX_LATE_S = float(os.environ.get("MAX_LATE_S", "0.5"))
+BURST_N = max(1, int(os.environ.get("BURST_N", "1")))                    # 5.6: shots per buy, consecutive nonces, BURST_STEP_MS apart, the first one BURST_LEAD_MS before the predicted
+BURST_STEP_MS = float(os.environ.get("BURST_STEP_MS", "4")); BURST_LEAD_MS = float(os.environ.get("BURST_LEAD_MS", "8"))   # boundary: shots that land in the creation second revert for the gas,
+BURST_SLIP = float(os.environ.get("BURST_SLIP", "0.07"))                 # the first one past the boundary fills; the minOut must reject a SECOND fill of our own (about 8% fewer tokens at 3% of supply) and no more: a fill behind a big crowd still pays (24.20)
+if BURST_N > 1 and not (SEND_MODE == "predict" and SEAT in ("E1", "E2")):
+    BURST_N = 1                                                          # a burst only makes sense aimed at a predicted boundary                  # do not send more than this far into the seat's second
 MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.01"))
 MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
 SWITCH_N = int(os.environ.get("SWITCH_N", "15")); SWITCH = float(os.environ.get("SWITCH", "-0.10")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.50"))
@@ -242,6 +247,7 @@ class Sender:
                 continue
             p = urllib.parse.urlparse(u); self.eps.append({"url": u, "host": p.netloc, "path": p.path or "/", "c": None, "lock": threading.Lock(), "rtt_ms": None, "ok": False, "ip": None, "ips": {}})
         self._local = threading.local(); self.last = []
+        self.pool = [{"c": None, "lock": threading.Lock(), "e": self.eps[0]} for _ in range(BURST_N)] if self.eps and BURST_N > 1 else []   # one warm socket per burst shot, to the sequencer
         threading.Thread(target=self._keepalive, daemon=True).start()
 
     def _connect(self, e):
@@ -293,9 +299,52 @@ class Sender:
                     self._measure(e)
             for e in self.eps:
                 self._ping(e)
+            for p in self.pool:
+                self._ping_pool(p)
             if n % 20 == 0:
                 log({"ev": "sender_rtt", "endpoints": [{"host": e["host"], "address": e["ip"], "warm_rtt_ms": e["rtt_ms"], "ok": e["ok"]} for e in self.eps]})
             n += 1; time.sleep(5)
+
+    def _ping_pool(self, p):
+        e = p["e"]
+        with p["lock"]:
+            try:
+                if p["c"] is None:
+                    p["c"] = self._connect(e)
+                p["c"].request("POST", e["path"], body=self.PING, headers=UA); p["c"].getresponse().read()
+            except Exception:
+                p["c"] = None
+
+    def fire_slot(self, body, slot):
+        """one shot of a burst on its own warm socket to the sequencer (slot: pool index): the request is written and the call
+        returns; the reply is read in the background. Returns (hash, answers) like fire()."""
+        p = self.pool[slot]; e = p["e"]; out = _Answers(); t0 = mono()
+        try:
+            h = "0x" + keccak(bytes.fromhex(json.loads(body)["params"][0][2:])).hex()
+        except Exception:
+            h = None
+        meta = {"pending": 0, "done": threading.Event(), "t0": t0, "hash": h, "replies": [], "write_ms": None}; out.meta = meta
+        if not p["lock"].acquire(timeout=0.02):
+            out.append((e["host"], {"error": "burst socket busy: shot skipped"})); meta["done"].set(); meta["complete"] = True; return None, out
+        try:
+            if p["c"] is None:
+                p["c"] = self._connect(e)
+            p["c"].request("POST", e["path"], body=body, headers=UA)
+        except Exception as ex:
+            p["c"] = None; p["lock"].release(); out.append((e["host"], {"error": str(ex)[:120]})); meta["done"].set(); meta["complete"] = True; return None, out
+        meta["pending"] = 1; meta["write_ms"] = round(1000 * (mono() - t0), 2)
+        threading.Thread(target=self._read_pool, args=(p, e, out, meta), daemon=True).start()
+        return h, out
+
+    def _read_pool(self, p, e, out, meta):
+        try:
+            d = json.loads(p["c"].getresponse().read())
+        except Exception as ex:
+            p["c"] = None; d = {"error": str(ex)[:120]}
+        finally:
+            p["lock"].release()
+        out.append((e["host"], d)); meta["replies"].append((e["host"], round(1000 * (mono() - meta["t0"]), 1))); meta["done"].set(); meta["complete"] = True
+        log({"ev": "send_answers", "hash": meta["hash"], "write_ms": meta["write_ms"], "reply_ms": meta["replies"], "answers": [(hh, str(dd)[:120]) for hh, dd in out]})
 
     def _read(self, e, out, meta):
         """background: the endpoint's reply to a fired transaction; releases the endpoint's lock taken by fire()"""
@@ -451,20 +500,24 @@ def abi_word(x):
 
 
 SEND = None                                                # the operator's send step, loaded from SEND_MODULE (deploy/send_step.py); None = dry run
+SEND_BURST = None                                          # its burst variant, make_burst(engine) -> submit_burst(txs, at, label) -> [(hash, answers)]
 
 
 def load_send_step():
     """SEND_MODULE=/etc/sniper/send_step.py: a file the operator writes (the reference is deploy/send_step.py) whose make(engine)
     returns a function submit(tx, label) -> hash. Nothing in the repository signs or sends; without the file the engine
     stays in dry run. The file is read once at start; an error in it stops the engine before the feed is opened."""
-    global SEND
+    global SEND, SEND_BURST
     path = os.environ.get("SEND_MODULE", "")
     if not path:
         return
     import importlib.util
     spec = importlib.util.spec_from_file_location("sniper_send_step", path); mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
     SEND = mod.make(sys.modules[__name__])
-    log({"ev": "send_step_loaded", "path": path, "wallet": WALLET})
+    SEND_BURST = mod.make_burst(sys.modules[__name__]) if hasattr(mod, "make_burst") else None
+    if BURST_N > 1 and SEND_BURST is None:
+        raise SystemExit("BURST_N > 1 needs the burst-capable send step (make_burst): sudo cp deploy/send_step.py /etc/sniper/send_step.py")
+    log({"ev": "send_step_loaded", "path": path, "wallet": WALLET, "burst": BURST_N if SEND_BURST else None})
 
 
 def submit(tx, label):
@@ -556,7 +609,7 @@ def wait_for_second(feed_ts, seconds, seen_at, deadline=3.5, watch=None):
     if SEND_MODE == "predict" and seconds >= 1:
         b = boundary(); ref = state["ref"]
         if b is not None and b[1] >= 0.5 and ref is not None:                 # a low-confidence estimate (a stalled or jittery feed) falls back to react
-            target = ref[0] + (target_ts - ref[1]) + b[0] + MARGIN_MS / 1000.0
+            target = ref[0] + (target_ts - ref[1]) + b[0] + MARGIN_MS / 1000.0 - (BURST_LEAD_MS / 1000.0 if BURST_N > 1 else 0.0)   # a burst starts BURST_LEAD_MS early
             with cond:
                 while state["feed_ts"] < target_ts and mono() - seen_at < deadline:
                     d = target - mono()
@@ -990,6 +1043,29 @@ def wait_receipt(h, timeout=10.0, ans=None):
     return None
 
 
+def burst_receipts(shots, timeout=10.0, settle_s=0.6):
+    """the receipts of a burst's shots, read in parallel: returns [(hash, receipt or None, answers)] in shot order as soon as a
+    filled shot is in and the rest have had settle_s to land, or when every shot has a receipt or a refusal, or at timeout"""
+    res = [[hh, None, a] for hh, a in shots]; done = [False] * len(shots)
+    def one(i):
+        if res[i][0]:
+            res[i][1] = wait_receipt(res[i][0], timeout=timeout, ans=res[i][2])
+        done[i] = True
+    ths = [threading.Thread(target=one, args=(i,), daemon=True) for i in range(len(shots))]
+    for t in ths:
+        t.start()
+    t0 = mono(); t_fill = None
+    while mono() - t0 < timeout:
+        if all(done):
+            break
+        if t_fill is None and any(r[1] and r[1].get("status") == "0x1" for r in res):
+            t_fill = mono()
+        if t_fill is not None and mono() - t_fill > settle_s:
+            break
+        time.sleep(0.02)
+    return [tuple(r) for r in res]
+
+
 def next_nonce():
     try:
         return int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16)
@@ -1415,15 +1491,36 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         if gc_usd is not None and gc_usd > GAS_MAX_SHARE * stake_usd:
             gates.append(f"gas ${gc_usd:.2f} per round trip > {100 * GAS_MAX_SHARE:.0f}% of stake")
         if not gates:
-            state["busy_until"] = mono() + HOLD + 3; nonce = state["nonce"]; state["nonce"] += 3; gas_price = state["gas_price"]
+            state["busy_until"] = mono() + HOLD + 3; nonce = state["nonce"]; state["nonce"] += BURST_N + 2; gas_price = state["gas_price"]   # the shots, the approve, the sell
     if gates:
         threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
         log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
     X, Y = w["X"], w["Y"]; stake_eth = stake_usd / state["eth_usd"]
     tk, net, gross, fee = size_buy(X, Y, stake_eth, SEAT)
-    amount_in = int(gross * 1e18); min_out = int(tk * (1 - SLIP) * 1e18)
+    amount_in = int(gross * 1e18); min_out = int(tk * (1 - (BURST_SLIP if BURST_N > 1 else SLIP)) * 1e18)
     buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
-    h = submit(buy, "buy"); t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk); buy_ans = SENDER.mine()
+    shots = None
+    if BURST_N > 1:                                                     # 5.6: BURST_N shots at consecutive nonces, BURST_STEP_MS apart, straddling the predicted boundary
+        own = 1 - ((Y - tk) * net / (X + 2 * net)) / tk if tk > 0 else 0.0   # tokens a second identical shot would get after our own fill, as a shortfall
+        if own < BURST_SLIP + 0.005:
+            decision["burst_note"] = f"stake too small for the burst's guard: a second shot would fill ({100*own:.1f}% shortfall < BURST_SLIP {100*BURST_SLIP:.0f}%)"
+        t_first = mono() + 0.0015 * BURST_N                               # the send step signs them all first (about 1.5 ms each)
+        txs = [dict(buy, nonce=hex(nonce + i)) for i in range(BURST_N)]; at = [t_first + i * BURST_STEP_MS / 1000.0 for i in range(BURST_N)]
+        if SEND_BURST is not None:
+            shots = SEND_BURST(txs, at, "buy")
+        else:
+            shots = []
+            for i, tx in enumerate(txs):
+                while mono() < at[i]:
+                    pass
+                shots.append((submit(tx, f"buy#{i}"), None))
+        h = next((hh for hh, _ in shots if hh), None); buy_ans = next((a for hh, a in shots if hh), None)
+        decision["burst"] = BURST_N; decision["burst_step_ms"] = BURST_STEP_MS; decision["burst_lead_ms"] = BURST_LEAD_MS
+        if h:
+            log({"ev": "burst_shots", "curve": curve, "hashes": [hh for hh, _ in shots], "nonces": [nonce + i for i in range(BURST_N)]})
+    else:
+        h = submit(buy, "buy"); buy_ans = SENDER.mine()
+    t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk)
     if h:
         state["live_trades"] = state.get("live_trades", 0) + 1                # a real buy left the box (the cap counts sends, not fills)
     decision["amount_in_eth"] = amount_in / 1e18; decision["min_out_tokens"] = min_out / 1e18        # for the scorer's revert check (5.44)
@@ -1435,7 +1532,29 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
          "seat_flip_to_send_ms": round((t_buy - state["flip_at"][feed_ts + SEAT_SECONDS[SEAT]]) * 1000, 1) if (feed_ts + SEAT_SECONDS.get(SEAT, 0)) in state["flip_at"] else None,
          "stake_usd": stake_usd, "tokens_target": tk, "supply_share": tk / Y0, "fee_assumed": fee, "price_vs_creator": round((X / Y) / p_creator, 3),
          "margin_ms": MARGIN_MS if send_mode and send_mode.startswith("predict") else None})
-    if h:                                                            # live: the tokens actually received, from the buy's own event
+    if h and shots is not None:                                      # live burst: every shot's receipt; the filled one is the buy
+        recs = burst_receipts(shots)
+        filled = [(hh, r) for hh, r, _ in recs if r and r.get("status") == "0x1"]; included = [(hh, r) for hh, r, _ in recs if r]
+        log({"ev": "burst_landing", "curve": curve, "filled": len(filled), "shots": [{"hash": hh, "status": (r or {}).get("status"), "block": int(r["blockNumber"], 16) if r else None,
+             "tx_index": int(r["transactionIndex"], 16) if r else None, "rejected": bool(a is not None and SENDER.rejected(a)) if r is None else False} for hh, r, a in recs]})
+        if not filled:
+            if not included:
+                log({"ev": "buy_rejected", "curve": curve, "hash": h, "answers": [(hh, str(d)[:120]) for _, _, a in recs if a for hh, d in a][:8]})
+            else:
+                log({"ev": "buy_reverted", "curve": curve, "hash": included[0][0], "note": f"{len(included)} shots included, none filled (all in the creation second, or behind the crowd past BURST_SLIP)"})
+            state["traded"].pop(curve, None); release_reservation(); return
+        h, rec = filled[0]
+        if len(filled) > 1:
+            log({"ev": "alarm", "what": f"burst double fill: {len(filled)} shots filled (BURST_SLIP too loose for this stake); selling all of them", "curve": curve})
+        if SEAT in ("E1", "E2"):
+            threading.Thread(target=tune_margin, args=(rec, feed_ts + SEAT_SECONDS[SEAT]), daemon=True).start()
+        tokens = 0.0
+        for _, r in filled:
+            for l in r.get("logs", []):
+                if l["topics"][0] == BUY_EV and l["address"].lower() == curve:
+                    tokens += int(l["data"][2 + 64:2 + 128], 16) / 1e18
+        t_buy = mono()
+    elif h:                                                          # live: the tokens actually received, from the buy's own event
         rec = wait_receipt(h, ans=buy_ans)
         if rec is None and buy_ans and SENDER.rejected(buy_ans):
             log({"ev": "buy_rejected", "curve": curve, "hash": h, "answers": [(hh, str(d)[:120]) for hh, d in buy_ans]})
@@ -1459,7 +1578,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             r = resolve_rpc(creator, deadline=HOLD - 1, lookback=120); token = r[0] if r else curve
             if not r:
                 log({"ev": "alarm", "what": "token address unknown at the exit: approving on the curve will revert; close_position re-resolves on every retry", "curve": curve})
-    pos = {"curve": curve, "token": token, "creator": creator, "tokens": tokens, "nonce": nonce, "t_buy": t_buy, "buy_hash": h, "approved": False, "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0)}
+    pos = {"curve": curve, "token": token, "creator": creator, "tokens": tokens, "nonce": nonce + (BURST_N - 1 if shots is not None else 0), "t_buy": t_buy, "buy_hash": h, "approved": False, "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0)}   # approve at +1, sell at +2 after the last shot
     state["open"] = pos; save_state()
     cap = (state.get("base_fee") or gas_price or 0) * SELL_GAS_HEADROOM if h else (gas_price or 0)
     pos["approve_hash"] = submit(tx_approve(pos, nonce + 1, cap), "approve"); pos["approved"] = True; save_state()
@@ -1769,8 +1888,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.53, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.6, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":

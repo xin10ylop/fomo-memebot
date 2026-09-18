@@ -229,7 +229,7 @@ not a knob to raise.
 **29. Take money out:** stop the engine, then on the machine send ETH from the wallet to your Phantom address with the
 same kind of one-line script as step 18 (ask me for it when you are there), or import the KEY into a fresh wallet once.
 
-**30. The E1 seat test** (runbook section 9) needs $60 to spare and a two-core machine in Ohio (AWS c6i.large). Ask me
+**30. The E1 seat test** (runbook section 9) needs $60 to spare and a two-core machine in Ohio (AWS c6i.large). Ask me Since Sep 18 the test runs with the burst send of runbook 5e (engine 5.6): ten launches at $100, `BURST_N=5`, and `src/analysis/landing_check.py --log` reads where every shot landed.
 when the bankroll is there.
 
 ---

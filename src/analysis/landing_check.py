@@ -65,5 +65,6 @@ if "--log" in sys.argv:
         except Exception: continue
         if e.get("ev") == "buy_reverted" and e.get("hash"): hashes.append(e["hash"])
         if e.get("ev") == "trade_done" and not e.get("dry_run") and e.get("buy_hash"): hashes.append(e["buy_hash"])
+        if e.get("ev") == "burst_landing": hashes += [sh["hash"] for sh in e.get("shots", []) if sh.get("hash") and sh.get("block") is not None]   # every included shot of a burst
 for h in dict.fromkeys(hashes): check(h)
 if not hashes: print("no buy hashes (pass them, or --log engine.jsonl)")

@@ -1,0 +1,107 @@
+The next-second seat and the second-two seat with real second boundaries, five full days (Sep 13-18), report 24.20.
+Filters: >=3 named wallets, bundle >=0.3 ETH in the creation second, tier 2-3%, ETH quote; 3% of supply cap; ETH $2,500; the public RPC (src/analysis/e1_multi.py, e1_agg.py, e1_design.py).
+
+=== both legal outside seats with real second boundaries, per day (tier 2-3%, >=3 named, bundle >=0.3 ETH, hold 15 blocks = 1.5 s, $250 capped at 3% of supply)
+day (UTC)                 n  /day |  E1 first    med  win |  E1 last    med  win | E1 +1blk |  E2 first    med |  E2 last    med | $/day E1 first  E1 last
+Sep 13 11:23            225   224 |    +17.3%  +7.2%  61% |    +8.2%  -3.9%  45% |    +5.3% |     +3.0%  -3.7% |    -2.6%  -4.1% |          +9458    +4486
+Sep 14 11:30            189   188 |    +18.5%  +1.6%  51% |    +5.3%  -7.6%  37% |    +3.0% |     +1.8%  -4.1% |    -2.3%  -4.3% |          +8583    +2490
+Sep 15 11:48            124   123 |    +15.2%  +3.5%  58% |    +1.2%  -6.5%  35% |    -2.3% |     -1.8%  -5.1% |    -3.7%  -6.1% |          +4632     +393
+Sep 16 11:41             74    74 |    +16.4%  -1.9%  49% |    +2.7%  -9.6%  27% |    -2.6% |     +0.0%  -4.3% |    -1.7%  -5.1% |          +2957     +538
+Sep 17 11:21            128   128 |    +10.8%  +1.5%  54% |    -3.6%  -9.8%  25% |    -5.3% |     -2.4%  -4.5% |    -3.4%  -5.2% |          +3469    -1125
+
+=== all days pooled: 740 launches over 5.0 days
+variant                       n    mean  median  win  dead  $/trade
+E1_first_h15_250            740  +16.1%   +3.7%  56%    1%   +39.47
+E1_first_h30_250            740  +16.2%   +3.6%  55%    2%   +39.92
+E1_first_h60_250            740  +14.6%   +0.2%  50%    8%   +36.08
+E1_first_h60tp50_250        740  +12.6%   +2.2%  52%    7%   +31.08
+E1_last_h15_250             740   +3.7%   -7.8%  36%    2%    +9.22
+E1_last_h30_250             740   +4.1%   -7.6%  38%    5%   +10.16
+E1_last_h60_250             740   +2.9%   -8.3%  37%   14%    +7.37
+E1_last_h60tp50_250         740   +2.5%   -7.6%  39%   13%    +6.41
+E1_late1_h15_250            740   +0.8%   -8.9%  31%    3%    +2.12
+E1_late1_h30_250            740   +0.9%   -8.8%  33%    6%    +2.37
+E2_first_h15_250            740   +0.6%   -4.1%  31%    3%    +1.76
+E2_first_h30_250            740   -0.4%   -4.1%  32%    7%    -0.94
+E2_first_h60_250            740   -0.6%   -5.1%  35%   15%    -1.30
+E2_last_h15_250             740   -2.7%   -4.8%  22%    4%    -6.63
+E2_last_h30_250             740   -3.8%   -5.5%  25%    8%    -9.29
+E2_last_h60_250             740   -3.9%   -5.9%  30%   17%    -9.40
+E1_first_h15_10             740  +15.4%   +3.4%  55%    1%    +1.54
+E1_last_h15_10              740   +3.3%   -7.9%  36%    2%    +0.33
+
+=== the first block of the next second: launches with nobody else in it 231/740 (31%); other buys per launch mean 2.6, median 2
+   most frequent occupants (buyer address in the Buy event, launches present / all launches):
+     0x0d20e37ebe71ea4e6db345079e59f12a02e2574e   114 / 740  (15%)
+     0xf3ce52b1c49c09ac1ca3d57c1557b303c83732b3    75 / 740  (10%)
+     0x3e7c18b0b1ec729819043a33115459b0ac9c000b    74 / 740  (10%)
+     0x946a63ddc8047761805459a54ca619c51696994a    68 / 740  (9%)
+     0xfefe306eb0e5eaf0d6821a1d2935ffc5cfa8cc1b    65 / 740  (9%)
+     0x2abdd72b5bb40ba0df894d33d40aee918da551ae    59 / 740  (8%)
+     0x5136067ccc0065c20ac16cd7191d08564e19d71e    59 / 740  (8%)
+     0x6c56103c6af4891be46cb3666c1fa354cc79eaca    57 / 740  (8%)
+   launches where at least one of the top-3 occupants is in the block: 185/740 (25%)
+   blocks sharing the creation's second after the creation block: median 6; E2-block other buys mean 1.3, empty 63%
+
+=== E1 first, by hour UTC: n / mean
+  00:24/+15%  01:13/+9%  02:18/-2%  03:9/+9%  05:8/+43%  06:12/+39%  07:10/+33%  08:16/+11%  09:8/+16%  10:9/+6%  11:18/+6%  12:23/+10%  13:39/+12%  14:41/+21%  15:69/+24%  16:58/+19%  17:65/+10%  18:47/+21%  19:49/+10%  20:66/+19%  21:52/+10%  22:47/+18%  23:39/+18%
+
+=== design questions
+=== alone in the block vs contested, five days pooled
+  alone (231/740 = 31%):      first  -3.2% med -10.0% win 21% n 231
+  contested, first:               +24.8% med +13.7% win 71% n 509
+  contested, last:                 +6.8% med  -4.4% win 43% n 509
+  by day: alone share / alone value / contested-first / contested-last
+    Sep 17:  29% /  -9.3% / +19.1% /  -1.3%
+    Sep 16:  22% /  -4.4% / +22.2% /  +4.6%
+    Sep 15:  20% /  -8.2% / +21.1% /  +3.5%
+    Sep 14:  32% /  -5.0% / +29.5% / +10.1%
+    Sep 13:  41% /  +2.0% / +28.1% / +12.6%
+
+=== minOut tolerance as a position filter (a 'last' landing fills only if the crowd ahead moved the price less than the tolerance)
+  tolerance   2%: behind the crowd -> fills  21% of the time, mean  +0.1%  (vs  +6.8% filling always)
+  tolerance   3%: behind the crowd -> fills  26% of the time, mean  +0.4%  (vs  +6.8% filling always)
+  tolerance   5%: behind the crowd -> fills  34% of the time, mean  +1.7%  (vs  +6.8% filling always)
+  tolerance  10%: behind the crowd -> fills  54% of the time, mean  +3.9%  (vs  +6.8% filling always)
+  tolerance  25%: behind the crowd -> fills  83% of the time, mean  +5.6%  (vs  +6.8% filling always)
+
+=== expected value per trade by the share of contested blocks we win (3% minOut, alone always ours at -3.2%)
+  win   0% ->  -0.7% a trade,     -262 $/day at $250
+  win  25% ->  +3.5% a trade,   +1,290 $/day at $250
+  win  50% ->  +7.7% a trade,   +2,841 $/day at $250
+  win  75% -> +11.9% a trade,   +4,393 $/day at $250
+  win 100% -> +16.1% a trade,   +5,945 $/day at $250
+
+=== who gets a crowd: share of launches with other buys in the block, by feature
+  bundle ETH:
+    [0.3, 0.5): n 247  contested  62%  first  +8.7%  last  +0.0%
+    [0.5, 0.8): n 276  contested  70%  first +18.8%  last  +4.4%
+    [0.8, 1.2): n  82  contested  73%  first +17.1%  last  +2.0%
+    [1.2, 2.0): n  97  contested  78%  first +21.8%  last +10.7%
+    [2.0, 99): n  38  contested  74%  first +27.4%  last  +8.1%
+  tier:
+    [0.02, 0.0225): n 273  contested  68%  first +11.8%  last  -0.9%
+    [0.0225, 0.0275): n  68  contested  82%  first +20.9%  last  +8.2%
+    [0.0275, 0.0301): n 399  contested  67%  first +18.2%  last  +6.0%
+  blocks left in the creation second after the creation block:
+    [0, 3): n 110  contested  66%  first +14.6%  last  +4.0%
+    [3, 6): n 235  contested  71%  first +20.5%  last  +5.9%
+    [6, 12): n 395  contested  68%  first +13.8%  last  +2.3%
+  hour UTC:
+    [0, 4): n  64  contested  73%  first  +8.1%  last  +0.7%
+    [4, 8): n  30  contested  80%  first +38.1%  last +12.3%
+    [8, 12): n  51  contested  59%  first  +8.9%  last  +0.6%
+    [12, 16): n 172  contested  73%  first +18.6%  last  +4.2%
+    [16, 20): n 219  contested  63%  first +14.8%  last  +2.7%
+    [20, 24): n 204  contested  71%  first +16.4%  last  +4.8%
+
+=== first value by the number of other buys in the block
+  0 others: n 231  first  -3.2%  med -10.0%
+  1 others: n 126  first  +5.2%  med  -5.4%
+  2 others: n  90  first +23.1%  med  +4.2%
+  3 others: n  79  first +18.6%  med  +9.9%
+  4 others: n  50  first +22.5%  med +11.8%
+  5 others: n  40  first +30.7%  med +20.7%
+  6+ others: n 124  first +49.0%  med +33.1%
+
+=== stake: first at $10 +15.4% vs $250 (3% cap) +16.1%; capped launches (stake < $250): 36%, mean stake $241

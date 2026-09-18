@@ -25,3 +25,24 @@ def make(engine):
         engine.log({"ev": "sent_tx", "label": label, "hash": result, "answers": [(h, str(d)[:120]) for h, d in answers]})
         return result
     return submit
+
+
+def make_burst(engine):
+    """engine 5.6, BURST_N > 1: the buy as BURST_N shots at consecutive nonces. All are signed first; then each is written to
+    its own warm socket to the sequencer at its scheduled time (engine.SENDER.fire_slot). Shots that reach the sequencer
+    before the second boundary land in the creation second and revert on their minOut for the gas; the first one past it
+    fills; the later ones revert on the same minOut once our own fill has moved the price. Returns [(hash, answers)]."""
+    key = Account.from_key(os.environ["PRIVATE_KEY"])
+    mono = engine.mono
+
+    def submit_burst(txs, at, label):
+        bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + bytes(key.sign_transaction(tx).raw_transaction).hex()]}).encode() for tx in txs]
+        t_signed = mono(); out = []; fired_at = []
+        for i, body in enumerate(bodies):
+            while mono() < at[i]:
+                pass
+            fired_at.append(mono()); out.append(engine.SENDER.fire_slot(body, i))
+        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "sign_ms": round(1000 * (t_signed - (at[0] - 0.0015 * len(txs))), 1),
+                    "shot_ms": [round(1000 * (t - at[0]), 1) for t in fired_at], "late_ms": [round(1000 * (t - a), 2) for t, a in zip(fired_at, at)]})
+        return out
+    return submit_burst

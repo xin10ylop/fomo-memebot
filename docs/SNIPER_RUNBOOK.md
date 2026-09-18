@@ -389,6 +389,40 @@ and records the boundary estimate and the send timing. On a paper box add `CHAIN
 (`MAX_LIVE_TRADES=3` at $10 with the send step), then `src/analysis/live_check.py` and the receipt's index against the
 other buys of its block. First every time, the seat pays +8–20%; behind the bots, it pays nothing and the strategy stops.
 
+## 5e. Five days on the true clock, the burst send, and the landing test (engine 5.6, report 24.20)
+
+Five days with real second boundaries (Sep 13–18, 740 launches, `data/derived/e1_five_days_0918.txt`): the next-second seat
+pays **+16.1% a trade first in its block** (+3.7% median, 56% win, 1% dead, 148 launches a day, about $5,900 a day at $250
+stakes), +3.7% behind the block's other buys, +0.8% one block late; the second-two seat is dead (+0.6% first, −2.7%
+behind). The value is the crowd: alone in the block −3.2%, first ahead of one bot +5%, ahead of two or more +19% to +49%,
+and behind a big crowd still +6.8%. Bundles under 0.5 ETH draw fewer bots and pay +8.7% first, nothing behind. Hold 1.5 s
+and 3 s score alike; 6 s and a +50% take-profit score worse. 02:00–04:00 UTC is the one negative stretch (small sample).
+
+**The burst.** `BURST_N` shots at consecutive nonces, `BURST_STEP_MS` apart, the first `BURST_LEAD_MS` before the predicted
+boundary (predict mode only; the sender keeps one warm socket per shot to the sequencer; the send step signs all shots
+first). A shot that reaches the sequencer before the tick lands in the creation second and reverts on its minOut for the
+gas, about $0.008; the first past the tick fills; the later ones must revert on the same minOut once our own fill has moved
+the price. So `BURST_SLIP` sits just below our own impact and no lower: at $250 (3% of supply) a second identical shot
+gets about 8% fewer tokens, so 7%; at $100 about 3.4%, so 3%. Any looser and a second shot fills; any tighter and a fill
+behind a crowd that still pays is thrown away (5% throws away two thirds of the +6.8%). The engine notes on the decision
+when the stake is too small for the guard. Needs the burst-capable send step: `sudo cp deploy/send_step.py
+/etc/sniper/send_step.py`.
+
+**The landing test**, on the Ohio box (`deploy/ohio_setup.sh`, section 3; the New York droplet is 14 ms away one way, the
+losing bucket of section 20.8), after an hour of paper there to fill the boundary estimator:
+
+    SEAT=E1 SEND_MODE=predict MARGIN_MS=0 BURST_N=5 BURST_STEP_MS=3 BURST_LEAD_MS=8 BURST_SLIP=0.03
+    STAKE_MIN=100 STAKE_MAX=100 MAX_LIVE_TRADES=10 HOLD_S=1.5 TAKE_PROFIT=0 TIER_MIN_BPS=100 TIER_MAX_BPS=200
+    BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.5 BUNDLE_MAX_ETH=0 MIN_CREATOR_SUPPLY=0.01 E0_BUNDLE_WAIT_S=0.9 E0_BUNDLE_MAX_BLOCKS=9
+    SEND_MODULE=/etc/sniper/send_step.py
+
+Ten launches; then `ALCHEMY_KEY=... python3 src/analysis/landing_check.py --log /var/log/sniper/engine.jsonl`: every
+included shot with its block, second, index and the other buys before and after it. The number that decides: the share of
+contested launches whose filled shot is first in the next second's first block. Above three in four, production at $250 with
+`BURST_SLIP=0.07`, `STAKE_MAX=250`, `MAX_LIVE_TRADES` off, `BUNDLE_MIN_ETH=0.5` (add the 0.3–0.5 ETH bundles only if the
+landing share stays high: they pay +8.7% first and nothing behind). Around half, the seat pays about +8% a trade and is
+worth running with the same care. Below one in four, it pays nothing and the strategy stops there.
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while
