@@ -50,14 +50,15 @@ def check(h):
         if tk <= 0 or tk >= Y or eth <= 0: continue
         net = X * tk / (Y - tk); fee = 1 - net / eth; X += net; Y -= tk
         if tier is None: tier = fee; continue
-        if ebl == bl and e["transactionHash"].lower() != h.lower():
+        if ebl == bl and e["transactionHash"].lower() not in OURS:          # the other shots of our own burst are not "others"
             cls = "exempt" if abs(fee - tier) <= 0.0008 else ("98%" if fee - tier > 0.5 else f"+{100 * (fee - tier):.1f}%")
             (before if eidx < idx else after).append(f"idx {eidx} {eth:.3f} ETH {cls}")
     gas = int(rc["gasUsed"], 16) * int(rc.get("effectiveGasPrice", tx.get("gasPrice", "0x0")), 16) / 1e18
     print(f"{h[:12]}  curve {cv[:10]}  {'OK' if ok else 'REVERTED'}  block +{bl - b0} after the creation, index {idx}, gas {gas:.6f} ETH")
     print(f"    landed in: {where}")
     print(f"    other buys of this curve in our block: {len(before)} before us [{', '.join(before)}], {len(after)} after us [{', '.join(after)}]")
-    print(f"    verdict: {'FIRST IN THE BLOCK' if not before and Tb == T0 + 1 and bl == first_next else 'not first'}")
+    print(f"    verdict: {'FIRST IN THE BLOCK' if not before and Tb == T0 + 1 and bl == first_next else ('reverted' if not ok else 'not first')}")
+OURS = set()
 hashes = [a for a in sys.argv[1:] if a.startswith("0x")]
 if "--log" in sys.argv:
     for l in open(sys.argv[sys.argv.index("--log") + 1]):
@@ -66,5 +67,6 @@ if "--log" in sys.argv:
         if e.get("ev") == "buy_reverted" and e.get("hash"): hashes.append(e["hash"])
         if e.get("ev") == "trade_done" and not e.get("dry_run") and e.get("buy_hash"): hashes.append(e["buy_hash"])
         if e.get("ev") == "burst_landing": hashes += [sh["hash"] for sh in e.get("shots", []) if sh.get("hash") and sh.get("block") is not None]   # every included shot of a burst
+OURS.update(x.lower() for x in hashes)
 for h in dict.fromkeys(hashes): check(h)
 if not hashes: print("no buy hashes (pass them, or --log engine.jsonl)")
