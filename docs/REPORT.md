@@ -2660,3 +2660,25 @@ jitter, and it names the block nine times in ten, the tenth being the 9-block ca
 and the burst is sized to it: 50 shots 3 ms apart from 100 ms before the predicted block window to 47 ms after, about
 18 cents of reverts a launch, `SLOT_SEND=1 SLOT_LEAD_MS=100 FEED_LAG_MS=85`. Every landing logs the flip's arrival against
 the first shot and the first fill, the constants that narrow the window once they repeat.
+
+### 24.23 First landings at the front of the block on the launches that pay (Sep 18, 16:5x–17:1x UTC)
+
+Four ramp-aimed bursts from Ohio (50 shots 3 ms apart, 100 ms before the ramp's predicted block window to 47 ms after,
+$15 stakes, 3% guard) on 2–3% tier launches with bundles of 0.5 ETH and more:
+
+| launch | shots before the seat block opened | our first shot in the seat second's first block | outcome |
+|---|---|---|---|
+| 0x511f1f88 | 17 | index 2, filled | sold 1.5 s later, about +7% |
+| 0x482b6bcd | 27 | **index 1, filled** | sold, about +7% |
+| 0xddd5df06 | 30 | index 2, one bot ahead, the 3% guard refused | gas |
+| 0xa92fdeb8 | 30 | index 4, three bots ahead, the guard refused | gas |
+
+Every burst straddled the block's opening (the fill or the first seat-block shot fell between shots 18 and 31 of 50),
+so the timing is solved to the width of the window, about 18 cents of reverts a launch. The race then reads first, first,
+second, fourth: three of four at the front or one behind it. Between our first seat-block shot and the next one 3 ms
+later, 20 to 50 other transactions landed every time: the crowd arrives within milliseconds of the opening, and the first
+shot past it is the seat. The wallet went from 0.02677 to 0.02755 ETH on the two fills, about +$2 on $30 of stakes. Every
+shot the sequencer was asked to take, it took (all fifty answers carried the hash); one burst's last twelve shots were
+mined after the ten-second receipt wait, harmless. At test stakes the 3% guard refuses a fill behind one bot, which the
+five-day table says is still worth taking; at production stakes the guard is 7% and our own fill is what protects the
+burst, so that fill goes through.
