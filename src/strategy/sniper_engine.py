@@ -1174,12 +1174,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             pass
         return cands
     if SEAT in ("E1", "E2") and BUNDLE_MIN > 0:
-        cands = count_cands()                                              # the moment BUNDLE_MIN named wallets have bought one curve, that is the curve
-        while (not cands or cands.most_common(1)[0][1] < BUNDLE_MIN) and state["feed_ts"] <= feed_ts and mono() - seen_at < 1.5:
-            with cond:
-                cond.wait(0.25)
-            cands = count_cands()
-        if cands:
+        cands = count_cands()                                              # direct named buys already on the feed name the curve at once; a bundle through a
+        if cands:                                                          # helper call (every bundle since Sep 17) is read by the shared wait below (5.52)
             a, c = cands.most_common(1)[0]
             if c >= BUNDLE_MIN:
                 curve = a; src = "feed"
@@ -1254,7 +1250,11 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         bundle_wait_ms = round((mono() - seen_at) * 1000)
         with cond:
             state["blocks"] = max(state["blocks"], chain_rows[2])           # the chain's progress as the log read saw it: blocks_to_seat is real
-    elif SEAT == "E0" and BUNDLE_MIN > 0:
+    elif SEAT in ("E0", "E1", "E2") and BUNDLE_MIN > 0 and curve is None and known is None:
+        # 5.52: every seat on the feed path resolves the curve the same way: the creation receipt (or the log scan) in a thread from the
+        # first millisecond, the bundle counted in buyers from direct buys and helper calls (24.18). Before 5.52 the E1/E2 path waited
+        # for direct named buys that today's single-transaction bundles never make, so it resolved the curve only when the next second
+        # opened on the feed: after the moment an E1 send has to leave.
         # 5.3-5.4: the creation-second seat enters only once the bundle is VISIBLE on the feed, never ahead of it (report 24.15); the bundle
         # is the named wallets' transactions in the creation block and the next nine, direct or through a helper contract (24.16). The chain
         # resolve of the curve starts in the first millisecond and runs while the bundle is awaited; the send goes out when both are in hand.
@@ -1384,7 +1384,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             gates.append("tax schedule changed (alarm): not trading")
         if mono() < state["busy_until"] or state["open"] is not None:
             gates.append("position open")
-        resolve_lim = max(MAX_RESOLVE_MS, int(1000 * E0_BUNDLE_WAIT_S) + 150) if SEAT == "E0" else MAX_RESOLVE_MS   # the E0 resolve includes the wait for the bundle
+        resolve_lim = max(MAX_RESOLVE_MS, int(1000 * E0_BUNDLE_WAIT_S) + 150) if BUNDLE_MIN > 0 else MAX_RESOLVE_MS   # the resolve includes the wait for the bundle (5.52: every seat)
         if resolve_ms > resolve_lim:
             gates.append(f"resolved in {resolve_ms} ms > {resolve_lim}")
         if state["bankroll"] < STAKE_MIN:
@@ -1767,7 +1767,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.51, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.52, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

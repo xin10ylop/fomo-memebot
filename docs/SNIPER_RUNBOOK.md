@@ -377,6 +377,12 @@ edge, and paper cannot measure it: only a real send can. Paper E1 (the engine's 
 
     SEAT=E1 SEND_MODE=predict MARGIN_MS=15 HOLD_S=1.5 TAKE_PROFIT=0 TIER_MIN_BPS=100 TIER_MAX_BPS=200 BUNDLE_MIN=3
     BUNDLE_MIN_ETH=0.3 BUNDLE_MAX_ETH=0 MIN_CREATOR_SUPPLY=0.01 MIN_FOLLOW_ETH_60=0 MAX_RESOLVE_MS=600 SEND_MODULE=
+    E0_BUNDLE_WAIT_S=0.9 E0_BUNDLE_MAX_BLOCKS=9
+
+(engine 5.52: the E1 and E2 seats resolve the curve and count the bundle exactly as the creation-second path does, from the
+creation receipt and the helper calls' calldata, so a single-transaction bundle is seen before the boundary; before 5.52
+the next-second path waited for direct named buys and only resolved the curve when the next second opened on the feed, too
+late for a predict-mode send. The bundle window is the whole creation second: `E0_BUNDLE_WAIT_S=0.9`, nine blocks.)
 
 and records the boundary estimate and the send timing. A landing test is a decision, not a default: section 9's E1 test
 (`MAX_LIVE_TRADES=3` at $10 with the send step), then `src/analysis/live_check.py` and the receipt's index against the
