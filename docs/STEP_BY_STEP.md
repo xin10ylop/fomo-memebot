@@ -59,6 +59,53 @@ It prints two lines. Put both in your password manager now. `ADDRESS` (starts `0
 
 ---
 
+## Part 1b. The Ohio machine on AWS (30 minutes; needed for the next-second seat, runbook 5e)
+
+**1. Make an AWS account.** Open `https://aws.amazon.com` → **Create an AWS Account**. Email, password, account name;
+then contact details, a card, a phone verification code, and the **Basic support** plan (free). It takes about ten
+minutes; the console is at `https://console.aws.amazon.com`.
+
+**2. Pick the region.** In the console, top right, the region menu: choose **US East (Ohio) us-east-2**. Everything
+below happens in that region; if the menu shows anything else, the machine is in the wrong place.
+
+**3. Launch the instance.** Search box at the top: type **EC2**, open it. Left menu **Instances** → orange **Launch
+instances**.
+- *Name*: `sniper-ohio`.
+- *Application and OS Images*: **Ubuntu** → **Ubuntu Server 24.04 LTS (HVM)**, architecture **64-bit (x86)**.
+- *Instance type*: **c6i.large** (2 vCPU, 4 GiB; about $2 a day). A t3.small is enough for a paper day, not for the race.
+- *Key pair (login)*: **Create new key pair** → name `sniper-ohio`, type **ED25519**, format **.pem** → **Create key
+  pair**. The browser downloads `sniper-ohio.pem`. Move it into `~/.ssh/` and run `chmod 400 ~/.ssh/sniper-ohio.pem`.
+- *Network settings*: leave the default VPC and subnet; **Allow SSH traffic from** → **My IP**.
+- *Configure storage*: **20 GiB gp3**.
+- **Launch instance**. After a minute, open the instance: its **Public IPv4 address** is `OHIO.IP` below.
+
+**4. Connect** (the user is `ubuntu`, not root):
+```
+ssh -i ~/.ssh/sniper-ohio.pem ubuntu@OHIO.IP
+```
+
+**5. Install** (three to five minutes; the engine starts in dry run):
+```
+sudo apt-get install -y git && git clone https://github.com/xin10ylop/fomo-memebot.git && cd fomo-memebot && git checkout claude/memecoin-strategy-research-vcdy6c && sudo bash deploy/ohio_setup.sh
+```
+
+**6. Move the settings and the key from the droplet**, through your laptop, then delete the copy. On the laptop:
+```
+scp -i ~/.ssh/sniper root@DROPLET.IP:/etc/sniper/engine.env ~/engine.env && scp -i ~/.ssh/sniper-ohio.pem ~/engine.env ubuntu@OHIO.IP:/tmp/engine.env && rm ~/engine.env
+```
+On the Ohio machine (paper first: the send step is off until the feed lag is measured and the burst calibrated):
+```
+sudo install -m 600 /tmp/engine.env /etc/sniper/engine.env && rm /tmp/engine.env && sudo cp ~/fomo-memebot/deploy/send_step.py /etc/sniper/send_step.py
+sudo sed -i 's|^SEND_MODULE=.*|SEND_MODULE=|' /etc/sniper/engine.env && sudo systemctl restart sniper-engine
+```
+
+**7. Stop the droplet's engine** once its current test is over, so two engines never share the wallet's nonces:
+```
+sudo systemctl disable --now sniper-engine
+```
+
+Then runbook 5e: the feed-lag probe, the calibration burst, the landing test.
+
 ## Part 2. The node key (5 minutes)
 
 **7. Alchemy account.** Open `https://www.alchemy.com`, **Sign up** (free). In the dashboard click **Create new app**:
