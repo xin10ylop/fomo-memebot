@@ -121,11 +121,11 @@ def tax_bps_of(sel, words):
     v = int.from_bytes(words[13], "big")
     return v if v <= 2000 else None
 SURCHARGE = {"E0": 0.0 if EXEMPT else 0.0618, "E1": 0.0618, "E2": 0.0019}; SEAT_SECONDS = {"E0": 0, "E1": 1, "E2": 2}
-# E0 for a wallet that is not exempt: the creation second after the creation block costs the second-one surcharge, 6.18%, on
-# 94-98% of outsider buys from Sep 2 to Sep 17 (the rest, 96-98%, are contract callers, routers and dust probes: our direct
-# buy with its minOut simply reverts on those tokens). The seat is 0.2-0.4 s after the creation block, ahead of the team's
-# second-one round and of every bot; it pays +25% (Sep 7-10), +23% (Sep 11), +15% (Sep 12-15), +6.5% (Sep 16-17) at 0.3 s
-# on every bundled launch, hold 2 s, take-profit +50%, and loses 3-5 points per 100 ms of delay (report 24.13).
+# E0 for a wallet that is not exempt does not exist (report 24.19, correcting 24.13): the snipe tax is keyed to the block's
+# clock second, so a buy in any block that carries the creation block's timestamp pays ~98%, whatever its block offset
+# (the live trade of Sep 18 landed 3 blocks after the creation and reverted on its minOut). 24.13 measured time in block
+# offsets and mistook next-second buys at small offsets for creation-second buys. The 6.18% surcharge starts with the
+# first block of the next second: that is SEAT=E1. SEAT=E0 is refused at start-up unless EXEMPT=1.
 ZERO = "0x" + "0" * 40
 mono = time.monotonic
 
@@ -1756,10 +1756,8 @@ last_prune_holder = [0.0]
 
 async def main():
     import websockets
-    if SEAT == "E0" and not EXEMPT and not E0_OUTSIDER:
-        raise SystemExit("SEAT=E0 as an outsider pays the 6.18% surcharge in the creation second (not the 93-98% assumed before Sep 17, report 24.13): set E0_OUTSIDER=1 to opt in explicitly (runbook 5d), or EXEMPT=1 for an exempt address.")
-    if SEAT == "E0" and E0_OUTSIDER and not EXEMPT:
-        log({"ev": "note", "what": "SEAT=E0 as an outsider (E0_OUTSIDER=1): 6.18% surcharge in the creation second, no seat wait, the send goes out the moment the bundle is visible on the feed (E0_BUNDLE_WAIT_S), never ahead of it (report 24.15)"})
+    if SEAT == "E0" and not EXEMPT:
+        raise SystemExit("SEAT=E0 for a wallet that is not on the creation's named list: refused. The snipe tax is keyed to the block's clock second, not to the block offset: a buy in any block that carries the creation block's timestamp pays ~98% (the live trade of Sep 18 09:43 UTC landed 3 blocks after the creation, index 1, and reverted on its minOut; report 24.19). E0_OUTSIDER no longer opts in. Use SEAT=E1 (the first block of the next second, 6.18%) or EXEMPT=1 for a named wallet.")
     if PIN_CPU:
         try:
             os.sched_setaffinity(0, {int(c) for c in PIN_CPU.split(",")})
@@ -1769,7 +1767,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.5, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.51, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

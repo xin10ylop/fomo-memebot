@@ -357,35 +357,30 @@ millions, something is subscribed to the whole chain again (engine 4.95–4.99 d
 `PROVIDER_WS=` (empty) switches the chain rivals off altogether; the feed decoder's token matching still covers the
 router blind spot that made trade 6.
 
-## 5d. The creation-second seat (engine 5.48, report 24.13–24.17)
+## 5d. The creation-second seat is closed to outsiders (engine 5.51, report 24.19)
 
-The seat 0.2–0.4 s after the creation block, 6.18% surcharge, ahead of the team's second round and of every bot. It is
-taken only once the bundle is VISIBLE on the feed: the named wallets' buys name the curve and fill the gates; a launch
-whose bundle is not visible within `E0_BUNDLE_WAIT_S` is skipped. Entering ahead of the bundle on the calldata alone is
-the look-ahead of report 24.15, not a seat. The bundle is the named wallets' transactions in the creation block and the
-next nine, direct or through a helper contract (since Sep 17 every bundle goes through one, 24.16); the chain resolve of the
-curve runs in parallel from the first millisecond, the creation transaction's receipt first (a lookup by hash), the log
-scan as the fallback. Opt in explicitly:
+The seat of engines 5.3–5.5 (0.2–0.4 s after the creation block at "6.18%") does not exist for a wallet that is not on
+the creation's named list. The snipe tax is keyed to the block's clock second, not to the block offset: a buy in any block
+that carries the creation block's timestamp pays ~98%, and the 6.18% surcharge starts with the first block of the next
+second. Report 24.13 measured time in block offsets (0.1 s a block) and mistook next-second buys at small offsets for
+creation-second buys. The first live trade (Sep 18 09:43 UTC, $10) landed three blocks after the creation at index 1,
+was offered 1.1% of the fair tokens, and reverted on its minOut: cost, the gas. With real timestamps every one of the
+1,547 outsider buys at 6.2% on Sep 18 sat in a later second, and every same-second outsider buy paid 98%.
 
-    SEAT=E0 E0_OUTSIDER=1 HOLD_S=1.5 TAKE_PROFIT=0 TIER_MIN_BPS=100 TIER_MAX_BPS=200 E0_BUNDLE_WAIT_S=0.45 E0_BUNDLE_MAX_BLOCKS=3
-    MAX_RESOLVE_MS=600 MIN_FOLLOW_ETH_60=0 BUNDLE_MIN=3 BUNDLE_MIN_ETH=0.3 BUNDLE_MAX_ETH=0 MIN_CREATOR_SUPPLY=0.01
+The engine refuses `SEAT=E0` without `EXEMPT=1` (the round-12 guard, back); `E0_OUTSIDER` no longer opts in.
 
-The feed requires permessage-deflate since Sep 17 (`FEED_COMPRESSION=deflate`, the default). When Robinhood's feed refuses
-connections the engine detects from the provider for `PROVIDER_FALLBACK_S` (120 s) and then
-tries the feed again, for ever. On the provider path the seat is refused unless `E0_ALLOW_PROVIDER=1` with the measured
-`PROVIDER_LAG_MS`: run `sudo bash deploy/provider_enable.sh` once on the box (60 s); it enables the seat there only if the
-median lag is under 300 ms against the sequencer feed. When the feed is down the absolute lag cannot be measured; the script
-then enables the seat for PAPER with a pessimistic 300 ms added to every score, and LIVE on the provider path waits for a
-feed-referenced measurement. The provider path is lean (factory events only, 24.17); the E1/E2 seats do not run on it.
+The next-second seat, scored honestly (E1, real second boundaries, >= 3 named wallets, bundle >= 0.3 ETH in the creation
+second, tier 2–3%, hold 1.5 s; `data/derived/e1_honest_0918.txt`, `src/analysis/e1_honest.py`): +8% a trade (median +1%,
+54% win, no dead) if our buy is the FIRST in the next second's first block, −4.6% (median −10%, 20% win) if it lands after
+the two or three bots that queue for that block; two days earlier +20% first, +5% last. The landing position is the whole
+edge, and paper cannot measure it: only a real send can. Paper E1 (the engine's original boundary-timed seat) runs with
 
-Dry-run it for a session and read it with `deploy/speed_readout.py` (rotation-safe, everything since the last start):
-every `trade_decision`'s `bundle_wait_ms` (creation seen to bundle visible), `sent_ms` (creation seen to send) and
-`seat_flip_to_send_ms`; the gate and skip tallies; the share of calldata-passing launches whose bundle showed in time.
-The honest replay (24.15) pays +13–19% a trade with a median near +2 to +8%, p5 −12%, on 45 trades a day in the Sep 16–17
-regime and 140–210 a day in the earlier ones. Go live only if the median send is within ~150 ms of the bundle being
-visible (`sent_ms - bundle_wait_ms`) and the paper mean on the seats taken is positive; the −50% daily stop and the
-switch stay on. The paper scorer places every E0 buy at 0.3 s after the creation block, so its ROI is the replay's row,
-not a speed measurement; only the timing fields are.
+    SEAT=E1 SEND_MODE=predict MARGIN_MS=15 HOLD_S=1.5 TAKE_PROFIT=0 TIER_MIN_BPS=100 TIER_MAX_BPS=200 BUNDLE_MIN=3
+    BUNDLE_MIN_ETH=0.3 BUNDLE_MAX_ETH=0 MIN_CREATOR_SUPPLY=0.01 MIN_FOLLOW_ETH_60=0 MAX_RESOLVE_MS=600 SEND_MODULE=
+
+and records the boundary estimate and the send timing. A landing test is a decision, not a default: section 9's E1 test
+(`MAX_LIVE_TRADES=3` at $10 with the send step), then `src/analysis/live_check.py` and the receipt's index against the
+other buys of its block. First every time, the seat pays +8–20%; behind the bots, it pays nothing and the strategy stops.
 
 ## 6. Kill criteria
 

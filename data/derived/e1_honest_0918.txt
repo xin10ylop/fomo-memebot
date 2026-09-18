@@ -1,0 +1,77 @@
+The next-second seat (E1) with real second boundaries, Sep 18 (report 24.19). Filters: >=3 named wallets, bundle >=0.3 ETH in the creation second, ETH quote, 3% supply cap, hold 15 blocks, 6.18% + tier on the buy, tier on the sell, ETH $2,482.
+
+=== tier 2-3% (the engine's band), last 14 h
+window Sep 17 20:38-Sep 18 10:36 UTC (14.0 h)
+creations: 3685
+qualifying launches (>=3 named, bundle >=0.3 ETH in the creation second, tier 2%-3%): 50  -> 86/day
+blocks after the creation block that still share its second: median 6, share with >=3 such blocks (a 0.3 s send lands inside): 96%
+other buys in our entry block (the first block of the next second): mean 2.7, launches with none 12, mean ETH ahead 0.179
+
+position  stake   n    mean  median   win dead<-20%  $/trade   $/day
+first        10  50   +8.0%   +1.3%   54%        0%    +0.80     +68
+first       100  50   +8.1%   +1.4%   54%        0%    +8.13    +698
+first       250  50   +8.4%   +1.5%   54%        0%   +21.00   +1804
+last         10  50   -4.6%  -10.0%   20%        6%    -0.46     -39
+last        100  50   -4.5%  -10.0%   20%        6%    -4.49    -386
+last        250  50   -4.4%  -10.0%   20%        6%   -10.56    -907
+
+by hour (UTC), position last, $10: n / mean / dead
+  00h:2/+0%/0%  01h:1/-12%/0%  02h:1/-13%/0%  05h:1/+2%/0%  06h:2/-7%/0%  07h:2/+28%/0%  08h:4/-5%/0%  09h:1/+1%/0%  10h:1/-8%/0%  20h:6/-0%/0%  21h:15/-3%/13%  22h:5/-16%/20%  23h:9/-11%/0%
+
+our live launch 0x1372f539: bundle 0.66 ETH, 5 more blocks in its second, 3 buys ahead in the next-second block; E1 $10 first +25.7%, last +0.6%
+
+=== tier 2-3%, same hours two days earlier
+window Sep 15 20:47-Sep 16 10:45 UTC (14.0 h)
+creations: 4159
+qualifying launches (>=3 named, bundle >=0.3 ETH in the creation second, tier 2%-3%): 43  -> 74/day
+blocks after the creation block that still share its second: median 4, share with >=3 such blocks (a 0.3 s send lands inside): 70%
+other buys in our entry block (the first block of the next second): mean 3.4, launches with none 4, mean ETH ahead 0.178
+
+position  stake   n    mean  median   win dead<-20%  $/trade   $/day
+first        10  43  +19.7%  +14.2%   63%        0%    +1.97    +146
+first       100  43  +20.0%  +14.4%   63%        0%   +20.02   +1479
+first       250  43  +20.5%  +14.7%   65%        0%   +49.80   +3679
+last         10  43   +5.2%   -0.9%   44%        5%    +0.52     +38
+last        100  43   +5.3%   -0.8%   44%        5%    +5.30    +391
+last        250  43   +5.5%   -0.8%   44%        5%   +13.95   +1031
+
+by hour (UTC), position last, $10: n / mean / dead
+  00h:4/-1%/0%  01h:3/+3%/0%  02h:2/-5%/0%  03h:1/+6%/0%  05h:1/+20%/0%  06h:1/-39%/100%  07h:1/-24%/100%  08h:3/-12%/0%  09h:1/-6%/0%  10h:1/+19%/0%  20h:5/+3%/0%  21h:4/+5%/0%  22h:8/+13%/0%  23h:8/+18%/0%
+
+=== tier 1-2%, last 14 h
+window Sep 17 20:34-Sep 18 10:32 UTC (14.0 h)
+creations: 3701
+qualifying launches (>=3 named, bundle >=0.3 ETH in the creation second, tier 1-2%): 58  -> 100/day
+blocks after the creation block that still share its second: median 6, share with >=3 such blocks (a 0.3 s send lands inside): 86%
+other buys in our entry block (the first block of the next second): mean 1.2, launches with none 35, mean ETH ahead 0.056
+
+position  stake   n    mean  median   win dead<-20%  $/trade   $/day
+first        10  58   +2.6%   -7.3%   38%        0%    +0.26     +26
+first       100  58   +2.7%   -7.3%   38%        0%    +2.65    +264
+first       250  58   +2.8%   -7.3%   38%        0%    +7.11    +708
+last         10  58   -1.3%   -7.6%   28%        7%    -0.13     -13
+last        100  58   -1.3%   -7.6%   28%        7%    -1.27    -127
+last        250  58   -1.2%   -7.6%   28%        7%    -2.68    -267
+
+by hour (UTC), position last, $10: n / mean / dead
+  00h:5/-8%/0%  01h:5/-8%/0%  04h:1/-8%/0%  06h:2/-8%/0%  07h:2/-8%/0%  08h:5/-7%/0%  10h:1/-8%/0%  20h:4/-17%/50%  21h:21/+4%/10%  22h:4/+3%/0%  23h:8/+7%/0%
+
+=== tier 1-2%, two days earlier
+window Sep 15 20:43-Sep 16 10:41 UTC (14.0 h)
+creations: 4200
+qualifying launches (>=3 named, bundle >=0.3 ETH in the creation second, tier 1-2%): 83  -> 143/day
+blocks after the creation block that still share its second: median 6, share with >=3 such blocks (a 0.3 s send lands inside): 93%
+other buys in our entry block (the first block of the next second): mean 1.8, launches with none 26, mean ETH ahead 0.053
+
+position  stake   n    mean  median   win dead<-20%  $/trade   $/day
+first        10  83   +2.6%   -2.7%   43%        0%    +0.26     +37
+first       100  83   +2.7%   -2.6%   43%        0%    +2.72    +388
+first       250  83   +2.9%   -2.6%   43%        0%    +6.27    +894
+last         10  83   -2.0%   -7.5%   24%        0%    -0.20     -29
+last        100  83   -2.0%   -7.5%   24%        0%    -1.96    -279
+last        250  83   -1.9%   -7.5%   24%        0%    -4.75    -677
+
+by hour (UTC), position last, $10: n / mean / dead
+  00h:7/-8%/0%  01h:9/+7%/0%  02h:1/-0%/0%  03h:1/+6%/0%  04h:5/-8%/0%  05h:2/-8%/0%  08h:1/-6%/0%  09h:2/-12%/0%  10h:3/-10%/0%  20h:5/+1%/0%  21h:23/-2%/0%  22h:19/-3%/0%  23h:5/+5%/0%
+
+=== the rule check: surcharged buys within 9 blocks of a creation, Sep 18, by whether the block shares the creation block's timestamp (first 12 rows)
