@@ -34,7 +34,7 @@ if nt:
     print("refused after the bundle was seen (last 6):")
     for e in nt[-6:]:
         print(f"  {u(e['t'])} {str(e.get('curve'))[:12]} src {e.get('resolve_src')} wait {e.get('bundle_wait_ms')} ms bundle {e.get('bundle')} / {e.get('bundle_eth')} ETH helper {e.get('bundle_helper')} tax {e.get('tax_bps')} | {'; '.join(str(g)[:70] for g in e.get('gates', []))}")
-nb3 = [e for e in ev if e["ev"] == "skip" and "bundle not visible" in str(e.get("why")) and "(0 named" not in str(e.get("why")) and "(1 named" not in str(e.get("why"))]
+nb3 = [e for e in ev if e["ev"] == "skip" and "bundle not visible" in str(e.get("why")) and "(0 named" not in str(e.get("why")) and "(1 named" not in str(e.get("why"))]   # both wordings: transactions (5.4-5.48) and buyers (5.49)
 if nb3:
     print("bundles that showed 2+ named transactions but missed the floor or the block cap (last 6):")
     for e in nb3[-6:]:

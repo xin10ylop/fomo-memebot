@@ -139,7 +139,7 @@ c9, cv9 = "0x" + "99" * 20, "0x" + "a9" * 20
 W = wallets(9); E.state["busy_until"] = 0.0; helper_bundle(9, cv9, wallets(19))        # helper calls from wallets the calldata did not name
 E._handle_creation(c9, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
 s9 = events(c9, "skip", wait=1.0)
-check("helper calls from unnamed wallets are not a bundle: skipped", bool(s9) and any("0 named transactions" in str(e.get("why")) for e in s9), str([e.get("why") for e in s9]))
+check("helper calls from unnamed wallets are not a bundle: skipped", bool(s9) and any("0 named" in str(e.get("why")) for e in s9), str([e.get("why") for e in s9]))
 # 10. a helper bundle that lands 5 blocks after the creation, past E0_BUNDLE_MAX_BLOCKS=3: not the seat's bundle (the honest table's 0.3 s)
 c10, cv10 = "0x" + "aa" * 20, "0x" + "b0" * 20
 W = wallets(10); E.state["busy_until"] = 0.0
@@ -228,6 +228,35 @@ E._handle_creation(c15, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bp
 s15 = events(c15, "skip", wait=1.5)
 check("lean provider path: one exempt buy only: skipped at the deadline", bool(s15) and any("provider path: 1 exempt buys" in str(e.get("why")) for e in s15), str([e.get("why") for e in s15]))
 E.E0_ALLOW_PROVIDER = False; E.state["detect"] = "sequencer"
+# 16-18. the single-transaction bundle (engine 5.49): one helper call carries the whole bundle's ETH and lists the buyers in its calldata
+E.get_logs = lambda filt, tries=3, seat=False: []
+def one_tx_bundle(k, curve, sender, recipients, eth, name_curve=True, delay_s=0.05):
+    tok = "0x" + ("%02x" % (0xd0 + k)) * 20
+    def feed():
+        time.sleep(delay_s)
+        raw = ("one-%d" % k).encode(); SENDERS[raw] = sender
+        data = bytes.fromhex("6f49227e") + bytes(12) + bytes.fromhex((curve if name_curve else tok)[2:]) + b"".join(bytes(12) + bytes.fromhex(a[2:]) for a in recipients) + bytes(32)
+        E.state["valtx"].append([E.mono(), T, None, eth, data, raw, 1000, "0x" + "14b9a544" + "0" * 32, "6f49227e"])
+        with E.cond:
+            E.cond.notify_all()
+    threading.Thread(target=feed, daemon=True).start()
+    E.resolve_rpc = lambda *a, **kw: (tok, curve, 0.02 * E.Y0, 1000)
+c16, cv16 = "0x" + "16" * 20, "0x" + "c6" * 20
+W = wallets(16); E.state["busy_until"] = 0.0; one_tx_bundle(16, cv16, W[0], W[1:], 0.45)
+E._handle_creation(c16, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
+d = events(c16, "trade_decision")
+check("one helper transaction, sender named, two more buyers in its calldata: traded", bool(d), str([e.get("why") for e in events(c16, "skip", wait=0.3)]) + str([e.get("gates") for e in events(c16, "eligible_not_traded", wait=0.3)]))
+if d: check("one-transaction bundle: 3 buyers, 0.45 ETH on the decision", d[0].get("bundle") == 3 and abs(d[0].get("bundle_eth", 0) - 0.45) < 1e-6 and d[0].get("bundle_wallets") == 3, f"{d[0].get('bundle')} {d[0].get('bundle_eth')} {d[0].get('bundle_wallets')}")
+c17, cv17 = "0x" + "17" * 20, "0x" + "c7" * 20
+W = wallets(17); E.state["busy_until"] = 0.0; one_tx_bundle(17, cv17, "0x" + "5e" * 20, W, 0.6)      # a bundler service wallet sends it, not a named one
+E._handle_creation(c17, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
+d = events(c17, "trade_decision")
+check("one helper transaction from an unnamed bundler wallet, three named buyers in its calldata: traded with bundle 3", bool(d) and d[0].get("bundle") == 3 and abs(d[0].get("bundle_eth", 0) - 0.6) < 1e-6, str([(e.get("bundle"), e.get("bundle_eth")) for e in d]) + str([e.get("why") for e in events(c17, "skip", wait=0.3)]) + str([e.get("gates") for e in events(c17, "eligible_not_traded", wait=0.3)]))
+c18, cv18 = "0x" + "18" * 20, "0x" + "c8" * 20
+W = wallets(18); E.state["busy_until"] = 0.0; one_tx_bundle(18, cv18, W[0], [], 1.5)                   # one named wallet, 1.5 ETH, nobody else named: not a bundle
+E._handle_creation(c18, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
+s18 = events(c18, "skip", wait=1.0)
+check("one named wallet alone with 1.5 ETH: skipped (1 named buyer)", bool(s18) and any("1 named buyers" in str(e.get("why")) for e in s18), str([e.get("why") for e in s18]))
 E.resolve_rpc = lambda *a, **kw: None
 print("all creation-second wait tests pass" if not fails else f"{len(fails)} TESTS FAILED: {fails}")
 raise SystemExit(1 if fails else 0)

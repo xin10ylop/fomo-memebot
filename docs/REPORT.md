@@ -2472,3 +2472,31 @@ two-minute retry loop was walking the address toward their hour-long block. 5.48
 fallback, lean since 5.47, with the seat allowed there in paper at an assumed 300 ms, pessimistic by about 100 ms against
 the probe's delivery estimate (215 ms after the first block of each second on an NTP-synced clock, blocks produced up to
 100 ms into their second).
+
+### 24.18 The single-transaction bundle (engine 5.49), and the first night of paper
+
+**The night's paper.** Sep 17 21:20 to Sep 18 07:25 UTC, 10 h on the sequencer feed under the block cap: 7 seats, mean
+−1.4% at our landing, median −12%, two wins (+20, +30%) and five launches where nobody followed. Sends 76–296 ms after
+the creation, median 205 ms; no revert; no bot ahead of any bundle.
+
+**The chain's version of the same night** (`today_probe14`, 17:29–07:29 UTC, 14 h): 60 qualifying launches (2–3% tier,
+bundle complete within three blocks), honest seat +11.1% mean, +1.7% median, 33% with no follow-through, in two-hour
+buckets: +24, +19, +8, −2, then a dead patch from 22:00 to 03:00 UTC (55–100% dead), then +56 and +38% from 04:00. The
+market half of the night's result is real and time-of-day shaped. The other half is the engine: 31 qualifying launches
+since the restart, 7 taken.
+
+**Why the engine took a fifth.** The bundles it missed are one transaction each: a wallet sends the whole bundle's ETH
+(0.36 to 2.5 ETH) to a helper contract, `0x14b9a544…` selector `6f49227e`, whose calldata lists the buyer wallets, every
+one of them in the creation's named list, and the helper buys for all of them in one call; the transaction's value
+equals the bundle's ETH to the wei; on two of ten the sender is a bundler-service wallet outside the named list. The
+feed sees one value-carrying transaction from one wallet, and 5.4–5.48 counted named transactions: "1 named
+transactions, 1.500 ETH", refused on the three-transaction floor, thirteen times in the night on thirteen-wallet
+bundles. The seven seats it took were the launches whose wallets still bought separately, a biased fifth.
+
+**Engine 5.49.** The bundle is counted in buyers, not transactions: a value-carrying call in the block window whose
+calldata names wallets from the creation's list is a bundle transaction whoever sent it, its named recipients are the
+buyers, its value the ETH. The same rule seeds the watch for every seat (`fold_buy` takes the buyers of a helper call),
+so the gates, the price and the E1/E2 readouts all see the bundle the chain sees. Three tests: one helper transaction
+from a named sender with two more buyers in its calldata, traded with bundle 3; the same from an unnamed bundler wallet,
+traded with bundle 3; one named wallet alone with 1.5 ETH, skipped as one buyer. The count of comparable paper seats
+starts again from this build, and the readout's near-miss list now reads "named buyers".
