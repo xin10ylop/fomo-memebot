@@ -78,6 +78,12 @@ def main():
     start, since = read(a.log); px = a.eth_usd or (start.get("eth_usd") or 0)
     if not px:
         px = next((e["eth_usd"] for e in reversed(since) if e.get("eth_usd")), 0) or 0
+    if not px:
+        try:
+            import urllib.request
+            px = float(json.load(urllib.request.urlopen("https://api.coinbase.com/v2/prices/ETH-USD/spot", timeout=10))["data"]["amount"])
+        except Exception:
+            px = 0
     usd = (lambda e: f" (${e * px:+,.2f})") if px else (lambda e: "")
     print(f"since the engine started at {t_str(start['t'])} UTC on {datetime.datetime.fromtimestamp(start['t'], datetime.timezone.utc).date()} (engine {start.get('version')}, stake ${start.get('stake', '?')})")
     L = collections.OrderedDict()                                       # curve -> launch record
@@ -116,7 +122,10 @@ def main():
     txs = dict(zip(landed, rpc.batch([("eth_getTransactionByHash", [h]) for h in landed])))
     wallet = None
     blocks_needed = sorted({int(recs[h]["blockNumber"], 16) for r in L.values() for h in r["shots"] if recs.get(h)})
-    blocks = dict(zip(blocks_needed, rpc.batch([("eth_getBlockByNumber", [hex(b), True]) for b in blocks_needed])))
+    blocks = dict(zip(blocks_needed, rpc.batch([("eth_getBlockByNumber", [hex(b), False]) for b in blocks_needed])))
+    spans = {c: (min(int(recs[h]["blockNumber"], 16) for h in r["shots"] if recs.get(h)), max(int(recs[h]["blockNumber"], 16) for h in r["shots"] if recs.get(h)))
+             for c, r in L.items() if any(recs.get(h) for h in r["shots"])}
+    buys = dict(zip(spans, rpc.batch([("eth_getLogs", [{"address": c, "fromBlock": hex(lo), "toBlock": hex(hi), "topics": [BUY_EV]}]) for c, (lo, hi) in spans.items()])))
     tot = collections.Counter(); n_fill_launch = 0; n_bursts = 0; nets = []; firsts = []
     print()
     for c, r in L.items():
@@ -154,9 +163,12 @@ def main():
         for b, v in sorted(by_block.items()):
             blk = blocks.get(b) or {}; ts = int(blk["timestamp"], 16) if blk else None; first = min(i for i, _ in v)
             sec = "?" if (ts is None or seat_ts is None) else ("creation-second" if ts < seat_ts else ("SEAT" if ts == seat_ts else f"seat+{ts - seat_ts}s"))
-            ahead = [t for t in blk.get("transactions", []) if int(t["transactionIndex"], 16) < first and (t.get("to") or "").lower() == c.lower()]
-            ahead_eth = sum(int(t["value"], 16) for t in ahead) / 1e18
-            parts.append(f"{sec}: {len(v)} shots from idx {first}" + (f", {len(ahead)} buy{'s' if len(ahead) != 1 else ''} ahead ({ahead_eth:.3f} ETH)" if ahead else (", nothing ahead" if first == 0 else f", {first} tx ahead not on the curve")) + (f", FILL@{','.join(str(i) for i, ok in sorted(v) if ok)}" if any(ok for _, ok in v) else ""))
+            ours = {i for i, _ in v}
+            bl = [l for l in (buys.get(c) or []) if int(l["blockNumber"], 16) == b and int(l["transactionIndex"], 16) not in ours and (wallet is None or l["topics"][2][-40:] != wallet[-40:])]
+            ahead = [l for l in bl if int(l["transactionIndex"], 16) < first]; after = [l for l in bl if int(l["transactionIndex"], 16) > first]
+            ahead_eth = sum(words(l["data"])[0] for l in ahead) / 1e18; after_eth = sum(words(l["data"])[0] for l in after) / 1e18
+            parts.append(f"{sec}: {len(v)} shots from idx {first}, " + (f"{len(ahead)} buy{'s' if len(ahead) != 1 else ''} ahead ({ahead_eth:.3f} ETH)" if ahead else "no buy ahead")
+                         + (f", {len(after)} behind ({after_eth:.3f} ETH)" if after else ", nobody behind") + (f", FILL@{','.join(str(i) for i, ok in sorted(v) if ok)}" if any(ok for _, ok in v) else ""))
         print(f"{when} launch {c[:10]}  shots landed {n_landed}/{len(r['shots'])}  " + " | ".join(parts) if parts else f"{when} launch {c[:10]}  no shot landed")
         if fills:
             ret = (eth_out - gas) / eth_in - 1 if eth_in else 0

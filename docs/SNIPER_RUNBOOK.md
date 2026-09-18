@@ -475,7 +475,12 @@ stops it: withdraw down to the stake (Phantom) or raise the ceiling. A balance o
 the wallet is skipped: the remainder could fund a second fill. The hold clock now starts at the fill (`fill_seen_ms`),
 so `HOLD_S=1.3` lands the sell about 15 blocks after the buy, the tables' exit; the 5.92 sells landed at 31–36 blocks.
 
-    WALLET_STAKE=1 STAKE_MIN=15 STAKE_MAX=60 HOLD_S=1.3        # the wallet holds $15-60: every launch bets what is there
+    WALLET_STAKE=1 STAKE_MIN=8 STAKE_MAX=60 HOLD_S=1.3 BURST_SLIP=0.25   # the wallet holds $8-60: every launch bets what is there
+
+`BURST_SLIP` goes back to the engine's ordinary 25%: the 3% guard existed to stop the burst's own second fill, which the
+wallet now does, and it was refusing the seat itself (four of the night's bursts sat first on the curve in the seat block
+and reverted on the minOut: the bundle's tax-free buys in the creation second's last blocks move the quote past 3%
+between the build and the block). The tables' minOut test: 3% keeps +0.4% of the +6.8% behind the crowd, 25% keeps +5.6%.
 
 After any run, the accounting of every hash the engine sent since its start, reconciled against the wallet:
 

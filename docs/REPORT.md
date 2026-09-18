@@ -2732,8 +2732,19 @@ did not fill: the readout now labels each block creation-second, seat or later a
 our first shot with their ETH, so a refusal behind the crowd (the guard working) is told from a burst that missed the
 seat block; those five are to be read that way on the next run of the readout.
 
+**The guard was refusing the seat.** The readout, re-run with the curve's own Buy events: seven of the eight bursts
+reached the seat block (one landed all 35 shots in the creation second, a block early), and in four of them our first
+seat-block shot had no buy on the curve ahead of it (index 1, 2, 4 and 7, the transactions before us were not buys) and
+still did not fill. The 3% guard is measured against the feed's reserves at build time, 35 ms before the first shot and
+about 130 ms before the seat block; the bundle's own tax-free buys in the last blocks of the creation second move the
+price past 3% before the seat block opens, and every shot then reverts on its minOut. The tables never refuse a first
+fill, and their own minOut test says a 3% tolerance behind the crowd turns +6.8% into +0.4% while 25% keeps +5.6%.
+The guard existed to stop the burst's own second fill, and the wallet now does that. `BURST_SLIP=0.25` from here, the
+engine's ordinary slip. The tables also score hold 15 and hold 30 blocks the same (+16.1% and +16.2%), so the late
+sells did not cause the night's losses.
+
 **The tally so far.** Nine fills on real launches from Ohio at $15 to the wallet: +24%, −3%, +7.5%, −15% (four fills),
-+49% (four fills), +22%, −8%, −12% (six fills), −56% (five fills). Four wins in nine, a mean near +1% before separating the
-first fill from the ones the bug added; the readout's `first-fill returns` line is that separation. Against the tables'
++49% (four fills), +22%, and the night's three read on the first fill alone −8.0%, −10.9% and −54.9% (the later fills of
+the two multi-fills bought higher and are excluded). Four wins in nine, mean about +1%. Against the tables'
 +16% mean and 56% win share this is too few trades to judge either way (the per-trade spread is about 30 points, so nine
 trades resolve the mean to ±10), and the size bug means the dollar result of the night says nothing about the seat.
