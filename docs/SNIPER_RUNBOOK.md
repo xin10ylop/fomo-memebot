@@ -384,7 +384,8 @@ creation receipt and the helper calls' calldata, so a single-transaction bundle 
 the next-second path waited for direct named buys and only resolved the curve when the next second opened on the feed, too
 late for a predict-mode send. The bundle window is the whole creation second: `E0_BUNDLE_WAIT_S=0.9`, nine blocks.)
 
-and records the boundary estimate and the send timing. A landing test is a decision, not a default: section 9's E1 test
+and records the boundary estimate and the send timing. On a paper box add `CHAIN_POLL_S=10 RECEIPT_POLL_MS=40` (engine
+5.53): the bookkeeping poll and the receipt poll are the engine's steady provider usage. A landing test is a decision, not a default: section 9's E1 test
 (`MAX_LIVE_TRADES=3` at $10 with the send step), then `src/analysis/live_check.py` and the receipt's index against the
 other buys of its block. First every time, the seat pays +8–20%; behind the bots, it pays nothing and the strategy stops.
 
