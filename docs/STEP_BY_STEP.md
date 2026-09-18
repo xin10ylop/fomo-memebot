@@ -281,6 +281,23 @@ when the bankroll is there.
 
 ---
 
+**31. One buy per launch with any bet: the relay (Sep 19).** The burst sends many shots at one launch and, without help,
+every shot after the first one also buys (Part 24.24 of the report: the night of Sep 18). Engine 5.93 stopped that by
+betting the whole wallet; the relay contract stops it for any bet. Deploy it once, engine stopped, on Ohio:
+
+```
+sudo systemctl stop sniper-engine; cd ~/fomo-memebot && git pull origin claude/memecoin-strategy-research-vcdy6c && sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_deploy.py --write-env
+```
+
+It shows the cost (a few cents), asks `deploy the BuyOnce relay now? (yes/no)`, type `yes`. It then verifies the
+contract on the chain and writes `RELAY=0x...` into `/etc/sniper/engine.env` by itself. Set the bet and restart:
+
+```
+for kv in STAKE_MIN=15 STAKE_MAX=15; do k=${kv%%=*}; sudo sed -i "/^$k=/d" /etc/sniper/engine.env; echo "$kv" | sudo tee -a /etc/sniper/engine.env > /dev/null; done; sudo systemctl restart sniper-engine
+```
+
+From then on every launch bets $15 (change both numbers for another bet) and the wallet may hold any amount.
+
 ## If something looks wrong
 
 - `systemctl status sniper-engine` says whether it runs; `journalctl -u sniper-engine -n 50` says why it stopped.

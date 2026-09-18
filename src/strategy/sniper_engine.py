@@ -51,10 +51,14 @@ FEED_SOURCE = os.environ.get("FEED_SOURCE", "sequencer")                  # "seq
 PROVIDER_WS = os.environ.get("PROVIDER_WS", "")                            # e.g. wss://robinhood-mainnet.g.alchemy.com/v2/KEY (section 23.10)
 LOG_PATH = os.environ.get("LOG_PATH", "sniper_engine.jsonl"); STATE_PATH = LOG_PATH + ".state.json"
 WALLET = os.environ.get("WALLET", "0x0000000000000000000000000000000000000000").lower()
+RELAY = os.environ.get("RELAY", "").strip().lower()                       # 5.94: the BuyOnce relay (contracts/BuyOnce.sol, deploy/relay_deploy.py): every shot goes through it and it
+if RELAY and not (RELAY.startswith("0x") and len(RELAY) == 42):           # buys at most once per curve, so the stake is a setting again and the wallet may hold many stakes
+    raise SystemExit(f"RELAY must be a 0x address, got {RELAY!r}")
+RELAY_BUY_SEL = "a59ac6dd"; RELAY_GAS_EXTRA = 60_000                       # buy(address curve, uint256 amountIn, uint256 minOut) payable; the relay's own gas on top of the curve's
 ETH_USD = float(os.environ.get("ETH_USD", "2445")); ETH_USD_URL = os.environ.get("ETH_USD_URL", "https://api.coinbase.com/v2/prices/ETH-USD/spot")
 BANKROLL = float(os.environ.get("BANKROLL_USD", "300"))
 FRAC = float(os.environ.get("FRAC", "0.15")); STAKE_MIN = float(os.environ.get("STAKE_MIN", "25")); STAKE_MAX = float(os.environ.get("STAKE_MAX", "300"))
-WALLET_STAKE = os.environ.get("WALLET_STAKE", "1") == "1"                # 5.93: live, every buy is sized to the wallet minus GAS_RESERVE_USD, so a second shot of the burst can never be
+WALLET_STAKE = os.environ.get("WALLET_STAKE", "0" if RELAY else "1") == "1"               # 5.93: live, every buy is sized to the wallet minus GAS_RESERVE_USD, so a second shot of the burst can never be
 GAS_RESERVE_USD = float(os.environ.get("GAS_RESERVE_USD", "2.5"))        # funded: the sequencer drops it for insufficient funds. The night of Sep 18 filled 6 and 5 shots at $15 (own
 WALLET_MAX_AGE_S = float(os.environ.get("WALLET_MAX_AGE_S", "60"))       # impact below the 3% guard) and put the whole wallet on one launch (-56%). STAKE_MAX is now the most the
 HOLD = float(os.environ.get("HOLD_S", "5")); SUPPLY_FRAC = float(os.environ.get("SUPPLY_FRAC", "0.03")); SLIP = float(os.environ.get("SLIP", "0.25"))
@@ -1655,7 +1659,10 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             release_reservation(); gates = [f"supply cap sizes the buy at {gross:.5f} ETH and leaves {left:.5f} ETH: a second shot could fill; not taking this launch"]
             threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
             log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
-    buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
+    if RELAY:                                                            # 5.94: the shot goes to the relay, which buys once per curve and sends the tokens to the wallet
+        buy = {"to": to_checksum_address(RELAY), "value": hex(amount_in), "data": "0x" + RELAY_BUY_SEL + abi_word(curve) + abi_word(amount_in) + abi_word(min_out), "gas": hex(GAS_BUY + RELAY_GAS_EXTRA), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
+    else:
+        buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
     shots = None
     if BURST_N > 1:                                                     # 5.6: BURST_N shots at consecutive nonces, BURST_STEP_MS apart, straddling the predicted boundary
         own = 1 - ((Y - tk) * net / (X + 2 * net)) / tk if tk > 0 else 0.0   # tokens a second identical shot would get after our own fill, as a shortfall
@@ -1715,7 +1722,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             state["traded"].pop(curve, None); release_reservation(); threading.Thread(target=refresh_wallet, args=("no fill",), daemon=True).start(); return
         h, rec = filled[0]
         if len(filled) > 1:
-            log({"ev": "alarm", "what": f"burst double fill: {len(filled)} shots filled (BURST_SLIP too loose for this stake); selling all of them", "curve": curve})
+            log({"ev": "alarm", "what": (f"burst double fill THROUGH THE RELAY: {len(filled)} shots filled; the relay did not hold, stop the engine and check the contract; selling all of them" if RELAY else
+                                          f"burst double fill: {len(filled)} shots filled (BURST_SLIP too loose for this stake); selling all of them"), "curve": curve})
         if SEAT in ("E1", "E2"):
             threading.Thread(target=tune_margin, args=(rec, feed_ts + SEAT_SECONDS[SEAT]), daemon=True).start()
         tokens = 0.0
@@ -2049,6 +2057,15 @@ async def main():
     import websockets
     if SEAT == "E0" and not EXEMPT:
         raise SystemExit("SEAT=E0 for a wallet that is not on the creation's named list: refused. The snipe tax is keyed to the block's clock second, not to the block offset: a buy in any block that carries the creation block's timestamp pays ~98% (the live trade of Sep 18 09:43 UTC landed 3 blocks after the creation, index 1, and reverted on its minOut; report 24.19). E0_OUTSIDER no longer opts in. Use SEAT=E1 (the first block of the next second, 6.18%) or EXEMPT=1 for a named wallet.")
+    if RELAY and SEND is not None:                                        # 5.94: a wrong relay address would burn every shot; the contract must be there and be ours
+        try:
+            code = rpc.call("eth_getCode", [RELAY, "latest"]); owner = rpc.call("eth_call", [{"to": RELAY, "data": "0x8da5cb5b"}, "latest"])
+        except Exception as e:
+            raise SystemExit(f"RELAY {RELAY}: cannot read it from the RPC ({e}); not starting")
+        if len(code) < 10:
+            raise SystemExit(f"RELAY {RELAY} has no code on the chain: deploy it first (deploy/relay_deploy.py) or unset RELAY")
+        if ("0x" + owner[-40:]).lower() != WALLET:
+            raise SystemExit(f"RELAY {RELAY} is owned by 0x{owner[-40:]}, not by this wallet {WALLET}: every shot would revert (NotOwner)")
     if PIN_CPU:
         try:
             os.sched_setaffinity(0, {int(c) for c in PIN_CPU.split(",")})
@@ -2058,8 +2075,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.93, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.94, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":

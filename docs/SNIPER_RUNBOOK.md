@@ -490,6 +490,27 @@ It prints, per launch, the shots by block (creation second, seat, later), the bu
 the fills, ETH in and out, gas, net, the exit and the blocks held; for a multi-fill, the first fill's own return; totals;
 alarms; the open position; and the part of the wallet's change the receipts do not explain (it should be cents).
 
+### 5g. The BuyOnce relay: any bet with any wallet (engine 5.94)
+
+`contracts/BuyOnce.sol` is a relay owned by the wallet that buys at most once per curve and sends the tokens to the
+wallet; with it the burst's extra shots revert on the relay's flag instead of buying, whatever the wallet holds
+(report 24.25). Deploy it once from the machine, with the engine stopped:
+
+    sudo systemctl stop sniper-engine
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_deploy.py
+
+The script checks the artifact against the source, shows the cost (a few cents), asks for a yes, deploys, verifies the
+code on the chain byte for byte and `owner()` against the wallet, simulates one buy through the relay, and prints the
+`RELAY=0x...` line. Put that line in `/etc/sniper/engine.env`, set `STAKE_MIN`/`STAKE_MAX` to the bet, and restart. The
+engine refuses to start on a relay that has no code or is not owned by the wallet. `WALLET_STAKE` turns off by itself
+when `RELAY` is set (the wallet may then hold many stakes); `BURST_SLIP` stays at 25%.
+
+    RELAY=0x... STAKE_MIN=15 STAKE_MAX=15 HOLD_S=1.3 BURST_SLIP=0.25   # $15 a launch, the wallet holds whatever you like
+
+If the readout ever shows two fills on one launch with the relay in place, stop the engine: the alarm says "THROUGH THE
+RELAY" and the contract, not the stake, is what to look at. `sweep(address)` on the relay (token, or 0 for ETH) returns
+anything that ended up in it to the wallet.
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while
