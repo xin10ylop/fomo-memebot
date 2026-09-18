@@ -432,6 +432,14 @@ p5–p10 of flip arrival minus its second is the feed's lag on the box). The cal
 
 spans 120 to 10 ms before the estimate; the first filled shot's index gives the true lead for the box (shot k filled first:
 lead = 120 − 10k ms puts the first shot on the tick), and the next run narrows to five shots 4 ms apart around it.
+Measured (report 24.21): the tick sits about 150 ms before the estimate on the New York droplet (feed lag 67–73 ms, 10 ms
+to the sequencer) and 170–180 ms on the Ohio c6i.large (feed lag 81–93 ms, 1 ms to the sequencer). The production shape
+on Ohio, from the first calibration burst there (index 2 of the first block, about twenty transactions behind within 10 ms):
+
+    BURST_N=9 BURST_STEP_MS=3 BURST_LEAD_MS=184 BURST_SLIP=0.03 MARGIN_MS=0 STAKE_MIN=20 STAKE_MAX=20 MAX_LIVE_TRADES=5
+    TIER_MIN_BPS=100 BUNDLE_MIN_ETH=0.5
+
+Re-run the calibration burst whenever the box, the region or the feed route changes: the lead is a property of the box.
 
 Ten launches; then `ALCHEMY_KEY=... python3 src/analysis/landing_check.py --log /var/log/sniper/engine.jsonl`: every
 included shot with its block, second, index and the other buys before and after it. The number that decides: the share of

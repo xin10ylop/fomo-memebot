@@ -2603,3 +2603,35 @@ position, and the dry run's four unsigned shots. The expected value by the share
 always ours: 0% → +3.7% a trade (the "behind" column), 50% → +9.9%, 100% → +16.1%. The share is measured by the landing
 test of runbook 5e on the Ohio box, ten launches at $100, position read from every included shot's receipt.
 
+### 24.21 Calibrating the burst: New York, then Ohio (engines 5.61–5.62)
+
+**Five live bursts from New York.** The first three (13:50–13:57 UTC, five shots at $10, 1% tier tokens) all landed in
+the second block of the new second with every shot in the same block: the saved state had restored a 25 ms margin, 26 ms
+passed between the boundary wake and the first shot (gates, sizing, build and signing after the wait on one core), and the
+estimate is in feed-arrival time. `deploy/feed_lag_probe.py` put the feed's delivery lag at 67–73 ms on that box (p5–p10
+of flip arrival minus its second, NTP within 50 µs). Engine 5.61 builds and signs the shots before the boundary and
+fires them on the estimate (`predict-prebuilt`); 5.62 refuses to fire a burst without a confident estimate (the first
+send of the 5.61 run had fallen back to react mode: twelve shots 429 ms into the second, all reverted on the guard, six
+cents). Two twelve-shot bursts 120 to 10 ms before the estimate then put their first shots in the **first block** of the
+new second at index 19 and index 6, five to seven shots in that block and the rest in the next: on the New York box the
+tick sits about 150 ms before the estimate, and 5 and 18 transactions were ahead of the first shot.
+
+**Ohio.** A c6i.large in us-east-2 (`docs/STEP_BY_STEP.md` Part 1b): 1.4 ms round trip to the sequencer against 21 ms
+from New York; the feed's lag there is 81–93 ms (through Cloudflare's edge, a little more than New York, and irrelevant
+to the send). The first live burst from Ohio, twelve shots 200 to 90 ms before the estimate at $5:
+
+| shot | ms before the estimate | landed | index | status |
+|---|---|---|---|---|
+| 1–3 | 200, 190, 180 | last block of the creation second | 5, 23, 25 | reverted (98%, the guard) |
+| **4** | **170** | **first block of the next second** | **2** | **filled** |
+| 5–12 | 160 … 90 | first block of the next second | 23–35 | reverted (the guard, after the crowd) |
+
+Between shot 4 at index 2 and shot 5 ten milliseconds later at index 23, about twenty other transactions landed: the
+bots' wave arrives within 10 ms of the tick, and from Ohio the first shot past the tick was ahead of all of it. The tick
+sits 170–180 ms before the estimate on that box. The production shape from there: nine shots 3 ms apart from 184 ms
+before the estimate, `BURST_SLIP=0.03` so that the shots behind the crowd revert, on the 2–3% tier with bundles of 0.5
+ETH and more, $20 stakes, five sends, the index read on every one. One launch is not a verdict; it is the position the
+five-day table pays +25% for, and the test that follows counts how often it repeats.
+
+Money: the wallet went from 0.02458 ETH at the start of the day to 0.02695 after twelve real trades, about +$6, on
+launches of the wrong class and mostly in the wrong position; the number says the machinery works, nothing about the edge.
