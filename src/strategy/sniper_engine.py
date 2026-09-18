@@ -83,8 +83,8 @@ BURST_N = max(1, int(os.environ.get("BURST_N", "1")))                    # 5.6: 
 BURST_STEP_MS = float(os.environ.get("BURST_STEP_MS", "4")); BURST_LEAD_MS = float(os.environ.get("BURST_LEAD_MS", "8"))   # boundary: shots that land in the creation second revert for the gas,
 BURST_SLIP = float(os.environ.get("BURST_SLIP", "0.07"))
 SLOT_SEND = os.environ.get("SLOT_SEND", "0") == "1"                     # 5.7: aim the burst with the slot model (every block's arrival folded on the 101.6 ms slot grid) instead of the flip vote
-SLOT_LEAD_MS = float(os.environ.get("SLOT_LEAD_MS", "0"))               # send this long before the predicted arrival of the seat second's first block (the feed's lag plus the block's window, calibrated from fills)
-FEED_LAG_MS = float(os.environ.get("FEED_LAG_MS", "85"))                # the feed's delivery lag on this box (deploy/feed_lag_probe.py p5-p10): which slot is the first of a second                 # the first one past the boundary fills; the minOut must reject a SECOND fill of our own (about 8% fewer tokens at 3% of supply) and no more: a fill behind a big crowd still pays (24.20)
+SLOT_LEAD_MS = float(os.environ.get("SLOT_LEAD_MS", "0"))               # send this long before the predicted CREATION of the seat second's first block (its window's opening plus our 1 ms, calibrated from fills)
+FEED_LAG_MS = float(os.environ.get("FEED_LAG_MS", "85"))                # the feed's delivery lag on this box (deploy/feed_lag_probe.py p5-p10); informational since 5.8                 # the first one past the boundary fills; the minOut must reject a SECOND fill of our own (about 8% fewer tokens at 3% of supply) and no more: a fill behind a big crowd still pays (24.20)
 if BURST_N > 1 and not (SEND_MODE == "predict" and SEAT in ("E1", "E2")):
     BURST_N = 1                                                          # a burst only makes sense aimed at a predicted boundary                  # do not send more than this far into the seat's second
 MIN_CREATOR_SUPPLY = float(os.environ.get("MIN_CREATOR_SUPPLY", "0.01"))
@@ -610,53 +610,54 @@ _scache = {"at": -1e9, "v": None}
 
 
 def slot_model():
-    """5.7: the sequencer creates a block every ~101.6 ms on a steady timer (deploy/grid_probe.py, Sep 18: the first block of each
-    second walks forward 16 ms a second in a clean sawtooth); what jitters is the feed's delivery, about 30 ms a block. Folding every
-    block's wall-clock arrival on candidate periods and taking the most concentrated phase averages that jitter over hundreds of
-    blocks. Returns (period_s, phase_s, R, n): phase is a slot's arrival time modulo the period, R the circular concentration
-    (1 = perfect). Cached for a second."""
+    """5.8: the sequencer creates a block every P = ~101.58 ms on a strict timer, so a block's creation time is c0 + n * P for its
+    number n (deploy/grid_probe.py, Sep 18: the first block of each second walks forward 16 ms a second, wrapping by 86, i.e. 10
+    or 9 blocks a second on a 101.58 ms timer). The feed's arrival times jitter by 30-40 ms and are not used at all: only the
+    block NUMBER of each second's first block (state['flip_block']) and the second itself. For each candidate P the set of
+    admissible c0 is the intersection of [S - n_S P, S - n_S P + P) over the flips; the P with the widest intersection is the
+    timer, and c0 its midpoint. Returns (P, c0, width_s, n_flips) or None; cached for a second."""
     if mono() - _scache["at"] < 1.0:
         return _scache["v"]
-    arr = list(state["arrivals"])
+    fl = sorted((ts_, n) for ts_, n in state["flip_block"].items() if n)[-150:]
     v = None
-    if len(arr) >= 300:
+    if len(fl) >= 40:
         best = None
-        for i in range(0, 41):
-            P = 0.1012 + 0.00002 * i                                    # 101.2 .. 102.0 ms
-            c = s_ = 0.0
-            for a in arr:
-                ph = (a % P) / P * 2 * math.pi; c += math.cos(ph); s_ += math.sin(ph)
-            R = math.hypot(c, s_) / len(arr)
-            if best is None or R > best[0]:
-                best = (R, P, math.atan2(s_, c))
-        R, P, ang = best; phase = (ang % (2 * math.pi)) / (2 * math.pi) * P
-        v = (P, phase, R, len(arr))
+        for i in range(0, 81):
+            P = 0.1013 + 0.00001 * i                                    # 101.3 .. 102.1 ms in 10 us steps
+            xs = sorted(ts_ - n * P for ts_, n in fl); k = max(1, len(xs) // 40)   # drop the 2.5% at each end: a missed feed message shifts one flip by a block
+            lo, hi = xs[-1 - k], xs[k] + P                              # c0 in [lo, hi): narrow when P is the timer, empty when it is not
+            width = hi - lo
+            if best is None or width > best[0]:
+                best = (width, P, lo, hi)
+        width, P, lo, hi = best
+        if width > 0.0:
+            v = (P, (lo + hi) / 2, width, len(fl))                        # a strict timer gives a width of a few ms: precision, not doubt
     _scache["at"] = mono(); _scache["v"] = v
     return v
 
 
 def slot_predict(second):
-    """the predicted wall-clock arrival of the first block stamped `second` (the seat second's first block): the first slot whose
-    creation (arrival minus FEED_LAG_MS) is at or after the second. None without a confident model."""
+    """the predicted creation time (sequencer clock = NTP wall clock) and number of the first block stamped `second`: the first
+    n with c0 + n P >= second. Returns (t_wall, n) or None without a confident model (width under 60 ms)."""
     m = slot_model()
-    if m is None or m[2] < 0.12:                                         # 30 ms of delivery jitter on a 101.6 ms period gives R about 0.2; 900 blocks still fix the phase to about 2 ms
+    if m is None or not (0.0 < m[2] < 0.030):                            # feasible and pinned to under 30 ms
         return None
-    P, phase, R, n = m
-    edge = second + FEED_LAG_MS / 1000.0                               # arrival-time equivalent of the tick
-    k = math.ceil((edge - phase) / P)
-    return phase + k * P
+    P, c0, width, nf = m
+    n = math.ceil((second - c0) / P)
+    return (c0 + n * P, n)
 
 
 def score_flip(ts, wall, seen):
-    """at every flip: the error of the slot model's and the vote's prediction of this flip's arrival (made at the previous
-    flip), then predict the next flip. Logged every 30 flips as slot_shadow: the case for SLOT_SEND, measured on the feed alone."""
+    """at every flip: did the timer model name this flip's block number (an exact hit is a prediction good to the block's creation
+    time; a miss is one slot, 101 ms), and the vote's timing error; then predict the next flip. slot_shadow every 30 flips."""
     try:
         pred = state["slot_pred"].pop(ts, None)
         if pred is not None:
             if pred[0] is not None:
-                state["slot_err"].append(1000 * (wall - pred[0]))
+                state["slot_err"].append(0 if pred[0][1] == state["flip_block"].get(ts) else (pred[0][1] - (state["flip_block"].get(ts) or 0)))
             if pred[1] is not None:
                 state["vote_err"].append(1000 * (seen - pred[1]))
+        _scache["at"] = -1e9                                             # a new flip: refit
         sp = slot_predict(ts + 1)
         b = boundary(); ref = state["ref"]
         vp = ref[0] + (ts + 1 - ref[1]) + b[0] if (b is not None and b[1] >= 0.5 and ref is not None) else None
@@ -664,12 +665,13 @@ def score_flip(ts, wall, seen):
         for k in [k for k in state["slot_pred"] if k < ts - 5]:
             state["slot_pred"].pop(k, None)
         state["flips_scored"] = state.get("flips_scored", 0) + 1
-        if state["flips_scored"] % 30 == 0:                              # every 30 flips whatever the model's state: silence is not a report
-            se = sorted(state["slot_err"]); ve = sorted(state["vote_err"]); m = slot_model()
+        if state["flips_scored"] % 30 == 0:
+            se = list(state["slot_err"]); ve = sorted(state["vote_err"]); m = slot_model()
             q = lambda xs, p: xs[min(len(xs) - 1, int(p * len(xs)))]
-            stats = lambda xs: {"n": len(xs), "median": round(st.median(xs), 1), "p10": round(q(xs, 0.1), 1), "p90": round(q(xs, 0.9), 1), "abs_median": round(st.median(abs(x) for x in xs), 1)} if xs else {"n": 0}
-            log({"ev": "slot_shadow", "flips": state["flips_scored"], "slot_err_ms": stats(se), "vote_err_ms": stats(ve), "period_ms": round(1000 * m[0], 2) if m else None, "R": round(m[2], 3) if m else None,
-                 "blocks": m[3] if m else len(state["arrivals"]), "model": "confident" if (m and m[2] >= 0.12) else ("weak" if m else "none"), "feed_lag_ms": FEED_LAG_MS, "slot_send": SLOT_SEND})
+            vs = {"n": len(ve), "median": round(st.median(ve), 1), "p10": round(q(ve, 0.1), 1), "p90": round(q(ve, 0.9), 1), "abs_median": round(st.median(abs(x) for x in ve), 1)} if ve else {"n": 0}
+            log({"ev": "slot_shadow", "flips": state["flips_scored"], "block_hits": sum(1 for x in se if x == 0), "block_misses": sum(1 for x in se if x != 0), "miss_slots": [x for x in se if x != 0][-8:],
+                 "vote_err_ms": vs, "period_ms": round(1000 * m[0], 3) if m else None, "c0_width_ms": round(1000 * m[2], 1) if m else None, "flips_fit": m[3] if m else len(state["flip_block"]),
+                 "model": "confident" if (m and 0.0 < m[2] < 0.030) else ("weak" if m else "none"), "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS})
     except Exception as e:
         log({"ev": "error", "stage": "score_flip", "err": str(e)[:160]})
 
@@ -682,10 +684,10 @@ def seat_target(feed_ts, seconds):
     if SEND_MODE != "predict" or seconds < 1 or state["feed_ts"] >= target_ts:
         return None
     if SLOT_SEND:
-        t_wall = slot_predict(target_ts)
-        if t_wall is None:
+        sp = slot_predict(target_ts)
+        if sp is None:
             return None
-        return mono() + (t_wall - time.time()) - SLOT_LEAD_MS / 1000.0 - (BURST_LEAD_MS / 1000.0 if BURST_N > 1 else 0.0)
+        return mono() + (sp[0] - time.time()) - SLOT_LEAD_MS / 1000.0 - (BURST_LEAD_MS / 1000.0 if BURST_N > 1 else 0.0)
     b = boundary(); ref = state["ref"]
     if b is None or b[1] < 0.5 or ref is None:
         return None
@@ -1612,6 +1614,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         if burst_at is not None:
             decision["burst_at_ms"] = round((burst_at - seen_at) * 1000, 1); decision["prebuilt_ms"] = round((burst_at - mono()) * 1000, 1)   # how early the shots were ready
             decision["target_model"] = "slot" if SLOT_SEND else "vote"; decision["burst_at_wall"] = time.time() + (burst_at - mono())
+            if SLOT_SEND:
+                sp_ = slot_predict(feed_ts + SEAT_SECONDS[SEAT]); decision["slot_block"] = sp_[1] if sp_ else None; decision["slot_t_wall"] = sp_[0] if sp_ else None
         txs = [dict(buy, nonce=hex(nonce + i)) for i in range(BURST_N)]; at = [t_first + i * BURST_STEP_MS / 1000.0 for i in range(BURST_N)]
         if SEND_BURST is not None:
             shots = SEND_BURST(txs, at, "buy")
@@ -2000,7 +2004,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.71, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.8, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
