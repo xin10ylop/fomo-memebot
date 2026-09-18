@@ -8,7 +8,7 @@ the shots that landed and where, the fills, the ETH that left the wallet (buy va
 curve's Sell event), the gas of every transaction, the net, the exit reason and whether the position is still open.
 Then the totals, the alarms and errors with their times, the open position from the state file, and the sum against
 the wallet's measured change when --start-eth is given. Nothing is estimated: every number is a receipt."""
-import sys, json, ssl, http.client, urllib.parse, argparse, datetime, collections, os
+import sys, json, ssl, http.client, urllib.parse, argparse, datetime, collections, os, time
 
 BUY_EV = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"
 SELL_EV = "0x8113d738abdcb6b38357e9d53a54a7157861a09031b453651f0fe7fe151f59df"
@@ -20,24 +20,30 @@ class Rpc:
         u = urllib.parse.urlparse(url); self.host = u.netloc; self.path = u.path or "/"; self.c = None; self.ctx = ssl.create_default_context()
 
     def batch(self, calls):
-        """calls: list of (method, params); returns results in order (None where the node answered with an error)."""
+        """calls: list of (method, params); returns results in order (None where the node answered with an error).
+        The public RPC allows about five requests a second: small batches, a pause between them, and a backoff on 429."""
         out = []
-        for i in range(0, len(calls), 20):
-            chunk = calls[i:i + 20]
+        for i in range(0, len(calls), 5):
+            chunk = calls[i:i + 5]
             body = json.dumps([{"jsonrpc": "2.0", "id": k, "method": m, "params": p} for k, (m, p) in enumerate(chunk)])
-            for attempt in range(4):
+            for attempt in range(8):
                 try:
                     if self.c is None:
                         self.c = http.client.HTTPSConnection(self.host, timeout=20, context=self.ctx)
                     self.c.request("POST", self.path, body=body, headers=UA)
-                    d = json.loads(self.c.getresponse().read())
+                    resp = self.c.getresponse(); raw = resp.read()
+                    if resp.status == 429:
+                        raise RuntimeError("429")
+                    d = json.loads(raw)
                     if isinstance(d, dict):
                         raise RuntimeError(d.get("error", d))
                     byid = {x["id"]: x.get("result") for x in d}; out.extend(byid.get(k) for k in range(len(chunk))); break
                 except Exception as e:
                     self.c = None
-                    if attempt == 3:
+                    if attempt == 7:
                         raise RuntimeError(f"rpc failed: {e}")
+                    time.sleep(1.5 * (attempt + 1) if "429" in str(e) else 0.5)
+            time.sleep(0.3)
         return out
 
 
