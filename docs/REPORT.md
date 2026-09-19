@@ -2848,3 +2848,11 @@ either column (no crowd, the same price from either seat); the one crowded launc
 0.3 s behind, the crowd's buys already in the price. 6.05 scores, switches and reads out the front seat when the burst
 is on, and `live_check` reads a relay-paid buy from the curve's Buy event. The unchanged five-day script, run on Sep 18-19
 from the chain, is the independent check of whether the front seat still pays (`data/derived/e1_sep1819/`).
+
+**6.06: the engine's scorer on the real clock.** The engine's replay measured time as blocks after the creation at 9.9 a
+second, the error 24.19 had found in the analysis and corrected in the tables (real second boundaries) but not in the
+engine: its simulated seat's second began up to 0.9 s after the real one and its front seat entered behind buyers our
+burst is ahead of. On Sep 19 it read the front seat at −3.9% over 24 hours while the tables' script read +5.6% on the
+same launches. 6.06 builds a clock from the feed's flips (every second's first block is known to the engine) so the
+seat's second's first block sits at exactly 1.0 s, the tables' definition; the score event says `clock: seconds` or
+`offset` (the fallback within a minute of a restart). `tests/test_clock.py` checks the clock and the three seats' order.
