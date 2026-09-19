@@ -130,8 +130,16 @@ class R:
 E.rpc = R(); submitted.clear(); E.SEND = object()
 E.relay_topup("test")
 tu = events("relay_topup", wait=0.5); tr = [t for l, t in submitted if l == "relay_float"]
-target = 1.5 * 15 / 2500.0
-check("relay refill: one transfer to the relay for the shortfall to 1.5 stakes", tu and tr and tr[0]["to"].lower() == RELAY and abs(int(tr[0]["value"], 16) / 1e18 - (target - 0.002)) < 1e-6, str((tu[-1] if tu else None, tr[:1])))
+target = 1.2 * 15 / 2500.0
+check("relay refill: one transfer to the relay for the shortfall to 1.2 stakes", tu and tr and tr[0]["to"].lower() == RELAY and abs(int(tr[0]["value"], 16) / 1e18 - (target - 0.002)) < 1e-6, str((tu[-1] if tu else None, tr[:1])))
+class R2(R):
+    def call(self, m, p, **k):
+        if m == "eth_getBalance": return hex(int(0.002e18)) if p[0].lower() == RELAY else hex(int(0.003e18))
+        return "0x0"
+E.rpc = R2(); submitted.clear()
+E.relay_topup("test partial")
+tr = [t for l, t in submitted if l == "relay_float"]
+check("relay refill: a short wallet sends what it can spare above 0.0015 ETH", tr and abs(int(tr[0]["value"], 16) / 1e18 - 0.0015) < 1e-6, str(tr[:1]))
 
 # 5. dry run: no keys, no shooter nonces needed
 E.SEND = None; E.SEND_BURST = None; E.state.update({"nonce": 9, "chain_at": E.mono(), "open": None, "busy_until": 0.0}); CV["v"] = "0x" + "c4" * 20

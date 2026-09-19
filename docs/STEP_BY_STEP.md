@@ -316,10 +316,10 @@ sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py shooters-cr
 ```
 
 ```
-sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py deposit 0.009 && sudo systemctl restart sniper-engine && sleep 30 && systemctl is-active sniper-engine
+sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py deposit 0.007 && sudo systemctl restart sniper-engine && sleep 30 && systemctl is-active sniper-engine
 ```
 
-The relay now holds the stake (about $23, 1.5 bets) and 35 shooters hold about $0.25 of gas each. The engine keeps
+The relay now holds the stake (about $18, 1.2 bets) and 35 shooters hold about $0.25 of gas each. The engine keeps
 both topped up from the wallet. `relay_ops.py status` shows all of it any time.
 
 ## If something looks wrong

@@ -2830,5 +2830,5 @@ relay). Each shot is built at its shooter's nonce with no value and 250k gas and
 shooter's key (`keys=`; the engine refuses an older send step). The wallet's nonce is reserved for the approve and the
 sell only, so the exit no longer depends on how many shots landed. The shooters' nonces and gas are read from the chain
 at start, after every burst and every five minutes; a shooter below 0.00004 ETH is refilled to 0.0001 from the wallet;
-the relay is refilled to 1.5 stakes after every exit; a relay below one stake, or fewer than half the shooters ready,
+the relay is refilled to 1.2 stakes after every exit; a relay below one stake, or fewer than half the shooters ready,
 gates the launch. `tests/test_shooters.py` (16 checks) and `tests/test_send_step_keys.py` (3) cover it.

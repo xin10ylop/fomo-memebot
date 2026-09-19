@@ -533,12 +533,12 @@ stake it holds. Set up once, engine stopped, on the machine (each command prints
     sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py shooters-create 35   # 35 keys into engine.env
     sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py shooters-register    # one transaction
     sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py shooters-fund --yes  # 0.0001 ETH of gas each
-    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py deposit 0.009        # the stake, 1.5 x $15 at $2,600
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py deposit 0.007        # the stake, 1.2 x $15 at $2,600
     sudo cp ~/fomo-memebot/deploy/send_step.py /etc/sniper/send_step.py                       # signs each shot with its shooter
     sudo systemctl restart sniper-engine
 
 `relay_ops.py status` (read-only, engine running or not) lists the wallet, the relay's ETH, every shooter's gas and
-registration. The engine refills shooters below 0.00004 ETH and the relay to 1.5 stakes after each exit, from the
+registration. The engine refills shooters below 0.00004 ETH and the relay to 1.2 stakes after each exit, from the
 wallet; it logs an alarm when the wallet cannot. `withdraw all` brings the relay's ETH back, `shooters-sweep` the
 shooters' gas. The start refuses to run with an older relay, an unregistered shooter, `BURST_N` above the number of
 shooters, or the old send step.

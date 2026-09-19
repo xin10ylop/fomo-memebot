@@ -67,7 +67,7 @@ except Exception as e:
 RELAY_SHOOT_GAS = 250_000                                                  # a shooter's shot: the relay's checks and the curve's buy (measured 130-170k), no value
 SHOOTER_MIN_ETH = float(os.environ.get("SHOOTER_MIN_ETH", "0.00004"))     # a shooter below this is refilled from the wallet to SHOOTER_TARGET_ETH (its gas float: about 15 reverted shots)
 SHOOTER_TARGET_ETH = float(os.environ.get("SHOOTER_TARGET_ETH", "0.0001"))
-RELAY_FLOAT_USD = float(os.environ.get("RELAY_FLOAT_USD", "0") or 0)      # the relay is refilled from the wallet to this after every exit (0 = 1.5 x STAKE_MAX)
+RELAY_FLOAT_USD = float(os.environ.get("RELAY_FLOAT_USD", "0") or 0)      # the relay is refilled from the wallet to this after every exit (0 = 1.2 x STAKE_MAX), as far as the wallet reaches
 ETH_USD = float(os.environ.get("ETH_USD", "2445")); ETH_USD_URL = os.environ.get("ETH_USD_URL", "https://api.coinbase.com/v2/prices/ETH-USD/spot")
 BANKROLL = float(os.environ.get("BANKROLL_USD", "300"))
 FRAC = float(os.environ.get("FRAC", "0.15")); STAKE_MIN = float(os.environ.get("STAKE_MIN", "25")); STAKE_MAX = float(os.environ.get("STAKE_MAX", "300"))
@@ -1408,6 +1408,11 @@ def shooter_topup(low):
     if SEND is None:
         return
     need = sum(SHOOTER_TARGET_ETH - state["shooter_eth"].get(a, 0) for a in low); gp = state.get("gas_price") or 2e8
+    if state.get("wallet_eth") is None:
+        try:
+            state["wallet_eth"] = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18; state["wallet_at"] = mono()
+        except Exception:
+            return
     if (state.get("wallet_eth") or 0) < need + 0.0005:
         log({"ev": "alarm", "what": f"{len(low)} shooters are out of gas and the wallet ({state.get('wallet_eth')} ETH) cannot refill them ({need:.5f} ETH): top up the wallet"}); return
     sent = 0
@@ -1426,16 +1431,17 @@ def relay_topup(why=""):
         return
     try:
         bal = int(rpc.call("eth_getBalance", [RELAY, "latest"]), 16) / 1e18; state["relay_eth"] = bal; state["relay_at"] = mono()
-        target = (RELAY_FLOAT_USD or 1.5 * STAKE_MAX) / max(state["eth_usd"], 1.0)
+        target = (RELAY_FLOAT_USD or 1.2 * STAKE_MAX) / max(state["eth_usd"], 1.0)
         if bal >= target * 0.98:
             return
         need = target - bal; we = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18; state["wallet_eth"] = we; state["wallet_at"] = mono()
-        if we < need + 0.001:                                              # keep a little for the approve, the sell and the shooters' gas
+        send_eth = min(need, we - 0.0015)                                  # the wallet keeps 0.0015 ETH for the approve, the sell and the shooters' gas; the rest goes as far as it reaches
+        if send_eth < 0.1 * need:
             log({"ev": "alarm", "what": f"relay holds {bal:.5f} ETH, float is {target:.5f}, the wallet ({we:.5f} ETH) cannot refill it: top up the wallet (Phantom -> {WALLET})"}); return
         gp = state.get("gas_price") or 2e8
-        h = submit({"to": to_checksum_address(RELAY), "value": hex(int(need * 1e18)), "data": "0x", "gas": hex(50_000), "gasPrice": hex(int(gp)), "nonce": hex(next_nonce()), "chainId": 4663}, "relay_float")
+        h = submit({"to": to_checksum_address(RELAY), "value": hex(int(send_eth * 1e18)), "data": "0x", "gas": hex(50_000), "gasPrice": hex(int(gp)), "nonce": hex(next_nonce()), "chainId": 4663}, "relay_float")
         rec = wait_receipt(h, 10.0) if h else None
-        log({"ev": "relay_topup", "why": why, "eth": round(need, 6), "hash": h, "landed": bool(rec and rec.get("status") == "0x1")})
+        log({"ev": "relay_topup", "why": why, "eth": round(send_eth, 6), "short_of_float": round(need - send_eth, 6), "hash": h, "landed": bool(rec and rec.get("status") == "0x1")})
         state["relay_eth"] = int(rpc.call("eth_getBalance", [RELAY, "latest"]), 16) / 1e18; state["relay_at"] = mono()
     except Exception as e:
         log({"ev": "error", "stage": "relay_topup", "err": str(e)[:160]})
