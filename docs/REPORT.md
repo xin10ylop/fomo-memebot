@@ -2832,3 +2832,9 @@ sell only, so the exit no longer depends on how many shots landed. The shooters'
 at start, after every burst and every five minutes; a shooter below 0.00004 ETH is refilled to 0.0001 from the wallet;
 the relay is refilled to 1.2 stakes after every exit; a relay below one stake, or fewer than half the shooters ready,
 gates the launch. `tests/test_shooters.py` (16 checks) and `tests/test_send_step_keys.py` (3) cover it.
+
+**6.03 (Sep 19, 12:xx).** The start-up checks added with the relays (the relay's code and owner, the deadline, the shooters'
+registration) sat before the line that loads the send step, so in live mode `SEND` was still `None` and none of them
+ran; the engine logged no `shooters` report and would have started on a wrong relay. 6.03 runs them right after the send
+step is loaded. Nothing was lost to it: the relay and the shooters were verified by the deploy and operations scripts,
+and the trades of the morning went through them correctly.
