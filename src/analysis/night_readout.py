@@ -133,7 +133,7 @@ def main():
     recs = dict(zip(hashes, rpc.batch([("eth_getTransactionReceipt", [h]) for h in hashes])))
     landed = [h for h in hashes if recs.get(h)]
     txs = dict(zip(landed, rpc.batch([("eth_getTransactionByHash", [h]) for h in landed])))
-    wallet = None
+    wallet = (start.get("wallet") or "").lower() or None
     ours_blocks = {int(recs[h]["blockNumber"], 16) for r in L.values() for h in r["shots"] if recs.get(h)}
     blocks_needed = sorted(ours_blocks | {b - 1 for b in ours_blocks})
     blocks = dict(zip(blocks_needed, rpc.batch([("eth_getBlockByNumber", [hex(b), False]) for b in blocks_needed])))
@@ -157,9 +157,12 @@ def main():
             b = int(rc["blockNumber"], 16); ix = int(rc["transactionIndex"], 16); ok = rc.get("status") == "0x1"
             by_block[b].append((ix, ok)); wallet = wallet or rc["from"].lower()
             if ok:
-                v = int(txs[h]["value"], 16) / 1e18; eth_in += v
-                tk = sum(words(l["data"])[1] for l in rc.get("logs", []) if l["topics"][0] == BUY_EV and l["address"].lower() == c.lower()) / 1e18
-                fills.append((b, ix, v, tk))
+                v = int(txs[h]["value"], 16) / 1e18
+                bl_ = [words(l["data"]) for l in rc.get("logs", []) if l["topics"][0] == BUY_EV and l["address"].lower() == c.lower()]
+                tk = sum(w_[1] for w_ in bl_) / 1e18
+                if v == 0 and bl_:                                            # a shooter's shot: the relay paid; the curve's Buy event carries the ETH it took
+                    v = sum(w_[0] for w_ in bl_) / 1e18
+                eth_in += v; fills.append((b, ix, v, tk))
         sold_hashes = list(dict.fromkeys(r["sells"])); sell_ok = None; sell_block = None; tokens_sold = 0.0
         for h in list(dict.fromkeys(r["approve"])) + sold_hashes:
             rc = recs.get(h)
@@ -249,7 +252,7 @@ def main():
         bal = rpc.batch([("eth_getBalance", [wallet, "latest"])])[0]; now = int(bal, 16) / 1e18
         print(f"wallet: {a.start_eth:.5f} ETH at the start, {now:.5f} ETH now, change {now - a.start_eth:+.5f} ETH{usd(now - a.start_eth)}; trades explain {tot['net']:+.5f} ETH, transfers {-moved:+.5f}, unexplained {now - a.start_eth - tot['net'] + moved:+.5f} ETH")
     shots_ev = [e for e in since if e.get("ev") == "burst_shots" and e.get("nonces")]
-    if shots_ev and wallet:
+    if shots_ev and wallet and not start.get("shooters"):
         last = shots_ev[-1]; landed_n = [n for h, n in zip(last["hashes"], last["nonces"]) if recs.get(h)]
         expected = (max(landed_n) + 1 if landed_n else min(last["nonces"])) + (2 if any(e.get("ev") == "trade_done" and e.get("curve") == last["curve"] for e in since) else 0)
         n_chain = int(rpc.batch([("eth_getTransactionCount", [wallet, "latest"])])[0], 16)
