@@ -330,13 +330,15 @@ class Sender:
 
     def fire_slot(self, body, slot):
         """one shot of a burst on its own warm socket to the sequencer (slot: pool index): the request is written and the call
-        returns; the reply is read in the background. Returns (hash, answers) like fire()."""
+        returns; the reply is read in the background. A socket the server closed meanwhile (write or read fails) is replaced
+        and the same shot re-fired once, a few ms late (5.97: 29 of 35 shots were lost that way on Sep 19 08:53 and every
+        later nonce with them). Returns (hash, answers) like fire()."""
         p = self.pool[slot]; e = p["e"]; out = _Answers(); t0 = mono()
         try:
             h = "0x" + keccak(bytes.fromhex(json.loads(body)["params"][0][2:])).hex()
         except Exception:
             h = None
-        meta = {"pending": 0, "done": threading.Event(), "t0": t0, "hash": h, "replies": [], "write_ms": None}; out.meta = meta
+        meta = {"pending": 0, "done": threading.Event(), "t0": t0, "hash": h, "replies": [], "write_ms": None, "body": body, "slot": slot}; out.meta = meta
         if not p["lock"].acquire(timeout=0.02):
             out.append((e["host"], {"error": "burst socket busy: shot skipped"})); meta["done"].set(); meta["complete"] = True; return None, out
         try:
@@ -344,7 +346,11 @@ class Sender:
                 p["c"] = self._connect(e)
             p["c"].request("POST", e["path"], body=body, headers=UA)
         except Exception as ex:
-            p["c"] = None; p["lock"].release(); out.append((e["host"], {"error": str(ex)[:120]})); meta["done"].set(); meta["complete"] = True; return None, out
+            p["c"] = None
+            try:                                                          # the write failed: a fresh socket, the same shot, once
+                p["c"] = self._connect(e); p["c"].request("POST", e["path"], body=body, headers=UA); meta["refired"] = str(ex)[:80]
+            except Exception as ex2:
+                p["c"] = None; p["lock"].release(); out.append((e["host"], {"error": str(ex2)[:120]})); meta["done"].set(); meta["complete"] = True; return None, out
         meta["pending"] = 1; meta["write_ms"] = round(1000 * (mono() - t0), 2)
         threading.Thread(target=self._read_pool, args=(p, e, out, meta), daemon=True).start()
         return h, out
@@ -354,10 +360,15 @@ class Sender:
             d = json.loads(p["c"].getresponse().read())
         except Exception as ex:
             p["c"] = None; d = {"error": str(ex)[:120]}
+            if not meta.get("refired"):                                   # the server closed the socket under the shot: a fresh socket, the same shot, once (same hash: harmless if it did arrive)
+                try:
+                    p["c"] = self._connect(e); p["c"].request("POST", e["path"], body=meta["body"], headers=UA); d = json.loads(p["c"].getresponse().read()); meta["refired"] = str(ex)[:80]
+                except Exception as ex2:
+                    p["c"] = None; d = {"error": f"{str(ex)[:60]}; refire failed: {str(ex2)[:60]}"}
         finally:
             p["lock"].release()
         out.append((e["host"], d)); meta["replies"].append((e["host"], round(1000 * (mono() - meta["t0"]), 1))); meta["done"].set(); meta["complete"] = True
-        log({"ev": "send_answers", "hash": meta["hash"], "write_ms": meta["write_ms"], "reply_ms": meta["replies"], "answers": [(hh, str(dd)[:120]) for hh, dd in out]})
+        log({"ev": "send_answers", "hash": meta["hash"], "write_ms": meta["write_ms"], "reply_ms": meta["replies"], "answers": [(hh, str(dd)[:120]) for hh, dd in out], **({"refired_after": meta["refired"]} if meta.get("refired") else {})})
 
     def _read(self, e, out, meta):
         """background: the endpoint's reply to a fired transaction; releases the endpoint's lock taken by fire()"""
@@ -1695,7 +1706,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             log({"ev": "burst_shots", "curve": curve, "hashes": [hh for hh, _ in shots], "nonces": [nonce + i for i in range(BURST_N)]})
     else:
         h = submit(buy, "buy"); buy_ans = SENDER.mine()
-    t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk)
+    t_buy = mono(); tokens = tk; p_in = (X + net) / (Y - tk); last_landed = nonce + BURST_N - 1   # the last shot sent; live, the last one the chain took (below)
     if h:
         state["live_trades"] = state.get("live_trades", 0) + 1                # a real buy left the box (the cap counts sends, not fills)
     decision["amount_in_eth"] = amount_in / 1e18; decision["min_out_tokens"] = min_out / 1e18        # for the scorer's revert check (5.44)
@@ -1725,6 +1736,12 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                 log({"ev": "buy_reverted", "curve": curve, "hash": included[0][0], "note": f"{len(included)} shots included, none filled (all in the creation second, or behind the crowd past BURST_SLIP)"})
             state["traded"].pop(curve, None); release_reservation(); threading.Thread(target=refresh_wallet, args=("no fill",), daemon=True).start(); return
         h, rec = filled[0]
+        landed_idx = [i for i, (hh, r, _) in enumerate(recs) if r]; last_landed = nonce + max(landed_idx)   # 5.97: the approve and the sell follow the last shot the chain took, not the last one sent
+        if len(landed_idx) < BURST_N:
+            lost = [i for i, (hh, r, a) in enumerate(recs) if not r]
+            log({"ev": "burst_dropped", "curve": curve, "lost": len(lost), "first_lost": lost[0], "answers": sorted({str(d)[:90] for i in lost for _, d in (recs[i][2] or [])})[:4],
+                 "note": "shots the chain never took; every later nonce went with them (a nonce gap): approve at the last landed + 1, next launch on a fresh nonce"})
+            state["chain_at"] = 0.0                                       # the reservation over-counted: the next launch waits for chain_loop's fresh nonce
         if len(filled) > 1:
             log({"ev": "alarm", "what": (f"burst double fill THROUGH THE RELAY: {len(filled)} shots filled; the relay did not hold, stop the engine and check the contract; selling all of them" if RELAY else
                                           f"burst double fill: {len(filled)} shots filled (BURST_SLIP too loose for this stake); selling all of them"), "curve": curve})
@@ -1760,7 +1777,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             r = resolve_rpc(creator, deadline=HOLD - 1, lookback=120); token = r[0] if r else curve
             if not r:
                 log({"ev": "alarm", "what": "token address unknown at the exit: approving on the curve will revert; close_position re-resolves on every retry", "curve": curve})
-    pos = {"curve": curve, "token": token, "creator": creator, "tokens": tokens, "nonce": nonce + (BURST_N - 1 if shots is not None else 0), "t_buy": t_buy, "buy_hash": h, "approved": False, "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0)}   # approve at +1, sell at +2 after the last shot
+    pos = {"curve": curve, "token": token, "creator": creator, "tokens": tokens, "nonce": last_landed if shots is not None else nonce, "t_buy": t_buy, "buy_hash": h, "approved": False, "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0)}   # approve at +1, sell at +2 after the last shot
     state["open"] = pos; save_state()
     cap = (state.get("base_fee") or gas_price or 0) * SELL_GAS_HEADROOM if h else (gas_price or 0)
     pos["approve_hash"] = submit(tx_approve(pos, pos["nonce"] + 1, cap), "approve"); pos["approved"] = True; save_state()   # 5.95: after the LAST shot's nonce (nonce + 1 was the second shot's, already used: the sequencer refused every approve since the burst, and the exit re-sent it a second later, Sep 19)
@@ -2087,7 +2104,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.96, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 5.97, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

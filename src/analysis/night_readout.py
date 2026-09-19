@@ -170,7 +170,7 @@ def main():
                 sell_ok = rc.get("status") == "0x1" if sell_ok is not True else sell_ok
                 for l in rc.get("logs", []):
                     if l["topics"][0] == SELL_EV and l["address"].lower() == c.lower():
-                        w_ = words(l["data"]); eth_out += (w_[1] - sum(w_[2:4])) / 1e18; tokens_sold += w_[0] / 1e18; sell_block = int(rc["blockNumber"], 16)   # the event's ETH out is gross: the curve keeps the two fees in words 3 and 4 (Sep 19: the wallet's change matched only net of them)
+                        w_ = words(l["data"]); eth_out += w_[1] / 1e18; tokens_sold += w_[0] / 1e18; sell_block = int(rc["blockNumber"], 16)   # word 2 is what the wallet receives; words 3-4 are the fees already taken out (checked against sellers' balance changes, Sep 19)
         net = eth_out - eth_in - gas; nets.append(net) if fills else None
         tot["eth_in"] += eth_in; tot["eth_out"] += eth_out; tot["gas"] += gas; tot["net"] += net; n_fill_launch += bool(fills)
         when = t_str(r["t"]) if r["t"] else "?"
@@ -194,6 +194,15 @@ def main():
             parts.append(f"{sec}: {len(v)} shots from idx {first}, " + (f"{len(ahead)} buy{'s' if len(ahead) != 1 else ''} ahead ({ahead_eth:.3f} ETH)" if ahead else "no buy ahead")
                          + (f", {len(after)} behind ({after_eth:.3f} ETH)" if after else ", nobody behind") + (f", FILL@{','.join(str(i) for i, ok in sorted(v) if ok)}" if any(ok for _, ok in v) else ""))
         print(f"{when} launch {c}  shots landed {n_landed}/{len(r['shots'])}  " + " | ".join(parts) + feed_note if parts else f"{when} launch {c}  no shot landed")
+        lost = [h for h in r["shots"] if not recs.get(h)]
+        if lost:
+            ans = collections.Counter()
+            for a in r["answers"]:
+                if a.get("hash") in lost:
+                    for _, txt in a.get("answers") or []:
+                        ans[txt[:90]] += 1
+            idx = [r["shots"].index(h) for h in lost]
+            print(f"           LOST {len(lost)} shots (never on the chain): shots {min(idx)}-{max(idx)}; the sequencer answered: " + ("; ".join(f"{n}x {t}" for t, n in ans.most_common(4)) if ans else "no answer recorded"))
         dc_ = r.get("decision") or {}; sb = r.get("sent") or {}; ld_ = r.get("landing") or {}
         if r["shots"] and (dc_ or sb or ld_):
             def nums(x):
@@ -233,7 +242,8 @@ def main():
         print(f"wallet: {a.start_eth:.5f} ETH at the start, {now:.5f} ETH now, change {now - a.start_eth:+.5f} ETH{usd(now - a.start_eth)}; receipts explain {tot['net']:+.5f} ETH, unexplained {now - a.start_eth - tot['net']:+.5f} ETH")
     shots_ev = [e for e in since if e.get("ev") == "burst_shots" and e.get("nonces")]
     if shots_ev and wallet:
-        last = shots_ev[-1]; expected = max(last["nonces"]) + 1 + (2 if any(e.get("ev") == "trade_done" and e.get("curve") == last["curve"] for e in since) else 0)
+        last = shots_ev[-1]; landed_n = [n for h, n in zip(last["hashes"], last["nonces"]) if recs.get(h)]
+        expected = (max(landed_n) + 1 if landed_n else min(last["nonces"])) + (2 if any(e.get("ev") == "trade_done" and e.get("curve") == last["curve"] for e in since) else 0)
         n_chain = int(rpc.batch([("eth_getTransactionCount", [wallet, "latest"])])[0], 16)
         print(f"nonce: the chain says {n_chain} transactions from the wallet, the log accounts for {expected}" + ("" if n_chain == expected else f": {n_chain - expected} transaction(s) the log does not list"))
     relay = start.get("relay")

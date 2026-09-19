@@ -48,6 +48,9 @@ def wallets(k): return ["0x" + ("%040x" % (0x1000 * k + i)) for i in range(3)]
 def launch(k, eth=0.6, flip_after_s=0.9, supply=0.02):
     curve = "0x" + ("%02x" % (0xc0 + k)) * 20; tok = "0x" + ("%02x" % (0xd0 + k)) * 20; creator = "0x" + ("%02x" % k) * 20; W = wallets(k)
     time.sleep(1.0)                                                       # the previous launch's scripted flip must be over before this one starts
+    E.state["chain_at"] = E.mono()                                        # chain_loop is not running here: a launch with a dropped shot asks for a fresh nonce
+    if E.state["nonce"] is None:
+        E.state["nonce"] = 20
     def feed():
         time.sleep(0.05)
         raw = ("one-%d" % k).encode(); SENDERS[raw] = W[0]

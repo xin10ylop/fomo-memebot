@@ -90,7 +90,11 @@ bl = events("burst_landing", wait=3.0)
 check("burst_landing: 4 shots, one filled", bool(bl) and bl[0]["filled"] == 1 and len(bl[0]["shots"]) == 4, str(bl[:1])[:200])
 t0 = time.time()
 while not captured and time.time() - t0 < 3: time.sleep(0.02)
-check("the position holds the filled shot's tokens (1.0M from its Buy event), its hash, nonce = last shot's (8)", bool(captured) and abs(captured[0]["tokens"] - 1_000_000) < 1 and captured[0]["buy_hash"] == "0x%064x" % 2 and captured[0]["nonce"] == 8, str({k: captured[0].get(k) for k in ("tokens", "buy_hash", "nonce")}) if captured else "no position")
+check("the position holds the filled shot's tokens (1.0M from its Buy event), its hash, nonce = the last shot the chain took (7: shot 4 was refused)", bool(captured) and abs(captured[0]["tokens"] - 1_000_000) < 1 and captured[0]["buy_hash"] == "0x%064x" % 2 and captured[0]["nonce"] == 7, str({k: captured[0].get(k) for k in ("tokens", "buy_hash", "nonce")}) if captured else "no position")
+ap = [e for e in events("unsigned_tx", wait=0.5) if e.get("label") == "approve"]
+check("the approve follows the last landed shot (nonce 8), not the last sent one", ap and int(ap[-1]["tx"]["nonce"], 16) == 8, str([e["tx"]["nonce"] for e in ap]))
+bd = events("burst_dropped", wait=0.5)
+check("a refused shot is logged as burst_dropped (1 lost, first lost = shot 3) and the next launch waits for a fresh nonce", bd and bd[-1]["lost"] == 1 and bd[-1]["first_lost"] == 3 and E.state["chain_at"] == 0.0, str(bd[-1] if bd else None) + f" chain_at {E.state['chain_at']}")
 check("the decision records burst 4", d and d[0].get("burst") == 4)
 
 # 2. no shot fills: buy_reverted, no position

@@ -2797,3 +2797,15 @@ with `TooLate(blockTime, deadline)` in any later block, for a cent, instead of b
 (exercised on a live curve's state before deployment: past deadline refused, future and none accepted, the old
 three-argument call gets a plain revert, which is how engine 5.96 tells an old relay from the new one at start and
 refuses to run on the old). And the readout nets the two sell fees the curve keeps, so its returns match the wallet.
+
+**Sep 19 08:01 and 08:53 (engine 5.97).** The first was the seat exactly: first in the seat block, nothing ahead,
+one buy of 0.1 ETH behind, sold 15 blocks later with the sell taking 0.2 s, +2.9%. The second lost 29 of its 35 shots:
+the first six reached the chain (index 72 of the seat block, three buys of 0.47 ETH ahead, −12.7%), the rest never did,
+and because the engine assumed every shot had landed, the approve went out at a nonce 29 ahead of the chain's and failed
+as before. Two changes: a shot whose socket fails on the write or the read is re-fired once on a fresh socket with the
+same hash (`refired_after` on its `send_answers`), and the position's nonce is the last shot the chain actually took,
+with a `burst_dropped` event naming the lost shots and the sequencer's answers, and the next launch waiting for a fresh
+nonce from the chain. The readout prints the lost shots and the answers, so the cause is read from the log rather than
+guessed. And the fee correction of the morning was wrong: recent sellers' balance changes match the Sell event's ETH
+out exactly (the two fee words are informational, already taken out), so the readout is back to the gross figure; the
+0.0003 ETH gap of the first two relay trades stays unexplained, about eighty cents.

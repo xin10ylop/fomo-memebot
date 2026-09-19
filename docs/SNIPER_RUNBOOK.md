@@ -518,6 +518,9 @@ Engine 5.96 and the second relay: `buy` takes the seat's clock second as a deadl
 block, so a burst the sequencer includes late (a one-second stall on Sep 19) costs gas instead of a dead seat. The engine
 refuses to start on the first relay (no deadline): redeploy with the same command (engine stopped, `--write-env`), a few
 cents; the old relay stays on the chain unused. `RELAY_DEADLINE=0` sends no deadline (a test setting only).
+Engine 5.97: a shot whose socket the sequencer closed is re-fired once; the approve and the sell follow the last shot the
+chain took (`burst_dropped` in the log names the lost ones and the sequencer's answers); the readout shows the Sell
+event's ETH out as the wallet receives it (gross; the fee words are already taken out).
 
 ## 6. Kill criteria
 
