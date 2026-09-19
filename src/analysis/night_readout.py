@@ -88,21 +88,29 @@ def main():
     print(f"since the engine started at {t_str(start['t'])} UTC on {datetime.datetime.fromtimestamp(start['t'], datetime.timezone.utc).date()} (engine {start.get('version')}, stake ${start.get('stake', '?')})")
     L = collections.OrderedDict()                                       # curve -> launch record
     def rec(curve):
-        return L.setdefault(curve, dict(t=None, shots=[], landing=None, dones=[], approve=[], sells=[], alarms=[], events=[]))
-    last_curve = None
+        return L.setdefault(curve, dict(t=None, shots=[], landing=None, dones=[], approve=[], sells=[], alarms=[], events=[], answers=[], sent=None))
+    last_curve = None; by_hash = {}; pending_sent = None
     for e in since:
         c = e.get("curve"); k = e.get("ev")
         if k == "resend" and last_curve:
             rec(last_curve)["events"].append(e); continue
+        if k == "sent_burst":
+            pending_sent = e; continue
+        if k == "send_answers" and e.get("hash") in by_hash:
+            rec(by_hash[e["hash"]])["answers"].append(e); continue
         if not c:
             continue
         if k == "trade_decision":
             last_curve = c
+            if pending_sent is not None and abs(pending_sent["t"] - e["t"]) < 3:
+                rec(c)["sent"] = pending_sent; pending_sent = None
         r = rec(c)
         if k == "trade_decision":
             r["t"] = e["t"]; r["decision"] = e
         elif k == "burst_shots":
             r["shots"] = e["hashes"]; r["t"] = r["t"] or e["t"]
+            for hh in e["hashes"]:
+                by_hash[hh] = c
         elif k == "burst_landing":
             r["landing"] = e
         elif k == "trade_done":
@@ -162,7 +170,7 @@ def main():
                 sell_ok = rc.get("status") == "0x1" if sell_ok is not True else sell_ok
                 for l in rc.get("logs", []):
                     if l["topics"][0] == SELL_EV and l["address"].lower() == c.lower():
-                        w_ = words(l["data"]); eth_out += w_[1] / 1e18; tokens_sold += w_[0] / 1e18; sell_block = int(rc["blockNumber"], 16)
+                        w_ = words(l["data"]); eth_out += (w_[1] - sum(w_[2:4])) / 1e18; tokens_sold += w_[0] / 1e18; sell_block = int(rc["blockNumber"], 16)   # the event's ETH out is gross: the curve keeps the two fees in words 3 and 4 (Sep 19: the wallet's change matched only net of them)
         net = eth_out - eth_in - gas; nets.append(net) if fills else None
         tot["eth_in"] += eth_in; tot["eth_out"] += eth_out; tot["gas"] += gas; tot["net"] += net; n_fill_launch += bool(fills)
         when = t_str(r["t"]) if r["t"] else "?"
@@ -186,6 +194,11 @@ def main():
             parts.append(f"{sec}: {len(v)} shots from idx {first}, " + (f"{len(ahead)} buy{'s' if len(ahead) != 1 else ''} ahead ({ahead_eth:.3f} ETH)" if ahead else "no buy ahead")
                          + (f", {len(after)} behind ({after_eth:.3f} ETH)" if after else ", nobody behind") + (f", FILL@{','.join(str(i) for i, ok in sorted(v) if ok)}" if any(ok for _, ok in v) else ""))
         print(f"{when} launch {c}  shots landed {n_landed}/{len(r['shots'])}  " + " | ".join(parts) + feed_note if parts else f"{when} launch {c}  no shot landed")
+        dc_ = r.get("decision") or {}; sb = r.get("sent") or {}; ld_ = r.get("landing") or {}
+        if r["shots"] and (dc_ or sb or ld_):
+            replies = [max(a.get("reply_ms") or [0]) for a in r["answers"]]
+            print(f"           send: aimed {dc_.get('burst_at_ms')} ms after the creation was seen ({dc_.get('target_model')}, built {dc_.get('build_lead_ms')} ms before), shots fired late by up to {max(sb.get('late_ms') or [0]):.1f} ms"
+                  + (f", sequencer replies up to {max(replies):.0f} ms" if replies else "") + (f"; flip minus first shot {ld_.get('flip_minus_first_shot_ms')} ms, flip minus first fill {ld_.get('flip_minus_first_fill_ms')} ms" if ld_ else ""))
         if fills:
             ret = (eth_out - gas) / eth_in - 1 if eth_in else 0
             state = "sold" if eth_out else ("SELL REVERTED, tokens still held" if sell_ok is False else ("NOT SOLD, tokens still held" if not sold_hashes else "sell sent, no receipt"))

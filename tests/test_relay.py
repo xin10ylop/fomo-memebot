@@ -100,6 +100,9 @@ if d:
     time.sleep(0.6)
     check("relay: the fill is read from the curve's Buy event in the relay shot's receipt (1,000,000 tokens)", captured and abs(captured[-1]["tokens"] - 1_000_000) < 1, str(captured[-1]["tokens"] if captured else None))
     check("relay: the position's nonce is the last shot's", captured and captured[-1]["nonce"] == 8, str(captured[-1]["nonce"] if captured else None))
+    ap = [e for e in events("unsigned_tx", wait=0.5) if e.get("label") == "approve"]
+    check("approve goes out at the last shot's nonce + 1 (9), not the second shot's", ap and int(ap[-1]["tx"]["nonce"], 16) == 9, str([e["tx"]["nonce"] for e in ap]))
+    check("approve is on the token for the curve", ap and ap[-1]["tx"]["to"].lower() == ("0x" + "d1" * 20) and ap[-1]["tx"]["data"][10:74].endswith(curve[2:]), str(ap[-1]["tx"]["to"] if ap else None))
     check("relay: no double-fill alarm", not any("double fill" in e.get("what", "") for e in events("alarm", wait=0.2)))
 
 # 2. a double fill through the relay is reported as a relay failure

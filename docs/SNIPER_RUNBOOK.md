@@ -511,6 +511,9 @@ If the readout ever shows two fills on one launch with the relay in place, stop 
 RELAY" and the contract, not the stake, is what to look at. `sweep(address)` on the relay (token, or 0 for ETH) returns
 anything that ended up in it to the wallet.
 
+Engine 5.95 fixed the approve's nonce (it was the second shot's, refused since the burst; the exit re-approved a second
+later), and the readout nets the curve's two sell fees from the Sell event's ETH out, which is gross.
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while

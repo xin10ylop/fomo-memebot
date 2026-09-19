@@ -2776,3 +2776,12 @@ if the relay has no code or is not owned by the wallet. `deploy/relay_deploy.py`
 simulates one buy through it. `tests/test_relay.py` covers the calldata, the value, the gas, the fill, the alarm and the
 dry run. The Buy event's first topic is the sender and the second the recipient (checked on live events), so
 `live_check.py` and `night_readout.py`, which match the recipient, still recognise our fills.
+
+**Two exit facts from the first relay trades (Sep 19, engine 5.95).** The per-trade timeline showed the approve sent
+right after the buy never landing (`approve_not_seen` at +1.1 s, `approve_missing` at +2.4 s, then a fresh approve and
+the sell): it was sent at the burst's first nonce plus one, the second shot's nonce, so the sequencer refused it on every
+burst since 5.6, and every exit waited a second for a receipt that could not come before re-approving. 5.95 sends it at
+the last shot's nonce plus one (`tests/test_relay.py` checks the nonce); the sells should now land about 15 blocks after
+the buy instead of 27–36. And the wallet's change was 0.00029 ETH short of what the receipts said: the curve's Sell event
+carries four words (tokens in, ETH out, two fees) and the wallet receives the ETH out net of both fees, about 3% here;
+the readout nets them now, so the live returns it prints are about three points lower than before, and match the wallet.
