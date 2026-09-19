@@ -94,13 +94,18 @@ def main():
         if relay:
             rb = int(rpc.call("eth_getBalance", [relay, "latest"]), 16) / 1e18; print(f"relay  {relay}: {rb:.6f} ETH{usd(rb)} (the stake it buys with)")
         print(f"shooters: {len(shooters)}")
-        low = 0; unreg = 0
+        low = 0; unreg = 0; gas_total = 0.0
         for s_ in shooters:
-            time.sleep(0.25); b = int(rpc.call("eth_getBalance", [s_, "latest"]), 16) / 1e18
+            time.sleep(0.25); b = int(rpc.call("eth_getBalance", [s_, "latest"]), 16) / 1e18; gas_total += b
             reg = int(rpc.call("eth_call", [{"to": relay, "data": "0x5c7b6bcb" + word(s_)}, "latest"]) or "0x0", 16) if relay else 0
             low += b < SHOOTER_MIN_ETH; unreg += not reg
             print(f"  {s_} {b:.6f} ETH {'registered' if reg else 'NOT registered'}{' LOW' if b < SHOOTER_MIN_ETH else ''}")
-        print(f"{low} low on gas, {unreg} not registered"); return
+        print(f"{low} low on gas, {unreg} not registered")
+        total = wb + (rb if relay else 0.0) + gas_total
+        print(f"TOTAL capital: {total:.6f} ETH{usd(total)} = wallet {wb:.6f} + relay {rb if relay else 0.0:.6f} + shooters' gas {gas_total:.6f}")
+        if a.arg:
+            base = float(a.arg); print(f"P&L since {base:.6f} ETH: {total - base:+.6f} ETH{usd(total - base)} ({100 * (total - base) / base:+.1f}%), every gas and fee included")
+        return
 
     if engine_running():
         sys.exit("the engine is running: sudo systemctl stop sniper-engine first (same wallet, same nonce)")
