@@ -211,6 +211,9 @@ def main():
             def nums(x):
                 return [x] if isinstance(x, (int, float)) else [v for y in x for v in nums(y)] if isinstance(x, (list, tuple)) else []
             replies = [v for a in r["answers"] for v in nums(a.get("reply_ms"))]
+            fk = next((i for i, h in enumerate(r["shots"]) if recs.get(h) and recs[h].get("status") == "0x1"), None)
+            seat_first = min((i for i, h in enumerate(r["shots"]) if recs.get(h) and c_ts is not None and blocks.get(int(recs[h]["blockNumber"], 16)) and int(blocks[int(recs[h]["blockNumber"], 16)]["timestamp"], 16) > c_ts), default=None)
+            print(f"           window: the seat's block opened at shot {seat_first if seat_first is not None else 'none (all before it)'} of {len(r['shots'])}" + (f", the fill was shot {fk}" if fk is not None else ""))
             print(f"           send: aimed {dc_.get('burst_at_ms')} ms after the creation was seen ({dc_.get('target_model')}, built {dc_.get('build_lead_ms')} ms before), shots fired late by up to {max(sb.get('late_ms') or [0]):.1f} ms"
                   + (f", sequencer replies up to {max(replies):.0f} ms" if replies else "") + (f"; flip minus first shot {ld_.get('flip_minus_first_shot_ms')} ms, flip minus first fill {ld_.get('flip_minus_first_fill_ms')} ms" if ld_ else ""))
         if fills:
@@ -250,14 +253,14 @@ def main():
         print(f"moved out of the wallet by the engine: {tot['relay_float']:.5f} ETH to the relay (its stake), {tot['shooter_gas']:.5f} ETH to shooters (gas); still yours, not a loss")
     if a.start_eth is not None and wallet and start.get("shooters"):        # the stake sits in the relay and the shots' gas in the shooters: reconcile the whole capital
         relay_ = start.get("relay"); sh_ev = [e for e in ev_all if e.get("ev") == "shooters"]
-        addrs = []
-        try:
-            import subprocess
-            env_ = dict(l.split("=", 1) for l in open("/etc/sniper/engine.env").read().splitlines() if "=" in l and not l.startswith("#"))
-            from eth_account import Account
-            addrs = [Account.from_key(k.strip()).address for k in env_.get("SHOOTER_KEYS", "").split(",") if k.strip()]
-        except Exception:
-            pass
+        addrs = (sh_ev[-1].get("addresses") or []) if sh_ev else []     # the engine logs them at start (6.02); before that, derive from the env when eth_account is at hand
+        if not addrs:
+            try:
+                env_ = dict(l.split("=", 1) for l in open("/etc/sniper/engine.env").read().splitlines() if "=" in l and not l.startswith("#"))
+                from eth_account import Account
+                addrs = [Account.from_key(k.strip()).address for k in env_.get("SHOOTER_KEYS", "").split(",") if k.strip()]
+            except Exception:
+                pass
         bals = rpc.batch([("eth_getBalance", [x, "latest"]) for x in [wallet, relay_] + addrs])
         wnow = int(bals[0], 16) / 1e18; rnow = int(bals[1], 16) / 1e18; snow = sum(int(b, 16) for b in bals[2:]) / 1e18; now = wnow + rnow + snow
         xfer_gas = moved - tot["relay_float"] - tot["shooter_gas"]

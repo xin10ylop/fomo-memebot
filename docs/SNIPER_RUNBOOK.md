@@ -543,6 +543,10 @@ wallet; it logs an alarm when the wallet cannot. `withdraw all` brings the relay
 shooters' gas. The start refuses to run with an older relay, an unregistered shooter, `BURST_N` above the number of
 shooters, or the old send step.
 
+Aim (Sep 19, five bursts under the shooters): the seat's block opened at shot 28-33 of 35, once after shot 35 (no fill), so
+the window sat 85 ms early; `SLOT_LEAD_MS=50` (from 100) centres it. The readout's `window:` line shows the shot the
+block opened at; keep it near the middle of the burst.
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while
