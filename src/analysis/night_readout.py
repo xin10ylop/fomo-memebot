@@ -197,10 +197,10 @@ def main():
         lost = [h for h in r["shots"] if not recs.get(h)]
         if lost:
             ans = collections.Counter()
-            for a in r["answers"]:
-                if a.get("hash") in lost:
-                    for _, txt in a.get("answers") or []:
-                        ans[txt[:90]] += 1
+            for ans_ev in r["answers"]:
+                if ans_ev.get("hash") in lost:
+                    for _, txt in ans_ev.get("answers") or []:
+                        ans[txt.split("'message': ")[-1][:70] if "'message': " in txt else txt[:70]] += 1
             idx = [r["shots"].index(h) for h in lost]
             print(f"           LOST {len(lost)} shots (never on the chain): shots {min(idx)}-{max(idx)}; the sequencer answered: " + ("; ".join(f"{n}x {t}" for t, n in ans.most_common(4)) if ans else "no answer recorded"))
         dc_ = r.get("decision") or {}; sb = r.get("sent") or {}; ld_ = r.get("landing") or {}
