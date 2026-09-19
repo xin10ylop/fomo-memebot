@@ -89,10 +89,15 @@ def main():
     L = collections.OrderedDict()                                       # curve -> launch record
     def rec(curve):
         return L.setdefault(curve, dict(t=None, shots=[], landing=None, dones=[], approve=[], sells=[], alarms=[], events=[]))
+    last_curve = None
     for e in since:
         c = e.get("curve"); k = e.get("ev")
+        if k == "resend" and last_curve:
+            rec(last_curve)["events"].append(e); continue
         if not c:
             continue
+        if k == "trade_decision":
+            last_curve = c
         r = rec(c)
         if k == "trade_decision":
             r["t"] = e["t"]; r["decision"] = e
@@ -109,7 +114,7 @@ def main():
         elif k == "alarm":
             r["alarms"].append(e)
             if e.get("sell_hash"): r["sells"].append(e["sell_hash"])
-        elif k in ("buy_reverted", "buy_rejected", "receipt_timeout", "token_resolved_at_exit", "landing", "score"):
+        elif k in ("buy_reverted", "buy_rejected", "receipt_timeout", "token_resolved_at_exit", "landing", "score", "approve_not_seen", "approve_missing", "sell_reverted"):
             r["events"].append(e)
     hashes = []
     for r in L.values():
@@ -191,6 +196,9 @@ def main():
                 t_buy = dn["t"] - dn["held_s"]
                 print(f"           timeline: decision->buy clock {1000 * (t_buy - dc['t']):.0f} ms" + (f", buy clock->landing logged {1000 * (ld['t'] - t_buy):.0f} ms" if ld else "")
                       + f", held {dn['held_s']} s of which the sell took {dn.get('sell_confirm_s', '?')} s" + (f"  (note: {dn['note']})" if dn.get("note") else ""))
+                exit_ev = [e for e in r["events"] if e["ev"] in ("approve_not_seen", "approve_missing", "resend", "sell_reverted", "receipt_timeout", "token_resolved_at_exit")]
+                if exit_ev:
+                    print("           exit events: " + "; ".join(f"{e['ev']} at +{e['t'] - t_buy:.2f} s" + (f" (attempt {e.get('attempt')}, {e.get('label')})" if e["ev"] == "resend" else "") for e in exit_ev))
             if len(fills) > 1 and eth_out and tokens_sold:
                 b0, i0, v0, tk0 = fills[0]; own = (tk0 / tokens_sold * eth_out) / v0 - 1 if v0 else 0.0; firsts.append(own)
                 print(f"           the first fill alone (${v0 * px:.2f} at idx {i0}): {100 * own:+.1f}% on its own tokens; the other {len(fills) - 1} fills bought higher and are what a one-stake wallet would not have bought")
