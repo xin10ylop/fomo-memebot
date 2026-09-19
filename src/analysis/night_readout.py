@@ -121,11 +121,14 @@ def main():
     landed = [h for h in hashes if recs.get(h)]
     txs = dict(zip(landed, rpc.batch([("eth_getTransactionByHash", [h]) for h in landed])))
     wallet = None
-    blocks_needed = sorted({int(recs[h]["blockNumber"], 16) for r in L.values() for h in r["shots"] if recs.get(h)})
+    ours_blocks = {int(recs[h]["blockNumber"], 16) for r in L.values() for h in r["shots"] if recs.get(h)}
+    blocks_needed = sorted(ours_blocks | {b - 1 for b in ours_blocks})
     blocks = dict(zip(blocks_needed, rpc.batch([("eth_getBlockByNumber", [hex(b), False]) for b in blocks_needed])))
     spans = {c: (min(int(recs[h]["blockNumber"], 16) for h in r["shots"] if recs.get(h)), max(int(recs[h]["blockNumber"], 16) for h in r["shots"] if recs.get(h)))
              for c, r in L.items() if any(recs.get(h) for h in r["shots"])}
-    buys = dict(zip(spans, rpc.batch([("eth_getLogs", [{"address": c, "fromBlock": hex(lo), "toBlock": hex(hi), "topics": [BUY_EV]}]) for c, (lo, hi) in spans.items()])))
+    buys = dict(zip(spans, rpc.batch([("eth_getLogs", [{"address": c, "fromBlock": hex(lo - 60), "toBlock": hex(hi), "topics": [BUY_EV]}]) for c, (lo, hi) in spans.items()])))
+    cblocks = {c: min(int(l["blockNumber"], 16) for l in (buys.get(c) or [])) for c in spans if buys.get(c)}          # the creation block carries the bundle's first buys
+    cts = dict(zip(cblocks, [int(b["timestamp"], 16) if b else None for b in rpc.batch([("eth_getBlockByNumber", [hex(b), False]) for b in cblocks.values()])]))
     tot = collections.Counter(); n_fill_launch = 0; n_bursts = 0; nets = []; firsts = []
     print()
     for c, r in L.items():
@@ -159,22 +162,35 @@ def main():
         tot["eth_in"] += eth_in; tot["eth_out"] += eth_out; tot["gas"] += gas; tot["net"] += net; n_fill_launch += bool(fills)
         when = t_str(r["t"]) if r["t"] else "?"
         seat_ts = (r.get("decision") or {}).get("seat_ts") or (r["dones"][-1].get("seat_ts") if r["dones"] else None)
+        c_ts = cts.get(c); feed_note = ""
+        if c_ts is not None and seat_ts is not None and c_ts + 1 != seat_ts:
+            feed_note = f"  [the engine's clock read the creation as second {seat_ts - 1}, the chain says {c_ts}: {seat_ts - 1 - c_ts:+d} s]"
         parts = []
         for b, v in sorted(by_block.items()):
             blk = blocks.get(b) or {}; ts = int(blk["timestamp"], 16) if blk else None; first = min(i for i, _ in v)
-            sec = "?" if (ts is None or seat_ts is None) else ("creation-second" if ts < seat_ts else ("SEAT" if ts == seat_ts else f"seat+{ts - seat_ts}s"))
+            if ts is None or c_ts is None:
+                sec = "?"
+            else:
+                d_ = ts - c_ts; sec = "creation-second" if d_ == 0 else ("SEAT" if d_ == 1 else (f"seat+{d_ - 1}s" if d_ > 1 else f"before creation ({d_} s)"))
+                if d_ == 1 and b > cblocks.get(c, b) and blocks.get(b - 1) and int(blocks[b - 1]["timestamp"], 16) == ts:
+                    sec = "SEAT (not its first block)"
             ours = {i for i, _ in v}
             bl = [l for l in (buys.get(c) or []) if int(l["blockNumber"], 16) == b and int(l["transactionIndex"], 16) not in ours and (wallet is None or l["topics"][2][-40:] != wallet[-40:])]
             ahead = [l for l in bl if int(l["transactionIndex"], 16) < first]; after = [l for l in bl if int(l["transactionIndex"], 16) > first]
             ahead_eth = sum(words(l["data"])[0] for l in ahead) / 1e18; after_eth = sum(words(l["data"])[0] for l in after) / 1e18
             parts.append(f"{sec}: {len(v)} shots from idx {first}, " + (f"{len(ahead)} buy{'s' if len(ahead) != 1 else ''} ahead ({ahead_eth:.3f} ETH)" if ahead else "no buy ahead")
                          + (f", {len(after)} behind ({after_eth:.3f} ETH)" if after else ", nobody behind") + (f", FILL@{','.join(str(i) for i, ok in sorted(v) if ok)}" if any(ok for _, ok in v) else ""))
-        print(f"{when} launch {c[:10]}  shots landed {n_landed}/{len(r['shots'])}  " + " | ".join(parts) if parts else f"{when} launch {c[:10]}  no shot landed")
+        print(f"{when} launch {c}  shots landed {n_landed}/{len(r['shots'])}  " + " | ".join(parts) + feed_note if parts else f"{when} launch {c}  no shot landed")
         if fills:
             ret = (eth_out - gas) / eth_in - 1 if eth_in else 0
             state = "sold" if eth_out else ("SELL REVERTED, tokens still held" if sell_ok is False else ("NOT SOLD, tokens still held" if not sold_hashes else "sell sent, no receipt"))
             print(f"           fills {len(fills)} (${eth_in * px:.2f} in)  ETH in {eth_in:.5f}  out {eth_out:.5f}  gas {gas:.6f}  net {net:+.5f} ETH{usd(net)}  return {100 * ret:+.1f}%  {state}"
                   + (f"  held {sell_block - fills[0][0]} blocks" if sell_block else "") + (f" ({r['dones'][-1].get('held_s')} s)" if r["dones"] and r["dones"][-1].get("held_s") is not None else "") + (f"  exit: {r['dones'][-1].get('exit')}" if r["dones"] else ""))
+            dn = r["dones"][-1] if r["dones"] else None; dc = r.get("decision"); ld = r.get("landing")
+            if dn and dc and dn.get("held_s") is not None:
+                t_buy = dn["t"] - dn["held_s"]
+                print(f"           timeline: decision->buy clock {1000 * (t_buy - dc['t']):.0f} ms" + (f", buy clock->landing logged {1000 * (ld['t'] - t_buy):.0f} ms" if ld else "")
+                      + f", held {dn['held_s']} s of which the sell took {dn.get('sell_confirm_s', '?')} s" + (f"  (note: {dn['note']})" if dn.get("note") else ""))
             if len(fills) > 1 and eth_out and tokens_sold:
                 b0, i0, v0, tk0 = fills[0]; own = (tk0 / tokens_sold * eth_out) / v0 - 1 if v0 else 0.0; firsts.append(own)
                 print(f"           the first fill alone (${v0 * px:.2f} at idx {i0}): {100 * own:+.1f}% on its own tokens; the other {len(fills) - 1} fills bought higher and are what a one-stake wallet would not have bought")
@@ -192,6 +208,15 @@ def main():
     if a.start_eth is not None and wallet:
         bal = rpc.batch([("eth_getBalance", [wallet, "latest"])])[0]; now = int(bal, 16) / 1e18
         print(f"wallet: {a.start_eth:.5f} ETH at the start, {now:.5f} ETH now, change {now - a.start_eth:+.5f} ETH{usd(now - a.start_eth)}; receipts explain {tot['net']:+.5f} ETH, unexplained {now - a.start_eth - tot['net']:+.5f} ETH")
+    shots_ev = [e for e in since if e.get("ev") == "burst_shots" and e.get("nonces")]
+    if shots_ev and wallet:
+        last = shots_ev[-1]; expected = max(last["nonces"]) + 1 + (2 if any(e.get("ev") == "trade_done" and e.get("curve") == last["curve"] for e in since) else 0)
+        n_chain = int(rpc.batch([("eth_getTransactionCount", [wallet, "latest"])])[0], 16)
+        print(f"nonce: the chain says {n_chain} transactions from the wallet, the log accounts for {expected}" + ("" if n_chain == expected else f": {n_chain - expected} transaction(s) the log does not list"))
+    relay = start.get("relay")
+    if relay:
+        rb = int(rpc.batch([("eth_getBalance", [relay, "latest"])])[0], 16) / 1e18
+        print(f"relay {relay} holds {rb:.6f} ETH" + ("" if rb == 0 else " (sweep it back: sweep(0x0) from the wallet)"))
     others = [e for e in since if e.get("ev") in ("alarm", "error", "feed_stall", "feed_error") and not e.get("curve")]
     if others:
         print("\nother alarms and errors:")
