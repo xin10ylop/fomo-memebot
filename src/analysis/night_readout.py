@@ -248,7 +248,21 @@ def main():
             moved += v + g; tot[e["label"]] += v
     if transfers:
         print(f"moved out of the wallet by the engine: {tot['relay_float']:.5f} ETH to the relay (its stake), {tot['shooter_gas']:.5f} ETH to shooters (gas); still yours, not a loss")
-    if a.start_eth is not None and wallet:
+    if a.start_eth is not None and wallet and start.get("shooters"):        # the stake sits in the relay and the shots' gas in the shooters: reconcile the whole capital
+        relay_ = start.get("relay"); sh_ev = [e for e in ev_all if e.get("ev") == "shooters"]
+        addrs = []
+        try:
+            import subprocess
+            env_ = dict(l.split("=", 1) for l in open("/etc/sniper/engine.env").read().splitlines() if "=" in l and not l.startswith("#"))
+            from eth_account import Account
+            addrs = [Account.from_key(k.strip()).address for k in env_.get("SHOOTER_KEYS", "").split(",") if k.strip()]
+        except Exception:
+            pass
+        bals = rpc.batch([("eth_getBalance", [x, "latest"]) for x in [wallet, relay_] + addrs])
+        wnow = int(bals[0], 16) / 1e18; rnow = int(bals[1], 16) / 1e18; snow = sum(int(b, 16) for b in bals[2:]) / 1e18; now = wnow + rnow + snow
+        xfer_gas = moved - tot["relay_float"] - tot["shooter_gas"]
+        print(f"capital (wallet {wnow:.5f} + relay {rnow:.5f} + {len(addrs)} shooters {snow:.5f}): {a.start_eth:.5f} ETH at the start, {now:.5f} ETH now, change {now - a.start_eth:+.5f} ETH{usd(now - a.start_eth)}; trades explain {tot['net']:+.5f} ETH, transfer gas {-xfer_gas:+.6f}, unexplained {now - a.start_eth - tot['net'] + xfer_gas:+.5f} ETH")
+    elif a.start_eth is not None and wallet:
         bal = rpc.batch([("eth_getBalance", [wallet, "latest"])])[0]; now = int(bal, 16) / 1e18
         print(f"wallet: {a.start_eth:.5f} ETH at the start, {now:.5f} ETH now, change {now - a.start_eth:+.5f} ETH{usd(now - a.start_eth)}; trades explain {tot['net']:+.5f} ETH, transfers {-moved:+.5f}, unexplained {now - a.start_eth - tot['net'] + moved:+.5f} ETH")
     shots_ev = [e for e in since if e.get("ev") == "burst_shots" and e.get("nonces")]
