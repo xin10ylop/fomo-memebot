@@ -587,7 +587,7 @@ def chain_loop():
             if SEND is not None and state["open"] is None and (n % (3 if WALLET_STAKE else 10) == 0 or not state["day_start_real"]):   # live: the bankroll is the wallet's ETH; it changes only on trades (every 10 s when it sizes the stake, else 30)
                 bal = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18; state["wallet_eth"] = bal; state["wallet_at"] = mono()
                 with lock:
-                    state["bankroll"] = bal * state["eth_usd"]
+                    state["bankroll"] = bankroll_usd(bal)
                     if not state["day_start_real"]:                       # until the wallet is read, day_start is BANKROLL_USD from the env; a wallet under half of it would latch the daily stop on the first launch (audit, Sep 16)
                         state["day_start"] = state["bankroll"]; state["day_start_real"] = True
                         log({"ev": "day_start", "bankroll_usd": round(state["bankroll"], 2), "stop_at_usd": round((1 - DAILY_STOP) * state["bankroll"], 2)})
@@ -1382,9 +1382,15 @@ def refresh_wallet(why=""):
     try:
         bal = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18
         with lock:
-            state["wallet_eth"] = bal; state["wallet_at"] = mono(); state["bankroll"] = bal * state["eth_usd"]
+            state["wallet_eth"] = bal; state["wallet_at"] = mono(); state["bankroll"] = bankroll_usd(bal)
     except Exception as e:
         log({"ev": "error", "stage": "refresh_wallet", "why": why, "err": str(e)[:160]})
+
+
+def bankroll_usd(wallet_eth):
+    """live: the wallet's ETH, plus the stake the relay holds when the shooters fire (6.01: the wallet alone read $8 with $18 in the relay and the
+    'bankroll below the minimum stake' gate refused the only qualifying launch of the hour, Sep 19 10:xx)"""
+    return (wallet_eth + ((state.get("relay_eth") or 0.0) if SHOOTERS else 0.0)) * state["eth_usd"]
 
 
 def refresh_shooters(nonces=True, gas=True):
@@ -2229,7 +2235,7 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 6.0, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.01, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

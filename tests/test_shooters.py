@@ -39,7 +39,8 @@ E.refresh_shooters = lambda nonces=True, gas=True: None
 E.next_nonce = lambda: E.state["nonce"]
 T = 1_800_000_000; ADDR = [x.address.lower() for x in KEYS]
 E.state.update({"nonce": 5, "chain_at": E.mono(), "eth_usd": 2500.0, "gas_price": 2 * 10 ** 8, "base_fee": 10 ** 8, "feed_ts": T, "blocks": 1000, "bankroll": 300.0, "day_start": 300.0, "open": None, "stopped": False,
-                "wallet_eth": 0.02, "wallet_at": E.mono(), "relay_eth": 0.012, "relay_at": E.mono(), "shooter_nonce": {a: 10 + i for i, a in enumerate(ADDR)}, "shooter_eth": {a: 0.0001 for a in ADDR}, "shooter_at": E.mono()})
+                "wallet_eth": 0.003, "wallet_at": E.mono(), "relay_eth": 0.012, "relay_at": E.mono(), "shooter_nonce": {a: 10 + i for i, a in enumerate(ADDR)}, "shooter_eth": {a: 0.0001 for a in ADDR}, "shooter_at": E.mono()})
+E.state["bankroll"] = E.bankroll_usd(E.state["wallet_eth"]); E.state["day_start"] = E.state["bankroll"]   # $37.5: a $7.50 wallet with the stake in the relay must still trade
 E.state["flip_at"][T] = E.mono()
 SENDERS = {}
 E.sender_of = lambda raw: SENDERS.get(raw)
@@ -85,6 +86,7 @@ def receipt(h, timeout=10.0, ans=None, stop=None):
 E.wait_receipt = receipt
 
 check("shooters: four addresses derived from the keys", E.SHOOTERS == ADDR)
+check("bankroll counts the relay's stake with the wallet (0.003 + 0.012 ETH at $2,500 = $37.50)", abs(E.bankroll_usd(0.003) - 37.5) < 0.01, str(E.bankroll_usd(0.003)))
 check("shooters: WALLET_STAKE off", E.WALLET_STAKE is False)
 
 # 1. a burst: shots from the shooters, no value, 250k gas, keys to the send step; the wallet's nonce reserved for two
