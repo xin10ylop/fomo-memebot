@@ -68,14 +68,14 @@ def read(log_path):
     if not starts:
         sys.exit("no start event in the log")
     t0 = starts[-1]["t"]; since = [e for e in ev if e.get("t", 0) >= t0]
-    return starts[-1], since
+    return starts[-1], since, ev
 
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("log", nargs="?", default="/var/log/sniper/engine.jsonl")
     ap.add_argument("--rpc", default="https://rpc.mainnet.chain.robinhood.com"); ap.add_argument("--start-eth", type=float, default=None)
     ap.add_argument("--eth-usd", type=float, default=None); a = ap.parse_args()
-    start, since = read(a.log); px = a.eth_usd or (start.get("eth_usd") or 0)
+    start, since, ev_all = read(a.log); px = a.eth_usd or (start.get("eth_usd") or 0)
     if not px:
         px = next((e["eth_usd"] for e in reversed(since) if e.get("eth_usd")), 0) or 0
     if not px:
@@ -89,7 +89,7 @@ def main():
     L = collections.OrderedDict()                                       # curve -> launch record
     def rec(curve):
         return L.setdefault(curve, dict(t=None, shots=[], landing=None, dones=[], approve=[], sells=[], alarms=[], events=[], answers=[], sent=None))
-    last_curve = None; by_hash = {}; pending_sent = None
+    last_curve = None; by_hash = {}; pending_sent = None; transfers = [e for e in since if e.get("ev") == "sent_tx" and e.get("label") in ("relay_float", "shooter_gas") and e.get("hash")]
     for e in since:
         c = e.get("curve"); k = e.get("ev")
         if k == "resend" and last_curve:
@@ -127,7 +127,7 @@ def main():
     hashes = []
     for r in L.values():
         hashes += r["shots"] + list(dict.fromkeys(r["approve"])) + list(dict.fromkeys(r["sells"]))
-    hashes = list(dict.fromkeys(h for h in hashes if h))
+    hashes = list(dict.fromkeys(h for h in hashes if h)) + [e["hash"] for e in transfers]
     rpc = Rpc(a.rpc)
     print(f"fetching {len(hashes)} receipts from {a.rpc} ...", flush=True)
     recs = dict(zip(hashes, rpc.batch([("eth_getTransactionReceipt", [h]) for h in hashes])))
@@ -237,9 +237,17 @@ def main():
     if nets:
         print(f"per filled launch: " + ", ".join(f"{n:+.5f}" for n in nets) + f" ETH; mean {sum(nets) / len(nets):+.5f}, worst {min(nets):+.5f}")
         print(f"first-fill returns (what one stake per launch would have made): " + ", ".join(f"{100 * x:+.1f}%" for x in firsts) + f"; mean {100 * sum(firsts) / len(firsts):+.1f}%")
+    moved = 0.0
+    for e in transfers:
+        rc = recs.get(e["hash"])
+        if rc:
+            v = int((txs.get(e["hash"]) or {}).get("value", "0x0"), 16) / 1e18; g = int(rc["gasUsed"], 16) * int(rc.get("effectiveGasPrice", "0x0"), 16) / 1e18
+            moved += v + g; tot[e["label"]] += v
+    if transfers:
+        print(f"moved out of the wallet by the engine: {tot['relay_float']:.5f} ETH to the relay (its stake), {tot['shooter_gas']:.5f} ETH to shooters (gas); still yours, not a loss")
     if a.start_eth is not None and wallet:
         bal = rpc.batch([("eth_getBalance", [wallet, "latest"])])[0]; now = int(bal, 16) / 1e18
-        print(f"wallet: {a.start_eth:.5f} ETH at the start, {now:.5f} ETH now, change {now - a.start_eth:+.5f} ETH{usd(now - a.start_eth)}; receipts explain {tot['net']:+.5f} ETH, unexplained {now - a.start_eth - tot['net']:+.5f} ETH")
+        print(f"wallet: {a.start_eth:.5f} ETH at the start, {now:.5f} ETH now, change {now - a.start_eth:+.5f} ETH{usd(now - a.start_eth)}; trades explain {tot['net']:+.5f} ETH, transfers {-moved:+.5f}, unexplained {now - a.start_eth - tot['net'] + moved:+.5f} ETH")
     shots_ev = [e for e in since if e.get("ev") == "burst_shots" and e.get("nonces")]
     if shots_ev and wallet:
         last = shots_ev[-1]; landed_n = [n for h, n in zip(last["hashes"], last["nonces"]) if recs.get(h)]
@@ -249,7 +257,12 @@ def main():
     relay = start.get("relay")
     if relay:
         rb = int(rpc.batch([("eth_getBalance", [relay, "latest"])])[0], 16) / 1e18
-        print(f"relay {relay} holds {rb:.6f} ETH" + ("" if rb == 0 else " (sweep it back: sweep(0x0) from the wallet)"))
+        print(f"relay {relay} holds {rb:.6f} ETH{usd(rb)}" + (" (the stake it buys with)" if start.get("shooters") else ("" if rb == 0 else " (withdraw it: deploy/relay_ops.py withdraw all)")))
+    sh = [e for e in ev_all if e.get("ev") in ("shooters", "shooter_topup")]
+    if start.get("shooters"):
+        last_sh = [e for e in ev_all if e.get("ev") == "shooters"]
+        if last_sh:
+            print(f"shooters: {last_sh[-1]['n']}, {last_sh[-1]['low']} low on gas at the last check; refills since the start: {sum(1 for e in since if e.get('ev') == 'shooter_topup')}")
     others = [e for e in since if e.get("ev") in ("alarm", "error", "feed_stall", "feed_error") and not e.get("curve")]
     if others:
         print("\nother alarms and errors:")

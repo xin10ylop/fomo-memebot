@@ -114,7 +114,7 @@ def main():
         print(f"{n} shooter keys written to {ENV} (SHOOTER_KEYS); addresses:"); [print("  " + x.address) for x in new]
         print("next: shooters-register, then shooters-fund"); return
 
-    if not shooters:
+    if not shooters and a.cmd.startswith("shooters-"):
         sys.exit("no SHOOTER_KEYS in the env: shooters-create first")
     nonce = int(rpc.call("eth_getTransactionCount", [wallet, "pending"]), 16)
 
