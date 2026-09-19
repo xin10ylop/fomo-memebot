@@ -196,7 +196,9 @@ def main():
         print(f"{when} launch {c}  shots landed {n_landed}/{len(r['shots'])}  " + " | ".join(parts) + feed_note if parts else f"{when} launch {c}  no shot landed")
         dc_ = r.get("decision") or {}; sb = r.get("sent") or {}; ld_ = r.get("landing") or {}
         if r["shots"] and (dc_ or sb or ld_):
-            replies = [max(a.get("reply_ms") or [0]) for a in r["answers"]]
+            def nums(x):
+                return [x] if isinstance(x, (int, float)) else [v for y in x for v in nums(y)] if isinstance(x, (list, tuple)) else []
+            replies = [v for a in r["answers"] for v in nums(a.get("reply_ms"))]
             print(f"           send: aimed {dc_.get('burst_at_ms')} ms after the creation was seen ({dc_.get('target_model')}, built {dc_.get('build_lead_ms')} ms before), shots fired late by up to {max(sb.get('late_ms') or [0]):.1f} ms"
                   + (f", sequencer replies up to {max(replies):.0f} ms" if replies else "") + (f"; flip minus first shot {ld_.get('flip_minus_first_shot_ms')} ms, flip minus first fill {ld_.get('flip_minus_first_fill_ms')} ms" if ld_ else ""))
         if fills:
