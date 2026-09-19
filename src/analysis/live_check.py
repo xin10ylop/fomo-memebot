@@ -73,7 +73,7 @@ def check(log_path, rpc_url, slip):
         ra = rpc.call("eth_getTransactionReceipt", [d["approve_hash"]]) if d.get("approve_hash") else None
         if rb is None or rs is None:
             rows.append(dict(curve=curve, note="receipt missing (buy)" if rb is None else "receipt missing (sell)")); continue
-        wallet = rb["from"].lower()
+        wallet = (rs["from"] if rs else rb["from"]).lower()                # the sell is the wallet's; the buy may come from a shooter through the relay (engine 6.0), whose Buy event names the wallet as recipient
         eth_in = tokens_out = tokens_in = eth_out = None
         for l in rb.get("logs", []):
             if l["topics"][0] == BUY_EV and l["address"].lower() == curve.lower() and l["topics"][2][-40:] == wallet[-40:]:

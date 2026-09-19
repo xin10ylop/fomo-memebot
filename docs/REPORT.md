@@ -2838,3 +2838,13 @@ registration) sat before the line that loads the send step, so in live mode `SEN
 ran; the engine logged no `shooters` report and would have started on a wrong relay. 6.03 runs them right after the send
 step is loaded. Nothing was lost to it: the relay and the shooters were verified by the deploy and operations scripts,
 and the trades of the morning went through them correctly.
+
+**A wrong column, and the switch on it (Sep 19 13:xx, engine 6.05).** The engine's `score` event carries two paper results
+for every qualifying launch: `roi`, the seat 0.3 s behind the first buyer of the seat's second (the tables' "behind"
+position), and `roi_e1`, the seat at the front of that second, ahead of every buyer. The burst takes the front (index 1-2
+on every clean trade), but the safety switch, the readouts and the first diagnosis of the day read `roi`: 145 launches at
+−8.5% mean and 9% winners, which I reported as the market having changed. The live results of six flat launches matched
+either column (no crowd, the same price from either seat); the one crowded launch made +38.4% live and scored −2% from
+0.3 s behind, the crowd's buys already in the price. 6.05 scores, switches and reads out the front seat when the burst
+is on, and `live_check` reads a relay-paid buy from the curve's Buy event. The unchanged five-day script, run on Sep 18-19
+from the chain, is the independent check of whether the front seat still pays (`data/derived/e1_sep1819/`).

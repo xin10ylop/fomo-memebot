@@ -1118,7 +1118,8 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
                 if state["reverters"][snd] == 3:
                     log({"ev": "reverter_learned", "sender": snd, "note": "three counted attempts that never landed: this sender's attempts are no longer rivals"})
         info = {}
-        r = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, gated=BUNDLE_MIN > 0, stop_sell_frac=STOP_SELL_FRAC if STOP_SELL_FRAC > 0 else None, tp=TAKE_PROFIT if TAKE_PROFIT > 0 else None, info=info)
+        front_seat = SEAT == "E1" and BURST_N > 1                       # 6.05: the burst lands at the front of the seat's block (index 1-2 on every clean trade, Sep 19); the score, the
+        r = exact_score(events, b_create, tk0, stake_usd / state["eth_usd"], SEAT, gated=BUNDLE_MIN > 0, stop_sell_frac=STOP_SELL_FRAC if STOP_SELL_FRAC > 0 else None, tp=TAKE_PROFIT if TAKE_PROFIT > 0 else None, info=info, front=front_seat)   # switch and the readouts follow that seat, not the tables' "0.3 s behind" (which read -8.5% while the front read the truth)
         if r is None:
             log({"ev": "score", "curve": curve, "result": "no usable launch-block buy"}); return
         roi_e1 = None                                                   # paper score of the E1 seat (the front of second one, every bundled launch), for the E1 plan
@@ -1156,7 +1157,7 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
             if traded is not None and SEND is None:                     # dry run: the paper bankroll follows the scores; live: the wallet balance (chain_loop)
                 state["bankroll"] += min(traded, cost) * roi
         save_state()
-        log({"ev": "score", "curve": curve, "roi": round(roi, 4), "roi_table": round(r[0] / r[1], 4), "roi_e1": roi_e1, "pnl_usd": round(pnl, 2), "cost_usd": round(cost, 2), "tier": round(tier, 4), "t_in_s": round(t_in, 2),
+        log({"ev": "score", "curve": curve, "roi": round(roi, 4), "roi_table": round(r[0] / r[1], 4), "roi_e1": roi_e1, "front_seat": front_seat, "pnl_usd": round(pnl, 2), "cost_usd": round(cost, 2), "tier": round(tier, 4), "t_in_s": round(t_in, 2),
              "bot_first": bool(info.get("bot_first")), **landing,
              "n_scores": len(sc), "rolling_mean": round(st.mean(sc), 4), "switch_on": on, "traded_dry_run": traded is not None, "bankroll": round(state["bankroll"], 2)})
     except Exception as e:
@@ -2236,7 +2237,7 @@ async def main():
     load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 6.04, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.05, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
