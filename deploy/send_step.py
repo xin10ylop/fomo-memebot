@@ -33,10 +33,17 @@ def make_burst(engine):
     before the second boundary land in the creation second and revert on their minOut for the gas; the first one past it
     fills; the later ones revert on the same minOut once our own fill has moved the price. Returns [(hash, answers)]."""
     key = Account.from_key(os.environ["PRIVATE_KEY"])
-    mono = engine.mono
+    mono = engine.mono; cache = {}
 
-    def submit_burst(txs, at, label):
-        bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + bytes(key.sign_transaction(tx).raw_transaction).hex()]}).encode() for tx in txs]
+    def signer(k):                                                       # engine 6.0: a shooter's key per shot (keys=), else the wallet's
+        if k is None:
+            return key
+        if k not in cache:
+            cache[k] = Account.from_key(k)
+        return cache[k]
+
+    def submit_burst(txs, at, label, keys=None):
+        bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + bytes(signer(keys[i] if keys else None).sign_transaction(tx).raw_transaction).hex()]}).encode() for i, tx in enumerate(txs)]
         t_signed = mono(); out = []; fired_at = []
         for i, body in enumerate(bodies):
             while mono() < at[i] - 0.004:                               # a prebuilt burst waits for the boundary here: sleep, then spin the last 4 ms
@@ -44,7 +51,7 @@ def make_burst(engine):
             while mono() < at[i]:
                 pass
             fired_at.append(mono()); out.append(engine.SENDER.fire_slot(body, i))
-        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "sign_ms": round(1000 * (t_signed - (at[0] - 0.0015 * len(txs))), 1),
+        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "shooters": bool(keys), "sign_ms": round(1000 * (t_signed - (at[0] - 0.0015 * len(txs))), 1),
                     "shot_ms": [round(1000 * (t - at[0]), 1) for t in fired_at], "late_ms": [round(1000 * (t - a), 2) for t, a in zip(fired_at, at)]})
         return out
     return submit_burst

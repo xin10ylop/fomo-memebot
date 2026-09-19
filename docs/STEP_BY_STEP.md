@@ -303,6 +303,25 @@ second, so a burst the sequencer includes late costs a cent instead of a bad buy
 deploy command again (engine stopped, it writes the new address by itself), then restart. The engine refuses to start on
 the old relay, so if it says "does not know the deadline", that is the reminder to run the deploy command.
 
+**33. Shooters (Sep 19, engine 6.0).** The burst's shots came from one wallet and the sequencer refused most of them
+under load ("nonce too high"). Now each shot has its own small wallet, and the relay holds the $15 and buys with it.
+Seven commands, in order, engine stopped; nothing to replace. Where one asks `(yes/no)`, type `yes`.
+
+```
+sudo systemctl stop sniper-engine; cd ~/fomo-memebot && git pull origin claude/memecoin-strategy-research-vcdy6c && sudo cp ~/fomo-memebot/deploy/send_step.py /etc/sniper/send_step.py && sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_deploy.py --write-env
+```
+
+```
+sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py shooters-create 35 && sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py shooters-register && sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py shooters-fund --yes
+```
+
+```
+sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py deposit 0.009 && sudo systemctl restart sniper-engine && sleep 30 && systemctl is-active sniper-engine
+```
+
+The relay now holds the stake (about $23, 1.5 bets) and 35 shooters hold about $0.25 of gas each. The engine keeps
+both topped up from the wallet. `relay_ops.py status` shows all of it any time.
+
 ## If something looks wrong
 
 - `systemctl status sniper-engine` says whether it runs; `journalctl -u sniper-engine -n 50` says why it stopped.

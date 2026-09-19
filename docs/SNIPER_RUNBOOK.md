@@ -522,6 +522,27 @@ Engine 5.97: a shot whose socket the sequencer closed is re-fired once; the appr
 chain took (`burst_dropped` in the log names the lost ones and the sequencer's answers); the readout shows the Sell
 event's ETH out as the wallet receives it (gross; the fee words are already taken out).
 
+### 5h. Shooters: one wallet per shot (engine 6.0, third relay)
+
+Why: one wallet's consecutive nonces fired on parallel sockets are refused as "nonce too high" when the sequencer is
+under load (report 24.26). Every shot now comes from its own shooter wallet (gas only) and the relay buys with the
+stake it holds. Set up once, engine stopped, on the machine (each command prints what it did):
+
+    sudo systemctl stop sniper-engine
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_deploy.py --write-env      # the third relay
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py shooters-create 35   # 35 keys into engine.env
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py shooters-register    # one transaction
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py shooters-fund --yes  # 0.0001 ETH of gas each
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py deposit 0.009        # the stake, 1.5 x $15 at $2,600
+    sudo cp ~/fomo-memebot/deploy/send_step.py /etc/sniper/send_step.py                       # signs each shot with its shooter
+    sudo systemctl restart sniper-engine
+
+`relay_ops.py status` (read-only, engine running or not) lists the wallet, the relay's ETH, every shooter's gas and
+registration. The engine refills shooters below 0.00004 ETH and the relay to 1.5 stakes after each exit, from the
+wallet; it logs an alarm when the wallet cannot. `withdraw all` brings the relay's ETH back, `shooters-sweep` the
+shooters' gas. The start refuses to run with an older relay, an unregistered shooter, `BURST_N` above the number of
+shooters, or the old send step.
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while

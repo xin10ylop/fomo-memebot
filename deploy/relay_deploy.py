@@ -98,10 +98,11 @@ def main():
     if curves:
         curve = curves[-1]; amt = 10 ** 14
         try:
-            rpc.call("eth_call", [{"from": wallet, "to": relay, "value": hex(amt), "data": "0x1622dbe4" + word(curve) + word(amt) + word(0) + word(0)}, "latest"], tries=2)
+            ov = {relay: {"balance": hex(10 ** 16)}}                      # the relay buys with its own ETH: simulate it funded
+            rpc.call("eth_call", [{"from": wallet, "to": relay, "data": "0x1622dbe4" + word(curve) + word(amt) + word(0) + word(0)}, "latest", ov], tries=2)
             print(f"simulated buy through the relay on the latest curve {curve}: ok")
             try:
-                rpc.call("eth_call", [{"from": wallet, "to": relay, "value": hex(amt), "data": "0x1622dbe4" + word(curve) + word(amt) + word(0) + word(1)}, "latest"], tries=2)
+                rpc.call("eth_call", [{"from": wallet, "to": relay, "data": "0x1622dbe4" + word(curve) + word(amt) + word(0) + word(1)}, "latest", ov], tries=2)
                 print("a buy with a deadline in the past WENT THROUGH: the relay does not enforce the deadline; do not use it"); sys.exit(1)
             except SystemExit:
                 raise
@@ -112,7 +113,7 @@ def main():
     if a.write_env:
         lines = [l for l in open(ENV).read().splitlines() if not l.startswith("RELAY=")] + [f"RELAY={relay}"]
         tmp = ENV + ".tmp"; open(tmp, "w").write("\n".join(lines) + "\n"); os.chmod(tmp, 0o600); os.replace(tmp, ENV)
-        print(f"\nRELAY={relay} written to {ENV}; set STAKE_MIN/STAKE_MAX to the bet you want and restart the engine")
+        print(f"\nRELAY={relay} written to {ENV}. Next: deploy/relay_ops.py shooters-register (if shooters exist), deposit <eth> (the stake), then restart the engine")
     else:
         print("\nadd this line to /etc/sniper/engine.env (and STAKE_MIN/STAKE_MAX to the bet you want), then restart the engine:")
         print(f"RELAY={relay}")
