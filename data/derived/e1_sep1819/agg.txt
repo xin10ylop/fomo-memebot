@@ -1,0 +1,41 @@
+=== both legal outside seats with real second boundaries, per day (tier 2-3%, >=3 named, bundle >=0.3 ETH, hold 15 blocks = 1.5 s, $250 capped at 3% of supply)
+day (UTC)                 n  /day |  E1 first    med  win |  E1 last    med  win | E1 +1blk |  E2 first    med |  E2 last    med | $/day E1 first  E1 last
+Sep 18 13:27            105   211 |    +10.5%  +1.1%  51% |    -7.3% -10.0%  15% |    -8.2% |     -1.7%  -4.1% |    -3.0%  -4.1% |          +5396    -3844
+Sep 19 01:12             36    72 |     +5.6%  -0.1%  50% |    -1.7%  -9.0%  31% |    -3.1% |     -3.3%  -6.1% |    -4.2%  -6.1% |           +992     -286
+
+=== all days pooled: 141 launches over 1.0 days
+variant                       n    mean  median  win  dead  $/trade
+E1_first_h15_250            141   +9.3%   +1.0%  51%    1%   +22.59
+E1_first_h30_250            141   +8.4%   -1.5%  48%    4%   +20.31
+E1_first_h60_250            141   +5.5%   -6.2%  40%    8%   +13.11
+E1_first_h60tp50_250        141   +4.9%   -5.2%  42%    8%   +11.73
+E1_last_h15_250             141   -5.8%  -10.0%  19%    8%   -14.60
+E1_last_h30_250             141   -6.4%   -9.9%  25%   14%   -16.19
+E1_last_h60_250             141   -8.5%  -11.7%  23%   25%   -21.24
+E1_last_h60tp50_250         141   -9.1%  -11.7%  23%   25%   -22.84
+E1_late1_h15_250            141   -6.9%  -10.0%  16%    9%   -17.21
+E1_late1_h30_250            141   -8.0%  -10.6%  23%   18%   -20.04
+E2_first_h15_250            141   -2.1%   -4.9%  23%    4%    -5.05
+E2_first_h30_250            141   -4.1%   -5.9%  26%   13%    -9.97
+E2_first_h60_250            141   -4.6%   -6.1%  24%   18%   -10.95
+E2_last_h15_250             141   -3.3%   -5.1%  20%    5%    -8.23
+E2_last_h30_250             141   -5.4%   -5.9%  22%   13%   -13.08
+E2_last_h60_250             141   -5.6%   -6.1%  24%   20%   -13.72
+E1_first_h15_10             141   +8.8%   +0.8%  51%    1%    +0.88
+E1_last_h15_10              141   -6.0%  -10.0%  19%    8%    -0.60
+
+=== the first block of the next second: launches with nobody else in it 25/141 (18%); other buys per launch mean 3.4, median 2
+   most frequent occupants (buyer address in the Buy event, launches present / all launches):
+     0x1ed153337379d2274a36656eff6c243b78be8023    23 / 141  (16%)
+     0xe0686dc72b04c12ceefeea75e286e4ef7c056f01    22 / 141  (16%)
+     0x62ef1b3c77dffbbbde9d3ed91ddb31a1b567d6de    21 / 141  (15%)
+     0x5136067ccc0065c20ac16cd7191d08564e19d71e    18 / 141  (13%)
+     0x6c56103c6af4891be46cb3666c1fa354cc79eaca    18 / 141  (13%)
+     0x2abdd72b5bb40ba0df894d33d40aee918da551ae    18 / 141  (13%)
+     0xfefe306eb0e5eaf0d6821a1d2935ffc5cfa8cc1b    17 / 141  (12%)
+     0xe268a3a469c4c34657491cdf3bc522c2313eb45b    16 / 141  (11%)
+   launches where at least one of the top-3 occupants is in the block: 58/141 (41%)
+   blocks sharing the creation's second after the creation block: median 6; E2-block other buys mean 0.6, empty 72%
+
+=== E1 first, by hour UTC: n / mean
+  00:1/+11%  02:2/-3%  03:3/+5%  04:1/+71%  05:2/-0%  06:2/-0%  07:2/+16%  08:3/+8%  09:3/+4%  10:4/+7%  11:8/+2%  12:4/-11%  13:3/+12%  14:2/-9%  15:5/+7%  16:13/+20%  17:11/+7%  18:13/+22%  19:16/+18%  20:11/+12%  21:14/-5%  22:10/+14%  23:8/-4%

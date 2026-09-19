@@ -547,6 +547,17 @@ Aim (Sep 19, five bursts under the shooters): the seat's block opened at shot 28
 the window sat 85 ms early; `SLOT_LEAD_MS=50` (from 100) centres it. The readout's `window:` line shows the shot the
 block opened at; keep it near the middle of the burst.
 
+### 5i. The daily check: the tables' script on the last 24 hours
+
+The engine's score line and the tables' script must agree; the script is the reference (real second boundaries, the
+chain). Once a day, on any machine with the public RPC (about 15 minutes for 24 hours):
+
+    mkdir -p data/derived/e1_today && python3 src/analysis/e1_multi.py 12 0 data/derived/e1_today/e1m_a.json 0.02 0.03 && python3 src/analysis/e1_multi.py 12 12 data/derived/e1_today/e1m_b.json 0.02 0.03 && python3 src/analysis/e1_agg.py data/derived/e1_today | head -8
+
+Read `E1 first` (mean, win) and `E1 last`. Sep 18-19: +9.3% and 51% over 141 launches (report 24.27). Trade while the
+front seat's mean over a day is above about +3% (the fees and the misses eat the rest); stop when a day reads below zero
+and the next day confirms it. Delete the folder before the next day's run (the script skips a file that exists).
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while

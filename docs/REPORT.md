@@ -31,6 +31,7 @@ Everything below was computed from data collected in this session; scripts are i
 25. **The burst filled six and five times at $15 and the wallet, not the stake, was the bet (section 24.24).** The 3% guard cannot see a $15 fill's own impact, so every shot after the first also fills until the wallet cannot fund one more; one launch at −56% on the whole wallet cost $42 of the night's $54. Engine 5.93 sizes every buy to the wallet less a gas reserve so the sequencer itself drops a second fill, makes `STAKE_MAX` the wallet's ceiling, and starts the hold clock at the fill (the sells had landed 31–36 blocks after the buy instead of 15). Nine live fills so far, four wins, a mean near +1%: too few to judge the seat's +16% either way.
 26. **The BuyOnce relay makes the bet a setting again (section 24.25).** A 20-line contract owned by the wallet buys at most once per curve and forwards the tokens to the wallet; the curve accepts contract buyers (checked by simulation), the relay's logic was exercised on a live curve's state before deployment, and engine 5.94 routes every shot through it. `STAKE_MIN`/`STAKE_MAX` are the bet, the wallet may hold any amount.
 27. **Shooters (section 24.26).** One wallet's consecutive nonces on parallel sockets are refused as "nonce too high" when the sequencer is under load (29 of 35 shots on Sep 19); engine 6.0 fires every shot from its own gas-only shooter wallet and the third relay buys with the stake it holds, once per curve, before the seat's deadline. No shot depends on another, and the exit no longer depends on how many landed.
+28. **The seat still pays, less (section 24.27).** The tables' unchanged script on the last 24 hours: 141 qualifying launches, front seat +9.3% mean, 51% winners, +10.5% in the evening half and +5.6% in the small hours; behind the crowd −5.9%. The engine's two readings of −8.5% and −3.9% the same day were its own errors (the wrong column, then a block-offset clock), fixed in 6.05 and 6.06. Live: seven clean trades at −0.8%, in the weak hours, within noise of the script.
 12. **Round 6 found the treasure's real owner and measured its seat: the first-block sniper.** The 185 sniper-bot wallets that pay the creators are not all losers. Reconstructing the dollar P&L of the fifteen busiest from their transfers, curve trades and pool swaps: the bots that buy 0.3–3 seconds after launch and sell 3–21 seconds later are net positive (the fastest: +$30.8k on $107k of turnover in six hours, +28.7% per trade, 175 launches, nothing left unsold); every bot that holds minutes or hours loses (−44% to −94%). Simulating that seat on every launch of the window with launch-time filters (creator's first launch of the day, ETH-quoted, stake min(3% of supply, $300), sell 7 s later into whoever bought next, exact curve exits, 1% fees each way) gives +27% on $97k in the fitting hours and +32% on $98k in the holdout hours, per-launch mean +27%/+33% with confidence intervals of +20% to +41%, median −2%, 46–48% of launches positive, worst case one stake. That is $26k and $31k of profit per three hours on a working capital of a few thousand dollars, and it reproduces the fastest real bot's holdout result (+31%). The sensitivity analysis says what it is: paying 10% more than first-in-line still earns +18–23%, paying 25% more earns +6–10%, paying 50% more or landing half a second late loses. It is a latency race for the first block after creation, on a chain with 100 ms blocks, sponsored gas and a first-come sequencer; the winner takes +30% a trade several hundred times a day and everyone behind them pays. Out of sample on Sep 2 (a lower-flow day) the same untouched rule made +0.4% in the first three hours and +15% in the next three. Three further windows across the fee cycle (section 14.2) then showed the seat is a peak-flow phenomenon: −13% in Pons V2's second week (Aug 12), flat at the trough (Aug 20) and on the ramp (Aug 27), positive only on the two peak days. It is not a structural edge. Section 14 has the tables and a live shadow tester that scores every new launch against the rule without capital.
 
 ## 1. Data access and what was analysed
@@ -2856,3 +2857,28 @@ burst is ahead of. On Sep 19 it read the front seat at −3.9% over 24 hours whi
 same launches. 6.06 builds a clock from the feed's flips (every second's first block is known to the engine) so the
 seat's second's first block sits at exactly 1.0 s, the tables' definition; the score event says `clock: seconds` or
 `offset` (the fallback within a minute of a restart). `tests/test_clock.py` checks the clock and the three seats' order.
+
+### 24.27 The last 24 hours by the tables' own script (Sep 18 13:27 to Sep 19 13:10 UTC)
+
+`src/analysis/e1_multi.py`, unchanged from the five-day run, on the chain, real second boundaries, the same filters
+(tier 2-3%, three named wallets, bundle 0.3 ETH and more), hold 15 blocks:
+
+| window (UTC) | qualifying | E1 first mean | median | win | E1 behind | E1 one block late |
+|---|---|---|---|---|---|---|
+| Sep 18 13:27 to 01:25 | 105 (211 a day) | **+10.5%** | +1.1% | 51% | −7.3% | −8.2% |
+| Sep 19 01:12 to 13:10 | 36 (72 a day) | **+5.6%** | −0.1% | 50% | −1.7% | −3.1% |
+| pooled | 141 | **+9.3%** | +1.0% | 51% | −5.9% | −6.9% |
+
+By hour, the evening pays and the small hours do not: 16h +20% (13), 18h +22% (13), 19h +18% (16), 20h +12% (11),
+22h +14% (10); 12h −11% (4), 14h −9% (2), 21h −5% (14), 23h −4% (8). Against the five days (+16.1%, 56% win, 148 a
+day) the seat pays about 60% of what it did and half as many launches qualify, and it pays in the same place: first in
+the block, with the crowd behind (behind the crowd is −5.9% now, against +3.7% then). The engine's own scorer had read
+the same day at −8.5% (the "behind" column) and then −3.9% (the front on the block-offset clock); both were the engine's
+errors, corrected in 6.05 and 6.06. The seven live trades of the day, −0.8% on average, fell in the morning hours where
+the script reads +5.6%, and seven trades resolve a mean only to about ±10 points.
+
+At $15 a launch the day's expectation is about $1.40 a launch, of the order of $150 to $200 a day at the day's rate if
+the seat keeps paying what it paid; at $250 it would have been $5,400 for the evening half alone by the script's
+figure, with the position risk that stake carries. The daily check is the script on the last 24 hours (`e1_multi.py 12 0`
+and `12 12`, then `e1_agg.py`), which the runbook now carries; the engine's own score line is the same measure from
+the feed and should agree with it from 6.06 on.
