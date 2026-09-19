@@ -514,6 +514,11 @@ anything that ended up in it to the wallet.
 Engine 5.95 fixed the approve's nonce (it was the second shot's, refused since the burst; the exit re-approved a second
 later), and the readout nets the curve's two sell fees from the Sell event's ETH out, which is gross.
 
+Engine 5.96 and the second relay: `buy` takes the seat's clock second as a deadline and reverts (`TooLate`) in any later
+block, so a burst the sequencer includes late (a one-second stall on Sep 19) costs gas instead of a dead seat. The engine
+refuses to start on the first relay (no deadline): redeploy with the same command (engine stopped, `--write-env`), a few
+cents; the old relay stays on the chain unused. `RELAY_DEADLINE=0` sends no deadline (a test setting only).
+
 ## 6. Kill criteria
 
 Stop for the day at −50%. Stop the strategy if the rolling mean of live outcomes over 30 trades is below zero while

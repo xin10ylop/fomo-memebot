@@ -298,6 +298,11 @@ for kv in STAKE_MIN=15 STAKE_MAX=15; do k=${kv%%=*}; sudo sed -i "/^$k=/d" /etc/
 
 From then on every launch bets $15 (change both numbers for another bet) and the wallet may hold any amount.
 
+**32. The relay with the deadline (Sep 19, engine 5.96).** The relay now refuses to buy in a block after the seat's
+second, so a burst the sequencer includes late costs a cent instead of a bad buy. It is a new contract: run step 31's
+deploy command again (engine stopped, it writes the new address by itself), then restart. The engine refuses to start on
+the old relay, so if it says "does not know the deadline", that is the reminder to run the deploy command.
+
 ## If something looks wrong
 
 - `systemctl status sniper-engine` says whether it runs; `journalctl -u sniper-engine -n 50` says why it stopped.

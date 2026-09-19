@@ -2785,3 +2785,15 @@ the last shot's nonce plus one (`tests/test_relay.py` checks the nonce); the sel
 the buy instead of 27–36. And the wallet's change was 0.00029 ETH short of what the receipts said: the curve's Sell event
 carries four words (tokens in, ETH out, two fees) and the wallet receives the ETH out net of both fees, about 3% here;
 the readout nets them now, so the live returns it prints are about three points lower than before, and match the wallet.
+
+**The first two relay trades, read with the send timing (Sep 19, engines 5.95–5.96).** 06:44: aimed on time, every
+shot fired within 0.0 ms of plan, and the sequencer answered up to 1.26 s later; the seat's first block reached the feed
+1.1 s after we fired, and every shot was included in the second after the seat (index 13, one buy ahead, −19.3% net of
+fees). The sequencer stalled for about a second and our transactions, already sent, landed after it. 07:14: fired on
+time, first in the seat block with nothing ahead and two small buys behind, −2.1% net: a launch with no crowd, which the
+tables price at −3.2% on average. Two lessons became code. A sent transaction cannot be recalled, but the relay reads the
+same block clock the curve keys its tax to, so `BuyOnce.buy` now takes a `deadline` (the seat's clock second) and reverts
+with `TooLate(blockTime, deadline)` in any later block, for a cent, instead of buying the dead seat behind a stall
+(exercised on a live curve's state before deployment: past deadline refused, future and none accepted, the old
+three-argument call gets a plain revert, which is how engine 5.96 tells an old relay from the new one at start and
+refuses to run on the old). And the readout nets the two sell fees the curve keeps, so its returns match the wallet.

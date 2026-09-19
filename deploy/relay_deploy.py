@@ -98,8 +98,15 @@ def main():
     if curves:
         curve = curves[-1]; amt = 10 ** 14
         try:
-            rpc.call("eth_call", [{"from": wallet, "to": relay, "value": hex(amt), "data": "0xa59ac6dd" + word(curve) + word(amt) + word(0)}, "latest"], tries=2)
+            rpc.call("eth_call", [{"from": wallet, "to": relay, "value": hex(amt), "data": "0x1622dbe4" + word(curve) + word(amt) + word(0) + word(0)}, "latest"], tries=2)
             print(f"simulated buy through the relay on the latest curve {curve}: ok")
+            try:
+                rpc.call("eth_call", [{"from": wallet, "to": relay, "value": hex(amt), "data": "0x1622dbe4" + word(curve) + word(amt) + word(0) + word(1)}, "latest"], tries=2)
+                print("a buy with a deadline in the past WENT THROUGH: the relay does not enforce the deadline; do not use it"); sys.exit(1)
+            except SystemExit:
+                raise
+            except Exception as ex:
+                print("a buy with a deadline in the past is refused (TooLate): ok" if "388b0173" in str(ex) else f"unexpected answer to a past deadline: {str(ex)[:120]}")
         except Exception as ex:
             print(f"simulated buy through the relay on {curve} did not go through ({str(ex)[:120]}); the curve may be graduated or in its tax second, try the engine's dry run")
     if a.write_env:

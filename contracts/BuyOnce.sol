@@ -15,14 +15,19 @@ contract BuyOnce {
 
     error NotOwner();
     error AlreadyBought(address curve);
+    error TooLate(uint256 blockTime, uint256 deadline);
 
     constructor() {
         owner = msg.sender;
     }
 
-    /// One buy per curve. amountIn and minOut are the curve's own arguments; msg.value funds it.
-    function buy(address curve, uint256 amountIn, uint256 minOut) external payable {
+    /// One buy per curve, and only in a block whose clock second is at or before `deadline` (0 = no deadline).
+    /// amountIn and minOut are the curve's own arguments; msg.value funds it. The curve keys its tax to the block's clock
+    /// second, so a shot the sequencer includes after the seat's second (a sequencer stall, Sep 19) reverts here for a
+    /// cent instead of buying a dead seat.
+    function buy(address curve, uint256 amountIn, uint256 minOut, uint256 deadline) external payable {
         if (msg.sender != owner) revert NotOwner();
+        if (deadline != 0 && block.timestamp > deadline) revert TooLate(block.timestamp, deadline);
         if (bought[curve]) revert AlreadyBought(curve);
         bought[curve] = true;
         (bool ok, bytes memory ret) = curve.call{value: msg.value}(abi.encodeWithSelector(0x59a87bc1, amountIn, minOut, owner));

@@ -54,7 +54,9 @@ WALLET = os.environ.get("WALLET", "0x0000000000000000000000000000000000000000").
 RELAY = os.environ.get("RELAY", "").strip().lower()                       # 5.94: the BuyOnce relay (contracts/BuyOnce.sol, deploy/relay_deploy.py): every shot goes through it and it
 if RELAY and not (RELAY.startswith("0x") and len(RELAY) == 42):           # buys at most once per curve, so the stake is a setting again and the wallet may hold many stakes
     raise SystemExit(f"RELAY must be a 0x address, got {RELAY!r}")
-RELAY_BUY_SEL = "a59ac6dd"; RELAY_GAS_EXTRA = 60_000                       # buy(address curve, uint256 amountIn, uint256 minOut) payable; the relay's own gas on top of the curve's
+RELAY_BUY_SEL = "1622dbe4"; RELAY_GAS_EXTRA = 60_000                       # buy(address curve, uint256 amountIn, uint256 minOut, uint256 deadline) payable; the relay's own gas on top of the curve's
+RELAY_TOO_LATE = "0x388b0173"                                              # TooLate(blockTime, deadline): the relay refuses a block past the seat's second (5.96; a sequencer stall put a burst a second late, Sep 19)
+RELAY_DEADLINE = os.environ.get("RELAY_DEADLINE", "1") == "1"              # pass the seat's second as the deadline (0 = never; only for a test)
 ETH_USD = float(os.environ.get("ETH_USD", "2445")); ETH_USD_URL = os.environ.get("ETH_USD_URL", "https://api.coinbase.com/v2/prices/ETH-USD/spot")
 BANKROLL = float(os.environ.get("BANKROLL_USD", "300"))
 FRAC = float(os.environ.get("FRAC", "0.15")); STAKE_MIN = float(os.environ.get("STAKE_MIN", "25")); STAKE_MAX = float(os.environ.get("STAKE_MAX", "300"))
@@ -1660,7 +1662,9 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
             log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
     if RELAY:                                                            # 5.94: the shot goes to the relay, which buys once per curve and sends the tokens to the wallet
-        buy = {"to": to_checksum_address(RELAY), "value": hex(amount_in), "data": "0x" + RELAY_BUY_SEL + abi_word(curve) + abi_word(amount_in) + abi_word(min_out), "gas": hex(GAS_BUY + RELAY_GAS_EXTRA), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
+        deadline = (feed_ts + SEAT_SECONDS.get(SEAT, 0)) if RELAY_DEADLINE else 0   # the seat's clock second: a block stamped later reverts in the relay (TooLate) instead of buying a dead seat
+        buy = {"to": to_checksum_address(RELAY), "value": hex(amount_in), "data": "0x" + RELAY_BUY_SEL + abi_word(curve) + abi_word(amount_in) + abi_word(min_out) + abi_word(deadline), "gas": hex(GAS_BUY + RELAY_GAS_EXTRA), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
+        decision["relay_deadline"] = deadline
     else:
         buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
     shots = None
@@ -2066,6 +2070,14 @@ async def main():
             raise SystemExit(f"RELAY {RELAY} has no code on the chain: deploy it first (deploy/relay_deploy.py) or unset RELAY")
         if ("0x" + owner[-40:]).lower() != WALLET:
             raise SystemExit(f"RELAY {RELAY} is owned by 0x{owner[-40:]}, not by this wallet {WALLET}: every shot would revert (NotOwner)")
+        try:                                                                  # a buy with a deadline in the past must answer TooLate: an older relay (no deadline) answers with a plain revert
+            rpc.call("eth_call", [{"from": WALLET, "to": RELAY, "value": hex(10 ** 12), "data": "0x" + RELAY_BUY_SEL + abi_word(RELAY) + abi_word(10 ** 12) + abi_word(0) + abi_word(1)}, "latest"], tries=1)
+            raise SystemExit(f"RELAY {RELAY} accepted a buy with a deadline in the past: not the relay this engine expects; redeploy with deploy/relay_deploy.py")
+        except SystemExit:
+            raise
+        except Exception as e:
+            if RELAY_TOO_LATE not in str(e):
+                raise SystemExit(f"RELAY {RELAY} does not know the deadline (old relay, or the RPC failed: {str(e)[:100]}): redeploy with deploy/relay_deploy.py --write-env, engine stopped")
     if PIN_CPU:
         try:
             os.sched_setaffinity(0, {int(c) for c in PIN_CPU.split(",")})
@@ -2075,8 +2087,8 @@ async def main():
     load_send_step(); load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 5.95, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 5.96, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":

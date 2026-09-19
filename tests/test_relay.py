@@ -89,7 +89,9 @@ if d:
     _, txs, at, _ = calls[-1]
     check("relay: every shot's 'to' is the relay", all(tx["to"].lower() == RELAY for tx in txs), str([tx["to"] for tx in txs]))
     data = txs[0]["data"]
-    check("relay: selector buy(address,uint256,uint256)", data[:10] == "0xa59ac6dd", data[:10])
+    check("relay: selector buy(address,uint256,uint256,uint256)", data[:10] == "0x1622dbe4", data[:10])
+    check("relay: word 4 is the seat's second as the deadline", len(data) == 10 + 4 * 64 and int(data[202:266], 16) == T + 1, f"len {len(data)} deadline {int(data[202:266], 16) if len(data) >= 266 else None} vs {T + 1}")
+    check("relay: the decision records the deadline", d[0].get("relay_deadline") == T + 1, str(d[0].get("relay_deadline")))
     check("relay: word 1 is the curve", data[10:74] == curve[2:].zfill(64), data[10:74])
     amount = int(txs[0]["value"], 16)
     check("relay: word 2 is amountIn and equals the value", int(data[74:138], 16) == amount and abs(amount / 1e18 * 2500 - 15) < 0.5, f"amount {amount / 1e18 * 2500:.2f}")
