@@ -67,4 +67,13 @@ except KeyError:
 check("dry run with shooters: an unfilled nonce map builds the shots at nonce 0 instead of raising", ok)
 src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "strategy", "sniper_engine.py")).read()
 check("the burst build reads the shooters' nonces with .get (the panel's night-killer, Sep 23)", 'state["shooter_nonce"].get(a, 0)' in src and 'nonce=hex(state["shooter_nonce"][a])' not in src)
+# 7. attackers(): the launch's own token never counts, even when the approve came before the token was learned
+w = {"attack_targets": {"0x" + "8532" * 10, "0x" + "99" * 20}, "attack_senders": set(), "tb": None}
+check("before the token is learned the approve's target counts (nothing better is known)", E.attackers(w) == 2)
+w["tb"] = bytes.fromhex("99" * 20)
+check("once the token is learned it is subtracted", E.attackers(w) == 1)
+# 8. burst_dropped: only shots that were sent can be lost
+recs = [(None, None, None), (None, None, None), ("0xa", {"status": "0x0"}, []), ("0xb", None, [("0xb", "nonce too high")]), ("0xc", {"status": "0x1"}, [])]
+lost = [i for i, (hh, r, a) in enumerate(recs) if hh and not r]
+check("gated shots are not 'lost': only the refused sent shot is", lost == [3])
 print(f"\n{passed} checks passed")

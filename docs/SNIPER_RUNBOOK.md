@@ -679,7 +679,7 @@ behind everybody) held 300 blocks, after gas, and the launches the gate refused.
 least 40 gated launches with the refused set negative. No-go: anything else; then the seat is closed and this stops.
 
 Live after a go: SEND_MODULE back, STAKE_MIN=STAKE_MAX=13, MAX_LIVE_TRADES=30, KILL_USD=15; every day
-`python3 src/analysis/live_vs_table.py` (the fills against the model) and `sudo python3 src/analysis/paper_day.py --from <yesterday>`
+`python3 src/analysis/live_vs_table.py` (the fills against the model) and `sudo python3 src/analysis/paper_day.py --from "<yesterday> 00:00"`
 (the rule against the chain). The burst may be cut to BURST_N=10 with BURST_STEP_MS=10 once section 24.30's position table
 confirms that third place pays the same as second at 300 blocks (it does on Sep 22-23: +19.5% against +26.9%).
 
@@ -688,7 +688,7 @@ confirms that third place pays the same as second at 300 blocks (it does on Sep 
 Paper day (nothing is sent; the engine logs what it would have done):
 
     sudo sed -i 's|^SEND_MODULE=.*|SEND_MODULE=|' /etc/sniper/engine.env
-    grep -q '^ATTACK_MIN=' /etc/sniper/engine.env || printf 'ATTACK_MIN=2\nHOLD_BLOCKS=300\nKILL_USD=15\n' | sudo tee -a /etc/sniper/engine.env >/dev/null
+    sudo grep -q '^ATTACK_MIN=' /etc/sniper/engine.env || printf 'ATTACK_MIN=2\nHOLD_BLOCKS=300\nKILL_USD=15\n' | sudo tee -a /etc/sniper/engine.env >/dev/null
     cd ~/fomo-memebot && git pull && sudo systemctl daemon-reload && sudo systemctl restart sniper-engine && sleep 5 && sudo tail -2 /var/log/sniper/engine.jsonl | cut -c1-400
 
 (the service runs the repo's own src/strategy/sniper_engine.py: the pull is the deploy). After a day:

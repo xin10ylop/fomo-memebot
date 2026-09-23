@@ -3213,3 +3213,14 @@ rule, so the paper day measures what the live sender would do. The deployed send
 **The other leak.** The tables' population that day was 58 launches; 16 reached the attackers gate. The engine's own
 filters (the bundle visible on the feed in time, creator repeats, the resolve limit, the slot model's confidence) removed
 42, and that loss has never been priced against the tables. It is the next thing to measure from the engine's skip log.
+
+**The review panel (night of Sep 23, `data/derived/audits_sep23/engine_62_panel.md`).** Five reviewers with distinct
+lenses over the 6.1+6.2 change, three refuters per finding: 19 confirmed. The one that mattered: in dry run with shooters
+configured the shooters' nonce map is never filled (only the live path reads it), so with 6.2 every eligible launch
+crashed at the burst's build before the gate was simulated; 6.1 had never reached that line because its gate refused
+first. Fixed (`.get(a, 0)`, a regression test that greps for it). Also fixed from the panel: `attackers()` no longer
+counts the launch's own token when the approve came before the token was learned; a burst with the gate on needs
+shooters (a wallet-nonce burst would gap) and the engine refuses to start otherwise; `burst_dropped` counts only shots
+that were sent; a live burst whose sent shots all came back without a hash opens no position; `paper_day.py` reads
+the 6.2 fields, defaults its window to the first start of the day rather than the last, prints the window, and takes a
+bare date; the runbook's env check uses sudo.

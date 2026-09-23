@@ -568,6 +568,8 @@ def load_send_step():
         import inspect
         if "gate" not in inspect.signature(SEND_BURST).parameters:
             raise SystemExit("ATTACK_MIN needs the send step that takes the gate (engine 6.2): sudo cp deploy/send_step.py /etc/sniper/send_step.py")
+        if not SHOOTERS:
+            raise SystemExit("ATTACK_MIN with a burst needs SHOOTER_KEYS: the gate skips shots, and the wallet's consecutive nonces would leave a gap in front of every shot sent")
     if BURST_N > 1 and SEND_BURST is None:
         raise SystemExit("BURST_N > 1 needs the burst-capable send step (make_burst): sudo cp deploy/send_step.py /etc/sniper/send_step.py")
     if SHOOTERS and SEND_BURST is not None:
@@ -946,8 +948,12 @@ def note_attack(w, to_hex, t, data, cv):
 
 
 def attackers(w):
-    """how many other snipers are firing at this curve so far: distinct relays plus distinct direct senders"""
-    return len(w.get("attack_targets", ())) + len(w.get("attack_senders", ()))
+    """how many other snipers are firing at this curve so far: distinct relays plus distinct direct senders (the launch's own token,
+    an approve's target, never counts, even when it was recorded before the token was learned)"""
+    t = set(w.get("attack_targets", ())); tb = w.get("tb")
+    if tb is not None:
+        t.discard("0x" + tb.hex())
+    return len(t) + len(w.get("attack_senders", ()))
 
 
 def fold_buy(w, ts_, snd, val, blk=None, to=None, sel=None, buyers=None):
@@ -1930,6 +1936,9 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                 threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
                 log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
         h = next((hh for hh, _ in shots if hh), None); buy_ans = next((a for hh, a in shots if hh), None)
+        if SEND is not None and h is None and any(hh or a for hh, a in shots):   # live: shots left but none got a hash (socket failures): no buy, so no position, no approve, no sell
+            log({"ev": "buy_rejected", "curve": curve, "hash": None, "answers": [str(a)[:120] for hh, a in shots if a][:8], "note": "every sent shot came back without a hash"})
+            state["traded"].pop(curve, None); release_reservation(); return
         decision["burst"] = BURST_N; decision["burst_step_ms"] = BURST_STEP_MS; decision["burst_lead_ms"] = BURST_LEAD_MS
         if h:
             log({"ev": "burst_shots", "curve": curve, "hashes": [hh for hh, _ in shots], "nonces": [nonce + i for i in range(BURST_N)]})
@@ -1977,8 +1986,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         if SHOOTERS:
             restore_shooter_nonces(shooters_now, recs)
             threading.Thread(target=refresh_shooters, kwargs={"gas": False}, daemon=True).start()
-        if len(landed_idx) < len(recs):
-            lost = [i for i, (hh, r, a) in enumerate(recs) if not r]
+        lost = [i for i, (hh, r, a) in enumerate(recs) if hh and not r]       # 6.2: a shot the gate never sent is not a shot the chain dropped
+        if lost:
             log({"ev": "burst_dropped", "curve": curve, "lost": len(lost), "first_lost": lost[0], "answers": sorted({str(d)[:90] for i in lost for _, d in (recs[i][2] or [])})[:4],
                  "note": "shots the chain never took; every later nonce went with them (a nonce gap): approve at the last landed + 1, next launch on a fresh nonce"})
             state["chain_at"] = 0.0                                       # the reservation over-counted: the next launch waits for chain_loop's fresh nonce

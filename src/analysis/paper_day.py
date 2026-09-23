@@ -12,8 +12,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
 import live_vs_table as lv
 from hold_grid import model_path
 ap = argparse.ArgumentParser(); ap.add_argument("log", nargs="?", default="/var/log/sniper/engine.jsonl"); ap.add_argument("--from", dest="t_from", default=None); ap.add_argument("--to", dest="t_to", default=None)
-ap.add_argument("--stake", type=float, default=13.0); ap.add_argument("--hold", type=int, default=300); ap.add_argument("--min-attackers", type=int, default=2); ap.add_argument("--gas", type=float, default=0.33); ap.add_argument("--eth-usd", type=float, default=2570.0)
-a = ap.parse_args(); utc = lambda x: datetime.datetime.strptime(x, "%Y-%m-%d %H:%M").replace(tzinfo=datetime.timezone.utc).timestamp() if x else None
+ap.add_argument("--stake", type=float, default=13.0); ap.add_argument("--hold", type=int, default=300); ap.add_argument("--gas", type=float, default=0.33); ap.add_argument("--eth-usd", type=float, default=2570.0)
+a = ap.parse_args()
+def utc(x):
+    if not x: return None
+    for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
+        try: return datetime.datetime.strptime(x, fmt).replace(tzinfo=datetime.timezone.utc).timestamp()
+        except ValueError: pass
+    raise SystemExit(f"--from/--to: use 'YYYY-MM-DD HH:MM' or 'YYYY-MM-DD', got {x!r}")
 t_from, t_to = utc(a.t_from), utc(a.t_to)
 ev = []
 for f in sorted((f for f in glob.glob(a.log + "*") if not f.endswith(".state.json")), key=os.path.getmtime):
@@ -23,10 +29,14 @@ for f in sorted((f for f in glob.glob(a.log + "*") if not f.endswith(".state.jso
             except ValueError: continue
             if e.get("ev") in ("trade_decision", "eligible_not_traded", "start") and (t_from is None or e["t"] >= t_from) and (t_to is None or e["t"] <= t_to): ev.append(e)
 ev.sort(key=lambda e: e["t"])
-if t_from is None:
-    starts = [i for i, e in enumerate(ev) if e["ev"] == "start"]; ev = ev[starts[-1]:] if starts else ev
+if t_from is None:                                                       # no window: from the FIRST start of today (UTC), so a restart does not drop the earlier events
+    day0 = datetime.datetime.now(datetime.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
+    starts = [i for i, e in enumerate(ev) if e["ev"] == "start" and e["t"] >= day0] or [i for i, e in enumerate(ev) if e["ev"] == "start"]
+    ev = ev[starts[0]:] if starts else ev
+n_starts = sum(1 for e in ev if e["ev"] == "start"); t0 = min((e["t"] for e in ev), default=None); t1 = max((e["t"] for e in ev), default=None)
 fired = [e for e in ev if e["ev"] == "trade_decision"]; refused = [e for e in ev if e["ev"] == "eligible_not_traded" and any("attackers" in g for g in e.get("gates", []))]
-print(f"{len(ev)} events; fired (or would have) {len(fired)}, refused by the attackers gate {len(refused)}, hold {a.hold} blocks, stake ${a.stake:.0f}, gas ${a.gas:.2f} a burst")
+fmt = lambda t: time.strftime("%b %d %H:%M", time.gmtime(t)) if t else "-"
+print(f"window {fmt(t0)} - {fmt(t1)} UTC ({n_starts} engine start{'s' if n_starts != 1 else ''} inside it); {len(ev)} events; fired (or would have) {len(fired)}, refused by the attackers gate {len(refused)}, hold {a.hold} blocks, stake ${a.stake:.0f}, gas ${a.gas:.2f} a burst")
 def score(events, label):
     rows = []
     for e in events:
@@ -40,9 +50,10 @@ def score(events, label):
             L["rows"] = sorted(L["rows"] + [lv.row_of(x) for x in more], key=lambda r: (r["bn"], r["li"])); ts = L["ts"]; T0 = L["T0"]
             bE1 = next((n for n in range(b0 + 1, b0 + 30) if ts.get(n, 0) == T0 + 1), None)
             if bE1 is None: continue
-            r = {"cv": cv, "when": time.strftime("%b %d %H:%M", time.gmtime(T0)), "attackers": e.get("attackers")}
+            r = {"cv": cv, "when": time.strftime("%b %d %H:%M", time.gmtime(T0)), "attackers": e.get("attackers_at_open", e.get("attackers_at_build", e.get("attackers"))),
+                 "at_build": e.get("attackers_at_build"), "gated": e.get("gated_shots"), "opened_at": e.get("gate_opened_at_shot")}
             for pos, nah in (("behind1", 1), ("behind2", 2), ("last", 99)): r[pos] = model_path(L, a.stake / a.eth_usd, bE1, nah, (a.hold,))[a.hold]
-            rows.append(r); print(f"  {r['when']} {cv[:10]} attackers {r['attackers']}: behind one {r['behind1']:+.0%}  behind two {r['behind2']:+.0%}  last {r['last']:+.0%}", flush=True)
+            rows.append(r); print(f"  {r['when']} {cv[:10]} attackers {r['attackers']} (at the build {r['at_build']}, gated shots {r['gated']}, opened at shot {r['opened_at']}): behind one {r['behind1']:+.0%}  behind two {r['behind2']:+.0%}  last {r['last']:+.0%}", flush=True)
         except Exception as ex: print("  err", cv[:10], str(ex)[:80])
     if not rows: print(f"{label}: nothing to score"); return
     for pos in ("behind1", "behind2", "last"):
