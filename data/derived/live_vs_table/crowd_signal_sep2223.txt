@@ -1,0 +1,52 @@
+0 0x655323a8 blocks 10 attackers by block [0, 0, 0, 0, 0, 0, 0, 0, 0] seat crowd 2 0.01 ETH bot txs 0
+10 0x3ccb15de blocks 10 attackers by block [0, 0, 0, 0, 0, 0, 0, 0, 3] seat crowd 4 0.10 ETH bot txs 0
+20 0x5799a1fb blocks 6 attackers by block [0, 0, 0, 0, 0] seat crowd 1 0.00 ETH bot txs 0
+30 0xd29d670a blocks 8 attackers by block [0, 0, 0, 0, 0, 0, 0] seat crowd 0 0.00 ETH bot txs 0
+40 0x8b23aeff blocks 7 attackers by block [0, 0, 0, 0, 0, 0] seat crowd 0 0.00 ETH bot txs 0
+50 0x29ddcc55 blocks 5 attackers by block [0, 0, 4, 7] seat crowd 4 0.25 ETH bot txs 67
+60 0x19268625 blocks 9 attackers by block [0, 0, 0, 0, 0, 0, 0, 0] seat crowd 0 0.00 ETH bot txs 0
+70 0xc7826a6c blocks 4 attackers by block [0, 0, 1] seat crowd 0 0.00 ETH bot txs 0
+80 0x09338f08 blocks 9 attackers by block [0, 0, 0, 0, 0, 0, 3, 3] seat crowd 3 0.16 ETH bot txs 65
+90 0x40db4142 blocks 10 attackers by block [0, 0, 1, 1, 1, 1, 1, 2, 3] seat crowd 2 0.06 ETH bot txs 0
+100 0x539845ee blocks 10 attackers by block [0, 0, 0, 0, 0, 0, 0, 1, 2] seat crowd 3 0.01 ETH bot txs 0
+110 0x84fb8bc8 blocks 7 attackers by block [0, 0, 0, 0, 3, 4] seat crowd 2 0.15 ETH bot txs 0
+120 0x16608ae6 blocks 7 attackers by block [0, 0, 0, 0, 0, 0] seat crowd 0 0.00 ETH bot txs 0
+130 0x490ac760 blocks 10 attackers by block [0, 0, 0, 0, 0, 0, 0, 0, 0] seat crowd 3 0.02 ETH bot txs 0
+140 0xfcf83691 blocks 4 attackers by block [0, 1, 10] seat crowd 3 0.66 ETH bot txs 60
+150 0xd8952fd6 blocks 9 attackers by block [0, 1, 1, 1, 2, 2, 3, 3] seat crowd 4 0.53 ETH bot txs 0
+160 0x44d261e1 blocks 10 attackers by block [0, 0, 1, 1, 1, 1, 1, 2, 2] seat crowd 3 0.02 ETH bot txs 0
+170 0x06be811d blocks 11 attackers by block [0, 0, 0, 0, 0, 1, 1, 1, 1, 1] seat crowd 0 0.00 ETH bot txs 0
+
+=== distinct attackers seen by creation-second block 5 (about 0.4 s before the tick) vs the seat block's crowd
+attackers 0-0: n= 83  seat buyers mean 1.2  seat ETH mean 0.036  bot present 5%  FIRST -6.4%  LAST +nan%  win(first) 17%
+attackers 1-1: n= 32  seat buyers mean 2.2  seat ETH mean 0.114  bot present 3%  FIRST -0.2%  LAST +nan%  win(first) 44%
+attackers 2-3: n= 24  seat buyers mean 3.2  seat ETH mean 0.291  bot present 8%  FIRST +7.3%  LAST +nan%  win(first) 58%
+attackers 4-6: n= 21  seat buyers mean 3.0  seat ETH mean 0.407  bot present 57%  FIRST +19.1%  LAST +nan%  win(first) 67%
+attackers 7-99: n= 15  seat buyers mean 3.3  seat ETH mean 0.321  bot present 40%  FIRST +15.3%  LAST +nan%  win(first) 53%
+
+=== the bot's sending pattern on its launches (block offset, tx index, aimed at the curve):
+   0x4e06b3a8 k 6 [(5, 1, True), (5, 3, True), (5, 4, True), (5, 6, True), (5, 7, True), (5, 8, True), (5, 9, True), (5, 11, True), (5, 13, True), (5, 14, True), (5, 15, True), (5, 16, True)]
+   0x3d6ebed8 k 3 [(2, 4, True), (2, 6, True), (2, 7, True), (2, 9, True), (2, 10, True), (2, 11, True), (2, 12, True), (2, 15, True), (2, 17, True), (2, 18, True), (2, 19, True), (2, 20, True)]
+   0xc3b0b6c2 k 3 [(2, 4, True), (2, 5, True), (2, 6, True), (2, 7, True), (2, 8, True), (2, 10, True), (2, 11, True), (2, 12, True), (2, 13, True), (2, 14, True), (2, 15, True), (2, 16, True)]
+   0x58ed5dd2 k 5 [(4, 27, True), (4, 32, True), (4, 42, True), (4, 47, True), (4, 53, True), (4, 59, True), (4, 60, True), (4, 61, True), (4, 62, True), (4, 63, True), (4, 64, True), (4, 65, True)]
+   0x4ecc308d k 6 [(5, 28, True), (5, 34, True), (5, 43, True), (5, 53, True), (5, 61, True), (5, 68, True), (5, 72, True), (5, 75, True), (5, 78, True), (5, 81, True), (5, 82, True), (5, 83, True)]
+   0x14efc68f k 6 [(6, 1, True), (6, 2, True), (6, 3, True), (6, 4, True), (6, 5, True), (6, 6, True), (6, 7, True), (6, 8, True), (6, 9, True), (6, 10, True), (6, 11, True), (6, 13, True)]
+   0xa05d2702 k 4 [(3, 2, True), (3, 4, True), (3, 5, True), (3, 6, True), (3, 8, True), (3, 9, True), (3, 10, True), (3, 12, True), (3, 14, True), (3, 17, True), (3, 18, True), (3, 19, True)]
+   0x29ddcc55 k 3 [(2, 9, True), (2, 10, True), (2, 11, True), (2, 12, True), (2, 13, True), (2, 14, True), (2, 15, True), (2, 16, True), (2, 19, True), (2, 20, True), (2, 21, True), (2, 22, True)]
+   0xe69ab0fa k 6 [(6, 32, True), (6, 41, True), (6, 47, True), (6, 52, True), (6, 58, True), (6, 61, True), (6, 62, True), (6, 63, True), (6, 64, True), (6, 66, True), (6, 67, True), (6, 69, True)]
+   0x0459a45f k 4 [(3, 2, True), (3, 3, True), (3, 5, True), (3, 7, True), (3, 8, True), (3, 10, True), (3, 11, True), (3, 13, True), (3, 14, True), (3, 15, True), (3, 18, True), (3, 20, True)]
+   0x29cdec44 k 2 [(2, 9, True), (2, 10, True), (2, 12, True), (2, 15, True), (2, 17, True), (2, 18, True), (2, 19, True), (2, 20, True), (2, 21, True), (2, 22, True), (2, 23, True), (2, 24, True)]
+   0x3d498138 k 6 [(5, 5, True), (5, 6, True), (5, 10, True), (5, 11, True), (5, 12, True), (5, 14, True), (5, 15, True), (5, 16, True), (5, 18, True), (5, 20, True), (5, 21, True), (5, 24, True)]
+   0xdb11c571 k 8 [(7, 1, True), (7, 4, True), (7, 5, True), (7, 7, True), (7, 8, True), (7, 9, True), (7, 10, True), (7, 11, True), (7, 12, True), (7, 14, True), (7, 15, True), (7, 16, True)]
+   0x09338f08 k 7 [(6, 2, True), (6, 4, True), (6, 5, True), (6, 7, True), (6, 8, True), (6, 10, True), (6, 12, True), (6, 14, True), (6, 17, True), (6, 18, True), (6, 20, True), (6, 21, True)]
+   0xce0682a0 k 6 [(5, 5, True), (5, 6, True), (5, 8, True), (5, 10, True), (5, 11, True), (5, 14, True), (5, 15, True), (5, 16, True), (5, 17, True), (5, 18, True), (5, 21, True), (5, 39, True)]
+   0x17d67e56 k 4 [(3, 4, True), (3, 5, True), (3, 7, True), (3, 9, True), (3, 10, True), (3, 11, True), (3, 12, True), (3, 14, True), (3, 15, True), (3, 16, True), (3, 18, True), (4, 1, True)]
+   0x1803d8be k 4 [(3, 7, True), (3, 9, True), (3, 10, True), (3, 11, True), (3, 12, True), (3, 14, True), (3, 16, True), (3, 19, True), (3, 20, True), (3, 21, True), (3, 23, True), (3, 27, True)]
+   0x1863dac9 k 2 [(2, 7, True), (2, 8, True), (2, 9, True), (2, 10, True), (2, 11, True), (2, 12, True), (2, 14, True), (2, 15, True), (2, 16, True), (2, 17, True), (2, 18, True), (2, 19, True)]
+   0x6ecb83c9 k 3 [(2, 6, True), (2, 7, True), (2, 8, True), (2, 9, True), (2, 11, True), (2, 12, True), (2, 13, True), (2, 15, True), (2, 16, True), (2, 19, True), (2, 20, True), (2, 22, True)]
+   0x50a86c90 k 9 [(8, 5, True), (8, 7, True), (8, 9, True), (8, 11, True), (8, 12, True), (8, 13, True), (8, 14, True), (8, 16, True), (8, 17, True), (8, 18, True), (8, 19, True), (8, 20, True)]
+   0x1e6dadbf k 3 [(2, 2, True), (2, 3, True), (2, 4, True), (2, 5, True), (2, 6, True), (2, 7, True), (2, 8, True), (2, 10, True), (2, 11, True), (2, 12, True), (2, 13, True), (2, 14, True)]
+   0x6ddfa673 k 2 [(2, 10, True), (2, 11, True), (2, 12, True), (2, 14, True), (2, 15, True), (2, 17, True), (2, 18, True), (2, 19, True), (2, 20, True), (2, 21, True), (2, 23, True), (2, 24, True)]
+   0xfcf83691 k 2 [(2, 13, True), (2, 14, True), (2, 15, True), (2, 16, True), (2, 17, True), (2, 18, True), (2, 20, True), (2, 21, True), (2, 23, True), (2, 26, True), (2, 31, True), (2, 33, True)]
+   0xf8b9335a k 2 [(2, 9, True), (2, 10, True), (2, 11, True), (2, 12, True), (2, 13, True), (2, 14, True), (2, 15, True), (2, 17, True), (2, 18, True), (2, 19, True), (2, 20, True), (2, 21, True)]
+   0xac044947 k 5 [(4, 4, True), (4, 5, True), (4, 6, True), (4, 7, True), (4, 8, True), (4, 9, True), (4, 11, True), (4, 17, True), (4, 27, True), (4, 31, True), (4, 32, True), (4, 34, True)]
