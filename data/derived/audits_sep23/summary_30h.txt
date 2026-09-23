@@ -1,0 +1,114 @@
+windows:
+  09-23 01:15 - 09-23 07:14 UTC blocks 70112454-70326294: creations 1277, calldata {'calldata': 959, 'tier': 43, 'selector': 222, 'ok': 53}, rejects {'bundle': 42}, errors 0, qualifying 11
+  09-22 19:16 - 09-23 01:15 UTC blocks 69898614-70112454: creations 1920, calldata {'ok': 129, 'calldata': 1328, 'selector': 294, 'tier': 169}, rejects {'bundle': 69}, errors 0, qualifying 60
+  09-22 13:18 - 09-22 19:16 UTC blocks 69684774-69898614: creations 2581, calldata {'calldata': 1805, 'ok': 240, 'selector': 307, 'tier': 229}, rejects {'bundle': 163, 'no_E1_E2': 1}, errors 0, qualifying 76
+  09-22 07:18 - 09-22 13:18 UTC blocks 69470934-69684774: creations 1600, calldata {'calldata': 1267, 'ok': 105, 'tier': 86, 'selector': 142}, rejects {'bundle': 83}, errors 0, qualifying 22
+  09-22 01:17 - 09-22 07:18 UTC blocks 69257094-69470934: creations 922, calldata {'calldata': 692, 'ok': 73, 'selector': 134, 'tier': 23}, rejects {'bundle': 67}, errors 0, qualifying 6
+launches: 175  repro max err: 0.0
+  model verbatim E1_first_h15_10: n 175 mean +1.2% median -7.1% win 0.36
+  model verbatim E1_first_h15_250: n 175 mean +1.5% median -7.1% win 0.37
+  model verbatim E1_first_h30_250: n 175 mean +4.0% median -6.7% win 0.37
+  model verbatim E1_first_h60_250: n 175 mean +6.5% median -5.5% win 0.43
+  model verbatim E1_first_h15_250 on launches whose E1 block has NO buy: n 43 mean -7.5%; with a buy: n 132 mean +4.4% med -2.1%
+E1 block buys per launch: Counter({0: 43, 1: 31, 2: 27, 6: 23, 4: 22, 3: 20, 5: 9})  (6 = 6+)
+
+BY POSITION (realized = sold all of the E1 lot within 100 blocks, FIFO; combined = realized, else model mark at +15)
+ pos1: n 132 | sold 64 (48%) held 54 partial 14 | realized mean -11.9% median -9.5% win 0.27 | combined mean -2.7% median -7.8% win 0.35 | own-lot mark@+15 mean -0.1% med -7.4% | median hold 18.5 blk, median first sell 18.5 | median stake 0.0400 ETH mean 0.0851 | median fee_eff 0.0918 | insiders 2 creator 0 | prior buys 0, later buys 1
+   held mark15 mean +5.8% median -6.0%; held with transfer-out 7
+   sold: total in 4.1329 ETH, total P&L -0.04401 ETH (ETH-weighted -1.1%); gas buy+sell 0.001060 ETH
+   hold blocks dist: <=5 5, 6-15 21, 16-50 23, 51-100 15
+ pos2: n 101 | sold 47 (47%) held 44 partial 10 | realized mean -20.5% median -11.3% win 0.26 | combined mean -6.6% median -8.3% win 0.33 | own-lot mark@+15 mean -2.9% med -7.8% | median hold 21 blk, median first sell 21 | median stake 0.0100 ETH mean 0.0594 | median fee_eff 0.0918 | insiders 0 creator 0 | prior buys 0, later buys 0
+   held mark15 mean +5.5% median -6.8%; held with transfer-out 3
+   sold: total in 1.2431 ETH, total P&L +0.01435 ETH (ETH-weighted +1.2%); gas buy+sell 0.000699 ETH
+   hold blocks dist: <=5 1, 6-15 12, 16-50 26, 51-100 8
+ pos3: n 74 | sold 33 (45%) held 40 partial 1 | realized mean -13.0% median -11.9% win 0.27 | combined mean -6.1% median -9.7% win 0.34 | own-lot mark@+15 mean -5.5% med -9.5% | median hold 21 blk, median first sell 21.0 | median stake 0.0100 ETH mean 0.0462 | median fee_eff 0.0918 | insiders 3 creator 0 | prior buys 0, later buys 0
+   held mark15 mean -0.3% median -4.5%; held with transfer-out 4
+   sold: total in 0.7421 ETH, total P&L +0.15401 ETH (ETH-weighted +20.8%); gas buy+sell 0.000452 ETH
+   hold blocks dist: <=5 0, 6-15 8, 16-50 17, 51-100 8
+ pos4: n 54 | sold 19 (35%) held 34 partial 1 | realized mean -21.0% median -24.6% win 0.21 | combined mean -6.4% median -10.9% win 0.35 | own-lot mark@+15 mean -4.7% med -8.2% | median hold 21 blk, median first sell 21.0 | median stake 0.0069 ETH mean 0.0389 | median fee_eff 0.0918 | insiders 2 creator 0 | prior buys 0, later buys 1
+   held mark15 mean -1.3% median -4.6%; held with transfer-out 4
+   sold: total in 0.7042 ETH, total P&L -0.08402 ETH (ETH-weighted -11.9%); gas buy+sell 0.000243 ETH
+   hold blocks dist: <=5 0, 6-15 7, 16-50 9, 51-100 3
+
+POSITION 1 matched pairs: actual (realized if sold-all, else own-lot mark@+15) minus model E1_first_h15 at the same ETH stake
+  all: n 132 actual mean -2.7% med -7.8% | model mean +4.3% med -2.1% | diff mean -7.0% median -2.4%
+  sold-all: n 64 actual mean -11.9% med -9.5% | model mean -4.5% med -5.5% | diff mean -7.5% median -0.9%
+  sold-all & single-lot: n 64 actual mean -11.9% med -9.5% | model mean -4.5% med -5.5% | diff mean -7.5% median -0.9%
+  p1 is first curve event in E1 block: n 132 actual mean -2.7% med -7.8% | model mean +4.3% med -2.1% | diff mean -7.0% median -2.4%
+  three-way (pos-1 only): A = actual (realized / held->mark15), B = model 'replace' (we take the incumbent's seat, its lot+sells removed, hold 15), C = backtest model 'insert' (verbatim score at the same ETH stake)
+   all: n 132 A mean -2.7% med -7.8% | B mean -0.3% med -7.3% | C mean +4.3% med -2.1% | C-A mean +7.0% med +2.4% | C-B (insertion double-count) mean +4.6% med +1.7% | B-A (15-block rule vs bots' actual exit) mean +2.4% med +0.0%
+     ETH-weighted: A +2.3% B +2.5% C +14.0% on 11.2397 ETH
+   sold-all: n 64 A mean -11.9% med -9.5% | B mean -6.8% med -8.1% | C mean -4.5% med -5.5% | C-A mean +7.5% med +0.9% | C-B (insertion double-count) mean +2.4% med +0.3% | B-A (15-block rule vs bots' actual exit) mean +5.1% med +0.0%
+     ETH-weighted: A -1.1% B -1.2% C +2.2% on 4.1329 ETH
+   uncapped (stake under the 3% CAP): n 101 A mean -3.3% med -9.0% | B mean +0.3% med -7.5% | C mean +2.9% med -6.0% | C-A mean +6.2% med +1.9% | C-B (insertion double-count) mean +2.7% med +1.1% | B-A (15-block rule vs bots' actual exit) mean +3.6% med +0.0%
+     ETH-weighted: A +8.0% B +9.3% C +15.3% on 3.8088 ETH
+   capped (stake hits 3% CAP): n 31 A mean -0.8% med -2.9% | B mean -2.0% med -3.1% | C mean +8.8% med +6.2% | C-A mean +9.5% med +10.2% | C-B (insertion double-count) mean +10.8% med +10.3% | B-A (15-block rule vs bots' actual exit) mean -1.2% med -0.0%
+     ETH-weighted: A -0.7% B -1.0% C +13.3% on 7.4309 ETH
+  decomposition entry_log: mean -0.1140 median +0.0000 (positive = model more favourable)
+  decomposition exit_log: mean +0.0750 median +0.0280 (positive = model more favourable)
+  decomposition exit_model_vs_actual15_log: mean +0.0321 median +0.0215 (positive = model more favourable)
+  decomposition exit_actual15_vs_actual_log: mean +0.0429 median +0.0000 (positive = model more favourable)
+  biggest disagreements (|actual - model|):
+   b0 70128063 bE1 70128072 p1 0x2abdd72b5bb40ba0df894d33d40aee918da551ae stake 0.0032 sold hold 32 act -72.3% model -7.3% diff -65.0% buy 0x73c7ef701695c9b16e18f01244fc8bf71e59f30f35cd727be5524be0e8be6951 sell ['0xb2e1789d7232b641203924ddc3cfa9e53aeb8b4da18c6613f1bfa1beb21c309c']
+   b0 69951764 bE1 69951773 p1 0x6d9b2677d28e874df878b262cac0a8df3b0b3a2e stake 0.0054 sold hold 27 act -60.7% model -4.9% diff -55.7% buy 0xe1bec479a1270bb78ec928216f3083fdf6926ad6055a3e1e115fb1cac47dda31 sell ['0x72d32fabe7d90c17e0f17bb74aafc296f74b89d29a49ec253c26060348b9fb82']
+   b0 69903860 bE1 69903868 p1 0x5bc235acecff3dde394f4bfc696f7c35efd502f0 stake 0.0300 sold hold 33 act -63.9% model -9.7% diff -54.3% buy 0x2c83f250fabd4cf01df8087bc8d18ded0de2d6bfd5ff7892e7b6358cb0be6d9a sell ['0x60efc01771606d991bf92294a9dc8414562b91f44506f7b984de87304a5e3b95']
+   b0 69888895 bE1 69888904 p1 0xdae16233107aaf22986340fc01a8727eabe70572 stake 0.0054 sold hold 59 act -63.5% model -9.3% diff -54.2% buy 0xad5493730e716f3ede8f43b79eb9670541627dbcfe83caf5e3eaf73abf6a850e sell ['0xd0989f711cca06ad005f1eaed4bf1e4e7706ac6d998f55f08a0dea6db4b4cad3']
+   b0 70073618 bE1 70073627 p1 0x5136067ccc0065c20ac16cd7191d08564e19d71e stake 0.0050 sold hold 53 act -59.6% model -6.2% diff -53.4% buy 0xe5a11ee70c51e0e20ad51b357d0c1b65ca5f92d41545b612398d6f2ea088b162 sell ['0x6bde8086bbe8e72a4ed1845fd248bac89f153891ffac7348f28e9fb84f74f83c']
+   b0 69966268 bE1 69966277 p1 0x6d9b2677d28e874df878b262cac0a8df3b0b3a2e stake 0.0055 sold hold 73 act -62.5% model -9.5% diff -53.0% buy 0xf1c0b9f4a4c425ee44a475fc02f0554d4129b84a76e33c8c7f4b47cd41d44028 sell ['0x81c650017cc585ee11da748cdc37c8a1586deeba87ee7506f447754b1b82cf85']
+   b0 70136547 bE1 70136553 p1 0x5051e45b2dbecf1b2041af3937bd85fc0dc43cd4 stake 0.5000 partial hold None act +29.5% model +70.0% diff -40.5% buy 0x8ce2a84c42391db1653cfa643eee81b403acefac2a94a50431df1f0dd8e3e9d1 sell ['0x19817f736eb4bd4b1995f089126e046fb6bd130582420a18ec05e356f0cb40d4']
+   b0 70239434 bE1 70239439 p1 0x5051e45b2dbecf1b2041af3937bd85fc0dc43cd4 stake 0.5000 held hold None act +1.9% model +30.7% diff -28.8% buy 0x0bc46bc2f1ea5adb045b03bac064e76488a157132e9f00f3d823221a190532c8 sell []
+   b0 69747816 bE1 69747823 p1 0x5051e45b2dbecf1b2041af3937bd85fc0dc43cd4 stake 0.5000 partial hold None act +47.2% model +73.0% diff -25.8% buy 0xf0f60f32d140e8fe4ba490e05425a59b0a9f08c7df2083ee54b070742e34dcd8 sell ['0x7443b520b126157af406d0b4731468f8bfb447882a0c763ba830113c050b2c89']
+   b0 69581786 bE1 69581793 p1 0x924378f23c4cc4b0b245d0219d0351309839492f stake 0.2100 partial hold None act +19.9% model +43.3% diff -23.3% buy 0x508e4e75f3fd07fab1547ebf6b56b87c7247dbad804b14137583dbd02a317461 sell ['0xf7d3b77c0a11d5f3027f508cdadd7831201718a9e0759554d686e72941f17f47', '0xfdb6ffef0f8b9b6ee9ba088bbdd5e4ffa01b8f97719ac021720475513d684cab']
+
+POS-1 FEES: fee_eff (model-implied from tokens) minus (tier+0.0618): mean -0.0009 median +0.0000 min -0.0618 max +0.0000
+SELL fee_eff minus tier (all tracked sells): n 231 mean -0.0000 median -0.0000
+
+POS-1 ADDRESSES:
+  0x6c56103c6af4891be46cb3666c1fa354cc79eaca (tx.from [('0x6dcd617a23d0cac0e81a098ce37fb1915c69d182', 9), ('0x443738adc68458906c43954dc3dee9c66d888edc', 6)]): n 20, sold 20, stake med 0.1487, realized P&L +0.00251 ETH on 2.9740 in, mean ret +0.1%, held-marked P&L +0.00000, gas 0.000372, median hold 14.5, insider 0
+  0xb316a9ccf21ca0c71701a5e756faf270b18e3060 (tx.from [('0xb316a9ccf21ca0c71701a5e756faf270b18e3060', 10)]): n 10, sold 10, stake med 0.0500, realized P&L -0.00332 ETH on 0.5000 in, mean ret -0.7%, held-marked P&L +0.00000, gas 0.000211, median hold 69.0, insider 0
+  0xfb5b10615a2008c6507d9fa02a55310159969f1e (tx.from [('0xfb5b10615a2008c6507d9fa02a55310159969f1e', 9)]): n 9, sold 9, stake med 0.0050, realized P&L -0.01693 ETH on 0.1350 in, mean ret -17.4%, held-marked P&L +0.00000, gas 0.000098, median hold 21, insider 0
+  0x5bc235acecff3dde394f4bfc696f7c35efd502f0 (tx.from [('0x5bc235acecff3dde394f4bfc696f7c35efd502f0', 8)]): n 8, sold 4, stake med 0.0300, realized P&L -0.07253 ETH on 0.1200 in, mean ret -60.4%, held-marked P&L -0.01295, gas 0.000062, median hold 12.0, insider 0
+  0x5051e45b2dbecf1b2041af3937bd85fc0dc43cd4 (tx.from [('0x5051e45b2dbecf1b2041af3937bd85fc0dc43cd4', 7)]): n 7, sold 0, stake med 0.5000, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.05202, gas 0.000086, median hold nan, insider 0
+  0x924378f23c4cc4b0b245d0219d0351309839492f (tx.from [('0x70f023a8597f2ca14e96937d23abc23731d1e2b5', 1), ('0xcef9a14334fcaa647cc94199e1ae7e356799844b', 1)]): n 6, sold 0, stake med 0.2100, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.06021, gas 0.000161, median hold nan, insider 0
+  0x9adbc54f7ab1600986981a3850be99926920796f (tx.from [('0x9adbc54f7ab1600986981a3850be99926920796f', 5)]): n 5, sold 0, stake med 0.0100, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.01570, gas 0.000031, median hold nan, insider 0
+  0x26558f89f952e9f557d91be898e7adcdcfb8ade6 (tx.from [('0x37bb03b4ca53b070c169728b596ff36d12c7f239', 3), ('0x26558f89f952e9f557d91be898e7adcdcfb8ade6', 1)]): n 5, sold 4, stake med 0.0292, realized P&L +0.03887 ETH on 0.1656 in, mean ret +33.0%, held-marked P&L -0.00180, gas 0.000081, median hold 49.5, insider 0
+  0x946a63ddc8047761805459a54ca619c51696994a (tx.from [('0x946a63ddc8047761805459a54ca619c51696994a', 5)]): n 5, sold 1, stake med 0.0400, realized P&L -0.00298 ETH on 0.0400 in, mean ret -7.4%, held-marked P&L +0.01633, gas 0.000033, median hold 48, insider 0
+  0x6d9b2677d28e874df878b262cac0a8df3b0b3a2e (tx.from [('0xb105d1d9df6e0fbb89a7e4d96be9950f86a27ec7', 4)]): n 4, sold 3, stake med 0.0054, realized P&L -0.00964 ETH on 0.0163 in, mean ret -59.1%, held-marked P&L +0.00076, gas 0.000073, median hold 27, insider 0
+  0xf9af9f3881b49382f1a77a61e0db08cd7a3f16ba (tx.from [('0x81e1e06728c1431b4d2542a1b723b73875d0c94f', 3)]): n 3, sold 3, stake med 0.0200, realized P&L +0.00015 ETH on 0.0750 in, mean ret -2.6%, held-marked P&L +0.00000, gas 0.000048, median hold 2, insider 0
+  0x9b22fed7eaf27326f7bb86019e6c6fac095d4b4a (tx.from [('0x9b22fed7eaf27326f7bb86019e6c6fac095d4b4a', 3)]): n 3, sold 0, stake med 0.0005, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00014, gas 0.000016, median hold nan, insider 0
+  0xe4a727d2cca580d95e52d55930f6aac12ec61075 (tx.from [('0xe4a727d2cca580d95e52d55930f6aac12ec61075', 3)]): n 3, sold 0, stake med 0.0040, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00114, gas 0.000017, median hold nan, insider 0
+  0x2abdd72b5bb40ba0df894d33d40aee918da551ae (tx.from [('0x2abdd72b5bb40ba0df894d33d40aee918da551ae', 3)]): n 3, sold 2, stake med 0.0040, realized P&L -0.00273 ETH on 0.0072 in, mean ret -41.4%, held-marked P&L -0.00074, gas 0.000034, median hold 18.0, insider 0
+  0x8adfb0c6a97042d75ef9ef494d980e7fe672bbad (tx.from [('0x1f4dbc5fb57d71f33c3972cefc00ae3e643fd817', 1), ('0x3ef48284d6db5d11c6152fdbe23c91d20eb647be', 1)]): n 3, sold 2, stake med 0.0600, realized P&L +0.03373 ETH on 0.0800 in, mean ret +25.1%, held-marked P&L +0.00225, gas 0.000052, median hold 13.5, insider 0
+  0xf6e55480c5939da146092301e388654879c6e6fb (tx.from [('0xf6e55480c5939da146092301e388654879c6e6fb', 3)]): n 3, sold 0, stake med 0.0050, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00395, gas 0.000033, median hold nan, insider 0
+  0x5136067ccc0065c20ac16cd7191d08564e19d71e (tx.from [('0x5136067ccc0065c20ac16cd7191d08564e19d71e', 2)]): n 2, sold 1, stake med 0.0049, realized P&L -0.00297 ETH on 0.0050 in, mean ret -59.6%, held-marked P&L -0.00035, gas 0.000022, median hold 53, insider 0
+  0xdae16233107aaf22986340fc01a8727eabe70572 (tx.from [('0xc9f9c892827ab670421686f62cef59c839c1790d', 2)]): n 2, sold 1, stake med 0.0055, realized P&L -0.00346 ETH on 0.0054 in, mean ret -63.5%, held-marked P&L +0.00027, gas 0.000029, median hold 59, insider 0
+  0xcbc91e49d4d145d57f27b1a7af0bd120771c4711 (tx.from [('0xcbc91e49d4d145d57f27b1a7af0bd120771c4711', 2)]): n 2, sold 0, stake med 0.0367, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00780, gas 0.000011, median hold nan, insider 0
+  0x3e7c18b0b1ec729819043a33115459b0ac9c000b (tx.from [('0x3e7c18b0b1ec729819043a33115459b0ac9c000b', 2)]): n 2, sold 0, stake med 0.0008, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00016, gas 0.000011, median hold nan, insider 0
+  0x62ef1b3c77dffbbbde9d3ed91ddb31a1b567d6de (tx.from [('0x62ef1b3c77dffbbbde9d3ed91ddb31a1b567d6de', 2)]): n 2, sold 0, stake med 0.0500, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.01332, gas 0.000020, median hold nan, insider 0
+  0xabccb78e5ab2af8a1cab867f1f2cd45b24e5638b (tx.from [('0xc620f50e6ee0111e7225fed1ff2b62919d93184b', 2)]): n 2, sold 0, stake med 0.0054, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00115, gas 0.000022, median hold nan, insider 0
+  0x6dd8cc8bc1e4bf68cd7f6f4efc01d95765578772 (tx.from [('0x6dd8cc8bc1e4bf68cd7f6f4efc01d95765578772', 2)]): n 2, sold 0, stake med 0.2200, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.01660, gas 0.000018, median hold nan, insider 0
+  0xe26afb788c9420c35086ffe3521e0a449c1d69ae (tx.from [('0xe26afb788c9420c35086ffe3521e0a449c1d69ae', 1)]): n 1, sold 1, stake med 0.0008, realized P&L -0.00009 ETH on 0.0008 in, mean ret -11.6%, held-marked P&L +0.00000, gas 0.000009, median hold 2, insider 0
+  0x0ba49f02687c7f64d6cd713e2412f2dad2050c83 (tx.from [('0x0ba49f02687c7f64d6cd713e2412f2dad2050c83', 1)]): n 1, sold 0, stake med 0.0200, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.00312, gas 0.000013, median hold nan, insider 0
+  0x95b4326851fac70970d335c0e59a5ea11abc9b53 (tx.from [('0x469cce5a63423ade1dc75b44686d56d1b8e833d4', 1)]): n 1, sold 1, stake med 0.0055, realized P&L -0.00328 ETH on 0.0055 in, mean ret -60.1%, held-marked P&L +0.00000, gas 0.000017, median hold 13, insider 0
+  0x9ccef731b9ef1077dc46f234afd69f1bc05ab932 (tx.from [('0x9ccef731b9ef1077dc46f234afd69f1bc05ab932', 1)]): n 1, sold 0, stake med 0.1350, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00798, gas 0.000005, median hold nan, insider 1
+  0xca9344a9b3fe3c3fbc044a7b3da969ea01e9a27c (tx.from [('0xca9344a9b3fe3c3fbc044a7b3da969ea01e9a27c', 1)]): n 1, sold 0, stake med 0.0700, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.06264, gas 0.000013, median hold nan, insider 0
+  0xa2a3de72ceac5b67310d5b7bbab16caf5665d137 (tx.from [('0xa2a3de72ceac5b67310d5b7bbab16caf5665d137', 1)]): n 1, sold 0, stake med 0.0110, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.00254, gas 0.000005, median hold nan, insider 0
+  0x86633e9ddd50fcd43cf4cca325f409dbea84ae7b (tx.from [('0x86633e9ddd50fcd43cf4cca325f409dbea84ae7b', 1)]): n 1, sold 0, stake med 0.0050, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00281, gas 0.000005, median hold nan, insider 0
+  0x89869da5beccd080b08ebfa1e527e20dbeebfe92 (tx.from [('0x89869da5beccd080b08ebfa1e527e20dbeebfe92', 1)]): n 1, sold 0, stake med 0.1000, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.02055, gas 0.000005, median hold nan, insider 0
+  0x8191c3278afa0eabf5c20f35c7e9a3a63879db4f (tx.from [('0x8191c3278afa0eabf5c20f35c7e9a3a63879db4f', 1)]): n 1, sold 0, stake med 0.0350, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00092, gas 0.000008, median hold nan, insider 0
+  0xbb094110f19c714f19501e5dc2634c2a4f987134 (tx.from [('0xbb094110f19c714f19501e5dc2634c2a4f987134', 1)]): n 1, sold 0, stake med 0.0500, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.01253, gas 0.000008, median hold nan, insider 0
+  0x4d377bdf066f538e8ede774842000faee40c46e3 (tx.from [('0x7adfcbd7dc0fac6d474098a4e666cd0e56b6c6d1', 1)]): n 1, sold 0, stake med 0.0710, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.03906, gas 0.000015, median hold nan, insider 0
+  0x379ac886267216618734ba2c934ddd6fb86e866e (tx.from [('0x379ac886267216618734ba2c934ddd6fb86e866e', 1)]): n 1, sold 1, stake med 0.0010, realized P&L -0.00010 ETH on 0.0010 in, mean ret -10.1%, held-marked P&L +0.00000, gas 0.000009, median hold 21, insider 0
+  0x47a2859dfcb9fd8b1c57d574013a965a24de1b32 (tx.from [('0x47a2859dfcb9fd8b1c57d574013a965a24de1b32', 1)]): n 1, sold 0, stake med 0.1000, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00053, gas 0.000010, median hold nan, insider 0
+  0xbb2009ba06a024ee5c4faed81b1977845c02afac (tx.from [('0xbb2009ba06a024ee5c4faed81b1977845c02afac', 1)]): n 1, sold 0, stake med 0.0347, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.00206, gas 0.000005, median hold nan, insider 1
+  0x0280d282eb59c655bf19e4906526b8d6fe094359 (tx.from [('0x0280d282eb59c655bf19e4906526b8d6fe094359', 1)]): n 1, sold 1, stake med 0.0020, realized P&L -0.00123 ETH on 0.0020 in, mean ret -61.7%, held-marked P&L +0.00000, gas 0.000012, median hold 61, insider 0
+  0xdf3841a8f36ef5436e58217aeba5d50b36f5ad99 (tx.from [('0xdf3841a8f36ef5436e58217aeba5d50b36f5ad99', 1)]): n 1, sold 0, stake med 0.1000, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.02492, gas 0.000006, median hold nan, insider 0
+  0x15689903de6453ffa99da6121a329a424da7fe4c (tx.from [('0x38509afb8bfab934e8dd504861834a126f6b1ce0', 1)]): n 1, sold 0, stake med 0.2000, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.02702, gas 0.000012, median hold nan, insider 0
+  0x3dddfd826712a6e6d245a8d5a9fadb345760650e (tx.from [('0x3dddfd826712a6e6d245a8d5a9fadb345760650e', 1)]): n 1, sold 0, stake med 0.0500, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.05247, gas 0.000006, median hold nan, insider 0
+  0x16ebf6fa59133471b7b6ebe685271bffce999999 (tx.from [('0x16ebf6fa59133471b7b6ebe685271bffce999999', 1)]): n 1, sold 0, stake med 0.2680, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.14612, gas 0.000009, median hold nan, insider 0
+  0x989a491607d7eb35cc88fd966a9503ab64ab397f (tx.from [('0x989a491607d7eb35cc88fd966a9503ab64ab397f', 1)]): n 1, sold 0, stake med 0.0500, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L +0.06356, gas 0.000007, median hold nan, insider 0
+  0x36c4aded11b1eddc651cfff3331e042de99b5f2f (tx.from [('0xa14a3eb89c0ffc8cecdf5b47a48d00e30419ce66', 1)]): n 1, sold 0, stake med 0.0001, realized P&L +0.00000 ETH on 0.0000 in, mean ret n/a, held-marked P&L -0.00001, gas 0.000014, median hold nan, insider 0
+
+POS-1 PRECEDED: 76/132 have user txs before them (txIndex>1); txIndex dist [(1, 56), (2, 25), (3, 10), (6, 9), (5, 8), (4, 8), (8, 4), (17, 2)]
+  preceding txs: 389, reverted 84, touching the curve 0, same `to` as p1 1
+  most common preceding `to`: [(('0x5b8e11e3b122c2858d30968be23172874c8ff73b', '0x33bfe246', None), 31), (('0xa95fe1ca2f3905fe50ef125475bd215d4502efe4', '0xeca314af', '0x0'), 22), (('0x520ed467860d840ec6ca20f1dacb9c0fa5168aa7', '0xb2460c48', None), 14), (('0x8876789976decbfcbbbe364623c63652db8c0904', '0x3593564c', '0x1'), 8), (('0x65050a9b7e5075a2ba5ced7b1b64ee66262c40dc', '0x4d819a2a', '0x1'), 8), (('0xe5e702641ea86f4ae6cc3cdaed2b886f976be044', '0x3d61055e', '0x1'), 8), (('0x198f7836093961c4e66f0cd9f5af000fb1666a76', '0xad5f0941', '0x0'), 8), (('0x5b8e11e3b122c2858d30968be23172874c8ff73b', '0x33bfe246', '0x0'), 8)]

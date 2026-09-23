@@ -1,0 +1,54 @@
+## Sep 18-19: the backtest's own 141 launches (+9.3%)
+coverage Sep 18 13:27 - Sep 19 13:10 UTC, creations 141, qualifying 141, errors 0
+backtest model E1_first_h15_250 (verbatim, repro err max 0.0e+00): all 141 mean +9.3% med +1.0% win 51%; E1 block occupied 116 mean +13.1%; empty 25 mean -8.5%
+our wallet/relay among E1 positions 1-4: 31 (pos-1: 15) -> excluded below unless stated
+
+| pos | n | sold all <=100 blk | realized mean / median / win (sold) | ETH-wtd realized | actual incl. held@mark15 mean / median / win | eventual (closed <=6000 blk) n, mean / median / win, ETH-wtd | median hold blk (s) | median stake ETH |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 101 | 47 (47%) | +6.1% / +1.8% / 57% | +3.5% | +7.2% / +0.1% / 51% | 82, +3.8% / +0.3% / 52%, +1.7% | 40 (4 s) | 0.0350 |
+| 2 | 81 | 33 (41%) | +1.4% / -0.8% / 45% | -3.8% | +6.4% / +0.4% / 52% | 62, +5.0% / -3.5% / 42%, -3.8% | 36 (3 s) | 0.0396 |
+| 3 | 64 | 24 (38%) | +5.5% / -5.2% / 33% | +3.9% | +7.5% / -0.8% / 47% | 41, +6.9% / -4.7% / 39%, +0.7% | 48.5 (4.0 s) | 0.0425 |
+| 4 | 49 | 15 (31%) | -6.5% / -9.7% / 33% | -4.6% | +6.8% / +0.3% / 51% | 31, -12.3% / -9.7% / 32%, -7.3% | 31 (3 s) | 0.0247 |
+
+pos-1 matched pairs (excl. ours). A = actual (realized if sold all <=100 blk, else own lot marked by the curve at +15); C = backtest score() at the same ETH stake (E1 first, hold 15, SUR 6.18%, tier); B = same but the incumbent's own buy and sells removed (we take its seat)
+| subset | n | A mean / med | C mean / med | A-C mean / med | C-B (incumbent's buy left behind us) mean / med | B-A (15-blk rule vs their exit) mean / med | ETH-wtd A / B / C |
+|---|---|---|---|---|---|---|---|
+| all | 101 | +7.2% / +0.1% | +14.2% / +8.8% | -7.0% / -2.0% | +5.4% / +2.0% | +1.6% / +0.0% | +5.2% / +8.0% / +19.0% |
+| sold all <=100 | 47 | +6.1% / +1.8% | +16.9% / +12.8% | -10.8% / -10.9% | +7.3% / +5.0% | +3.5% / +2.3% | +3.5% / +8.1% / +18.5% |
+| held/partial | 54 | +8.2% / -1.7% | +12.0% / -0.6% | -3.8% / -0.9% | +3.8% / +0.9% | -0.0% / +0.0% | +8.0% / +7.9% / +19.8% |
+| stake under CAP | 77 | +8.6% / +0.1% | +12.3% / +0.9% | -3.7% / -0.8% | +3.0% / +1.2% | +0.7% / +0.0% | +8.6% / +9.8% / +17.9% |
+| stake at CAP | 24 | +2.8% / +0.4% | +20.5% / +16.6% | -17.8% / -19.0% | +13.2% / +13.3% | +4.6% / +3.1% | +2.7% / +6.7% / +19.8% |
+
+entry: pos-1 is the first curve event of the E1 block in 101/101; paid fee = tier+6.18% within 0.0005 in 101/101; the rest paid [] above tier (insiders: [])
+exit: 212 tracked sells, ETH out / curve-model gross = 1 - tier within 0.0005 in 212/212 (max |dev| 0.00000)
+hold: pos-1 sold all within 100 blk 47/101; of those <=9 blk 5, 10-20 7, 21-50 16, 51-100 19; eventual last sell median for the rest 151 blk
+preceded: pos-1 at txIndex 1 (first user tx; index 0 is the ArbOS tx) 50/101; preceded by other user txs 51/101 (331 txs, 66 reverted, 127 receipt not fetched, curve logs from any of them: 0)
+insiders (named wallets in the creation calldata) at pos 1-4: 1; at pos 1: 0; their fee = tier only (no surcharge): 1
+
+pos-1 addresses (n>=3, excl. ours):
+| address | n | stake med ETH | sold<=100 | hold med blk (s) | realized P&L ETH (sold) | eventual P&L ETH (closed) | A mean | C mean | gas ETH |
+|---|---|---|---|---|---|---|---|---|---|
+| 0x6c56103c6af4891be46cb3666c1fa354cc79eaca | 16 | 0.1500 | 16 | 48.5 (4.5) | +0.04703 on 2.400 | +0.04703 (16/16) | +2.0% | +24.7% | 0.00030 |
+| 0xfefe306eb0e5eaf0d6821a1d2935ffc5cfa8cc1b | 13 | 0.0295 | 7 | 79 (5) | +0.00786 on 0.243 | +0.01764 (13/13) | -2.4% | -3.5% | 0.00021 |
+| 0xe268a3a469c4c34657491cdf3bc522c2313eb45b | 10 | 0.0050 | 0 | nan (nan) | +0.00000 on 0.000 | -0.00259 (10/10) | +5.8% | +6.3% | 0.00008 |
+| 0x147ca3d806b6cf35d6e69e793892e0cd8ef3dc4b | 8 | 0.0020 | 1 | 100 (11) | +0.00067 on 0.002 | -0.00041 (7/8) | -2.0% | -7.2% | 0.00006 |
+| 0x9adbc54f7ab1600986981a3850be99926920796f | 4 | 0.0100 | 2 | 8.0 (0.5) | +0.00272 on 0.020 | +0.02293 (3/4) | +61.2% | +73.2% | 0.00004 |
+| 0x2abdd72b5bb40ba0df894d33d40aee918da551ae | 4 | 0.0063 | 0 | nan (nan) | +0.00000 on 0.000 | -0.00322 (3/4) | +15.0% | +15.7% | 0.00004 |
+| 0x62ef1b3c77dffbbbde9d3ed91ddb31a1b567d6de | 4 | 0.0200 | 1 | 2 (0) | -0.00300 on 0.030 | +0.00012 (4/4) | -9.5% | -6.0% | 0.00003 |
+| 0xb316a9ccf21ca0c71701a5e756faf270b18e3060 | 4 | 0.0550 | 4 | 82.0 (8.0) | +0.04476 on 0.220 | +0.04476 (4/4) | +20.3% | +28.5% | 0.00010 |
+| 0x1ed153337379d2274a36656eff6c243b78be8023 | 3 | 0.0971 | 3 | 53 (5) | -0.00730 on 0.291 | -0.00730 (3/3) | -2.5% | +6.8% | 0.00006 |
+distinct pos-1 addresses: 35; top-5 share of pos-1 seats 50%
+
+biggest |A - C| (excl. ours):
+- b0 66558210 E1 66558216 curve 0x3cd13561f528b39165dbca7599136d5368fe54af p1 0x6c56103c6af4891be46cb3666c1fa354cc79eaca stake 0.1500 sold hold 23 A -53.7% C +6.1% B -5.8% | buy 0x6f7a9085bc32c61f52e67cba12da52c5fa63aca4573ac3cdfe41345cea9bed6c | sell 0x4e6ab86f37252c5d4e4929c00a6c41c88610b604e47dfc9f13e41e050378c0db
+- b0 66486701 E1 66486710 curve 0x9d1cedfcc82a0bb904a3f1a5ae543cb6f3eea2cd p1 0x26558f89f952e9f557d91be898e7adcdcfb8ade6 stake 0.0394 sold hold 94 A +19.5% C +76.8% B +68.8% | buy 0x3854b46a2647177c2ee9961aa3dc92a97996476252e938875d457b2f589c644a | sell 0x1fd6e6727fb766fbc3214ee3d7c2c86ab93198179109bc497f1b8bbb709d55f8
+- b0 66877669 E1 66877675 curve 0x267f13148bf5cdc878ce54aa927a406b3e182fc6 p1 0x147ca3d806b6cf35d6e69e793892e0cd8ef3dc4b stake 0.0020 sold hold 100 A +33.3% C -9.1% B -9.2% | buy 0x2216109cd623e42ced3d079e807fa1f1f66190bee2aa3d03afb6cbbe7ece93cc | sell 0xe0aea72faccbc13e767b43684fe596f0f21e181b925af5451b7c17c7c1d514a6
+- b0 67045115 E1 67045121 curve 0xdcd71241d9f7a424bd5b23c0219b4e0425d38775 p1 0x6c56103c6af4891be46cb3666c1fa354cc79eaca stake 0.1500 sold hold 22 A +28.1% C +61.6% B +39.2% | buy 0x95e5298c951da5ea92b3238f06389736b290f658c2e198f67f4fff1dba28174e | sell 0xdbce03a190ce73815163201f324ebf94f25b725490f804b5f6d58b69d0a21492
+- b0 66448819 E1 66448828 curve 0xf6bf73ea50aa62b8b9f12bad7790aa1863a2582c p1 0x6c56103c6af4891be46cb3666c1fa354cc79eaca stake 0.1500 sold hold 49 A +14.6% C +40.9% B +23.2% | buy 0xcb167dc54404090a80f49767126750f8c5bb23058e053176a1f14aa705a639b3 | sell 0x56a51e9f7794707fb5a568471a6ca572415e2fc9ef94c3069569df77b251785e
+- b0 66450123 E1 66450131 curve 0xf188c735b5bd467a1ec6e17996d436e053642b8e p1 0x6c56103c6af4891be46cb3666c1fa354cc79eaca stake 0.1500 sold hold 53 A -13.1% C +12.8% B +1.1% | buy 0x3d1aa11bf34912bddcf479219cf5ee57cf118ca7713fc111c9dadd824c8f3f6a | sell 0x1f17a199d2313edffe549b323b9fad7c251c18e77bc063a6cf53db3be5bcae5b
+- b0 66346326 E1 66346330 curve 0xbf9fbfa4eed38327be01544007b30bbe53cdc82a p1 0x6c56103c6af4891be46cb3666c1fa354cc79eaca stake 0.1500 sold hold 55 A -4.7% C +20.3% B +6.2% | buy 0x19e04ebf3ab87ae9075988391e58e3aab75024da3e430aeb7cfcb735e97a9f0e | sell 0x5e4caace2ab7dac6d7d4711181993e4f68745c918efaf8e8fb5affe28f931b07
+- b0 66396741 E1 66396747 curve 0xa92fdeb8a2387d9ef8e3b87d5ef68a0bc4d0fcda p1 0x1ed153337379d2274a36656eff6c243b78be8023 stake 0.0971 sold hold 53 A -0.6% C +24.2% B +13.8% | buy 0x5fa4220948b42f896e315dc0b22b1358667eb0ccc7f549aa1a0fd127df3f67c7 | sell 0xb00df4049d3bfe96f4a8eb86b696555cf240386a3ec4f36975e6676c04431662
+- b0 66470481 E1 66470491 curve 0xedc1591047cef7957e74899420eaaab8c730eae6 p1 0xfefe306eb0e5eaf0d6821a1d2935ffc5cfa8cc1b stake 0.0291 sold hold 79 A +15.7% C -8.7% B -9.7% | buy 0x2b4b33bc9df243c6358333398351b83e9af68377520f984892d8e7f5de13c09c | sell 0x43832b4d2d77495de2f770f78f1f4a89b1ca2b9ccd4e3082e9b27bc904156447, 0x0da53578f779fb9546b65d66a31ff64263e50145d2dc0738ea096c68d2989901
+- b0 66394706 E1 66394711 curve 0xddd5df0643a84a72972ceda4a80c900da94f58a2 p1 0x6c56103c6af4891be46cb3666c1fa354cc79eaca stake 0.1500 sold hold 40 A -0.2% C +23.8% B +8.1% | buy 0x1bdb5c8bcc35a8f66046d171e4b8fa60b2222c606d8e4cdd5d9074c2d081b1dc | sell 0xc6f357a34e6d1ec6e496f9848042983e8d878595f71e68b57a14784ddd6f8f36
+
+our own E1 fills in this sample: n 31 (pos Counter({1: 15, 2: 8, 3: 4, 4: 4})), A mean -4.8%, C mean +3.5% (pos-1 only)
