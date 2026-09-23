@@ -9,7 +9,8 @@ the buys ahead (whether a 25% guard lets a fill through at each position). Gas: 
 import json, sys, statistics as st, time
 sys.path.insert(0, "src/analysis"); from live_vs_table import launch, model, fold_buy, X0, Y0, OURS
 MIN_A = int(sys.argv[1]) if len(sys.argv) > 1 else 2; BLK = int(sys.argv[2]) if len(sys.argv) > 2 else 5; E = 2570.0; GAS = 0.33
-C = json.load(open("data/derived/live_vs_table/crowd_signal.json"))
+SRC = sys.argv[3] if len(sys.argv) > 3 else "data/derived/live_vs_table/crowd_signal.json"; DST = sys.argv[4] if len(sys.argv) > 4 else "data/derived/live_vs_table/gated_seat.json"
+C = json.load(open(SRC))
 at = lambda r: r["attackers_by_block"][min(BLK, len(r["attackers_by_block"]) - 1)] if r["attackers_by_block"] else 0
 gated = [r for r in C if at(r) >= MIN_A]; rest = [r for r in C if at(r) < MIN_A]
 print(f"{len(C)} launches; gate 'attackers >= {MIN_A} by block {BLK}': {len(gated)} fire, {len(rest)} skipped (skipped: first {st.mean(r['first'] for r in rest):+.1%}, win {sum(r['first']>0 for r in rest)/len(rest):.0%})")
@@ -39,7 +40,7 @@ for r in gated:
             for p in (1, 2, 3): row[f"behind{p}_{int(stake)}_{hold}"] = model(L, g, bE1, p, hold=hold) if len(blockbuys) >= p else None
             row[f"last_{int(stake)}_{hold}"] = model(L, g, bE1, 99, hold=hold)
     rows.append(row); print(f"  {time.strftime('%b %d %H:%M', time.gmtime(T0))} {r['cv'][:10]} attackers {at(r)} block buys {len(blockbuys)} first15 {row['first_15_15']:+.0%} b1 {row['behind1_15_15'] if row['behind1_15_15'] is None else round(100*row['behind1_15_15'])} b2 {row['behind2_15_15'] if row['behind2_15_15'] is None else round(100*row['behind2_15_15'])} last {row['last_15_15']:+.0%}  move ahead of pos2 {moves[0]*100 if moves else 0:+.0f}%", flush=True)
-json.dump(rows, open("data/derived/live_vs_table/gated_seat.json", "w"), indent=0)
+json.dump(rows, open(DST, "w"), indent=0)
 def col(k):
     v = [x[k] for x in rows if x.get(k) is not None]; return f"n={len(v):2d} mean {st.mean(v):+6.1%} med {st.median(v):+6.1%} win {sum(x>0 for x in v)/len(v):3.0%}" if v else "-"
 print(f"\n=== gated launches, model by position (hold 15 blocks / 25 blocks), before gas")

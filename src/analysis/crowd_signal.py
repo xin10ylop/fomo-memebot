@@ -31,14 +31,14 @@ for n, l in enumerate(L):
         if off <= k: attackers_cum |= att; cum.append(len(attackers_cum))
         per_block.append(sorted(att))
     res.append({"cv": cv, "b0": b0, "k": k, "hour": l["hour"], "attackers_by_block": cum, "attackers_creation_second": len(attackers_cum), "seat_block_attackers": len(per_block[-1]),
-                "e1_buyers": len(l["e1_block_buyers"]), "e1_eth": l["e1_block_eth"], "bot_in_seat": BOT in l["e1_block_buyers"], "bot_txs": bot_txs, "first": l["res"]["E1_first_h15_250"][0], "last": l["res"]["E1_last_h15_250"][0], "bundle_eth": l["bundle_eth"]})
+                "e1_buyers": len(l["e1_block_buyers"]), "e1_eth": l["e1_block_eth"], "bot_in_seat": BOT in l["e1_block_buyers"], "bot_txs": bot_txs, "first": l["res"]["E1_first_h15_250"][0], "last": l["res"].get("E1_last_h15_250", [float("nan")])[0], "bundle_eth": l["bundle_eth"]})
     if n % 10 == 0: print(n, cv[:10], "blocks", k + 2, "attackers by block", cum, "seat crowd", len(l["e1_block_buyers"]), f"{l['e1_block_eth']:.2f} ETH", "bot txs", len(bot_txs), flush=True)
 json.dump(res, open(out, "w"), indent=0)
 def at(r, j): return r["attackers_by_block"][min(j, len(r["attackers_by_block"]) - 1)] if r["attackers_by_block"] else 0
 print("\n=== distinct attackers seen by creation-second block 5 (about 0.4 s before the tick) vs the seat block's crowd")
 for lo, hi in ((0, 0), (1, 1), (2, 3), (4, 6), (7, 99)):
     g = [r for r in res if lo <= at(r, 5) <= hi]
-    if g: print(f"attackers {lo}-{hi}: n={len(g):3d}  seat buyers mean {st.mean(r['e1_buyers'] for r in g):.1f}  seat ETH mean {st.mean(r['e1_eth'] for r in g):.3f}  bot present {sum(r['bot_in_seat'] for r in g)/len(g):.0%}  FIRST {st.mean(r['first'] for r in g):+.1%}  LAST {st.mean(r['last'] for r in g):+.1%}  win(first) {sum(r['first']>0 for r in g)/len(g):.0%}")
+    if g: print(f"attackers {lo}-{hi}: n={len(g):3d}  seat buyers mean {st.mean(r['e1_buyers'] for r in g):.1f}  seat ETH mean {st.mean(r['e1_eth'] for r in g):.3f}  bot present {sum(r['bot_in_seat'] for r in g)/len(g):.0%}  FIRST {st.mean(r['first'] for r in g):+.1%}  LAST {st.mean(r['last'] for r in g) if all(r['last'] == r['last'] for r in g) else float('nan'):+.1%}  win(first) {sum(r['first']>0 for r in g)/len(g):.0%}")
 print("\n=== the bot's sending pattern on its launches (block offset, tx index, aimed at the curve):")
 for r in res:
     if r["bot_in_seat"]: print("  ", r["cv"][:10], "k", r["k"], r["bot_txs"][:12])
