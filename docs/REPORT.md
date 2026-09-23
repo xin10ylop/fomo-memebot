@@ -31,6 +31,7 @@ Everything below was computed from data collected in this session; scripts are i
 25. **The burst filled six and five times at $15 and the wallet, not the stake, was the bet (section 24.24).** The 3% guard cannot see a $15 fill's own impact, so every shot after the first also fills until the wallet cannot fund one more; one launch at −56% on the whole wallet cost $42 of the night's $54. Engine 5.93 sizes every buy to the wallet less a gas reserve so the sequencer itself drops a second fill, makes `STAKE_MAX` the wallet's ceiling, and starts the hold clock at the fill (the sells had landed 31–36 blocks after the buy instead of 15). Nine live fills so far, four wins, a mean near +1%: too few to judge the seat's +16% either way.
 26. **The BuyOnce relay makes the bet a setting again (section 24.25).** A 20-line contract owned by the wallet buys at most once per curve and forwards the tokens to the wallet; the curve accepts contract buyers (checked by simulation), the relay's logic was exercised on a live curve's state before deployment, and engine 5.94 routes every shot through it. `STAKE_MIN`/`STAKE_MAX` are the bet, the wallet may hold any amount.
 27. **Shooters (section 24.26).** One wallet's consecutive nonces on parallel sockets are refused as "nonce too high" when the sequencer is under load (29 of 35 shots on Sep 19); engine 6.0 fires every shot from its own gas-only shooter wallet and the third relay buys with the stake it holds, once per curve, before the seat's deadline. No shot depends on another, and the exit no longer depends on how many landed.
+32. **Out of sample, and the rule (section 24.31).** On Sep 20 13:26 to Sep 22 01:02 UTC (189 qualifying launches, a window nothing was fitted on) the pre-tick gate separates as before: 0 attackers −1.0% first seat (29% win), 2-3 attackers +30.2% (67%), 4-6 +13.9% (89%). On the 65 gated launches, second place is +11.2% at 15 blocks and +10.9% at 300; across the three windows second place at 300 blocks is +13.7%, +10.9%, +26.9% (at 15 blocks +18.0%, +11.2%, +4.9%), so 300 blocks is the hold whose worst window is still above +10%. Third and fourth place are weaker out of sample (+6.5%, +1.9% at 300), last is negative on every window, and the second-second seat is negative on two of three: the burst stays dense and the guard stays. Engine 6.1 carries the gate (ATTACK_MIN), the hold in blocks (HOLD_BLOCKS), the measured gas model and a kill line (KILL_USD), all off by default; the next step is a paper day on the box, scored by `paper_day.py` from the chain, then $13 stakes with KILL_USD=15 on the $22 the box holds.
 31. **What the profitable trades had, and what it points to (section 24.30).** The P&L peaked at +$24 on Sep 18 18:44 UTC and lost $51 in the next five minutes to two multi-fill launches. Every winner had a crowd buying behind us in the 15 blocks after the seat (5.5 wallets, 0.23 ETH, against 2 wallets and 0.05 ETH on the losers); the three big ones were multi-fills (size on winners +$48, size on losers −$72); and the tokens we sold were up 20-30% a minute later. On the population, the current regime pays later than 1.5 s: on the last 30 hours' 175 launches, the first seat held 15 blocks is +1.2% and held 300 blocks +12.6%; with the pre-tick crowd gate (60 launches) and second place, +4.3% at 15 blocks and **+25% at 300 blocks (median +15%, 63% winners, 10% dead, standard error 8)**: +$3.43 a burst at $15 after gas, about $200 a day on paper, in sample. Sep 18-19 did not need the long hold (+17% at 15 blocks, +13% at 300). Out of sample on Sep 20-21 pending; not to be traded before it and a paper day.
 30. **Verdict (section 24.29).** Three independent audits and two more chain tests. The seat's ground truth from events: the bots that take index 1 realise about 0% (the one that beats us: +0.08% on 2.97 ETH over 20 seats in the last 30 hours; +2.0% on Sep 18-19 where the tables said +24%). The tables' own model fell from +9.3% (Sep 18-19) to +1.5% (Sep 22-23). Pons changed nothing; Sep 20 was a 1%-tier lull. The crowd is visible before the tick (wallets already firing at the curve by creation-second block 5: 0 of them = −6%, 2 or more = +13% first seat now, +27% then), which removes the leftover launches; landing second on those is +4.9% before gas today (median −3%, 46% win), +18% four days ago. At $100 a stake that is of the order of $80-150 a day expected with swings of the same size, on an edge that halved in four days, with $22 on the box. The seat as built does not meet the brief; the gated version is a capped experiment at best, not a business.
 29. **Why live does not pay: the seat we get is not the seat the tables price (section 24.28).** Every real fill of Sep 17-20 re-run through the tables' own model for the same launch: the model reproduces the wallet to the decimal on all 34 single fills, so the engine is right and none of the fixed bugs was the cause. The tables assume we are first on every launch. Live: first only when nobody faster wants the launch (26 of 38 fills, worth −1.5% even when first), behind one bot on the launches that pay (12 fills, +17.7% if first, +7.4% got; 13 more bursts on its launches filled nothing at all). Plus 2.3% gas a burst at $15. As executed: about −2% a trade. The bot straddles the second's tick finer than our 3 ms grid and picks 13% of launches whose first seat is +19% with 92% winners; nothing in the calldata says which. Following it one block later is −10%. Not a code fix.
@@ -3096,3 +3097,54 @@ The out-of-sample run is Sep 20 12:00 to Sep 22 00:30 (three 12-hour windows of 
 signal and the hold grid: `data/derived/e1_sep2021/`, `launches_oos_sep2021.json`); if the gated long hold survives it,
 the engine change is the pre-tick gate at burst-build time, a hold of 150-300 blocks with a sell minOut, the real gas
 model, and a paper day before any stake.
+
+### 24.31 Out of sample: Sep 20-21, and the rule as it will be run (Sep 23)
+
+The tables' script on three 12-hour windows nothing above was fitted on (`data/derived/e1_sep2021/`: Sep 20 13:26 to Sep 22
+01:02 UTC, 189 qualifying launches), then the crowd signal and the position-by-hold model on them
+(`crowd_signal_oos_sep2021.json`, `position_hold_oos_sep2021.txt`).
+
+**The gate holds out of sample.** Distinct wallets already firing at the curve by creation-second block 5 (our own shooters
+excluded; the engine was stopped for most of this window anyway):
+
+| attackers | launches | first seat | win |
+|---|---|---|---|
+| 0 | 90 | −1.0% | 29% |
+| 1 | 34 | +9.0% | 47% |
+| 2-3 | 27 | **+30.2%** | 67% |
+| 4-6 | 18 | +13.9% | 89% |
+| 7+ | 20 | +8.2% | 50% |
+
+**The hold, by position, on the 65 gated launches ($15, before gas):**
+
+| position | 15 blocks | 150 | 300 | 600 |
+|---|---|---|---|---|
+| first | +18.1% / 66% | +16.2% | +16.8% / 58% | +8.0% |
+| behind one | +11.2% / 53% | +9.7% | **+10.9% / 54%** | +2.9% |
+| behind two | +6.0% | +5.6% | +6.5% | −0.5% |
+| behind three | +2.2% | +1.3% | +1.9% | −4.4% |
+| last | −4.4% | −4.9% | −3.7% | −10.6% |
+| second second (E2), first | −7.5% | −5.5% | −5.2% | −11.3% |
+
+**Across the three windows, second place:** at 15 blocks +18.0% (Sep 18-19), +11.2% (Sep 20-21), +4.9% (Sep 22-23); at
+300 blocks **+13.7%, +10.9%, +26.9%**. The 300-block hold is the one whose worst window stays above +10%; 600 blocks
+loses out of sample. Third and fourth place: +11.3% / +16.5% (Sep 18-19), +6.5% / +1.9% (Sep 20-21), +21.0% / +19.5%
+(Sep 22-23) at 300 blocks: weaker and less stable, so the burst stays dense (the 3 ms grid is what puts us second
+rather than fourth). Last in the block is negative on every window: the 25% guard stays. The second-second seat and
+E1+3 are negative on two windows of three: no shortcut around the seat block.
+
+**The rule, as it will be run:** the existing seat (E1, the burst of 35 at 3 ms, the relay, the shooters, the 25%
+guard), plus engine 6.1's `ATTACK_MIN=2` (fire only when two or more relays or direct senders are already firing at the
+curve when the burst is built), `HOLD_BLOCKS=300`, the measured gas model in the engine's own cost gate, and
+`KILL_USD=15` on the $22.50 the box holds ($13.40 in the relay as the stake, $7 of shooter gas for about 25 bursts, $2 in
+the wallet). Expected at $13 from the three windows, with our real landing mix (behind one two thirds of the time, behind
+two or three otherwise) and a fill on about half the bursts: roughly +9% (Sep 20-21) to +24% (Sep 22-23) a fill before
+gas, $0.30 to $1.20 a burst after it, of the order of $10-40 a day at 25-65 bursts; positive on every window, small at
+this stake, and the stake is the setting.
+
+**What the paper day tests** is the one assumption the chain cannot: that the engine sees two attackers on the feed by
+the time the burst is built (the chain counts by block 5 of the creation second, about 0.4 s before the tick; the burst
+leaves about 130 ms before the seat's predicted arrival). `paper_day.py` scores every launch the engine would have
+fired at from the chain, at the positions we can get, held 300 blocks, after gas, and every launch the gate refused.
+Go: second place at or above +10% over at least 40 gated launches with the refused set negative. Then live at $13 with
+the kill line, the fills reconciled daily with `live_vs_table.py` (which must keep reading 0.0% in its model column).

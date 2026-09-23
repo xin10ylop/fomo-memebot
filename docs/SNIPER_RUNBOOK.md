@@ -682,3 +682,23 @@ Live after a go: SEND_MODULE back, STAKE_MIN=STAKE_MAX=13, MAX_LIVE_TRADES=30, K
 `python3 src/analysis/live_vs_table.py` (the fills against the model) and `sudo python3 src/analysis/paper_day.py --from <yesterday>`
 (the rule against the chain). The burst may be cut to BURST_N=10 with BURST_STEP_MS=10 once section 24.30's position table
 confirms that third place pays the same as second at 300 blocks (it does on Sep 22-23: +19.5% against +26.9%).
+
+### 5l, the commands (on the box)
+
+Paper day (nothing is sent; the engine logs what it would have done):
+
+    sudo sed -i 's|^SEND_MODULE=.*|SEND_MODULE=|' /etc/sniper/engine.env
+    grep -q '^ATTACK_MIN=' /etc/sniper/engine.env || printf 'ATTACK_MIN=2\nHOLD_BLOCKS=300\nKILL_USD=15\n' | sudo tee -a /etc/sniper/engine.env >/dev/null
+    cd ~/fomo-memebot && git pull && sudo cp src/strategy/sniper_engine.py /opt/sniper/src/strategy/sniper_engine.py 2>/dev/null; sudo systemctl daemon-reload && sudo systemctl restart sniper-engine && sleep 5 && sudo tail -3 /var/log/sniper/engine.jsonl | cut -c1-300
+
+(the engine reads the repo copy the service points at; if the unit's WorkingDirectory is ~/fomo-memebot the cp is not needed and
+fails harmlessly). After a day:
+
+    sudo python3 src/analysis/paper_day.py --stake 13 --hold 300
+
+Live after a go:
+
+    sudo sed -i 's|^SEND_MODULE=.*|SEND_MODULE=/etc/sniper/send_step.py|; s|^STAKE_MIN=.*|STAKE_MIN=13|; s|^STAKE_MAX=.*|STAKE_MAX=13|' /etc/sniper/engine.env
+    sudo systemctl restart sniper-engine
+
+Daily: `python3 src/analysis/live_vs_table.py` and `sudo python3 src/analysis/paper_day.py --from "<yesterday> 00:00"`.
