@@ -7,7 +7,7 @@ how the index-1 bots send (one transaction or a burst). Public RPC, full blocks.
     python3 src/analysis/crowd_signal.py data/derived/live_vs_table/launches_141_creators.json [out.json]"""
 import json, urllib.request, time, sys, collections, statistics as st
 RPC = "https://rpc.mainnet.chain.robinhood.com"; H = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 curl/8"}
-BOT = "0x6c56103c6af4891be46cb3666c1fa354cc79eaca"; US = {"0xe0686dc72b04c12ceefeea75e286e4ef7c056f01", "0xe8e98c3514d5bd83fdd01360896f2382b861a720"}
+BOT = "0x6c56103c6af4891be46cb3666c1fa354cc79eaca"; US = {"0xe0686dc72b04c12ceefeea75e286e4ef7c056f01", "0xe8e98c3514d5bd83fdd01360896f2382b861a720"}   # our shooters send to the relay: excluded by `to` below
 def call(m, p):
     for i in range(6):
         try:
@@ -26,7 +26,7 @@ for n, l in enumerate(L):
         blk = call("eth_getBlockByNumber", [hex(b0 + off), True]); att = set()
         for t in blk["transactions"]:
             fr = t["from"].lower(); to = (t.get("to") or "").lower(); aimed = to == cv or cv[2:] in t.get("input", "")
-            if aimed and fr not in named and fr not in US: att.add(fr)
+            if aimed and fr not in named and fr not in US and to not in US: att.add(fr)   # not our wallet, relay or shooters (whose shots go to the relay)
             if fr == BOT or to == BOT: bot_txs.append((off, int(t["transactionIndex"], 16), aimed))
         if off <= k: attackers_cum |= att; cum.append(len(attackers_cum))
         per_block.append(sorted(att))
