@@ -689,10 +689,9 @@ Paper day (nothing is sent; the engine logs what it would have done):
 
     sudo sed -i 's|^SEND_MODULE=.*|SEND_MODULE=|' /etc/sniper/engine.env
     grep -q '^ATTACK_MIN=' /etc/sniper/engine.env || printf 'ATTACK_MIN=2\nHOLD_BLOCKS=300\nKILL_USD=15\n' | sudo tee -a /etc/sniper/engine.env >/dev/null
-    cd ~/fomo-memebot && git pull && sudo cp src/strategy/sniper_engine.py /opt/sniper/src/strategy/sniper_engine.py 2>/dev/null; sudo systemctl daemon-reload && sudo systemctl restart sniper-engine && sleep 5 && sudo tail -3 /var/log/sniper/engine.jsonl | cut -c1-300
+    cd ~/fomo-memebot && git pull && sudo systemctl daemon-reload && sudo systemctl restart sniper-engine && sleep 5 && sudo tail -2 /var/log/sniper/engine.jsonl | cut -c1-400
 
-(the engine reads the repo copy the service points at; if the unit's WorkingDirectory is ~/fomo-memebot the cp is not needed and
-fails harmlessly). After a day:
+(the service runs the repo's own src/strategy/sniper_engine.py: the pull is the deploy). After a day:
 
     sudo python3 src/analysis/paper_day.py --stake 13 --hold 300
 
