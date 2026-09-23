@@ -2,9 +2,10 @@
 
     sudo python3 src/analysis/race_readout.py [/var/log/sniper/engine.jsonl]
 
-flip-first_shot = the seat second's first block (the flip, wall clock) minus our first shot's send time: positive means the
-burst straddled the tick (that many ms of shots landed in the tax second and reverted, the next one filled); negative means
-every shot left after the tick, we were late by that much. `fill shot` = which shot of the burst filled (1 = the first).
+flip-first_shot = the seat second's first block (the flip, wall clock) minus our first shot's send time: it carries the feed's
+delivery lag (about +200 to +400 ms on the Ohio box), so it cannot say late or early by itself. `fill shot` = which shot of the burst
+filled (1 = the first): k > 1 means shots 1..k-1 reverted in the tax second and the tick fell inside the 3 ms before shot k
+(the burst straddled the tick); k = 1 means the whole burst left after the tick, so we were late by an unknown amount.
 Joined with data/derived/live_vs_table/sep17_20_fills.json (who was ahead of us in the block, the real return) when present."""
 import sys, os, json, glob, gzip, time, collections, statistics as st
 P = sys.argv[1] if len(sys.argv) > 1 else "/var/log/sniper/engine.jsonl"
@@ -44,7 +45,7 @@ print(f"\nbursts {len(rows)}, filled {len(fills)}, no fill {len(rows)-len(fills)
 print("flip - first shot, fills with SOMEBODY ahead:", q([r["straddle"] for r in withs if r["ahead"]]))
 print("flip - first shot, fills with NOBODY ahead:  ", q([r["straddle"] for r in withs if r["ahead"] == 0]))
 print("flip - first shot, bursts with no fill:      ", q([r["straddle"] for r in rows if not r["fill_shot"] and r["straddle"] is not None]))
-late = [r for r in withs if r["straddle"] < 0]; print(f"LATE bursts (every shot after the tick): {len(late)} of {len(withs)} fills; fill shot numbers when somebody was ahead: {[r['fill_shot'] for r in fills if r['ahead']]}; when nobody: {[r['fill_shot'] for r in fills if r['ahead'] == 0]}")
+late = [r for r in fills if r["fill_shot"] == 1]; print(f"LATE bursts (the FIRST shot filled, so the whole burst left after the tick; flip-1st shot cannot tell, it carries the feed's lag): {len(late)} of {len(fills)} fills; fill shot numbers when somebody was ahead: {[r['fill_shot'] for r in fills if r['ahead']]}; when nobody: {[r['fill_shot'] for r in fills if r['ahead'] == 0]}")
 print("tx index of our fill when somebody was ahead:", [r["fill_idx"] for r in fills if r["ahead"]], "| nobody ahead:", [r["fill_idx"] for r in fills if r["ahead"] == 0])
 rtt = [e for e in ev if e["ev"] == "sender_rtt"]
 if rtt: print("sender RTT:", {k: v for k, v in rtt[-1].items() if k not in ("ev", "t")})
