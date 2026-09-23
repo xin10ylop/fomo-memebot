@@ -648,3 +648,12 @@ Before any restart, and after any run, two readouts say whether the seat pays as
 `live_vs_table` must show `execution/fees/model +0.0%` on every line (the engine is exact); the money is in the `seat`
 column. `race_readout`: fill shot k > 1 means the burst straddled the tick; k = 1 means the whole burst was late. Section
 24.28 of the report: the seat we get is the one the fast bot leaves, worth −1.5% first and −2% after gas at $15.
+
+## 5k. Do not restart the seat as built (Sep 23)
+
+Report 24.29: the seat as built is −2% a trade after gas (the launches we win have no crowd; the ones with a crowd belong
+to a faster bot that itself earns about 0%). A restart needs, in this order: the pre-tick crowd gate (crowd_signal.py's
+rule inside the engine: fire only when two or more wallets are already firing at the curve by the last visible creation-
+second block), a hold counted in blocks, gas_usd() at the real 1.94M gas a round trip, a sell minOut; a paper day with
+the expected return logged per burst; then $100 stakes with a dollar kill line, re-priced daily with gated_seat.py on the
+last 24 hours. At $15 the gated seat is $0.20 a burst: not worth the gas.
