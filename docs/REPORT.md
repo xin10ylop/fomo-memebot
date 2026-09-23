@@ -3148,3 +3148,11 @@ leaves about 130 ms before the seat's predicted arrival). `paper_day.py` scores 
 fired at from the chain, at the positions we can get, held 300 blocks, after gas, and every launch the gate refused.
 Go: second place at or above +10% over at least 40 gated launches with the refused set negative. Then live at $13 with
 the kill line, the fills reconciled daily with `live_vs_table.py` (which must keep reading 0.0% in its model column).
+
+**The same window priced a second way** (`hold_grid.py` on all 189, joined with the gate: `gate_hold_eval_oos_sep2021.txt`):
+at $13 a burst after $0.33 of gas, second place on the 65 gated launches is **+$0.87 a burst at 15 blocks (SE $0.40, none
+dead) and +$0.84 at 300 blocks (SE $0.68, 6% dead)**; on the 124 the gate skips, −$0.63 and −$0.30. Across the three
+windows at 300 blocks the burst is worth +$1.65, +$0.84, +$3.43; at 15 blocks +$2.25, +$0.87, +$0.32. The long hold's
+worst window is the better one and its mean is higher, at the price of a fatter tail (6-10% of fills below −40%
+against 0-3%). The gate is worth about $1.20 a burst on every window; the hold is worth the difference between a
+regime where the crowd comes in 1.5 s and one where it comes in 30 s, and the last two windows say 30 s.
