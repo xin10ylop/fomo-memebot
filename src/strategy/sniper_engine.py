@@ -1907,18 +1907,19 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             gk = {"gate": gate, "open_by": open_by} if gate is not None else {}   # an older send step (no gate=) still works when the gate is off
             shots = SEND_BURST(txs, at, "buy", keys=keys, **gk) if keys else SEND_BURST(txs, at, "buy", **gk)
         else:
-            shots = []; opened = gate is None
+            shots = []; opened = gate is None; shut = False
             for i, tx in enumerate(txs):
                 while mono() < at[i] - 0.004:
                     time.sleep(0.0005)
                 while mono() < at[i]:
                     pass
+                if not opened and not shut:                              # dry run: the sender's rule exactly (deploy/send_step.py): a shot is skipped until the
+                    opened = bool(gate())                                # gate opens; if it is still shut at the shot scheduled at or after open_by, no later shot is sent
+                    if opened:
+                        decision["gate_opened_at_shot"] = i
+                    elif at[i] >= open_by:
+                        shut = True
                 if not opened:
-                    opened = gate()
-                    if not opened:
-                        shots.append((None, None)); continue            # dry run: the same rule as the sender's (a shot is skipped until the gate opens; none after open_by)
-                    decision["gate_opened_at_shot"] = i
-                if not opened and open_by is not None and at[i] > open_by:
                     shots.append((None, None)); continue
                 shots.append((submit(tx, f"buy#{i}"), None))
         if gate is not None:
