@@ -1,0 +1,19 @@
+=== all: 189 launches, $15 stake, before gas
+  first    hold   15 blocks:   +7.2% med   -2.1% win 44% dead  2%
+  first    hold   30 blocks:   +6.1% med   -4.2% win 43% dead  4%
+  first    hold   60 blocks:   +8.9% med   -3.1% win 44% dead  5%
+  first    hold  150 blocks:  +10.5% med   -1.6% win 48% dead  7%
+  first    hold  300 blocks:   +8.7% med   -4.6% win 43% dead 16%
+  first    hold  600 blocks:   +9.6% med   -5.6% win 42% dead 26%
+  first    tp +50% else 600:    +4.8% med   +9.8% win 53% dead 17%
+  first    stop -20% else 600:  +13.5% med   -7.5% win 41% dead  2%
+  behind1  hold   15 blocks:   +1.7% med   -7.5% win 32% dead  2%
+  behind1  hold   30 blocks:   +0.8% med   -7.6% win 35% dead  4%
+  behind1  hold   60 blocks:   +3.3% med   -7.3% win 35% dead  5%
+  behind1  hold  150 blocks:   +4.8% med   -5.8% win 41% dead  8%
+  behind1  hold  300 blocks:   +3.3% med   -7.2% win 39% dead 16%
+  behind1  hold  600 blocks:   +4.2% med   -8.8% win 40% dead 28%
+  behind1  tp +50% else 600:    +1.4% med   +0.8% win 51% dead 19%
+  behind1  stop -20% else 600:   +8.7% med   -9.5% win 38% dead  1%
++ echo OOS_DONE
+OOS_DONE
