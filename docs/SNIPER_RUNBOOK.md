@@ -638,3 +638,13 @@ for this box and `SEAT=E1 FRAC=0.10` is the plan while `flow` shows `out1_share_
 (section 23.11: hold 5 with the take-profit as the engine runs it, or `HOLD_S=7 TAKE_PROFIT=0` for +13.1% a trade at a
 17% tail); if fewer than twenty do, stay at E2. The cost of the test is about $2 a launch in gas and surcharge, $60 in all.
 
+## 5j. The reconciliation and the race readout (Sep 23)
+
+Before any restart, and after any run, two readouts say whether the seat pays as executed, not as modelled:
+
+    python3 src/analysis/live_vs_table.py            # every real fill against the tables' model for the same launch (chain only, public RPC)
+    sudo python3 src/analysis/race_readout.py        # on the box: per burst, which shot filled, our tx index, who was ahead (all rotated logs)
+
+`live_vs_table` must show `execution/fees/model +0.0%` on every line (the engine is exact); the money is in the `seat`
+column. `race_readout`: fill shot k > 1 means the burst straddled the tick; k = 1 means the whole burst was late. Section
+24.28 of the report: the seat we get is the one the fast bot leaves, worth −1.5% first and −2% after gas at $15.

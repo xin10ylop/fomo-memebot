@@ -31,6 +31,7 @@ Everything below was computed from data collected in this session; scripts are i
 25. **The burst filled six and five times at $15 and the wallet, not the stake, was the bet (section 24.24).** The 3% guard cannot see a $15 fill's own impact, so every shot after the first also fills until the wallet cannot fund one more; one launch at −56% on the whole wallet cost $42 of the night's $54. Engine 5.93 sizes every buy to the wallet less a gas reserve so the sequencer itself drops a second fill, makes `STAKE_MAX` the wallet's ceiling, and starts the hold clock at the fill (the sells had landed 31–36 blocks after the buy instead of 15). Nine live fills so far, four wins, a mean near +1%: too few to judge the seat's +16% either way.
 26. **The BuyOnce relay makes the bet a setting again (section 24.25).** A 20-line contract owned by the wallet buys at most once per curve and forwards the tokens to the wallet; the curve accepts contract buyers (checked by simulation), the relay's logic was exercised on a live curve's state before deployment, and engine 5.94 routes every shot through it. `STAKE_MIN`/`STAKE_MAX` are the bet, the wallet may hold any amount.
 27. **Shooters (section 24.26).** One wallet's consecutive nonces on parallel sockets are refused as "nonce too high" when the sequencer is under load (29 of 35 shots on Sep 19); engine 6.0 fires every shot from its own gas-only shooter wallet and the third relay buys with the stake it holds, once per curve, before the seat's deadline. No shot depends on another, and the exit no longer depends on how many landed.
+29. **Why live does not pay: the seat we get is not the seat the tables price (section 24.28).** Every real fill of Sep 17-20 re-run through the tables' own model for the same launch: the model reproduces the wallet to the decimal on all 34 single fills, so the engine is right and none of the fixed bugs was the cause. The tables assume we are first on every launch. Live: first only when nobody faster wants the launch (26 of 38 fills, worth −1.5% even when first), behind one bot on the launches that pay (12 fills, +17.7% if first, +7.4% got; 13 more bursts on its launches filled nothing at all). Plus 2.3% gas a burst at $15. As executed: about −2% a trade. The bot straddles the second's tick finer than our 3 ms grid and picks 13% of launches whose first seat is +19% with 92% winners; nothing in the calldata says which. Following it one block later is −10%. Not a code fix.
 28. **The seat still pays, less (section 24.27).** The tables' unchanged script on the last 24 hours: 141 qualifying launches, front seat +9.3% mean, 51% winners, +10.5% in the evening half and +5.6% in the small hours; behind the crowd −5.9%. The engine's two readings of −8.5% and −3.9% the same day were its own errors (the wrong column, then a block-offset clock), fixed in 6.05 and 6.06. Live: seven clean trades at −0.8%, in the weak hours, within noise of the script.
 12. **Round 6 found the treasure's real owner and measured its seat: the first-block sniper.** The 185 sniper-bot wallets that pay the creators are not all losers. Reconstructing the dollar P&L of the fifteen busiest from their transfers, curve trades and pool swaps: the bots that buy 0.3–3 seconds after launch and sell 3–21 seconds later are net positive (the fastest: +$30.8k on $107k of turnover in six hours, +28.7% per trade, 175 launches, nothing left unsold); every bot that holds minutes or hours loses (−44% to −94%). Simulating that seat on every launch of the window with launch-time filters (creator's first launch of the day, ETH-quoted, stake min(3% of supply, $300), sell 7 s later into whoever bought next, exact curve exits, 1% fees each way) gives +27% on $97k in the fitting hours and +32% on $98k in the holdout hours, per-launch mean +27%/+33% with confidence intervals of +20% to +41%, median −2%, 46–48% of launches positive, worst case one stake. That is $26k and $31k of profit per three hours on a working capital of a few thousand dollars, and it reproduces the fastest real bot's holdout result (+31%). The sensitivity analysis says what it is: paying 10% more than first-in-line still earns +18–23%, paying 25% more earns +6–10%, paying 50% more or landing half a second late loses. It is a latency race for the first block after creation, on a chain with 100 ms blocks, sponsored gas and a first-come sequencer; the winner takes +30% a trade several hundred times a day and everyone behind them pays. Out of sample on Sep 2 (a lower-flow day) the same untouched rule made +0.4% in the first three hours and +15% in the next three. Three further windows across the fee cycle (section 14.2) then showed the seat is a peak-flow phenomenon: −13% in Pons V2's second week (Aug 12), flat at the trough (Aug 20) and on the ramp (Aug 27), positive only on the two peak days. It is not a structural edge. Section 14 has the tables and a live shadow tester that scores every new launch against the rule without capital.
 
@@ -2882,3 +2883,61 @@ the seat keeps paying what it paid; at $250 it would have been $5,400 for the ev
 figure, with the position risk that stake carries. The daily check is the script on the last 24 hours (`e1_multi.py 12 0`
 and `12 12`, then `e1_agg.py`), which the runbook now carries; the engine's own score line is the same measure from
 the feed and should agree with it from 6.06 on.
+
+### 24.28 The seat we get against the seat the tables price (Sep 23: every fill reconciled on the chain)
+
+Three days after the engine was stopped, the question was put the other way round: not "what did the engine do wrong"
+but "what would the tables have said for the launches we really traded, at our stake, at the position we really got".
+`src/analysis/live_vs_table.py` pulls every Buy and Sell event whose counterparty is the wallet or the relay (135
+events, 43 curves, Sep 17 to 20), rebuilds each launch's tape from the chain, removes our own events from it, and runs
+`e1_multi.py`'s `score()` for the same launch four ways: first in the seat block (the tables' column), behind every buy
+of the block, at the position we really landed with a 15-block hold, and at that position sold in the block our sell
+really landed in. `data/derived/live_vs_table/sep17_20_fills.txt` has every line.
+
+**The engine is exact.** On all 34 single-fill trades the last of those four equals the wallet's realised return to
+the decimal (`execution/fees/model +0.0%` on every line): every fill landed in the seat second and paid tier + 6.18%,
+every sell returned what the curve model says. The multi-fill, approve-nonce, nonce-too-high, bankroll, start-check
+and clock bugs of 24.24-24.26 were real and are fixed, and none of them was the reason live pays less than the tables.
+
+**Where the tables' +9.3% goes:**
+
+| fills, Sep 17-20 | n | first in the block | at our position, 15 blocks | actual |
+|---|---|---|---|---|
+| nobody ahead of us | 22 | −1.5% | −1.5% | −3.9% (27% win) |
+| somebody ahead of us | 12 | **+17.7%** | +5.8% | +7.4% (67% win) |
+| all | 34 | +5.2% | +1.0% | +0.1% |
+
+The −3.9% against −1.5% is the hold: the first trades held 24-31 blocks (the approve at the spent nonce, 24.24). Gas is
+not in the tables: a 35-shot burst is 34 reverts at 27k gas plus the fill, the approve and the sell, $0.32-0.38 at
+0.054 gwei, **2.3% of a $15 stake** on every burst, filled or not. As executed: +0.1% − 2.3% ≈ −2% a trade. The nine
+multi-fill launches of Sep 18 (24.24) are a further −$24 and are structurally impossible since the relay.
+
+**Why.** The race readout (`src/analysis/race_readout.py`, the engine's own timing on all 53 bursts,
+`data/derived/live_vs_table/race_readout_sep18_20.txt`): on 32 of 37 fills the burst straddled the second's tick
+(shot k filled with shots 1..k−1 reverted in the tax second, so the tick fell inside the 3 ms before shot k), and
+when nobody faster wanted the launch we took tx index 1, the block's first user slot, 20 times of 26. On the launches
+that pay, one wallet, `0x6c56103c…`, sits at index 1: ahead of us on 7 of the 12 crowd fills although we had
+straddled the tick (it wins inside our 3 ms step), and first on 10 of the 13 no-fill bursts whose crowd moved the price
+past the 25% guard before any shot of ours was processed (those 13 launches model +15%, +20%, +127%, +36%, +24%, +24%,
++13%, +13%, +9%, +9%, −49%, +6%, +6% for the first seat). On the other 5 crowd fills the whole burst left after the tick
+(the first shot filled, at index 6 to 72): the seat blocks that matter are the congested ones, and congestion is what
+makes the aim late. The sequencer is in the box's own region (3.141.111.43, warm RTT 1.3 ms); this is not a distance
+problem.
+
+The bot selects. On the tables' 141 launches it is in the seat block 18 times (13%); the first seat on its launches is
+**+19.4% with 92% winners**, on the launches it skips +12% with a crowd and −8.5% without. Its launches look like the
+others in the calldata (tier 2.7% vs 2.6%, bundle 0.77 vs 0.74 ETH, four named wallets vs nine, no repeat creator,
+never itself a named wallet); the only thing that separates them is the crowd that arrives with it (0.40 ETH in the
+seat block vs 0.17), which is the outcome, not a signal. Following it one block later, once its buy is visible, is
+−10% to −15% on its launches by the tables (`E1_late1`), and the second-second seat (E2) −9% to −10%. Being second
+behind it in the same block is +7% before gas, and a race for second place.
+
+**What the tables' number is.** +9.3% is the mean over 141 launches of a seat that one bot takes when it is worth
++19% and leaves when it is worth −1.5%. We get the seat it leaves. That is the winner's curse of a latency race, and
+it is not a code fix: a finer grid (1 ms, 105 shots) triples the gas to about 7% at $15, and the bot can go finer.
+
+**What the process got wrong.** Each live shortfall was met with a mechanism bug, real, fixed, redeployed, and the
+next batch expected to show the tables' number; the fill-by-fill reconciliation, which shows in one run that the
+mechanism was exact by Sep 18 and the gap is who gets the seat, was never done until now. Seven trades were called
+noise while 34 were on the chain. The tables assumed we are first on every launch and carried no gas; both were
+assumptions of this report, not of the chain.

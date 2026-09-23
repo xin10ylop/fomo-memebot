@@ -1,0 +1,80 @@
+src/analysis/race_readout.py on the Ohio box, Sep 23 (all rotated logs: 60000 events, Sep 18 15:14 - Sep 20 11:10 UTC)
+flip-1st shot carries the feed's delivery lag (+186..+439 ms on every burst) and cannot say late or early; the fill shot number can:
+k > 1 = shots 1..k-1 reverted in the tax second and the tick fell inside the 3 ms before shot k (straddled); k = 1 = the whole burst left after the tick (late).
+
+when (UTC)      curve      flip-1st shot fill shot tx idx incl/rej/n ahead  actual if first
+Sep 18 15:26:09 0xf3a9f809             -         4      2  12/ 0/12      1     -2%      -2%
+Sep 18 15:50:34 0x60dfc9ac             -      none      -   9/ 0/9       -       -        -
+Sep 18 15:51:59 0xbf9fbfa4             -      none      -   9/ 0/9       -       -        -
+Sep 18 16:23:02 0x9c62e88e             -      none      -  21/ 0/21      -       -        -
+Sep 18 16:23:21 0xa4c30439             -      none      -  21/ 0/21      -       -        -
+Sep 18 16:42:35 0x511f1f88       +307 ms        18      2  50/ 0/50      1    +24%     +16%
+Sep 18 16:56:14 0x482b6bcd       +400 ms        28      1  50/ 0/50      0     -3%      +8%
+Sep 18 17:13:10 0xddd5df06       +356 ms      none      -  38/12/50      -       -        -
+Sep 18 17:16:34 0xa92fdeb8       +409 ms      none      -  50/ 0/50      -       -        -
+Sep 18 17:34:06 0x46ce738f       +321 ms      none      -  50/ 0/50      -       -        -
+Sep 18 17:51:00 0xaddd8312       +222 ms         1      6  35/ 0/35      1     +8%      +1%
+Sep 18 18:15:25 0x429eca1b       +337 ms        15      1  18/ 1/35      0    -14%      -9%
+Sep 18 18:36:22 0xe7bc27c2       +315 ms        18      1  21/ 1/35      0    +48%     +90%
+Sep 18 18:44:10 0xf6bf73ea       +265 ms         6      5  35/ 0/35      2    +22%     +39%
+Sep 18 19:36:43 0x8a5732e2       +200 ms      none      -  35/ 0/35      -       -        -
+Sep 18 20:12:37 0xd40f1361       +340 ms        18      1  35/ 0/35      0     -6%     +12%
+Sep 18 21:10:39 0x8899d130       +308 ms      none      -  35/ 0/35      -       -        -
+Sep 18 21:11:34 0xd2c7ae65       +280 ms      none      -  22/13/35      -       -        -
+Sep 18 21:19:17 0x774ea85a       +341 ms      none      -  35/ 0/35      -       -        -
+Sep 18 21:35:01 0x40cdca89       +267 ms      none      -  35/ 0/35      -       -        -
+Sep 18 21:47:55 0x3cd13561       +315 ms      none      -  35/ 0/35      -       -        -
+Sep 18 21:52:34 0x0fa7e6dd       +248 ms         1      4   6/ 7/35      0    -12%     -12%
+Sep 18 21:57:54 0x02d962e4       +418 ms        22      1  26/ 1/35      0    -55%     -12%
+Sep 19 02:27:29 0x12b78114       +371 ms        27      3  35/ 0/35      0     +0%      +3%
+Sep 19 03:19:24 0x2bcd5d8c       +439 ms      none      -  22/13/35      -       -        -
+Sep 19 06:44:29 0x267f1314      +1099 ms         1     13  35/ 0/35      1    -15%      -9%
+Sep 19 07:14:57 0x73340ab8       +316 ms         7      1  35/ 0/35      0     +3%      +3%
+Sep 19 08:01:30 0x9fec8af5       +257 ms        28      1  35/ 0/35      0    +10%     +10%
+Sep 19 08:53:02 0xf08e4638       +350 ms         1     72   6/29/35      3     -9%     +23%
+Sep 19 10:44:58 0xe59034ef       +264 ms        28      1  35/ 0/35      0     -8%      -8%
+Sep 19 10:56:00 0x85ec0b6f       +261 ms        31      2  35/ 0/35      0     +5%      +5%
+Sep 19 11:25:48 0xdcd71241       +273 ms        35      2  35/ 0/35      1    +42%     +59%
+Sep 19 11:39:57 0x91f19055       +271 ms      none      -  35/ 0/35      -       -        -
+Sep 19 11:47:18 0xf61127ee       +281 ms        30      1  35/ 0/35      0    -12%     -12%
+Sep 19 11:59:14 0x1ab4ca11       +215 ms        16      1  35/ 0/35      0    -12%     -12%
+Sep 19 12:28:44 0xc98afc99       +276 ms         8      3  35/ 0/35      0    -12%     -12%
+Sep 19 12:52:20 0x83c4d8ba       +268 ms         4      1  35/ 0/35      0    -10%     -10%
+Sep 19 13:07:56 0xf8ff6744       +362 ms         1      6  35/ 0/35      1    +22%     +36%
+Sep 19 14:46:40 0x83dfffd7       +186 ms         1      1  35/ 0/35      0     -6%      -6%
+Sep 19 14:49:40 0x303a30f4       +236 ms        15      1  35/ 0/35      0    -11%     -11%
+Sep 19 15:27:11 0x0169d4e0       +210 ms         9      1  35/ 0/35      0    -10%     -10%
+Sep 19 16:44:30 0xa84bb9de       +219 ms         6      1  35/ 0/35      0    +15%     +15%
+Sep 19 16:59:31 0xcd311f04       +213 ms        12      1  35/ 0/35      0    -10%     -10%
+Sep 19 17:14:25 0xc71634a8       +237 ms         6      1  35/ 0/35      0    +29%     +51%
+Sep 19 17:22:31 0x280cca14       +344 ms        18      5  35/ 0/35      1     +0%     +12%
+Sep 19 17:36:59 0xef59cbae       +239 ms        16      1  35/ 0/35      0     -9%      -9%
+Sep 19 18:01:43 0x271356a6       +239 ms        13      9  35/ 0/35      1    -16%     -12%
+Sep 19 18:59:32 0x6d42bf0c       +204 ms         8      1  35/ 0/35      0     -9%      -9%
+Sep 19 19:56:29 0x33a36483       +237 ms        13      3  35/ 0/35      2    +10%     +34%
+Sep 19 19:57:18 0x848dffb8       +211 ms         1      9  23/12/35      2     +5%     +15%
+Sep 19 20:01:33 0x41c6395c       +210 ms        11      2  35/ 0/35      0    -10%     -10%
+Sep 19 20:27:27 0x59d51e2d       +220 ms        15      1  35/ 0/35      0    -12%     -12%
+Sep 19 20:44:57 0xb996f3b8       +214 ms        16      1  35/ 0/35      0     -8%      -8%
+
+bursts 53, filled 38, no fill 15 (all shots reverted or refused)
+fill shot numbers when somebody was ahead: [4, 18, 1, 6, 1, 1, 35, 1, 18, 13, 13, 1]; when nobody: [28, 15, 18, 18, 1, 22, 27, 7, 28, 28, 31, 30, 16, 8, 4, 1, 15, 9, 6, 12, 6, 16, 8, 11, 15, 16]
+tx index of our fill when somebody was ahead: [2, 2, 6, 5, 13, 72, 2, 6, 5, 9, 3, 9] | nobody ahead: [1, 1, 1, 1, 4, 1, 3, 1, 1, 1, 2, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1]
+sender RTT: sequencer.mainnet.chain.robinhood.com (3.141.111.43, AWS us-east-2 like the box) warm 1.3 ms; alchemy 18.5 ms
+
+the 15 no-fill bursts in the tables (seat-block buyers, ETH, first buyer, model first / behind):
+  0x60dfc9ac  8 buyers 0.337 ETH  0x6c56103c first   +15% / -11%
+  0xbf9fbfa4  5 buyers 0.260 ETH  0x6c56103c first   +20% /  -1%
+  0x9c62e88e 15 buyers 1.109 ETH  0x6c56103c first  +127% / +18%
+  0xa4c30439  5 buyers 0.315 ETH  0xe268a3a4 first   +36% /  +8%
+  0xddd5df06  9 buyers 0.330 ETH  0x6c56103c first   +24% /  -5%
+  0xa92fdeb8  4 buyers 0.422 ETH  0x1ed15333 first   +24% /  -9%
+  0x46ce738f  9 buyers 0.525 ETH  0x6d79eca8 first   +13% / -22%
+  0x8a5732e2  2 buyers 0.247 ETH  0x6c56103c first   +13% /  -1%
+  0x8899d130  2 buyers 0.247 ETH  0x6c56103c first    +9% / -10%
+  0xd2c7ae65  7 buyers 0.550 ETH  0x10ad8a51 first    +9% / -27%
+  0x774ea85a  2 buyers 0.247 ETH  0x6c56103c first   -49% / -58%
+  0x40cdca89  2 buyers 0.247 ETH  0x6c56103c first    +6% / -12%
+  0x3cd13561  2 buyers 0.247 ETH  0x6c56103c first    +6% / -12%
+  0x91f19055  1 buyer  0.002 ETH  0x147ca3d8 first   -12% / -12%
+  0x2bcd5d8c  1 buyer  0.002 ETH  0x147ca3d8 first   -10% / -10%
