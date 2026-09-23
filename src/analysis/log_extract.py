@@ -6,7 +6,7 @@ Keeps the events that describe every decision and every send (start, creation, g
 answers, landings, scores, trades, alarms, errors, feed events, shooter/relay top-ups) and drops nothing else of substance;
 any field whose name mentions key, priv or secret is redacted before writing, though the engine never logs one. Writes
 gzip-compressed JSON lines. Commit the file and push, or paste the printed summary."""
-import sys, json, gzip, os, collections, datetime
+import sys, json, gzip, os, collections, datetime, glob
 src = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].endswith(".gz") else "/var/log/sniper/engine.jsonl"
 dst = next((a for a in sys.argv[1:] if a.endswith(".gz")), "data/live/engine_extract.jsonl.gz")
 KEEP = {"start", "creation", "gate_check", "eligible_not_traded", "skip", "trade_decision", "burst_shots", "sent_burst", "send_answers", "burst_landing", "landing",
@@ -20,8 +20,13 @@ def scrub(o):
     return o
 n = collections.Counter(); kept = 0; first = last = None
 os.makedirs(os.path.dirname(dst) or ".", exist_ok=True)
-with open(src) as f, gzip.open(dst, "wt") as g:
-    for line in f:
+files = sorted((f for f in glob.glob(src + "*") if not f.endswith(".state.json")), key=os.path.getmtime)   # rotated copies too (.1, .2.gz, ...)
+def lines():
+    for f in files:
+        with (gzip.open if f.endswith(".gz") else open)(f, "rt", errors="replace") as fh:
+            yield from fh
+with gzip.open(dst, "wt") as g:
+    for line in lines():
         try: ev = json.loads(line)
         except ValueError: continue
         n[ev.get("ev")] += 1
