@@ -54,6 +54,7 @@ WALLET = os.environ.get("WALLET", "0x0000000000000000000000000000000000000000").
 RELAY = os.environ.get("RELAY", "").strip().lower()                       # 5.94: the BuyOnce relay (contracts/BuyOnce.sol, deploy/relay_deploy.py): every shot goes through it and it
 if RELAY and not (RELAY.startswith("0x") and len(RELAY) == 42):           # buys at most once per curve, so the stake is a setting again and the wallet may hold many stakes
     raise SystemExit(f"RELAY must be a 0x address, got {RELAY!r}")
+OUR_ADDRS = {a for a in (WALLET, RELAY) if a and a != "0x" + "0" * 40}   # 6.1: our wallet and relay; the shooters send to the relay, so a shot of ours is never counted as another sniper's
 RELAY_BUY_SEL = "1622dbe4"; RELAY_GAS_EXTRA = 60_000                       # buy(address curve, uint256 amountIn, uint256 minOut, uint256 deadline) payable; the relay's own gas on top of the curve's
 RELAY_TOO_LATE = "0x388b0173"                                              # TooLate(blockTime, deadline): the relay refuses a block past the seat's second (5.96; a sequencer stall put a burst a second late, Sep 19)
 RELAY_DEADLINE = os.environ.get("RELAY_DEADLINE", "1") == "1"              # pass the seat's second as the deadline (0 = never; only for a test)
@@ -142,6 +143,12 @@ try:
     PROVIDER_LAG_MS = float(os.environ.get("PROVIDER_LAG_MS", "0") or 0)   # the measured lag of the provider path behind the sequencer: added to the paper landing of seats taken on it
 except ValueError:
     PROVIDER_LAG_MS = 0.0; E0_ALLOW_PROVIDER = False                   # a placeholder left in the env file: the seat stays off the provider path until a number is set   # after the sequencer feed refuses us, run on the provider this long, then try the feed again (24.17: the fallback was a one-way door)   # the creation-second seat counts the bundle inside this many blocks of the creation; 3 = the honest table's "complete by 0.3 s" (24.15), the 5.41 paper run lost on later ones   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
+
+
+ATTACK_MIN = int(os.environ.get("ATTACK_MIN", "0"))                       # 6.1: fire only when at least this many other snipers (distinct relay targets plus direct senders) are already firing at the
+HOLD_BLOCKS = int(os.environ.get("HOLD_BLOCKS", "0"))                     # curve when the burst is built (0 = off). Report 24.30: the seat block's crowd shows in the creation second's blocks; launches with 0-1
+KILL_USD = float(os.environ.get("KILL_USD", "0"))                         # attackers lost at every hold, 2+ paid +25% at second place over 300 blocks (Sep 22-23). HOLD_BLOCKS: hold this many feed blocks after the
+HOLD_EFF = (HOLD_BLOCKS / 9.9) if HOLD_BLOCKS else HOLD                   # fill instead of HOLD_S seconds (0 = seconds); the crowd arrives over 30 s now. KILL_USD: below this capital no launch is taken (0 = off).
 
 
 def tax_bps_of(sel, words):
@@ -810,10 +817,36 @@ def tune_margin(receipt, seat_ts):
         log({"ev": "error", "stage": "tune_margin", "err": str(e)[:200]})
 
 
+GAS_SHOT_BEFORE, GAS_SHOT_FILL, GAS_SHOT_AFTER = 88_594, 137_693, 27_021   # 6.1: measured on the Sep 19 receipts (audit): a shot in the tax second (the curve reverts on minOut), the
+                                                                             # filling shot through the relay, a shot after the fill (the relay refuses it, AlreadyBought)
+
+
+def burst_gas_units(n=None):
+    """gas used by a whole round trip: the burst's shots (about a third of them before the tick, measured 12 of 35), the approve and the
+    sell; the plain buy when there is no burst. The old 230k assumed one buy: 8.4x low with the burst on (about 1.94M, $0.33 at $15)."""
+    n = BURST_N if n is None else n
+    if n > 1:
+        before = round(n * 0.34)
+        return before * GAS_SHOT_BEFORE + GAS_SHOT_FILL + max(0, n - 1 - before) * GAS_SHOT_AFTER + GAS_EST_APPROVE + GAS_EST_SELL
+    return GAS_EST_BUY + GAS_EST_APPROVE + GAS_EST_SELL
+
+
+def still_holding(pos, t_buy):
+    """6.1: the hold is HOLD_BLOCKS feed blocks after the fill when set (capped at the equivalent seconds plus three, in case the feed
+    stalls), else HOLD_S seconds"""
+    if HOLD_BLOCKS and pos.get("blocks_at_fill") is not None:
+        return state["blocks"] < pos["blocks_at_fill"] + HOLD_BLOCKS and mono() - t_buy < HOLD_EFF + 3.0
+    return mono() - t_buy < HOLD
+
+
+def hold_cap():
+    return HOLD_EFF + 3.0 if HOLD_BLOCKS else HOLD
+
+
 def gas_cost_usd():
     """the round trip's cost at the price we send with (measured gas used, not the limits)"""
     gp = state["gas_price"]
-    return (GAS_EST_BUY + GAS_EST_APPROVE + GAS_EST_SELL) * gp / 1e18 * state["eth_usd"] if gp else None
+    return burst_gas_units() * gp / 1e18 * state["eth_usd"] if gp else None
 
 
 def new_day_check():
@@ -868,7 +901,7 @@ def watch_curve(curve, tk0, feed_ts, named, creator, blk0=None, tax_bps=None):
     """register the curve for incremental folding and build its state from what the feed has shown so far"""
     net0 = X0 * tk0 / (Y0 - tk0); w = {"X": X0 + net0, "Y": Y0 - tk0, "cb": bytes.fromhex(curve[2:]), "ts0": feed_ts, "blk0": blk0, "named": named, "creator": creator, "curve": curve,
                                        "tax_bps": tax_bps, "tax": 0.01 + (tax_bps or 0) / 10000.0,             # the buyers' tax on this token: the 1% protocol fee plus the token's own (calldata word 13)
-                                       "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "out1_chain": 0, "out2_chain": 0, "tb": None, "buys": 0, "sells": 0, "since": mono(), "dump": None, "wallets": set(), "rivals": []}
+                                       "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "out1_chain": 0, "out2_chain": 0, "tb": None, "buys": 0, "sells": 0, "since": mono(), "dump": None, "wallets": set(), "rivals": [], "attack_targets": set(), "attack_senders": set()}
     for b in curve_buys(curve, feed_ts):
         ts_, snd, val, seen = b[:4]; blk = b[4] if len(b) > 4 else None
         buyers = named_in(b[7], named) if len(b) > 7 else None                 # a helper call: its recipients are the bundle
@@ -887,6 +920,26 @@ def named_in(data, named):
     if not data or not named:
         return set()
     return {a for a in named if bytes.fromhex(a[2:]) in data}
+
+
+def note_attack(w, to_hex, t, data, cv):
+    """6.1: another sniper's shot at a watched curve, seen on the feed before the seat: a call to the curve itself from a wallet that is
+    not the launch's own, or any call that names the curve (a relay like ours, whatever its selector or value). Counted by distinct
+    relay targets plus direct senders, so a fleet of shooter wallets behind one relay counts once (Sep 18 14:17: 42 shots from 30
+    wallets were three relays). Our own relay and wallet do not count, and neither does the bundle's helper (it names named wallets)."""
+    if to_hex in OUR_ADDRS:
+        return
+    if to_hex == cv:
+        snd = sender_of(t)
+        if snd and snd not in w["named"] and snd != w["creator"] and snd not in OUR_ADDRS:
+            w["attack_senders"].add(snd)
+    elif not named_in(data, w["named"]):
+        w["attack_targets"].add(to_hex)
+
+
+def attackers(w):
+    """how many other snipers are firing at this curve so far: distinct relays plus distinct direct senders"""
+    return len(w.get("attack_targets", ())) + len(w.get("attack_senders", ()))
 
 
 def fold_buy(w, ts_, snd, val, blk=None, to=None, sel=None, buyers=None):
@@ -963,7 +1016,7 @@ def gas_usd():
     (four Sep 11 receipts: $0.021-0.054 a transaction). The scorer used to charge a flat $1.00, which put every paper score
     4 points low at $25 and 10 points low at $10 and fed that bias into the switch and the readouts (found Sep 17)."""
     try:
-        return min(1.0, max(0.05, (state.get("base_fee") or 2e8) * 230_000 / 1e18 * state["eth_usd"]))
+        return min(5.0, max(0.05, (state.get("base_fee") or 2e8) * burst_gas_units() / 1e18 * state["eth_usd"]))
     except Exception:
         return 0.15
 
@@ -1407,6 +1460,18 @@ def refresh_wallet(why=""):
         log({"ev": "error", "stage": "refresh_wallet", "why": why, "err": str(e)[:160]})
 
 
+def kill_gate():
+    """6.1: the dollar line set before the start: below it no launch is taken and one alarm is logged (a change of KILL_USD or a
+    top-up clears it)"""
+    b = state.get("bankroll")
+    if KILL_USD > 0 and b is not None and b < KILL_USD:
+        if not state.get("killed"):
+            state["killed"] = True; log({"ev": "alarm", "what": f"kill line: capital ${b:.2f} (wallet plus relay) is below ${KILL_USD:.2f}; no launch is taken until it is above"})
+        return f"kill line: capital ${b:.2f} < ${KILL_USD:.2f}"
+    state["killed"] = False
+    return None
+
+
 def bankroll_usd(wallet_eth):
     """live: the wallet's ETH, plus the stake the relay holds when the shooters fire (6.01: the wallet alone read $8 with $18 in the relay and the
     'bankroll below the minimum stake' gate refused the only qualifying launch of the hour, Sep 19 10:xx)"""
@@ -1736,6 +1801,9 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             gates.append(f"resolved in {resolve_ms} ms > {resolve_lim}")
         if state["bankroll"] < STAKE_MIN:
             gates.append("bankroll below the minimum stake")
+        k = kill_gate()
+        if k:
+            gates.append(k)
         if not hours_ok():
             gates.append(f"outside trading hours {TRADE_HOURS} UTC (hours the tables never measured)")
         if MIN_RULE_PASSING_1H > 0 and sum(1 for t in state["rule_passing"] if time.time() - t < 3600) < MIN_RULE_PASSING_1H:
@@ -1769,7 +1837,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         if gc_usd is not None and gc_usd > GAS_MAX_SHARE * stake_usd:
             gates.append(f"gas ${gc_usd:.2f} per round trip > {100 * GAS_MAX_SHARE:.0f}% of stake")
         if not gates:
-            state["busy_until"] = mono() + HOLD + 3; nonce = state["nonce"]; state["nonce"] += (2 if SHOOTERS else BURST_N + 2); gas_price = state["gas_price"]   # the shots (unless the shooters fire them), the approve, the sell
+            state["busy_until"] = mono() + HOLD_EFF + 3; nonce = state["nonce"]; state["nonce"] += (2 if SHOOTERS else BURST_N + 2); gas_price = state["gas_price"]   # the shots (unless the shooters fire them), the approve, the sell
             shooters_now = list(ready[:BURST_N]) if SHOOTERS else []
     if gates:
         threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
@@ -1779,6 +1847,11 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         while mono() < t_build:                                           # creation second and refused a fill at index 1 (0x46ce738f, Sep 18 17:2x).
             time.sleep(0.002)
         decision["build_lead_ms"] = round((burst_at - mono()) * 1000, 1)
+    n_att = attackers(w); decision["attackers"] = n_att; decision["attack_targets"] = len(w["attack_targets"])   # 6.1: the crowd before the tick, as the feed showed it by now
+    if ATTACK_MIN > 0 and n_att < ATTACK_MIN:
+        release_reservation(); gates = [f"attackers {n_att} < {ATTACK_MIN} when the burst was built (the seat block's crowd shows in the creation second; 24.30)"]
+        threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
+        log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
     X, Y = w["X"], w["Y"]; stake_eth = stake_usd / state["eth_usd"]
     tk, net, gross, fee = size_buy(X, Y, stake_eth, SEAT)
     amount_in = int(gross * 1e18); min_out = int(tk * (1 - (BURST_SLIP if BURST_N > 1 else SLIP)) * 1e18)
@@ -1911,10 +1984,10 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         if tb is not None:
             token = "0x" + tb.hex()                                       # learn_token already found it
         else:
-            r = resolve_rpc(creator, deadline=HOLD - 1, lookback=120); token = r[0] if r else curve
+            r = resolve_rpc(creator, deadline=max(1.0, HOLD_EFF - 1), lookback=120); token = r[0] if r else curve
             if not r:
                 log({"ev": "alarm", "what": "token address unknown at the exit: approving on the curve will revert; close_position re-resolves on every retry", "curve": curve})
-    pos = {"curve": curve, "token": token, "creator": creator, "tokens": tokens, "nonce": last_landed if shots is not None else nonce, "t_buy": t_buy, "buy_hash": h, "approved": False, "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0)}   # approve at +1, sell at +2 after the last shot
+    pos = {"curve": curve, "token": token, "creator": creator, "tokens": tokens, "blocks_at_fill": state["blocks"], "nonce": last_landed if shots is not None else nonce, "t_buy": t_buy, "buy_hash": h, "approved": False, "seat_ts": feed_ts + SEAT_SECONDS.get(SEAT, 0)}   # approve at +1, sell at +2 after the last shot
     state["open"] = pos; save_state()
     cap = (state.get("base_fee") or gas_price or 0) * SELL_GAS_HEADROOM if h else (gas_price or 0)
     pos["approve_hash"] = submit(tx_approve(pos, pos["nonce"] + 1, cap), "approve"); pos["approved"] = True; save_state()   # 5.95: after the LAST shot's nonce (nonce + 1 was the second shot's, already used: the sequencer refused every approve since the burst, and the exit re-sent it a second later, Sep 19)
@@ -1922,12 +1995,12 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         threading.Thread(target=watch_approve, args=(pos,), daemon=True).start()
     why = "hold"
     with cond:
-        while mono() - t_buy < HOLD:
+        while still_holding(pos, t_buy):
             if STOP_SELL_FRAC > 0 and w["dump"] is not None:
                 why = f"dump {100 * w['dump'] / Y0:.1f}% of supply"; break
             if TAKE_PROFIT > 0 and w["X"] / w["Y"] >= p_in * (1 + TAKE_PROFIT):
                 why = f"take-profit: curve price {w['X'] / w['Y'] / p_in:.2f}x our entry"; break
-            cond.wait(min(0.25, max(0.0, HOLD - (mono() - t_buy))))
+            cond.wait(min(0.25, max(0.0, hold_cap() - (mono() - t_buy))))
     close_position(pos, why)
     if SHOOTERS:
         threading.Thread(target=relay_topup, args=("after exit",), daemon=True).start()
@@ -1998,6 +2071,10 @@ def index_message(inner, ts, seen):
             continue
         val = int.from_bytes(value, "big") / 1e18 if value else 0.0; sel = data[:4]; to_hex = "0x" + to.hex()
         try:
+            if watched:                                                              # 6.1: every call that touches a watched curve counts as a sniper's shot (see note_attack)
+                for cv_, w_ in list(watched.items()):
+                    if to_hex == cv_ or w_["cb"] in data:
+                        note_attack(w_, to_hex, t, data, cv_)
             if sel == BUY_SEL:                                                       # direct curve buy
                 snd = sender_of(t)
                 state["buys"][to_hex].append((ts, snd, val, seen, state["blocks"], to_hex, sel.hex()))
@@ -2261,8 +2338,8 @@ async def main():
     load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 6.06, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD,
+    log({"ev": "start", "version": 6.1, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":

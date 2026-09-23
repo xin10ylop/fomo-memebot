@@ -660,3 +660,25 @@ last 24 hours. At $15 the gated seat is $0.20 a burst: not worth the gas.
 
 Addendum (24.30): the candidate that survives the winners' anatomy is the pre-tick gate plus a 150-300-block hold at second
 place (+20-25% a fill on Sep 22-23, in sample). Not before the out-of-sample run on Sep 20-21 and a paper day.
+
+## 5l. Engine 6.1: the gated seat with a long hold, paper first (Sep 23)
+
+Settings (in /etc/sniper/engine.env), all off by default:
+
+    ATTACK_MIN=2        # fire only when two or more other snipers (relays or direct senders) are already firing at the curve when the burst is built
+    HOLD_BLOCKS=300     # hold 300 feed blocks (about 30 s) after the fill instead of HOLD_S seconds
+    KILL_USD=15         # below this capital (wallet + relay) no launch is taken; one alarm
+
+The paper day: unset SEND_MODULE (the engine logs unsigned transactions and sends nothing), set the three above, restart, run a
+day, then on the box:
+
+    sudo python3 src/analysis/paper_day.py --stake 13 --hold 300
+
+It scores every launch the engine would have fired at from the chain at the positions we can get (behind one, behind two,
+behind everybody) held 300 blocks, after gas, and the launches the gate refused. Go: behind one at or above +10% mean over at
+least 40 gated launches with the refused set negative. No-go: anything else; then the seat is closed and this stops.
+
+Live after a go: SEND_MODULE back, STAKE_MIN=STAKE_MAX=13, MAX_LIVE_TRADES=30, KILL_USD=15; every day
+`python3 src/analysis/live_vs_table.py` (the fills against the model) and `sudo python3 src/analysis/paper_day.py --from <yesterday>`
+(the rule against the chain). The burst may be cut to BURST_N=10 with BURST_STEP_MS=10 once section 24.30's position table
+confirms that third place pays the same as second at 300 blocks (it does on Sep 22-23: +19.5% against +26.9%).

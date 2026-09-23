@@ -11,17 +11,23 @@ for r in gated:
     if L is None or L["tier"] is None: continue
     ev = lv.call("eth_getLogs", [{"fromBlock": hex(b0 + 121), "toBlock": hex(b0 + 620), "address": cv, "topics": [[lv.BUY, lv.SELL]]}])
     L["rows"] = sorted(L["rows"] + [lv.row_of(e) for e in ev], key=lambda x: (x["bn"], x["li"])); ts = L["ts"]; T0 = L["T0"]
-    bE1 = next((n for n in range(b0 + 1, b0 + 30) if ts.get(n, 0) == T0 + 1), None)
+    bE1 = next((n for n in range(b0 + 1, b0 + 30) if ts.get(n, 0) == T0 + 1), None); bE2 = next((n for n in range(b0 + 1, b0 + 30) if ts.get(n, 0) == T0 + 2), None)
     if bE1 is None: continue
     nb = sum(1 for x in L["rows"] if x["bn"] == bE1 and x["k"] == "B" and x["who"] not in lv.OURS); row = {"cv": cv, "block_buys": nb}
     for pos, nah in (("first", 0), ("behind1", 1), ("behind2", 2), ("behind3", 3), ("last", 99)):
         if nah not in (0, 99) and nb < nah: continue
         o = model_path(L, 15.0 / E, bE1, nah, HOLDS)
         for h in HOLDS: row[f"{pos}_h{h}"] = o[h]
+    if bE2 is not None:                                                   # the second second: a 0.19% surcharge, no race, one transaction
+        for pos, nah in (("E2first", 0), ("E2last", 99)):
+            o = model_path(L, 15.0 / E, bE2, nah, HOLDS)
+            for h in HOLDS: row[f"{pos}_h{h}"] = o[h]
+        o = model_path(L, 15.0 / E, bE1 + 3, 99, HOLDS)                      # three blocks after the seat block, behind everybody there
+        for h in HOLDS: row[f"E1plus3last_h{h}"] = o[h]
     rows.append(row)
 json.dump(rows, open(sys.argv[1].replace(".json", "_position_hold.json"), "w"), indent=0)
 print(f"{len(rows)} gated launches ({sys.argv[1]}), $15, before gas: mean / win")
 print(f"{'position':9s} " + " ".join(f"{'h%d' % h:>13s}" for h in HOLDS) + "   n")
-for pos in ("first", "behind1", "behind2", "behind3", "last"):
+for pos in ("first", "behind1", "behind2", "behind3", "last", "E1plus3last", "E2first", "E2last"):
     v = [r for r in rows if f"{pos}_h15" in r]
     print(f"{pos:9s} " + " ".join(f"{st.mean(r[f'{pos}_h{h}'] for r in v):+7.1%}/{sum(r[f'{pos}_h{h}']>0 for r in v)/len(v):3.0%}" for h in HOLDS) + f"   {len(v)}")
