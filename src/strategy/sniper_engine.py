@@ -1921,9 +1921,9 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                         shut = True
                 if not opened:
                     shots.append((None, None)); continue
-                shots.append((submit(tx, f"buy#{i}"), None))
+                shots.append((submit(tx, f"buy#{i}"), "dry"))           # dry run: submit() logs the unsigned shot and returns no hash; "dry" marks it as sent, not gated
         if gate is not None:
-            decision["attackers_at_open"] = attackers(w); decision["gated_shots"] = sum(1 for hh, a in shots if hh is None and a is None)
+            decision["attackers_at_open"] = attackers(w); decision["gated_shots"] = sum(1 for hh, a in shots if hh is None and a is None)   # (None, None) = never sent, live or dry
             decision["attack_list"] = sorted(w["attack_targets"])[:6] + sorted(w["attack_senders"])[:4]
             if decision["gated_shots"] == len(shots):                   # the gate never opened: nothing left the box, nothing to pay
                 release_reservation(); state["traded"].pop(curve, None); gates = [f"attackers {decision['attackers_at_open']} < {ATTACK_MIN} by the tick's shot (the gate never opened; no shot sent)"]
