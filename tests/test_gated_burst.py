@@ -58,4 +58,13 @@ E.state["shooter_nonce"] = {a: 5, b: 5, c: 5}
 E.restore_shooter_nonces([a, b, c], [(None, None, None), ("0xhash", None, [("0xhash", "nonce too high")]), ("0xhash2", {"status": "0x0"}, [])])
 check("a gated shot (no hash) keeps its nonce; a refused shot gives one back; a landed shot keeps it", E.state["shooter_nonce"] == {a: 5, b: 4, c: 5})
 check("GATE_LATE_MS and the settings are read", E.GATE_LATE_MS == 0.0 and E.ATTACK_MIN == 2)
+# 6. the dry run with shooters configured: the nonce map is empty (only the live path fills it) and the build must not crash on it
+E.state["shooter_nonce"] = {}
+try:
+    txs = [dict({"to": "0x0"}, nonce=hex(E.state["shooter_nonce"].get(a, 0))) for a in (a, b, c)]; ok = [t["nonce"] for t in txs] == ["0x0"] * 3
+except KeyError:
+    ok = False
+check("dry run with shooters: an unfilled nonce map builds the shots at nonce 0 instead of raising", ok)
+src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "strategy", "sniper_engine.py")).read()
+check("the burst build reads the shooters' nonces with .get (the panel's night-killer, Sep 23)", 'state["shooter_nonce"].get(a, 0)' in src and 'nonce=hex(state["shooter_nonce"][a])' not in src)
 print(f"\n{passed} checks passed")

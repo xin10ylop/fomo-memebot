@@ -1897,7 +1897,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             if SLOT_SEND:
                 sp_ = slot_predict(feed_ts + SEAT_SECONDS[SEAT]); decision["slot_block"] = sp_[1] if sp_ else None; decision["slot_t_wall"] = sp_[0] if sp_ else None
         if SHOOTERS:                                                     # 6.0: one shooter per shot, each at its own nonce; the relay pays the stake
-            txs = [dict(buy, nonce=hex(state["shooter_nonce"][a])) for a in shooters_now]; keys = [SHOOTER_KEYS[SHOOTERS.index(a)] for a in shooters_now]
+            txs = [dict(buy, nonce=hex(state["shooter_nonce"].get(a, 0))) for a in shooters_now]; keys = [SHOOTER_KEYS[SHOOTERS.index(a)] for a in shooters_now]   # 6.2: the dry run never reads the shooters' nonces (only the live path does), so a missing one is 0 in the unsigned log, not a crash
             decision["shooters"] = len(shooters_now)
         else:
             txs = [dict(buy, nonce=hex(nonce + i)) for i in range(BURST_N)]; keys = None
