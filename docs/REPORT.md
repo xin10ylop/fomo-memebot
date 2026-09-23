@@ -2941,3 +2941,15 @@ next batch expected to show the tables' number; the fill-by-fill reconciliation,
 mechanism was exact by Sep 18 and the gap is who gets the seat, was never done until now. Seven trades were called
 noise while 34 were on the chain. The tables assumed we are first on every launch and carried no gas; both were
 assumptions of this report, not of the chain.
+
+**The engine's own record of the last run agrees.** `night_readout.py --from "2026-09-19 14:00" --to "2026-09-20 12:00"`
+on the box (604 receipts; `data/derived/live_vs_table/night_readout_last_run.txt`): 15 bursts, 15 fills, ETH in
+0.08515, out 0.08272 (the chain reconciliation's −0.00243 ETH to the wei), gas from receipts 0.001773 ETH ($4.56),
+net −$10.80; capital −$12.33 from the shooters' baseline, of which transfers' gas $0.18 and $1.34 unexplained (the
+relay and shooter top-ups' own gas outside the window's labels is the likely remainder). Every burst straddled the
+tick (the seat's block opened at shot 5 to 16 of 35; shots fired late by at most 1.1 ms); 11 of 15 fills took index 1
+with nobody ahead and returned −3.7% before gas; the 4 with somebody ahead returned −0.4% where the first seat was
++12.3%. The 37-block hold of 17:14 was 1.57 s of wall clock: the block rate spiked on the hot launch (16 buys behind
+us), so a hold in seconds is a longer hold in blocks exactly on the launches that pay (+51% at 15 blocks, +27% at 37);
+a hold counted in blocks would have kept about $3 of that one trade. After 20:44 the engine ran 14 more hours without
+a burst: the tier gate refused every eligible launch at "token tax 0 bps".

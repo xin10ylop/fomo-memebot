@@ -1,0 +1,27 @@
+sudo python3 src/analysis/night_readout.py --from "2026-09-19 14:00" --to "2026-09-20 12:00" --start-eth 0.013549 --eth-usd 2570   (on the Ohio box, Sep 23)
+window 2026-09-19 14:00 to 2026-09-20 12:00 UTC; the start before it: engine 6.06 started 13:30:12 UTC on 2026-09-19, stake $15
+604 receipts fetched. Per launch (ETH in / out / gas / net / return incl. gas / hold):
+14:46:40 0x83dfffd7  34 shots in the seat block from idx 1, no buy ahead, 1 behind (0.055)  FILL@1  in 0.00569 out 0.00534 gas 0.000075 net -0.00042 ($-1.08)  -7.4%  16 blocks
+14:49:40 0x303a30f4  seat opened at shot 14: 21 shots from idx 1, no buy ahead, 1 behind (0.033)  FILL@1  in 0.00568 out 0.00508 gas 0.000129 net -0.00074 ($-1.89)  -12.9%  16
+15:27:11 0x0169d4e0  seat opened at shot 8: 27 shots from idx 1, no buy ahead, 1 behind (0.030)  FILL@1  in 0.00568 out 0.00509 gas 0.000107 net -0.00069 ($-1.78)  -12.2%  15
+16:44:30 0xa84bb9de  seat opened at shot 5: 28 shots from idx 1, no buy ahead, 6 behind (0.579)  FILL@1  in 0.00567 out 0.00651 gas 0.000101 net +0.00074 ($+1.91)  +13.1%  16
+16:59:31 0xcd311f04  seat opened at shot 11: 24 shots from idx 1, nobody ahead or behind  FILL@1  in 0.00566 out 0.00510 gas 0.000125 net -0.00069 ($-1.77)  -12.2%  15
+17:14:25 0xc71634a8  seat opened at shot 5: 30 shots from idx 1, no buy ahead, 16 behind (0.763)  FILL@1  in 0.00566 out 0.00730 gas 0.000102 net +0.00154 ($+3.95)  +27.2%  37 blocks in 1.57 s (the block rate spiked on the hot launch; the sell took 0.27 s)
+17:22:31 0x280cca14  seat opened at shot 16: 19 shots from idx 5, 1 buy ahead (0.150), 9 behind (0.193)  FILL@5  in 0.00565 out 0.00568 gas 0.000146 net -0.00012 ($-0.30)  -2.1%  15
+17:36:59 0xef59cbae  seat opened at shot 15: 20 shots from idx 1, no buy ahead, 1 behind (0.090)  FILL@1  in 0.00567 out 0.00518 gas 0.000142 net -0.00063 ($-1.62)  -11.1%  15
+18:01:43 0x271356a6  seat opened at shot 11: 24 shots from idx 9, 1 buy ahead (0.080), 2 behind (0.041)  FILL@9  in 0.00567 out 0.00474 gas 0.000126 net -0.00106 ($-2.73)  -18.7%  15
+18:59:32 0x6d42bf0c  seat opened at shot 7: 28 shots from idx 1, no buy ahead, 2 behind (0.010)  FILL@1  in 0.00569 out 0.00516 gas 0.000110 net -0.00064 ($-1.64)  -11.2%  15
+19:56:29 0x33a36483  seat opened at shot 12: 22 shots from idx 3, 2 buys ahead (0.380), 4 behind (0.139)  FILL@3  in 0.00569 out 0.00624 gas 0.000136 net +0.00041 ($+1.06)  +7.3%  16
+19:57:18 0x848dffb8  23 of 35 shots landed (12 lost: 3x 'Too Many Requests'): 23 shots from idx 9, 2 buys ahead (0.115), 5 behind (0.082)  FILL@9  in 0.00569 out 0.00596 gas 0.000060 net +0.00021 ($+0.54)  +3.7%  16
+20:01:33 0x41c6395c  seat opened at shot 10: 24 shots from idx 2, nobody ahead or behind  FILL@2  in 0.00569 out 0.00512 gas 0.000128 net -0.00070 ($-1.80)  -12.3%  15
+20:27:27 0x59d51e2d  seat opened at shot 14: 21 shots from idx 1, nobody ahead or behind  FILL@1  in 0.00569 out 0.00501 gas 0.000140 net -0.00082 ($-2.10)  -14.4%  15
+20:44:57 0xb996f3b8  seat opened at shot 15: 20 shots from idx 1, no buy ahead, 1 behind (0.003)  FILL@1  in 0.00568 out 0.00522 gas 0.000146 net -0.00060 ($-1.55)  -10.6%  15
+shots fired late by at most 0.0-1.1 ms on every burst; sequencer replies 128-198 ms; flip minus first shot 204-344 ms (the feed's lag)
+
+totals: bursts 15, launches filled 15, ETH in 0.08515, ETH out 0.08272, gas 0.001773 ETH ($-4.56), net -0.00420 ETH ($-10.80)
+first-fill returns incl. gas: mean -4.9%
+moved out of the wallet by the engine: 0.08355 ETH to the relay (its stake), 0.00214 ETH to shooters (gas); still yours
+capital (wallet 0.00080 + relay 0.00521 + 35 shooters 0.00274): 0.01355 ETH at the start, 0.00875 now, change -0.00480 ETH ($-12.33); trades explain -0.00420, transfer gas -0.000069, unexplained -0.00052 ETH ($1.34)
+relay holds 0.005212 ETH ($13.39); shooters 35, 0 low on gas; refills since the start: 13
+alarms/errors: 4 feed stalls/reconnects, nothing else; open position: none
+after 20:44 Sep 19 until the stop at 11:10 Sep 20: no burst (the tier gate refused every eligible launch: token tax 0 bps < 100)
