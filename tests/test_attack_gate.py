@@ -50,6 +50,9 @@ helper = b"\x01\x02\x03\x04" + b"\0" * 12 + bytes.fromhex("11" * 20) + b"\0" * 1
 E.note_attack(w, "0x" + "77" * 20, b"", helper, CV)
 check("the bundle's helper call (it names a named wallet) is not an attacker", E.attackers(w) == 3)
 check("OUR_ADDRS holds the wallet and the relay", E.OUR_ADDRS == {E.WALLET, E.RELAY})
+w["tb"] = bytes.fromhex("99" * 20)
+E.note_attack(w, "0x" + "99" * 20, b"", b"\x09\x5e\xa7\xb3" + b"\0" * 12 + cb + b"\xff" * 32, CV)   # approve(curve, amount) on the token
+check("an approve on the launch's own token (naming the curve as spender) is not an attacker", E.attackers(w) == 3)
 
 # 2. the gate's wording (the decision path is exercised live; here the threshold arithmetic)
 check("ATTACK_MIN read from the environment", E.ATTACK_MIN == 2)

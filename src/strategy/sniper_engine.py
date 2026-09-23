@@ -927,7 +927,7 @@ def note_attack(w, to_hex, t, data, cv):
     not the launch's own, or any call that names the curve (a relay like ours, whatever its selector or value). Counted by distinct
     relay targets plus direct senders, so a fleet of shooter wallets behind one relay counts once (Sep 18 14:17: 42 shots from 30
     wallets were three relays). Our own relay and wallet do not count, and neither does the bundle's helper (it names named wallets)."""
-    if to_hex in OUR_ADDRS:
+    if to_hex in OUR_ADDRS or (w.get("tb") is not None and to_hex == "0x" + w["tb"].hex()):   # an approve on the launch's own token names the curve as spender: not a shot
         return
     if to_hex == cv:
         snd = sender_of(t)
@@ -1848,6 +1848,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             time.sleep(0.002)
         decision["build_lead_ms"] = round((burst_at - mono()) * 1000, 1)
     n_att = attackers(w); decision["attackers"] = n_att; decision["attack_targets"] = len(w["attack_targets"])   # 6.1: the crowd before the tick, as the feed showed it by now
+    decision["attack_list"] = sorted(w["attack_targets"])[:6] + sorted(w["attack_senders"])[:4]                # who: relays first, then direct senders (for the daily check against the chain)
     if ATTACK_MIN > 0 and n_att < ATTACK_MIN:
         release_reservation(); gates = [f"attackers {n_att} < {ATTACK_MIN} when the burst was built (the seat block's crowd shows in the creation second; 24.30)"]
         threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
