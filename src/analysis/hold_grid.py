@@ -64,7 +64,7 @@ for f in sys.argv[1:]:
             res.append(row)
             if len(res) % 25 == 0: print(len(res), "launches", flush=True)
         except Exception as e: print("err", l.get("cv", "")[:10], str(e)[:80], flush=True)
-json.dump(res, open("data/derived/live_vs_table/hold_grid.json", "w"), indent=0)
+import os; json.dump(res, open(os.environ.get("HOLD_OUT", "data/derived/live_vs_table/hold_grid.json"), "w"), indent=0)
 def col(rows, k):
     v = [r[k] for r in rows]; return f"{st.mean(v):+7.1%} med {st.median(v):+7.1%} win {sum(x>0 for x in v)/len(v):3.0%} dead {sum(x<-0.4 for x in v)/len(v):3.0%}"
 for day in sorted({r["day"] for r in res}) + ["all"]:
