@@ -657,3 +657,6 @@ rule inside the engine: fire only when two or more wallets are already firing at
 second block), a hold counted in blocks, gas_usd() at the real 1.94M gas a round trip, a sell minOut; a paper day with
 the expected return logged per burst; then $100 stakes with a dollar kill line, re-priced daily with gated_seat.py on the
 last 24 hours. At $15 the gated seat is $0.20 a burst: not worth the gas.
+
+Addendum (24.30): the candidate that survives the winners' anatomy is the pre-tick gate plus a 150-300-block hold at second
+place (+20-25% a fill on Sep 22-23, in sample). Not before the out-of-sample run on Sep 20-21 and a paper day.
