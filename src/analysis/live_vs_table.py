@@ -145,4 +145,5 @@ def main():
         print(f"    buys ahead of us: {[r['ahead'] for r in clean]}; seconds landed: {[r['sec'] for r in clean]}; holds (blocks): {[r['hold'] for r in clean]}; fee paid: {[round(r['fee_paid'],4) for r in clean]}")
         print(f"    net ETH {sum(r['net'] for r in clean):+.5f} (${sum(r['net'] for r in clean)*ETH_USD:+.2f}) on stakes {sum(r['stake'] for r in clean):.5f} ETH; multi-fill launches: {[(r['fills'], round(r['net'],5)) for r in rowsout if r['fills'] > 1]}")
     json.dump(rowsout, open("live_vs_table.json", "w"), indent=1)
-main()
+if __name__ == "__main__":
+    main()
