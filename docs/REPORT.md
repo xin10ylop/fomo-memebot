@@ -3156,3 +3156,12 @@ windows at 300 blocks the burst is worth +$1.65, +$0.84, +$3.43; at 15 blocks +$
 worst window is the better one and its mean is higher, at the price of a fatter tail (6-10% of fills below −40%
 against 0-3%). The gate is worth about $1.20 a burst on every window; the hold is worth the difference between a
 regime where the crowd comes in 1.5 s and one where it comes in 30 s, and the last two windows say 30 s.
+
+**The first gated launch of the paper day (Sep 23 11:55 UTC, curve 0xac4d55df…)** was refused with 0 attackers at the
+build (build lead 37 ms). On the chain: nothing fired at the curve until creation-second block +5 (one fleet, relay
+0xa95fe1ca…), a second sender only in the seat block; the seat at second place would have returned −7.2%. The engine
+builds about 130 ms before the tick, so its count runs about two blocks behind the tables' block-5 count. Re-running the
+gate at block 3, what the engine can see, on the three windows (second place, 300 blocks, $13 after gas): 2+ attackers
+by block 3 fires 23 / 41 / 44 launches a window at **+19.4% / +13.3% / +30.4%** ($2.19 / $1.40 / $3.63 a burst), against
++13.2% / +9.0% / +25.1% for the block-5 gate; the launches it skips are −1.0% / +0.5% / −1.2%. The fleets that fire
+early are the stronger signal; the engine's lag makes the gate stricter and better. ATTACK_MIN=2 stands.
