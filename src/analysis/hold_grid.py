@@ -44,33 +44,38 @@ def model_path(L, stake_eth, entry_block, n_ahead, holds, tp=None, stop=None):
             j += 1
         out[h] = (X * tk / (Y + tk) * (1 - tier)) / g - 1
     return out
-HOLDS = (15, 30, 60, 150, 300, 600); res = []
-for f in sys.argv[1:]:
-    for l in json.load(open(f)):
-        try:
-            cv = l["cv"].lower(); b0 = l["b0"]
-            L = lv.launch(cv, b0 + l["same_second_blocks"] + 1)
-            if L is None or L["tier"] is None: continue
-            ev = lv.call("eth_getLogs", [{"fromBlock": hex(b0 + 121), "toBlock": hex(b0 + 620), "address": cv, "topics": [[lv.BUY, lv.SELL]]}])
-            L["rows"] = sorted(L["rows"] + [lv.row_of(e) for e in ev], key=lambda r: (r["bn"], r["li"]))
-            ts = L["ts"]; T0 = L["T0"]; bE1 = next((n for n in range(b0 + 1, b0 + 30) if ts.get(n, 0) == T0 + 1), None)
-            if bE1 is None: continue
-            row = {"cv": cv, "T0": T0, "day": time.strftime("%b %d", time.gmtime(T0))}
-            for stake in (15.0, 100.0):
-                for pos, nah in (("first", 0), ("behind1", 1)):
-                    o = model_path(L, stake / E, bE1, nah, HOLDS, tp=0.5, stop=0.2)
-                    for h in HOLDS: row[f"{pos}_{int(stake)}_h{h}"] = o[h]
-                    row[f"{pos}_{int(stake)}_tp50_h600"] = o.get("tp", o[600]); row[f"{pos}_{int(stake)}_stop20_h600"] = o.get("stop", o[600]); row[f"{pos}_{int(stake)}_tp50_stop20_h600"] = o.get("tp", o.get("stop", o[600])) if ("tp" not in o or "stop" not in o) else (o["tp"] if L else o["stop"])
-            res.append(row)
-            if len(res) % 25 == 0: print(len(res), "launches", flush=True)
-        except Exception as e: print("err", l.get("cv", "")[:10], str(e)[:80], flush=True)
-import os; json.dump(res, open(os.environ.get("HOLD_OUT", "data/derived/live_vs_table/hold_grid.json"), "w"), indent=0)
-def col(rows, k):
-    v = [r[k] for r in rows]; return f"{st.mean(v):+7.1%} med {st.median(v):+7.1%} win {sum(x>0 for x in v)/len(v):3.0%} dead {sum(x<-0.4 for x in v)/len(v):3.0%}"
-for day in sorted({r["day"] for r in res}) + ["all"]:
-    rows = [r for r in res if day == "all" or r["day"] == day]
-    print(f"\n=== {day}: {len(rows)} launches, $15 stake, before gas")
-    for pos in ("first", "behind1"):
-        for h in HOLDS: print(f"  {pos:8s} hold {h:4d} blocks: {col(rows, f'{pos}_15_h{h}')}")
-        print(f"  {pos:8s} tp +50% else 600:  {col(rows, f'{pos}_15_tp50_h600')}")
-        print(f"  {pos:8s} stop -20% else 600: {col(rows, f'{pos}_15_stop20_h600')}")
+HOLDS = (15, 30, 60, 150, 300, 600)
+def main():
+    res = []
+    for f in sys.argv[1:]:
+        for l in json.load(open(f)):
+            try:
+                cv = l["cv"].lower(); b0 = l["b0"]
+                L = lv.launch(cv, b0 + l["same_second_blocks"] + 1)
+                if L is None or L["tier"] is None: continue
+                ev = lv.call("eth_getLogs", [{"fromBlock": hex(b0 + 121), "toBlock": hex(b0 + 620), "address": cv, "topics": [[lv.BUY, lv.SELL]]}])
+                L["rows"] = sorted(L["rows"] + [lv.row_of(e) for e in ev], key=lambda r: (r["bn"], r["li"]))
+                ts = L["ts"]; T0 = L["T0"]; bE1 = next((n for n in range(b0 + 1, b0 + 30) if ts.get(n, 0) == T0 + 1), None)
+                if bE1 is None: continue
+                row = {"cv": cv, "T0": T0, "day": time.strftime("%b %d", time.gmtime(T0))}
+                for stake in (15.0, 100.0):
+                    for pos, nah in (("first", 0), ("behind1", 1)):
+                        o = model_path(L, stake / E, bE1, nah, HOLDS, tp=0.5, stop=0.2)
+                        for h in HOLDS: row[f"{pos}_{int(stake)}_h{h}"] = o[h]
+                        row[f"{pos}_{int(stake)}_tp50_h600"] = o.get("tp", o[600]); row[f"{pos}_{int(stake)}_stop20_h600"] = o.get("stop", o[600]); row[f"{pos}_{int(stake)}_tp50_stop20_h600"] = o.get("tp", o.get("stop", o[600])) if ("tp" not in o or "stop" not in o) else (o["tp"] if L else o["stop"])
+                res.append(row)
+                if len(res) % 25 == 0: print(len(res), "launches", flush=True)
+            except Exception as e: print("err", l.get("cv", "")[:10], str(e)[:80], flush=True)
+    import os; json.dump(res, open(os.environ.get("HOLD_OUT", "data/derived/live_vs_table/hold_grid.json"), "w"), indent=0)
+    def col(rows, k):
+        v = [r[k] for r in rows]; return f"{st.mean(v):+7.1%} med {st.median(v):+7.1%} win {sum(x>0 for x in v)/len(v):3.0%} dead {sum(x<-0.4 for x in v)/len(v):3.0%}"
+    for day in sorted({r["day"] for r in res}) + ["all"]:
+        rows = [r for r in res if day == "all" or r["day"] == day]
+        print(f"\n=== {day}: {len(rows)} launches, $15 stake, before gas")
+        for pos in ("first", "behind1"):
+            for h in HOLDS: print(f"  {pos:8s} hold {h:4d} blocks: {col(rows, f'{pos}_15_h{h}')}")
+            print(f"  {pos:8s} tp +50% else 600:  {col(rows, f'{pos}_15_tp50_h600')}")
+            print(f"  {pos:8s} stop -20% else 600: {col(rows, f'{pos}_15_stop20_h600')}")
+
+if __name__ == "__main__":
+    main()
