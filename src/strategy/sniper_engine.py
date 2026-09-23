@@ -149,6 +149,10 @@ ATTACK_MIN = int(os.environ.get("ATTACK_MIN", "0"))                       # 6.1:
 HOLD_BLOCKS = int(os.environ.get("HOLD_BLOCKS", "0"))                     # curve when the burst is built (0 = off). Report 24.30: the seat block's crowd shows in the creation second's blocks; launches with 0-1
 KILL_USD = float(os.environ.get("KILL_USD", "0"))                         # attackers lost at every hold, 2+ paid +25% at second place over 300 blocks (Sep 22-23). HOLD_BLOCKS: hold this many feed blocks after the
 HOLD_EFF = (HOLD_BLOCKS / 9.9) if HOLD_BLOCKS else HOLD                   # fill instead of HOLD_S seconds (0 = seconds); the crowd arrives over 30 s now. KILL_USD: below this capital no launch is taken (0 = off).
+GATE_LATE_MS = float(os.environ.get("GATE_LATE_MS", "0"))                 # 6.2: the gate is decided shot by shot while the burst runs (the shots before the tick revert anyway): a shot is sent only once
+                                                                          # ATTACK_MIN snipers are visible, and the gate may open no later than the shot scheduled this long after the predicted tick;
+                                                                          # a burst whose gate never opens sends nothing and costs nothing. At the build the engine sees about block k-5 of the creation
+                                                                          # second (3% of launches pass); at the tick's shot about block k-2 (24%, the same return): report 24.32.
 
 
 def tax_bps_of(sel, words):
@@ -560,6 +564,10 @@ def load_send_step():
     spec = importlib.util.spec_from_file_location("sniper_send_step", path); mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
     SEND = mod.make(sys.modules[__name__])
     SEND_BURST = mod.make_burst(sys.modules[__name__]) if hasattr(mod, "make_burst") else None
+    if ATTACK_MIN > 0 and BURST_N > 1 and SEND_BURST is not None:
+        import inspect
+        if "gate" not in inspect.signature(SEND_BURST).parameters:
+            raise SystemExit("ATTACK_MIN needs the send step that takes the gate (engine 6.2): sudo cp deploy/send_step.py /etc/sniper/send_step.py")
     if BURST_N > 1 and SEND_BURST is None:
         raise SystemExit("BURST_N > 1 needs the burst-capable send step (make_burst): sudo cp deploy/send_step.py /etc/sniper/send_step.py")
     if SHOOTERS and SEND_BURST is not None:
@@ -1281,6 +1289,14 @@ def burst_receipts(shots, timeout=10.0, settle_s=0.6):
     return [tuple(r) for r in res]                                         # hold clock starts at the fill, not after the settle (the sells landed 31-36 blocks after the buy, Sep 18)
 
 
+def restore_shooter_nonces(shooters_now, recs):
+    """a shot the chain refused spent no nonce: give it back (the provisional +1 after the send). A shot the gate never sent (6.2, hash
+    None) was never counted, so it is left alone; the chain read after the burst corrects any drift."""
+    for a, (hh, r, _) in zip(shooters_now, recs):
+        if hh and r is None:
+            state["shooter_nonce"][a] = max(0, state["shooter_nonce"][a] - 1)
+
+
 def next_nonce():
     try:
         return int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16)
@@ -1847,10 +1863,10 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         while mono() < t_build:                                           # creation second and refused a fill at index 1 (0x46ce738f, Sep 18 17:2x).
             time.sleep(0.002)
         decision["build_lead_ms"] = round((burst_at - mono()) * 1000, 1)
-    n_att = attackers(w); decision["attackers"] = n_att; decision["attack_targets"] = len(w["attack_targets"])   # 6.1: the crowd before the tick, as the feed showed it by now
-    decision["attack_list"] = sorted(w["attack_targets"])[:6] + sorted(w["attack_senders"])[:4]                # who: relays first, then direct senders (for the daily check against the chain)
-    if ATTACK_MIN > 0 and n_att < ATTACK_MIN:
-        release_reservation(); gates = [f"attackers {n_att} < {ATTACK_MIN} when the burst was built (the seat block's crowd shows in the creation second; 24.30)"]
+    n_att = attackers(w); decision["attackers_at_build"] = n_att                                              # 6.1/6.2: the crowd before the tick as the feed showed it at the build (about block k-5)
+    gate = (lambda: attackers(w) >= ATTACK_MIN) if ATTACK_MIN > 0 else None                                    # 6.2: decided shot by shot while the burst runs (see GATE_LATE_MS)
+    if gate is not None and BURST_N <= 1 and not gate():                                                        # a single shot cannot wait: the build's count decides
+        release_reservation(); gates = [f"attackers {n_att} < {ATTACK_MIN} at the build (no burst to wait in)"]
         threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
         log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
     X, Y = w["X"], w["Y"]; stake_eth = stake_usd / state["eth_usd"]
@@ -1886,16 +1902,32 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         else:
             txs = [dict(buy, nonce=hex(nonce + i)) for i in range(BURST_N)]; keys = None
         at = [t_first + i * BURST_STEP_MS / 1000.0 for i in range(len(txs))]
+        open_by = t_first + (BURST_LEAD_MS + GATE_LATE_MS) / 1000.0 if gate is not None else None   # the gate may open up to the shot scheduled at the predicted tick (+GATE_LATE_MS)
         if SEND_BURST is not None:
-            shots = SEND_BURST(txs, at, "buy", keys=keys) if keys else SEND_BURST(txs, at, "buy")
+            gk = {"gate": gate, "open_by": open_by} if gate is not None else {}   # an older send step (no gate=) still works when the gate is off
+            shots = SEND_BURST(txs, at, "buy", keys=keys, **gk) if keys else SEND_BURST(txs, at, "buy", **gk)
         else:
-            shots = []
+            shots = []; opened = gate is None
             for i, tx in enumerate(txs):
                 while mono() < at[i] - 0.004:
                     time.sleep(0.0005)
                 while mono() < at[i]:
                     pass
+                if not opened:
+                    opened = gate()
+                    if not opened:
+                        shots.append((None, None)); continue            # dry run: the same rule as the sender's (a shot is skipped until the gate opens; none after open_by)
+                    decision["gate_opened_at_shot"] = i
+                if not opened and open_by is not None and at[i] > open_by:
+                    shots.append((None, None)); continue
                 shots.append((submit(tx, f"buy#{i}"), None))
+        if gate is not None:
+            decision["attackers_at_open"] = attackers(w); decision["gated_shots"] = sum(1 for hh, a in shots if hh is None and a is None)
+            decision["attack_list"] = sorted(w["attack_targets"])[:6] + sorted(w["attack_senders"])[:4]
+            if decision["gated_shots"] == len(shots):                   # the gate never opened: nothing left the box, nothing to pay
+                release_reservation(); state["traded"].pop(curve, None); gates = [f"attackers {decision['attackers_at_open']} < {ATTACK_MIN} by the tick's shot (the gate never opened; no shot sent)"]
+                threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
+                log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
         h = next((hh for hh, _ in shots if hh), None); buy_ans = next((a for hh, a in shots if hh), None)
         decision["burst"] = BURST_N; decision["burst_step_ms"] = BURST_STEP_MS; decision["burst_lead_ms"] = BURST_LEAD_MS
         if h:
@@ -1936,17 +1968,13 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                 log({"ev": "buy_reverted", "curve": curve, "hash": included[0][0], "note": f"{len(included)} shots included, none filled (all in the creation second, or behind the crowd past BURST_SLIP)"})
             state["traded"].pop(curve, None); release_reservation(); threading.Thread(target=refresh_wallet, args=("no fill",), daemon=True).start()
             if SHOOTERS:
-                for a, (hh, r, _) in zip(shooters_now, recs):
-                    if r is None:
-                        state["shooter_nonce"][a] = max(0, state["shooter_nonce"][a] - 1)
+                restore_shooter_nonces(shooters_now, recs)
                 threading.Thread(target=refresh_shooters, kwargs={"gas": False}, daemon=True).start()
             return
         h, rec = filled[0]
         landed_idx = [i for i, (hh, r, _) in enumerate(recs) if r]; last_landed = (nonce - 1) if SHOOTERS else nonce + max(landed_idx)   # 5.97: the approve and the sell follow the last shot the chain took; 6.0: the shooters fired, the wallet's nonce is untouched
         if SHOOTERS:
-            for a, (hh, r, _) in zip(shooters_now, recs):
-                if r is None:
-                    state["shooter_nonce"][a] = max(0, state["shooter_nonce"][a] - 1)   # refused: the nonce was not spent
+            restore_shooter_nonces(shooters_now, recs)
             threading.Thread(target=refresh_shooters, kwargs={"gas": False}, daemon=True).start()
         if len(landed_idx) < len(recs):
             lost = [i for i, (hh, r, a) in enumerate(recs) if not r]
@@ -2339,8 +2367,8 @@ async def main():
     load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 6.1, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
-         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "kill_usd": KILL_USD,
+    log({"ev": "start", "version": 6.2, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+         "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "gate_late_ms": GATE_LATE_MS, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":

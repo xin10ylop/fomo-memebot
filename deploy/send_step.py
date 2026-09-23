@@ -42,16 +42,27 @@ def make_burst(engine):
             cache[k] = Account.from_key(k)
         return cache[k]
 
-    def submit_burst(txs, at, label, keys=None):
+    def submit_burst(txs, at, label, keys=None, gate=None, open_by=None):
+        """engine 6.2: with gate (a callable), a shot is sent only once gate() is true; shots before that are skipped (they would have
+        landed in the tax second and reverted anyway), and if the gate is still shut at the shot scheduled after open_by no later shot
+        is sent at all. A skipped shot is (None, None) in the result."""
         bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + bytes(signer(keys[i] if keys else None).sign_transaction(tx).raw_transaction).hex()]}).encode() for i, tx in enumerate(txs)]
-        t_signed = mono(); out = []; fired_at = []
+        t_signed = mono(); out = []; fired_at = []; opened = gate is None; opened_at = None; shut = False
         for i, body in enumerate(bodies):
             while mono() < at[i] - 0.004:                               # a prebuilt burst waits for the boundary here: sleep, then spin the last 4 ms
                 time.sleep(0.0005)
             while mono() < at[i]:
                 pass
+            if not opened and not shut:
+                opened = bool(gate())
+                if opened:
+                    opened_at = i
+                elif open_by is not None and at[i] >= open_by:
+                    shut = True                                          # too late for a shot to straddle the tick: the burst is abandoned
+            if not opened:
+                fired_at.append(mono()); out.append((None, None)); continue
             fired_at.append(mono()); out.append(engine.SENDER.fire_slot(body, i))
-        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "shooters": bool(keys), "sign_ms": round(1000 * (t_signed - (at[0] - 0.0015 * len(txs))), 1),
+        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "shooters": bool(keys), "gated": sum(1 for h, _ in out if h is None), "gate_opened_at_shot": opened_at, "sign_ms": round(1000 * (t_signed - (at[0] - 0.0015 * len(txs))), 1),
                     "shot_ms": [round(1000 * (t - at[0]), 1) for t in fired_at], "late_ms": [round(1000 * (t - a), 2) for t, a in zip(fired_at, at)]})
         return out
     return submit_burst

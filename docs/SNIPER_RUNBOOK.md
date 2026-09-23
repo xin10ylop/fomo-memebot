@@ -701,3 +701,13 @@ Live after a go:
     sudo systemctl restart sniper-engine
 
 Daily: `python3 src/analysis/live_vs_table.py` and `sudo python3 src/analysis/paper_day.py --from "<yesterday> 00:00"`.
+
+## 5m. Engine 6.2: the gate inside the burst (Sep 23)
+
+The gate is decided shot by shot while the burst runs (report 24.32). Nothing to set beyond 5l; GATE_LATE_MS (default 0)
+lets the gate open this many ms after the predicted tick's shot. The deployed send step must be the 6.2 copy:
+
+    cd ~/fomo-memebot && git pull && sudo cp deploy/send_step.py /etc/sniper/send_step.py && sudo systemctl restart sniper-engine && sleep 5 && sudo grep '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"dry_run": [a-z]*\|"attack_min": [0-9]*\|"gate_late_ms": [0-9.]*'
+
+The paper day's events now carry attackers_at_build, attackers_at_open, gated_shots and gate_opened_at_shot; a launch whose
+gate never opened is an eligible_not_traded with "the gate never opened" and paper_day.py counts it as refused.
