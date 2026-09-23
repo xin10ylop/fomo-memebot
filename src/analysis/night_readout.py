@@ -55,27 +55,39 @@ def t_str(t):
     return datetime.datetime.fromtimestamp(t, datetime.timezone.utc).strftime("%H:%M:%S")
 
 
-def read(log_path):
+def read(log_path, t_from=None, t_to=None):
+    """all rotated copies of the log too (engine.jsonl, .1, .2.gz, ...); the window is the last start by default, or
+    --from/--to (UTC), whose header start is the last one before the window"""
+    import glob, gzip
     ev = []
-    for line in open(log_path):
-        if not line.startswith("{"):
-            continue
-        try:
-            ev.append(json.loads(line))
-        except Exception:
-            pass
+    for f in sorted((f for f in glob.glob(log_path + "*") if not f.endswith(".state.json")), key=os.path.getmtime):
+        with (gzip.open if f.endswith(".gz") else open)(f, "rt", errors="replace") as fh:
+            for line in fh:
+                if not line.startswith("{"):
+                    continue
+                try:
+                    ev.append(json.loads(line))
+                except Exception:
+                    pass
+    ev.sort(key=lambda e: e.get("t", 0))
     starts = [e for e in ev if e.get("ev") == "start"]
     if not starts:
         sys.exit("no start event in the log")
-    t0 = starts[-1]["t"]; since = [e for e in ev if e.get("t", 0) >= t0]
-    return starts[-1], since, ev
+    if t_from is None:
+        t0 = starts[-1]["t"]; since = [e for e in ev if e.get("t", 0) >= t0]; return starts[-1], since, ev
+    start = next((s for s in reversed(starts) if s["t"] <= t_from), starts[0])
+    since = [e for e in ev if t_from <= e.get("t", 0) <= (t_to or 9e18)]
+    return start, since, ev
 
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("log", nargs="?", default="/var/log/sniper/engine.jsonl")
     ap.add_argument("--rpc", default="https://rpc.mainnet.chain.robinhood.com"); ap.add_argument("--start-eth", type=float, default=None)
-    ap.add_argument("--eth-usd", type=float, default=None); a = ap.parse_args()
-    start, since, ev_all = read(a.log); px = a.eth_usd or (start.get("eth_usd") or 0)
+    ap.add_argument("--eth-usd", type=float, default=None)
+    ap.add_argument("--from", dest="t_from", default=None, help="UTC 'YYYY-MM-DD HH:MM': account this window instead of the last start")
+    ap.add_argument("--to", dest="t_to", default=None); a = ap.parse_args()
+    utc = lambda x: datetime.datetime.strptime(x, "%Y-%m-%d %H:%M").replace(tzinfo=datetime.timezone.utc).timestamp() if x else None
+    start, since, ev_all = read(a.log, utc(a.t_from), utc(a.t_to)); px = a.eth_usd or (start.get("eth_usd") or 0)
     if not px:
         px = next((e["eth_usd"] for e in reversed(since) if e.get("eth_usd")), 0) or 0
     if not px:
@@ -85,6 +97,7 @@ def main():
         except Exception:
             px = 0
     usd = (lambda e: f" (${e * px:+,.2f})") if px else (lambda e: "")
+    if a.t_from: print(f"window {a.t_from} to {a.t_to or 'now'} UTC; the start before it:")
     print(f"since the engine started at {t_str(start['t'])} UTC on {datetime.datetime.fromtimestamp(start['t'], datetime.timezone.utc).date()} (engine {start.get('version')}, stake ${start.get('stake', '?')})")
     L = collections.OrderedDict()                                       # curve -> launch record
     def rec(curve):
