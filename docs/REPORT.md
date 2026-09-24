@@ -3405,3 +3405,11 @@ the opposite of the four windows' 0-1 fleet mean of −1% to −9%. At the engin
 mean is positive on this day), not failed (the fired set is positive). The paper run continues; 15 fires need about two
 days at this rate. The 14 launches that never reached the gate are the next reading (`skip`/`gates` reasons on the box).
 
+*The 14 that never reached the gate* (from the box's `skip` events): 6 "no confident boundary estimate to aim at" (five of
+them creations landing in the last one or two blocks of their second, k ≤ 2, where the bundle wait leaves no time to aim;
+the k−2 row of the tables already excludes those by construction, since block k−2 is the creation block or earlier; the
+sixth, `0xcff204f6` +44%, k=6, an aim gap of the estimator), 7 "creator buy < 1% of supply" (MIN_CREATOR_SUPPLY, kept on
+purpose: five losers, one flat, one +102%, mean +5%, −11% without the winner), 1 "bundle 0 < 3" (the feed's fold saw no
+bundle where the chain had one: the fold's early close, audit row 11; +4%). Nothing broken; the aim skip is a property of
+the burst, the creator filter a choice, the fold race a known one-in-fifty.
+
