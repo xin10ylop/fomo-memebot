@@ -1,8 +1,7 @@
 """The seam test (report 24.33): the number the engine gates on is the number the backtest gated on. Every transaction aimed at
 the 563 launches of the four windows (data/derived/live_vs_table/crowd_raw_*.json.gz) is replayed through the engine's own
 note_attack / attack_fleets / attack_wallets, block by block, and compared with crowd_rules.cums(), the backtest's count.
-Our own wallet's shots are skipped (in live they go to the current relay, which OUR_ADDRS excludes; on Sep 18-19 they went
-through two retired relay addresses the engine no longer knows).
+Our own wallet's shots through the retired Sep 18-19 relays are excluded on both sides (6.4: the engine skips its own sender).
 
     python3 tests/test_seam_replay.py
 """
@@ -24,7 +23,6 @@ for rf in ("crowd_raw_sep1819.json", "crowd_raw_sep2021.json", "crowd_raw_sep222
         cw, cf = cums(r); ef, ew = [], []
         for off, rows in enumerate(r["blocks"][: r["k"] + 1]):
             for t in rows:
-                if t["fr"] in US: continue
                 E.sender_of = (lambda fr: (lambda tx: fr))(t["fr"])
                 data = bytes.fromhex(t["sel"][2:]) if t["direct"] else (bytes.fromhex(t["sel"][2:]) + b"\0" * 12 + bytes.fromhex(cv[2:]) +
                        b"".join(b"\0" * 12 + bytes.fromhex(a[2:]) for a in named if t["named_data"]))

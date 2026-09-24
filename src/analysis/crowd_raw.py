@@ -5,7 +5,7 @@ to_token} where named_data says a named wallet's address is in the calldata (the
     python3 src/analysis/crowd_raw.py data/derived/live_vs_table/launches_141_creators.json data/derived/live_vs_table/crowd_raw_sep1819.json"""
 import json, urllib.request, time, sys
 RPC = "https://rpc.mainnet.chain.robinhood.com"; H = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 curl/8"}
-V2F = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"
+V2F = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"                    # the Pons V2 factory (its creation log: topics[1] token, [2] curve, [3] creator)
 def call(m, p):
     for i in range(6):
         try:
@@ -19,8 +19,9 @@ L = json.load(open(sys.argv[1])); out = sys.argv[2]; res = []
 for n, l in enumerate(L):
     cv = l["cv"].lower(); b0 = l["b0"]; k = l["same_second_blocks"]; creator = (l.get("creator") or "").lower(); named = {w.lower() for w in l.get("named", [])}
     token = None
-    for lg in call("eth_getLogs", [{"fromBlock": hex(b0), "toBlock": hex(b0), "topics": [V2F]}]):
-        if len(lg["topics"]) > 2 and lg["topics"][2][-40:] == cv[2:]: token = "0x" + lg["topics"][1][-40:]
+    for lg in call("eth_getLogs", [{"fromBlock": hex(b0), "toBlock": hex(b0), "address": V2F}]):
+        if len(lg["topics"]) > 3 and lg["topics"][2][-40:] == cv[2:]: token = "0x" + lg["topics"][1][-40:]
+    if token is None: raise SystemExit(f"no factory log for {cv} at block {b0}")
     blocks = []
     for off in range(0, k + 2):
         blk = call("eth_getBlockByNumber", [hex(b0 + off), True]); rows = []

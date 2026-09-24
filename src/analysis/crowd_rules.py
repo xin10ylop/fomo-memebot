@@ -4,7 +4,8 @@ Two things separated the engine from the tables: the unit (the tables counted di
 crowd_signal.py; engine 6.1/6.2 counted FLEETS: distinct relay targets plus direct senders, so a 51-wallet fleet behind one
 relay was 51 for the tables and 1 for the engine) and the view (the tables priced block k-2 of a creation second; the feed
 shows the engine blocks minted before the shot's time minus the feed lag, and the median creation second has 7 blocks, not 10,
-so the shot at the tick sees block k-1). This script evaluates every rule on one raw pull (crowd_raw.py) with the same
+so the shot at the tick sees block k-1; note k counts the blocks after the creation block, not the second's length, so the
+fraction view is a label, the exact-block rows are the reference). This script evaluates every rule on one raw pull (crowd_raw.py) with the same
 returns (hold_grid: second place, 300 blocks, $15 model), per window and pooled, and prints the engine's view model
 against the launches the engine actually judged.
     python3 src/analysis/crowd_rules.py [open_frac=0.76] [build_frac=0.71]"""
@@ -48,6 +49,7 @@ def cell(f, hours):
     if len(f) < 3: return f"{len(f):3d}        -           "
     usd = st.mean([x * STAKE - GAS for x in f]); return f"{len(f):3d} {st.mean(f):+6.1%} {sum(x>0 for x in f)/len(f):3.0%} ${usd:+5.2f} ${usd*len(f)/hours*24:+5.0f}/d"
 rules = [("tables as priced: wallets>=2 @k-2", lambda r: r["w_k2"] >= 2), ("engine 6.2 as built: fleets>=2 @open", lambda r: r["f_open"] >= 2),
+         ("fleets>=2 @k-1 (exact block)", lambda r: at(r["cf"], r["k"] - 1) >= 2), ("fleets>=2 @k-2 (exact block)", lambda r: at(r["cf"], r["k"] - 2) >= 2), ("fleets>=2 @k-3 (exact block)", lambda r: at(r["cf"], r["k"] - 3) >= 2),
          ("fleets>=1 @open", lambda r: r["f_open"] >= 1), ("wallets>=2 @open (unit=wallets)", lambda r: r["w_open"] >= 2), ("wallets>=3 @open", lambda r: r["w_open"] >= 3),
          ("wallets>=5 @open", lambda r: r["w_open"] >= 5), ("wallets>=10 @open", lambda r: r["w_open"] >= 10),
          ("wallets>=2 @open & >=1 @build", lambda r: r["w_open"] >= 2 and r["w_build"] >= 1), ("wallets>=2 @open & >=2 @build", lambda r: r["w_open"] >= 2 and r["w_build"] >= 2),

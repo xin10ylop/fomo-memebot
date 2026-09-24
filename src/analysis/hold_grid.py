@@ -8,7 +8,7 @@ import json, sys, statistics as st, time
 sys.path.insert(0, "src/analysis"); import live_vs_table as lv
 from live_vs_table import fold_buy, fold_sell, X0, Y0, OURS, SUR, CAP
 E = 2570.0
-def model_path(L, stake_eth, entry_block, n_ahead, holds, tp=None, stop=None):
+def model_path(L, stake_eth, entry_block, n_ahead, holds, tp=None, stop=None, info=None):
     rows = [r for r in L["rows"] if r["who"] not in OURS]; tier = L["tier"]; ts = L["ts"]; T0 = L["T0"]
     X, Y = X0, Y0; i = 0
     while i < len(rows) and ts.get(rows[i]["bn"], 9e18) == T0:
@@ -31,6 +31,7 @@ def model_path(L, stake_eth, entry_block, n_ahead, holds, tp=None, stop=None):
         else: X, Y = fold_sell(X, Y, r["tk"])
     sur = SUR.get(ts.get(entry_block, T0) - T0, 0.0); g = stake_eth; net = g * (1 - tier - sur); tk = Y * net / (X + net)
     if tk > CAP * Y0: tk = CAP * Y0; net = X * tk / (Y - tk); g = net / (1 - tier - sur)
+    if info is not None: info["tk"] = tk; info["g"] = g                      # the entry: tokens bought, ETH paid (paper_day's minOut guard)
     X, Y = X + net, Y - tk; p_in = X / Y; out = {}; done = set(); j = 0
     for h in sorted(holds):
         while j < len(post) and post[j]["bn"] <= entry_block + h:

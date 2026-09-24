@@ -69,6 +69,9 @@ check("a named wallet behind a relay is not a wallet (the relay still counts as 
 E.sender_of = lambda t: E.WALLET
 E.note_attack(w3, "0x" + "f300" * 10, b"", b"\x9c\xbb\x2c\x35" + cb, CV)
 check("our own wallet behind a relay is not a wallet", E.attack_wallets(w3) == 2)
+E.sender_of = lambda t: E.WALLET
+E.note_attack(w3, "0x" + "4985" * 10, b"", b"\xa5\x9a\xc6\xdd" + b"\0" * 12 + cb, CV)                    # our own wallet through a retired relay (Sep 18-19)
+check("our own wallet behind any relay is not a fleet (6.4)", E.attack_fleets(w3) == 3)
 check("ATTACK_UNIT defaults to fleets and attackers() counts fleets", E.ATTACK_UNIT == "fleets" and E.attackers(w3) == 3)
 E.ATTACK_UNIT = "wallets"
 check("ATTACK_UNIT=wallets: attackers() counts the shooter wallets", E.attackers(w3) == 2)
