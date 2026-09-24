@@ -3376,3 +3376,32 @@ dollars a day are unchanged, the return per fire higher. The reverse seam: with 
 SWITCH=−9 is a real off (roi ≥ −1.38 by construction). Runbook 5o sets every one of these explicitly. Live: KILL_USD=15 on
 $15.40 of capital stops after the first loss over $0.40.
 
+**Addendum 4, the first day of engine 6.4 against the prediction (Sep 24 12:55-21:45 UTC).** The prediction was committed
+before the box was read (`prediction_sep24_paper.txt`: 51 qualifying launches; the rule at k−1 17 fires +19.4%, at the
+tick's shot 11 fires +8.0%, at k−2 9 fires +1.8%; the 34 refused −2.8%). The engine's reading: 37 of the 51 reached the
+gate, 8 fired, 29 refused; 14 never reached it (the pre-gate filters; among them three k−1 fires at +102%, +44%, +4%,
+and three losers).
+
+*Is the engine on the rule?* Every one of the 8 fires is in the predicted k−1 set, and every refusal agrees with the count the
+engine logged at the gate's close, with one exception: `0xc63ab843` (17:58), 2 fleets by block 3 on the chain, the engine
+saw 1 at its close (block 5): it registered the curve at block 2 and the fleet that fired only in block 2 was never counted
+(the blind window of audit item 3, measured for the first time; a loser, −8.6%). Registration was at block 1 on 30 of the
+37 launches, so the window is usually blocks 0-1.
+
+*The measured view.* At the gate's opening or close the feed's last fully indexed block was k−2 on most launches, with the
+next block partly indexed (`0xf61ae3fa`: block 5 recorded, 2 fleets counted, the chain's block 5 has 1 and block 6 has 6;
+the count runs ahead of the block number while a message is being indexed). So the engine's view is k−2 fully, k−1 in
+part: the rows it can reach are the tick's-shot and k−2 rows of the tables (+22.1% / +26.7% over the four windows), not
+the k−1 row; a later close would fill behind the wave.
+
+*The day's numbers.* Fired: 8, behind one +13.7% mean, median −1.4%, 38% wins, $1.46 a burst, about +$12 in nine hours;
+before the minOut guard the same eight average +7.1% (the guard, real in live, turned −41% and −17% into gas only, and
+refused a further two at the later positions). Refused: 29, mean +5.3%, median −12.7%, 28% wins: the day's largest
+winners had 0 or 1 fleet before the tick (+191% with 1 at k−2 and 3 at k−1, +120% with 0, +51%, +45%, +41%, +39%, +36%),
+the opposite of the four windows' 0-1 fleet mean of −1% to −9%. At the engine's real view the prediction for the day was
++1.8% to +8.0%; the engine's +13.7% sits above it because of the guard.
+
+*Against the go line* (5l: behind one ≥ +10% over 15+ fired launches, the refused set ≤ 0): not met (8 fires; the refused
+mean is positive on this day), not failed (the fired set is positive). The paper run continues; 15 fires need about two
+days at this rate. The 14 launches that never reached the gate are the next reading (`skip`/`gates` reasons on the box).
+
