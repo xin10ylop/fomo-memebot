@@ -6,7 +6,7 @@ blind window before registration) are not applied here, so the engine fires on a
     python3 src/analysis/predict_window.py crowd_raw_X.json[.gz] hold_grid_X.json launches_X.json"""
 import json, gzip, sys, os, math, time, statistics as st
 sys.argv_saved = list(sys.argv); raw_f, hg_f, la_f = sys.argv[1:4]; sys.argv = ["x", "0.76", "0.71"]
-exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "crowd_rules.py")).read().split("W = [")[0])   # cums, view, at, US, STAKE, GAS
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "crowd_rules.py")).read().split("rules = [")[0])   # cums, view, at, US, STAKE, GAS
 R = json.load(gzip.open(raw_f, "rt")) if raw_f.endswith(".gz") else json.load(open(raw_f)); H = {r["cv"]: r for r in json.load(open(hg_f))}
 L = {l["cv"].lower(): l for l in json.load(open(la_f))}
 rows = []
