@@ -52,8 +52,13 @@ def score(events, label):
             if bE1 is None: continue
             r = {"cv": cv, "when": time.strftime("%b %d %H:%M", time.gmtime(T0)), "attackers": e.get("attackers_at_open", e.get("attackers_at_build", e.get("attackers"))),
                  "at_build": e.get("attackers_at_build"), "gated": e.get("gated_shots"), "opened_at": e.get("gate_opened_at_shot")}
+            k = max((n - b0 for n in range(b0, b0 + 30) if ts.get(n) == T0), default=None); r["k"] = k      # the creation second's last block offset
+            if e.get("blk0") is not None and e.get("feed_block_at_build") is not None:                        # 6.3: the feed's view, measured (report 24.33)
+                fo = e.get("feed_block_at_open"); r["view"] = (f"; k={k}, feed at the build block {e['feed_block_at_build'] - e['blk0']}, at the open " + (f"block {fo - e['blk0']}" if fo is not None else "-")
+                                                              + f"; fleets/wallets at the open {e.get('fleets_at_open', e.get('fleets_at_build'))}/{e.get('wallets_at_open', e.get('wallets_at_build'))} ({e.get('attack_unit', 'fleets')} gate)")
+            else: r["view"] = ""
             for pos, nah in (("behind1", 1), ("behind2", 2), ("last", 99)): r[pos] = model_path(L, a.stake / a.eth_usd, bE1, nah, (a.hold,))[a.hold]
-            rows.append(r); print(f"  {r['when']} {cv[:10]} attackers {r['attackers']} (at the build {r['at_build']}, gated shots {r['gated']}, opened at shot {r['opened_at']}): behind one {r['behind1']:+.0%}  behind two {r['behind2']:+.0%}  last {r['last']:+.0%}", flush=True)
+            rows.append(r); print(f"  {r['when']} {cv[:10]} attackers {r['attackers']} (at the build {r['at_build']}, gated shots {r['gated']}, opened at shot {r['opened_at']}{r['view']}): behind one {r['behind1']:+.0%}  behind two {r['behind2']:+.0%}  last {r['last']:+.0%}", flush=True)
         except Exception as ex: print("  err", cv[:10], str(ex)[:80])
     if not rows: print(f"{label}: nothing to score"); return
     for pos in ("behind1", "behind2", "last"):

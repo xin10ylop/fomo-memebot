@@ -54,6 +54,29 @@ w["tb"] = bytes.fromhex("99" * 20)
 E.note_attack(w, "0x" + "99" * 20, b"", b"\x09\x5e\xa7\xb3" + b"\0" * 12 + cb + b"\xff" * 32, CV)   # approve(curve, amount) on the token
 check("an approve on the launch's own token (naming the curve as spender) is not an attacker", E.attackers(w) == 3)
 
+# 1b. engine 6.3: the shooter wallets behind the relays (the unit the tables count), and ATTACK_UNIT
+w3 = fresh(); real_sender = E.sender_of
+E.sender_of = lambda t: "0x" + "a1" * 20
+E.note_attack(w3, "0x" + "8532" * 10, b"", b"\x16\x22\xdb\xe4" + b"\0" * 12 + cb, CV)          # shooter a1 through relay 8532
+E.sender_of = lambda t: "0x" + "a2" * 20
+E.note_attack(w3, "0x" + "8532" * 10, b"", b"\x16\x22\xdb\xe4" + b"\0" * 12 + cb, CV)          # shooter a2 through the same relay
+check("one relay, two shooters: 1 fleet, 2 wallets", E.attack_fleets(w3) == 1 and E.attack_wallets(w3) == 2)
+E.note_attack(w3, CV, b"", b"\x59\xa8\x7b\xc1", CV)                                             # a2 also calls the curve directly
+check("a direct call by a wallet already counted adds a fleet (direct sender) but not a wallet", E.attack_fleets(w3) == 2 and E.attack_wallets(w3) == 2)
+E.sender_of = lambda t: "0x" + "11" * 20
+E.note_attack(w3, "0x" + "f300" * 10, b"", b"\x9c\xbb\x2c\x35" + cb, CV)                        # a named wallet through another relay
+check("a named wallet behind a relay is not a wallet (the relay still counts as a fleet)", E.attack_fleets(w3) == 3 and E.attack_wallets(w3) == 2)
+E.sender_of = lambda t: E.WALLET
+E.note_attack(w3, "0x" + "f300" * 10, b"", b"\x9c\xbb\x2c\x35" + cb, CV)
+check("our own wallet behind a relay is not a wallet", E.attack_wallets(w3) == 2)
+check("ATTACK_UNIT defaults to fleets and attackers() counts fleets", E.ATTACK_UNIT == "fleets" and E.attackers(w3) == 3)
+E.ATTACK_UNIT = "wallets"
+check("ATTACK_UNIT=wallets: attackers() counts the shooter wallets", E.attackers(w3) == 2)
+E.ATTACK_UNIT = "fleets"; E.sender_of = real_sender
+E.note_attack(w3, "0x" + "f301" * 10, b"", b"\x9c\xbb\x2c\x35" + cb, CV)                        # a relay call whose raw transaction cannot be decoded (b"")
+check("an undecodable relay transaction still counts the relay and does not raise", E.attack_fleets(w3) == 4 and E.attack_wallets(w3) == 2)
+check("ATTACK_BUILD_MIN defaults to 0 (no count required at the build)", E.ATTACK_BUILD_MIN == 0)
+
 # 2. the gate's wording (the decision path is exercised live; here the threshold arithmetic)
 check("ATTACK_MIN read from the environment", E.ATTACK_MIN == 2)
 w2 = fresh(); E.note_attack(w2, "0x" + "8532" * 10, b"", cb, CV)
