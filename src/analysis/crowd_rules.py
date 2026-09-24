@@ -33,8 +33,10 @@ def view(k, frac):
 def at(c, j): return c[j] if 0 <= j < len(c) else 0
 data = []
 for name, rf, hf, hours in W:
-    try: R = json.load(open(D + rf))
-    except FileNotFoundError: print("missing", rf); continue
+    import gzip, os
+    if os.path.exists(D + rf): R = json.load(open(D + rf))
+    elif os.path.exists(D + rf + ".gz"): R = json.load(gzip.open(D + rf + ".gz", "rt"))
+    else: print("missing", rf); continue
     H = {r["cv"]: r for r in json.load(open(D + hf))}; rows = []
     for r in R:
         h = H.get(r["cv"]); x = h.get("behind1_15_h300") if h else None

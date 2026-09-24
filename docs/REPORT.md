@@ -31,6 +31,7 @@ Everything below was computed from data collected in this session; scripts are i
 25. **The burst filled six and five times at $15 and the wallet, not the stake, was the bet (section 24.24).** The 3% guard cannot see a $15 fill's own impact, so every shot after the first also fills until the wallet cannot fund one more; one launch at −56% on the whole wallet cost $42 of the night's $54. Engine 5.93 sizes every buy to the wallet less a gas reserve so the sequencer itself drops a second fill, makes `STAKE_MAX` the wallet's ceiling, and starts the hold clock at the fill (the sells had landed 31–36 blocks after the buy instead of 15). Nine live fills so far, four wins, a mean near +1%: too few to judge the seat's +16% either way.
 26. **The BuyOnce relay makes the bet a setting again (section 24.25).** A 20-line contract owned by the wallet buys at most once per curve and forwards the tokens to the wallet; the curve accepts contract buyers (checked by simulation), the relay's logic was exercised on a live curve's state before deployment, and engine 5.94 routes every shot through it. `STAKE_MIN`/`STAKE_MAX` are the bet, the wallet may hold any amount.
 27. **Shooters (section 24.26).** One wallet's consecutive nonces on parallel sockets are refused as "nonce too high" when the sequencer is under load (29 of 35 shots on Sep 19); engine 6.0 fires every shot from its own gas-only shooter wallet and the third relay buys with the stake it holds, once per curve, before the seat's deadline. No shot depends on another, and the exit no longer depends on how many landed.
+34. **Is the engine doing what the tables priced? No, in two ways (section 24.33).** The tables counted distinct shooter wallets; the engine counts fleets (a 51-wallet fleet behind one relay is 51 for the tables, 1 for the engine). The tables' "block k−2" is a block index; the engine sees time, and blocks are produced on demand, so the index cannot be mapped to what the feed had shown. Every shot aimed at the 563 launches was pulled raw and the engine's own rule priced at every view it could have: fleets ≥ 2 at the shot at the tick pays about +11% to +15% a fire, 55-58% wins, about $48 a day at $13, positive on all four windows; the earlier the crowd is seen the better (k−3: +18%; k−0: +7.5%). Engine 6.3 logs the feed's block at the build and at the gate's opening, so the view is measured from now on; the settings do not change; the expectation does.
 33. **The paper day, and the gate moved into the burst (section 24.32).** Twelve hours of engine 6.1 in dry run: 16 launches reached the gate, all refused (0-1 attackers), all 16 would have lost (−15% at second place). The chain, scored like the windows, says the signal was there: 25 of the day's 58 qualifying launches had 2+ fleets by block 5 and the first seat paid +13% to +37%. The engine counts at the burst's build, about 300 ms before the tick, where the feed shows only block k−5 of the creation second: 3% of launches pass at that view on every window; at the tick's shot (block k−2) 24% pass at the same return. Engine 6.2 decides the gate shot by shot inside the burst (the shots before the tick revert anyway): a shot is sent only once two snipers are visible, a burst whose gate never opens sends nothing and costs nothing. Second place, 300 blocks, at that view: +23.0% / +18.0% / +30.0% on the three windows, 14-29 fires a window, $37-60 a day at $13. The other filters let only 16 of 58 launches reach the gate: the next leak to measure.
 32. **Out of sample, and the rule (section 24.31).** On Sep 20 13:26 to Sep 22 01:02 UTC (189 qualifying launches, a window nothing was fitted on) the pre-tick gate separates as before: 0 attackers −1.0% first seat (29% win), 2-3 attackers +30.2% (67%), 4-6 +13.9% (89%). On the 65 gated launches, second place is +11.2% at 15 blocks and +10.9% at 300; across the three windows second place at 300 blocks is +13.7%, +10.9%, +26.9% (at 15 blocks +18.0%, +11.2%, +4.9%), so 300 blocks is the hold whose worst window is still above +10%. Third and fourth place are weaker out of sample (+6.5%, +1.9% at 300), last is negative on every window, and the second-second seat is negative on two of three: the burst stays dense and the guard stays. Engine 6.1 carries the gate (ATTACK_MIN), the hold in blocks (HOLD_BLOCKS), the measured gas model and a kill line (KILL_USD), all off by default; the next step is a paper day on the box, scored by `paper_day.py` from the chain, then $13 stakes with KILL_USD=15 on the $22 the box holds.
 31. **What the profitable trades had, and what it points to (section 24.30).** The P&L peaked at +$24 on Sep 18 18:44 UTC and lost $51 in the next five minutes to two multi-fill launches. Every winner had a crowd buying behind us in the 15 blocks after the seat (5.5 wallets, 0.23 ETH, against 2 wallets and 0.05 ETH on the losers); the three big ones were multi-fills (size on winners +$48, size on losers −$72); and the tokens we sold were up 20-30% a minute later. On the population, the current regime pays later than 1.5 s: on the last 30 hours' 175 launches, the first seat held 15 blocks is +1.2% and held 300 blocks +12.6%; with the pre-tick crowd gate (60 launches) and second place, +4.3% at 15 blocks and **+25% at 300 blocks (median +15%, 63% winners, 10% dead, standard error 8)**: +$3.43 a burst at $15 after gas, about $200 a day on paper, in sample. Sep 18-19 did not need the long hold (+17% at 15 blocks, +13% at 300). Out of sample on Sep 20-21 pending; not to be traded before it and a paper day.
@@ -3224,3 +3225,72 @@ shooters (a wallet-nonce burst would gap) and the engine refuses to start otherw
 that were sent; a live burst whose sent shots all came back without a hash opens no position; `paper_day.py` reads
 the 6.2 fields, defaults its window to the first start of the day rather than the last, prints the window, and takes a
 bare date; the runbook's env check uses sudo.
+
+### 24.33 Is the engine doing what the tables priced? Two mismatches, measured (Sep 24)
+
+The night's one fire lost 20% and the question was whether engine 6.2 fires on the launches the tables priced. Checked
+on the chain, launch by launch, then on every shot aimed at the 563 launches of the four windows, pulled raw
+(`src/analysis/crowd_raw.py`, `data/derived/live_vs_table/crowd_raw_*.json.gz`: per creation-second block, every
+transaction to the curve or naming it, with sender, target, and the named-wallet flags) so that every counting rule is
+scored on one pull with the same returns (`hold_grid`: second place, 300 blocks, the $15 model). `crowd_rules.py`
+prints the tables below (`crowd_rules.txt`).
+
+**The night's three decisions against the chain.** Fleets (the engine's unit, see below) cumulative by block of the
+creation second, the tables' rule, the engine:
+
+| launch | blocks in the second | fleets by block | tables' rule (2+ by block k−2) | engine 6.2 |
+|---|---|---|---|---|
+| Sep 23 23:23 `0x7f4588cb` | 7 | 0 0 0 0 0 3 4 (seat block 6) | 0 by block 4: refuse | fired: 0 at the build, opened at shot 4 with 3 |
+| Sep 23 23:47 `0x1a03dc87` | 4 | 0 0 1 1 (seat 3) | 0: refuse | refused: 1 at the tick's shot |
+| Sep 24 04:52 `0xb88cdecd` | 5 | 0 0 0 0 0 (seat 2) | 0: refuse | refused: 0 |
+
+The fire is a launch the tables' rule refuses: the crowd arrived in block 5 of 7, one block after the index the tables
+priced, and the engine saw that block before the shot at the tick. Two of eight refusals of the Sep 23 day (6.1, the
+count at the build) also disagree with the tables' count: `0xacbc7874` (14:19), engine 1, tables 51; `0xf5737a75`,
+engine 1, tables 0.
+
+**Mismatch 1: the unit.** The tables (`crowd_signal.py`) count distinct shooter *wallets* aimed at the curve. The engine
+(`note_attack`) counts *fleets*: distinct relay targets plus direct senders, so a fleet behind one relay counts once.
+`0xacbc7874`: one relay, `0x5b8e11e3…`, fired 73, 82, 76 and 87 shots from 51 wallets in blocks 3-6 of the creation
+second: 51 for the tables, 1 for the engine. (`0xf5737a75`: the engine's 1 was the token's approve target, recorded
+before the token was learned, fixed at `6f89765`.) The tables' "2+ attackers" is nearly "any fleet with two shooters";
+the engine's "2+" is two separate snipers. Different rules, priced as one.
+
+**Mismatch 2: the view.** The tables' "block k−2" is a block index. The engine sees time: the blocks the feed has
+delivered (about 200 ms behind) by the shot that fills. Blocks on this chain are produced on demand, so the fleets'
+own shots create blocks late in the second: on `0x1332d47c` (10 blocks) the engine's build had seen at most block 2;
+on `0xacbc7874` (7 blocks) block 3 or 4. A block index is not a time, and the engine's view cannot be reconstructed from
+block numbers; it can only be measured, which 6.3 now does: every decision logs `blk0`, `feed_block_at_build`,
+`feed_block_at_open` (the feed's block when the gate first opened) and `feed_block_after_burst`, plus both counts
+(`fleets_at_open`, `wallets_at_open`); `paper_day.py` prints them against the chain's k.
+
+**The engine's rule priced at every view it could have.** Fleets ≥ 2 at the gate's opening, the view modelled as the
+blocks minted before a fraction of the creation second with the blocks evenly spaced (0.76 = the shot at the tick with a
+200 ms lag; 1.0 = the whole second). Second place, 300 blocks; $/burst and $/day at $13 after $0.33 gas:
+
+| view | Sep 18-19 (23 h) | Sep 20-21 (35 h) | Sep 22-23 (29 h) | Sep 23 day (9 h) | pooled |
+|---|---|---|---|---|---|
+| 0.60 | 14, +21.8%, $36/d | 32, +23.8%, $61/d | 27, +8.3%, $16/d | 9, +22.2%, $63/d | 82, +18.2%, 57% win, $2.03, $42/d |
+| 0.71 | 17, +20.2%, $41/d | 37, +21.9%, $64/d | 31, +10.4%, $26/d | 11, +15.9%, $52/d | 96, +17.2%, 57%, $1.91, $46/d |
+| 0.76 | 21, +15.3%, $36/d | 46, +18.7%, $67/d | 42, +12.2%, $43/d | 14, +6.4%, $19/d | 123, +14.5%, 57%, $1.56, $48/d |
+| 0.86 | 34, +4.7%, $10/d | 66, +15.3%, $76/d | 62, +10.8%, $54/d | 20, +4.9%, $17/d | 182, +10.6%, 55%, $1.05, $48/d |
+| 1.0 | 64, +2.4%, −$1/d | 113, +6.5%, $40/d | 105, +12.1%, $107/d | 31, +5.8%, $36/d | 313, +7.5%, 49%, $0.64, $50/d |
+| tables as priced (wallets ≥ 2 by block k−2) | 12, +27.8%, $41/d | 27, +15.8%, $32/d | 21, +30.0%, $61/d | 14, +5.5%, $15/d | 74, +19.8%, 57%, $2.25, $42/d |
+
+By exact block: fleets ≥ 2 by block k−3 +17.9% (84 fires), k−2 +14.6% (114), k−1 +8.8% (215), k−0 +7.5% (313).
+By the block where the second fleet first showed: k−3 to k−5 +21% to +28%; k−2 +6%; k−1 and k−0 +2% to +5%. The night's
+fire was a k−1 arrival. The later the crowd is seen, the thinner the fire: the dollars a day hold up (more fires at a
+lower return), the win rate and the return per fire fall, and at the latest views Sep 18-19 is negative after gas.
+
+**Alternatives on the same pull, not adopted.** Wallets ≥ 2 at the opening (the tables' unit at the engine's time):
++15.0% pooled, but +6.7% on Sep 20-21 and −$8/d on the day. Fleets ≥ 2 at the opening and ≥ 1 at the build: +16.3%,
+positive on all four windows, but the build's view is the least measurable of all. Wallets ≥ 2 and fleets ≥ 2: +20.2%
+pooled, +8.1% on Sep 20-21. Higher wallet thresholds (5, 10) lose the day window. The settings stay `ATTACK_UNIT=fleets`,
+`ATTACK_MIN=2`, `ATTACK_BUILD_MIN=0` (6.3 makes the others settable); they are re-scored at the *measured* view after a
+paper day of 6.3, not at a modelled one.
+
+**What this changes.** The expectation for the paper day and for live is the engine's rule at the tick's shot: about
+**+11% to +15% a fire, 55-58% wins, $1.0-1.6 a burst, about $48 a day at $13** (views 0.76-0.86), not the +23% to
++30% of 24.32, which priced a block index the engine does not see. The go line of runbook 5l (behind one at or above
++10% mean over the gated launches with the refused set negative) stands; the measured view (`paper_day.py`'s "feed at
+the open block j; k=…") is read alongside it.

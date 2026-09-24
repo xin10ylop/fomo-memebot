@@ -711,3 +711,23 @@ lets the gate open this many ms after the predicted tick's shot. The deployed se
 
 The paper day's events now carry attackers_at_build, attackers_at_open, gated_shots and gate_opened_at_shot; a launch whose
 gate never opened is an eligible_not_traded with "the gate never opened" and paper_day.py counts it as refused.
+
+## 5n. Engine 6.3: the view measured, both units logged (Sep 24)
+
+Report 24.33: the tables counted shooter wallets and priced a block index; the engine counts fleets and sees time. Nothing
+to set (ATTACK_UNIT=fleets, ATTACK_MIN=2, ATTACK_BUILD_MIN=0 are the defaults and the rule of 6.2); every decision now
+carries blk0, feed_block_at_build, feed_block_at_open, feed_block_after_burst, fleets_at_open and wallets_at_open. The
+send step is unchanged. Deploy (the paper day keeps running, dry run):
+
+    cd ~/fomo-memebot && git pull && sudo systemctl restart sniper-engine && sleep 5 && sudo grep '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"dry_run": [a-z]*\|"attack_min": [0-9]*\|"attack_unit": "[a-z]*"'
+
+The reading (the day's window from its first start, or `--from "YYYY-MM-DD HH:MM"`):
+
+    cd ~/fomo-memebot && git pull && sudo python3 src/analysis/paper_day.py --stake 13 --hold 300 2>&1 | tail -30
+
+Each fired or refused launch prints "k=<blocks in the creation second minus one>, feed at the build block <j>, at the open
+block <j>; fleets/wallets at the open a/b": the engine's view, measured. The expectation for the fired set is the
+engine's rule at the tick's shot (24.33): behind one +11% to +15% mean, 55-58% wins; the go line of 5l stands (behind one
+at or above +10% over the gated launches, the refused set negative). Once a day of 6.3 is in, `crowd_rules.py` is re-run
+with the measured view in place of the modelled one before any setting changes.
+
