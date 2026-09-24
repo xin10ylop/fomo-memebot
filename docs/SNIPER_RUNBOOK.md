@@ -731,3 +731,19 @@ engine's rule at the tick's shot (24.33): behind one +11% to +15% mean, 55-58% w
 at or above +10% over the gated launches, the refused set negative). Once a day of 6.3 is in, `crowd_rules.py` is re-run
 with the measured view in place of the modelled one before any setting changes.
 
+### 5n, the safety switch must be off for the gated rule (Sep 24)
+
+The first 6.3 day showed the leak in front of the gate: 10 of the 12 launches that passed the tables' filters were refused
+by the safety switch (`safety switch off (rolling -0.13 over 15 < -0.10)`), not by the crowd gate. The switch scores every
+eligible launch, fired or refused, at the first seat and the HOLD_S hold (`score_launch` calls `exact_score` without
+`hold=`), so it measures the ungated old rule, whose population the crowd gate exists to refuse; in this regime that
+rolling mean sits below −10% most of the time and the gate never gets the launch. The tables never had a switch: on the
+four windows the same switch would have blocked 12 of 123 gated fires, and those 12 averaged +50% (report 24.33). Capital
+protection stays with KILL_USD and DAILY_STOP. Set it off and restart:
+
+    sudo grep -q '^SWITCH=' /etc/sniper/engine.env && sudo sed -i 's|^SWITCH=.*|SWITCH=-9|' /etc/sniper/engine.env || echo 'SWITCH=-9' | sudo tee -a /etc/sniper/engine.env >/dev/null
+    sudo systemctl restart sniper-engine && sleep 5 && sudo grep '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"dry_run": [a-z]*\|"switch": \[[^]]*\]'
+
+Expected: version 6.3, dry_run true, switch [15, -9.0]. With the switch off the gate sees every qualifying launch and the
+fire rate should approach the tables' 22-38 a day (about 31 pooled) instead of the 6-10 the switch was leaving.
+

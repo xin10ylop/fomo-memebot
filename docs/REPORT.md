@@ -3294,3 +3294,15 @@ paper day of 6.3, not at a modelled one.
 +30% of 24.32, which priced a block index the engine does not see. The go line of runbook 5l (behind one at or above
 +10% mean over the gated launches with the refused set negative) stands; the measured view (`paper_day.py`'s "feed at
 the open block j; k=…") is read alongside it.
+
+**Addendum, the first measured view and the third mismatch (Sep 24 10:23).** The first 6.3 decision: `0xfa1eea51`, 8 blocks
+in the creation second, the feed had shown block 4 at the build (the model's 0.71 view says block 4), one fleet of 51
+wallets by the tick's shot: the fleets gate refused (1 < 2), the wallets unit would have fired, second place lost 20%.
+The pre-gate histogram of the same day answered the leak of 24.32: 10 of the 12 launches that passed the tables' filters
+were refused by the **safety switch** ("rolling −0.13 over 15 < −0.10"), which scores every eligible launch, fired or
+refused, at the first seat and the HOLD_S hold: the ungated old rule, whose population the crowd gate exists to refuse. The
+tables never had a switch. Replayed on the four windows with the tables' own first-seat scores, the switch is on 93-97% of
+the time there, yet the fires it blocks are the best ones: 12 of 123 blocked, averaging +50% (h300 metric; h15: 1 of 123,
++47%). It is set off (`SWITCH=-9`, runbook 5n); KILL_USD and DAILY_STOP remain the capital protection. Three mismatches,
+then: the unit, the view, the switch; the engine now runs the priced rule and nothing else in front of it.
+
