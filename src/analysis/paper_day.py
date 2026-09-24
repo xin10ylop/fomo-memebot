@@ -47,7 +47,13 @@ def score(events, label):
     for e in events:
         cv = e["curve"].lower()
         try:
-            cl = [x for x in lv.call("eth_getLogs", [{"fromBlock": hex(66_000_000), "toBlock": "latest", "address": lv.V2F, "topics": [None, None, lv.pad(cv)]}]) if len(x["topics"]) > 3]
+            hint = e.get("b_create") or (e.get("seq_at_build") - 40 if e.get("seq_at_build") else None)   # 6.4: the creation block is in the decision; older events search the whole range
+            span = [{"fromBlock": hex(hint - 20), "toBlock": hex(hint + 60)}] if hint else []
+            span.append({"fromBlock": hex(66_000_000), "toBlock": "latest"})
+            cl = []
+            for sp in span:
+                cl = [x for x in lv.call("eth_getLogs", [{**sp, "address": lv.V2F, "topics": [None, None, lv.pad(cv)]}]) if len(x["topics"]) > 3]
+                if cl: break
             if not cl: print("  ", cv[:10], "no factory log on the chain: not scored"); continue
             b0 = int(cl[0]["blockNumber"], 16); L = lv.launch(cv, b0 + 12)
             if L is None or L["tier"] is None: print("  ", cv[:10], "no tape or unknown tier: not scored"); continue
