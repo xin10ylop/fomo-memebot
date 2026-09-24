@@ -3306,3 +3306,58 @@ the time there, yet the fires it blocks are the best ones: 12 of 123 blocked, av
 +47%). It is set off (`SWITCH=-9`, runbook 5n); KILL_USD and DAILY_STOP remain the capital protection. Three mismatches,
 then: the unit, the view, the switch; the engine now runs the priced rule and nothing else in front of it.
 
+**Addendum 2, the seam audit (Sep 24 12:00).** Three checks on "is the number the engine gates on the number the tables
+priced, at the same moment": a mechanical replay, and two independent readers, one on the moment and the fill, one on the
+filters in front of the gate.
+
+*The replay* (`tests/test_seam_replay.py`): every transaction of the raw pull fed through the engine's own `note_attack`,
+block by block, against the tables' count. 4 of 563 launches differed, all Sep 18-19, all our own wallet firing through two
+retired relay addresses (the tables skip our sender, the engine only knew its current relay): 6.4 skips its own sender behind
+any relay; 0 differences.
+
+*The moment reader found the largest error in the tables, not the engine.* `crowd_raw.py` looked the launch's token up with
+the Buy event's topic instead of the factory's address, so the token was unknown on all 563 launches and the exclusion of the
+token's approvals never fired: the bundle wallets' `approve(curve)` calls (1,178 rows in the creation seconds) name the curve
+in their calldata and were counted as a fleet. The engine excludes the token (`note_attack`, `attack_fleets`). The replay
+missed it because both sides read the same wrong field. Tokens refilled from the factory log; the engine's rule re-priced:
+
+| fleets ≥ 2 at | fires (96 h) | mean | win | $/burst at $13 | $/day | SE | dead |
+|---|---|---|---|---|---|---|---|
+| the tick's shot (0.76 view) | 83 | +22.1% | 63% | $2.54 | $53 | 5.9% | 7% |
+| block k−1 | 147 | +19.5% | 60% | $2.20 | $81 | 5.8% | 12% |
+| block k−2 | 73 | +26.7% | 67% | $3.14 | $57 | 6.9% | 8% |
+| block k−3 | 52 | +30.1% | 65% | $3.59 | $47 | | |
+| the whole second | 251 | +13.3% | 53% | $1.39 | $87 | | |
+
+Every row is positive on all four windows (Sep 23 day +12.5% to +24.8%); the 40 fires the token alone had added averaged
+−1.2%. The tables of 24.33 above (+14.5% at the tick's shot) carried the token; the engine's own number is +19% to +30% a
+fire, 3.4 to 3.9 standard errors above zero pooled, median +11% to +21%.
+
+*The moment reader's other findings, in order of effect:*
+1. **The gate's deadline is the predicted tick, the fill depends on the actual one.** With the 80 ms lead the gate may open
+   until t_first + 80 ms; the race readout puts the actual tick at about t_first + 36 ms (fills at shots 1-18, median 12).
+   A gate that opens in that 45 ms window fills on its opening shot, behind the crowd's wave, not at the priced second
+   place. 6.4 adds GATE_CLOSE_MS (the deadline as ms after the first shot); 36 aligns it with the median actual tick, at the
+   cost of the fires whose second fleet shows between +36 and +80 ms (the late arrivals, +5% in the tables). Live, the check
+   is `gate_opened_at_shot` against the landing's shot index.
+2. **The burst's minOut guard is not in the price.** minOut is set at the build from the feed's curve state; the bundle's
+   remaining creation-second buys can move the price past 25% (9 of 123 priced fires, 7 of the 83 token-free ones, among
+   them +254%, +48%, +28%); scoring those at zero takes +22.1% to +19.3%. `paper_day.py` now applies the guard from the
+   decision's `min_out_tokens` and prints "GUARD: no fill, gas only".
+3. **The engine is blind until the curve is registered.** `note_attack` counts only watched curves; the watch starts after
+   the bundle wait and the resolve (up to 1.5 s); shots before it are never replayed. Blind to blocks 0-2 costs 4 of 83
+   fires, blind to 0-3 costs 46. 6.4 logs the feed's position at registration (`seq_watch`), `paper_day` prints it.
+4. **"At the open" was read after the burst.** The 6.3 counts labelled at the open were taken when the burst ended; 6.4
+   snapshots block, chain block and both counts at every ask of the gate: the opening's snapshot decides a fire, the last
+   ask's a refusal, both logged (`seq_at_open`, `fleets_at_open`, `gate_opened`), plus the after-burst values apart.
+5. **k is not the second's length.** `k` counts the blocks after the creation block; the creation lands anywhere inside its
+   second, so the fraction view is a label, not a clock. The exact-block rows are the reference; `feed_seq` (the L2 block
+   number) is now logged at the build, the open and after the burst, so offsets are the chain's.
+6. The feed counter skips non-L2 messages and counts backlog replays (±1 block, rare): `feed_seq` supersedes it. Live
+   signing of 35 shots (about 50 ms) competes with the feed thread: the paper view is slightly fresher than live. `paper_day`
+   joins the live `sent_burst` for the opening shot and names the launches it cannot score.
+
+Verified identical: the gate loop in the sender and the dry run; the decision as a single-view rule (the count only rises);
+the exclusions (named sender, creator, helper, direct rule); `paper_day`'s positions and hold against `hold_grid`; the 6.3
+fields' fallbacks; `blk0`'s zero against the chain's b0.
+
