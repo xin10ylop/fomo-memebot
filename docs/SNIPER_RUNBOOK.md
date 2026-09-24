@@ -747,3 +747,46 @@ protection stays with KILL_USD and DAILY_STOP. Set it off and restart:
 Expected: version 6.3, dry_run true, switch [15, -9.0]. With the switch off the gate sees every qualifying launch and the
 fire rate should approach the tables' 22-38 a day (about 31 pooled) instead of the 6-10 the switch was leaving.
 
+## 5o. Engine 6.4: the seam closed, the settings aligned with the tables (Sep 24)
+
+Report 24.33 addenda 2-3: two independent readers and a mechanical replay compared what the engine gates on with what the
+tables priced. The tables had counted the token's own approvals as a fleet (fixed in the pull; the engine's rule re-priced at
++19% to +30% a fire); the engine's gate could open after the actual tick and fill behind the wave (GATE_CLOSE_MS); and a
+list of engine-only filters stood in front of the gate that the tables never had (TRADE_HOURS 12-05, the demand floor's
+arming after a restart, GAS_MAX_SHARE at 5% of a $13 stake, the safety switch) or that the tables had and the engine might
+not (the 100-200 bps tier band, no bundle cap). One command sets every one of them explicitly; the send step is unchanged:
+
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }
+    set_kv ATTACK_MIN 2; set_kv HOLD_BLOCKS 300; set_kv SWITCH -9; set_kv GATE_CLOSE_MS 36; set_kv TRADE_HOURS ""; set_kv MIN_FOLLOW_ETH_60 0; set_kv GAS_MAX_SHARE 0.10
+    set_kv TIER_MIN_BPS 100; set_kv TIER_MAX_BPS 200; set_kv BUNDLE_MIN 3; set_kv BUNDLE_MIN_ETH 0.3; set_kv BUNDLE_MAX_ETH 0; set_kv MIN_CREATOR_SUPPLY 0.01
+    cd ~/fomo-memebot && git pull && sudo systemctl restart sniper-engine && sleep 5 && sudo grep '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"dry_run": [a-z]*\|"gate_close_ms": [0-9.-]*\|"trade_hours": "[^"]*"\|"tier_min_bps": [0-9]*\|"tier_max_bps": [0-9]*\|"bundle_max_eth": [0-9.]*\|"min_creator_supply": [0-9.]*\|"min_follow_eth_60": [0-9.]*\|"switch": \[[^]]*\]'
+
+Expected: version 6.4, dry_run true, gate_close_ms 36.0, trade_hours "", tier 100/200, bundle_max_eth 0.0, min_creator_supply
+0.01, min_follow_eth_60 0.0, switch [15, -9.0]. What each does:
+
+- `GATE_CLOSE_MS=36`: the gate may open until 36 ms after the burst's first shot, where the actual tick lands on median
+  (fills at shots 1-18, median 12); a gate opening later would fill on its own shot behind the crowd's wave, not at the
+  priced second place. Costs the fires whose second fleet shows between +36 and +80 ms (the late arrivals, +5% in the tables).
+- `TRADE_HOURS=""`: all hours. The old rule's 12-05 window dropped 12 of 123 fires averaging +17.7%.
+- `MIN_FOLLOW_ETH_60=0`: the demand floor never binds on the four windows at its level, but it arms only after 10 scored
+  launches following any restart with a state file older than an hour: an hour or two of refusals after every such restart.
+- `GAS_MAX_SHARE=0.10`: the 5% cap is $0.65 on $13 and the burst costs $0.43 at today's 0.043 gwei and $0.65 at 0.066 gwei
+  (Sep 18-19 median 0.063): at those fees it refused up to 28% of launches on the base fee alone. 10% = $1.30 still refuses a
+  burst that would eat the edge.
+- `TIER_MIN_BPS=100, TIER_MAX_BPS=200, BUNDLE_MIN=3, BUNDLE_MIN_ETH=0.3, BUNDLE_MAX_ETH=0`: the tables' population (the 2-3%
+  tiers, three named wallets and 0.3 ETH, no cap). With the tier gates at 0 the engine fires on 1%-tier and 4%+ launches
+  never priced; with BUNDLE_MAX_ETH=1.2 (the ohio template) it drops 30 of 123 fires averaging +26%.
+- `MIN_CREATOR_SUPPLY=0.01` stays: the tables never had it, it drops 15 fires averaging +3.5% and lifts the mean.
+- Kept and unpriced, in the engine's favour: the creator-repeat skip (5 fires at −36% dropped), one position at a time (2
+  fires), the bundle fold's early close on a stranger's direct shot (up to 19 fires at −5%).
+
+Live note: capital is about $15.40 (wallet plus relay) and KILL_USD=15 stops trading after the first loss over $0.40. The
+rule's mean shows over 15+ fires with 7-12% of them dead; a live test needs either KILL_USD=10 or more capital, and that is the
+owner's call, not a setting to change quietly.
+
+The reading (unchanged): `cd ~/fomo-memebot && git pull && sudo python3 src/analysis/paper_day.py --stake 13 --hold 300 2>&1 | tail -40`.
+Each launch prints, from 6.4, the chain-numbered feed blocks at the watch, the build, the open (or the close of a refusal) and
+after the burst, both counts at the open and after, the opening in ms, and "GUARD: no fill" where the burst's minOut would
+have refused the priced fill. The expectation for the fired set is the engine's own rule: behind one +19% to +30% mean, 60-67%
+wins; the go line stands (behind one at or above +10% over 15+ fired launches, the refused set at or below zero).
+
