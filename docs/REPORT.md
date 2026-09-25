@@ -3461,3 +3461,14 @@ bundle at zero. That is the population audit's row 11, and it hits exactly the l
 the tables pay most for. Engine 6.5 folds the replay in (block, arrival) order; `tests/test_bundle_order.py` pins it.
 Three launches in two days carried it (`0x56e76663` on Sep 24 too).
 
+**Addendum 9, the evening of Sep 25 against its prediction (19:30-22:22 UTC).** Prediction: 14 qualifying launches (plus
+`0xf45fa520` 20:07, +67.9%, present in the first run of the window and silently dropped by the launch builder's second
+run); one sure fire (`0xe41e16e1` 20:47, −10.5%), three k−1 borderlines (−11.9%, −1.1%, +67.9%), 11 refused at −12.7%.
+Reading: two fires, the sure one (−10%) and the 20:05 borderline (3 fleets at block 2 of 3, the engine's open at block 2:
+−12%); eight refusals, all with 0-1 fleets at the close (the 21:31 borderline's four fleets sat in block k−1), mean −25.6%
+with three dead; five never reached the gate, among them the two winners of the window (+81% with 0 fleets, +68% with 2
+in block k−1). Prediction and reading agree; the refused set is negative for the first window, as the tables say.
+
+Running tally (Sep 24 12:55 to Sep 25 22:22, 33.5 h): 13 fires, 4 wins, about +$24 at $13; 54 refused, mean about 0,
+median about −10%. The go line: 13 of 15 fires, the refused mean at zero; one more busy stretch decides it.
+
