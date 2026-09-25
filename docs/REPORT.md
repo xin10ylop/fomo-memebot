@@ -3439,3 +3439,15 @@ launch measured so far.
 Running tally (Sep 24 12:55 to Sep 25 12:11, 23 h): 10 fires, 4 wins, about +$30 at $13; 35 refused, mean about +5%,
 median about −12%.
 
+**Addendum 7, the afternoon of Sep 25 against its prediction (12:15-18:34 UTC).** Prediction: 22 qualifying launches, one
+sure fire at the engine's view (`0xd43ed726` 16:24, 2 fleets from block 2, +9.2%), three k−1 borderlines (+12.6%, +50.0%,
+−0.5%), 18 refused at +4.3%. Reading: 0 fires, 10 refused, 12 never reached the gate, the sure fire among them. The three
+borderlines were refused with the count of block k−2 (1, 0, 1 at the close; the chain's 2, 2, 3 sit in block k−1), so
+the engine's view this afternoon was k−2 with no partial k−1 on any of them. Every decision agrees with the rule; the
+refused set: +6.9% mean, +6.0% median, 5 of 10 up (+50%, +24%, +17%, +13%, +50%).
+
+Running tally (Sep 24 12:55 to Sep 25 18:34, 30 h): 10 fires, +31% mean, 4 wins, about +$30 at $13; 45 refused, mean about
++5%, median about −8%; 8 fires a day against the k−2 row's 18 before the pre-gate filters. The 15-fire line is not reached
+and the refused set is not at or below zero: the go conditions of runbook 5l are not met after 30 hours. The 12 launches
+that never reached the gate today (of 22) are the next reading.
+
