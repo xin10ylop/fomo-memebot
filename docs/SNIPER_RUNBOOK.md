@@ -790,3 +790,16 @@ after the burst, both counts at the open and after, the opening in ms, and "GUAR
 have refused the priced fill. The expectation for the fired set is the engine's own rule: behind one +19% to +30% mean, 60-67%
 wins; the go line stands (behind one at or above +10% over 15+ fired launches, the refused set at or below zero).
 
+## 5p. Engine 6.5: the watch's replay in chronological order (Sep 25)
+
+Report 24.33 addendum 8. When a curve is registered, the buys the feed had already shown are replayed into its state; the
+replay folded direct buys first and helper calls after, so a stranger's reverting shot at block 2 closed the bundle before
+the helper's named buys at block 1 were counted, and the launch was refused with "bundle 0 < 3" (3 launches in two days,
+one of them the afternoon's only sure fire). 6.5 folds them in (block, arrival) order. No setting; deploy:
+
+    cd ~/fomo-memebot && git pull && sudo systemctl restart sniper-engine && sleep 5 && sudo grep '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"dry_run": [a-z]*'
+
+The aim's skip ("no confident boundary estimate") logs `boundary` [theta ms, confidence, brackets] and `since_creation_ms`;
+a skip with a large since_creation_ms is a creation in the last blocks of its second (un-aimable), one with few brackets
+or low confidence is the estimator after a reconnect. To read them: `sudo grep -h '"no confident boundary' /var/log/sniper/engine.jsonl | grep -o '"curve": "0x[0-9a-f]\{8\}\|"boundary": [^}]*\|"since_creation_ms": [0-9]*' | paste - - -`.
+

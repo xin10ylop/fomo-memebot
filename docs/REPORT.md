@@ -3451,3 +3451,13 @@ Running tally (Sep 24 12:55 to Sep 25 18:34, 30 h): 10 fires, +31% mean, 4 wins,
 and the refused set is not at or below zero: the go conditions of runbook 5l are not met after 30 hours. The 12 launches
 that never reached the gate today (of 22) are the next reading.
 
+**Addendum 8, the 12 that never reached the gate on Sep 25 afternoon.** 6 "no confident boundary estimate" (five creations
+in the last one or two blocks of their second, un-aimable by construction; one, `0x48a89f86` k=5 +5.6%, an estimator gap);
+3 "creator buy < 1% of supply" (+110%, −6%, −6%; the filter kept its net: it also dropped −58% yesterday, but the +110% is
+its cost); 1 creator repeat (−58%); and **2 "bundle 0 < 3"** where the chain has a full bundle: `0xd43ed726` (the sure
+fire, +9.2%) and `0xba059c17`. Cause found: `curve_buys` returned the feed's direct buys before its helper calls, so at
+registration a stranger's reverting shot at block 2 was folded before the helper's named buys at block 1 and closed the
+bundle at zero. That is the population audit's row 11, and it hits exactly the launches with the earliest crowd, the ones
+the tables pay most for. Engine 6.5 folds the replay in (block, arrival) order; `tests/test_bundle_order.py` pins it.
+Three launches in two days carried it (`0x56e76663` on Sep 24 too).
+
