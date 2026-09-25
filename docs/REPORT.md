@@ -3413,3 +3413,17 @@ purpose: five losers, one flat, one +102%, mean +5%, −11% without the winner),
 bundle where the chain had one: the fold's early close, audit row 11; +4%). Nothing broken; the aim skip is a property of
 the burst, the creator filter a choice, the fold race a known one-in-fifty.
 
+**Addendum 5, the night of Sep 24-25 against its prediction (21:45-05:21 UTC).** Prediction (`prediction_sep25night.txt`,
+committed first): 8 qualifying launches; at the engine's view one fire, `0x9f834b70` 00:33, +169%; at k−1 three; the five
+refused +27% with two 0-fleet winners (+80%, +134%). The reading: one fire, `0x9f834b70`, opened at shot 0 with 2 fleets, the
+feed's block 2 of k=4 (the chain's count at block 2 is 2: exact), behind one +169.1%, +$21.66; three refused (0, 0 and 0
+fleets at the close; the third, `0x2c296eee`, had 2 fleets by block 4 = k−1, the engine's close was block 3: consistent with
+the k−2 view); four never reached the gate (one un-aimable k=1 creation, the +134% one, and the pre-gate filters).
+Prediction and reading agree launch by launch.
+
+Running tally of engine 6.4 with the aligned settings (18 h, Sep 24 12:55 to Sep 25 05:21): 9 fires, behind one +31.0% mean,
+44% wins, about +$33 at $13; 32 refused, +7.5% mean, median about −12%. The refused set's mean is positive because the five
+largest winners of the period (+191%, +134%, +120%, +85%, +80%) had 0 or 1 fleet before the tick, two of them 0 at every
+view; on the four windows the 0-1 fleet launches averaged −1% to −9%. Recorded as a fact against the rule, not acted on:
+the go line (15+ fires, refused ≤ 0) is not met and not failed; the day stretch of Sep 25 decides it.
+
