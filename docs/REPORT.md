@@ -3427,3 +3427,15 @@ largest winners of the period (+191%, +134%, +120%, +85%, +80%) had 0 or 1 fleet
 view; on the four windows the 0-1 fleet launches averaged −1% to −9%. Recorded as a fact against the rule, not acted on:
 the go line (15+ fires, refused ≤ 0) is not met and not failed; the day stretch of Sep 25 decides it.
 
+**Addendum 6, the morning of Sep 25 against its prediction (05:30-12:11 UTC).** Prediction: 4 qualifying launches, 0-1 fires
+(the 11:43 one, borderline at block 2 of 3), the rest refused near −12%. Reading: one fire, `0x03e861dc` 09:23, opened at
+shot 5 with 2 fleets at the feed's block 6 of 8; the chain has 1 fleet by block 6 and 2 by block 7, so the count was block
+7's while block 6 was still the last fully indexed one (the partial-index effect of addendum 4, now seen twice): the fire
+was in the predicted k−1 set (−20.7%, −$3.02). The 11:43 launch was refused with 1 fleet at block 1 of 3 (block 2 partly
+in), +4.3% missed; two 0-fleet refusals (−12%, −64%; the second landed after the prediction's cut). One never reached the
+gate. Prediction and reading agree. The engine's effective view is "inside block k−1": fully k−2, partly k−1, on every
+launch measured so far.
+
+Running tally (Sep 24 12:55 to Sep 25 12:11, 23 h): 10 fires, 4 wins, about +$30 at $13; 35 refused, mean about +5%,
+median about −12%.
+
