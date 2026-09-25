@@ -1,0 +1,101 @@
+=== (1) the stake, baseline gate (fleets>=2 @k-2), behind one, per fire; $ at the stake after $0.33 gas
+  behind1_15_h300    at $   13  FIT            fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.14/burst  $ +57.3/day  $ +229.2 total
+  behind1_15_h300    at $   13  VAL            fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  behind1_15_h300    at $   15  FIT            fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.67/burst  $ +67.0/day  $ +268.1 total
+  behind1_15_h300    at $   15  VAL            fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.97/burst  $ +16.7/day  $  +23.6 total
+  behind1_100_h300   at $  100  FIT            fires  73  18.2/d  mean  +27.1%  med  +21.2%  win  67%  dead   8%  $+26.74/burst  $+488.0/day  $+1952.1 total
+  behind1_100_h300   at $  100  VAL            fires  12   8.5/d  mean  +15.5%  med   -0.9%  win  50%  dead   0%  $+15.21/burst  $+129.0/day  $ +182.5 total
+  behind1_15_h150    at $   13  FIT            fires  73  18.2/d  mean  +21.5%  med  +12.8%  win  66%  dead   7%  $ +2.46/burst  $ +45.0/day  $ +179.8 total
+  behind1_15_h150    at $   13  VAL            fires  12   8.5/d  mean  +13.3%  med   +0.1%  win  50%  dead   0%  $ +1.40/burst  $ +11.9/day  $  +16.8 total
+  behind1_100_h150   at $  100  FIT            fires  73  18.2/d  mean  +21.8%  med  +13.0%  win  66%  dead   7%  $+21.47/burst  $+391.8/day  $+1567.0 total
+  behind1_100_h150   at $  100  VAL            fires  12   8.5/d  mean  +13.6%  med   +0.1%  win  50%  dead   0%  $+13.22/burst  $+112.2/day  $ +158.6 total
+  behind1_15_h600    at $   13  FIT            fires  73  18.2/d  mean  +20.0%  med  +11.2%  win  52%  dead  19%  $ +2.27/burst  $ +41.4/day  $ +165.7 total
+  behind1_15_h600    at $   13  VAL            fires  12   8.5/d  mean  +15.6%  med   +1.1%  win  50%  dead  17%  $ +1.70/burst  $ +14.4/day  $  +20.4 total
+  behind1_100_h600   at $  100  FIT            fires  73  18.2/d  mean  +20.4%  med  +11.3%  win  52%  dead  19%  $+20.03/burst  $+365.6/day  $+1462.4 total
+  behind1_100_h600   at $  100  VAL            fires  12   8.5/d  mean  +15.9%  med   +1.2%  win  50%  dead  17%  $+15.58/burst  $+132.2/day  $ +187.0 total
+  FIT: the $100 return is below the $15 return on 9 of 73 fires; mean gap -0.4% (price impact of the larger buy + the 3% supply cap)
+
+=== (2) with the engine's approximable pre-gate filters (creator repeat, k<=2, one position at a time) on BOTH sides
+  baseline      FIT            fires  71  17.8/d  mean  +27.6%  med  +21.0%  win  68%  dead   7%  $ +3.26/burst  $ +57.9/day  $ +231.6 total
+                VAL            fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  BASE | (f@k-2==1 & bundle_eth<0.446) _h300
+    FIT            fires  83  20.8/d  mean  +31.0%  med  +15.7%  win  64%  dead   6%  $ +3.70/burst  $ +76.8/day  $ +307.0 total
+    VAL            fires  13   9.2/d  mean  +18.0%  med   +2.4%  win  54%  dead   0%  $ +2.01/burst  $ +18.5/day  $  +26.2 total   criteria abcde
+  BASE | (f@k-2==1 & bundle_eth<0.446) _h150
+    FIT            fires  84  21.0/d  mean  +25.9%  med   +7.4%  win  62%  dead   5%  $ +3.04/burst  $ +63.9/day  $ +255.5 total
+    VAL            fires  13   9.2/d  mean  +15.9%  med   +3.0%  win  54%  dead   0%  $ +1.74/burst  $ +15.9/day  $  +22.6 total   criteria abcde
+  BASE | (f@k-2==1 & bundle_eth>=1.5) _h300
+    FIT            fires  79  19.8/d  mean  +27.6%  med  +20.6%  win  66%  dead   8%  $ +3.26/burst  $ +64.4/day  $ +257.7 total
+    VAL            fires  17  12.0/d  mean  +19.2%  med   -4.3%  win  47%  dead   6%  $ +2.17/burst  $ +26.1/day  $  +36.9 total   criteria abcde
+  BASE | (f@k-2==1 & bundle_eth>=1.0) _h300
+    FIT            fires  87  21.8/d  mean  +24.2%  med  +18.2%  win  63%  dead   9%  $ +2.81/burst  $ +61.2/day  $ +244.9 total
+    VAL            fires  19  13.4/d  mean  +22.4%  med   -4.3%  win  47%  dead   5%  $ +2.59/burst  $ +34.7/day  $  +49.1 total   criteria abcde
+  BASE | (f@k-2==1 & bundle_eth>=0.836) _h300
+    FIT            fires  95  23.8/d  mean  +21.6%  med  +15.7%  win  61%  dead  11%  $ +2.48/burst  $ +58.9/day  $ +235.6 total
+    VAL            fires  19  13.4/d  mean  +22.4%  med   -4.3%  win  47%  dead   5%  $ +2.59/burst  $ +34.7/day  $  +49.1 total   criteria abcde
+  BASE & not creator repeat _h300
+    FIT            fires  71  17.8/d  mean  +27.6%  med  +21.0%  win  68%  dead   7%  $ +3.26/burst  $ +57.9/day  $ +231.6 total
+    VAL            fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total   criteria -bcde
+  BASE & relay fleets@k-2>=1 _h300
+    FIT            fires  70  17.5/d  mean  +28.2%  med  +21.5%  win  69%  dead   7%  $ +3.34/burst  $ +58.4/day  $ +233.5 total
+    VAL            fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total   criteria abcde
+  BASE & maxshots@k-2>=3 _h300
+    FIT            fires  63  15.8/d  mean  +31.0%  med  +22.2%  win  70%  dead   6%  $ +3.70/burst  $ +58.3/day  $ +233.2 total
+    VAL            fires  10   7.1/d  mean  +20.2%  med   +3.1%  win  60%  dead   0%  $ +2.29/burst  $ +16.2/day  $  +22.9 total   criteria abcde
+  BASE | (f@k-2==1 & k<=5) _h300
+    FIT            fires  91  22.8/d  mean  +22.2%  med  +15.7%  win  64%  dead   8%  $ +2.55/burst  $ +58.1/day  $ +232.4 total
+    VAL            fires  18  12.7/d  mean  +15.7%  med   -6.4%  win  44%  dead   6%  $ +1.71/burst  $ +21.7/day  $  +30.7 total   criteria abcde
+
+=== (3) the k-1 borderline of each (the same rule with k-2 replaced by k-1; NOT executable as a headline)
+  baseline@k-1  FIT            fires 147  36.8/d  mean  +19.5%  med  +11.3%  win  60%  dead  12%  $ +2.20/burst  $ +81.0/day  $ +324.1 total
+  baseline@k-1  VAL            fires  30  21.2/d  mean  +22.5%  med   +1.1%  win  50%  dead   3%  $ +2.59/burst  $ +55.0/day  $  +77.8 total
+  BASE | (f@k-2==1 & bundle_eth<0.446) _h300 @k-1
+    FIT            fires 167  41.8/d  mean  +16.2%  med   +3.3%  win  57%  dead  13%  $ +1.77/burst  $ +74.0/day  $ +295.9 total
+    VAL            fires  34  24.0/d  mean  +20.4%  med   +1.1%  win  50%  dead   6%  $ +2.32/burst  $ +55.7/day  $  +78.8 total
+  BASE | (f@k-2==1 & bundle_eth<0.446) _h150 @k-1
+    FIT            fires 167  41.8/d  mean  +14.1%  med   +2.2%  win  54%  dead   9%  $ +1.51/burst  $ +62.9/day  $ +251.5 total
+    VAL            fires  34  24.0/d  mean  +17.6%  med   +1.0%  win  50%  dead   3%  $ +1.96/burst  $ +47.1/day  $  +66.6 total
+  BASE | (f@k-2==1 & bundle_eth>=1.5) _h300 @k-1
+    FIT            fires 155  38.8/d  mean  +19.5%  med  +10.1%  win  59%  dead  12%  $ +2.20/burst  $ +85.3/day  $ +341.3 total
+    VAL            fires  34  24.0/d  mean  +17.4%  med   -0.3%  win  47%  dead   6%  $ +1.93/burst  $ +46.4/day  $  +65.6 total
+  BASE | (f@k-2==1 & bundle_eth>=1.0) _h300 @k-1
+    FIT            fires 165  41.2/d  mean  +16.7%  med   +5.5%  win  56%  dead  13%  $ +1.84/burst  $ +75.8/day  $ +303.1 total
+    VAL            fires  35  24.7/d  mean  +20.3%  med   -0.2%  win  49%  dead   6%  $ +2.31/burst  $ +57.2/day  $  +80.9 total
+  BASE | (f@k-2==1 & bundle_eth>=0.836) _h300 @k-1
+    FIT            fires 180  45.0/d  mean  +14.3%  med   +1.3%  win  54%  dead  14%  $ +1.52/burst  $ +68.5/day  $ +274.1 total
+    VAL            fires  37  26.2/d  mean  +17.1%  med   -0.5%  win  46%  dead   8%  $ +1.89/burst  $ +49.4/day  $  +69.9 total
+  BASE & not creator repeat _h300 @k-1
+    FIT            fires 145  36.2/d  mean  +20.6%  med  +11.7%  win  61%  dead  10%  $ +2.34/burst  $ +84.9/day  $ +339.7 total
+    VAL            fires  30  21.2/d  mean  +22.5%  med   +1.1%  win  50%  dead   3%  $ +2.59/burst  $ +55.0/day  $  +77.8 total
+  BASE & relay fleets@k-2>=1 _h300 @k-1
+    FIT            fires 146  36.5/d  mean  +19.7%  med  +11.5%  win  60%  dead  12%  $ +2.23/burst  $ +81.5/day  $ +326.0 total
+    VAL            fires  30  21.2/d  mean  +22.5%  med   +1.1%  win  50%  dead   3%  $ +2.59/burst  $ +55.0/day  $  +77.8 total
+  BASE & maxshots@k-2>=3 _h300 @k-1
+    FIT            fires 129  32.2/d  mean  +24.5%  med  +15.0%  win  65%  dead   9%  $ +2.85/burst  $ +91.9/day  $ +367.6 total
+    VAL            fires  27  19.1/d  mean  +24.9%  med   +2.4%  win  52%  dead   4%  $ +2.91/burst  $ +55.6/day  $  +78.6 total
+  BASE | (f@k-2==1 & k<=5) _h300 @k-1
+    FIT            fires 201  50.2/d  mean  +13.5%  med   +1.8%  win  55%  dead  13%  $ +1.43/burst  $ +71.9/day  $ +287.6 total
+    VAL            fires  37  26.2/d  mean  +19.3%  med   -0.2%  win  49%  dead   3%  $ +2.17/burst  $ +56.8/day  $  +80.4 total
+
+=== (4) stage 2: every AND-filter x OR-branch pair among the fit-qualified components, all nine holds
+  324 stage-2 variants; 20 meet all five:
+   (BASE & not creator repeat) | (f==1 & bundle<0.446)  ind1_15_h300 FIT n= 84 +31.1% win 64% dead  6% $ 78.0/d | VAL n=13 +18.0% $ +26.2
+   (BASE & relay fleets@k-2>=1) | (f==1 & bundle<0.446) ind1_15_h300 FIT n= 84 +30.6% win 64% dead  7% $ 76.6/d | VAL n=13 +18.0% $ +26.2
+   (BASE & maxshots@k-2>=3) | (f==1 & bundle<0.446)     ind1_15_h300 FIT n= 77 +33.1% win 65% dead  6% $ 76.5/d | VAL n=11 +22.9% $ +29.2
+   (BASE & not creator repeat) | (f==1 & bundle>=1.5)   ind1_15_h300 FIT n= 80 +27.8% win 66% dead  8% $ 65.6/d | VAL n=17 +19.2% $ +36.9
+   (BASE & relay fleets@k-2>=1) | (f==1 & bundle>=1.5)  ind1_15_h300 FIT n= 80 +27.3% win 66% dead  9% $ 64.3/d | VAL n=17 +19.2% $ +36.9
+   (BASE & maxshots@k-2>=3) | (f==1 & bundle>=1.5)      ind1_15_h300 FIT n= 73 +29.6% win 67% dead  8% $ 64.2/d | VAL n=15 +23.0% $ +39.9
+   (BASE & not creator repeat) | (f==1 & bundle<0.446)  ind1_15_h150 FIT n= 84 +25.9% win 62% dead  5% $ 63.9/d | VAL n=13 +15.9% $ +22.6
+   (BASE & maxshots@k-2>=3) | (f==1 & bundle<0.446)     ind1_15_h150 FIT n= 77 +27.6% win 65% dead  6% $ 62.8/d | VAL n=11 +19.0% $ +23.6
+   (BASE & relay fleets@k-2>=1) | (f==1 & bundle<0.446) ind1_15_h150 FIT n= 84 +25.5% win 62% dead  6% $ 62.6/d | VAL n=13 +15.9% $ +22.6
+   (BASE & not creator repeat) | (f==1 & bundle>=1.0)   ind1_15_h300 FIT n= 88 +24.4% win 64% dead  9% $ 62.4/d | VAL n=19 +22.4% $ +49.1
+   (BASE & fleets>=1@k-3) | (f==1 & bundle>=1.0)        ind1_15_h300 FIT n= 80 +26.3% win 62% dead 10% $ 61.7/d | VAL n=15 +19.4% $ +32.9
+   (BASE & relay fleets@k-2>=1) | (f==1 & bundle>=1.0)  ind1_15_h300 FIT n= 88 +23.9% win 64% dead 10% $ 61.1/d | VAL n=19 +22.4% $ +49.1
+   (BASE & maxshots@k-2>=3) | (f==1 & bundle>=1.0)      ind1_15_h300 FIT n= 81 +25.7% win 64% dead 10% $ 61.0/d | VAL n=17 +26.1% $ +52.1
+   (BASE & not creator repeat) | (f==1 & bundle>=0.836) ind1_15_h300 FIT n= 96 +21.8% win 61% dead 10% $ 60.1/d | VAL n=19 +22.4% $ +49.1
+   (BASE & fleets>=1@k-3) | (f==1 & bundle>=0.836)      ind1_15_h300 FIT n= 88 +23.3% win 60% dead 11% $ 59.4/d | VAL n=15 +19.4% $ +32.9
+   (BASE & not creator repeat) | (f==1 & k<=5)          ind1_15_h300 FIT n= 92 +22.4% win 64% dead  8% $ 59.3/d | VAL n=18 +15.7% $ +30.7
+   (BASE & relay fleets@k-2>=1) | (f==1 & bundle>=0.836) ind1_15_h300 FIT n= 96 +21.4% win 61% dead 11% $ 58.8/d | VAL n=19 +22.4% $ +49.1
+   (BASE & maxshots@k-2>=3) | (f==1 & bundle>=0.836)    ind1_15_h300 FIT n= 89 +22.8% win 62% dead 11% $ 58.7/d | VAL n=17 +26.1% $ +52.1
+   (BASE & relay fleets@k-2>=1) | (f==1 & k<=5)         ind1_15_h300 FIT n= 92 +21.9% win 64% dead  9% $ 58.0/d | VAL n=18 +15.7% $ +30.7
+   (BASE & maxshots@k-2>=3) | (f==1 & k<=5)             ind1_15_h300 FIT n= 85 +23.5% win 65% dead  8% $ 57.9/d | VAL n=16 +18.7% $ +33.7

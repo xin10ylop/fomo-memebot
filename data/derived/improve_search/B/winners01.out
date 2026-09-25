@@ -1,0 +1,27 @@
+VAL launches with fleets@k-2 < 2 and behind1 h300 >= +50%:
+  sep24paper Sep 24 18:21 0x6771ca6c h300 +119.8% fleets [0, 0, 1, 1, 1, 1, 1, 1, 1, 1] wallets [0, 0, 1, 1, 1, 1, 1, 1, 1, 1] k=9 bundle_eth=1.19 named=31 tier=0.03 hour=18 f_k2=1 w_k2=1 shots_k2=1 maxw_k2=1 fd_k2=0 fr_k2=1 arr1=7 creator_repeat=False
+  sep24paper Sep 24 18:26 0x93d7d429 h300  +50.6% fleets [0, 0, 0, 1, 1, 1, 1, 1, 1, 3] wallets [0, 0, 0, 1, 1, 3, 51, 51, 51, 55] k=9 bundle_eth=0.32 named=11 tier=0.03 hour=18 f_k2=1 w_k2=51 shots_k2=167 maxw_k2=51 fd_k2=0 fr_k2=1 arr1=6 creator_repeat=False
+  sep24paper Sep 24 18:29 0x05012728 h300 +101.7% fleets [0, 0, 2, 3] wallets [0, 0, 20, 32] k=3 bundle_eth=0.47 named=7 tier=0.02 hour=18 f_k2=0 w_k2=0 shots_k2=0 maxw_k2=0 fd_k2=0 fr_k2=0 arr1=1 creator_repeat=False
+  sep24paper Sep 24 20:23 0x057d2437 h300 +190.6% fleets [0, 1, 1, 3, 3] wallets [0, 1, 1, 5, 5] k=4 bundle_eth=1.55 named=5 tier=0.03 hour=20 f_k2=1 w_k2=1 shots_k2=6 maxw_k2=1 fd_k2=0 fr_k2=1 arr1=3 creator_repeat=False
+  sep24paper Sep 24 21:27 0xf61ae3fa h300  +66.1% fleets [0, 0, 0, 1, 1, 1, 6, 7] wallets [0, 0, 0, 1, 1, 1, 8, 11] k=7 bundle_eth=0.76 named=5 tier=0.03 hour=21 f_k2=1 w_k2=1 shots_k2=2 maxw_k2=1 fd_k2=0 fr_k2=1 arr1=4 creator_repeat=False
+  sep25night Sep 24 22:01 0x4840a6c3 h300  +80.4% fleets [0, 0, 0, 0, 0] wallets [0, 0, 0, 0, 0] k=4 bundle_eth=1.46 named=13 tier=0.03 hour=22 f_k2=0 w_k2=0 shots_k2=0 maxw_k2=0 fd_k2=0 fr_k2=0 arr1=None creator_repeat=False
+  sep25night Sep 25 02:15 0x980a17cf h300 +133.6% fleets [0, 2] wallets [0, 2] k=1 bundle_eth=1.55 named=5 tier=0.03 hour=2 f_k2=0 w_k2=0 shots_k2=0 maxw_k2=0 fd_k2=0 fr_k2=0 arr1=0 creator_repeat=False
+  sep25night Sep 25 05:21 0x2c296eee h300  +85.2% fleets [0, 0, 0, 0, 2, 3] wallets [0, 0, 0, 0, 2, 3] k=5 bundle_eth=0.52 named=3 tier=0.03 hour=5 f_k2=0 w_k2=0 shots_k2=0 maxw_k2=0 fd_k2=0 fr_k2=0 arr1=1 creator_repeat=False
+  sep25pm    Sep 25 15:45 0x36226fd7 h300 +109.9% fleets [0, 0, 0] wallets [0, 0, 0] k=2 bundle_eth=0.46 named=5 tier=0.02 hour=15 f_k2=0 w_k2=0 shots_k2=0 maxw_k2=0 fd_k2=0 fr_k2=0 arr1=None creator_repeat=False
+  sep25pm    Sep 25 17:40 0x4d0ce3ca h300  +50.0% fleets [0, 0, 0, 0, 0, 2, 5] wallets [0, 0, 0, 0, 0, 2, 7] k=6 bundle_eth=0.34 named=3 tier=0.03 hour=17 f_k2=0 w_k2=0 shots_k2=0 maxw_k2=0 fd_k2=0 fr_k2=0 arr1=1 creator_repeat=False
+  sep25eve2  Sep 25 20:07 0xf45fa520 h300  +67.9% fleets [0, 0, 0, 0, 0, 0, 0, 0, 2, 2] wallets [0, 0, 0, 0, 0, 0, 0, 0, 4, 4] k=9 bundle_eth=1.55 named=5 tier=0.03 hour=20 f_k2=0 w_k2=0 shots_k2=0 maxw_k2=0 fd_k2=0 fr_k2=0 arr1=1 creator_repeat=False
+  sep25eve2  Sep 25 20:19 0x32290d40 h300  +80.7% fleets [0, 0, 0, 0, 0, 0, 0] wallets [0, 0, 0, 0, 0, 0, 0] k=6 bundle_eth=1.10 named=23 tier=0.03 hour=20 f_k2=0 w_k2=0 shots_k2=0 maxw_k2=0 fd_k2=0 fr_k2=0 arr1=None creator_repeat=False
+
+all 0-1 fleet launches: FIT n=490 mean  -0.2% med  -8.7% win 37% | VAL n= 88 mean  +5.1% med  -6.8% win 34%
+0-1 fleet launches with h300 >= +50%: FIT 45 of 490 (9.2%); VAL 12 of 88 (13.6%)
+
+for each feature, the FIT 0-1 fleet launches inside the VAL winners' range [min, max] of that feature, against those outside:
+  k           VAL winners in [1, 9]:  FIT inside n=489 mean  -0.1% med  -8.7% win 37% | FIT outside n=  1 mean -41.8% med -41.8% win  0% | VAL inside n= 88 mean  +5.1% med  -6.8% win 34%
+  bundle_eth  VAL winners in [0.315056, 1.54517]:  FIT inside n=447 mean  -1.2% med  -8.7% win 37% | FIT outside n= 43 mean  +9.6% med -10.0% win 35% | VAL inside n= 79 mean  +6.6% med  -6.4% win 35%
+  named       VAL winners in [3, 31]:  FIT inside n=490 mean  -0.2% med  -8.7% win 37% | FIT outside n=0 | VAL inside n= 87 mean  +5.0% med  -6.9% win 33%
+  tier        VAL winners in [0.02, 0.03]:  FIT inside n=490 mean  -0.2% med  -8.7% win 37% | FIT outside n=0 | VAL inside n= 88 mean  +5.1% med  -6.8% win 34%
+  hour        VAL winners in [2, 22]:  FIT inside n=445 mean  +1.5% med  -8.7% win 37% | FIT outside n= 45 mean -17.4% med -10.0% win 31% | VAL inside n= 87 mean  +5.0% med  -6.9% win 33%
+  w_k2        VAL winners in [0, 51]:  FIT inside n=489 mean  -0.2% med  -8.7% win 37% | FIT outside n=  1 mean -12.4% med -12.4% win  0% | VAL inside n= 88 mean  +5.1% med  -6.8% win 34%
+  shots_k2    VAL winners in [0, 167]:  FIT inside n=489 mean  -0.2% med  -8.7% win 37% | FIT outside n=  1 mean  -8.0% med  -8.0% win  0% | VAL inside n= 88 mean  +5.1% med  -6.8% win 34%
+  maxw_k2     VAL winners in [0, 51]:  FIT inside n=489 mean  -0.2% med  -8.7% win 37% | FIT outside n=  1 mean -12.4% med -12.4% win  0% | VAL inside n= 88 mean  +5.1% med  -6.8% win 34%
+  arr1        VAL winners in [0, 7]:  FIT inside n=314 mean  -0.7% med  -6.6% win 39% | FIT outside n=  5 mean  +2.6% med -10.0% win 40% | VAL inside n= 61 mean  +6.7% med  -6.7% win 38%

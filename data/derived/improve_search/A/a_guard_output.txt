@@ -1,0 +1,35 @@
+
+=== minOut guard, build view = view(k, 0.71): refused fills scored -gas (return 0, $-0.33)
+  baseline: 5 of 85 fires guarded. fit n= 73 +24.0% win 63% dead  5% $+51.0/d | per-window $ [ +30.4  +86.9  +65.0  +21.6] | val n=12 +15.3% $+19.92
+  BASE OR (exactly 1 fleet & bundle_eth < 0.53): 9 guarded. fit n= 91 +25.1% win 57% dead  7% $+66.6/d | per-window $ [ +27.3  +68.5 +146.2  +24.5] | val n=15 +19.0% $+32.01  fails vs guarded baseline: none
+  BASE OR (exactly 1 fleet & bundle_eth >= 0.950851): 5 guarded. fit n= 92 +21.1% win 60% dead  8% $+55.4/d | per-window $ [ +14.6 +120.2  +68.4  +18.5] | val n=19 +22.4% $+49.12  fails vs guarded baseline: none
+  2<=fleets<=4 @k-2: 5 guarded. fit n= 71 +25.1% win 65% dead  6% $+52.0/d | per-window $ [ +30.4  +91.0  +65.0  +21.6] | val n=12 +15.3% $+19.92  fails vs guarded baseline: none
+  BASE OR (0-1 fleets & arr1_d < 4): 11 guarded. fit n=107 +18.3% win 58% dead  5% $+55.0/d | per-window $ [ +24.5  +82.2  +88.7  +24.6] | val n=17 +23.3% $+45.90  fails vs guarded baseline: none
+  BASE OR (exactly 1 fleet & k < 6): 9 guarded. fit n= 93 +21.1% win 60% dead  4% $+56.1/d | per-window $ [ +36.5  +77.6  +86.5  +24.0] | val n=18 +17.3% $+34.51  fails vs guarded baseline: none
+
+=== minOut guard, build view = block k-2: refused fills scored -gas (return 0, $-0.33)
+  baseline: 3 of 85 fires guarded. fit n= 73 +23.8% win 64% dead  7% $+50.4/d | per-window $ [ +30.4  +90.3  +59.3  +21.6] | val n=12 +15.3% $+19.92
+  BASE OR (exactly 1 fleet & bundle_eth < 0.53): 4 guarded. fit n= 91 +24.7% win 59% dead  8% $+65.6/d | per-window $ [ +26.6  +71.0 +140.4  +24.5] | val n=15 +19.0% $+32.01  fails vs guarded baseline: none
+  BASE OR (exactly 1 fleet & bundle_eth >= 0.950851): 3 guarded. fit n= 92 +20.9% win 61% dead  9% $+54.8/d | per-window $ [ +14.6 +123.6  +62.6  +18.5] | val n=19 +22.4% $+49.12  fails vs guarded baseline: none
+  2<=fleets<=4 @k-2: 3 guarded. fit n= 71 +24.8% win 66% dead  7% $+51.4/d | per-window $ [ +30.4  +94.4  +59.3  +21.6] | val n=12 +15.3% $+19.92  fails vs guarded baseline: none
+  BASE OR (0-1 fleets & arr1_d < 4): 7 guarded. fit n=107 +18.7% win 61% dead  6% $+56.1/d | per-window $ [ +30.7  +86.3  +82.9  +24.6] | val n=17 +23.3% $+45.90  fails vs guarded baseline: none
+  BASE OR (exactly 1 fleet & k < 6): 7 guarded. fit n= 93 +20.9% win 61% dead  5% $+55.5/d | per-window $ [ +36.5  +80.9  +80.7  +24.0] | val n=18 +17.3% $+34.51  fails vs guarded baseline: none
+
+=== creator's supply share (first buy / 1e9) as an AND-filter on the baseline (the engine already runs >= 1%)
+  creator share >= 0.0%: fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92  fails (vs the brief's baseline): a
+  creator share >= 0.5%: fit n= 71 +26.4% win 66% dead  8% $+55.0/d | per-window $ [ +30.4  +83.7  +86.8  +19.2] | val n=10 +19.5% $+22.03  fails (vs the brief's baseline): a
+  creator share >= 1.0%: fit n= 64 +29.3% win 67% dead  6% $+55.7/d | per-window $ [ +26.0  +74.1 +103.5  +19.2] | val n=10 +19.5% $+22.03  fails (vs the brief's baseline): a
+  creator share >= 2.0%: fit n= 34 +35.7% win 65% dead  3% $+36.7/d | per-window $ [ +11.0  +32.8  +96.0   +6.8] | val n= 5 +28.5% $+16.85  fails (vs the brief's baseline): ac
+  creator share >= 3.0%: fit n= 17 +38.1% win 53% dead  0% $+19.7/d | per-window $ [ +10.6  +31.1  +39.3   -2.4] | val n= 3 +55.4% $+20.63  fails (vs the brief's baseline): abde
+  creator share >= 5.0%: fit n=  4 +23.7% win 50% dead  0% $ +2.7/d | per-window $ [ +11.7   +1.2   -1.9   +0.0] | val n= 0      - $ +0.00  fails (vs the brief's baseline): abcde
+
+=== the engine's MIN_CREATOR_SUPPLY 1% applied to BOTH sides (every fire of the baseline and of the passes has a tape)
+  baseline & creator >= 1%: fit n= 64 +29.3% win 67% dead  6% $+55.7/d | per-window $ [ +26.0  +74.1 +103.5  +19.2] | val n=10 +19.5% $+22.03
+  BASE OR (exactly 1 fleet & bundle_eth < 0.53) & creator >= 1%: fit n= 79 +30.5% win 61% dead  6% $+71.8/d | per-window $ [ +22.1  +58.5 +184.6  +22.1] | val n=12 +24.6% $+34.45  fails vs that baseline: none
+  BASE OR (exactly 1 fleet & bundle_eth >= 0.950851) & creator >= 1%: fit n= 82 +25.2% win 63% dead  9% $+60.3/d | per-window $ [ +10.1 +108.1 +106.8  +16.1] | val n=17 +25.7% $+51.24  fails vs that baseline: none
+  2<=fleets<=4 @k-2 & creator >= 1%: fit n= 62 +30.7% win 69% dead  6% $+56.7/d | per-window $ [ +26.0  +78.2 +103.5  +19.2] | val n=10 +19.5% $+22.03  fails vs that baseline: none
+  BASE OR (0-1 fleets & arr1_d < 4) & creator >= 1%: fit n= 87 +22.5% win 63% dead  8% $+56.4/d | per-window $ [ +20.2  +61.1 +129.0  +15.3] | val n=14 +29.1% $+48.34  fails vs that baseline: none
+  BASE OR (exactly 1 fleet & k < 6) & creator >= 1%: fit n= 77 +24.7% win 64% dead  8% $+55.4/d | per-window $ [ +26.0  +54.1 +126.9  +14.8] | val n=15 +21.5% $+36.95  fails vs that baseline: a
+
+=== the stake: the $100 entry's share of supply against the model's 3% cap (live_vs_table.py CAP), baseline fires
+  85 fires: median 0.90% of supply, max 1.40%; at the 3% cap: 0

@@ -1,0 +1,55 @@
+fit = 4 backtest windows (96 h); val = 5 paper windows (34 h); $ at $13 after $0.33 gas unless the $100 column
+
+BASELINE fleets>=2 @k-2, behind1 h300      fit n= 73 +26.7% win 67% dead  8% $  +57/d | val n=12 +15.3% $ +19.9  <- baseline
+per fit window: sep1819 n=14 +19% $+32/d | sep2021 n=29 +26% $+62/d | sep2223 n=20 +36% $+71/d | sep23day n=10 +19% $+59/d
+per val window: sep24paper n=9 +2% $-0.9 | sep25night n=1 +169% $+21.7 | sep25am n=0 +0% $+0.0 | sep25pm n=1 +9% $+0.9 | sep25eve2 n=1 -10% $-1.7
+
+baseline gate, $100 column h300            fit n= 73 +27.1% win 67% dead  8% $ +488/d | val n=12 +15.5% $+182.5  PASS
+OR k<=2 (un-aimable anyway)                fit n=164 +19.3% win 52% dead 12% $  +90/d | val n=31  +9.9% $ +29.5  fail: validation $30/+10% below baseline $20/+15%; win/dead worse than allowed
+(borderline) fleets>=2 @k-1                fit n=147 +19.5% win 60% dead 12% $  +81/d | val n=30 +22.5% $ +77.8  PASS
+OR bundle_eth>=1.0                         fit n=135 +18.3% win 54% dead 10% $  +69/d | val n=35 +18.0% $ +70.5  fail: a fit window not positive; win/dead worse than allowed
+OR bundle_eth>=1.5                         fit n=106 +21.4% win 56% dead  8% $  +65/d | val n=26 +16.0% $ +45.4  fail: win/dead worse than allowed
+fleets>=2 @k-2 & >=1 @k-3                  fit n= 64 +30.6% win 67% dead  8% $  +58/d | val n= 8  +6.1% $  +3.7  fail: validation $4/+6% below baseline $20/+15%
+AND relay shots >=10                       fit n= 71 +27.7% win 69% dead  8% $  +58/d | val n=10 +13.9% $ +14.7  fail: validation $15/+14% below baseline $20/+15%
+AND k>=4                                   fit n= 73 +26.7% win 67% dead  8% $  +57/d | val n=11 +18.5% $ +22.8  fail: fit $/day 57 <= baseline 57
+fleets>=1 @k-2                             fit n=164 +12.5% win 52% dead 16% $  +53/d | val n=25 +22.1% $ +63.7  fail: fit $/day 53 <= baseline 57; win/dead worse than allowed
+AND named>=5                               fit n= 56 +31.1% win 68% dead 11% $  +52/d | val n= 9 +24.2% $ +25.4  fail: fit $/day 52 <= baseline 57
+OR wallets>=10 @k-2                        fit n= 83 +21.7% win 61% dead 11% $  +52/d | val n=13 +18.0% $ +26.2  fail: fit $/day 52 <= baseline 57
+OR fleets>=1 @k-3                          fit n=146 +13.4% win 51% dead 17% $  +51/d | val n=22 +24.7% $ +63.5  fail: fit $/day 51 <= baseline 57; win/dead worse than allowed
+baseline gate, exit stop20_h600            fit n= 73 +24.0% win 51% dead  1% $  +51/d | val n=12 +14.0% $ +17.9  fail: fit $/day 51 <= baseline 57; validation $18/+14% below baseline $20/+15%; win/dead worse than allowed
+AND bundle_eth>=0.5                        fit n= 55 +29.7% win 67% dead  9% $  +48/d | val n=12 +15.3% $ +19.9  fail: fit $/day 48 <= baseline 57
+fleets>=2 @k-2 & first reached 2 by k-3    fit n= 52 +30.1% win 65% dead 10% $  +47/d | val n= 8  +6.1% $  +3.7  fail: fit $/day 47 <= baseline 57; validation $4/+6% below baseline $20/+15%
+baseline gate, exit h150                   fit n= 73 +21.5% win 66% dead  7% $  +45/d | val n=12 +13.3% $ +16.8  fail: fit $/day 45 <= baseline 57; validation $17/+13% below baseline $20/+15%
+OR bundle_eth>=0.8                         fit n=198  +9.3% win 47% dead 18% $  +44/d | val n=47  +7.6% $ +30.8  fail: fit $/day 44 <= baseline 57; a fit window not positive; validation $31/+8% below baseline $20/+15%; win/dead worse than allowed
+wallets>=2 @k-2                            fit n= 73 +20.9% win 58% dead 10% $  +44/d | val n=12 +22.1% $ +30.5  fail: fit $/day 44 <= baseline 57
+baseline gate, exit h600                   fit n= 73 +20.0% win 52% dead 19% $  +41/d | val n=12 +15.6% $ +20.4  fail: fit $/day 41 <= baseline 57; win/dead worse than allowed
+baseline gate, exit tp50_stop20_h600       fit n= 73 +18.6% win 70% dead  0% $  +38/d | val n=12 +13.5% $ +17.1  fail: fit $/day 38 <= baseline 57; validation $17/+14% below baseline $20/+15%
+AND bundle_eth>=0.8                        fit n= 25 +47.5% win 64% dead  0% $  +37/d | val n= 5 +41.0% $ +25.0  fail: fit fires 25 < 30; fit $/day 37 <= baseline 57
+AND named>=8                               fit n= 47 +25.4% win 62% dead 13% $  +35/d | val n= 7  +9.5% $  +6.3  fail: fit $/day 35 <= baseline 57; validation $6/+9% below baseline $20/+15%
+AND tier==0.03                             fit n= 36 +32.0% win 64% dead  8% $  +35/d | val n= 7 +27.2% $ +22.5  fail: fit $/day 35 <= baseline 57
+fleets>=1 @k-2 & bundle>=0.8               fit n= 52 +22.4% win 52% dead 13% $  +33/d | val n=12 +37.3% $ +54.2  fail: fit $/day 33 <= baseline 57; win/dead worse than allowed
+fleets>=1 @k-2 & named>=8                  fit n= 99 +12.8% win 48% dead 20% $  +33/d | val n=14 +13.9% $ +20.7  fail: fit $/day 33 <= baseline 57; a fit window not positive; validation $21/+14% below baseline $20/+15%; win/dead worse than allowed
+baseline gate, exit tp50_h600              fit n= 73 +16.5% win 70% dead  8% $  +33/d | val n=12  +7.4% $  +7.6  fail: fit $/day 33 <= baseline 57; validation $8/+7% below baseline $20/+15%
+baseline gate, exit h60                    fit n= 73 +16.5% win 66% dead  3% $  +33/d | val n=12  +8.5% $  +9.3  fail: fit $/day 33 <= baseline 57; validation $9/+8% below baseline $20/+15%
+AND bundle_eth>=1.0                        fit n= 23 +46.7% win 65% dead  0% $  +33/d | val n= 3 +80.7% $ +30.5  fail: fit fires 23 < 30; fit $/day 33 <= baseline 57
+baseline gate, exit h15                    fit n= 73 +16.4% win 66% dead  3% $  +33/d | val n=12 +18.6% $ +25.0  fail: fit $/day 33 <= baseline 57
+baseline gate, exit h30                    fit n= 73 +16.2% win 64% dead  3% $  +33/d | val n=12 +13.2% $ +16.7  fail: fit $/day 33 <= baseline 57; validation $17/+13% below baseline $20/+15%
+AND k<=6                                   fit n= 40 +26.7% win 65% dead  8% $  +31/d | val n= 7 +18.9% $ +14.9  fail: fit $/day 31 <= baseline 57; validation $15/+19% below baseline $20/+15%
+wallets>=3 @k-2                            fit n= 46 +20.8% win 57% dead  9% $  +27/d | val n= 6 +17.7% $ +11.8  fail: fit $/day 27 <= baseline 57; validation $12/+18% below baseline $20/+15%; win/dead worse than allowed
+OR tier==0.03 & bundle>=0.8                fit n=149  +7.7% win 47% dead 22% $  +25/d | val n=43  +9.3% $ +38.1  fail: fit $/day 25 <= baseline 57; a fit window not positive; validation $38/+9% below baseline $20/+15%; win/dead worse than allowed
+AND hour in [12,22)                        fit n= 44 +19.4% win 68% dead  9% $  +24/d | val n=11  +1.3% $  -1.7  fail: fit $/day 24 <= baseline 57; validation $-2/+1% below baseline $20/+15%
+OR named>=12                               fit n=215  +6.0% win 43% dead 20% $  +24/d | val n=33  +9.6% $ +30.3  fail: fit $/day 24 <= baseline 57; a fit window not positive; validation $30/+10% below baseline $20/+15%; win/dead worse than allowed
+AND hour in [13,21)                        fit n= 39 +21.2% win 69% dead  8% $  +24/d | val n=10  +1.9% $  -0.9  fail: fit $/day 24 <= baseline 57; validation $-1/+2% below baseline $20/+15%
+AND direct shots >=1                       fit n= 16 +44.8% win 75% dead  6% $  +22/d | val n= 0  +0.0% $  +0.0  fail: fit fires 16 < 30; fit $/day 22 <= baseline 57; a fit window not positive; validation $0/+0% below baseline $20/+15%
+AND bundle_eth<0.8                         fit n= 48 +15.8% win 69% dead 12% $  +21/d | val n= 7  -3.1% $  -5.1  fail: fit $/day 21 <= baseline 57; a fit window not positive; validation $-5/-3% below baseline $20/+15%
+fleets>=3 @k-2                             fit n= 27 +26.0% win 59% dead  0% $  +21/d | val n= 2  -6.7% $  -2.4  fail: fit fires 27 < 30; fit $/day 21 <= baseline 57; a fit window not positive; validation $-2/-7% below baseline $20/+15%
+AND hour in [0,12)                         fit n= 13 +45.7% win 69% dead  0% $  +18/d | val n= 1 +169.2% $ +21.7  fail: fit fires 13 < 30; fit $/day 18 <= baseline 57; a fit window not positive
+AND tier==0.02                             fit n= 25 +19.6% win 60% dead  8% $  +14/d | val n= 5  -1.4% $  -2.5  fail: fit fires 25 < 30; fit $/day 14 <= baseline 57; a fit window not positive; validation $-3/-1% below baseline $20/+15%
+OR named>=8                                fit n=258  +4.0% win 39% dead 19% $  +12/d | val n=41  +9.6% $ +37.6  fail: fit $/day 12 <= baseline 57; a fit window not positive; validation $38/+10% below baseline $20/+15%; win/dead worse than allowed
+AND bundle_eth<0.5                         fit n= 18 +17.6% win 67% dead  6% $   +9/d | val n= 0  +0.0% $  +0.0  fail: fit fires 18 < 30; fit $/day 9 <= baseline 57; a fit window not positive; validation $0/+0% below baseline $20/+15%
+wallets>=5 @k-2                            fit n= 27  +9.6% win 48% dead 15% $   +6/d | val n= 5 +11.3% $  +5.7  fail: fit fires 27 < 30; fit $/day 6 <= baseline 57; a fit window not positive; validation $6/+11% below baseline $20/+15%; win/dead worse than allowed
+fleets>=4 @k-2                             fit n=  7 +13.5% win 57% dead  0% $   +2/d | val n= 0  +0.0% $  +0.0  fail: fit fires 7 < 30; fit $/day 2 <= baseline 57; a fit window not positive; validation $0/+0% below baseline $20/+15%
+OR bundle_eth>=0.5                         fit n=399  +2.6% win 42% dead 21% $   +0/d | val n=79  +4.7% $ +21.8  fail: fit $/day 0 <= baseline 57; a fit window not positive; validation $22/+5% below baseline $20/+15%; win/dead worse than allowed
+OR named>=5                                fit n=360  +2.4% win 37% dead 22% $   -1/d | val n=65 +11.4% $ +75.2  fail: fit $/day -1 <= baseline 57; a fit window not positive; validation $75/+11% below baseline $20/+15%; win/dead worse than allowed
+
+47 candidates tried, 2 pass the protocol

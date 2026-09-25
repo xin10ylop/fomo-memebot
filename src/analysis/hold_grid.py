@@ -40,8 +40,8 @@ def model_path(L, stake_eth, entry_block, n_ahead, holds, tp=None, stop=None, in
                 if 0 < r["tk"] < Y: X, Y = fold_buy(X, Y, r["tk"])
             else: X, Y = fold_sell(X, Y, r["tk"])
             p = X / Y
-            if tp and "tp" not in done and p >= p_in * (1 + tp): out["tp"] = (X * tk / (Y + tk) * (1 - tier)) / g - 1; done.add("tp")
-            if stop and "stop" not in done and p <= p_in * (1 - stop): out["stop"] = (X * tk / (Y + tk) * (1 - tier)) / g - 1; done.add("stop")
+            if tp and "tp" not in done and p >= p_in * (1 + tp): out["tp"] = (X * tk / (Y + tk) * (1 - tier)) / g - 1; done.add("tp"); out.setdefault("first_exit", "tp")
+            if stop and "stop" not in done and p <= p_in * (1 - stop): out["stop"] = (X * tk / (Y + tk) * (1 - tier)) / g - 1; done.add("stop"); out.setdefault("first_exit", "stop")
             j += 1
         out[h] = (X * tk / (Y + tk) * (1 - tier)) / g - 1
     return out
@@ -63,7 +63,7 @@ def main():
                     for pos, nah in (("first", 0), ("behind1", 1)):
                         o = model_path(L, stake / E, bE1, nah, HOLDS, tp=0.5, stop=0.2)
                         for h in HOLDS: row[f"{pos}_{int(stake)}_h{h}"] = o[h]
-                        row[f"{pos}_{int(stake)}_tp50_h600"] = o.get("tp", o[600]); row[f"{pos}_{int(stake)}_stop20_h600"] = o.get("stop", o[600]); row[f"{pos}_{int(stake)}_tp50_stop20_h600"] = o.get("tp", o.get("stop", o[600])) if ("tp" not in o or "stop" not in o) else (o["tp"] if L else o["stop"])
+                        row[f"{pos}_{int(stake)}_tp50_h600"] = o.get("tp", o[600]); row[f"{pos}_{int(stake)}_stop20_h600"] = o.get("stop", o[600]); row[f"{pos}_{int(stake)}_tp50_stop20_h600"] = o[o["first_exit"]] if "first_exit" in o else o[600]   # whichever hit first (the review's finding: tp was taken even when the stop hit first)
                 res.append(row)
                 if len(res) % 25 == 0: print(len(res), "launches", flush=True)
             except Exception as e: print("err", l.get("cv", "")[:10], str(e)[:80], flush=True)

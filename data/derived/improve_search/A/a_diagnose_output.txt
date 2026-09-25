@@ -1,0 +1,262 @@
+=== 5. per-window tables (the brief's format): baseline and the 5 distinct variants that clear (a)-(e)
+--- BASELINE fleets>=2 @k-2, behind1 h300
+window        n fires/d    mean  median  win dead $/burst    $/day
+sep1819      14  14.5/d  +19.3%   +4.4%  71%  21% $ +2.17 $  +32/d
+sep2021      29  20.0/d  +26.5%  +23.2%  72%   0% $ +3.11 $  +62/d
+sep2223      20  16.4/d  +35.9%  +22.5%  65%  15% $ +4.34 $  +71/d
+sep23day     10  27.3/d  +19.2%   -1.4%  50%   0% $ +2.16 $  +59/d
+FIT pooled   73  18.2/d  +26.7%  +21.0%  67%   8% $ +3.14 $  +57/d   ($ total +229.17, 96.0 h)
+sep24paper    9  24.0/d   +1.8%   -4.3%  44%   0% $ -0.10 $   -2/d
+sep25night    1   2.7/d +169.2% +169.2% 100%   0% $+21.66 $  +58/d
+sep25am       0   0.0/d        -        -     -     -        -        $+0/d
+sep25pm       1   3.6/d   +9.2%   +9.2% 100%   0% $ +0.86 $   +3/d
+sep25eve2     1   8.7/d  -10.5%  -10.5%   0%   0% $ -1.69 $  -15/d
+VAL pooled   12   8.5/d  +15.3%   -0.9%  50%   0% $ +1.66 $  +14/d   ($ total +19.92, 33.95 h)
+--- [OR] BASE OR (exactly 1 fleet & bundle_eth < 0.53)
+window        n fires/d    mean  median  win dead $/burst    $/day
+sep1819      18  18.7/d  +13.9%   +0.8%  61%  17% $ +1.48 $  +28/d
+sep2021      38  26.2/d  +16.9%  +20.0%  63%   5% $ +1.87 $  +49/d
+sep2223      22  18.0/d  +61.3%  +22.5%  68%  14% $ +7.63 $ +138/d
+sep23day     13  35.5/d  +17.0%   -2.4%  46%   0% $ +1.89 $  +67/d
+FIT pooled   91  22.8/d  +27.1%   +8.6%  62%   9% $ +3.19 $  +73/d   ($ total +290.07, 96.0 h)
+sep24paper   11  29.3/d   +3.4%   -4.3%  45%   0% $ +0.11 $   +3/d
+sep25night    1   2.7/d +169.2% +169.2% 100%   0% $+21.66 $  +58/d
+sep25am       0   0.0/d        -        -     -     -        -        $+0/d
+sep25pm       2   7.3/d  +29.5%  +29.5% 100%   0% $ +3.51 $  +26/d
+sep25eve2     1   8.7/d  -10.5%  -10.5%   0%   0% $ -1.69 $  -15/d
+VAL pooled   15  10.6/d  +17.0%   +2.4%  53%   0% $ +1.88 $  +20/d   ($ total +28.21, 33.95 h)
+    (d) read on the validation set instead: win 53.3% vs >= 40.0%, dead 0.0% vs <= 5.0%: holds
+--- [OR] BASE OR (exactly 1 fleet & bundle_eth >= 0.950851)
+window        n fires/d    mean  median  win dead $/burst    $/day
+sep1819      17  17.7/d   +9.1%   +1.1%  59%  24% $ +0.86 $  +15/d
+sep2021      36  24.8/d  +29.0%  +23.1%  69%   0% $ +3.43 $  +85/d
+sep2223      27  22.1/d  +28.2%  +20.6%  67%  19% $ +3.34 $  +74/d
+sep23day     12  32.7/d  +14.4%   -3.1%  42%   0% $ +1.54 $  +50/d
+FIT pooled   92  23.0/d  +23.2%  +17.8%  63%  10% $ +2.68 $  +62/d   ($ total +246.77, 96.0 h)
+sep24paper   12  32.0/d  +23.8%   -0.9%  50%   8% $ +2.76 $  +88/d
+sep25night    1   2.7/d +169.2% +169.2% 100%   0% $+21.66 $  +58/d
+sep25am       1   3.6/d  -20.7%  -20.7%   0%   0% $ -3.02 $  -11/d
+sep25pm       3  10.9/d   +4.8%   +9.2%  67%   0% $ +0.30 $   +3/d
+sep25eve2     2  17.5/d  -11.2%  -11.2%   0%   0% $ -1.78 $  -31/d
+VAL pooled   19  13.4/d  +22.4%   -4.3%  47%   5% $ +2.59 $  +35/d   ($ total +49.12, 33.95 h)
+    (d) read on the validation set instead: win 47.4% vs >= 40.0%, dead 5.3% vs <= 5.0%: FAILS
+--- [threshold] 2<=fleets<=4 @k-2
+window        n fires/d    mean  median  win dead $/burst    $/day
+sep1819      14  14.5/d  +19.3%   +4.4%  71%  21% $ +2.17 $  +32/d
+sep2021      27  18.6/d  +29.4%  +24.3%  78%   0% $ +3.50 $  +65/d
+sep2223      20  16.4/d  +35.9%  +22.5%  65%  15% $ +4.34 $  +71/d
+sep23day     10  27.3/d  +19.2%   -1.4%  50%   0% $ +2.16 $  +59/d
+FIT pooled   71  17.8/d  +27.8%  +22.0%  69%   8% $ +3.29 $  +58/d   ($ total +233.26, 96.0 h)
+sep24paper    9  24.0/d   +1.8%   -4.3%  44%   0% $ -0.10 $   -2/d
+sep25night    1   2.7/d +169.2% +169.2% 100%   0% $+21.66 $  +58/d
+sep25am       0   0.0/d        -        -     -     -        -        $+0/d
+sep25pm       1   3.6/d   +9.2%   +9.2% 100%   0% $ +0.86 $   +3/d
+sep25eve2     1   8.7/d  -10.5%  -10.5%   0%   0% $ -1.69 $  -15/d
+VAL pooled   12   8.5/d  +15.3%   -0.9%  50%   0% $ +1.66 $  +14/d   ($ total +19.92, 33.95 h)
+    (d) read on the validation set instead: win 50.0% vs >= 40.0%, dead 0.0% vs <= 5.0%: holds
+--- [OR] BASE OR (0-1 fleets & arr1_d < 4)
+window        n fires/d    mean  median  win dead $/burst    $/day
+sep1819      17  17.7/d  +16.4%   +7.5%  71%  24% $ +1.81 $  +32/d
+sep2021      49  33.8/d  +14.6%  +13.6%  63%   2% $ +1.57 $  +53/d
+sep2223      27  22.1/d  +32.9%  +20.6%  67%  11% $ +3.95 $  +87/d
+sep23day     14  38.2/d  +12.3%   -2.8%  43%   7% $ +1.27 $  +48/d
+FIT pooled  107  26.8/d  +19.2%  +13.6%  63%   8% $ +2.17 $  +58/d   ($ total +232.19, 96.0 h)
+sep24paper   12  32.0/d  +13.4%   -6.4%  42%   0% $ +1.42 $  +45/d
+sep25night    1   2.7/d +169.2% +169.2% 100%   0% $+21.66 $  +58/d
+sep25am       0   0.0/d        -        -     -     -        -        $+0/d
+sep25pm       2   7.3/d  +29.5%  +29.5% 100%   0% $ +3.51 $  +26/d
+sep25eve2     2  17.5/d  -11.2%  -11.2%   0%   0% $ -1.78 $  -31/d
+VAL pooled   17  12.0/d  +21.6%   -4.3%  47%   0% $ +2.48 $  +30/d   ($ total +42.11, 33.95 h)
+    (d) read on the validation set instead: win 47.1% vs >= 40.0%, dead 0.0% vs <= 5.0%: holds
+--- [OR] BASE OR (exactly 1 fleet & k < 6)
+window        n fires/d    mean  median  win dead $/burst    $/day
+sep1819      15  15.6/d  +21.2%   +7.5%  73%  20% $ +2.43 $  +38/d
+sep2021      38  26.2/d  +17.1%  +20.0%  63%   3% $ +1.89 $  +49/d
+sep2223      27  22.1/d  +32.3%  +20.5%  67%  11% $ +3.87 $  +86/d
+sep23day     13  35.5/d  +12.7%   -3.1%  46%   8% $ +1.32 $  +47/d
+FIT pooled   93  23.2/d  +21.6%  +15.7%  63%   9% $ +2.47 $  +57/d   ($ total +229.93, 96.0 h)
+sep24paper   13  34.7/d   +9.3%   -8.6%  38%   8% $ +0.87 $  +30/d
+sep25night    1   2.7/d +169.2% +169.2% 100%   0% $+21.66 $  +58/d
+sep25am       0   0.0/d        -        -     -     -        -        $+0/d
+sep25pm       2   7.3/d   +7.4%   +7.4% 100%   0% $ +0.63 $   +5/d
+sep25eve2     2  17.5/d  -11.2%  -11.2%   0%   0% $ -1.78 $  -31/d
+VAL pooled   18  12.7/d  +15.7%   -6.4%  44%   6% $ +1.71 $  +22/d   ($ total +30.71, 33.95 h)
+    (d) read on the validation set instead: win 44.4% vs >= 40.0%, dead 5.6% vs <= 5.0%: FAILS
+
+=== 5b. the three closest misses (fewest failed criteria, then the smallest shortfall), full tables
+--- [threshold] wallets>=1 @k-2  FAILS: (d) fit win 55.8% (floor 57.1%), dead 15.9% (ceiling 13.2%)
+window        n fires/d    mean  median  win dead $/burst    $/day
+sep1819      22  22.9/d  +12.6%   +1.2%  64%  18% $ +1.31 $  +30/d
+sep2021      55  37.9/d  +13.8%   +5.7%  58%   7% $ +1.46 $  +55/d
+sep2223      43  35.2/d  +24.8%  +15.7%  56%  28% $ +2.90 $ +102/d
+sep23day     18  49.1/d   +7.2%   -3.1%  39%  11% $ +0.61 $  +30/d
+FIT pooled  138  34.5/d  +16.2%   +1.6%  56%  16% $ +1.77 $  +61/d   ($ total +244.81, 96.0 h)
+sep24paper   16  42.7/d  +22.3%   -0.9%  50%   6% $ +2.57 $ +110/d
+sep25night    1   2.7/d +169.2% +169.2% 100%   0% $+21.66 $  +58/d
+sep25am       1   3.6/d  -20.7%  -20.7%   0%   0% $ -3.02 $  -11/d
+sep25pm       5  18.2/d  +14.0%   +9.2%  80%   0% $ +1.49 $  +27/d
+sep25eve2     2  17.5/d  -11.2%  -11.2%   0%   0% $ -1.78 $  -31/d
+VAL pooled   25  17.7/d  +22.1%   +2.4%  52%   4% $ +2.55 $  +45/d   ($ total +63.66, 33.95 h)
+--- [threshold] wallets>=1 @k-3  FAILS: (d) fit win 53.2% (floor 57.1%), dead 17.1% (ceiling 13.2%)
+window        n fires/d    mean  median  win dead $/burst    $/day
+sep1819      19  19.7/d  +16.6%   +1.2%  63%  16% $ +1.83 $  +36/d
+sep2021      44  30.3/d  +16.6%   +9.7%  57%   9% $ +1.83 $  +55/d
+sep2223      35  28.7/d  +28.7%   +9.0%  51%  31% $ +3.40 $  +97/d
+sep23day     13  35.5/d   +9.5%   -5.0%  31%   8% $ +0.91 $  +32/d
+FIT pooled  111  27.8/d  +19.6%   +1.4%  53%  17% $ +2.22 $  +61/d   ($ total +245.98, 96.0 h)
+sep24paper   13  34.7/d  +31.6%   +3.8%  62%   8% $ +3.77 $ +131/d
+sep25night    0   0.0/d        -        -     -     -        -        $+0/d
+sep25am       1   3.6/d  -20.7%  -20.7%   0%   0% $ -3.02 $  -11/d
+sep25pm       4  14.5/d   +5.0%   +7.4%  75%   0% $ +0.32 $   +5/d
+sep25eve2     0   0.0/d        -        -     -     -        -        $+0/d
+VAL pooled   18  12.7/d  +22.8%   +4.7%  61%   6% $ +2.63 $  +33/d   ($ total +47.31, 33.95 h)
+--- [hold] fleets>=1 @k-2, behind1 h150  FAILS: (d) fit win 52.4% (floor 57.1%), dead 10.4% (ceiling 13.2%)
+window        n fires/d    mean  median  win dead $/burst    $/day
+sep1819      30  31.2/d  +14.6%   +5.4%  57%  10% $ +1.57 $  +49/d
+sep2021      69  47.6/d  +10.3%   +4.4%  54%   3% $ +1.00 $  +48/d
+sep2223      47  38.5/d  +19.8%   +4.1%  53%  23% $ +2.24 $  +86/d
+sep23day     18  49.1/d   +6.9%   -5.0%  39%   6% $ +0.57 $  +28/d
+FIT pooled  164  41.0/d  +13.4%   +1.5%  52%  10% $ +1.41 $  +58/d   ($ total +232.02, 96.0 h)
+sep24paper   16  42.7/d  +17.5%   +0.1%  50%   0% $ +1.95 $  +83/d
+sep25night    1   2.7/d +139.7% +139.7% 100%   0% $+17.83 $  +48/d
+sep25am       1   3.6/d  -19.5%  -19.5%   0%   0% $ -2.86 $  -10/d
+sep25pm       5  18.2/d   +3.3%  -10.7%  40%   0% $ +0.10 $   +2/d
+sep25eve2     2  17.5/d   -8.0%   -8.0%   0%   0% $ -1.38 $  -24/d
+VAL pooled   25  17.7/d  +16.1%   -4.2%  44%   0% $ +1.76 $  +31/d   ($ total +43.94, 33.95 h)
+
+=== 1. what each pass changes against the baseline (fires added / removed), per window, $ at $13 after gas
+--- BASE OR (exactly 1 fleet & bundle_eth < 0.53)
+  sep1819    added   4 mean   -4.8% median   -5.3% win  25% $  -3.81 | removed  0
+  sep2021    added   9 mean  -14.0% median  -13.5% win  33% $ -19.30 | removed  0
+  sep2223    added   2 mean +314.6% median +314.6% win 100% $ +81.13 | removed  0
+  sep23day   added   3 mean   +9.9% median   -2.4% win  33% $  +2.88 | removed  0
+  FIT        added  18 mean  +28.6% median   -5.3% win  39% $ +60.90 | removed  0
+  sep24paper added   2 mean  +10.7% median  +10.7% win  50% $  +2.13 | removed  0
+  sep25night added   0 | removed  0
+  sep25am    added   0 | removed  0
+  sep25pm    added   1 mean  +49.9% median  +49.9% win 100% $  +6.16 | removed  0
+  sep25eve2  added   0 | removed  0
+  VAL        added   3 mean  +23.8% median  +49.9% win  67% $  +8.29 | removed  0
+  (a) margin: fit $+60.90 over 96 h ($+15.22/d); (a) fails when ONE fit launch is removed from both sides: 0x39501200 sep2223 +619.1%
+  validation launches it adds: 0x93d7d429 sep24paper +50.6%, 0x0928c56d sep25pm +49.9%, 0x046c4a35 sep24paper -29.2%
+--- BASE OR (exactly 1 fleet & bundle_eth >= 0.950851)
+  sep1819    added   3 mean  -38.1% median  -17.5% win   0% $ -15.87 | removed  0
+  sep2021    added   7 mean  +39.1% median  +11.7% win  57% $ +33.31 | removed  0
+  sep2223    added   7 mean   +6.2% median  +20.5% win  71% $  +3.33 | removed  0
+  sep23day   added   2 mean   -9.7% median   -9.7% win   0% $  -3.17 | removed  0
+  FIT        added  19 mean   +9.7% median   -1.1% win  47% $ +17.60 | removed  0
+  sep24paper added   3 mean  +89.9% median +119.8% win  67% $ +34.07 | removed  0
+  sep25night added   0 | removed  0
+  sep25am    added   1 mean  -20.7% median  -20.7% win   0% $  -3.02 | removed  0
+  sep25pm    added   2 mean   +2.7% median   +2.7% win  50% $  +0.03 | removed  0
+  sep25eve2  added   1 mean  -11.9% median  -11.9% win   0% $  -1.88 | removed  0
+  VAL        added   7 mean  +34.6% median  -11.9% win  43% $ +29.20 | removed  0
+  (a) margin: fit $+17.60 over 96 h ($+4.40/d); (a) fails when ONE fit launch is removed from both sides: 0xe52ce83c sep2021 +182.3%
+  validation launches it adds: 0x057d2437 sep24paper +190.6%, 0x6771ca6c sep24paper +119.8%, 0x218330b1 sep25pm +17.2%, 0xba059c17 sep25pm -11.9%, 0x8aba714f sep25eve2 -11.9%, 0x03e861dc sep25am -20.7%, 0xcd182c24 sep24paper -40.7%
+--- 2<=fleets<=4 @k-2
+  sep1819    added   0 | removed  0
+  sep2021    added   0 | removed  2 mean  -13.2% $  -4.09
+  sep2223    added   0 | removed  0
+  sep23day   added   0 | removed  0
+  FIT        added   0 | removed  2 mean  -13.2% $  -4.09
+  sep24paper added   0 | removed  0
+  sep25night added   0 | removed  0
+  sep25am    added   0 | removed  0
+  sep25pm    added   0 | removed  0
+  sep25eve2  added   0 | removed  0
+  VAL        added   0 | removed  0
+  (a) margin: fit $+4.09 over 96 h ($+1.02/d); (a) fails when ONE fit launch is removed from both sides: none
+  validation launches it adds: 
+--- BASE OR (0-1 fleets & arr1_d < 4)
+  sep1819    added   3 mean   +3.3% median  +47.5% win  67% $  +0.28 | removed  0
+  sep2021    added  20 mean   -2.6% median   -1.1% win  50% $ -13.27 | removed  0
+  sep2223    added   7 mean  +24.4% median  +20.5% win  71% $ +19.93 | removed  0
+  sep23day   added   4 mean   -5.0% median   -3.7% win  25% $  -3.92 | removed  0
+  FIT        added  34 mean   +3.2% median   +1.1% win  53% $  +3.02 | removed  0
+  sep24paper added   3 mean  +48.4% median  -16.1% win  33% $ +17.90 | removed  0
+  sep25night added   0 | removed  0
+  sep25am    added   0 | removed  0
+  sep25pm    added   1 mean  +49.9% median  +49.9% win 100% $  +6.16 | removed  0
+  sep25eve2  added   1 mean  -11.9% median  -11.9% win   0% $  -1.88 | removed  0
+  VAL        added   5 mean  +36.7% median  -11.9% win  40% $ +22.19 | removed  0
+  (a) margin: fit $+3.02 over 96 h ($+0.76/d); (a) fails when ONE fit launch is removed from both sides: 0x46ce738f sep1819 +47.5%, 0xe1e09a9f sep1819 +49.2%, 0xf43f9175 sep2021 +38.1%, 0xb9334f06 sep2223 +45.2%, 0xde81c961 sep2223 +99.5%, 0x1eb97415 sep2223 +26.6%, 0x6db12d9a sep23day +40.1%
+  validation launches it adds: 0x057d2437 sep24paper +190.6%, 0x0928c56d sep25pm +49.9%, 0x8aba714f sep25eve2 -11.9%, 0xf6c72aa8 sep24paper -16.1%, 0x046c4a35 sep24paper -29.2%
+--- BASE OR (exactly 1 fleet & k < 6)
+  sep1819    added   1 mean  +49.2% median  +49.2% win 100% $  +6.06 | removed  0
+  sep2021    added   9 mean  -13.4% median  -10.0% win  33% $ -18.62 | removed  0
+  sep2223    added   7 mean  +22.1% median  +17.3% win  71% $ +17.78 | removed  0
+  sep23day   added   3 mean   -8.9% median  -14.3% win  33% $  -4.47 | removed  0
+  FIT        added  20 mean   +2.8% median   -2.7% win  50% $  +0.76 | removed  0
+  sep24paper added   4 mean  +26.1% median  -22.6% win  25% $ +12.28 | removed  0
+  sep25night added   0 | removed  0
+  sep25am    added   0 | removed  0
+  sep25pm    added   1 mean   +5.6% median   +5.6% win 100% $  +0.40 | removed  0
+  sep25eve2  added   1 mean  -11.9% median  -11.9% win   0% $  -1.88 | removed  0
+  VAL        added   6 mean  +16.4% median  -14.0% win  33% $ +10.79 | removed  0
+  (a) margin: fit $+0.76 over 96 h ($+0.19/d); (a) fails when ONE fit launch is removed from both sides: 0xe1e09a9f sep1819 +49.2%, 0xc60a1345 sep2021 +12.5%, 0x7b9e0ee6 sep2021 +17.9%, 0x43b75c2c sep2223 +20.5%, 0xb9334f06 sep2223 +45.2%, 0x1803d8be sep2223 +17.3%, 0x8113ecb2 sep2223 +10.1%, 0xde81c961 sep2223 +99.5%, 0x6db12d9a sep23day +40.1%
+  validation launches it adds: 0x057d2437 sep24paper +190.6%, 0x48a89f86 sep25pm +5.6%, 0x8aba714f sep25eve2 -11.9%, 0xf6c72aa8 sep24paper -16.1%, 0x046c4a35 sep24paper -29.2%, 0xcd182c24 sep24paper -40.7%
+
+=== 2. threshold neighbours (same family, same feature, every fit-quantile cut): which cuts pass, and what each fails
+--- exactly 1 fleet & bundle_eth
+  abcd   BASE OR (0-1 fleets & bundle_eth >= 0.4): fit n=466  +1.4% win 41% dead 21% $-17.0/d | per-window $ [ -60.2  +44.2   +0.2  -52.1] | val n=96  +5.6% $+38.63
+  d      BASE OR (0-1 fleets & bundle_eth < 0.4): fit n=170 +18.4% win 50% dead 16% $+87.6/d | per-window $ [ +86.5  +63.9 +182.5  +17.4] | val n=16 +17.0% $+30.08
+  abcd   BASE OR (0-1 fleets & bundle_eth >= 0.55): fit n=367  +2.9% win 44% dead 22% $ +4.2/d | per-window $ [ -92.4 +109.0   +7.1   -6.7] | val n=71  +5.4% $+26.57
+  bcd    BASE OR (0-1 fleets & bundle_eth < 0.55): fit n=269 +10.1% win 43% dead 16% $+66.3/d | per-window $ [+118.8   -1.0 +175.6  -28.0] | val n=41 +10.4% $+42.13
+  abcd   BASE OR (0-1 fleets & bundle_eth >= 0.672074): fit n=269  +6.9% win 48% dead 21% $+38.4/d | per-window $ [  -3.7 +147.5  +13.9   -4.1] | val n=61  +8.5% $+47.20
+  abcd   BASE OR (0-1 fleets & bundle_eth < 0.672074): fit n=367  +5.2% win 41% dead 19% $+32.2/d | per-window $ [ +30.0  -39.5 +168.8  -30.6] | val n=51  +5.8% $+21.50
+  bcd    BASE OR (0-1 fleets & bundle_eth >= 0.907254): fit n=171 +15.8% win 52% dead 12% $+73.7/d | per-window $ [ +40.7 +179.4  +77.0   -2.3] | val n=44  +8.7% $+35.28
+  abcd   BASE OR (0-1 fleets & bundle_eth < 0.907254): fit n=465  +2.3% win 41% dead 22% $ -3.1/d | per-window $ [ -14.4  -71.4 +105.7  -32.4] | val n=68  +6.3% $+33.43
+  ad     BASE OR (exactly 1 fleet & bundle_eth >= 0.53): fit n=146 +10.5% win 54% dead 17% $+37.7/d | per-window $ [ +25.0  +77.8  +39.9   +8.1] | val n=22 +21.9% $+55.37
+  PASS   BASE OR (exactly 1 fleet & bundle_eth < 0.53): fit n= 91 +27.1% win 62% dead  9% $+72.5/d | per-window $ [ +26.6  +71.0 +167.9  +24.5] | val n=15 +17.0% $+28.21
+  ad     BASE OR (exactly 1 fleet & bundle_eth >= 0.58): fit n=128 +12.7% win 59% dead 19% $+42.4/d | per-window $ [ +23.2  +87.7  +43.8  +14.7] | val n=22 +21.9% $+55.37
+  d      BASE OR (exactly 1 fleet & bundle_eth < 0.58): fit n=109 +21.7% win 55% dead  8% $+67.9/d | per-window $ [ +28.4  +61.1 +164.1  +17.8] | val n=15 +17.0% $+28.21
+  ad     BASE OR (exactly 1 fleet & bundle_eth >= 0.767535): fit n=110 +14.4% win 57% dead 18% $+42.5/d | per-window $ [ +12.7  +80.7  +54.7  +21.9] | val n=19 +22.4% $+49.12
+  d      BASE OR (exactly 1 fleet & bundle_eth < 0.767535): fit n=127 +18.9% win 57% dead 10% $+67.7/d | per-window $ [ +38.9  +68.0 +153.2  +10.7] | val n=18 +17.3% $+34.46
+  PASS   BASE OR (exactly 1 fleet & bundle_eth >= 0.950851): fit n= 92 +23.2% win 63% dead 10% $+61.7/d | per-window $ [ +14.6 +123.6  +90.1  +18.5] | val n=19 +22.4% $+49.12
+  ad     BASE OR (exactly 1 fleet & bundle_eth < 0.950851): fit n=145 +12.8% win 53% dead 17% $+48.5/d | per-window $ [ +37.0  +25.2 +117.7  +14.1] | val n=18 +17.3% $+34.46
+--- 0-1 fleets & arr1_d
+  ad     BASE OR (0-1 fleets & arr1_d >= 3): fit n=146 +13.4% win 51% dead 17% $+51.4/d | per-window $ [ +20.9  +55.2 +115.6  +13.9] | val n=22 +24.7% $+63.50
+  c      BASE OR (0-1 fleets & arr1_d < 3): fit n= 91 +22.4% win 67% dead  9% $+58.8/d | per-window $ [ +30.7  +93.6  +92.3  +18.7] | val n=15 +12.8% $+20.08
+  ad     BASE OR (0-1 fleets & arr1_d >= 4): fit n=130 +14.9% win 52% dead 18% $+52.2/d | per-window $ [ +20.9  +71.7 +101.1  +14.9] | val n=20 +18.5% $+41.47
+  PASS   BASE OR (0-1 fleets & arr1_d < 4): fit n=107 +19.2% win 63% dead  8% $+58.0/d | per-window $ [ +30.7  +77.0 +106.7  +17.7] | val n=17 +21.6% $+42.11
+  d      BASE OR (0-1 fleets & arr1_d >= 5): fit n=112 +18.5% win 55% dead 19% $+58.0/d | per-window $ [ +34.5  +76.9 +103.5  +17.1] | val n=17 +19.9% $+38.44
+  a      BASE OR (0-1 fleets & arr1_d < 5): fit n=125 +15.4% win 58% dead 10% $+52.2/d | per-window $ [ +17.1  +71.9 +104.4  +15.5] | val n=20 +19.9% $+45.14
+  d      BASE OR (0-1 fleets & arr1_d >= 6): fit n=100 +22.1% win 57% dead 17% $+63.6/d | per-window $ [ +35.0  +93.8 +101.7  +23.7] | val n=16 +20.1% $+36.52
+  ad     BASE OR (0-1 fleets & arr1_d < 6): fit n=137 +13.0% win 57% dead 12% $+46.6/d | per-window $ [ +16.5  +55.0 +106.2   +8.9] | val n=21 +19.8% $+47.05
+  ad     BASE OR (exactly 1 fleet & arr1_d >= 3): fit n=146 +13.4% win 51% dead 17% $+51.4/d | per-window $ [ +20.9  +55.2 +115.6  +13.9] | val n=22 +24.7% $+63.50
+  c      BASE OR (exactly 1 fleet & arr1_d < 3): fit n= 91 +22.4% win 67% dead  9% $+58.8/d | per-window $ [ +30.7  +93.6  +92.3  +18.7] | val n=15 +12.8% $+20.08
+  ad     BASE OR (exactly 1 fleet & arr1_d >= 4): fit n=130 +14.9% win 52% dead 18% $+52.2/d | per-window $ [ +20.9  +71.7 +101.1  +14.9] | val n=20 +18.5% $+41.47
+  PASS   BASE OR (exactly 1 fleet & arr1_d < 4): fit n=107 +19.2% win 63% dead  8% $+58.0/d | per-window $ [ +30.7  +77.0 +106.7  +17.7] | val n=17 +21.6% $+42.11
+  d      BASE OR (exactly 1 fleet & arr1_d >= 5): fit n=112 +18.5% win 55% dead 19% $+58.0/d | per-window $ [ +34.5  +76.9 +103.5  +17.1] | val n=17 +19.9% $+38.44
+  a      BASE OR (exactly 1 fleet & arr1_d < 5): fit n=125 +15.4% win 58% dead 10% $+52.2/d | per-window $ [ +17.1  +71.9 +104.4  +15.5] | val n=20 +19.9% $+45.14
+  d      BASE OR (exactly 1 fleet & arr1_d >= 6): fit n=100 +22.1% win 57% dead 17% $+63.6/d | per-window $ [ +35.0  +93.8 +101.7  +23.7] | val n=16 +20.1% $+36.52
+  ad     BASE OR (exactly 1 fleet & arr1_d < 6): fit n=137 +13.0% win 57% dead 12% $+46.6/d | per-window $ [ +16.5  +55.0 +106.2   +8.9] | val n=21 +19.8% $+47.05
+--- exactly 1 fleet & k
+  abcd   BASE OR (0-1 fleets & k >= 3): fit n=472  +1.3% win 41% dead 22% $-18.9/d | per-window $ [  +2.1  -10.6  +10.6  -77.9] | val n=81  +6.3% $+39.16
+  cd     BASE OR (0-1 fleets & k < 3): fit n=164 +19.3% win 52% dead 12% $+89.5/d | per-window $ [ +24.2 +118.6 +172.1  +43.2] | val n=31  +9.9% $+29.54
+  abcd   BASE OR (0-1 fleets & k >= 5): fit n=379  +0.5% win 39% dead 24% $-25.5/d | per-window $ [ -13.3   +0.3  -17.0  -71.9] | val n=62  +4.3% $+14.23
+  cd     BASE OR (0-1 fleets & k < 5): fit n=257 +14.0% win 51% dead 13% $+96.0/d | per-window $ [ +39.6 +107.7 +199.7  +37.2] | val n=50 +10.9% $+54.47
+  abcd   BASE OR (0-1 fleets & k >= 6): fit n=334  +1.0% win 40% dead 25% $-16.4/d | per-window $ [ +14.2   +6.7  -34.4  -52.0] | val n=50  +7.8% $+34.50
+  cd     BASE OR (0-1 fleets & k < 6): fit n=302 +11.4% win 48% dead 14% $+86.9/d | per-window $ [ +12.1 +101.3 +217.1  +17.3] | val n=62  +6.8% $+34.20
+  acd    BASE OR (0-1 fleets & k >= 8): fit n=186  +8.2% win 47% dead 24% $+34.0/d | per-window $ [  +8.0  +95.1  +26.1   +6.9] | val n=32 +14.2% $+48.61
+  abcd   BASE OR (0-1 fleets & k < 8): fit n=450  +5.0% win 42% dead 18% $+36.6/d | per-window $ [ +18.3  +12.9 +156.6  -41.6] | val n=80  +4.5% $+20.09
+  ad     BASE OR (exactly 1 fleet & k >= 5): fit n=154 +13.6% win 52% dead 16% $+55.4/d | per-window $ [ +21.2  +72.9 +114.3  +13.2] | val n=22 +18.3% $+45.22
+  a      BASE OR (exactly 1 fleet & k < 5): fit n= 83 +22.9% win 66% dead 10% $+54.8/d | per-window $ [ +30.4  +75.8  +93.6  +19.3] | val n=15 +22.2% $+38.36
+  ad     BASE OR (exactly 1 fleet & k >= 6): fit n=144 +13.8% win 53% dead 17% $+52.7/d | per-window $ [ +15.1  +77.1 +103.3  +15.4] | val n=19 +23.9% $+52.86
+  PASS   BASE OR (exactly 1 fleet & k < 6): fit n= 93 +21.6% win 63% dead  9% $+57.5/d | per-window $ [ +36.5  +71.7 +104.6  +17.2] | val n=18 +15.7% $+30.71
+  d      BASE OR (exactly 1 fleet & k >= 7): fit n=124 +17.4% win 54% dead 16% $+59.9/d | per-window $ [ +32.0  +89.0 +101.5  +17.1] | val n=18 +24.3% $+50.95
+  a      BASE OR (exactly 1 fleet & k < 7): fit n=113 +16.2% win 60% dead 12% $+50.3/d | per-window $ [ +19.6  +59.7 +106.4  +15.5] | val n=19 +15.7% $+32.63
+  d      BASE OR (exactly 1 fleet & k >= 8): fit n=107 +21.2% win 58% dead 16% $+64.9/d | per-window $ [ +35.5  +97.2 +103.3  +23.7] | val n=17 +21.9% $+42.69
+  ad     BASE OR (exactly 1 fleet & k < 8): fit n=130 +13.3% win 56% dead 12% $+45.3/d | per-window $ [ +16.1  +51.5 +104.6   +8.9] | val n=20 +18.3% $+40.89
+
+=== 3. null test: the OR family with random features (uniform, fixed seeds 0..199)
+  random features: 157 of 4800 variants clear (a)-(e) = 3.3%; 114 of 200 random features have at least one passing cut (of 24 cuts each)
+  real features:   5 of 184 OR variants clear (a)-(e) = 2.7% (4 distinct fire sets)
+
+=== 4. the engine's own skips applied to BOTH sides (not in the brief's baseline numbers): one position at a time, creator repeat
+  baseline with skips: fit n= 71 +27.6% win 68% dead  7% $+57.9/d | per-window $ [ +37.7  +85.5  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  BASE OR (exactly 1 fleet & bundle_eth < 0.53): fit n= 89 +27.8% win 62% dead  8% $+73.1/d | per-window $ [ +33.9  +66.2 +167.9  +24.5] | val n=15 +17.0% $+28.21  criteria vs the skipped baseline: all pass
+  BASE OR (exactly 1 fleet & bundle_eth >= 0.950851): fit n= 90 +23.8% win 63% dead  9% $+62.3/d | per-window $ [ +21.8 +118.8  +90.1  +18.5] | val n=19 +22.4% $+49.12  criteria vs the skipped baseline: all pass
+  2<=fleets<=4 @k-2: fit n= 69 +28.8% win 70% dead  7% $+58.9/d | per-window $ [ +37.7  +89.6  +86.8  +21.6] | val n=12 +15.3% $+19.92  criteria vs the skipped baseline: all pass
+  BASE OR (0-1 fleets & arr1_d < 4): fit n=105 +19.7% win 63% dead  8% $+58.7/d | per-window $ [ +37.9  +72.2 +106.7  +17.7] | val n=17 +21.6% $+42.11  criteria vs the skipped baseline: all pass
+  BASE OR (exactly 1 fleet & k < 6): fit n= 91 +22.2% win 64% dead  8% $+58.1/d | per-window $ [ +43.7  +66.9 +104.6  +17.2] | val n=18 +15.7% $+30.71  criteria vs the skipped baseline: all pass

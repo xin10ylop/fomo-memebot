@@ -31,6 +31,7 @@ Everything below was computed from data collected in this session; scripts are i
 25. **The burst filled six and five times at $15 and the wallet, not the stake, was the bet (section 24.24).** The 3% guard cannot see a $15 fill's own impact, so every shot after the first also fills until the wallet cannot fund one more; one launch at −56% on the whole wallet cost $42 of the night's $54. Engine 5.93 sizes every buy to the wallet less a gas reserve so the sequencer itself drops a second fill, makes `STAKE_MAX` the wallet's ceiling, and starts the hold clock at the fill (the sells had landed 31–36 blocks after the buy instead of 15). Nine live fills so far, four wins, a mean near +1%: too few to judge the seat's +16% either way.
 26. **The BuyOnce relay makes the bet a setting again (section 24.25).** A 20-line contract owned by the wallet buys at most once per curve and forwards the tokens to the wallet; the curve accepts contract buyers (checked by simulation), the relay's logic was exercised on a live curve's state before deployment, and engine 5.94 routes every shot through it. `STAKE_MIN`/`STAKE_MAX` are the bet, the wallet may hold any amount.
 27. **Shooters (section 24.26).** One wallet's consecutive nonces on parallel sockets are refused as "nonce too high" when the sequencer is under load (29 of 35 shots on Sep 19); engine 6.0 fires every shot from its own gas-only shooter wallet and the third relay buys with the stake it holds, once per curve, before the seat's deadline. No shot depends on another, and the exit no longer depends on how many landed.
+35. **Can the rule be improved? No, not provably (section 24.34).** Three independent searches on one strict protocol (fit on the four backtest windows, validate on the five paper windows, executable views only): 47, 383 and 3,420 variants; the same baseline to the cent; every pass rests on a single launch, random features pass as often as real ones, the k−1 view is the only material gain and the feed cannot show it in time. Keep the rule. One trade-off recorded (a −20% stop: 1% dead, $51 instead of $57 a day).
 34. **Is the engine doing what the tables priced? No, in three ways, then audited at the seam (section 24.33).** The tables counted shooter wallets and the token's own approvals; the engine counts fleets and excludes the token. The tables priced a block index; the engine sees time. The safety switch, the trade hours, the demand floor and the gas cap stood in front of the gate unpriced. Every shot aimed at the 563 launches was pulled raw, the engine's own count replayed against the tables' (0 differences, a permanent test), and its rule re-priced: fleets ≥ 2 at the gate's opening pays +19% to +30% a fire, 60-67% wins, 3.4-3.9 standard errors above zero, positive on all four windows on every view from block k−1 to k−3, about $2.2-3.6 a burst at $13. Engine 6.4 measures its view in chain-numbered blocks at every ask of the gate, closes the gate at the actual tick (GATE_CLOSE_MS), and runbook 5o sets every pre-gate filter to the tables' population.
 33. **The paper day, and the gate moved into the burst (section 24.32).** Twelve hours of engine 6.1 in dry run: 16 launches reached the gate, all refused (0-1 attackers), all 16 would have lost (−15% at second place). The chain, scored like the windows, says the signal was there: 25 of the day's 58 qualifying launches had 2+ fleets by block 5 and the first seat paid +13% to +37%. The engine counts at the burst's build, about 300 ms before the tick, where the feed shows only block k−5 of the creation second: 3% of launches pass at that view on every window; at the tick's shot (block k−2) 24% pass at the same return. Engine 6.2 decides the gate shot by shot inside the burst (the shots before the tick revert anyway): a shot is sent only once two snipers are visible, a burst whose gate never opens sends nothing and costs nothing. Second place, 300 blocks, at that view: +23.0% / +18.0% / +30.0% on the three windows, 14-29 fires a window, $37-60 a day at $13. The other filters let only 16 of 58 launches reach the gate: the next leak to measure.
 32. **Out of sample, and the rule (section 24.31).** On Sep 20 13:26 to Sep 22 01:02 UTC (189 qualifying launches, a window nothing was fitted on) the pre-tick gate separates as before: 0 attackers −1.0% first seat (29% win), 2-3 attackers +30.2% (67%), 4-6 +13.9% (89%). On the 65 gated launches, second place is +11.2% at 15 blocks and +10.9% at 300; across the three windows second place at 300 blocks is +13.7%, +10.9%, +26.9% (at 15 blocks +18.0%, +11.2%, +4.9%), so 300 blocks is the hold whose worst window is still above +10%. Third and fourth place are weaker out of sample (+6.5%, +1.9% at 300), last is negative on every window, and the second-second seat is negative on two of three: the burst stays dense and the guard stays. Engine 6.1 carries the gate (ATTACK_MIN), the hold in blocks (HOLD_BLOCKS), the measured gas model and a kill line (KILL_USD), all off by default; the next step is a paper day on the box, scored by `paper_day.py` from the chain, then $13 stakes with KILL_USD=15 on the $22 the box holds.
@@ -3471,4 +3472,48 @@ in block k−1). Prediction and reading agree; the refused set is negative for t
 
 Running tally (Sep 24 12:55 to Sep 25 22:22, 33.5 h): 13 fires, 4 wins, about +$24 at $13; 54 refused, mean about 0,
 median about −10%. The go line: 13 of 15 fires, the refused mean at zero; one more busy stretch decides it.
+
+### 24.34 Can the rule be improved? Three independent searches, one protocol (Sep 25-26)
+
+The question, asked after five days of predictions against readings: is any change to the rule more profitable, robustly,
+on everything measured? Three searchers ran the identical brief (`data/derived/improve_search/BRIEF.md`) independently:
+two Opus agents (A, B) and the session itself (C); each wrote its own scripts (`data/derived/improve_search/{A,B,C}/`),
+and each other's scripts were re-run as the cross-check. The protocol: fit on the four backtest windows (96 h, 563
+launches), validate on the five paper windows (34 h, 99 launches, truly out of sample since the rule was fixed on Sep 24
+before them); executable views only (block k−2 exact; k−1 reported as a borderline, never a headline); a candidate passes
+only if it beats the baseline's $/day on the fit set, is positive on each fit window, beats or matches the baseline on the
+validation set, keeps the win and dead rates within 10 and 5 points, and fires at least 30 times on the fit set.
+
+**All three reproduce the same baseline to the cent** (fleets ≥ 2 at k−2, second place, 300 blocks, $13 after $0.33 gas):
+fit 73 fires, +26.7%, 67% wins, 8% dead, $3.14 a burst, $57.3 a day; validation 12 fires, +15.3%, $19.92 total. A's fleet
+counts match `crowd_rules.py` on all 563 launches; A's and B's tape pulls reproduce `hold_grid`'s returns exactly.
+
+**Verdict, unanimous: nothing is proven; keep the rule as it is.** Variants tried: C 47, A 383 (plus 4,800 random-feature
+variants as a null test), B 3,420. Every variant that clears the five criteria as written fails the brief's own caveat:
+- A's 5 and B's 9 "passes" are all OR-branches on 1-fleet launches split by bundle size, k, or the fleet's arrival block, and
+  every one rests on a single launch: `0x39501200` (+619%, Sep 22-23) on the fit set, `0x057d2437` (+191%) or `0x93d7d429`
+  (+51%) on validation. Remove it and the pass flips. Both tails of the same feature (bundle < 0.45 ETH and bundle ≥ 1.0
+  ETH) "pass", and the middle loses. A's null test: random features pass at 3.3%, the real ones at 2.7%. B's paired
+  t-statistics of the per-launch gain over the baseline never exceed +1.06.
+- C's two "passes" are not rule changes: the $100 stake column (size; and `hold_grid` folds later buyers by tokens, so it
+  overstates large stakes: 24.29), and the k−1 view (147 fires, +19.5%, $81 a day fit; validation 30 fires, +22.5%, $78),
+  which the feed cannot show in time: a later gate fills behind the crowd (24.33 addendum 2).
+
+**By dimension, all three agree:** thresholds: fleets ≥ 1 $53/day (52% wins, 16% dead), ≥ 3 $21, ≥ 4 $2; wallets ≥ 2 $44;
+fleets ≥ 2 at k−2 and ≥ 1 at k−3 $58 on fit but +6% on validation. Holds on the baseline gate: h15 $33, h60 $33, h150 $45,
+h300 $57, h600 $41; tp50 $33; stop20 $51 (51% wins, 1% dead); tp50+stop20 $38. Hours: every exclusion lowers $/day (the old
+12-05 window $56). Creator supply: ≥ 1% (the engine's setting) $56, ≥ 2% $37. No pre-tick feature separates the 0-1 fleet
+winners of Sep 24-25: the twelve of them span the whole range of every feature (k 1-9, bundle 0.32-1.55 ETH, named 3-31,
+both tiers, hours 2-22), two are un-aimable creations.
+
+**One trade-off, not an improvement:** a −20% stop with a 600-block hold takes the dead fraction from 8% to 1% at the cost
+of $/day ($51 against $57) and win rate (51%: many small stops); the stop is modelled as an instant exit at the crossing
+trade, which the engine's single sell is not. Recorded for the owner's risk preference, not adopted.
+
+**Found on the way and fixed:** `hold_grid.py`'s combined take-profit/stop column took the take-profit even when the stop
+had hit first (48 of 563 fit launches, 9 baseline fires): now whichever hit first. The column is not used by the rule.
+
+**Not testable with this data:** the real minOut guard per launch (needs the engine's `min_out_tokens`), the partial k−1 view
+and the blind window (need more 6.4+ logs), exits outside the nine columns and other seat positions (need re-pulled tapes),
+stakes above $13 (need the fixed-ETH model on every launch), creator supply as a branch (tapes for all 663 launches).
 

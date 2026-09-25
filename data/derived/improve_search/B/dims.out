@@ -1,0 +1,76 @@
+1. threshold / unit / view (hold 300)
+  fleets>=1@k-2                                h300               FIT n=164 +12.5% med  +0.7% win 52% dead 16% $+1.29/b $  52.9/d | VAL n= 25 +22.1% $ +63.7 | -bc-e
+  fleets>=2@k-2                                h300               FIT n= 73 +26.7% med +21.0% win 67% dead  8% $+3.14/b $  57.3/d | VAL n= 12 +15.3% $ +19.9 | -bcde
+  fleets>=3@k-2                                h300               FIT n= 27 +26.0% med  +1.2% win 59% dead  0% $+3.05/b $  20.6/d | VAL n=  2  -6.7% $  -2.4 | ---d-
+  fleets>=4@k-2                                h300               FIT n=  7 +13.5% med  +7.5% win 57% dead  0% $+1.42/b $   2.5/d | VAL n=0 | ---d-
+  wallets>=1@k-2                               h300               FIT n=138 +16.2% med  +1.6% win 56% dead 16% $+1.77/b $  61.2/d | VAL n= 25 +22.1% $ +63.7 | abc-e
+  wallets>=2@k-2                               h300               FIT n= 73 +20.9% med  +1.2% win 58% dead 10% $+2.39/b $  43.6/d | VAL n= 12 +22.1% $ +30.5 | -bcde
+  wallets>=3@k-2                               h300               FIT n= 46 +20.8% med  +1.2% win 57% dead  9% $+2.38/b $  27.4/d | VAL n=  6 +17.7% $ +11.8 | -b--e
+  wallets>=5@k-2                               h300               FIT n= 27  +9.6% med  -1.1% win 48% dead 15% $+0.92/b $   6.2/d | VAL n=  5 +11.3% $  +5.7 | -----
+  wallets>=10@k-2                              h300               FIT n= 16  +1.3% med  -6.5% win 38% dead 25% $-0.16/b $  -0.6/d | VAL n=  2 +16.7% $  +3.7 | -----
+  fleets>=1@k-3                                h300               FIT n=137 +14.3% med  -1.1% win 50% dead 18% $+1.53/b $  52.5/d | VAL n= 18 +22.8% $ +47.3 | -bc-e
+  fleets>=2@k-3                                h300               FIT n= 52 +30.1% med +23.1% win 65% dead 10% $+3.59/b $  46.7/d | VAL n=  8  +6.1% $  +3.7 | -b-de
+  fleets>=2@k-2 & fleets>=1@k-3                h300               FIT n= 64 +30.6% med +22.4% win 67% dead  8% $+3.65/b $  58.4/d | VAL n=  8  +6.1% $  +3.7 | ab-de
+  fleets>=2@k-2 & wallets>=2@k-3               h300               FIT n= 35 +37.6% med +23.0% win 63% dead  9% $+4.56/b $  39.9/d | VAL n=  5  +9.2% $  +4.3 | -b-de
+  fleets>=2@k-2 & wallets>=5@k-2               h300               FIT n= 14 +29.1% med +19.1% win 64% dead  7% $+3.46/b $  12.1/d | VAL n=  3  +7.2% $  +1.8 | ---d-
+  fleets>=2@k-2 | wallets>=2@k-2               h300               FIT n= 88 +20.6% med  +8.0% win 61% dead 10% $+2.34/b $  51.6/d | VAL n= 15 +17.9% $ +29.9 | -bcde
+  fleets>=2@k-2 | wallets>=5@k-2               h300               FIT n= 86 +20.9% med  +8.0% win 62% dead 10% $+2.39/b $  51.4/d | VAL n= 14 +15.6% $ +23.8 | -bcde
+  fleets>=2@k-2 | fleets>=1@k-3                h300               FIT n=146 +13.4% med  +0.3% win 51% dead 17% $+1.41/b $  51.4/d | VAL n= 22 +24.7% $ +63.5 | -bc-e
+  fleets>=1@k-2 & wallets>=5@k-2               h300               FIT n= 27  +9.6% med  -1.1% win 48% dead 15% $+0.92/b $   6.2/d | VAL n=  5 +11.3% $  +5.7 | -----
+2. the hold, baseline gate
+  fleets>=2@k-2                                h15                FIT n= 73 +16.4% med  +8.1% win 66% dead  3% $+1.80/b $  32.8/d | VAL n= 12 +18.6% $ +25.0 | -bcde
+  fleets>=2@k-2                                h30                FIT n= 73 +16.2% med  +8.7% win 64% dead  3% $+1.78/b $  32.5/d | VAL n= 12 +13.2% $ +16.7 | -b-de
+  fleets>=2@k-2                                h60                FIT n= 73 +16.5% med  +9.4% win 66% dead  3% $+1.81/b $  33.1/d | VAL n= 12  +8.5% $  +9.3 | -b-de
+  fleets>=2@k-2                                h150               FIT n= 73 +21.5% med +12.8% win 66% dead  7% $+2.46/b $  45.0/d | VAL n= 12 +13.3% $ +16.8 | -b-de
+  fleets>=2@k-2                                h300               FIT n= 73 +26.7% med +21.0% win 67% dead  8% $+3.14/b $  57.3/d | VAL n= 12 +15.3% $ +19.9 | -bcde
+  fleets>=2@k-2                                h600               FIT n= 73 +20.0% med +11.2% win 52% dead 19% $+2.27/b $  41.4/d | VAL n= 12 +15.6% $ +20.4 | -bc-e
+  fleets>=2@k-2                                tp50_h600          FIT n= 73 +16.5% med +32.7% win 70% dead  8% $+1.81/b $  33.1/d | VAL n= 12  +7.4% $  +7.6 | -b-de
+  fleets>=2@k-2                                stop20_h600        FIT n= 73 +24.0% med  +4.1% win 51% dead  1% $+2.79/b $  50.9/d | VAL n= 12 +14.0% $ +17.9 | -b--e
+  fleets>=2@k-2                                tp50_stop20_h600   FIT n= 73 +18.6% med +32.7% win 70% dead  0% $+2.09/b $  38.2/d | VAL n= 12 +13.5% $ +17.1 | -b-de
+3. features as AND-filters on the baseline gate (hold 300), a selection
+  BASE & bundle_eth>=0.628                     h300               FIT n= 51 +31.2% med +22.1% win 67% dead 10% $+3.72/b $  47.4/d | VAL n= 10 +19.8% $ +22.5 | -bcde
+  BASE & bundle_eth>=0.836                     h300               FIT n= 25 +47.5% med +22.2% win 64% dead  0% $+5.85/b $  36.6/d | VAL n=  5 +41.0% $ +25.0 | -bcd-
+  BASE & bundle_eth<0.628                      h300               FIT n= 22 +16.3% med +18.3% win 68% dead  5% $+1.79/b $   9.8/d | VAL n=  2  -7.4% $  -2.6 | ---d-
+  BASE & named>=5                              h300               FIT n= 56 +31.1% med +22.0% win 68% dead 11% $+3.71/b $  51.9/d | VAL n=  9 +24.2% $ +25.4 | -bcde
+  BASE & named<5                               h300               FIT n= 17 +12.3% med  +1.2% win 65% dead  0% $+1.26/b $   5.4/d | VAL n=  3 -11.5% $  -5.5 | ---d-
+  BASE & tier==2%                              h300               FIT n= 25 +19.6% med +13.7% win 60% dead  8% $+2.22/b $  13.9/d | VAL n=  5  -1.4% $  -2.5 | ---d-
+  BASE & tier>2%                               h300               FIT n= 48 +30.4% med +21.5% win 71% dead  8% $+3.62/b $  43.4/d | VAL n=  7 +27.2% $ +22.5 | -bcde
+  BASE & k>=5                                  h300               FIT n= 67 +28.8% med +22.1% win 70% dead  9% $+3.41/b $  57.1/d | VAL n= 10  +3.4% $  +1.2 | -b-de
+  BASE & k<=6                                  h300               FIT n= 40 +26.7% med +22.3% win 65% dead  8% $+3.14/b $  31.4/d | VAL n=  7 +18.9% $ +14.9 | -b-de
+  BASE & arr1>=3                               h300               FIT n= 64 +30.6% med +22.4% win 67% dead  8% $+3.65/b $  58.4/d | VAL n=  8  +6.1% $  +3.7 | ab-de
+  BASE & arr2>=3                               h300               FIT n= 52 +30.1% med +23.1% win 65% dead 10% $+3.59/b $  46.7/d | VAL n=  8  +6.1% $  +3.7 | -b-de
+  BASE & maxw@k-2>=3                           h300               FIT n= 14 +29.1% med +19.1% win 64% dead  7% $+3.46/b $  12.1/d | VAL n=  3  +7.2% $  +1.8 | ---d-
+  BASE & maxshots@k-2>=3                       h300               FIT n= 65 +29.8% med +22.2% win 69% dead  8% $+3.55/b $  57.7/d | VAL n= 10 +20.2% $ +22.9 | abcde
+  BASE & shots@k-2>=5                          h300               FIT n= 64 +25.8% med +22.1% win 67% dead  8% $+3.03/b $  48.5/d | VAL n= 10 +20.2% $ +22.9 | -bcde
+  BASE & direct fleets@k-2==0                  h300               FIT n= 64 +25.6% med +19.4% win 67% dead  8% $+3.00/b $  48.1/d | VAL n= 12 +15.3% $ +19.9 | -bcde
+  BASE & relay fleets@k-2>=2                   h300               FIT n= 66 +25.2% med +19.4% win 67% dead  8% $+2.94/b $  48.5/d | VAL n= 12 +15.3% $ +19.9 | -bcde
+3b. features as OR-branches (fire also when fleets@k-2 < 2 and ...), hold 300, a selection
+  BASE | (f@k-2<2 & bundle_eth>=0.836)         h300               FIT n=163  +7.6% med  -3.0% win 48% dead 17% $+0.65/b $  26.6/d | VAL n= 40  +5.6% $ +16.0 | ----e
+  BASE | (f@k-2==1 & bundle_eth>=0.836)        h300               FIT n= 97 +21.0% med +15.7% win 61% dead 11% $+2.40/b $  58.3/d | VAL n= 19 +22.4% $ +49.1 | abcde
+  BASE | (f@k-2<2 & bundle_eth>=1.0)           h300               FIT n=120 +17.4% med  +1.3% win 55% dead 10% $+1.93/b $  58.0/d | VAL n= 30 +16.2% $ +53.2 | a-c-e
+  BASE | (f@k-2==1 & bundle_eth>=1.0)          h300               FIT n= 89 +23.5% med +18.2% win 63% dead 10% $+2.72/b $  60.6/d | VAL n= 19 +22.4% $ +49.1 | abcde
+  BASE | (f@k-2<2 & bundle_eth>=1.5)           h300               FIT n= 95 +22.6% med  +8.6% win 58% dead  7% $+2.61/b $  62.0/d | VAL n= 23 +11.4% $ +26.5 | ab-de
+  BASE | (f@k-2==1 & bundle_eth>=1.5)          h300               FIT n= 81 +26.8% med +20.6% win 65% dead  9% $+3.15/b $  63.8/d | VAL n= 17 +19.2% $ +36.9 | abcde
+  BASE | (f@k-2<2 & named<4)                   h300               FIT n=145 +20.0% med +11.7% win 63% dead 10% $+2.26/b $  82.1/d | VAL n= 26 +10.1% $ +25.5 | ab-de
+  BASE | (f@k-2==1 & named<4)                  h300               FIT n= 87 +21.9% med +15.7% win 64% dead  9% $+2.51/b $  54.6/d | VAL n= 13 +18.0% $ +26.1 | -bcde
+  BASE | (f@k-2<2 & k<=4)                      h300               FIT n=166 +14.4% med  +2.7% win 57% dead 11% $+1.54/b $  63.8/d | VAL n= 31 +13.7% $ +44.9 | ab--e
+  BASE | (f@k-2==1 & k<=4)                     h300               FIT n= 83 +22.9% med +18.2% win 66% dead 10% $+2.64/b $  54.8/d | VAL n= 15 +22.2% $ +38.4 | -bcde
+  BASE | (f@k-2<2 & w@k-2>=2)                  h300               FIT n= 88 +20.6% med  +8.0% win 61% dead 10% $+2.34/b $  51.6/d | VAL n= 15 +17.9% $ +29.9 | -bcde
+  BASE | (f@k-2==1 & w@k-2>=2)                 h300               FIT n= 88 +20.6% med  +8.0% win 61% dead 10% $+2.34/b $  51.6/d | VAL n= 15 +17.9% $ +29.9 | -bcde
+  BASE | (f@k-2<2 & w@k-2>=5)                  h300               FIT n= 86 +20.9% med  +8.0% win 62% dead 10% $+2.39/b $  51.4/d | VAL n= 14 +15.6% $ +23.8 | -bcde
+  BASE | (f@k-2==1 & w@k-2>=5)                 h300               FIT n= 86 +20.9% med  +8.0% win 62% dead 10% $+2.39/b $  51.4/d | VAL n= 14 +15.6% $ +23.8 | -bcde
+  BASE | (f@k-2<2 & maxshots@k-2>=3)           h300               FIT n=132 +13.3% med  +1.6% win 55% dead 12% $+1.40/b $  46.3/d | VAL n= 20 +21.4% $ +49.2 | -bc-e
+  BASE | (f@k-2==1 & maxshots@k-2>=3)          h300               FIT n=132 +13.3% med  +1.6% win 55% dead 12% $+1.40/b $  46.3/d | VAL n= 20 +21.4% $ +49.2 | -bc-e
+  BASE | (f@k-2<2 & tier==2%)                  h300               FIT n=181 +10.8% med  -3.1% win 48% dead 13% $+1.07/b $  48.5/d | VAL n= 21 +13.8% $ +30.7 | ----e
+  BASE | (f@k-2==1 & tier==2%)                 h300               FIT n=111 +15.6% med  +1.7% win 57% dead 11% $+1.69/b $  47.0/d | VAL n= 13 +14.6% $ +20.3 | -b--e
+  BASE | (f@k-2<2 & only h18-23)               h300               FIT n=258  +8.1% med  -4.2% win 45% dead 23% $+0.72/b $  46.5/d | VAL n= 51 +12.9% $ +68.9 | -b--e
+  BASE | (f@k-2==1 & only h18-23)              h300               FIT n=125 +18.8% med  +4.1% win 58% dead 15% $+2.12/b $  66.2/d | VAL n= 20 +27.4% $ +64.6 | abc-e
+5. hours of the day (AND on the baseline gate, hold 300)
+  BASE & not h00-05                            h300               FIT n= 65 +22.1% med +21.0% win 68% dead  9% $+2.54/b $  41.2/d | VAL n= 11  +1.3% $  -1.7 | -b-de
+  BASE & not h06-11                            h300               FIT n= 68 +27.5% med +19.6% win 66% dead  9% $+3.24/b $  55.1/d | VAL n= 12 +15.3% $ +19.9 | -bcde
+  BASE & not h12-17                            h300               FIT n= 47 +26.6% med  +8.6% win 60% dead  9% $+3.13/b $  36.8/d | VAL n=  6 +30.7% $ +22.0 | --cde
+  BASE & not h18-23                            h300               FIT n= 39 +33.1% med +24.4% win 77% dead  5% $+3.97/b $  38.7/d | VAL n=  7 +24.1% $ +19.6 | ---de
+  BASE & only h12-17                           h300               FIT n= 26 +26.8% med +27.0% win 81% dead  8% $+3.16/b $  20.5/d | VAL n=  6  -0.1% $  -2.0 | ---d-
+  BASE & only h18-23                           h300               FIT n= 34 +19.3% med  +1.0% win 56% dead 12% $+2.18/b $  18.6/d | VAL n=  5  +3.0% $  +0.3 | ----e
+  BASE & TRADE_HOURS 12-05                     h300               FIT n= 67 +28.3% med +21.0% win 67% dead  9% $+3.34/b $  56.0/d | VAL n= 12 +15.3% $ +19.9 | -bcde
+  BASE & not creator repeat                    h300               FIT n= 72 +27.8% med +21.5% win 68% dead  7% $+3.28/b $  59.1/d | VAL n= 12 +15.3% $ +19.9 | abcde

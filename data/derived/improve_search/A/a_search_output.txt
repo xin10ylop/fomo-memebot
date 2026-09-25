@@ -1,0 +1,474 @@
+variants scored: 380 (baseline 1 + 378 candidates + 1 engine-skip check) by family: {'baseline': 1, 'threshold': 48, 'hold': 27, 'AND': 109, 'engine-skip': 1, 'hours': 10, 'OR': 184}
+  distinct fire/return sets among the candidates: 290; identical to the baseline (no-ops): 23
+baseline: fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+pass thresholds: (a) fit $/day > 57.29; (b) $ after gas > 0 in each fit window; (c) val $ total >= 19.92 AND val mean >= +15.31%; (d) fit win >= 57.1%, fit dead <= 13.2%; (e) fit fires >= 30
+candidates meeting each criterion alone: {'a': 65, 'b': 238, 'c': 151, 'd': 182, 'e': 303}
+
+PASSES: 6
+  [OR] BASE OR (exactly 1 fleet & bundle_eth < 0.53)
+      fit n= 91 +27.1% win 62% dead  9% $+72.5/d | per-window $ [ +26.6  +71.0 +167.9  +24.5] | val n=15 +17.0% $+28.21
+      (c) margin: val $+8.29, mean +1.70%; (c) fails when ONE validation launch is removed from both sides: ['0x93d7d429', '0x0928c56d']
+  [OR] BASE OR (exactly 1 fleet & bundle_eth >= 0.950851)
+      fit n= 92 +23.2% win 63% dead 10% $+61.7/d | per-window $ [ +14.6 +123.6  +90.1  +18.5] | val n=19 +22.4% $+49.12
+      (c) margin: val $+29.20, mean +7.12%; (c) fails when ONE validation launch is removed from both sides: ['0x057d2437']
+  [threshold] 2<=fleets<=4 @k-2
+      fit n= 71 +27.8% win 69% dead  8% $+58.3/d | per-window $ [ +30.4  +94.4  +86.8  +21.6] | val n=12 +15.3% $+19.92
+      (c) margin: val $+0.00, mean +0.00%; (c) fails when ONE validation launch is removed from both sides: none
+  [OR] BASE OR (0-1 fleets & arr1_d < 4)
+      fit n=107 +19.2% win 63% dead  8% $+58.0/d | per-window $ [ +30.7  +77.0 +106.7  +17.7] | val n=17 +21.6% $+42.11
+      (c) margin: val $+22.19, mean +6.28%; (c) fails when ONE validation launch is removed from both sides: ['0x057d2437']
+  [OR] BASE OR (exactly 1 fleet & arr1_d < 4)   (same fires as: BASE OR (0-1 fleets & arr1_d < 4))
+      fit n=107 +19.2% win 63% dead  8% $+58.0/d | per-window $ [ +30.7  +77.0 +106.7  +17.7] | val n=17 +21.6% $+42.11
+      (c) margin: val $+22.19, mean +6.28%; (c) fails when ONE validation launch is removed from both sides: ['0x057d2437']
+  [OR] BASE OR (exactly 1 fleet & k < 6)
+      fit n= 93 +21.6% win 63% dead  9% $+57.5/d | per-window $ [ +36.5  +71.7 +104.6  +17.2] | val n=18 +15.7% $+30.71
+      (c) margin: val $+10.79, mean +0.36%; (c) fails when ONE validation launch is removed from both sides: ['0xad1c5f76', '0x2ad76f05', '0x89f41f56', '0xc63ab843', '0x95f60349', '0x9132d3db', '0x057d2437', '0xe41e16e1']
+  (not a candidate) [engine-skip] BASE & not a creator repeat (approx. of the skip the engine ALREADY runs: not a change)
+      fit n= 72 +27.8% win 68% dead  7% $+59.1/d | per-window $ [ +37.7  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+
+CLOSEST MISSES (fewest failed criteria, then the smallest shortfall on (a)/(c)):
+  fails (d) [threshold] wallets>=1 @k-2
+      fit n=138 +16.2% win 56% dead 16% $+61.2/d | per-window $ [ +28.9  +80.2 +124.7  +11.0] | val n=25 +22.1% $+63.66
+  fails (d) [threshold] wallets>=1 @k-3
+      fit n=111 +19.6% win 53% dead 17% $+61.5/d | per-window $ [ +34.8  +80.4 +119.0  +11.8] | val n=18 +22.8% $+47.31
+  fails (d) [hold] fleets>=1 @k-2, behind1 h150
+      fit n=164 +13.4% win 52% dead 10% $+58.0/d | per-window $ [ +47.1  +69.3 +105.4  +10.2] | val n=25 +16.1% $+43.94
+  fails (d) [hold] fleets>=1 @k-2, behind1 stop20_h600
+      fit n=164 +15.6% win 44% dead  2% $+69.9/d | per-window $ [ +76.1  +64.0 +136.8   +2.6] | val n=25 +25.9% $+76.03
+  fails (d) [OR] BASE OR (0-1 fleets & bundle_eth < 0.4)
+      fit n=170 +18.4% win 50% dead 16% $+87.6/d | per-window $ [ +86.5  +63.9 +182.5  +17.4] | val n=16 +17.0% $+30.08
+  fails (d) [OR] BASE OR (0-1 fleets & arr1_d >= 5)
+      fit n=112 +18.5% win 55% dead 19% $+58.0/d | per-window $ [ +34.5  +76.9 +103.5  +17.1] | val n=17 +19.9% $+38.44
+  fails (d) [OR] BASE OR (0-1 fleets & arr1_d >= 6)
+      fit n=100 +22.1% win 57% dead 17% $+63.6/d | per-window $ [ +35.0  +93.8 +101.7  +23.7] | val n=16 +20.1% $+36.52
+  fails (d) [OR] BASE OR (exactly 1 fleet & bundle_eth < 0.58)
+      fit n=109 +21.7% win 55% dead  8% $+67.9/d | per-window $ [ +28.4  +61.1 +164.1  +17.8] | val n=15 +17.0% $+28.21
+  fails (d) [OR] BASE OR (exactly 1 fleet & bundle_eth < 0.767535)
+      fit n=127 +18.9% win 57% dead 10% $+67.7/d | per-window $ [ +38.9  +68.0 +153.2  +10.7] | val n=18 +17.3% $+34.46
+  fails (d) [OR] BASE OR (exactly 1 fleet & named >= 20)
+      fit n=100 +21.5% win 59% dead 16% $+61.7/d | per-window $ [ +23.4  +63.4 +138.3  +21.6] | val n=15 +16.7% $+27.67
+  fails (d) [OR] BASE OR (exactly 1 fleet & tier >= 0.03)
+      fit n=111 +19.0% win 56% dead 17% $+59.6/d | per-window $ [ +24.3  +92.5 +105.5  +15.9] | val n=22 +20.3% $+50.85
+  fails (d) [OR] BASE OR (exactly 1 fleet & k >= 7)
+      fit n=124 +17.4% win 54% dead 16% $+59.9/d | per-window $ [ +32.0  +89.0 +101.5  +17.1] | val n=18 +24.3% $+50.95
+  fails (d) [OR] BASE OR (exactly 1 fleet & k >= 8)
+      fit n=107 +21.2% win 58% dead 16% $+64.9/d | per-window $ [ +35.5  +97.2 +103.3  +23.7] | val n=17 +21.9% $+42.69
+  fails (d) [OR] BASE OR (exactly 1 fleet & hour >= 15)
+      fit n=148 +14.5% win 54% dead 17% $+57.6/d | per-window $ [ +25.4  +67.8 +125.3  +11.9] | val n=23 +22.8% $+60.52
+  fails (d) [OR] BASE OR (exactly 1 fleet & hour >= 17)
+      fit n=135 +17.7% win 59% dead 16% $+66.6/d | per-window $ [ +35.5  +71.4 +131.6  +27.8] | val n=21 +26.9% $+66.52
+
+BEST fit $/day among candidates, whatever they fail (top 10):
+  fails (cd) [OR] BASE OR (0 fleets & k < 4)
+      fit n=209 +17.1% win 52% dead 11% $+98.6/d | per-window $ [ +64.4 +124.2 +172.6  +33.3] | val n=38  +8.3% $+28.55
+  fails (c) [OR] BASE OR (0 fleets & named < 4)
+      fit n=154 +21.9% win 60% dead 10% $+96.8/d | per-window $ [ +94.7 +140.6 +129.6  +22.1] | val n=31  +3.4% $ +3.65
+  fails (cd) [OR] BASE OR (0-1 fleets & k < 5)
+      fit n=257 +14.0% win 51% dead 13% $+96.0/d | per-window $ [ +39.6 +107.7 +199.7  +37.2] | val n=50 +10.9% $+54.47
+  fails (c) [OR] BASE OR (0-1 fleets & named < 4)
+      fit n=168 +19.8% win 60% dead 10% $+94.1/d | per-window $ [+100.8 +127.4 +124.0  +24.2] | val n=32  +4.9% $ +9.81
+  fails (cd) [OR] BASE OR (0-1 fleets & k < 3)
+      fit n=164 +19.3% win 52% dead 12% $+89.5/d | per-window $ [ +24.2 +118.6 +172.1  +43.2] | val n=31  +9.9% $+29.54
+  fails (d) [OR] BASE OR (0-1 fleets & bundle_eth < 0.4)
+      fit n=170 +18.4% win 50% dead 16% $+87.6/d | per-window $ [ +86.5  +63.9 +182.5  +17.4] | val n=16 +17.0% $+30.08
+  fails (cd) [OR] BASE OR (0-1 fleets & k < 6)
+      fit n=302 +11.4% win 48% dead 14% $+86.9/d | per-window $ [ +12.1 +101.3 +217.1  +17.3] | val n=62  +6.8% $+34.20
+  fails (cd) [OR] BASE OR (0 fleets & k < 6)
+      fit n=282 +12.0% win 48% dead 14% $+86.7/d | per-window $ [  +6.0 +119.9 +199.3  +21.7] | val n=56  +5.8% $+23.41
+  fails (bcd) [OR] BASE OR (0-1 fleets & bundle_eth >= 0.907254)
+      fit n=171 +15.8% win 52% dead 12% $+73.7/d | per-window $ [ +40.7 +179.4  +77.0   -2.3] | val n=44  +8.7% $+35.28
+  fails (-) [OR] BASE OR (exactly 1 fleet & bundle_eth < 0.53)
+      fit n= 91 +27.1% win 62% dead  9% $+72.5/d | per-window $ [ +26.6  +71.0 +167.9  +24.5] | val n=15 +17.0% $+28.21
+
+BORDERLINE (k-1 view: not executable as a headline, shown for reference only):
+  fleets>=2 @k-1: fit n=147 +19.5% win 60% dead 12% $+81.0/d | per-window $ [ +50.8  +93.0 +160.3  +20.0] | val n=30 +22.5% $+77.79
+  fleets>=3 @k-1: fit n= 71 +31.1% win 65% dead  6% $+66.0/d | per-window $ [  +8.2  +56.8 +179.8  +19.2] | val n=15 +27.1% $+47.99
+  wallets>=2 @k-1: fit n=181 +13.7% win 56% dead 13% $+65.6/d | per-window $ [ +33.3  +57.6 +169.6   +2.0] | val n=38 +21.3% $+92.88
+
+STAKE (information; the protocol scores $/day at $13):
+  fleets>=2 @k-2, $15 model scored at $13: fit mean +26.7%, $+3.14/burst, $+57.3/d; per-window $ [+30.4 +90.3 +86.8 +21.6]; val mean +15.3%, $+19.92 total
+  fleets>=2 @k-2, $15 model scored at $15: fit mean +26.7%, $+3.67/burst, $+67.0/d; per-window $ [+35.8 +105.7 +101.2 +25.5]; val mean +15.3%, $+23.59 total
+  fleets>=2 @k-2, $100 model scored at $100: fit mean +27.1%, $+26.74/burst, $+488.0/d; per-window $ [+269.6 +768.6 +722.7 +191.1]; val mean +15.5%, $+182.52 total
+  on the 85 baseline fires (fit+val): $100-model return minus $15-model return: mean +0.36%, median +0.17%
+
+ALL VARIANTS:
+  fail a     [baseline] fleets>=2 @k-2 (BASELINE): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail ad    [threshold] fleets>=1 @k-2: fit n=164 +12.5% win 52% dead 16% $+52.9/d | per-window $ [ +21.2  +58.5 +121.1  +11.0] | val n=25 +22.1% $+63.66
+  fail abce  [threshold] fleets>=3 @k-2: fit n= 27 +26.0% win 59% dead  0% $+20.6/d | per-window $ [  +1.1   -6.2  +67.1  +20.3] | val n= 2  -6.7% $ -2.40
+  fail abce  [threshold] fleets>=4 @k-2: fit n=  7 +13.5% win 57% dead  0% $ +2.5/d | per-window $ [  +2.7   -4.1  +13.0   -1.6] | val n= 0      - $ +0.00
+  fail abcde [threshold] fleets>=5 @k-2: fit n=  2 -13.2% win  0% dead  0% $ -1.0/d | per-window $ [  +0.0   -4.1   +0.0   +0.0] | val n= 0      - $ +0.00
+  fail d     [threshold] wallets>=1 @k-2: fit n=138 +16.2% win 56% dead 16% $+61.2/d | per-window $ [ +28.9  +80.2 +124.7  +11.0] | val n=25 +22.1% $+63.66
+  fail a     [threshold] wallets>=2 @k-2: fit n= 73 +20.9% win 58% dead 10% $+43.6/d | per-window $ [ +39.4  +46.6  +82.9   +5.4] | val n=12 +22.1% $+30.52
+  fail acd   [threshold] wallets>=3 @k-2: fit n= 46 +20.8% win 57% dead  9% $+27.4/d | per-window $ [ +10.6  +26.1  +66.4   +6.3] | val n= 6 +17.7% $+11.83
+  fail abcd  [threshold] wallets>=4 @k-2: fit n= 32 +18.4% win 53% dead 12% $+16.5/d | per-window $ [ +12.0  +27.7  +44.0  -17.8] | val n= 5 +11.3% $ +5.66
+  fail abcde [threshold] wallets>=5 @k-2: fit n= 27  +9.6% win 48% dead 15% $ +6.2/d | per-window $ [  +9.3  +29.4   +4.0  -17.8] | val n= 5 +11.3% $ +5.66
+  fail abcde [threshold] wallets>=7 @k-2: fit n= 21  +1.5% win 43% dead 19% $ -0.7/d | per-window $ [  +9.3   +6.3   -2.3  -16.2] | val n= 4  -0.6% $ -1.63
+  fail abcde [threshold] wallets>=10 @k-2: fit n= 16  +1.3% win 38% dead 25% $ -0.6/d | per-window $ [  +7.9   +8.1   -2.3  -16.2] | val n= 2 +16.7% $ +3.69
+  fail abcde [threshold] wallets>=15 @k-2: fit n= 15  -0.3% win 33% dead 27% $ -1.4/d | per-window $ [  +7.9   +5.0   -2.3  -16.2] | val n= 2 +16.7% $ +3.69
+  fail abcde [threshold] wallets>=20 @k-2: fit n= 15  -0.3% win 33% dead 27% $ -1.4/d | per-window $ [  +7.9   +5.0   -2.3  -16.2] | val n= 1 +50.6% $ +6.25
+  fail abcde [threshold] wallets>=30 @k-2: fit n= 11 +15.1% win 45% dead  9% $ +4.5/d | per-window $ [ +15.2   +7.5   -2.3   -2.4] | val n= 1 +50.6% $ +6.25
+  fail ad    [threshold] fleets>=1 @k-3: fit n=137 +14.3% win 50% dead 18% $+52.5/d | per-window $ [ +21.2  +58.7 +118.2  +11.8] | val n=18 +22.8% $+47.31
+  fail ac    [threshold] fleets>=2 @k-3: fit n= 52 +30.1% win 65% dead 10% $+46.7/d | per-window $ [ +28.0  +62.5  +75.8  +20.3] | val n= 8  +6.1% $ +3.73
+  fail abcde [threshold] fleets>=3 @k-3: fit n= 11 +23.7% win 55% dead  0% $ +7.6/d | per-window $ [  -1.3   -4.2  +11.6  +24.1] | val n= 2  -6.7% $ -2.40
+  fail d     [threshold] wallets>=1 @k-3: fit n=111 +19.6% win 53% dead 17% $+61.5/d | per-window $ [ +34.8  +80.4 +119.0  +11.8] | val n=18 +22.8% $+47.31
+  fail acd   [threshold] wallets>=2 @k-3: fit n= 47 +25.9% win 53% dead 11% $+35.7/d | per-window $ [ +37.0  +17.6  +74.8  +13.5] | val n= 7 +11.5% $ +8.17
+  fail acde  [threshold] wallets>=3 @k-3: fit n= 28 +13.2% win 50% dead 11% $ +9.7/d | per-window $ [  +8.2   +6.2   +9.3  +15.1] | val n= 4 +19.0% $ +8.56
+  fail abcde [threshold] wallets>=5 @k-3: fit n= 20  +4.2% win 45% dead 15% $ +1.1/d | per-window $ [  +9.3   +6.3   -2.3   -9.0] | val n= 4 +19.0% $ +8.56
+  fail c     [threshold] fleets>=2 @k-2 & fleets>=1 @k-3: fit n= 64 +30.6% win 67% dead  8% $+58.4/d | per-window $ [ +30.7  +93.8  +89.4  +19.5] | val n= 8  +6.1% $ +3.73
+  fail c     [threshold] fleets>=2 @k-2 & wallets>=1 @k-3: fit n= 63 +30.7% win 67% dead  8% $+57.6/d | per-window $ [ +30.7  +93.8  +86.6  +19.5] | val n= 8  +6.1% $ +3.73
+  fail ac    [threshold] fleets>=2 @k-2 & wallets>=2 @k-3: fit n= 35 +37.6% win 63% dead  9% $+39.9/d | per-window $ [ +38.0  +22.1  +77.1  +22.5] | val n= 5  +9.2% $ +4.33
+  fail ace   [threshold] fleets>=2 @k-2 & wallets>=3 @k-3: fit n= 17 +27.4% win 65% dead  6% $+13.7/d | per-window $ [  +9.3   +9.9  +11.6  +24.1] | val n= 2 +20.7% $ +4.73
+  fail abce  [threshold] fleets>=2 @k-2 & wallets>=5 @k-3: fit n=  9 +19.9% win 67% dead 11% $ +5.1/d | per-window $ [ +10.4  +10.0   +0.0   +0.0] | val n= 2 +20.7% $ +4.73
+  fail ac    [threshold] fleets>=2 @k-2 & wallets>=3 @k-2: fit n= 32 +34.2% win 66% dead  3% $+32.9/d | per-window $ [ +11.7  +28.6  +68.8  +22.5] | val n= 3  +7.2% $ +1.83
+  fail abce  [threshold] fleets>=2 @k-2 & wallets>=4 @k-2: fit n= 19 +38.8% win 68% dead  5% $+22.4/d | per-window $ [ +13.1  +31.7  +46.3   -1.6] | val n= 3  +7.2% $ +1.83
+  fail abce  [threshold] fleets>=2 @k-2 & wallets>=5 @k-2: fit n= 14 +29.1% win 64% dead  7% $+12.1/d | per-window $ [ +10.4  +33.3   +6.3   -1.6] | val n= 3  +7.2% $ +1.83
+  fail abcde [threshold] fleets>=2 @k-2 & wallets>=10 @k-2: fit n=  6 +27.6% win 67% dead 17% $ +4.9/d | per-window $ [  +7.9  +11.6   +0.0   +0.0] | val n= 1 -17.2% $ -2.57
+  fail a     [threshold] fleets>=2 @k-2 OR wallets>=2 @k-2: fit n= 88 +20.6% win 61% dead 10% $+51.6/d | per-window $ [ +29.4  +87.0  +84.5   +5.4] | val n=15 +17.9% $+29.92
+  fail a     [threshold] fleets>=2 @k-2 OR wallets>=3 @k-2: fit n= 87 +20.9% win 62% dead 10% $+51.8/d | per-window $ [ +29.4  +87.8  +84.5   +5.4] | val n=15 +17.9% $+29.92
+  fail a     [threshold] fleets>=2 @k-2 OR wallets>=5 @k-2: fit n= 86 +20.9% win 62% dead 10% $+51.4/d | per-window $ [ +29.4  +86.4  +84.5   +5.4] | val n=14 +15.6% $+23.75
+  fail a     [threshold] fleets>=2 @k-2 OR wallets>=10 @k-2: fit n= 83 +21.7% win 61% dead 11% $+51.8/d | per-window $ [ +30.4  +86.7  +84.5   +5.4] | val n=13 +18.0% $+26.17
+  fail a     [threshold] fleets>=2 @k-2 OR wallets>=20 @k-2: fit n= 83 +21.7% win 61% dead 11% $+51.8/d | per-window $ [ +30.4  +86.7  +84.5   +5.4] | val n=13 +18.0% $+26.17
+  fail a     [threshold] fleets>=2 @k-2 OR wallets>=30 @k-2: fit n= 81 +23.5% win 63% dead  9% $+55.2/d | per-window $ [ +30.4  +86.7  +84.5  +19.3] | val n=13 +18.0% $+26.17
+  fail a     [threshold] fleets>=1 @k-2 & wallets>=2 @k-2: fit n= 73 +20.9% win 58% dead 10% $+43.6/d | per-window $ [ +39.4  +46.6  +82.9   +5.4] | val n=12 +22.1% $+30.52
+  fail acd   [threshold] fleets>=1 @k-2 & wallets>=3 @k-2: fit n= 46 +20.8% win 57% dead  9% $+27.4/d | per-window $ [ +10.6  +26.1  +66.4   +6.3] | val n= 6 +17.7% $+11.83
+  fail abcde [threshold] fleets>=1 @k-2 & wallets>=5 @k-2: fit n= 27  +9.6% win 48% dead 15% $ +6.2/d | per-window $ [  +9.3  +29.4   +4.0  -17.8] | val n= 5 +11.3% $ +5.66
+  fail abcde [threshold] fleets>=1 @k-2 & wallets>=10 @k-2: fit n= 16  +1.3% win 38% dead 25% $ -0.6/d | per-window $ [  +7.9   +8.1   -2.3  -16.2] | val n= 2 +16.7% $ +3.69
+  fail abcde [threshold] fleets>=1 @k-2 & wallets>=20 @k-2: fit n= 15  -0.3% win 33% dead 27% $ -1.4/d | per-window $ [  +7.9   +5.0   -2.3  -16.2] | val n= 1 +50.6% $ +6.25
+  fail ad    [threshold] fleets>=2 @k-2 OR fleets>=1 @k-3: fit n=146 +13.4% win 51% dead 17% $+51.4/d | per-window $ [ +20.9  +55.2 +115.6  +13.9] | val n=22 +24.7% $+63.50
+  fail a     [threshold] fleets>=2 @k-2 OR (fleets>=1 @k-3 & wallets>=2 @k-3): fit n= 85 +21.8% win 61% dead  9% $+53.1/d | per-window $ [ +29.4  +85.8  +84.5  +12.6] | val n=14 +15.6% $+23.75
+  fail a     [threshold] 2<=fleets<=2 @k-2: fit n= 46 +27.1% win 72% dead 13% $+36.7/d | per-window $ [ +29.3  +96.5  +19.7   +1.4] | val n=10 +19.7% $+22.32
+  fail a     [threshold] 2<=fleets<=3 @k-2: fit n= 66 +28.1% win 68% dead  9% $+54.8/d | per-window $ [ +27.7  +94.4  +73.8  +23.3] | val n=12 +15.3% $+19.92
+  PASS       [threshold] 2<=fleets<=4 @k-2: fit n= 71 +27.8% win 69% dead  8% $+58.3/d | per-window $ [ +30.4  +94.4  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail ac    [threshold] fleets>=2 @k-2 & fleets>=2 @k-3 (=fleets>=2 @k-3): fit n= 52 +30.1% win 65% dead 10% $+46.7/d | per-window $ [ +28.0  +62.5  +75.8  +20.3] | val n= 8  +6.1% $ +3.73
+  fail ac    [threshold] fleets>=3 @k-2 OR fleets>=2 @k-3: fit n= 57 +29.5% win 68% dead  9% $+49.9/d | per-window $ [ +30.4  +62.5  +86.6  +20.3] | val n= 8  +6.1% $ +3.73
+  fail a     [hold] fleets>=2 @k-2, behind1 h15: fit n= 73 +16.4% win 66% dead  3% $+32.8/d | per-window $ [ +45.7  +52.8  +17.2  +15.6] | val n=12 +18.6% $+25.03
+  fail ac    [hold] fleets>=2 @k-2, behind1 h30: fit n= 73 +16.2% win 64% dead  3% $+32.5/d | per-window $ [ +49.8  +35.0  +29.6  +15.7] | val n=12 +13.2% $+16.68
+  fail ac    [hold] fleets>=2 @k-2, behind1 h60: fit n= 73 +16.5% win 66% dead  3% $+33.1/d | per-window $ [ +37.0  +49.3  +28.9  +17.0] | val n=12  +8.5% $ +9.26
+  fail ac    [hold] fleets>=2 @k-2, behind1 h150: fit n= 73 +21.5% win 66% dead  7% $+45.0/d | per-window $ [ +15.3  +73.0  +73.0  +18.5] | val n=12 +13.3% $+16.85
+  fail ad    [hold] fleets>=2 @k-2, behind1 h600: fit n= 73 +20.0% win 52% dead 19% $+41.4/d | per-window $ [ +44.1  +41.0  +69.2  +11.4] | val n=12 +15.6% $+20.37
+  fail ac    [hold] fleets>=2 @k-2, behind1 tp50_h600: fit n= 73 +16.5% win 70% dead  8% $+33.1/d | per-window $ [ +43.1  +67.5  +17.5   +4.3] | val n=12  +7.4% $ +7.62
+  fail acd   [hold] fleets>=2 @k-2, behind1 stop20_h600: fit n= 73 +24.0% win 51% dead  1% $+50.9/d | per-window $ [ +44.1  +64.9  +80.9  +13.6] | val n=12 +14.0% $+17.94
+  fail ac    [hold] fleets>=2 @k-2, behind1 tp50_stop20_h600: fit n= 73 +18.6% win 70% dead  0% $+38.2/d | per-window $ [ +43.1  +75.6  +27.6   +6.5] | val n=12 +13.5% $+17.12
+  fail ac    [hold] fleets>=2 @k-2, behind1 tp50_stop20_h600 PESSIMISTIC (stop first when both hit): fit n= 73 +10.1% win 58% dead  1% $+17.9/d | per-window $ [  +9.0  +41.0  +15.1   +6.5] | val n=12  +2.1% $ -0.64
+  fail abcd  [hold] fleets>=1 @k-2, behind1 h15: fit n=164  +5.3% win 45% dead  4% $+14.5/d | per-window $ [ +41.1  +26.1  -11.5   +2.3] | val n=25 +10.1% $+24.50
+  fail acd   [hold] fleets>=1 @k-2, behind1 h30: fit n=164  +8.3% win 48% dead  4% $+30.6/d | per-window $ [ +52.0   +8.0  +56.9   +5.3] | val n=25 +10.5% $+26.02
+  fail acd   [hold] fleets>=1 @k-2, behind1 h60: fit n=164 +10.0% win 49% dead  5% $+39.5/d | per-window $ [ +38.7  +41.7  +71.4   +6.2] | val n=25  +7.6% $+16.52
+  fail d     [hold] fleets>=1 @k-2, behind1 h150: fit n=164 +13.4% win 52% dead 10% $+58.0/d | per-window $ [ +47.1  +69.3 +105.4  +10.2] | val n=25 +16.1% $+43.94
+  fail abd   [hold] fleets>=1 @k-2, behind1 h600: fit n=164 +10.0% win 45% dead 26% $+39.8/d | per-window $ [ +59.7   +5.0  +99.1   -4.7] | val n=25 +28.6% $+84.70
+  fail abcd  [hold] fleets>=1 @k-2, behind1 tp50_h600: fit n=164  +5.4% win 57% dead 17% $+15.1/d | per-window $ [ +56.7  +37.0  -38.3   +4.8] | val n=25 +10.1% $+24.52
+  fail d     [hold] fleets>=1 @k-2, behind1 stop20_h600: fit n=164 +15.6% win 44% dead  2% $+69.9/d | per-window $ [ +76.1  +64.0 +136.8   +2.6] | val n=25 +25.9% $+76.03
+  fail abc   [hold] fleets>=1 @k-2, behind1 tp50_stop20_h600: fit n=164  +9.4% win 57% dead  1% $+36.5/d | per-window $ [ +66.0  +73.4   -2.5   +9.1] | val n=25 +11.1% $+27.78
+  fail abcd  [hold] fleets>=1 @k-2, behind1 tp50_stop20_h600 PESSIMISTIC (stop first when both hit): fit n=164  +2.2% win 47% dead  2% $ -1.8/d | per-window $ [ +14.7   +9.1  -23.4   -7.6] | val n=25  +5.6% $+10.03
+  fail ace   [hold] fleets>=3 @k-2, behind1 h15: fit n= 27 +20.0% win 70% dead  0% $+15.3/d | per-window $ [  +2.4   +9.2  +37.9  +11.7] | val n= 2 +18.5% $ +4.14
+  fail ace   [hold] fleets>=3 @k-2, behind1 h30: fit n= 27 +21.1% win 67% dead  0% $+16.3/d | per-window $ [  +2.4   +1.9  +47.5  +13.6] | val n= 2  -7.9% $ -2.72
+  fail abcde [hold] fleets>=3 @k-2, behind1 h60: fit n= 27 +14.7% win 56% dead  0% $+10.6/d | per-window $ [  -9.4   -4.0  +41.1  +14.9] | val n= 2 -15.9% $ -4.79
+  fail abcde [hold] fleets>=3 @k-2, behind1 h150: fit n= 27 +23.3% win 52% dead  0% $+18.3/d | per-window $ [  -6.3   -2.2  +65.4  +16.1] | val n= 2 -12.1% $ -3.80
+  fail abcde [hold] fleets>=3 @k-2, behind1 h600: fit n= 27 +24.8% win 52% dead  7% $+19.5/d | per-window $ [ +15.0   -8.6  +50.8  +21.0] | val n= 2  +4.8% $ +0.60
+  fail ace   [hold] fleets>=3 @k-2, behind1 tp50_h600: fit n= 27 +18.9% win 67% dead  0% $+14.4/d | per-window $ [ +12.2  +11.2  +26.5   +7.6] | val n= 2 +38.4% $ +9.33
+  fail abcde [hold] fleets>=3 @k-2, behind1 stop20_h600: fit n= 27 +23.9% win 48% dead  4% $+18.7/d | per-window $ [  +5.0   -3.5  +52.5  +21.0] | val n= 2  +0.3% $ -0.59
+  fail ace   [hold] fleets>=3 @k-2, behind1 tp50_stop20_h600: fit n= 27 +18.9% win 67% dead  0% $+14.4/d | per-window $ [ +12.2  +11.2  +26.5   +7.6] | val n= 2 +38.4% $ +9.33
+  fail acde  [hold] fleets>=3 @k-2, behind1 tp50_stop20_h600 PESSIMISTIC (stop first when both hit): fit n= 27 +10.5% win 56% dead  4% $ +7.0/d | per-window $ [  +3.8   +2.6  +14.0   +7.6] | val n= 2  +2.8% $ +0.06
+  fail a     [AND] BASE & bundle_eth >= 0.46: fit n= 59 +29.3% win 68% dead  8% $+51.4/d | per-window $ [ +14.6  +81.3  +89.6  +20.0] | val n=12 +15.3% $+19.92
+  fail abce  [AND] BASE & bundle_eth < 0.46: fit n= 14 +15.5% win 64% dead  7% $ +5.9/d | per-window $ [ +15.8   +9.0   -2.8   +1.7] | val n= 0      - $ +0.00
+  fail a     [AND] BASE & bundle_eth >= 0.706922: fit n= 44 +32.0% win 64% dead 11% $+42.1/d | per-window $ [ +12.2  +51.4  +84.8  +19.9] | val n= 8 +23.2% $+21.47
+  fail ace   [AND] BASE & bundle_eth < 0.706922: fit n= 29 +18.7% win 72% dead  3% $+15.2/d | per-window $ [ +18.3  +38.9   +2.0   +1.7] | val n= 4  -0.4% $ -1.55
+  fail a     [AND] BASE & bundle_eth >= 0.767535: fit n= 30 +48.4% win 67% dead  3% $+44.8/d | per-window $ [ +29.7  +40.8  +86.4  +22.2] | val n= 5 +41.0% $+25.03
+  fail abc   [AND] BASE & bundle_eth < 0.767535: fit n= 43 +11.5% win 67% dead 12% $+12.5/d | per-window $ [  +0.7  +49.5   +0.5   -0.6] | val n= 7  -3.1% $ -5.11
+  fail abde  [AND] BASE & bundle_eth >= 1.49285: fit n= 15 +21.5% win 47% dead  0% $ +9.2/d | per-window $ [ +10.6   -2.6  +23.0   +5.9] | val n= 2 +91.8% $+23.20
+  fail ac    [AND] BASE & bundle_eth < 1.49285: fit n= 58 +28.0% win 72% dead 10% $+48.1/d | per-window $ [ +19.8  +92.9  +63.8  +15.8] | val n=10  +0.0% $ -3.28
+  fail a     [AND] BASE & named >= 4: fit n= 64 +28.8% win 67% dead  9% $+54.5/d | per-window $ [ +26.0  +87.6  +82.2  +22.4] | val n=12 +15.3% $+19.92
+  fail abce  [AND] BASE & named < 4: fit n=  9 +12.0% win 67% dead  0% $ +2.8/d | per-window $ [  +4.5   +2.7   +4.6   -0.7] | val n= 0      - $ +0.00
+  fail acd   [AND] BASE & named >= 10: fit n= 44 +18.2% win 59% dead 14% $+22.4/d | per-window $ [ +10.4  +73.7   +1.9   +3.6] | val n= 7  +9.5% $ +6.30
+  fail ace   [AND] BASE & named < 10: fit n= 29 +39.5% win 79% dead  0% $+34.9/d | per-window $ [ +20.0  +16.6  +84.9  +18.0] | val n= 5 +23.5% $+13.62
+  fail ac    [AND] BASE & named >= 15: fit n= 32 +16.0% win 62% dead 12% $+14.0/d | per-window $ [  +5.9  +35.1   +8.2   +6.9] | val n= 7  +9.5% $ +6.30
+  fail ac    [AND] BASE & named < 15: fit n= 41 +35.0% win 71% dead  5% $+43.3/d | per-window $ [ +24.5  +55.2  +78.6  +14.7] | val n= 5 +23.5% $+13.62
+  fail abce  [AND] BASE & named >= 21: fit n= 17 +16.6% win 71% dead  6% $ +7.8/d | per-window $ [  -2.2  +35.1   -0.3   -1.5] | val n= 5 +13.1% $ +6.86
+  fail ac    [AND] BASE & named < 21: fit n= 56 +29.7% win 66% dead  9% $+49.5/d | per-window $ [ +32.6  +55.2  +87.1  +23.1] | val n= 7 +16.9% $+13.06
+  fail a     [AND] BASE & tier >= 0.02: fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcde [AND] BASE & tier < 0.02: fit n=  0      - win   - dead   - $ +0.0/d | per-window $ [  +0.0   +0.0   +0.0   +0.0] | val n= 0      - $ +0.00
+  fail a     [AND] BASE & tier >= 0.025: fit n= 47 +30.6% win 70% dead  9% $+42.9/d | per-window $ [ +37.8  +53.1  +53.6  +27.1] | val n= 7 +27.2% $+22.45
+  fail abce  [AND] BASE & tier < 0.025: fit n= 26 +19.6% win 62% dead  8% $+14.4/d | per-window $ [  -7.3  +37.2  +33.2   -5.5] | val n= 5  -1.4% $ -2.53
+  fail a     [AND] BASE & tier >= 0.03: fit n= 36 +32.0% win 64% dead  8% $+34.5/d | per-window $ [ +35.5  +37.9  +39.9  +24.7] | val n= 7 +27.2% $+22.45
+  fail abc   [AND] BASE & tier < 0.03: fit n= 37 +21.5% win 70% dead  8% $+22.8/d | per-window $ [  -5.1  +52.4  +46.9   -3.1] | val n= 5  -1.4% $ -2.53
+  fail ac    [AND] BASE & k >= 6: fit n= 60 +21.1% win 68% dead  8% $+36.2/d | per-window $ [ +20.6  +89.7  +29.3   +5.0] | val n= 8  +5.3% $ +2.87
+  fail ace   [AND] BASE & k < 6: fit n= 13 +52.6% win 62% dead  8% $+21.1/d | per-window $ [  +9.8   +0.6  +57.5  +16.6] | val n= 4 +35.3% $+17.05
+  fail ac    [AND] BASE & k >= 7: fit n= 33 +26.7% win 70% dead  9% $+25.9/d | per-window $ [ +27.4  +48.1  +16.9  +11.2] | val n= 5 +10.3% $ +5.03
+  fail ac    [AND] BASE & k < 7: fit n= 40 +26.7% win 65% dead  8% $+31.4/d | per-window $ [  +3.0  +42.2  +69.9  +10.4] | val n= 7 +18.9% $+14.89
+  fail abce  [AND] BASE & k >= 8: fit n= 21 +35.9% win 76% dead  0% $+22.8/d | per-window $ [  -0.6  +43.6  +36.9  +11.2] | val n= 3  -5.5% $ -3.13
+  fail a     [AND] BASE & k < 8: fit n= 52 +23.0% win 63% dead 12% $+34.5/d | per-window $ [ +31.1  +46.7  +49.9  +10.4] | val n= 9 +22.2% $+23.05
+  fail a     [AND] BASE & arr2_d (blocks before the end when the 2nd fleet showed) >= 2: fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcde [AND] BASE & arr2_d (blocks before the end when the 2nd fleet showed) < 2: fit n=  0      - win   - dead   - $ +0.0/d | per-window $ [  +0.0   +0.0   +0.0   +0.0] | val n= 0      - $ +0.00
+  fail ac    [AND] BASE & arr2_d (blocks before the end when the 2nd fleet showed) >= 3: fit n= 52 +30.1% win 65% dead 10% $+46.7/d | per-window $ [ +28.0  +62.5  +75.8  +20.3] | val n= 8  +6.1% $ +3.73
+  fail ace   [AND] BASE & arr2_d (blocks before the end when the 2nd fleet showed) < 3: fit n= 21 +18.1% win 71% dead  5% $+10.6/d | per-window $ [  +2.4  +27.8  +11.0   +1.4] | val n= 4 +33.7% $+16.19
+  fail ac    [AND] BASE & arr2_d (blocks before the end when the 2nd fleet showed) >= 4: fit n= 41 +28.9% win 66% dead 10% $+35.1/d | per-window $ [ +28.0  +51.7  +41.4  +19.5] | val n= 5 +13.8% $ +7.29
+  fail ac    [AND] BASE & arr2_d (blocks before the end when the 2nd fleet showed) < 4: fit n= 32 +23.8% win 69% dead  6% $+22.1/d | per-window $ [  +2.4  +38.6  +45.4   +2.2] | val n= 7 +16.4% $+12.63
+  fail ace   [AND] BASE & arr2_d (blocks before the end when the 2nd fleet showed) >= 5: fit n= 17 +35.6% win 65% dead  6% $+18.3/d | per-window $ [ +25.6  +10.7  +29.2   +7.5] | val n= 3  +2.1% $ -0.17
+  fail a     [AND] BASE & arr2_d (blocks before the end when the 2nd fleet showed) < 5: fit n= 56 +24.0% win 68% dead  9% $+39.0/d | per-window $ [  +4.8  +79.6  +57.7  +14.1] | val n= 9 +19.7% $+20.09
+  fail c     [AND] BASE & arr1_d >= 3: fit n= 64 +30.6% win 67% dead  8% $+58.4/d | per-window $ [ +30.7  +93.8  +89.4  +19.5] | val n= 8  +6.1% $ +3.73
+  fail abce  [AND] BASE & arr1_d < 3: fit n=  9  -1.1% win 67% dead 11% $ -1.1/d | per-window $ [  -0.3   -3.5   -2.6   +2.1] | val n= 4 +33.7% $+16.19
+  fail ac    [AND] BASE & arr1_d >= 4: fit n= 55 +34.2% win 71% dead  9% $+56.5/d | per-window $ [ +30.1  +95.3  +80.6  +20.3] | val n= 8  +6.1% $ +3.73
+  fail abcde [AND] BASE & arr1_d < 4: fit n= 18  +3.8% win 56% dead  6% $ +0.8/d | per-window $ [  +0.4   -5.0   +6.2   +1.4] | val n= 4 +33.7% $+16.19
+  fail ace   [AND] BASE & arr1_d >= 6: fit n= 20 +38.9% win 70% dead 10% $+23.6/d | per-window $ [ +26.5  +39.1  +19.7   +9.1] | val n= 3  -5.5% $ -3.13
+  fail a     [AND] BASE & arr1_d < 6: fit n= 53 +22.1% win 66% dead  8% $+33.7/d | per-window $ [  +3.9  +51.2  +67.1  +12.5] | val n= 9 +22.2% $+23.05
+  fail a     [AND] BASE & wallets@k-2 >= 1: fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcde [AND] BASE & wallets@k-2 < 1: fit n=  0      - win   - dead   - $ +0.0/d | per-window $ [  +0.0   +0.0   +0.0   +0.0] | val n= 0      - $ +0.00
+  fail a     [AND] BASE & wallets@k-2 >= 2: fit n= 58 +28.7% win 64% dead  7% $+49.3/d | per-window $ [ +40.5  +49.9  +85.2  +21.6] | val n= 9 +20.1% $+20.52
+  fail abcde [AND] BASE & wallets@k-2 < 2: fit n= 15 +19.0% win 80% dead 13% $ +8.0/d | per-window $ [ -10.0  +40.4   +1.6   +0.0] | val n= 3  +1.0% $ -0.60
+  fail ac    [AND] BASE & wallets@k-2 >= 3: fit n= 32 +34.2% win 66% dead  3% $+32.9/d | per-window $ [ +11.7  +28.6  +68.8  +22.5] | val n= 3  +7.2% $ +1.83
+  fail abc   [AND] BASE & wallets@k-2 < 3: fit n= 41 +20.9% win 68% dead 12% $+24.4/d | per-window $ [ +18.8  +61.7  +18.0   -0.8] | val n= 9 +18.0% $+18.09
+  fail abce  [AND] BASE & wallets@k-2 >= 4: fit n= 19 +38.8% win 68% dead  5% $+22.4/d | per-window $ [ +13.1  +31.7  +46.3   -1.6] | val n= 3  +7.2% $ +1.83
+  fail ac    [AND] BASE & wallets@k-2 < 4: fit n= 54 +22.4% win 67% dead  9% $+34.9/d | per-window $ [ +17.4  +58.6  +40.5  +23.3] | val n= 9 +18.0% $+18.09
+  fail a     [AND] BASE & fleets@k-2 >= 2: fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcde [AND] BASE & fleets@k-2 < 2: fit n=  0      - win   - dead   - $ +0.0/d | per-window $ [  +0.0   +0.0   +0.0   +0.0] | val n= 0      - $ +0.00
+  fail abce  [AND] BASE & fleets@k-2 >= 3: fit n= 27 +26.0% win 59% dead  0% $+20.6/d | per-window $ [  +1.1   -6.2  +67.1  +20.3] | val n= 2  -6.7% $ -2.40
+  fail a     [AND] BASE & fleets@k-2 < 3: fit n= 46 +27.1% win 72% dead 13% $+36.7/d | per-window $ [ +29.3  +96.5  +19.7   +1.4] | val n=10 +19.7% $+22.32
+  fail a     [AND] BASE & direct fleets@k-2 >= 0: fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcde [AND] BASE & direct fleets@k-2 < 0: fit n=  0      - win   - dead   - $ +0.0/d | per-window $ [  +0.0   +0.0   +0.0   +0.0] | val n= 0      - $ +0.00
+  fail a     [AND] BASE & relay fleets@k-2 >= 2: fit n= 66 +25.2% win 67% dead  8% $+48.5/d | per-window $ [ +30.4  +84.0  +58.0  +21.6] | val n=12 +15.3% $+19.92
+  fail abcde [AND] BASE & relay fleets@k-2 < 2: fit n=  7 +41.1% win 71% dead 14% $ +8.8/d | per-window $ [  +0.0   +6.3  +28.8   +0.0] | val n= 0      - $ +0.00
+  fail abce  [AND] BASE & relay fleets@k-2 >= 3: fit n= 24 +28.9% win 62% dead  0% $+20.6/d | per-window $ [  +1.1   -6.1  +67.1  +20.3] | val n= 2  -6.7% $ -2.40
+  fail a     [AND] BASE & relay fleets@k-2 < 3: fit n= 49 +25.6% win 69% dead 12% $+36.7/d | per-window $ [ +29.3  +96.4  +19.7   +1.4] | val n=10 +19.7% $+22.32
+  fail a     [AND] BASE & shots@k-2 >= 6: fit n= 62 +26.8% win 68% dead  8% $+49.0/d | per-window $ [ +29.8  +88.6  +57.9  +19.5] | val n= 9 +23.6% $+24.59
+  fail ace   [AND] BASE & shots@k-2 < 6: fit n= 11 +25.9% win 64% dead  9% $ +8.3/d | per-window $ [  +0.6   +1.7  +28.9   +2.1] | val n= 3  -9.4% $ -4.67
+  fail ac    [AND] BASE & shots@k-2 >= 15: fit n= 44 +34.2% win 73% dead  9% $+45.3/d | per-window $ [ +28.0  +81.1  +59.2  +12.8] | val n= 6  +0.7% $ -1.47
+  fail ae    [AND] BASE & shots@k-2 < 15: fit n= 29 +15.3% win 59% dead  7% $+12.0/d | per-window $ [  +2.4   +9.2  +27.6   +8.9] | val n= 6 +30.0% $+21.39
+  fail abc   [AND] BASE & shots@k-2 >= 26: fit n= 30 +25.1% win 70% dead 10% $+22.0/d | per-window $ [ +11.0  +30.2  +48.4   -1.5] | val n= 4  +0.8% $ -0.88
+  fail a     [AND] BASE & shots@k-2 < 26: fit n= 43 +27.8% win 65% dead  7% $+35.3/d | per-window $ [ +19.5  +60.1  +38.4  +23.1] | val n= 8 +22.5% $+20.80
+  fail abce  [AND] BASE & shots@k-2 >= 32: fit n= 15 +26.0% win 73% dead  7% $+11.4/d | per-window $ [ +21.0   +6.8  +18.0   +0.0] | val n= 2  -1.4% $ -1.03
+  fail a     [AND] BASE & shots@k-2 < 32: fit n= 58 +26.9% win 66% dead  9% $+45.8/d | per-window $ [  +9.4  +83.5  +68.8  +21.6] | val n=10 +18.7% $+20.95
+  fail a     [AND] BASE & shots/fleet@k-2 >= 2.75: fit n= 59 +28.3% win 69% dead  8% $+49.3/d | per-window $ [ +27.7  +90.5  +57.9  +21.2] | val n= 9 +23.6% $+24.59
+  fail abce  [AND] BASE & shots/fleet@k-2 < 2.75: fit n= 14 +20.1% win 57% dead  7% $ +8.0/d | per-window $ [  +2.7   -0.2  +28.9   +0.5] | val n= 3  -9.4% $ -4.67
+  fail abc   [AND] BASE & shots/fleet@k-2 >= 6.5: fit n= 44 +30.5% win 75% dead  9% $+40.1/d | per-window $ [ +28.0  +88.9  +45.5   -2.2] | val n= 6  +0.7% $ -1.47
+  fail ade   [AND] BASE & shots/fleet@k-2 < 6.5: fit n= 29 +20.8% win 55% dead  7% $+17.2/d | per-window $ [  +2.4   +1.4  +41.3  +23.9] | val n= 6 +30.0% $+21.39
+  fail abcd  [AND] BASE & shots/fleet@k-2 >= 11: fit n= 30 +21.3% win 73% dead 13% $+18.3/d | per-window $ [ +11.1  +51.3  +10.7   +0.0] | val n= 5  +0.0% $ -1.63
+  fail a     [AND] BASE & shots/fleet@k-2 < 11: fit n= 43 +30.4% win 63% dead  5% $+39.0/d | per-window $ [ +19.3  +39.0  +76.1  +21.6] | val n= 7 +26.2% $+21.55
+  fail abce  [AND] BASE & shots/fleet@k-2 >= 14: fit n= 16 +28.7% win 75% dead  6% $+13.6/d | per-window $ [ +26.2  +24.7   +3.7   +0.0] | val n= 3  -0.2% $ -1.05
+  fail a     [AND] BASE & shots/fleet@k-2 < 14: fit n= 57 +26.1% win 65% dead  9% $+43.7/d | per-window $ [  +4.3  +65.6  +83.1  +21.6] | val n= 9 +20.5% $+20.97
+  fail a     [AND] BASE & wallets/fleet@k-2 >= 0.5: fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcde [AND] BASE & wallets/fleet@k-2 < 0.5: fit n=  0      - win   - dead   - $ +0.0/d | per-window $ [  +0.0   +0.0   +0.0   +0.0] | val n= 0      - $ +0.00
+  fail a     [AND] BASE & wallets/fleet@k-2 >= 1: fit n= 55 +30.4% win 65% dead  7% $+49.8/d | per-window $ [ +40.5  +49.9  +85.2  +23.9] | val n= 8 +22.1% $+20.36
+  fail abce  [AND] BASE & wallets/fleet@k-2 < 1: fit n= 18 +15.3% win 72% dead 11% $ +7.4/d | per-window $ [ -10.0  +40.4   +1.6   -2.2] | val n= 4  +1.7% $ -0.44
+  fail abce  [AND] BASE & wallets/fleet@k-2 >= 1.33333: fit n= 15 +43.6% win 67% dead  7% $+20.0/d | per-window $ [ +10.4  +31.7  +38.0   +0.0] | val n= 3  +7.2% $ +1.83
+  fail ac    [AND] BASE & wallets/fleet@k-2 < 1.33333: fit n= 58 +22.3% win 67% dead  9% $+37.3/d | per-window $ [ +20.1  +58.6  +48.8  +21.6] | val n= 9 +18.0% $+18.09
+  fail a     [AND] BASE & max shots of one fleet@k-2 >= 4: fit n= 59 +28.3% win 69% dead  8% $+49.3/d | per-window $ [ +27.7  +90.5  +57.9  +21.2] | val n=10 +20.2% $+22.90
+  fail abce  [AND] BASE & max shots of one fleet@k-2 < 4: fit n= 14 +20.1% win 57% dead  7% $ +8.0/d | per-window $ [  +2.7   -0.2  +28.9   +0.5] | val n= 2  -8.9% $ -2.98
+  fail ac    [AND] BASE & max shots of one fleet@k-2 >= 11: fit n= 46 +34.2% win 74% dead  9% $+47.4/d | per-window $ [ +28.0  +87.9  +59.2  +14.4] | val n= 6  +0.7% $ -1.47
+  fail ade   [AND] BASE & max shots of one fleet@k-2 < 11: fit n= 27 +13.8% win 56% dead  7% $ +9.9/d | per-window $ [  +2.4   +2.4  +27.6   +7.2] | val n= 6 +30.0% $+21.39
+  fail abc   [AND] BASE & max shots of one fleet@k-2 >= 21: fit n= 31 +26.5% win 74% dead 10% $+24.2/d | per-window $ [ +18.8  +36.9  +42.4   -1.5] | val n= 6  +0.7% $ -1.47
+  fail a     [AND] BASE & max shots of one fleet@k-2 < 21: fit n= 42 +26.8% win 62% dead  7% $+33.1/d | per-window $ [ +11.6  +53.4  +44.4  +23.1] | val n= 6 +30.0% $+21.39
+  fail abce  [AND] BASE & max shots of one fleet@k-2 >= 25: fit n= 15 +36.2% win 73% dead  7% $+16.4/d | per-window $ [  +9.3   +6.8  +49.6   +0.0] | val n= 2  -1.4% $ -1.03
+  fail a     [AND] BASE & max shots of one fleet@k-2 < 25: fit n= 58 +24.2% win 66% dead  9% $+40.9/d | per-window $ [ +21.2  +83.5  +37.2  +21.6] | val n=10 +18.7% $+20.95
+  fail a     [AND] BASE & blocks with a new fleet@k-2 >= 1: fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcde [AND] BASE & blocks with a new fleet@k-2 < 1: fit n=  0      - win   - dead   - $ +0.0/d | per-window $ [  +0.0   +0.0   +0.0   +0.0] | val n= 0      - $ +0.00
+  fail ac    [AND] BASE & blocks with a new fleet@k-2 >= 2: fit n= 43 +32.9% win 67% dead  2% $+42.4/d | per-window $ [ +16.6  +60.6  +87.9   +4.5] | val n= 6  +4.3% $ +1.34
+  fail abcd  [AND] BASE & blocks with a new fleet@k-2 < 2: fit n= 30 +17.8% win 67% dead 17% $+14.9/d | per-window $ [ +13.8  +29.8   -1.1  +17.1] | val n= 6 +26.4% $+18.58
+  fail c     [AND] BASE & wallets@k-3 >= 1: fit n= 63 +30.7% win 67% dead  8% $+57.6/d | per-window $ [ +30.7  +93.8  +86.6  +19.5] | val n= 8  +6.1% $ +3.73
+  fail abce  [AND] BASE & wallets@k-3 < 1: fit n= 10  +1.4% win 70% dead 10% $ -0.4/d | per-window $ [  -0.3   -3.5   +0.2   +2.1] | val n= 4 +33.7% $+16.19
+  fail ac    [AND] BASE & wallets@k-3 >= 2: fit n= 35 +37.6% win 63% dead  9% $+39.9/d | per-window $ [ +38.0  +22.1  +77.1  +22.5] | val n= 5  +9.2% $ +4.33
+  fail abc   [AND] BASE & wallets@k-3 < 2: fit n= 38 +16.6% win 71% dead  8% $+17.4/d | per-window $ [  -7.6  +68.2   +9.7   -0.8] | val n= 7 +19.7% $+15.59
+  fail ace   [AND] BASE & wallets@k-3 >= 3: fit n= 17 +27.4% win 65% dead  6% $+13.7/d | per-window $ [  +9.3   +9.9  +11.6  +24.1] | val n= 2 +20.7% $ +4.73
+  fail abc   [AND] BASE & wallets@k-3 < 3: fit n= 56 +26.5% win 68% dead  9% $+43.6/d | per-window $ [ +21.2  +80.5  +75.2   -2.5] | val n=10 +14.2% $+15.19
+  fail c     [AND] BASE & fleets@k-3 >= 1: fit n= 64 +30.6% win 67% dead  8% $+58.4/d | per-window $ [ +30.7  +93.8  +89.4  +19.5] | val n= 8  +6.1% $ +3.73
+  fail abce  [AND] BASE & fleets@k-3 < 1: fit n=  9  -1.1% win 67% dead 11% $ -1.1/d | per-window $ [  -0.3   -3.5   -2.6   +2.1] | val n= 4 +33.7% $+16.19
+  fail ac    [AND] BASE & fleets@k-3 >= 2: fit n= 52 +30.1% win 65% dead 10% $+46.7/d | per-window $ [ +28.0  +62.5  +75.8  +20.3] | val n= 8  +6.1% $ +3.73
+  fail ace   [AND] BASE & fleets@k-3 < 2: fit n= 21 +18.1% win 71% dead  5% $+10.6/d | per-window $ [  +2.4  +27.8  +11.0   +1.4] | val n= 4 +33.7% $+16.19
+  fail abce  [AND] BASE & direct fleets@k-2 >= 1 & relay fleets@k-2 >= 1: fit n=  8 +39.8% win 75% dead 12% $ +9.7/d | per-window $ [  +0.0  +10.0  +28.8   +0.0] | val n= 0      - $ +0.00
+  fail a     [AND] BASE & relay only (no direct fleet @k-2): fit n= 64 +25.6% win 67% dead  8% $+48.1/d | per-window $ [ +30.4  +82.2  +58.0  +21.6] | val n=12 +15.3% $+19.92
+  fail abcde [AND] BASE & direct only (no relay fleet @k-2): fit n=  1 -11.9% win  0% dead  0% $ -0.5/d | per-window $ [  +0.0   -1.9   +0.0   +0.0] | val n= 0      - $ +0.00
+  fail a     [AND] BASE & tier == 3%: fit n= 36 +32.0% win 64% dead  8% $+34.5/d | per-window $ [ +35.5  +37.9  +39.9  +24.7] | val n= 7 +27.2% $+22.45
+  fail abc   [AND] BASE & tier < 3%: fit n= 37 +21.5% win 70% dead  8% $+22.8/d | per-window $ [  -5.1  +52.4  +46.9   -3.1] | val n= 5  -1.4% $ -2.53
+  PASS       [engine-skip] BASE & not a creator repeat (approx. of the skip the engine ALREADY runs: not a change): fit n= 72 +27.8% win 68% dead  7% $+59.1/d | per-window $ [ +37.7  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abe   [hours] BASE & hour in 00-06: fit n=  8 +64.3% win 62% dead  0% $+16.1/d | per-window $ [  +0.0  +21.4  +42.8   +0.0] | val n= 1 +169.2% $+21.66
+  fail ac    [hours] BASE & hour not in 00-06: fit n= 65 +22.1% win 68% dead  9% $+41.2/d | per-window $ [ +30.4  +68.9  +44.0  +21.6] | val n=11  +1.3% $ -1.74
+  fail abce  [hours] BASE & hour in 06-12: fit n=  5 +15.9% win 80% dead  0% $ +2.2/d | per-window $ [  +2.6   +2.5   +3.6   +0.0] | val n= 0      - $ +0.00
+  fail a     [hours] BASE & hour not in 06-12: fit n= 68 +27.5% win 66% dead  9% $+55.1/d | per-window $ [ +27.8  +87.8  +83.2  +21.6] | val n=12 +15.3% $+19.92
+  fail abce  [hours] BASE & hour in 12-18: fit n= 26 +26.8% win 81% dead  8% $+20.5/d | per-window $ [  -7.2  +52.7  +11.1  +25.5] | val n= 6  -0.1% $ -2.05
+  fail ab    [hours] BASE & hour not in 12-18: fit n= 47 +26.6% win 60% dead  9% $+36.8/d | per-window $ [ +37.6  +37.6  +75.7   -3.8] | val n= 6 +30.7% $+21.97
+  fail abcd  [hours] BASE & hour in 18-24: fit n= 34 +19.3% win 56% dead 12% $+18.6/d | per-window $ [ +35.0  +13.7  +29.3   -3.8] | val n= 5  +3.0% $ +0.30
+  fail abc   [hours] BASE & hour not in 18-24: fit n= 39 +33.1% win 77% dead  5% $+38.7/d | per-window $ [  -4.6  +76.6  +57.5  +25.5] | val n= 7 +24.1% $+19.62
+  fail a     [hours] BASE & TRADE_HOURS 12-05 (hour >= 12 or < 5): fit n= 67 +28.3% win 67% dead  9% $+56.0/d | per-window $ [ +27.8  +91.3  +83.2  +21.6] | val n=12 +15.3% $+19.92
+  fail a     [hours] BASE & hour not in 05-12: fit n= 67 +28.3% win 67% dead  9% $+56.0/d | per-window $ [ +27.8  +91.3  +83.2  +21.6] | val n=12 +15.3% $+19.92
+  fail abcd  [OR] BASE OR (0-1 fleets & bundle_eth >= 0.4): fit n=466  +1.4% win 41% dead 21% $-17.0/d | per-window $ [ -60.2  +44.2   +0.2  -52.1] | val n=96  +5.6% $+38.63
+  fail d     [OR] BASE OR (0-1 fleets & bundle_eth < 0.4): fit n=170 +18.4% win 50% dead 16% $+87.6/d | per-window $ [ +86.5  +63.9 +182.5  +17.4] | val n=16 +17.0% $+30.08
+  fail abcd  [OR] BASE OR (0-1 fleets & bundle_eth >= 0.55): fit n=367  +2.9% win 44% dead 22% $ +4.2/d | per-window $ [ -92.4 +109.0   +7.1   -6.7] | val n=71  +5.4% $+26.57
+  fail bcd   [OR] BASE OR (0-1 fleets & bundle_eth < 0.55): fit n=269 +10.1% win 43% dead 16% $+66.3/d | per-window $ [+118.8   -1.0 +175.6  -28.0] | val n=41 +10.4% $+42.13
+  fail abcd  [OR] BASE OR (0-1 fleets & bundle_eth >= 0.672074): fit n=269  +6.9% win 48% dead 21% $+38.4/d | per-window $ [  -3.7 +147.5  +13.9   -4.1] | val n=61  +8.5% $+47.20
+  fail abcd  [OR] BASE OR (0-1 fleets & bundle_eth < 0.672074): fit n=367  +5.2% win 41% dead 19% $+32.2/d | per-window $ [ +30.0  -39.5 +168.8  -30.6] | val n=51  +5.8% $+21.50
+  fail bcd   [OR] BASE OR (0-1 fleets & bundle_eth >= 0.907254): fit n=171 +15.8% win 52% dead 12% $+73.7/d | per-window $ [ +40.7 +179.4  +77.0   -2.3] | val n=44  +8.7% $+35.28
+  fail abcd  [OR] BASE OR (0-1 fleets & bundle_eth < 0.907254): fit n=465  +2.3% win 41% dead 22% $ -3.1/d | per-window $ [ -14.4  -71.4 +105.7  -32.4] | val n=68  +6.3% $+33.43
+  fail abcd  [OR] BASE OR (0-1 fleets & named >= 4): fit n=468  +1.0% win 38% dead 23% $-23.5/d | per-window $ [ -74.5  -19.4  +58.7  -58.9] | val n=80  +8.2% $+58.90
+  fail c     [OR] BASE OR (0-1 fleets & named < 4): fit n=168 +19.8% win 60% dead 10% $+94.1/d | per-window $ [+100.8 +127.4 +124.0  +24.2] | val n=32  +4.9% $ +9.81
+  fail abcd  [OR] BASE OR (0-1 fleets & named >= 7): fit n=270  +3.5% win 39% dead 19% $ +8.2/d | per-window $ [  -1.4  -71.9 +126.1  -19.9] | val n=44  +9.8% $+41.61
+  fail bcd   [OR] BASE OR (0-1 fleets & named < 7): fit n=366  +7.8% win 47% dead 20% $+62.4/d | per-window $ [ +27.7 +179.9  +56.6  -14.8] | val n=68  +5.6% $+27.09
+  fail abcd  [OR] BASE OR (0-1 fleets & named >= 15): fit n=179 +10.3% win 46% dead 16% $+45.3/d | per-window $ [ +12.4  -15.7 +156.0  +28.4] | val n=26 +12.0% $+32.12
+  fail abcd  [OR] BASE OR (0-1 fleets & named < 15): fit n=457  +4.2% win 43% dead 21% $+25.3/d | per-window $ [ +13.9 +123.7  +26.7  -63.1] | val n=86  +5.8% $+36.59
+  fail abcd  [OR] BASE OR (0-1 fleets & tier >= 0.02): fit n=563  +3.3% win 41% dead 21% $+13.3/d | per-window $ [  -4.1  +17.7  +95.9  -56.3] | val n=100  +6.3% $+48.78
+  fail a     [OR] BASE OR (0-1 fleets & tier < 0.02): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcd  [OR] BASE OR (0-1 fleets & tier >= 0.0255): fit n=367  +3.2% win 42% dead 23% $ +7.9/d | per-window $ [ +25.3  +46.8   +7.2  -47.5] | val n=80  +5.3% $+29.09
+  fail cd    [OR] BASE OR (0-1 fleets & tier < 0.0255): fit n=269  +9.7% win 46% dead 14% $+62.6/d | per-window $ [  +1.0  +61.2 +175.5  +12.8] | val n=32 +12.1% $+39.61
+  fail abcd  [OR] BASE OR (0-1 fleets & tier >= 0.03): fit n=334  +3.1% win 40% dead 24% $ +5.6/d | per-window $ [ +41.3  +49.6  -20.9  -47.5] | val n=75  +5.3% $+26.79
+  fail bcd   [OR] BASE OR (0-1 fleets & tier < 0.03): fit n=302  +9.2% win 48% dead 15% $+65.0/d | per-window $ [ -15.0  +58.4 +203.6  +12.8] | val n=37 +11.3% $+41.92
+  fail abcd  [OR] BASE OR (0-1 fleets & k >= 3): fit n=472  +1.3% win 41% dead 22% $-18.9/d | per-window $ [  +2.1  -10.6  +10.6  -77.9] | val n=81  +6.3% $+39.16
+  fail cd    [OR] BASE OR (0-1 fleets & k < 3): fit n=164 +19.3% win 52% dead 12% $+89.5/d | per-window $ [ +24.2 +118.6 +172.1  +43.2] | val n=31  +9.9% $+29.54
+  fail abcd  [OR] BASE OR (0-1 fleets & k >= 5): fit n=379  +0.5% win 39% dead 24% $-25.5/d | per-window $ [ -13.3   +0.3  -17.0  -71.9] | val n=62  +4.3% $+14.23
+  fail cd    [OR] BASE OR (0-1 fleets & k < 5): fit n=257 +14.0% win 51% dead 13% $+96.0/d | per-window $ [ +39.6 +107.7 +199.7  +37.2] | val n=50 +10.9% $+54.47
+  fail abcd  [OR] BASE OR (0-1 fleets & k >= 6): fit n=334  +1.0% win 40% dead 25% $-16.4/d | per-window $ [ +14.2   +6.7  -34.4  -52.0] | val n=50  +7.8% $+34.50
+  fail cd    [OR] BASE OR (0-1 fleets & k < 6): fit n=302 +11.4% win 48% dead 14% $+86.9/d | per-window $ [ +12.1 +101.3 +217.1  +17.3] | val n=62  +6.8% $+34.20
+  fail acd   [OR] BASE OR (0-1 fleets & k >= 8): fit n=186  +8.2% win 47% dead 24% $+34.0/d | per-window $ [  +8.0  +95.1  +26.1   +6.9] | val n=32 +14.2% $+48.61
+  fail abcd  [OR] BASE OR (0-1 fleets & k < 8): fit n=450  +5.0% win 42% dead 18% $+36.6/d | per-window $ [ +18.3  +12.9 +156.6  -41.6] | val n=80  +4.5% $+20.09
+  fail abcd  [OR] BASE OR (0-1 fleets & hour >= 12): fit n=474  +5.3% win 41% dead 21% $+43.2/d | per-window $ [ +21.6  +50.0 +151.2  -50.0] | val n=94  +5.5% $+36.29
+  fail ad    [OR] BASE OR (0-1 fleets & hour < 12): fit n=162  +7.7% win 51% dead 15% $+27.4/d | per-window $ [  +4.7  +58.0  +31.5  +15.3] | val n=18 +16.4% $+32.42
+  fail abcd  [OR] BASE OR (0-1 fleets & hour >= 16): fit n=383  +6.2% win 41% dead 22% $+46.1/d | per-window $ [ +20.4  +96.5 +106.0  -38.5] | val n=70  +8.9% $+57.71
+  fail acd   [OR] BASE OR (0-1 fleets & hour < 16): fit n=253  +5.5% win 48% dead 17% $+24.5/d | per-window $ [  +5.9  +11.5  +76.7   +3.7] | val n=42  +4.6% $+10.99
+  fail cd    [OR] BASE OR (0-1 fleets & hour >= 18): fit n=299  +9.2% win 43% dead 22% $+65.2/d | per-window $ [ +18.7 +106.9 +120.4  +14.9] | val n=59 +10.8% $+63.67
+  fail abcd  [OR] BASE OR (0-1 fleets & hour < 18): fit n=337  +3.0% win 44% dead 18% $ +5.4/d | per-window $ [  +7.6   +1.1  +62.3  -49.6] | val n=53  +3.3% $ +5.03
+  fail abcd  [OR] BASE OR (0-1 fleets & hour >= 21): fit n=179  +8.1% win 47% dead 22% $+32.4/d | per-window $ [ -64.5  +67.7 +104.6  +21.6] | val n=26  +8.2% $+19.16
+  fail abcd  [OR] BASE OR (0-1 fleets & hour < 21): fit n=457  +5.1% win 42% dead 19% $+38.2/d | per-window $ [ +90.8  +40.3  +78.1  -56.3] | val n=86  +7.0% $+49.55
+  fail abcd  [OR] BASE OR (0-1 fleets & wallets@k-2 >= 0): fit n=563  +3.3% win 41% dead 21% $+13.3/d | per-window $ [  -4.1  +17.7  +95.9  -56.3] | val n=100  +6.3% $+48.78
+  fail a     [OR] BASE OR (0-1 fleets & wallets@k-2 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail ad    [OR] BASE OR (0-1 fleets & arr1_d >= 3): fit n=146 +13.4% win 51% dead 17% $+51.4/d | per-window $ [ +20.9  +55.2 +115.6  +13.9] | val n=22 +24.7% $+63.50
+  fail c     [OR] BASE OR (0-1 fleets & arr1_d < 3): fit n= 91 +22.4% win 67% dead  9% $+58.8/d | per-window $ [ +30.7  +93.6  +92.3  +18.7] | val n=15 +12.8% $+20.08
+  fail ad    [OR] BASE OR (0-1 fleets & arr1_d >= 4): fit n=130 +14.9% win 52% dead 18% $+52.2/d | per-window $ [ +20.9  +71.7 +101.1  +14.9] | val n=20 +18.5% $+41.47
+  PASS       [OR] BASE OR (0-1 fleets & arr1_d < 4): fit n=107 +19.2% win 63% dead  8% $+58.0/d | per-window $ [ +30.7  +77.0 +106.7  +17.7] | val n=17 +21.6% $+42.11
+  fail d     [OR] BASE OR (0-1 fleets & arr1_d >= 5): fit n=112 +18.5% win 55% dead 19% $+58.0/d | per-window $ [ +34.5  +76.9 +103.5  +17.1] | val n=17 +19.9% $+38.44
+  fail a     [OR] BASE OR (0-1 fleets & arr1_d < 5): fit n=125 +15.4% win 58% dead 10% $+52.2/d | per-window $ [ +17.1  +71.9 +104.4  +15.5] | val n=20 +19.9% $+45.14
+  fail d     [OR] BASE OR (0-1 fleets & arr1_d >= 6): fit n=100 +22.1% win 57% dead 17% $+63.6/d | per-window $ [ +35.0  +93.8 +101.7  +23.7] | val n=16 +20.1% $+36.52
+  fail ad    [OR] BASE OR (0-1 fleets & arr1_d < 6): fit n=137 +13.0% win 57% dead 12% $+46.6/d | per-window $ [ +16.5  +55.0 +106.2   +8.9] | val n=21 +19.8% $+47.05
+  fail abcd  [OR] BASE OR (0-1 fleets & shots@k-2 >= 0): fit n=563  +3.3% win 41% dead 21% $+13.3/d | per-window $ [  -4.1  +17.7  +95.9  -56.3] | val n=100  +6.3% $+48.78
+  fail a     [OR] BASE OR (0-1 fleets & shots@k-2 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcd  [OR] BASE OR (0-1 fleets & wallets/fleet@k-2 >= 0): fit n=563  +3.3% win 41% dead 21% $+13.3/d | per-window $ [  -4.1  +17.7  +95.9  -56.3] | val n=100  +6.3% $+48.78
+  fail a     [OR] BASE OR (0-1 fleets & wallets/fleet@k-2 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcd  [OR] BASE OR (0-1 fleets & direct fleets@k-2 >= 0): fit n=563  +3.3% win 41% dead 21% $+13.3/d | per-window $ [  -4.1  +17.7  +95.9  -56.3] | val n=100  +6.3% $+48.78
+  fail a     [OR] BASE OR (0-1 fleets & direct fleets@k-2 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcd  [OR] BASE OR (0-1 fleets & relay fleets@k-2 >= 0): fit n=563  +3.3% win 41% dead 21% $+13.3/d | per-window $ [  -4.1  +17.7  +95.9  -56.3] | val n=100  +6.3% $+48.78
+  fail a     [OR] BASE OR (0-1 fleets & relay fleets@k-2 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcd  [OR] BASE OR (0-1 fleets & wallets@k-3 >= 0): fit n=563  +3.3% win 41% dead 21% $+13.3/d | per-window $ [  -4.1  +17.7  +95.9  -56.3] | val n=100  +6.3% $+48.78
+  fail a     [OR] BASE OR (0-1 fleets & wallets@k-3 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcd  [OR] BASE OR (0-1 fleets & fleets@k-3 >= 0): fit n=563  +3.3% win 41% dead 21% $+13.3/d | per-window $ [  -4.1  +17.7  +95.9  -56.3] | val n=100  +6.3% $+48.78
+  fail a     [OR] BASE OR (0-1 fleets & fleets@k-3 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcd  [OR] BASE OR (0-1 fleets & tier == 3%): fit n=334  +3.1% win 40% dead 24% $ +5.6/d | per-window $ [ +41.3  +49.6  -20.9  -47.5] | val n=75  +5.3% $+26.79
+  fail bcd   [OR] BASE OR (0-1 fleets & tier < 3%): fit n=302  +9.2% win 48% dead 15% $+65.0/d | per-window $ [ -15.0  +58.4 +203.6  +12.8] | val n=37 +11.3% $+41.92
+  fail ad    [OR] BASE OR (0-1 fleets & hour in 00-06): fit n=110 +12.1% win 53% dead 15% $+34.2/d | per-window $ [ +12.1  +63.5  +39.5  +21.6] | val n=15 +21.6% $+37.19
+  fail ac    [OR] BASE OR (0-1 fleets & hour in 06-12): fit n=125 +15.0% win 59% dead 11% $+50.5/d | per-window $ [ +23.0  +84.8  +78.8  +15.3] | val n=15 +10.3% $+15.15
+  fail abcd  [OR] BASE OR (0-1 fleets & hour in 12-18): fit n=248  +6.9% win 46% dead 16% $+35.3/d | per-window $ [ +33.3  +33.4 +117.6  -43.3] | val n=47  +1.3% $ -7.46
+  fail cd    [OR] BASE OR (0-1 fleets & hour in 18-24): fit n=299  +9.2% win 43% dead 22% $+65.2/d | per-window $ [ +18.7 +106.9 +120.4  +14.9] | val n=59 +10.8% $+63.67
+  fail ad    [OR] BASE OR (exactly 1 fleet & bundle_eth >= 0.53): fit n=146 +10.5% win 54% dead 17% $+37.7/d | per-window $ [ +25.0  +77.8  +39.9   +8.1] | val n=22 +21.9% $+55.37
+  PASS       [OR] BASE OR (exactly 1 fleet & bundle_eth < 0.53): fit n= 91 +27.1% win 62% dead  9% $+72.5/d | per-window $ [ +26.6  +71.0 +167.9  +24.5] | val n=15 +17.0% $+28.21
+  fail ad    [OR] BASE OR (exactly 1 fleet & bundle_eth >= 0.58): fit n=128 +12.7% win 59% dead 19% $+42.4/d | per-window $ [ +23.2  +87.7  +43.8  +14.7] | val n=22 +21.9% $+55.37
+  fail d     [OR] BASE OR (exactly 1 fleet & bundle_eth < 0.58): fit n=109 +21.7% win 55% dead  8% $+67.9/d | per-window $ [ +28.4  +61.1 +164.1  +17.8] | val n=15 +17.0% $+28.21
+  fail ad    [OR] BASE OR (exactly 1 fleet & bundle_eth >= 0.767535): fit n=110 +14.4% win 57% dead 18% $+42.5/d | per-window $ [ +12.7  +80.7  +54.7  +21.9] | val n=19 +22.4% $+49.12
+  fail d     [OR] BASE OR (exactly 1 fleet & bundle_eth < 0.767535): fit n=127 +18.9% win 57% dead 10% $+67.7/d | per-window $ [ +38.9  +68.0 +153.2  +10.7] | val n=18 +17.3% $+34.46
+  PASS       [OR] BASE OR (exactly 1 fleet & bundle_eth >= 0.950851): fit n= 92 +23.2% win 63% dead 10% $+61.7/d | per-window $ [ +14.6 +123.6  +90.1  +18.5] | val n=19 +22.4% $+49.12
+  fail ad    [OR] BASE OR (exactly 1 fleet & bundle_eth < 0.950851): fit n=145 +12.8% win 53% dead 17% $+48.5/d | per-window $ [ +37.0  +25.2 +117.7  +14.1] | val n=18 +17.3% $+34.46
+  fail ad    [OR] BASE OR (exactly 1 fleet & named >= 4): fit n=150 +13.9% win 53% dead 17% $+55.6/d | per-window $ [ +15.1  +71.7 +126.7   +8.9] | val n=24 +21.0% $+57.50
+  fail a     [OR] BASE OR (exactly 1 fleet & named < 4): fit n= 87 +21.9% win 64% dead  9% $+54.6/d | per-window $ [ +36.5  +77.1  +81.2  +23.7] | val n=13 +18.0% $+26.08
+  fail ad    [OR] BASE OR (exactly 1 fleet & named >= 5): fit n=142 +14.0% win 52% dead 18% $+53.0/d | per-window $ [ +16.6  +72.5 +114.1   +8.9] | val n=23 +23.1% $+61.62
+  fail ac    [OR] BASE OR (exactly 1 fleet & named < 5): fit n= 95 +21.1% win 64% dead  8% $+57.2/d | per-window $ [ +35.0  +76.2  +93.8  +23.7] | val n=14 +14.6% $+21.96
+  fail cd    [OR] BASE OR (exactly 1 fleet & named >= 15): fit n=115 +19.9% win 57% dead 14% $+65.1/d | per-window $ [ +23.7  +65.5 +149.4  +21.6] | val n=16 +14.9% $+25.79
+  fail ad    [OR] BASE OR (exactly 1 fleet & named < 15): fit n=122 +13.9% win 57% dead 14% $+45.2/d | per-window $ [ +27.9  +83.2  +58.5  +11.0] | val n=21 +23.7% $+57.79
+  fail d     [OR] BASE OR (exactly 1 fleet & named >= 20): fit n=100 +21.5% win 59% dead 16% $+61.7/d | per-window $ [ +23.4  +63.4 +138.3  +21.6] | val n=15 +16.7% $+27.67
+  fail ad    [OR] BASE OR (exactly 1 fleet & named < 20): fit n=137 +13.4% win 55% dead 12% $+48.5/d | per-window $ [ +28.2  +85.3  +69.6  +11.0] | val n=22 +22.1% $+55.91
+  fail ad    [OR] BASE OR (exactly 1 fleet & tier >= 0.02): fit n=164 +12.5% win 52% dead 16% $+52.9/d | per-window $ [ +21.2  +58.5 +121.1  +11.0] | val n=25 +22.1% $+63.66
+  fail a     [OR] BASE OR (exactly 1 fleet & tier < 0.02): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail d     [OR] BASE OR (exactly 1 fleet & tier >= 0.03): fit n=111 +19.0% win 56% dead 17% $+59.6/d | per-window $ [ +24.3  +92.5 +105.5  +15.9] | val n=22 +20.3% $+50.85
+  fail a     [OR] BASE OR (exactly 1 fleet & tier < 0.03): fit n=126 +14.9% win 58% dead 11% $+50.7/d | per-window $ [ +27.3  +56.3 +102.4  +16.7] | val n=15 +19.3% $+32.73
+  fail ad    [OR] BASE OR (exactly 1 fleet & k >= 5): fit n=154 +13.6% win 52% dead 16% $+55.4/d | per-window $ [ +21.2  +72.9 +114.3  +13.2] | val n=22 +18.3% $+45.22
+  fail a     [OR] BASE OR (exactly 1 fleet & k < 5): fit n= 83 +22.9% win 66% dead 10% $+54.8/d | per-window $ [ +30.4  +75.8  +93.6  +19.3] | val n=15 +22.2% $+38.36
+  fail ad    [OR] BASE OR (exactly 1 fleet & k >= 6): fit n=144 +13.8% win 53% dead 17% $+52.7/d | per-window $ [ +15.1  +77.1 +103.3  +15.4] | val n=19 +23.9% $+52.86
+  PASS       [OR] BASE OR (exactly 1 fleet & k < 6): fit n= 93 +21.6% win 63% dead  9% $+57.5/d | per-window $ [ +36.5  +71.7 +104.6  +17.2] | val n=18 +15.7% $+30.71
+  fail d     [OR] BASE OR (exactly 1 fleet & k >= 7): fit n=124 +17.4% win 54% dead 16% $+59.9/d | per-window $ [ +32.0  +89.0 +101.5  +17.1] | val n=18 +24.3% $+50.95
+  fail a     [OR] BASE OR (exactly 1 fleet & k < 7): fit n=113 +16.2% win 60% dead 12% $+50.3/d | per-window $ [ +19.6  +59.7 +106.4  +15.5] | val n=19 +15.7% $+32.63
+  fail d     [OR] BASE OR (exactly 1 fleet & k >= 8): fit n=107 +21.2% win 58% dead 16% $+64.9/d | per-window $ [ +35.5  +97.2 +103.3  +23.7] | val n=17 +21.9% $+42.69
+  fail ad    [OR] BASE OR (exactly 1 fleet & k < 8): fit n=130 +13.3% win 56% dead 12% $+45.3/d | per-window $ [ +16.1  +51.5 +104.6   +8.9] | val n=20 +18.3% $+40.89
+  fail d     [OR] BASE OR (exactly 1 fleet & hour >= 15): fit n=148 +14.5% win 54% dead 17% $+57.6/d | per-window $ [ +25.4  +67.8 +125.3  +11.9] | val n=23 +22.8% $+60.52
+  fail ac    [OR] BASE OR (exactly 1 fleet & hour < 15): fit n= 89 +20.7% win 62% dead  9% $+52.6/d | per-window $ [ +26.2  +81.0  +82.6  +20.6] | val n=14 +15.2% $+23.06
+  fail d     [OR] BASE OR (exactly 1 fleet & hour >= 17): fit n=135 +17.7% win 59% dead 16% $+66.6/d | per-window $ [ +35.5  +71.4 +131.6  +27.8] | val n=21 +26.9% $+66.52
+  fail acd   [OR] BASE OR (exactly 1 fleet & hour < 17): fit n=102 +15.7% win 55% dead 12% $+43.6/d | per-window $ [ +16.1  +77.4  +76.3   +4.8] | val n=16 +10.7% $+17.06
+  fail ad    [OR] BASE OR (exactly 1 fleet & hour >= 19): fit n=118 +14.0% win 57% dead 15% $+43.9/d | per-window $ [ +21.5  +60.8  +69.0  +24.3] | val n=15 +28.6% $+50.75
+  fail c     [OR] BASE OR (exactly 1 fleet & hour < 19): fit n=119 +19.7% win 57% dead 13% $+66.3/d | per-window $ [ +30.1  +87.9 +138.9   +8.3] | val n=22 +14.0% $+32.83
+  fail ad    [OR] BASE OR (exactly 1 fleet & hour >= 21): fit n= 99 +15.2% win 57% dead 14% $+40.8/d | per-window $ [ +22.4  +50.2  +69.0  +21.6] | val n=13 +19.2% $+28.19
+  fail d     [OR] BASE OR (exactly 1 fleet & hour < 21): fit n=138 +18.0% win 57% dead 14% $+69.4/d | per-window $ [ +29.2  +98.6 +138.9  +11.0] | val n=24 +20.3% $+55.39
+  fail ad    [OR] BASE OR (exactly 1 fleet & wallets@k-2 >= 0): fit n=164 +12.5% win 52% dead 16% $+52.9/d | per-window $ [ +21.2  +58.5 +121.1  +11.0] | val n=25 +22.1% $+63.66
+  fail a     [OR] BASE OR (exactly 1 fleet & wallets@k-2 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail d     [OR] BASE OR (exactly 1 fleet & wallets@k-2 >= 1): fit n=138 +16.2% win 56% dead 16% $+61.2/d | per-window $ [ +28.9  +80.2 +124.7  +11.0] | val n=25 +22.1% $+63.66
+  fail a     [OR] BASE OR (exactly 1 fleet & wallets@k-2 < 1): fit n= 99 +17.8% win 59% dead 11% $+49.0/d | per-window $ [ +22.7  +68.5  +83.2  +21.6] | val n=12 +15.3% $+19.92
+  fail ad    [OR] BASE OR (exactly 1 fleet & arr1_d >= 3): fit n=146 +13.4% win 51% dead 17% $+51.4/d | per-window $ [ +20.9  +55.2 +115.6  +13.9] | val n=22 +24.7% $+63.50
+  fail c     [OR] BASE OR (exactly 1 fleet & arr1_d < 3): fit n= 91 +22.4% win 67% dead  9% $+58.8/d | per-window $ [ +30.7  +93.6  +92.3  +18.7] | val n=15 +12.8% $+20.08
+  fail ad    [OR] BASE OR (exactly 1 fleet & arr1_d >= 4): fit n=130 +14.9% win 52% dead 18% $+52.2/d | per-window $ [ +20.9  +71.7 +101.1  +14.9] | val n=20 +18.5% $+41.47
+  PASS       [OR] BASE OR (exactly 1 fleet & arr1_d < 4): fit n=107 +19.2% win 63% dead  8% $+58.0/d | per-window $ [ +30.7  +77.0 +106.7  +17.7] | val n=17 +21.6% $+42.11
+  fail d     [OR] BASE OR (exactly 1 fleet & arr1_d >= 5): fit n=112 +18.5% win 55% dead 19% $+58.0/d | per-window $ [ +34.5  +76.9 +103.5  +17.1] | val n=17 +19.9% $+38.44
+  fail a     [OR] BASE OR (exactly 1 fleet & arr1_d < 5): fit n=125 +15.4% win 58% dead 10% $+52.2/d | per-window $ [ +17.1  +71.9 +104.4  +15.5] | val n=20 +19.9% $+45.14
+  fail d     [OR] BASE OR (exactly 1 fleet & arr1_d >= 6): fit n=100 +22.1% win 57% dead 17% $+63.6/d | per-window $ [ +35.0  +93.8 +101.7  +23.7] | val n=16 +20.1% $+36.52
+  fail ad    [OR] BASE OR (exactly 1 fleet & arr1_d < 6): fit n=137 +13.0% win 57% dead 12% $+46.6/d | per-window $ [ +16.5  +55.0 +106.2   +8.9] | val n=21 +19.8% $+47.05
+  fail ad    [OR] BASE OR (exactly 1 fleet & shots@k-2 >= 1): fit n=164 +12.5% win 52% dead 16% $+52.9/d | per-window $ [ +21.2  +58.5 +121.1  +11.0] | val n=25 +22.1% $+63.66
+  fail a     [OR] BASE OR (exactly 1 fleet & shots@k-2 < 1): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail ad    [OR] BASE OR (exactly 1 fleet & shots@k-2 >= 3): fit n=132 +13.3% win 55% dead 12% $+46.3/d | per-window $ [ +28.2  +49.1 +101.4   +6.7] | val n=20 +21.4% $+49.16
+  fail d     [OR] BASE OR (exactly 1 fleet & shots@k-2 < 3): fit n=105 +21.3% win 59% dead 16% $+63.9/d | per-window $ [ +23.4  +99.7 +106.5  +25.9] | val n=17 +18.1% $+34.42
+  fail ad    [OR] BASE OR (exactly 1 fleet & shots@k-2 >= 15): fit n=110 +15.5% win 55% dead 13% $+46.3/d | per-window $ [ +34.3  +62.7  +82.7   +5.4] | val n=13 +18.0% $+26.17
+  fail d     [OR] BASE OR (exactly 1 fleet & shots@k-2 < 15): fit n=127 +18.0% win 58% dead 15% $+63.9/d | per-window $ [ +17.3  +86.1 +125.2  +27.1] | val n=24 +20.9% $+57.41
+  fail a     [OR] BASE OR (exactly 1 fleet & shots@k-2 >= 22): fit n= 97 +17.9% win 59% dead 12% $+48.5/d | per-window $ [ +26.7  +72.9  +81.8  +12.6] | val n=13 +18.0% $+26.17
+  fail d     [OR] BASE OR (exactly 1 fleet & shots@k-2 < 22): fit n=140 +16.1% win 56% dead 15% $+61.7/d | per-window $ [ +24.9  +75.9 +126.1  +20.0] | val n=24 +20.9% $+57.41
+  fail ad    [OR] BASE OR (exactly 1 fleet & wallets/fleet@k-2 >= 0): fit n=164 +12.5% win 52% dead 16% $+52.9/d | per-window $ [ +21.2  +58.5 +121.1  +11.0] | val n=25 +22.1% $+63.66
+  fail a     [OR] BASE OR (exactly 1 fleet & wallets/fleet@k-2 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail d     [OR] BASE OR (exactly 1 fleet & wallets/fleet@k-2 >= 1): fit n=138 +16.2% win 56% dead 16% $+61.2/d | per-window $ [ +28.9  +80.2 +124.7  +11.0] | val n=25 +22.1% $+63.66
+  fail a     [OR] BASE OR (exactly 1 fleet & wallets/fleet@k-2 < 1): fit n= 99 +17.8% win 59% dead 11% $+49.0/d | per-window $ [ +22.7  +68.5  +83.2  +21.6] | val n=12 +15.3% $+19.92
+  fail ad    [OR] BASE OR (exactly 1 fleet & direct fleets@k-2 >= 0): fit n=164 +12.5% win 52% dead 16% $+52.9/d | per-window $ [ +21.2  +58.5 +121.1  +11.0] | val n=25 +22.1% $+63.66
+  fail a     [OR] BASE OR (exactly 1 fleet & direct fleets@k-2 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail d     [OR] BASE OR (exactly 1 fleet & relay fleets@k-2 >= 1): fit n=153 +16.0% win 55% dead 13% $+67.0/d | per-window $ [ +21.2  +61.3 +174.4  +11.0] | val n=25 +22.1% $+63.66
+  fail ad    [OR] BASE OR (exactly 1 fleet & relay fleets@k-2 < 1): fit n= 84 +18.4% win 61% dead 15% $+43.3/d | per-window $ [ +30.4  +87.5  +33.5  +21.6] | val n=12 +15.3% $+19.92
+  fail ad    [OR] BASE OR (exactly 1 fleet & wallets@k-3 >= 0): fit n=164 +12.5% win 52% dead 16% $+52.9/d | per-window $ [ +21.2  +58.5 +121.1  +11.0] | val n=25 +22.1% $+63.66
+  fail a     [OR] BASE OR (exactly 1 fleet & wallets@k-3 < 0): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail d     [OR] BASE OR (exactly 1 fleet & wallets@k-3 >= 1): fit n=121 +18.1% win 55% dead 17% $+61.1/d | per-window $ [ +34.5  +76.9 +119.3  +13.9] | val n=22 +24.7% $+63.50
+  fail ac    [OR] BASE OR (exactly 1 fleet & wallets@k-3 < 1): fit n=116 +15.6% win 59% dead 11% $+49.1/d | per-window $ [ +17.1  +71.8  +88.6  +18.7] | val n=15 +12.8% $+20.08
+  fail ad    [OR] BASE OR (exactly 1 fleet & fleets@k-3 >= 1): fit n=146 +13.4% win 51% dead 17% $+51.4/d | per-window $ [ +20.9  +55.2 +115.6  +13.9] | val n=22 +24.7% $+63.50
+  fail c     [OR] BASE OR (exactly 1 fleet & fleets@k-3 < 1): fit n= 91 +22.4% win 67% dead  9% $+58.8/d | per-window $ [ +30.7  +93.6  +92.3  +18.7] | val n=15 +12.8% $+20.08
+  fail d     [OR] BASE OR (exactly 1 fleet & tier == 3%): fit n=111 +19.0% win 56% dead 17% $+59.6/d | per-window $ [ +24.3  +92.5 +105.5  +15.9] | val n=22 +20.3% $+50.85
+  fail a     [OR] BASE OR (exactly 1 fleet & tier < 3%): fit n=126 +14.9% win 58% dead 11% $+50.7/d | per-window $ [ +27.3  +56.3 +102.4  +16.7] | val n=15 +19.3% $+32.73
+  fail a     [OR] BASE OR (exactly 1 fleet & hour in 00-06): fit n= 79 +22.9% win 65% dead 10% $+52.4/d | per-window $ [ +27.8  +78.1  +82.0  +21.6] | val n=12 +15.3% $+19.92
+  fail c     [OR] BASE OR (exactly 1 fleet & hour in 06-12): fit n= 79 +25.1% win 66% dead  8% $+58.0/d | per-window $ [ +30.4  +92.5  +87.4  +21.6] | val n=13 +12.5% $+16.90
+  fail acd   [OR] BASE OR (exactly 1 fleet & hour in 12-18): fit n=100 +17.4% win 57% dead 12% $+48.2/d | per-window $ [ +32.7  +88.4  +63.5   +8.3] | val n=16 +13.1% $+21.99
+  fail d     [OR] BASE OR (exactly 1 fleet & hour in 18-24): fit n=125 +18.8% win 58% dead 15% $+66.2/d | per-window $ [ +21.5  +70.4 +148.6  +24.3] | val n=20 +27.4% $+64.61
+  fail abcd  [OR] BASE OR (0 fleets & bundle_eth >= 0.39): fit n=394  +4.2% win 42% dead 20% $+21.5/d | per-window $ [ -47.3  +88.6  +84.0  -39.3] | val n=84  +2.6% $ +1.14
+  fail acd   [OR] BASE OR (0 fleets & bundle_eth < 0.39): fit n=151 +13.4% win 50% dead 18% $+53.5/d | per-window $ [ +82.9  +51.2  +64.4  +15.2] | val n=15 +14.8% $+23.83
+  fail abcd  [OR] BASE OR (0 fleets & bundle_eth >= 0.524037): fit n=313  +4.8% win 43% dead 20% $+22.8/d | per-window $ [ -68.9 +107.9  +47.1   +5.0] | val n=63  +1.3% $-10.46
+  fail abcd  [OR] BASE OR (0 fleets & bundle_eth < 0.524037): fit n=232  +9.5% win 46% dead 17% $+52.2/d | per-window $ [+104.5  +32.0 +101.4  -29.0] | val n=36 +10.1% $+35.43
+  fail abcd  [OR] BASE OR (0 fleets & bundle_eth >= 0.66): fit n=235  +7.1% win 46% dead 21% $+35.0/d | per-window $ [ -58.9 +140.0  +56.3   +2.7] | val n=51  +4.3% $+11.76
+  fail abcd  [OR] BASE OR (0 fleets & bundle_eth < 0.66): fit n=310  +6.5% win 43% dead 17% $+40.0/d | per-window $ [ +94.5   -0.1  +92.1  -26.7] | val n=48  +4.7% $+13.21
+  fail acd   [OR] BASE OR (0 fleets & bundle_eth >= 0.88): fit n=158 +13.5% win 50% dead 16% $+56.1/d | per-window $ [ +11.8 +146.1  +65.5   +0.9] | val n=39  +3.1% $ +2.93
+  fail abcd  [OR] BASE OR (0 fleets & bundle_eth < 0.88): fit n=387  +4.0% win 42% dead 20% $+18.9/d | per-window $ [ +23.7   -6.2  +83.0  -24.9] | val n=60  +5.4% $+22.04
+  fail abcd  [OR] BASE OR (0 fleets & named >= 3): fit n=472  +3.7% win 41% dead 21% $+17.7/d | per-window $ [  +5.2  +49.6  +61.6  -45.7] | val n=87  +3.0% $ +5.05
+  fail a     [OR] BASE OR (0 fleets & named < 3): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcd  [OR] BASE OR (0 fleets & named >= 4): fit n=391  +0.8% win 38% dead 23% $-21.8/d | per-window $ [ -59.1   -0.8  +18.8  -46.2] | val n=68  +5.0% $+21.32
+  fail c     [OR] BASE OR (0 fleets & named < 4): fit n=154 +21.9% win 60% dead 10% $+96.8/d | per-window $ [ +94.7 +140.6 +129.6  +22.1] | val n=31  +3.4% $ +3.65
+  fail abcd  [OR] BASE OR (0 fleets & named >= 5): fit n=291  +2.8% win 37% dead 21% $ +2.9/d | per-window $ [ +27.6  +30.6  -15.7  -30.9] | val n=54  +7.3% $+33.49
+  fail cd    [OR] BASE OR (0 fleets & named < 5): fit n=254 +11.3% win 52% dead 17% $+72.0/d | per-window $ [  +8.0 +109.2 +164.1   +6.8] | val n=45  +1.1% $ -8.53
+  fail abcd  [OR] BASE OR (0 fleets & named >= 13): fit n=160  +7.0% win 45% dead 16% $+23.3/d | per-window $ [ +15.6  -17.9  +86.5   +8.9] | val n=29  +9.0% $+24.48
+  fail abcd  [OR] BASE OR (0 fleets & named < 13): fit n=385  +6.7% win 44% dead 21% $+51.7/d | per-window $ [ +19.9 +157.8  +61.9  -32.9] | val n=70  +2.6% $ +0.49
+  fail abcd  [OR] BASE OR (0 fleets & tier >= 0.02): fit n=472  +3.7% win 41% dead 21% $+17.7/d | per-window $ [  +5.2  +49.6  +61.6  -45.7] | val n=87  +3.0% $ +5.05
+  fail a     [OR] BASE OR (0 fleets & tier < 0.02): fit n= 73 +26.7% win 67% dead  8% $+57.3/d | per-window $ [ +30.4  +90.3  +86.8  +21.6] | val n=12 +15.3% $+19.92
+  fail abcd  [OR] BASE OR (0 fleets & tier >= 0.028): fit n=321  +3.6% win 43% dead 22% $+11.6/d | per-window $ [ +58.9  +40.7  -11.5  -41.8] | val n=68  +0.9% $-14.25
+  fail bcd   [OR] BASE OR (0 fleets & tier < 0.028): fit n=224 +11.2% win 46% dead 15% $+63.4/d | per-window $ [ -23.3  +99.2 +159.9  +17.8] | val n=31 +12.3% $+39.22
+  fail abcd  [OR] BASE OR (0 fleets & tier >= 0.03): fit n=296  +2.9% win 41% dead 23% $ +3.4/d | per-window $ [ +47.4  +47.4  -39.6  -41.8] | val n=65  +2.0% $ -4.14
+  fail bcd   [OR] BASE OR (0 fleets & tier < 0.03): fit n=249 +11.4% win 48% dead 15% $+71.6/d | per-window $ [ -11.9  +92.4 +188.0  +17.8] | val n=34  +9.1% $+29.11
+  fail abcd  [OR] BASE OR (0 fleets & k >= 2): fit n=419  +3.7% win 41% dead 21% $+15.3/d | per-window $ [  +3.5  +77.0  +18.1  -37.3] | val n=81  +2.6% $ +1.10
+  fail cd    [OR] BASE OR (0 fleets & k < 2): fit n=126 +17.1% win 56% dead 13% $+59.6/d | per-window $ [ +32.1  +62.8 +130.3  +13.3] | val n=18 +12.7% $+23.86
+  fail abcd  [OR] BASE OR (0 fleets & k >= 4): fit n=336  +0.4% win 39% dead 24% $-23.7/d | per-window $ [ -28.9  +15.7  -24.1  -57.3] | val n=61  +2.1% $ -3.58
+  fail cd    [OR] BASE OR (0 fleets & k < 4): fit n=209 +17.1% win 52% dead 11% $+98.6/d | per-window $ [ +64.4 +124.2 +172.6  +33.3] | val n=38  +8.3% $+28.55
+  fail abcd  [OR] BASE OR (0 fleets & k >= 6): fit n=263  +1.2% win 41% dead 25% $-11.8/d | per-window $ [ +29.6  +20.0  -50.9  -45.8] | val n=43  +2.8% $ +1.56
+  fail cd    [OR] BASE OR (0 fleets & k < 6): fit n=282 +12.0% win 48% dead 14% $+86.7/d | per-window $ [  +6.0 +119.9 +199.3  +21.7] | val n=56  +5.8% $+23.41
+  fail abcd  [OR] BASE OR (0 fleets & k >= 7): fit n=212  +3.9% win 42% dead 25% $ +9.3/d | per-window $ [ +58.8  +48.4  -36.1  -33.9] | val n=33  +2.5% $ -0.06
+  fail bcd   [OR] BASE OR (0 fleets & k < 7): fit n=333  +8.6% win 46% dead 15% $+65.7/d | per-window $ [ -23.3  +91.5 +184.6   +9.9] | val n=66  +5.5% $+25.03
+  fail abcd  [OR] BASE OR (0 fleets & hour >= 12): fit n=395  +5.9% win 41% dead 21% $+43.4/d | per-window $ [ +28.3  +71.9 +112.8  -39.3] | val n=82  +1.6% $-10.47
+  fail ad    [OR] BASE OR (0 fleets & hour < 12): fit n=150  +9.0% win 52% dead 15% $+31.6/d | per-window $ [  +7.3  +68.0  +35.7  +15.3] | val n=17 +18.6% $+35.44
+  fail abcd  [OR] BASE OR (0 fleets & hour >= 15): fit n=337  +7.2% win 42% dead 20% $+50.5/d | per-window $ [ +29.6 +109.6  +91.9  -28.9] | val n=68  +3.7% $+10.52
+  fail acd   [OR] BASE OR (0 fleets & hour < 15): fit n=208  +6.2% win 48% dead 18% $+24.5/d | per-window $ [  +6.0  +30.3  +56.6   +4.9] | val n=31  +6.1% $+14.45
+  fail acd   [OR] BASE OR (0 fleets & hour >= 18): fit n=247  +9.6% win 43% dead 21% $+56.3/d | per-window $ [ +27.6 +126.8  +58.6  +12.2] | val n=51  +5.4% $+18.98
+  fail abcd  [OR] BASE OR (0 fleets & hour < 18): fit n=298  +4.5% win 45% dead 17% $+18.7/d | per-window $ [  +8.0  +13.0  +89.9  -36.2] | val n=48  +3.5% $ +5.98
+  fail abcd  [OR] BASE OR (0 fleets & hour >= 21): fit n=153 +12.4% win 51% dead 21% $+48.9/d | per-window $ [ -56.4 +107.8 +122.5  +21.6] | val n=25  +5.9% $+10.89
+  fail abcd  [OR] BASE OR (0 fleets & hour < 21): fit n=392  +4.6% win 42% dead 18% $+26.1/d | per-window $ [ +92.0  +32.0  +26.0  -45.7] | val n=74  +4.0% $+14.08
+  fail abcd  [OR] BASE OR (0 fleets & tier == 3%): fit n=296  +2.9% win 41% dead 23% $ +3.4/d | per-window $ [ +47.4  +47.4  -39.6  -41.8] | val n=65  +2.0% $ -4.14
+  fail bcd   [OR] BASE OR (0 fleets & tier < 3%): fit n=249 +11.4% win 48% dead 15% $+71.6/d | per-window $ [ -11.9  +92.4 +188.0  +17.8] | val n=34  +9.1% $+29.11
+  fail ad    [OR] BASE OR (0 fleets & hour in 00-06): fit n=104 +14.1% win 54% dead 14% $+39.1/d | per-window $ [ +14.7  +75.7  +44.3  +21.6] | val n=15 +21.6% $+37.19
+  fail ac    [OR] BASE OR (0 fleets & hour in 06-12): fit n=119 +15.4% win 60% dead 12% $+49.8/d | per-window $ [ +23.0  +82.6  +78.2  +15.3] | val n=14 +12.5% $+18.17
+  fail abcd  [OR] BASE OR (0 fleets & hour in 12-18): fit n=221  +8.7% win 48% dead 15% $+44.4/d | per-window $ [ +31.1  +35.4 +141.0  -29.9] | val n=43  +0.8% $ -9.54
+  fail acd   [OR] BASE OR (0 fleets & hour in 18-24): fit n=247  +9.6% win 43% dead 21% $+56.3/d | per-window $ [ +27.6 +126.8  +58.6  +12.2] | val n=51  +5.4% $+18.98

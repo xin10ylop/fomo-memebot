@@ -1,0 +1,165 @@
+=== all qualifying launches by fleets@k-2 (h300)
+  f_k2 in [0,0]  FIT n=399 mean  -0.5% med  -9.1% win 36% dead 23%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+  f_k2 in [1,1]  FIT n= 91 mean  +1.1% med  -5.3% win 41% dead 23%   VAL n= 13 mean +28.4% med  +5.6% win 54% dead  8%
+  f_k2 in [2,2]  FIT n= 46 mean +27.1% med +23.1% win 72% dead 13%   VAL n= 10 mean +19.7% med  -0.9% win 50% dead  0%
+  f_k2 in [3,3]  FIT n= 20 mean +30.3% med  +1.2% win 60% dead  0%   VAL n=  2 mean  -6.7% med  -6.7% win 50% dead  0%
+  f_k2 in [4,99]  FIT n=  7 mean +13.5% med  +7.5% win 57% dead  0%   VAL n=0
+=== baseline fires by hold (FIT | VAL)
+  behind1_15_h15                 FIT n= 73 mean +16.4% med  +8.1% win 66% dead  3%   VAL n= 12 mean +18.6% med  +4.9% win 50% dead  0%
+  behind1_15_h30                 FIT n= 73 mean +16.2% med  +8.7% win 64% dead  3%   VAL n= 12 mean +13.2% med  -4.1% win 33% dead  0%
+  behind1_15_h60                 FIT n= 73 mean +16.5% med  +9.4% win 66% dead  3%   VAL n= 12 mean  +8.5% med  -3.6% win 42% dead  0%
+  behind1_15_h150                FIT n= 73 mean +21.5% med +12.8% win 66% dead  7%   VAL n= 12 mean +13.3% med  +0.1% win 50% dead  0%
+  behind1_15_h300                FIT n= 73 mean +26.7% med +21.0% win 67% dead  8%   VAL n= 12 mean +15.3% med  -0.9% win 50% dead  0%
+  behind1_15_h600                FIT n= 73 mean +20.0% med +11.2% win 52% dead 19%   VAL n= 12 mean +15.6% med  +1.1% win 50% dead 17%
+  behind1_15_tp50_h600           FIT n= 73 mean +16.5% med +32.7% win 70% dead  8%   VAL n= 12 mean  +7.4% med +24.9% win 67% dead 17%
+  behind1_15_stop20_h600         FIT n= 73 mean +24.0% med  +4.1% win 51% dead  1%   VAL n= 12 mean +14.0% med -14.7% win 42% dead  0%
+  behind1_15_tp50_stop20_h600    FIT n= 73 mean +18.6% med +32.7% win 70% dead  0%   VAL n= 12 mean +13.5% med +24.9% win 67% dead  0%
+=== all qualifying launches by hold (FIT | VAL)
+  behind1_15_h15                 FIT n=563 mean  +0.2% med  -8.6% win 31% dead  3%   VAL n=100 mean  +1.0% med  -7.8% win 28% dead  0%
+  behind1_15_h30                 FIT n=563 mean  +0.4% med  -8.3% win 34% dead  5%   VAL n=100 mean  +0.7% med  -8.9% win 24% dead  2%
+  behind1_15_h60                 FIT n=563 mean  +1.3% med  -8.4% win 35% dead  7%   VAL n=100 mean  -2.1% med -10.0% win 26% dead  6%
+  behind1_15_h150                FIT n=563 mean  +3.0% med  -6.7% win 40% dead 12%   VAL n=100 mean  +2.6% med  -7.5% win 35% dead  8%
+  behind1_15_h300                FIT n=563 mean  +3.3% med  -7.2% win 41% dead 21%   VAL n=100 mean  +6.3% med  -6.5% win 36% dead 10%
+  behind1_15_h600                FIT n=563 mean  +2.5% med  -9.0% win 39% dead 31%   VAL n=100 mean  +9.4% med  -4.9% win 40% dead 14%
+  behind1_15_tp50_h600           FIT n=563 mean  -3.1% med  -2.6% win 48% dead 25%   VAL n=100 mean  -0.9% med  -3.3% win 44% dead 14%
+  behind1_15_stop20_h600         FIT n=563 mean  +6.7% med -10.4% win 37% dead  6%   VAL n=100 mean +12.1% med  -5.8% win 39% dead  0%
+  behind1_15_tp50_stop20_h600    FIT n=563 mean  +1.5% med  -3.6% win 47% dead  4%   VAL n=100 mean  +2.7% med  -3.3% win 44% dead  0%
+=== bundle_eth: fit quartile cuts [0.445572476, 0.6275362830000001, 0.8355597830901723]
+   all        (-1e+09,0.445572]  FIT n=141 mean  +8.4% med  -8.0% win 39% dead 21%   VAL n= 16 mean  +4.2% med  -2.9% win 31% dead  6%
+   all        (0.445572,0.627536]  FIT n=141 mean  -2.4% med  -7.4% win 34% dead 16%   VAL n= 23 mean  +1.5% med -13.2% win 26% dead 13%
+   all        (0.627536,0.83556]  FIT n=141 mean  -2.3% med  -0.9% win 49% dead 30%   VAL n= 21 mean  +7.2% med  +3.8% win 57% dead  5%
+   all        (0.83556,1e+09]  FIT n=140 mean  +9.4% med  -7.5% win 41% dead 19%   VAL n= 40 mean  +9.4% med -11.0% win 32% dead 12%
+   base fires (-1e+09,0.445572]  FIT n= 12 mean +17.3% med +14.8% win 67% dead  8%   VAL n=0
+   base fires (0.445572,0.627536]  FIT n= 10 mean +15.1% med +18.3% win 70% dead  0%   VAL n=  2 mean  -7.4% med  -7.4% win  0% dead  0%
+   base fires (0.627536,0.83556]  FIT n= 26 mean +15.4% med +21.3% win 69% dead 19%   VAL n=  5 mean  -1.4% med  +2.4% win 60% dead  0%
+   base fires (0.83556,1e+09]  FIT n= 25 mean +47.5% med +22.2% win 64% dead  0%   VAL n=  5 mean +41.0% med +14.3% win 60% dead  0%
+   f_k2<2     (-1e+09,0.445572]  FIT n=129 mean  +7.6% med  -9.4% win 36% dead 22%   VAL n= 16 mean  +4.2% med  -2.9% win 31% dead  6%
+   f_k2<2     (0.445572,0.627536]  FIT n=131 mean  -3.7% med  -8.7% win 31% dead 17%   VAL n= 21 mean  +2.3% med -14.9% win 29% dead 14%
+   f_k2<2     (0.627536,0.83556]  FIT n=115 mean  -6.3% med  -7.6% win 44% dead 32%   VAL n= 16 mean  +9.9% med  +4.9% win 56% dead  6%
+   f_k2<2     (0.83556,1e+09]  FIT n=115 mean  +1.1% med  -9.5% win 36% dead 23%   VAL n= 35 mean  +4.9% med -11.8% win 29% dead 14%
+=== named: fit quartile cuts [4, 5, 14]
+   all        (-1e+09,4]  FIT n=220 mean  +5.3% med  -1.3% win 49% dead 18%   VAL n= 38 mean  -3.9% med  -9.8% win 21% dead  5%
+   all        (4,5]  FIT n= 92 mean  +1.9% med -10.7% win 36% dead 29%   VAL n= 22 mean +21.7% med  -3.8% win 50% dead 23%
+   all        (5,14]  FIT n=113 mean  +0.6% med -11.9% win 31% dead 23%   VAL n= 19 mean  +5.6% med  -5.5% win 37% dead 11%
+   all        (14,1e+09]  FIT n=138 mean  +3.0% med  -6.6% win 39% dead 20%   VAL n= 21 mean  +9.3% med  -2.6% win 48% dead  5%
+   base fires (-1e+09,4]  FIT n= 17 mean +12.3% med  +1.2% win 65% dead  0%   VAL n=  3 mean -11.5% med -10.5% win  0% dead  0%
+   base fires (4,5]  FIT n=  6 mean +56.7% med +22.5% win 100% dead  0%   VAL n=  2 mean +76.0% med +76.0% win 50% dead  0%
+   base fires (5,14]  FIT n= 18 mean +49.2% med +21.6% win 67% dead 11%   VAL n=0
+   base fires (14,1e+09]  FIT n= 32 mean +16.0% med +17.9% win 62% dead 12%   VAL n=  7 mean  +9.5% med  +3.8% win 71% dead  0%
+   f_k2<2     (-1e+09,4]  FIT n=203 mean  +4.8% med  -1.8% win 47% dead 19%   VAL n= 35 mean  -3.3% med  -9.4% win 23% dead  6%
+   f_k2<2     (4,5]  FIT n= 86 mean  -1.9% med -12.0% win 31% dead 31%   VAL n= 20 mean +16.2% med  -3.8% win 50% dead 25%
+   f_k2<2     (5,14]  FIT n= 95 mean  -8.6% med -14.2% win 24% dead 25%   VAL n= 19 mean  +5.6% med  -5.5% win 37% dead 11%
+   f_k2<2     (14,1e+09]  FIT n=106 mean  -1.0% med  -7.9% win 32% dead 22%   VAL n= 14 mean  +9.2% med  -6.0% win 36% dead  7%
+=== tier: fit quartile cuts [0.02, 0.03, 0.03]
+   all        (-1e+09,0.02]  FIT n=159 mean  +4.2% med  -7.8% win 37% dead 13%   VAL n= 18 mean +13.7% med  +0.1% win 50% dead  0%
+   all        (0.02,0.03]  FIT n=404 mean  +2.9% med  -6.1% win 42% dead 24%   VAL n= 82 mean  +4.7% med -10.1% win 33% dead 12%
+   all        (0.03,1e+09]  FIT n=0   VAL n=0
+   base fires (-1e+09,0.02]  FIT n= 25 mean +19.6% med +13.7% win 60% dead  8%   VAL n=  5 mean  -1.4% med  +2.4% win 60% dead  0%
+   base fires (0.02,0.03]  FIT n= 48 mean +30.4% med +21.5% win 71% dead  8%   VAL n=  7 mean +27.2% med  -4.3% win 43% dead  0%
+   base fires (0.03,1e+09]  FIT n=0   VAL n=0
+   f_k2<2     (-1e+09,0.02]  FIT n=134 mean  +1.4% med  -9.0% win 33% dead 14%   VAL n= 13 mean +19.5% med  -2.1% win 46% dead  0%
+   f_k2<2     (0.02,0.03]  FIT n=356 mean  -0.8% med  -8.2% win 38% dead 26%   VAL n= 75 mean  +2.6% med -10.2% win 32% dead 13%
+   f_k2<2     (0.03,1e+09]  FIT n=0   VAL n=0
+=== k: fit quartile cuts [4, 6, 7]
+   all        (-1e+09,4]  FIT n=190 mean  +8.8% med  -5.0% win 44% dead 14%   VAL n= 40 mean +12.8% med  -5.0% win 35% dead  8%
+   all        (4,6]  FIT n=150 mean  +1.3% med  -6.0% win 43% dead 18%   VAL n= 28 mean  -3.1% med  -9.7% win 32% dead 18%
+   all        (6,7]  FIT n= 89 mean  -4.0% med -11.9% win 30% dead 29%   VAL n=  9 mean  -5.6% med  -6.7% win 44% dead 22%
+   all        (7,1e+09]  FIT n=134 mean  +2.4% med  -8.4% win 40% dead 29%   VAL n= 23 mean +11.1% med  -5.5% win 39% dead  0%
+   base fires (-1e+09,4]  FIT n=  6 mean  +3.3% med -11.0% win 33% dead  0%   VAL n=  2 mean +74.7% med +74.7% win 50% dead  0%
+   base fires (4,6]  FIT n= 34 mean +30.8% med +23.1% win 71% dead  9%   VAL n=  5 mean  -3.4% med  -4.3% win 40% dead  0%
+   base fires (6,7]  FIT n= 12 mean +10.5% med  +9.5% win 58% dead 25%   VAL n=  2 mean +33.9% med +33.9% win 100% dead  0%
+   base fires (7,1e+09]  FIT n= 21 mean +35.9% med +21.0% win 76% dead  0%   VAL n=  3 mean  -5.5% med -13.6% win 33% dead  0%
+   f_k2<2     (-1e+09,4]  FIT n=184 mean  +9.0% med  -4.3% win 45% dead 15%   VAL n= 38 mean  +9.5% med  -5.0% win 34% dead  8%
+   f_k2<2     (4,6]  FIT n=116 mean  -7.4% med  -9.2% win 34% dead 21%   VAL n= 23 mean  -3.1% med -11.8% win 30% dead 22%
+   f_k2<2     (6,7]  FIT n= 77 mean  -6.3% med -12.4% win 26% dead 30%   VAL n=  7 mean -16.8% med -18.0% win 29% dead 29%
+   f_k2<2     (7,1e+09]  FIT n=113 mean  -3.8% med -10.0% win 34% dead 35%   VAL n= 20 mean +13.6% med  -4.6% win 40% dead  0%
+=== hour: fit quartile cuts [14, 17, 20]
+   all        (-1e+09,14]  FIT n=169 mean  -0.5% med  -8.0% win 41% dead 20%   VAL n= 24 mean  +7.8% med -12.9% win 33% dead  8%
+   all        (14,17]  FIT n=134 mean  +3.4% med  -5.7% win 44% dead 16%   VAL n= 24 mean  -1.2% med  -5.9% win 33% dead  8%
+   all        (17,20]  FIT n=135 mean +11.2% med  -7.2% win 39% dead 20%   VAL n= 38 mean +11.6% med  -3.5% win 45% dead 13%
+   all        (20,1e+09]  FIT n=125 mean  -0.3% med  -8.0% win 38% dead 30%   VAL n= 14 mean  +2.1% med  -5.8% win 21% dead  7%
+   base fires (-1e+09,14]  FIT n= 18 mean +38.0% med +22.8% win 72% dead  6%   VAL n=  3 mean +50.4% med  -4.3% win 33% dead  0%
+   base fires (14,17]  FIT n= 21 mean +28.9% med +28.2% win 81% dead  5%   VAL n=  4 mean  +4.3% med  +5.8% win 75% dead  0%
+   base fires (17,20]  FIT n= 15 mean +12.8% med  +0.4% win 53% dead  7%   VAL n=  5 mean  +3.0% med -10.5% win 40% dead  0%
+   base fires (20,1e+09]  FIT n= 19 mean +24.5% med  +1.1% win 58% dead 16%   VAL n=0
+   f_k2<2     (-1e+09,14]  FIT n=151 mean  -5.1% med  -8.8% win 38% dead 22%   VAL n= 21 mean  +1.7% med -13.2% win 33% dead 10%
+   f_k2<2     (14,17]  FIT n=113 mean  -1.4% med  -9.1% win 37% dead 18%   VAL n= 20 mean  -2.3% med  -8.2% win 25% dead 10%
+   f_k2<2     (17,20]  FIT n=120 mean +11.0% med  -7.7% win 38% dead 22%   VAL n= 33 mean +12.9% med  -3.3% win 45% dead 15%
+   f_k2<2     (20,1e+09]  FIT n=106 mean  -4.7% med  -9.3% win 34% dead 32%   VAL n= 14 mean  +2.1% med  -5.8% win 21% dead  7%
+=== w_k2: fit quartile cuts [0, 0, 0]
+   all        (-1e+09,0]  FIT n=425 mean  -0.9% med  -9.0% win 36% dead 23%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+   all        (0,1e+09]  FIT n=138 mean +16.2% med  +1.6% win 56% dead 16%   VAL n= 25 mean +22.1% med  +2.4% win 52% dead  4%
+   base fires (-1e+09,0]  FIT n=0   VAL n=0
+   base fires (0,1e+09]  FIT n= 73 mean +26.7% med +21.0% win 67% dead  8%   VAL n= 12 mean +15.3% med  -0.9% win 50% dead  0%
+   f_k2<2     (-1e+09,0]  FIT n=425 mean  -0.9% med  -9.0% win 36% dead 23%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+   f_k2<2     (0,1e+09]  FIT n= 65 mean  +4.4% med  -3.7% win 43% dead 25%   VAL n= 13 mean +28.4% med  +5.6% win 54% dead  8%
+=== shots_k2: fit quartile cuts [0, 0, 1]
+   all        (-1e+09,0]  FIT n=399 mean  -0.5% med  -9.1% win 36% dead 23%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+   all        (0,1]  FIT n= 29 mean  +9.7% med  -3.0% win 41% dead 38%   VAL n=  4 mean +14.5% med -16.3% win 25% dead  0%
+   all        (1,1e+09]  FIT n=135 mean +13.1% med  +1.4% win 55% dead 12%   VAL n= 21 mean +23.6% med  +3.8% win 57% dead  5%
+   base fires (-1e+09,0]  FIT n=0   VAL n=0
+   base fires (0,1]  FIT n=0   VAL n=0
+   base fires (1,1e+09]  FIT n= 73 mean +26.7% med +21.0% win 67% dead  8%   VAL n= 12 mean +15.3% med  -0.9% win 50% dead  0%
+   f_k2<2     (-1e+09,0]  FIT n=399 mean  -0.5% med  -9.1% win 36% dead 23%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+   f_k2<2     (0,1]  FIT n= 29 mean  +9.7% med  -3.0% win 41% dead 38%   VAL n=  4 mean +14.5% med -16.3% win 25% dead  0%
+   f_k2<2     (1,1e+09]  FIT n= 62 mean  -3.0% med  -5.6% win 40% dead 16%   VAL n=  9 mean +34.6% med +17.2% win 67% dead 11%
+=== maxw_k2: fit quartile cuts [0, 0, 0]
+   all        (-1e+09,0]  FIT n=425 mean  -0.9% med  -9.0% win 36% dead 23%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+   all        (0,1e+09]  FIT n=138 mean +16.2% med  +1.6% win 56% dead 16%   VAL n= 25 mean +22.1% med  +2.4% win 52% dead  4%
+   base fires (-1e+09,0]  FIT n=0   VAL n=0
+   base fires (0,1e+09]  FIT n= 73 mean +26.7% med +21.0% win 67% dead  8%   VAL n= 12 mean +15.3% med  -0.9% win 50% dead  0%
+   f_k2<2     (-1e+09,0]  FIT n=425 mean  -0.9% med  -9.0% win 36% dead 23%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+   f_k2<2     (0,1e+09]  FIT n= 65 mean  +4.4% med  -3.7% win 43% dead 25%   VAL n= 13 mean +28.4% med  +5.6% win 54% dead  8%
+=== maxshots_k2: fit quartile cuts [0, 0, 1]
+   all        (-1e+09,0]  FIT n=399 mean  -0.5% med  -9.1% win 36% dead 23%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+   all        (0,1]  FIT n= 35 mean  +9.8% med  -2.7% win 46% dead 31%   VAL n=  6 mean  +6.7% med -12.7% win 17% dead  0%
+   all        (1,1e+09]  FIT n=129 mean +13.2% med  +1.2% win 54% dead 12%   VAL n= 19 mean +27.0% med  +5.6% win 63% dead  5%
+   base fires (-1e+09,0]  FIT n=0   VAL n=0
+   base fires (0,1]  FIT n=  6 mean +10.4% med +14.0% win 67% dead  0%   VAL n=  2 mean  -8.9% med  -8.9% win  0% dead  0%
+   base fires (1,1e+09]  FIT n= 67 mean +28.1% med +22.1% win 67% dead  9%   VAL n= 10 mean +20.2% med  +3.1% win 60% dead  0%
+   f_k2<2     (-1e+09,0]  FIT n=399 mean  -0.5% med  -9.1% win 36% dead 23%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+   f_k2<2     (0,1]  FIT n= 29 mean  +9.7% med  -3.0% win 41% dead 38%   VAL n=  4 mean +14.5% med -16.3% win 25% dead  0%
+   f_k2<2     (1,1e+09]  FIT n= 62 mean  -3.0% med  -5.6% win 40% dead 16%   VAL n=  9 mean +34.6% med +17.2% win 67% dead 11%
+=== fd_k2: fit quartile cuts [0, 0, 0]
+   all        (-1e+09,0]  FIT n=543 mean  +3.6% med  -7.2% win 41% dead 20%   VAL n=100 mean  +6.3% med  -6.5% win 36% dead 10%
+   all        (0,1e+09]  FIT n= 20 mean  -4.9% med  -8.7% win 40% dead 40%   VAL n=0
+   base fires (-1e+09,0]  FIT n= 64 mean +25.6% med +19.4% win 67% dead  8%   VAL n= 12 mean +15.3% med  -0.9% win 50% dead  0%
+   base fires (0,1e+09]  FIT n=  9 mean +34.1% med +23.0% win 67% dead 11%   VAL n=0
+   f_k2<2     (-1e+09,0]  FIT n=479 mean  +0.6% med  -8.7% win 37% dead 22%   VAL n= 88 mean  +5.1% med  -6.8% win 34% dead 11%
+   f_k2<2     (0,1e+09]  FIT n= 11 mean -36.7% med -59.0% win 18% dead 64%   VAL n=0
+=== fr_k2: fit quartile cuts [0, 0, 1]
+   all        (-1e+09,0]  FIT n=411 mean  -1.5% med  -9.4% win 35% dead 24%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+   all        (0,1]  FIT n= 86 mean  +9.3% med  -3.2% win 47% dead 17%   VAL n= 13 mean +28.4% med  +5.6% win 54% dead  8%
+   all        (1,1e+09]  FIT n= 66 mean +25.2% med +19.4% win 67% dead  8%   VAL n= 12 mean +15.3% med  -0.9% win 50% dead  0%
+   base fires (-1e+09,0]  FIT n=  1 mean -11.9% med -11.9% win  0% dead  0%   VAL n=0
+   base fires (0,1]  FIT n=  6 mean +50.0% med +24.4% win 83% dead 17%   VAL n=0
+   base fires (1,1e+09]  FIT n= 66 mean +25.2% med +19.4% win 67% dead  8%   VAL n= 12 mean +15.3% med  -0.9% win 50% dead  0%
+   f_k2<2     (-1e+09,0]  FIT n=410 mean  -1.5% med  -9.4% win 35% dead 24%   VAL n= 75 mean  +1.0% med  -6.9% win 31% dead 12%
+   f_k2<2     (0,1]  FIT n= 80 mean  +6.3% med  -4.6% win 44% dead 18%   VAL n= 13 mean +28.4% med  +5.6% win 54% dead  8%
+   f_k2<2     (1,1e+09]  FIT n=0   VAL n=0
+=== arr1: fit quartile cuts [0, 1, 4]
+   all        (-1e+09,0]  FIT n=110 mean  +2.3% med  -8.4% win 36% dead 23%   VAL n= 22 mean  -9.3% med -10.7% win 18% dead 18%
+   all        (0,1]  FIT n=118 mean  -4.8% med  -6.0% win 42% dead 21%   VAL n= 26 mean  +9.3% med  -0.2% win 46% dead 12%
+   all        (1,4]  FIT n= 96 mean +10.3% med  +3.0% win 56% dead 10%   VAL n= 14 mean +24.5% med  -6.4% win 43% dead  7%
+   all        (4,1e+09]  FIT n= 68 mean +15.5% med  -4.9% win 47% dead 25%   VAL n= 11 mean +19.1% med  +9.2% win 64% dead  0%
+   base fires (-1e+09,0]  FIT n=0   VAL n=0
+   base fires (0,1]  FIT n=0   VAL n=0
+   base fires (1,4]  FIT n= 44 mean +23.1% med +19.4% win 68% dead  9%   VAL n=  6 mean +21.4% med  -6.4% win 33% dead  0%
+   base fires (4,1e+09]  FIT n= 29 mean +32.2% med +22.2% win 66% dead  7%   VAL n=  6 mean  +9.2% med  +6.5% win 67% dead  0%
+   f_k2<2     (-1e+09,0]  FIT n=110 mean  +2.3% med  -8.4% win 36% dead 23%   VAL n= 22 mean  -9.3% med -10.7% win 18% dead 18%
+   f_k2<2     (0,1]  FIT n=118 mean  -4.8% med  -6.0% win 42% dead 21%   VAL n= 26 mean  +9.3% med  -0.2% win 46% dead 12%
+   f_k2<2     (1,4]  FIT n= 52 mean  -0.5% med  -2.6% win 46% dead 12%   VAL n=  8 mean +26.8% med  -3.2% win 50% dead 12%
+   f_k2<2     (4,1e+09]  FIT n= 39 mean  +3.1% med -10.0% win 33% dead 38%   VAL n=  5 mean +31.0% med +17.2% win 60% dead  0%
+=== arr2: fit quartile cuts [0, 1, 2]
+   all        (-1e+09,0]  FIT n=104 mean  +4.4% med  -4.4% win 42% dead 18%   VAL n= 21 mean  +7.3% med  -3.3% win 43% dead 10%
+   all        (0,1]  FIT n= 74 mean +12.4% med  +1.7% win 53% dead 15%   VAL n= 18 mean +27.3% med  +2.1% win 50% dead  6%
+   all        (1,2]  FIT n= 21 mean +18.1% med +15.7% win 71% dead  5%   VAL n=  4 mean +33.7% med  -7.4% win 25% dead  0%
+   all        (2,1e+09]  FIT n= 52 mean +30.1% med +23.1% win 65% dead 10%   VAL n=  8 mean  +6.1% med  +3.1% win 62% dead  0%
+   base fires (-1e+09,0]  FIT n=0   VAL n=0
+   base fires (0,1]  FIT n=0   VAL n=0
+   base fires (1,2]  FIT n= 21 mean +18.1% med +15.7% win 71% dead  5%   VAL n=  4 mean +33.7% med  -7.4% win 25% dead  0%
+   base fires (2,1e+09]  FIT n= 52 mean +30.1% med +23.1% win 65% dead 10%   VAL n=  8 mean  +6.1% med  +3.1% win 62% dead  0%
+   f_k2<2     (-1e+09,0]  FIT n=104 mean  +4.4% med  -4.4% win 42% dead 18%   VAL n= 21 mean  +7.3% med  -3.3% win 43% dead 10%
+   f_k2<2     (0,1]  FIT n= 74 mean +12.4% med  +1.7% win 53% dead 15%   VAL n= 18 mean +27.3% med  +2.1% win 50% dead  6%
+   f_k2<2     (1,2]  FIT n=0   VAL n=0
+   f_k2<2     (2,1e+09]  FIT n=0   VAL n=0

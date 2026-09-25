@@ -1,0 +1,412 @@
+======================================================================================================================================================
+BASE | (f@k-2==1 & bundle_eth<0.446)   hold behind1_15_h300
+  candidate
+   sep1819        fires  18  18.7/d  mean  +13.9%  med   +0.8%  win  61%  dead  17%  $ +1.48/burst  $ +27.6/day  $  +26.6 total
+   sep2021        fires  34  23.4/d  mean  +22.0%  med  +22.1%  win  68%  dead   0%  $ +2.53/burst  $ +59.2/day  $  +85.9 total
+   sep2223        fires  21  17.2/d  mean  +63.7%  med  +24.4%  win  67%  dead  14%  $ +7.95/burst  $+136.8/day  $ +167.0 total
+   sep23day       fires  12  32.7/d  mean  +18.7%  med   -1.4%  win  50%  dead   0%  $ +2.10/burst  $ +68.6/day  $  +25.2 total
+   FIT pooled     fires  85  21.2/d  mean  +30.1%  med  +15.7%  win  64%  dead   7%  $ +3.58/burst  $ +76.1/day  $ +304.6 total
+   sep24paper     fires  10  26.7/d  mean   +6.6%  med   -0.9%  win  50%  dead   0%  $ +0.53/burst  $ +14.2/day  $   +5.3 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  13   9.2/d  mean  +18.0%  med   +2.4%  win  54%  dead   0%  $ +2.01/burst  $ +18.5/day  $  +26.2 total
+  baseline (h300)
+   sep1819        fires  14  14.5/d  mean  +19.3%  med   +4.4%  win  71%  dead  21%  $ +2.17/burst  $ +31.6/day  $  +30.4 total
+   sep2021        fires  29  20.0/d  mean  +26.5%  med  +23.2%  win  72%  dead   0%  $ +3.11/burst  $ +62.3/day  $  +90.3 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.14/burst  $ +57.3/day  $ +229.2 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  FIT: added 12, removed 0; candidate minus baseline $+75.40 over the window set; t of the per-launch delta +0.93 (n=12); without the single best delta $-4.75
+     + sep1819    Sep 18 15:51 0x9faed815 k=7 fleets [0, 0, 0, 1, 1, 1, 1, 2] bundle 0.34 named 4 tier 0.020  ind1_15_h300   -8.7%
+     + sep1819    Sep 18 16:45 0xb3495621 k=7 fleets [0, 0, 0, 1, 1, 1, 2, 2] bundle 0.39 named 5 tier 0.020  ind1_15_h300   -5.3%
+     + sep1819    Sep 18 17:31 0x94a56d08 k=7 fleets [0, 0, 1, 1, 1, 1, 1, 1] bundle 0.44 named 5 tier 0.030  ind1_15_h300   -5.3%
+     + sep1819    Sep 18 23:30 0x5f3a6a5d k=9 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1, 1] bundle 0.35 named 15 tier 0.025  ind1_15_h300   +0.2%
+     + sep2021    Sep 20 21:41 0xf9112f3d k=7 fleets [0, 0, 0, 1, 1, 1, 1, 1] bundle 0.39 named 4 tier 0.030  ind1_15_h300  -12.4%
+     + sep2021    Sep 20 23:07 0x90afa8e8 k=7 fleets [0, 0, 0, 0, 1, 1, 1, 1] bundle 0.36 named 4 tier 0.030  ind1_15_h300   +5.7%
+     + sep2021    Sep 20 23:29 0x1f65e953 k=6 fleets [0, 0, 0, 1, 1, 1, 1] bundle 0.33 named 3 tier 0.030  ind1_15_h300  -15.0%
+     + sep2021    Sep 21 03:20 0x7b9e0ee6 k=5 fleets [0, 0, 0, 1, 2, 3] bundle 0.44 named 3 tier 0.030  ind1_15_h300  +17.9%
+     + sep2021    Sep 21 22:21 0xbf0e8cc2 k=5 fleets [0, 0, 0, 1, 1, 3] bundle 0.30 named 3 tier 0.030  ind1_15_h300  -17.8%
+     + sep2223    Sep 22 18:56 0x39501200 k=8 fleets [0, 0, 1, 1, 1, 1, 1, 3, 3] bundle 0.37 named 31 tier 0.030  ind1_15_h300 +619.1%
+     + sep23day   Sep 23 16:35 0xa53addbd k=8 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1] bundle 0.33 named 5 tier 0.030  ind1_15_h300   -8.0%
+     + sep23day   Sep 23 19:22 0x6db12d9a k=4 fleets [0, 0, 1, 2, 2] bundle 0.31 named 3 tier 0.025  ind1_15_h300  +40.1%
+  VAL: added 1, removed 0; candidate minus baseline $+6.25 over the window set; t of the per-launch delta +nan (n=1); without the single best delta $+0.00
+     + sep24paper Sep 24 18:26 0x93d7d429 k=9 fleets [0, 0, 0, 1, 1, 1, 1, 1, 1, 3] bundle 0.32 named 11 tier 0.028  ind1_15_h300  +50.6%
+======================================================================================================================================================
+BASE | (f@k-2==1 & bundle_eth<0.446)   hold behind1_15_h150
+  candidate
+   sep1819        fires  18  18.7/d  mean   +7.3%  med   -5.4%  win  44%  dead  17%  $ +0.62/burst  $ +11.7/day  $  +11.2 total
+   sep2021        fires  34  23.4/d  mean  +17.9%  med  +13.8%  win  71%  dead   0%  $ +1.99/burst  $ +46.8/day  $  +67.8 total
+   sep2223        fires  21  17.2/d  mean  +58.6%  med  +17.8%  win  71%  dead  10%  $ +7.29/burst  $+125.4/day  $ +153.1 total
+   sep23day       fires  12  32.7/d  mean  +13.1%  med   -2.7%  win  42%  dead   0%  $ +1.38/burst  $ +45.0/day  $  +16.5 total
+   FIT pooled     fires  85  21.2/d  mean  +25.0%  med   +7.2%  win  61%  dead   6%  $ +2.93/burst  $ +62.2/day  $ +248.7 total
+   sep24paper     fires  10  26.7/d  mean   +6.4%  med   +0.1%  win  50%  dead   0%  $ +0.51/burst  $ +13.5/day  $   +5.1 total
+   sep25night     fires   1   2.7/d  mean +139.7%  med +139.7%  win 100%  dead   0%  $+17.83/burst  $ +47.5/day  $  +17.8 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +6.6%  med   +6.6%  win 100%  dead   0%  $ +0.53/burst  $  +1.9/day  $   +0.5 total
+   sep25eve2      fires   1   8.7/d  mean   -4.2%  med   -4.2%  win   0%  dead   0%  $ -0.87/burst  $  -7.6/day  $   -0.9 total
+   VAL pooled     fires  13   9.2/d  mean  +15.9%  med   +3.0%  win  54%  dead   0%  $ +1.74/burst  $ +15.9/day  $  +22.6 total
+  baseline (h300)
+   sep1819        fires  14  14.5/d  mean  +19.3%  med   +4.4%  win  71%  dead  21%  $ +2.17/burst  $ +31.6/day  $  +30.4 total
+   sep2021        fires  29  20.0/d  mean  +26.5%  med  +23.2%  win  72%  dead   0%  $ +3.11/burst  $ +62.3/day  $  +90.3 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.14/burst  $ +57.3/day  $ +229.2 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  FIT: added 12, removed 0; candidate minus baseline $+19.49 over the window set; t of the per-launch delta +0.23 (n=72); without the single best delta $-60.66
+     + sep1819    Sep 18 15:51 0x9faed815 k=7 fleets [0, 0, 0, 1, 1, 1, 1, 2] bundle 0.34 named 4 tier 0.020  ind1_15_h150   -8.7%
+     + sep1819    Sep 18 16:45 0xb3495621 k=7 fleets [0, 0, 0, 1, 1, 1, 2, 2] bundle 0.39 named 5 tier 0.020  ind1_15_h150   -6.2%
+     + sep1819    Sep 18 17:31 0x94a56d08 k=7 fleets [0, 0, 1, 1, 1, 1, 1, 1] bundle 0.44 named 5 tier 0.030  ind1_15_h150  -11.9%
+     + sep1819    Sep 18 23:30 0x5f3a6a5d k=9 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1, 1] bundle 0.35 named 15 tier 0.025  ind1_15_h150   +5.3%
+     + sep2021    Sep 20 21:41 0xf9112f3d k=7 fleets [0, 0, 0, 1, 1, 1, 1, 1] bundle 0.39 named 4 tier 0.030  ind1_15_h150  -18.6%
+     + sep2021    Sep 20 23:07 0x90afa8e8 k=7 fleets [0, 0, 0, 0, 1, 1, 1, 1] bundle 0.36 named 4 tier 0.030  ind1_15_h150  -10.6%
+     + sep2021    Sep 20 23:29 0x1f65e953 k=6 fleets [0, 0, 0, 1, 1, 1, 1] bundle 0.33 named 3 tier 0.030  ind1_15_h150   -9.0%
+     + sep2021    Sep 21 03:20 0x7b9e0ee6 k=5 fleets [0, 0, 0, 1, 2, 3] bundle 0.44 named 3 tier 0.030  ind1_15_h150   +9.5%
+     + sep2021    Sep 21 22:21 0xbf0e8cc2 k=5 fleets [0, 0, 0, 1, 1, 3] bundle 0.30 named 3 tier 0.030  ind1_15_h150   +1.2%
+     + sep2223    Sep 22 18:56 0x39501200 k=8 fleets [0, 0, 1, 1, 1, 1, 1, 3, 3] bundle 0.37 named 31 tier 0.030  ind1_15_h150 +619.1%
+     + sep23day   Sep 23 16:35 0xa53addbd k=8 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1] bundle 0.33 named 5 tier 0.030  ind1_15_h150   -6.7%
+     + sep23day   Sep 23 19:22 0x6db12d9a k=4 fleets [0, 0, 1, 2, 2] bundle 0.31 named 3 tier 0.025  ind1_15_h150   -3.3%
+  VAL: added 1, removed 0; candidate minus baseline $+2.64 over the window set; t of the per-launch delta +0.32 (n=13); without the single best delta $-3.07
+     + sep24paper Sep 24 18:26 0x93d7d429 k=9 fleets [0, 0, 0, 1, 1, 1, 1, 1, 1, 3] bundle 0.32 named 11 tier 0.028  ind1_15_h150  +46.4%
+======================================================================================================================================================
+BASE | (f@k-2==1 & bundle_eth>=1.5)   hold behind1_15_h300
+  candidate
+   sep1819        fires  17  17.7/d  mean   +9.1%  med   +1.1%  win  59%  dead  24%  $ +0.86/burst  $ +15.1/day  $  +14.6 total
+   sep2021        fires  32  22.1/d  mean  +30.8%  med  +23.7%  win  72%  dead   0%  $ +3.67/burst  $ +80.9/day  $ +117.4 total
+   sep2223        fires  22  18.0/d  mean  +38.1%  med  +22.5%  win  68%  dead  14%  $ +4.62/burst  $ +83.3/day  $ +101.7 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  81  20.2/d  mean  +26.8%  med  +20.6%  win  65%  dead   9%  $ +3.15/burst  $ +63.8/day  $ +255.3 total
+   sep24paper     fires  11  29.3/d  mean  +15.1%  med   -4.3%  win  45%  dead   9%  $ +1.63/burst  $ +47.8/day  $  +17.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   3  10.9/d  mean   +4.8%  med   +9.2%  win  67%  dead   0%  $ +0.30/burst  $  +3.3/day  $   +0.9 total
+   sep25eve2      fires   2  17.5/d  mean  -11.2%  med  -11.2%  win   0%  dead   0%  $ -1.78/burst  $ -31.2/day  $   -3.6 total
+   VAL pooled     fires  17  12.0/d  mean  +19.2%  med   -4.3%  win  47%  dead   6%  $ +2.17/burst  $ +26.1/day  $  +36.9 total
+  baseline (h300)
+   sep1819        fires  14  14.5/d  mean  +19.3%  med   +4.4%  win  71%  dead  21%  $ +2.17/burst  $ +31.6/day  $  +30.4 total
+   sep2021        fires  29  20.0/d  mean  +26.5%  med  +23.2%  win  72%  dead   0%  $ +3.11/burst  $ +62.3/day  $  +90.3 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.14/burst  $ +57.3/day  $ +229.2 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  FIT: added 8, removed 0; candidate minus baseline $+26.14 over the window set; t of the per-launch delta +0.83 (n=8); without the single best delta $+2.77
+     + sep1819    Sep 18 14:41 0x732ef190 k=9 fleets [0, 1, 1, 1, 1, 1, 1, 1, 2, 3] bundle 4.23 named 15 tier 0.020  ind1_15_h300  -10.0%
+     + sep1819    Sep 18 20:15 0xe28fc4fd k=6 fleets [0, 0, 0, 0, 1, 1, 1] bundle 2.58 named 12 tier 0.030  ind1_15_h300  -86.9%
+     + sep1819    Sep 19 03:19 0x2bcd5d8c k=9 fleets [0, 1, 1, 1, 1, 1, 1, 1, 1, 1] bundle 1.64 named 7 tier 0.030  ind1_15_h300  -17.5%
+     + sep2021    Sep 20 18:56 0xaff83cc3 k=8 fleets [0, 0, 1, 1, 1, 1, 1, 2, 3] bundle 1.91 named 15 tier 0.025  ind1_15_h300  +66.5%
+     + sep2021    Sep 21 20:10 0xe52ce83c k=8 fleets [0, 1, 1, 1, 1, 1, 1, 1, 2] bundle 1.57 named 5 tier 0.030  ind1_15_h300 +182.3%
+     + sep2021    Sep 22 00:18 0x9c861776 k=4 fleets [0, 0, 1, 1, 3] bundle 3.13 named 9 tier 0.020  ind1_15_h300  -33.0%
+     + sep2223    Sep 22 07:19 0x43b75c2c k=3 fleets [0, 1, 2, 2] bundle 1.70 named 20 tier 0.030  ind1_15_h300  +20.5%
+     + sep2223    Sep 22 21:07 0xde81c961 k=5 fleets [0, 0, 1, 1, 2, 3] bundle 2.17 named 16 tier 0.030  ind1_15_h300  +99.5%
+  VAL: added 5, removed 0; candidate minus baseline $+16.97 over the window set; t of the per-launch delta +0.63 (n=5); without the single best delta $-7.47
+     + sep24paper Sep 24 18:05 0xcd182c24 k=5 fleets [0, 1, 1, 1, 2, 2] bundle 2.69 named 23 tier 0.030  ind1_15_h300  -40.7%
+     + sep24paper Sep 24 20:23 0x057d2437 k=4 fleets [0, 1, 1, 3, 3] bundle 1.55 named 5 tier 0.030  ind1_15_h300 +190.6%
+     + sep25pm    Sep 25 15:28 0xba059c17 k=9 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1, 2] bundle 1.78 named 18 tier 0.030  ind1_15_h300  -11.9%
+     + sep25pm    Sep 25 17:33 0x218330b1 k=6 fleets [0, 1, 1, 1, 1, 1, 1] bundle 2.10 named 10 tier 0.030  ind1_15_h300  +17.2%
+     + sep25eve2  Sep 25 20:05 0x8aba714f k=3 fleets [0, 1, 3, 5] bundle 4.26 named 22 tier 0.030  ind1_15_h300  -11.9%
+======================================================================================================================================================
+BASE | (f@k-2==1 & bundle_eth>=1.0)   hold behind1_15_h300
+  candidate
+   sep1819        fires  17  17.7/d  mean   +9.1%  med   +1.1%  win  59%  dead  24%  $ +0.86/burst  $ +15.1/day  $  +14.6 total
+   sep2021        fires  35  24.1/d  mean  +29.9%  med  +23.2%  win  71%  dead   0%  $ +3.55/burst  $ +85.7/day  $ +124.3 total
+   sep2223        fires  25  20.5/d  mean  +28.7%  med  +20.6%  win  64%  dead  20%  $ +3.40/burst  $ +69.7/day  $  +85.1 total
+   sep23day       fires  12  32.7/d  mean  +14.4%  med   -3.1%  win  42%  dead   0%  $ +1.54/burst  $ +50.4/day  $  +18.5 total
+   FIT pooled     fires  89  22.2/d  mean  +23.5%  med  +18.2%  win  63%  dead  10%  $ +2.72/burst  $ +60.6/day  $ +242.4 total
+   sep24paper     fires  12  32.0/d  mean  +23.8%  med   -0.9%  win  50%  dead   8%  $ +2.76/burst  $ +88.4/day  $  +33.2 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   1   3.6/d  mean  -20.7%  med  -20.7%  win   0%  dead   0%  $ -3.02/burst  $ -11.0/day  $   -3.0 total
+   sep25pm        fires   3  10.9/d  mean   +4.8%  med   +9.2%  win  67%  dead   0%  $ +0.30/burst  $  +3.3/day  $   +0.9 total
+   sep25eve2      fires   2  17.5/d  mean  -11.2%  med  -11.2%  win   0%  dead   0%  $ -1.78/burst  $ -31.2/day  $   -3.6 total
+   VAL pooled     fires  19  13.4/d  mean  +22.4%  med   -4.3%  win  47%  dead   5%  $ +2.59/burst  $ +34.7/day  $  +49.1 total
+  baseline (h300)
+   sep1819        fires  14  14.5/d  mean  +19.3%  med   +4.4%  win  71%  dead  21%  $ +2.17/burst  $ +31.6/day  $  +30.4 total
+   sep2021        fires  29  20.0/d  mean  +26.5%  med  +23.2%  win  72%  dead   0%  $ +3.11/burst  $ +62.3/day  $  +90.3 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.14/burst  $ +57.3/day  $ +229.2 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  FIT: added 16, removed 0; candidate minus baseline $+13.27 over the window set; t of the per-launch delta +0.37 (n=16); without the single best delta $-10.11
+     + sep1819    Sep 18 14:41 0x732ef190 k=9 fleets [0, 1, 1, 1, 1, 1, 1, 1, 2, 3] bundle 4.23 named 15 tier 0.020  ind1_15_h300  -10.0%
+     + sep1819    Sep 18 20:15 0xe28fc4fd k=6 fleets [0, 0, 0, 0, 1, 1, 1] bundle 2.58 named 12 tier 0.030  ind1_15_h300  -86.9%
+     + sep1819    Sep 19 03:19 0x2bcd5d8c k=9 fleets [0, 1, 1, 1, 1, 1, 1, 1, 1, 1] bundle 1.64 named 7 tier 0.030  ind1_15_h300  -17.5%
+     + sep2021    Sep 20 18:13 0x9f21cbb6 k=6 fleets [0, 0, 1, 1, 1, 2, 2] bundle 1.14 named 23 tier 0.020  ind1_15_h300  +11.7%
+     + sep2021    Sep 20 18:56 0xaff83cc3 k=8 fleets [0, 0, 1, 1, 1, 1, 1, 2, 3] bundle 1.91 named 15 tier 0.025  ind1_15_h300  +66.5%
+     + sep2021    Sep 20 21:14 0xc5ce064e k=6 fleets [0, 0, 1, 1, 1, 3, 11] bundle 1.20 named 20 tier 0.025  ind1_15_h300   -1.1%
+     + sep2021    Sep 21 20:10 0xe52ce83c k=8 fleets [0, 1, 1, 1, 1, 1, 1, 1, 2] bundle 1.57 named 5 tier 0.030  ind1_15_h300 +182.3%
+     + sep2021    Sep 21 20:34 0xa21417f4 k=6 fleets [0, 0, 1, 1, 1, 2, 2] bundle 1.05 named 28 tier 0.020  ind1_15_h300  +50.5%
+     + sep2021    Sep 22 00:18 0x9c861776 k=4 fleets [0, 0, 1, 1, 3] bundle 3.13 named 9 tier 0.020  ind1_15_h300  -33.0%
+     + sep2223    Sep 22 07:19 0x43b75c2c k=3 fleets [0, 1, 2, 2] bundle 1.70 named 20 tier 0.030  ind1_15_h300  +20.5%
+     + sep2223    Sep 22 17:24 0x59217e68 k=8 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1] bundle 1.37 named 5 tier 0.030  ind1_15_h300  -72.5%
+     + sep2223    Sep 22 17:36 0x0a02289f k=8 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1] bundle 1.36 named 5 tier 0.030  ind1_15_h300  -73.0%
+     + sep2223    Sep 22 21:07 0xde81c961 k=5 fleets [0, 0, 1, 1, 2, 3] bundle 2.17 named 16 tier 0.030  ind1_15_h300  +99.5%
+     + sep2223    Sep 23 06:37 0xe6240f57 k=7 fleets [0, 0, 1, 1, 1, 1, 1, 2] bundle 1.46 named 5 tier 0.020  ind1_15_h300  +25.0%
+     + sep23day   Sep 23 14:19 0xacbc7874 k=6 fleets [0, 0, 0, 1, 1, 1, 1] bundle 1.49 named 5 tier 0.025  ind1_15_h300   -5.0%
+     + sep23day   Sep 23 19:15 0xaae335a0 k=5 fleets [0, 1, 1, 1, 1, 2] bundle 1.18 named 3 tier 0.025  ind1_15_h300  -14.3%
+  VAL: added 7, removed 0; candidate minus baseline $+29.20 over the window set; t of the per-launch delta +0.98 (n=7); without the single best delta $+4.76
+     + sep24paper Sep 24 18:05 0xcd182c24 k=5 fleets [0, 1, 1, 1, 2, 2] bundle 2.69 named 23 tier 0.030  ind1_15_h300  -40.7%
+     + sep24paper Sep 24 18:21 0x6771ca6c k=9 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1, 1] bundle 1.19 named 31 tier 0.030  ind1_15_h300 +119.8%
+     + sep24paper Sep 24 20:23 0x057d2437 k=4 fleets [0, 1, 1, 3, 3] bundle 1.55 named 5 tier 0.030  ind1_15_h300 +190.6%
+     + sep25am    Sep 25 09:23 0x03e861dc k=8 fleets [0, 0, 1, 1, 1, 1, 1, 2, 3] bundle 1.19 named 5 tier 0.030  ind1_15_h300  -20.7%
+     + sep25pm    Sep 25 15:28 0xba059c17 k=9 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1, 2] bundle 1.78 named 18 tier 0.030  ind1_15_h300  -11.9%
+     + sep25pm    Sep 25 17:33 0x218330b1 k=6 fleets [0, 1, 1, 1, 1, 1, 1] bundle 2.10 named 10 tier 0.030  ind1_15_h300  +17.2%
+     + sep25eve2  Sep 25 20:05 0x8aba714f k=3 fleets [0, 1, 3, 5] bundle 4.26 named 22 tier 0.030  ind1_15_h300  -11.9%
+======================================================================================================================================================
+BASE | (f@k-2==1 & bundle_eth>=0.836)   hold behind1_15_h300
+  candidate
+   sep1819        fires  18  18.7/d  mean  +11.3%  med   +1.2%  win  61%  dead  22%  $ +1.15/burst  $ +21.4/day  $  +20.6 total
+   sep2021        fires  39  26.9/d  mean  +24.8%  med  +22.2%  win  64%  dead   3%  $ +2.89/burst  $ +77.7/day  $ +112.6 total
+   sep2223        fires  28  22.9/d  mean  +24.9%  med  +20.5%  win  64%  dead  21%  $ +2.91/burst  $ +66.7/day  $  +81.5 total
+   sep23day       fires  12  32.7/d  mean  +14.4%  med   -3.1%  win  42%  dead   0%  $ +1.54/burst  $ +50.4/day  $  +18.5 total
+   FIT pooled     fires  97  24.2/d  mean  +21.0%  med  +15.7%  win  61%  dead  11%  $ +2.40/burst  $ +58.3/day  $ +233.2 total
+   sep24paper     fires  12  32.0/d  mean  +23.8%  med   -0.9%  win  50%  dead   8%  $ +2.76/burst  $ +88.4/day  $  +33.2 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   1   3.6/d  mean  -20.7%  med  -20.7%  win   0%  dead   0%  $ -3.02/burst  $ -11.0/day  $   -3.0 total
+   sep25pm        fires   3  10.9/d  mean   +4.8%  med   +9.2%  win  67%  dead   0%  $ +0.30/burst  $  +3.3/day  $   +0.9 total
+   sep25eve2      fires   2  17.5/d  mean  -11.2%  med  -11.2%  win   0%  dead   0%  $ -1.78/burst  $ -31.2/day  $   -3.6 total
+   VAL pooled     fires  19  13.4/d  mean  +22.4%  med   -4.3%  win  47%  dead   5%  $ +2.59/burst  $ +34.7/day  $  +49.1 total
+  baseline (h300)
+   sep1819        fires  14  14.5/d  mean  +19.3%  med   +4.4%  win  71%  dead  21%  $ +2.17/burst  $ +31.6/day  $  +30.4 total
+   sep2021        fires  29  20.0/d  mean  +26.5%  med  +23.2%  win  72%  dead   0%  $ +3.11/burst  $ +62.3/day  $  +90.3 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.14/burst  $ +57.3/day  $ +229.2 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  FIT: added 24, removed 0; candidate minus baseline $+4.02 over the window set; t of the per-launch delta +0.11 (n=24); without the single best delta $-19.36
+     + sep1819    Sep 18 14:41 0x732ef190 k=9 fleets [0, 1, 1, 1, 1, 1, 1, 1, 2, 3] bundle 4.23 named 15 tier 0.020  ind1_15_h300  -10.0%
+     + sep1819    Sep 18 20:15 0xe28fc4fd k=6 fleets [0, 0, 0, 0, 1, 1, 1] bundle 2.58 named 12 tier 0.030  ind1_15_h300  -86.9%
+     + sep1819    Sep 18 20:15 0xe1e09a9f k=5 fleets [0, 0, 0, 1, 2, 2] bundle 0.94 named 3 tier 0.023  ind1_15_h300  +49.2%
+     + sep1819    Sep 19 03:19 0x2bcd5d8c k=9 fleets [0, 1, 1, 1, 1, 1, 1, 1, 1, 1] bundle 1.64 named 7 tier 0.030  ind1_15_h300  -17.5%
+     + sep2021    Sep 20 18:13 0x9f21cbb6 k=6 fleets [0, 0, 1, 1, 1, 2, 2] bundle 1.14 named 23 tier 0.020  ind1_15_h300  +11.7%
+     + sep2021    Sep 20 18:56 0xaff83cc3 k=8 fleets [0, 0, 1, 1, 1, 1, 1, 2, 3] bundle 1.91 named 15 tier 0.025  ind1_15_h300  +66.5%
+     + sep2021    Sep 20 21:06 0x3b2bf495 k=7 fleets [0, 0, 1, 1, 1, 1, 1, 2] bundle 0.85 named 18 tier 0.020  ind1_15_h300   -9.5%
+     + sep2021    Sep 20 21:14 0xc5ce064e k=6 fleets [0, 0, 1, 1, 1, 3, 11] bundle 1.20 named 20 tier 0.025  ind1_15_h300   -1.1%
+     + sep2021    Sep 21 14:40 0xb3c4fd62 k=7 fleets [0, 0, 0, 0, 1, 1, 1, 2] bundle 0.90 named 16 tier 0.030  ind1_15_h300   -3.7%
+     + sep2021    Sep 21 20:00 0xe7d3fec3 k=8 fleets [0, 1, 1, 1, 1, 1, 1, 1, 1] bundle 0.84 named 10 tier 0.030  ind1_15_h300  -63.5%
+     + sep2021    Sep 21 20:10 0xe52ce83c k=8 fleets [0, 1, 1, 1, 1, 1, 1, 1, 2] bundle 1.57 named 5 tier 0.030  ind1_15_h300 +182.3%
+     + sep2021    Sep 21 20:34 0xa21417f4 k=6 fleets [0, 0, 1, 1, 1, 2, 2] bundle 1.05 named 28 tier 0.020  ind1_15_h300  +50.5%
+     + sep2021    Sep 21 20:37 0x28bd391f k=8 fleets [0, 0, 0, 0, 1, 1, 1, 1, 1] bundle 0.95 named 20 tier 0.020  ind1_15_h300   -3.0%
+     + sep2021    Sep 22 00:18 0x9c861776 k=4 fleets [0, 0, 1, 1, 3] bundle 3.13 named 9 tier 0.020  ind1_15_h300  -33.0%
+     + sep2223    Sep 22 07:19 0x43b75c2c k=3 fleets [0, 1, 2, 2] bundle 1.70 named 20 tier 0.030  ind1_15_h300  +20.5%
+     + sep2223    Sep 22 17:24 0x59217e68 k=8 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1] bundle 1.37 named 5 tier 0.030  ind1_15_h300  -72.5%
+     + sep2223    Sep 22 17:36 0x0a02289f k=8 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1] bundle 1.36 named 5 tier 0.030  ind1_15_h300  -73.0%
+     + sep2223    Sep 22 18:15 0x1803d8be k=4 fleets [0, 1, 1, 2, 3] bundle 0.95 named 3 tier 0.024  ind1_15_h300  +17.3%
+     + sep2223    Sep 22 18:29 0x479d1f42 k=8 fleets [0, 0, 1, 1, 1, 1, 1, 2, 2] bundle 0.95 named 5 tier 0.030  ind1_15_h300  -64.2%
+     + sep2223    Sep 22 21:07 0xde81c961 k=5 fleets [0, 0, 1, 1, 2, 3] bundle 2.17 named 16 tier 0.030  ind1_15_h300  +99.5%
+     + sep2223    Sep 23 04:26 0x1eb97415 k=6 fleets [0, 0, 0, 0, 1, 2, 13] bundle 1.00 named 17 tier 0.025  ind1_15_h300  +26.6%
+     + sep2223    Sep 23 06:37 0xe6240f57 k=7 fleets [0, 0, 1, 1, 1, 1, 1, 2] bundle 1.46 named 5 tier 0.020  ind1_15_h300  +25.0%
+     + sep23day   Sep 23 14:19 0xacbc7874 k=6 fleets [0, 0, 0, 1, 1, 1, 1] bundle 1.49 named 5 tier 0.025  ind1_15_h300   -5.0%
+     + sep23day   Sep 23 19:15 0xaae335a0 k=5 fleets [0, 1, 1, 1, 1, 2] bundle 1.18 named 3 tier 0.025  ind1_15_h300  -14.3%
+  VAL: added 7, removed 0; candidate minus baseline $+29.20 over the window set; t of the per-launch delta +0.98 (n=7); without the single best delta $+4.76
+     + sep24paper Sep 24 18:05 0xcd182c24 k=5 fleets [0, 1, 1, 1, 2, 2] bundle 2.69 named 23 tier 0.030  ind1_15_h300  -40.7%
+     + sep24paper Sep 24 18:21 0x6771ca6c k=9 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1, 1] bundle 1.19 named 31 tier 0.030  ind1_15_h300 +119.8%
+     + sep24paper Sep 24 20:23 0x057d2437 k=4 fleets [0, 1, 1, 3, 3] bundle 1.55 named 5 tier 0.030  ind1_15_h300 +190.6%
+     + sep25am    Sep 25 09:23 0x03e861dc k=8 fleets [0, 0, 1, 1, 1, 1, 1, 2, 3] bundle 1.19 named 5 tier 0.030  ind1_15_h300  -20.7%
+     + sep25pm    Sep 25 15:28 0xba059c17 k=9 fleets [0, 0, 1, 1, 1, 1, 1, 1, 1, 2] bundle 1.78 named 18 tier 0.030  ind1_15_h300  -11.9%
+     + sep25pm    Sep 25 17:33 0x218330b1 k=6 fleets [0, 1, 1, 1, 1, 1, 1] bundle 2.10 named 10 tier 0.030  ind1_15_h300  +17.2%
+     + sep25eve2  Sep 25 20:05 0x8aba714f k=3 fleets [0, 1, 3, 5] bundle 4.26 named 22 tier 0.030  ind1_15_h300  -11.9%
+======================================================================================================================================================
+BASE & not creator repeat   hold behind1_15_h300
+  candidate
+   sep1819        fires  13  13.5/d  mean  +24.8%  med   +7.5%  win  77%  dead  15%  $ +2.90/burst  $ +39.1/day  $  +37.7 total
+   sep2021        fires  29  20.0/d  mean  +26.5%  med  +23.2%  win  72%  dead   0%  $ +3.11/burst  $ +62.3/day  $  +90.3 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  72  18.0/d  mean  +27.8%  med  +21.5%  win  68%  dead   7%  $ +3.28/burst  $ +59.1/day  $ +236.4 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  baseline (h300)
+   sep1819        fires  14  14.5/d  mean  +19.3%  med   +4.4%  win  71%  dead  21%  $ +2.17/burst  $ +31.6/day  $  +30.4 total
+   sep2021        fires  29  20.0/d  mean  +26.5%  med  +23.2%  win  72%  dead   0%  $ +3.11/burst  $ +62.3/day  $  +90.3 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.14/burst  $ +57.3/day  $ +229.2 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  FIT: added 0, removed 1; candidate minus baseline $+7.25 over the window set; t of the per-launch delta +nan (n=1); without the single best delta $+0.00
+     - sep1819    Sep 18 19:52 0xa7b0955b k=5 fleets [0, 2, 2, 2, 3, 6]  h300  -53.2%
+  VAL: added 0, removed 0; candidate minus baseline $+0.00 over the window set; t of the per-launch delta +nan (n=0); without the single best delta $+0.00
+======================================================================================================================================================
+BASE & relay fleets@k-2>=1   hold behind1_15_h300
+  candidate
+   sep1819        fires  14  14.5/d  mean  +19.3%  med   +4.4%  win  71%  dead  21%  $ +2.17/burst  $ +31.6/day  $  +30.4 total
+   sep2021        fires  28  19.3/d  mean  +27.9%  med  +23.7%  win  75%  dead   0%  $ +3.29/burst  $ +63.6/day  $  +92.2 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  72  18.0/d  mean  +27.2%  med  +21.5%  win  68%  dead   8%  $ +3.21/burst  $ +57.8/day  $ +231.0 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  baseline (h300)
+   sep1819        fires  14  14.5/d  mean  +19.3%  med   +4.4%  win  71%  dead  21%  $ +2.17/burst  $ +31.6/day  $  +30.4 total
+   sep2021        fires  29  20.0/d  mean  +26.5%  med  +23.2%  win  72%  dead   0%  $ +3.11/burst  $ +62.3/day  $  +90.3 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.14/burst  $ +57.3/day  $ +229.2 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  FIT: added 0, removed 1; candidate minus baseline $+1.88 over the window set; t of the per-launch delta +nan (n=1); without the single best delta $+0.00
+     - sep2021    Sep 21 20:38 0x00e758bf k=8 fleets [0, 0, 1, 1, 1, 2, 3, 3, 3]  h300  -11.9%
+  VAL: added 0, removed 0; candidate minus baseline $+0.00 over the window set; t of the per-launch delta +nan (n=0); without the single best delta $+0.00
+======================================================================================================================================================
+BASE & maxshots@k-2>=3   hold behind1_15_h300
+  candidate
+   sep1819        fires  13  13.5/d  mean  +20.2%  med   +1.2%  win  69%  dead  23%  $ +2.29/burst  $ +30.9/day  $  +29.8 total
+   sep2021        fires  26  17.9/d  mean  +29.0%  med  +23.7%  win  77%  dead   0%  $ +3.44/burst  $ +61.8/day  $  +89.5 total
+   sep2223        fires  18  14.7/d  mean  +41.2%  med  +25.4%  win  67%  dead  11%  $ +5.03/burst  $ +74.2/day  $  +90.6 total
+   sep23day       fires   8  21.8/d  mean  +22.6%  med   -1.4%  win  50%  dead   0%  $ +2.61/burst  $ +56.9/day  $  +20.9 total
+   FIT pooled     fires  65  16.2/d  mean  +29.8%  med  +22.2%  win  69%  dead   8%  $ +3.55/burst  $ +57.7/day  $ +230.8 total
+   sep24paper     fires   7  18.7/d  mean   +4.8%  med   +2.4%  win  57%  dead   0%  $ +0.30/burst  $  +5.5/day  $   +2.1 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  10   7.1/d  mean  +20.2%  med   +3.1%  win  60%  dead   0%  $ +2.29/burst  $ +16.2/day  $  +22.9 total
+  baseline (h300)
+   sep1819        fires  14  14.5/d  mean  +19.3%  med   +4.4%  win  71%  dead  21%  $ +2.17/burst  $ +31.6/day  $  +30.4 total
+   sep2021        fires  29  20.0/d  mean  +26.5%  med  +23.2%  win  72%  dead   0%  $ +3.11/burst  $ +62.3/day  $  +90.3 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.14/burst  $ +57.3/day  $ +229.2 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  FIT: added 0, removed 8; candidate minus baseline $+1.60 over the window set; t of the per-launch delta +0.17 (n=8); without the single best delta $-4.51
+     - sep1819    Sep 18 17:06 0x6b59bebc k=6 fleets [0, 0, 0, 1, 4, 4, 5]  h300   +7.5%
+     - sep2021    Sep 20 17:34 0x08c6146f k=7 fleets [0, 0, 0, 0, 1, 2, 4, 4]  h300  -11.2%
+     - sep2021    Sep 20 19:34 0xc719473c k=8 fleets [0, 0, 0, 0, 0, 1, 2, 3, 5]  h300  +36.5%
+     - sep2021    Sep 21 20:38 0x00e758bf k=8 fleets [0, 0, 1, 1, 1, 2, 3, 3, 3]  h300  -11.9%
+     - sep2223    Sep 22 10:25 0x4ecc308d k=6 fleets [0, 0, 0, 1, 3, 4, 5]  h300  +20.6%
+     - sep2223    Sep 22 13:07 0xe07530aa k=7 fleets [0, 0, 0, 0, 0, 2, 2, 2]  h300  -44.4%
+     - sep23day   Sep 23 18:32 0x89fcdf54 k=9 fleets [0, 0, 0, 0, 0, 0, 0, 2, 2, 3]  h300  +21.0%
+     - sep23day   Sep 23 19:52 0x6ff3cd2b k=6 fleets [0, 1, 2, 2, 4, 4, 6]  h300  -10.0%
+  VAL: added 0, removed 2; candidate minus baseline $+2.98 over the window set; t of the per-launch delta +nan (n=2); without the single best delta $+0.88
+     - sep24paper Sep 24 12:59 0xad1c5f76 k=6 fleets [0, 0, 0, 0, 2, 4, 5]  h300   -4.3%
+     - sep24paper Sep 24 14:52 0x2ad76f05 k=8 fleets [0, 0, 1, 1, 1, 2, 2, 2, 3]  h300  -13.6%
+======================================================================================================================================================
+BASE | (f@k-2==1 & k<=5)   hold behind1_15_h300
+  candidate
+   sep1819        fires  15  15.6/d  mean  +21.2%  med   +7.5%  win  73%  dead  20%  $ +2.43/burst  $ +37.9/day  $  +36.5 total
+   sep2021        fires  38  26.2/d  mean  +17.1%  med  +20.0%  win  63%  dead   3%  $ +1.89/burst  $ +49.4/day  $  +71.7 total
+   sep2223        fires  27  22.1/d  mean  +32.3%  med  +20.5%  win  67%  dead  11%  $ +3.87/burst  $ +85.7/day  $ +104.6 total
+   sep23day       fires  13  35.5/d  mean  +12.7%  med   -3.1%  win  46%  dead   8%  $ +1.32/burst  $ +46.8/day  $  +17.2 total
+   FIT pooled     fires  93  23.2/d  mean  +21.6%  med  +15.7%  win  63%  dead   9%  $ +2.47/burst  $ +57.5/day  $ +229.9 total
+   sep24paper     fires  13  34.7/d  mean   +9.3%  med   -8.6%  win  38%  dead   8%  $ +0.87/burst  $ +30.3/day  $  +11.4 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   2   7.3/d  mean   +7.4%  med   +7.4%  win 100%  dead   0%  $ +0.63/burst  $  +4.6/day  $   +1.3 total
+   sep25eve2      fires   2  17.5/d  mean  -11.2%  med  -11.2%  win   0%  dead   0%  $ -1.78/burst  $ -31.2/day  $   -3.6 total
+   VAL pooled     fires  18  12.7/d  mean  +15.7%  med   -6.4%  win  44%  dead   6%  $ +1.71/burst  $ +21.7/day  $  +30.7 total
+  baseline (h300)
+   sep1819        fires  14  14.5/d  mean  +19.3%  med   +4.4%  win  71%  dead  21%  $ +2.17/burst  $ +31.6/day  $  +30.4 total
+   sep2021        fires  29  20.0/d  mean  +26.5%  med  +23.2%  win  72%  dead   0%  $ +3.11/burst  $ +62.3/day  $  +90.3 total
+   sep2223        fires  20  16.4/d  mean  +35.9%  med  +22.5%  win  65%  dead  15%  $ +4.34/burst  $ +71.1/day  $  +86.8 total
+   sep23day       fires  10  27.3/d  mean  +19.2%  med   -1.4%  win  50%  dead   0%  $ +2.16/burst  $ +59.0/day  $  +21.6 total
+   FIT pooled     fires  73  18.2/d  mean  +26.7%  med  +21.0%  win  67%  dead   8%  $ +3.14/burst  $ +57.3/day  $ +229.2 total
+   sep24paper     fires   9  24.0/d  mean   +1.8%  med   -4.3%  win  44%  dead   0%  $ -0.10/burst  $  -2.4/day  $   -0.9 total
+   sep25night     fires   1   2.7/d  mean +169.2%  med +169.2%  win 100%  dead   0%  $+21.66/burst  $ +57.8/day  $  +21.7 total
+   sep25am        fires   0
+   sep25pm        fires   1   3.6/d  mean   +9.2%  med   +9.2%  win 100%  dead   0%  $ +0.86/burst  $  +3.1/day  $   +0.9 total
+   sep25eve2      fires   1   8.7/d  mean  -10.5%  med  -10.5%  win   0%  dead   0%  $ -1.69/burst  $ -14.8/day  $   -1.7 total
+   VAL pooled     fires  12   8.5/d  mean  +15.3%  med   -0.9%  win  50%  dead   0%  $ +1.66/burst  $ +14.1/day  $  +19.9 total
+  FIT: added 20, removed 0; candidate minus baseline $+0.76 over the window set; t of the per-launch delta +0.03 (n=20); without the single best delta $-11.84
+     + sep1819    Sep 18 20:15 0xe1e09a9f k=5 fleets [0, 0, 0, 1, 2, 2] bundle 0.94 named 3 tier 0.023  ind1_15_h300  +49.2%
+     + sep2021    Sep 20 16:26 0x8379b27b k=5 fleets [0, 0, 1, 1, 4, 7] bundle 0.52 named 3 tier 0.030  ind1_15_h300  -13.5%
+     + sep2021    Sep 20 20:42 0xc60a1345 k=5 fleets [0, 0, 1, 1, 1, 2] bundle 0.81 named 20 tier 0.020  ind1_15_h300  +12.5%
+     + sep2021    Sep 21 03:20 0x7b9e0ee6 k=5 fleets [0, 0, 0, 1, 2, 3] bundle 0.44 named 3 tier 0.030  ind1_15_h300  +17.9%
+     + sep2021    Sep 21 17:41 0xf04b481a k=5 fleets [0, 0, 1, 1, 1, 1] bundle 0.56 named 20 tier 0.020  ind1_15_h300   -5.9%
+     + sep2021    Sep 21 21:14 0xab0f5249 k=4 fleets [0, 0, 1, 2, 3] bundle 0.55 named 13 tier 0.020  ind1_15_h300   +0.4%
+     + sep2021    Sep 21 22:21 0xbf0e8cc2 k=5 fleets [0, 0, 0, 1, 1, 3] bundle 0.30 named 3 tier 0.030  ind1_15_h300  -17.8%
+     + sep2021    Sep 21 22:22 0xd27786e6 k=5 fleets [0, 0, 1, 1, 1, 1] bundle 0.53 named 22 tier 0.020  ind1_15_h300  -10.0%
+     + sep2021    Sep 21 22:51 0xcf897a23 k=4 fleets [0, 1, 1, 1, 3] bundle 0.83 named 3 tier 0.022  ind1_15_h300  -71.0%
+     + sep2021    Sep 22 00:18 0x9c861776 k=4 fleets [0, 0, 1, 1, 3] bundle 3.13 named 9 tier 0.020  ind1_15_h300  -33.0%
+     + sep2223    Sep 22 07:19 0x43b75c2c k=3 fleets [0, 1, 2, 2] bundle 1.70 named 20 tier 0.030  ind1_15_h300  +20.5%
+     + sep2223    Sep 22 08:59 0xe8cb2161 k=5 fleets [0, 0, 1, 1, 1, 2] bundle 0.54 named 15 tier 0.020  ind1_15_h300   -9.6%
+     + sep2223    Sep 22 15:19 0xb9334f06 k=4 fleets [0, 1, 1, 1, 2] bundle 0.63 named 4 tier 0.025  ind1_15_h300  +45.2%
+     + sep2223    Sep 22 18:15 0x1803d8be k=4 fleets [0, 1, 1, 2, 3] bundle 0.95 named 3 tier 0.024  ind1_15_h300  +17.3%
+     + sep2223    Sep 22 18:38 0x8113ecb2 k=4 fleets [1, 1, 1, 4, 4] bundle 0.45 named 21 tier 0.020  ind1_15_h300  +10.1%
+     + sep2223    Sep 22 21:07 0xde81c961 k=5 fleets [0, 0, 1, 1, 2, 3] bundle 2.17 named 16 tier 0.030  ind1_15_h300  +99.5%
+     + sep2223    Sep 22 21:23 0x65e0953f k=4 fleets [0, 1, 1, 1, 1] bundle 0.58 named 8 tier 0.030  ind1_15_h300  -28.4%
+     + sep23day   Sep 23 15:27 0xb787b7c9 k=4 fleets [0, 0, 1, 1, 1] bundle 0.60 named 10 tier 0.030  ind1_15_h300  -52.6%
+     + sep23day   Sep 23 19:15 0xaae335a0 k=5 fleets [0, 1, 1, 1, 1, 2] bundle 1.18 named 3 tier 0.025  ind1_15_h300  -14.3%
+     + sep23day   Sep 23 19:22 0x6db12d9a k=4 fleets [0, 0, 1, 2, 2] bundle 0.31 named 3 tier 0.025  ind1_15_h300  +40.1%
+  VAL: added 6, removed 0; candidate minus baseline $+10.79 over the window set; t of the per-launch delta +0.39 (n=6); without the single best delta $-13.65
+     + sep24paper Sep 24 15:46 0x046c4a35 k=3 fleets [0, 1, 2, 2] bundle 0.52 named 4 tier 0.030  ind1_15_h300  -29.2%
+     + sep24paper Sep 24 18:05 0xcd182c24 k=5 fleets [0, 1, 1, 1, 2, 2] bundle 2.69 named 23 tier 0.030  ind1_15_h300  -40.7%
+     + sep24paper Sep 24 18:55 0xf6c72aa8 k=5 fleets [0, 0, 1, 1, 1, 1] bundle 0.76 named 5 tier 0.030  ind1_15_h300  -16.1%
+     + sep24paper Sep 24 20:23 0x057d2437 k=4 fleets [0, 1, 1, 3, 3] bundle 1.55 named 5 tier 0.030  ind1_15_h300 +190.6%
+     + sep25pm    Sep 25 18:37 0x48a89f86 k=5 fleets [0, 1, 1, 1, 1, 3] bundle 0.68 named 8 tier 0.020  ind1_15_h300   +5.6%
+     + sep25eve2  Sep 25 20:05 0x8aba714f k=3 fleets [0, 1, 3, 5] bundle 4.26 named 22 tier 0.030  ind1_15_h300  -11.9%
+======================================================================================================================================================
+the bundle_eth OR-branch's neighbourhood (fire also on f@k-2==1 with bundle_eth >= c / < c), h300: FIT $/day, per-window $/burst, VAL $ total and mean
+  bundle >= 0.300: FIT n=164 +12.5% $ 52.9/d  per-window $/burst +0.71 +0.85 +2.58 +0.61  | VAL n=25 +22.1% $ +63.7  | the branch alone: FIT n=91  +1.1% med  -5.3%, VAL n=13 +28.4% med  +5.6%
+  bundle >= 0.446: FIT n=152  +9.4% $ 34.1/d  per-window $/burst +0.96 +0.98 +0.89 +0.47  | VAL n=24 +20.9% $ +57.4  | the branch alone: FIT n=79  -6.5% med  -5.9%, VAL n=12 +26.6% med  -3.2%
+  bundle >= 0.500: FIT n=149  +9.9% $ 35.8/d  per-window $/burst +0.96 +1.11 +0.89 +0.54  | VAL n=23 +19.7% $ +51.2  | the branch alone: FIT n=76  -6.2% med  -6.2%, VAL n=11 +24.4% med -11.9%
+  bundle >= 0.628: FIT n=125 +13.9% $ 46.1/d  per-window $/burst +0.95 +1.75 +1.37 +1.69  | VAL n=22 +21.9% $ +55.4  | the branch alone: FIT n=52  -4.1% med  -2.1%, VAL n=10 +29.8% med  -3.2%
+  bundle >= 0.700: FIT n=121 +13.8% $ 44.1/d  per-window $/burst +0.95 +1.81 +1.24 +1.69  | VAL n=21 +22.7% $ +55.0  | the branch alone: FIT n=48  -5.9% med  -3.3%, VAL n= 9 +32.5% med -11.9%
+  bundle >= 0.836: FIT n= 97 +21.0% $ 58.3/d  per-window $/burst +1.15 +2.89 +2.91 +1.54  | VAL n=19 +22.4% $ +49.1  | the branch alone: FIT n=24  +3.8% med  -3.3%, VAL n= 7 +34.6% med -11.9%
+  bundle >= 0.900: FIT n= 95 +22.2% $ 60.8/d  per-window $/burst +1.15 +3.32 +2.91 +1.54  | VAL n=19 +22.4% $ +49.1  | the branch alone: FIT n=22  +7.5% med  -2.1%, VAL n= 7 +34.6% med -11.9%
+  bundle >= 1.000: FIT n= 89 +23.5% $ 60.6/d  per-window $/burst +0.86 +3.55 +3.40 +1.54  | VAL n=19 +22.4% $ +49.1  | the branch alone: FIT n=16  +8.9% med  -3.1%, VAL n= 7 +34.6% med -11.9%
+  bundle >= 1.100: FIT n= 88 +23.2% $ 59.0/d  per-window $/burst +0.86 +3.47 +3.40 +1.54  | VAL n=19 +22.4% $ +49.1  | the branch alone: FIT n=15  +6.1% med  -5.0%, VAL n= 7 +34.6% med -11.9%
+  bundle >= 1.250: FIT n= 85 +24.0% $ 59.4/d  per-window $/burst +0.86 +3.67 +3.40 +1.88  | VAL n=17 +19.2% $ +36.9  | the branch alone: FIT n=12  +8.0% med  -7.5%, VAL n= 5 +28.7% med -11.9%
+  bundle >= 1.500: FIT n= 81 +26.8% $ 63.8/d  per-window $/burst +0.86 +3.67 +4.62 +2.16  | VAL n=17 +19.2% $ +36.9  | the branch alone: FIT n= 8 +27.7% med  +5.2%, VAL n= 5 +28.7% med -11.9%
+  bundle >= 2.000: FIT n= 77 +24.9% $ 56.0/d  per-window $/burst +1.07 +2.86 +4.73 +2.16  | VAL n=15  +9.9% $ +14.3  | the branch alone: FIT n= 4  -7.6% med -21.5%, VAL n= 3 -11.8% med -11.9%
+  bundle >= 3.000: FIT n= 75 +25.4% $ 55.7/d  per-window $/burst +1.92 +2.86 +4.34 +2.16  | VAL n=13 +13.2% $ +18.0  | the branch alone: FIT n= 2 -21.5% med -21.5%, VAL n= 1 -11.9% med -11.9%
+  bundle <  0.400: FIT n= 83 +30.7% $ 75.9/d  per-window $/burst +1.63 +2.54 +7.95 +2.10  | VAL n=13 +18.0% $ +26.2  | the branch alone: FIT n=10 +59.8% med  -6.6%, VAL n= 1 +50.6% med +50.6%
+  bundle <  0.446: FIT n= 85 +30.1% $ 76.1/d  per-window $/burst +1.48 +2.53 +7.95 +2.10  | VAL n=13 +18.0% $ +26.2  | the branch alone: FIT n=12 +50.9% med  -5.3%, VAL n= 1 +50.6% med +50.6%
+  bundle <  0.500: FIT n= 88 +28.6% $ 74.5/d  per-window $/burst +1.48 +2.25 +7.63 +1.89  | VAL n=14 +20.3% $ +32.3  | the branch alone: FIT n=15 +37.7% med  -5.3%, VAL n= 2 +50.3% med +50.3%
+  bundle <  0.550: FIT n=101 +24.6% $ 72.3/d  per-window $/burst +1.49 +1.47 +6.86 +1.89  | VAL n=15 +17.0% $ +28.2  | the branch alone: FIT n=28 +19.0% med  -6.3%, VAL n= 3 +23.8% med +49.9%
+  bundle <  0.628: FIT n=112 +20.1% $ 64.1/d  per-window $/burst +1.44 +1.27 +5.37 +0.71  | VAL n=15 +17.0% $ +28.2  | the branch alone: FIT n=39  +7.9% med  -7.2%, VAL n= 3 +23.8% med +49.9%
+  bundle <  0.700: FIT n=116 +20.1% $ 66.1/d  per-window $/burst +1.44 +1.24 +5.26 +0.71  | VAL n=16 +16.3% $ +28.6  | the branch alone: FIT n=43  +8.8% med  -6.4%, VAL n= 4 +19.2% med +27.8%
+
+f@k-2==1 launches (FIT) by bundle_eth bucket, h300:
+   [0.000,0.446) FIT: n= 12 mean +50.9% med  -5.3% win 42%      [0.000,0.446) VAL: n=  1 mean +50.6% med +50.6% win 100%   
+   [0.446,0.628) FIT: n= 27 mean -11.2% med  -9.4% win 26%      [0.446,0.628) VAL: n=  2 mean +10.4% med +10.4% win 50%   
+   [0.628,0.836) FIT: n= 28 mean -10.9% med  +2.9% win 54%      [0.628,0.836) VAL: n=  3 mean +18.5% med  +5.6% win 67%   
+   [0.836,1.000) FIT: n=  8 mean  -6.4% med  -3.3% win 38%      [0.836,1.000) VAL: n=  0    
+   [1.000,1.500) FIT: n=  8 mean  -9.8% med  -3.1% win 38%      [1.000,1.500) VAL: n=  2 mean +49.6% med +49.6% win 50%   
+   [1.500,99.000) FIT: n=  8 mean +27.7% med  +5.2% win 50%      [1.500,99.000) VAL: n=  5 mean +28.7% med -11.9% win 40%   
