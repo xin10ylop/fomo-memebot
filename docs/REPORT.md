@@ -3587,3 +3587,12 @@ the engine blind, though it was refusing on the relay anyway). The engine restar
 from Robinhood's public node; no provider error since. The extra 0.000659 ETH in the wallet, chased for an hour, was
 the difference between "0.006 ETH" and the $17.90 actually sent.
 
+*Stakes past $300 (stake_table.py with STAKES 200..1500, Sep 26).* The 3% supply cap binds on most fires from $400 and
+the deployable stake plateaus: on the fit windows' 73 fires the average amount that can go in is $333 at a $400 stake
+(46 capped), $364 at $500 (54), $418 at $750 (60), $458 at $1,000 (63); the return per fire falls from +22.2% at $200 to
++19.3% at $400, +18.6% at $500, +17.7% at $1,000; the day peaks at about $1,550 near $750 and falls past it ($1,533 at
+$1,000, $1,411 at $1,500) because the uncapped fires get worse while the capped ones cannot grow. On the paper windows'
+12 fires the same shape at a quarter of the height: $296/day at $400, $363 at $500, $425 at $750 and flat after. The
+worst single fire is −$285 at $400 and −$318 from $500 up. One seat is therefore worth about $400-500 of stake at most;
+more money is idle on most launches, and a second seat (a second address behind the first) is unmodelled.
+
