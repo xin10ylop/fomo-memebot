@@ -1,0 +1,20 @@
+13 qualifying launches scored, Sep 26 09:24 - Sep 26 12:14 UTC
+when          launch       k fleets by block           k-1 tick  k-2  behind1 h300
+Sep 26 09:24  0xc0190204   6 [0, 2, 2, 2, 2, 3, 3]       3    2    2        -41.3%
+Sep 26 09:33  0xe08ad4fb   7 [0, 0, 0, 0, 0, 0, 0, 1]    0    0    0        -22.6%
+Sep 26 09:35  0x23e943b0   4 [0, 0, 0, 1, 1]             1    0    0         +3.4%
+Sep 26 09:39  0x2e779580   5 [0, 0, 0, 1, 1, 2]          1    1    1         -5.2%
+Sep 26 10:16  0xb572f2cb   1 [0, 0]                      0    0    0        -46.8%
+Sep 26 10:46  0x39f53dff   8 [0, 0, 0, 0, 0, 0, 0, 0, 0]    0    0    0         +3.6%
+Sep 26 10:49  0x8df3b435   3 [0, 0, 1, 1]                1    1    0        +25.6%
+Sep 26 10:57  0xf3084070   6 [0, 0, 0, 0, 1, 1, 2]       1    1    1        +20.6%
+Sep 26 11:29  0x0c55377f   2 [0, 0, 0]                   0    0    0        -24.3%
+Sep 26 11:42  0x74bdd9e8   9 [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]    0    0    0        +21.3%
+Sep 26 11:52  0x9007287a   4 [0, 0, 0, 1, 1]             1    0    0         -8.5%
+Sep 26 12:03  0xe7789c57   6 [0, 0, 0, 0, 0, 1, 1]       1    0    0         -9.3%
+Sep 26 12:14  0x749fae08   9 [0, 0, 0, 0, 0, 0, 0, 0, 1, 2]    1    0    0         -0.3%
+
+k-1                    1 fires  mean -41.3%  median -41.3%  win  0%  dead 100%  $-5.70 total at $13 after gas
+tick's shot (0.76)     1 fires  mean -41.3%  median -41.3%  win  0%  dead 100%  $-5.70 total at $13 after gas
+k-2                    1 fires  mean -41.3%  median -41.3%  win  0%  dead 100%  $-5.70 total at $13 after gas
+refused (k-1 < 2)     12        mean  -3.5%  median  -2.7%  win 42%
