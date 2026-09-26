@@ -3572,3 +3572,12 @@ exits of slack; the runbook's daily status line carries the new base. The rule t
 stake it cannot fund is not sent); the 15 launches of the afternoon it refused for that reason were, at k−2, one fire
 at −11% and one on the seam, so nothing was lost but the afternoon.
 
+*The afternoon's population, launch by launch (engine log against the prediction).* Of the 15 launches the prediction
+listed for 13:57-17:28, the engine skipped 8 before the crowd gate on `creator buy 0.1% of supply < 1%` (one launcher's
+template: bundles of 0.377, 0.457 and 0.702 ETH repeating, 4-7 named wallets, 0-1 fleets at k−2), 2 on the aim ("no
+confident boundary estimate"), 1 on `creator buy 0.8%` (the 16:57 seam case), and 4 reached the funding check and were
+refused there (the 16:05 sure fire at −11% among them). The pre-gate filters are the engine's and not the tables'
+(runbook: MIN_CREATOR_SUPPLY=0.01 drops 15 fires averaging +3.5% on the fit windows; predict_window's docstring), so
+the prediction lists a superset by design; the morning's 13 happened to pass them all. Every launch of the afternoon
+is accounted for; nothing changed in the engine.
+
