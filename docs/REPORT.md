@@ -3546,3 +3546,29 @@ second on the biggest crowds and, about one burst in twenty, at random; a held b
 24.33, not a defect of the engine; it is now read every evening per burst (intake_readout) and the guard (BURST_SLIP) is the
 lever if late fills prove frequent. The engine was restarted at 13:50 UTC.
 
+**Live, the first fill (Sep 26 13:47 UTC) and the afternoon the engine sat idle.** The engine was restarted at about 13:45;
+at 13:47:18 `0xa80c4813` showed 3 fleets at k−2 and the burst fired: shot 26 filled in the seat block (E1, one buy ahead,
+sequencer reply 102 ms), the position was held 302 blocks and sold at −2.6% (−$0.32, plus $0.33 of burst gas). The table
+for that launch, at our stake and one buy behind, says −2.6% at the 300-block hold: the engine and the model agree to
+the decimal, as on September's 34 single fills. Two of our own misses around it:
+
+- *The prediction window began 42 seconds after the launch.* The afternoon prediction was built from 13:48 on the
+  assumption that the engine had started at 13:50; scored after the fact (`prediction_sep26restart.txt`) the launch
+  reads 3 fleets at k−2, −2.6%: a fire at the engine's view, priced as it came out. From now on the window starts at
+  the engine's start line, not at an assumed time.
+- *`live_vs_table.py` read +4.5% for the exit.* Its launch tape ran to b0+120, enough for September's 15-block holds
+  and 190 blocks short of a 300-block hold, so the sells of blocks 121-311 were missing from the model and the line
+  printed a −7.1% "execution/fees/model" gap that did not exist. The tape now runs to our last event on the curve;
+  rerun, the gap is +0.0%.
+
+After the exit the relay was refilled from the wallet as far as the wallet reaches (the wallet keeps 0.0015 ETH for the
+approve, the sell and the shooters' gas): 0.00396 ETH went over, the relay ended at 0.00433 ETH ($11.63), below the $13
+stake, and from then on every launch was refused before the crowd gate with "the relay holds ... < the stake: deposit"
+(the fail-closed guard of 6.01). No alarm was logged because the refill itself succeeded. The arithmetic was wrong
+from the start: the float rule needs wallet + relay ≥ stake + 0.0015 ETH reserve, i.e. $17 at $13, and the switch was
+made with $15.6 in the two, so the first losing exit was always going to park the engine. The fix is capital, not code:
+0.004 ETH into the wallet and 0.0015 ETH deposited to the relay puts the relay at its 1.2-stake float with three losing
+exits of slack; the runbook's daily status line carries the new base. The rule the engine applied is right (a $13
+stake it cannot fund is not sent); the 15 launches of the afternoon it refused for that reason were, at k−2, one fire
+at −11% and one on the seam, so nothing was lost but the afternoon.
+

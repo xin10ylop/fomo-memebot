@@ -837,3 +837,23 @@ One line per burst: the sequencer's reply time (median / max ms), filled or not,
 late: filled behind everybody), the blocks the shots spread over, the crowd's rival shots. A reply median over 500 ms is a
 held burst. `deploy/seq_probe.py 35 3` (engine stopped, about $0.10 of gas) measures the intake on demand.
 
+### 5q, capital for the float (Sep 26)
+
+The relay must hold the stake and the wallet keeps 0.0015 ETH; after every exit the relay is refilled from the wallet
+to 1.2 x the stake, as far as the wallet reaches. So wallet + relay must stay above stake + 0.0015 ETH (about $17 at
+$13), plus slack for losing exits (about $0.7 each at $13: the loss and the burst's gas). Below that the engine refuses
+every launch with `the relay holds ... < the stake: deposit` (no alarm: the refill itself did not fail) and the evening
+reading shows 0 fires and 0 gate refusals. Check and fix:
+
+    # what the engine refused on, since 13:47 UTC on Sep 26 (change the epoch for another day)
+    sudo grep -h '"ev": "eligible_not_traded"' /var/log/sniper/engine.jsonl | python3 -c "import sys,json; [print(json.loads(l)['gates'][0][:90]) for l in sys.stdin if json.loads(l)['t'] > 1790430420]" | sort | uniq -c | sort -rn | head
+    # top up the wallet from Phantom (0.004 ETH), wait for it to land, then move the relay to its float
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py deposit 0.0015
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py status 0.012753
+
+The engine reads the relay's balance every 6 s while no position is open: no restart. The status line's base moves
+by exactly the top-up (0.008753 + 0.004 = 0.012753 ETH), so the P&L line keeps counting from the switch.
+
+The prediction window starts at the engine's start line (`"ev": "start"`, its `t`), not at an assumed time: the first
+live fill (13:47:18) fell 42 s before a window that assumed a 13:50 start.
+

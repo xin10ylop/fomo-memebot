@@ -57,7 +57,7 @@ def row_of(e):
     d = e["data"][2:]; w = [int(d[i:i + 64], 16) / 1e18 for i in range(0, len(d), 64)]; bn = int(e["blockNumber"], 16)
     who = ("0x" + e["topics"][2][-40:]).lower() if len(e["topics"]) > 2 else None; k = "B" if e["topics"][0] == BUY else "S"
     return {"bn": bn, "k": k, "eth": w[0] if k == "B" else w[1], "tk": w[1] if k == "B" else w[0], "who": who, "li": int(e["logIndex"], 16), "ti": int(e["transactionIndex"], 16), "h": e["transactionHash"]}
-def launch(cv, b_first):
+def launch(cv, b_first, b_last=None):
     cl = call("eth_getLogs", [{"fromBlock": hex(b_first - 400), "toBlock": hex(b_first), "address": V2F, "topics": [None, None, pad(cv)]}])
     cl = [l for l in cl if len(l["topics"]) > 3]
     if not cl: return None
@@ -66,7 +66,8 @@ def launch(cv, b_first):
     words = [data[4 + 32 * i: 4 + 32 * (i + 1)] for i in range((len(data) - 4) // 32)]
     tb = int.from_bytes(words[13], "big") if sel == "f85f8e41" and len(words) > 13 and int.from_bytes(words[13], "big") <= 2000 else None
     named = {"0x" + w[12:].hex() for w in words if w[:12] == b"\0" * 12 and int.from_bytes(w[12:], "big") > 2 ** 100} - {creator}
-    ev = call("eth_getLogs", [{"fromBlock": hex(b0), "toBlock": hex(b0 + 120), "address": cv, "topics": [[BUY, SELL]]}])
+    b_to = max(b0 + 120, (b_last or 0) + 1)                                   # the tape runs to our last event on the curve: a 300-block hold sells past b0+120 (Sep 26: the model missed the sells of blocks 121-311 and read +4.5% for a -2.6% exit)
+    ev = call("eth_getLogs", [{"fromBlock": hex(b0), "toBlock": hex(b_to), "address": cv, "topics": [[BUY, SELL]]}])
     rows = sorted((row_of(e) for e in ev), key=lambda r: (r["bn"], r["li"])); ts = stamps(b0, b0 + 30)
     return {"cv": cv, "b0": b0, "T0": ts[b0], "ts": ts, "tier": (0.01 + tb / 10000.0) if tb is not None else None, "tb": tb, "named": len(named), "rows": rows, "sel": sel}
 def model(L, stake_eth, entry_block, n_ahead, hold=None, exit_block=None, sur=None):
@@ -113,7 +114,7 @@ def main():
     for cv, rs in by_cv.items():
         buys = [r for r in rs if r["k"] == "B"]; sells = [r for r in rs if r["k"] == "S"]
         if not buys: continue
-        L = launch(cv, buys[0]["bn"])
+        L = launch(cv, buys[0]["bn"], max(r["bn"] for r in rs))
         if L is None or L["tier"] is None: print(f"{cv}: launch not found or layout unknown ({L and L['sel']})"); continue
         ts = L["ts"]; T0 = L["T0"]; b0 = L["b0"]
         bE1 = next((n for n in range(b0 + 1, b0 + 30) if ts.get(n, 0) == T0 + 1), None)
