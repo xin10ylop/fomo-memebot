@@ -857,3 +857,21 @@ by exactly the top-up (0.008753 + 0.004 = 0.012753 ETH), so the P&L line keeps c
 The prediction window starts at the engine's start line (`"ev": "start"`, its `t`), not at an assumed time: the first
 live fill (13:47:18) fell 42 s before a window that assumed a 13:50 start.
 
+### 5q, the RPC quota (Sep 26 22:29 UTC)
+
+The provider behind RPC_URL answered `429 Monthly capacity limit exceeded` to every call from 22:29: the engine's
+bookkeeping loop (nonce, gas, the relay's and the wallet's balances) failed every 3 s, every launch was refused on
+`nonce/gas not fresh (RPC)`, and `relay_ops.py` could not deposit. The engine already reads logs from the public node
+(LOGS_RPC_URL); it now reads everything from it:
+
+    sudo systemctl stop sniper-engine
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }
+    set_kv RPC_URL https://rpc.mainnet.chain.robinhood.com
+    sudo systemctl start sniper-engine
+
+Symptom to watch (should print a time before the restart, then nothing new):
+
+    sudo grep -h '"stage": "chain_loop"' /var/log/sniper/engine.jsonl | tail -1 | cut -c1-120
+
+`relay_ops.py deposit` refuses to run while the engine runs (same wallet, same nonce): stop, deposit, start.
+
