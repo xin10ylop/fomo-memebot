@@ -77,7 +77,7 @@ def send(rpc, acct, tx, label, wait=True):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("cmd", choices=["status", "shooters-create", "shooters-register", "shooters-fund", "shooters-sweep", "deposit", "withdraw"])
     ap.add_argument("arg", nargs="?"); ap.add_argument("--replace", action="store_true"); ap.add_argument("--yes", action="store_true"); a = ap.parse_args()
-    e = env(); key = e.get("PRIVATE_KEY"); wallet = e.get("WALLET", "").lower(); url = os.environ.get("RPC_URL") or e.get("RPC_URL") or "https://rpc.mainnet.chain.robinhood.com"   # RPC_URL in the shell overrides the env file (the provider answered 429 to a deposit while the engine polled it, Sep 26); relay = e.get("RELAY", "").lower()
+    e = env(); key = e.get("PRIVATE_KEY"); wallet = e.get("WALLET", "").lower(); url = os.environ.get("RPC_URL") or e.get("RPC_URL") or "https://rpc.mainnet.chain.robinhood.com"; relay = e.get("RELAY", "").lower()   # RPC_URL in the shell overrides the env file
     if not key or not wallet:
         sys.exit(f"PRIVATE_KEY or WALLET missing in {ENV}")
     acct = Account.from_key(key); rpc = Rpc(url); px = None
