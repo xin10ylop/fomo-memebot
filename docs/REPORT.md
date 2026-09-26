@@ -3581,3 +3581,9 @@ refused there (the 16:05 sure fire at −11% among them). The pre-gate filters a
 the prediction lists a superset by design; the morning's 13 happened to pass them all. Every launch of the afternoon
 is accounted for; nothing changed in the engine.
 
+*Evening of Sep 26.* The relay was refilled to its float (deposit 0.0015 ETH after a $17.90 top-up of the wallet; base
+0.015412 ETH from here), and the RPC provider's monthly quota ran out at 22:29 UTC (every bookkeeping call refused;
+the engine blind, though it was refusing on the relay anyway). The engine restarted at 22:43:55 reading everything
+from Robinhood's public node; no provider error since. The extra 0.000659 ETH in the wallet, chased for an hour, was
+the difference between "0.006 ETH" and the $17.90 actually sent.
+

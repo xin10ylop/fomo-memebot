@@ -849,10 +849,11 @@ reading shows 0 fires and 0 gate refusals. Check and fix:
     sudo grep -h '"ev": "eligible_not_traded"' /var/log/sniper/engine.jsonl | python3 -c "import sys,json; [print(json.loads(l)['gates'][0][:90]) for l in sys.stdin if json.loads(l)['t'] > 1790430420]" | sort | uniq -c | sort -rn | head
     # top up the wallet from Phantom (0.004 ETH), wait for it to land, then move the relay to its float
     sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py deposit 0.0015
-    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py status 0.012753
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py status 0.015412
 
 The engine reads the relay's balance every 6 s while no position is open: no restart. The status line's base moves
-by exactly the top-up (0.008753 + 0.004 = 0.012753 ETH), so the P&L line keeps counting from the switch.
+by exactly the top-up: on Sep 26 the top-up was $17.90 = 0.006659 ETH, so the base is 0.008753 + 0.006659 = 0.015412 ETH
+and the P&L line keeps counting from the switch (−$0.68 at 22:45 UTC, the first fire's gas and the first fill's −2.6%).
 
 The prediction window starts at the engine's start line (`"ev": "start"`, its `t`), not at an assumed time: the first
 live fill (13:47:18) fell 42 s before a window that assumed a 13:50 start.
