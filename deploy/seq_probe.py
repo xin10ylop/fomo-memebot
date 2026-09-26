@@ -17,19 +17,20 @@ for line in open(ENV):
     if line and not line.startswith("#") and "=" in line:
         k, v = line.split("=", 1); e[k.strip()] = v.strip().strip('"').strip("'")
 keys = [k for k in e.get("SHOOTER_KEYS", "").split(",") if k.strip()]; SEQ = e.get("SEQ_URL", "https://sequencer.mainnet.chain.robinhood.com"); RPC = e.get("RPC_URL", "https://rpc.mainnet.chain.robinhood.com")
-if len(keys) < N + 5: sys.exit(f"need {N + 5} shooter keys, have {len(keys)}: lower burst_n")
+if len(keys) < max(N, 5): sys.exit(f"need {max(N, 5)} shooter keys, have {len(keys)}: lower burst_n")
 def rpc(url, m, p):
     r = urllib.request.urlopen(urllib.request.Request(url, data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": m, "params": p}).encode(), headers={"Content-Type": "application/json"}), timeout=20)
     return json.load(r).get("result")
 u = urlparse(SEQ); host = u.hostname; port = u.port or 443; path = u.path or "/"; ctx = ssl.create_default_context()
-gp = int(rpc(RPC, "eth_gasPrice", []), 16) * 2; accts = [Account.from_key(k) for k in keys[: N + 5]]
-print(f"sequencer {host}, gas price x2 = {gp / 1e9:.3f} gwei, {N + 5} shooters (5 control + {N} burst), step {STEP * 1000:.0f} ms")
-bodies = []
-for a in accts:
-    nonce = int(rpc(RPC, "eth_getTransactionCount", [a.address, "pending"]), 16)
-    tx = {"to": a.address, "value": 0, "data": b"", "gas": 21_000, "gasPrice": gp, "nonce": nonce, "chainId": 4663}
-    raw = "0x" + bytes(a.sign_transaction(tx).raw_transaction).hex()
-    bodies.append(json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": [raw]}).encode())
+gp = int(rpc(RPC, "eth_gasPrice", []), 16) * 2; accts = [Account.from_key(k) for k in keys[:N]]
+print(f"sequencer {host}, gas price x2 = {gp / 1e9:.3f} gwei, {len(accts)} shooters (the first 5 fire the control, then all {N} the burst), step {STEP * 1000:.0f} ms")
+def bodies_for(acs):
+    out = []
+    for a in acs:
+        nonce = int(rpc(RPC, "eth_getTransactionCount", [a.address, "pending"]), 16)
+        tx = {"to": a.address, "value": 0, "data": b"", "gas": 21_000, "gasPrice": gp, "nonce": nonce, "chainId": 4663}
+        out.append(json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + bytes(a.sign_transaction(tx).raw_transaction).hex()]}).encode())
+    return out
 def connect():
     c = http.client.HTTPSConnection(host, port, timeout=20, context=ctx); c.connect(); return c
 def fire(c, body, rec):
@@ -53,13 +54,13 @@ def landing(recs, head0, label):
           f" (about 10 blocks a second; a shot the intake holds 1.4 s lands 14 blocks late)")
     for r in recs[:5]: print(f"   write {r.get('write_ms')} ms, reply {r.get('reply_ms')} ms, block +{(r.get('block') - head0) if r.get('block') is not None else '-'}, err {r.get('err')}")
 # control: five shots 500 ms apart, one socket each
-conns = [connect() for _ in range(5)]; recs = [{} for _ in range(5)]; head0 = int(rpc(RPC, "eth_blockNumber", []), 16)
+bodies = bodies_for(accts[:5]); conns = [connect() for _ in range(5)]; recs = [{} for _ in range(5)]; head0 = int(rpc(RPC, "eth_blockNumber", []), 16)
 for i in range(5):
     fire(conns[i], bodies[i], recs[i]); time.sleep(0.5)
 time.sleep(3); landing(recs, head0, "CONTROL (5 shots, 500 ms apart)")
-# the burst: N warm sockets, step ms apart
-conns = [connect() for _ in range(N)]; recs = [{} for _ in range(N)]; head0 = int(rpc(RPC, "eth_blockNumber", []), 16); t = time.monotonic()
+# the burst: N warm sockets, step ms apart (fresh nonces: the control's shots have landed by now)
+time.sleep(2); bodies = bodies_for(accts); conns = [connect() for _ in range(N)]; recs = [{} for _ in range(N)]; head0 = int(rpc(RPC, "eth_blockNumber", []), 16); t = time.monotonic()
 for i in range(N):
     while time.monotonic() < t + i * STEP: pass
-    fire(conns[i], bodies[5 + i], recs[i])
+    fire(conns[i], bodies[i], recs[i])
 time.sleep(3); landing(recs, head0, f"BURST ({N} shots, {STEP * 1000:.0f} ms apart)")
