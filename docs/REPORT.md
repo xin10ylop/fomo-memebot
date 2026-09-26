@@ -3527,3 +3527,8 @@ gate would have refused anyway). Prediction and reading agree; the engine report
 Running tally (Sep 24 12:55 to Sep 26 08:02, 43 h): 14 fires, 5 wins, +21.5% mean, about +$27 at $13; 61 refused, mean
 about −4%, median about −10%. The go line: 14 of 15 fires; the refused set below zero; the fired mean above +10%.
 
+**Live, Sep 26 09:15 UTC.** After 43 hours of paper on the aligned settings (14 fires, +21.5% mean, about +$27 at $13, the
+refused set below zero), the owner switched the engine to live at $13 with KILL_USD=10 on 0.008753 ETH ($23.48) of
+capital ($13.98 in the relay, $7.34 of shooters' gas). The daily order stays: the prediction from the chain first, then the
+reading, then every real fill against the model (runbook 5q).
+

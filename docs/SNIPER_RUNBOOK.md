@@ -803,3 +803,26 @@ The aim's skip ("no confident boundary estimate") logs `boundary` [theta ms, con
 a skip with a large since_creation_ms is a creation in the last blocks of its second (un-aimable), one with few brackets
 or low confidence is the estimator after a reconnect. To read them: `sudo grep -h '"no confident boundary' /var/log/sniper/engine.jsonl | grep -o '"curve": "0x[0-9a-f]\{8\}\|"boundary": [^}]*\|"since_creation_ms": [0-9]*' | paste - - -`.
 
+## 5q. Live, Sep 26 09:15 UTC: the daily commands
+
+Switched on with SEND_MODULE=/etc/sniper/send_step.py, STAKE_MIN=STAKE_MAX=13, KILL_USD=10, MAX_LIVE_TRADES=30, engine 6.5,
+the pre-gate settings of 5o. Base capital 0.008753 ETH ($23.48): wallet 0.000804, relay 0.005212 (the stake), shooters'
+gas 0.002737 (35 shooters, 0 low, 0 unregistered). The relay is refilled from the wallet to 1.2 x the stake after every
+exit (RELAY_FLOAT_USD); shooters below SHOOTER_MIN_ETH are refilled from the wallet; both log an alarm when the wallet
+cannot. The stake stays $13 until a week of real fills reconciles against the model; then $25, then $50, one step per
+reconciled week (the return per fire falls with size: stake_table.txt).
+
+Every evening after 22:00 UTC, in this order (the prediction is built here first, from the chain, before the log is read):
+
+    # 1. the balance and the P&L since the base, every gas and fee included (read-only)
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py status 0.008753
+    # 2. the rule against the chain: fires and refusals, scored as on the paper days (--from = the previous reading's end)
+    cd ~/fomo-memebot && git pull && sudo python3 src/analysis/paper_day.py --from "<previous end>" --stake 13 --hold 300 2>&1 | tee /tmp/reading.txt
+    # 3. every real fill against the model for the same launch (the seat we got, the hold, the rest)
+    cd ~/fomo-memebot && python3 src/analysis/live_vs_table.py 2>&1 | tail -40
+    # 4. alarms (a relay or shooter the wallet could not refill, a crashed launch thread, the kill line)
+    sudo grep -h '"ev": "alarm"' /var/log/sniper/engine.jsonl | tail -5 | cut -c1-220
+
+Stop at any time: `sudo systemctl stop sniper-engine` (positions already open are sold by the engine only while it runs:
+stop between trades, i.e. when `sudo grep -c '"ev": "trade_done"' ...` equals the trade_decision count).
+
