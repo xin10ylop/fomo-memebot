@@ -3532,3 +3532,17 @@ refused set below zero), the owner switched the engine to live at $13 with KILL_
 capital ($13.98 in the relay, $7.34 of shooters' gas). The daily order stays: the prediction from the chain first, then the
 reading, then every real fill against the model (runbook 5q).
 
+**Live, the first fire (Sep 26 09:24 UTC) and the sequencer's intake.** The engine fired as predicted (3 fleets at shot 0);
+the 35 shots left the box on time (3 ms apart, 0.1 ms writes) and the sequencer acknowledged each one 1,406-1,518 ms later,
+then put all 35 into one block 13 blocks after the seat block, where they reverted (no fill, −$0.07 of gas; the model had
+priced second place at −41%). A probe half an hour later (`deploy/seq_probe.py`: 5 spaced shots, then a 35-shot burst of
+zero-value self-transfers on warm sockets) got replies in 21-117 ms and landings 2-3 blocks after the send: the intake was
+not throttling us. The September live logs read the same way (`src/analysis/intake_readout.py`): 52 bursts on crowds under
+300 rival shots, reply median 104 ms, 37 filled; the two bursts on crowds of 886 and 2,056 rival shots, replies 386 and
+1,460 ms, one late fill (shot 1, −9%) and one no-fill; and three bursts on small crowds where the intake stalled a second
+for no visible reason (two late fills at −12% and −15%, one no-fill). So: the sequencer's intake holds a burst about a
+second on the biggest crowds and, about one burst in twenty, at random; a held burst fills late behind everybody (−9% to
+−15% in September) or not at all (gas). That is a cost of the live seat the paper cannot see, inside the 60-80% haircut of
+24.33, not a defect of the engine; it is now read every evening per burst (intake_readout) and the guard (BURST_SLIP) is the
+lever if late fills prove frequent. The engine was restarted at 13:50 UTC.
+

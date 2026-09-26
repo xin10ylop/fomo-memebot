@@ -826,3 +826,14 @@ Every evening after 22:00 UTC, in this order (the prediction is built here first
 Stop at any time: `sudo systemctl stop sniper-engine` (positions already open are sold by the engine only while it runs:
 stop between trades, i.e. when `sudo grep -c '"ev": "trade_done"' ...` equals the trade_decision count).
 
+### 5q, the intake readout (Sep 26)
+
+The sequencer's transaction intake holds a burst about a second on the biggest crowds and about one burst in twenty at
+random (report: live, the first fire). Every evening, with the four commands of 5q:
+
+    sudo python3 src/analysis/intake_readout.py /var/log/sniper/engine.jsonl | tail -8
+
+One line per burst: the sequencer's reply time (median / max ms), filled or not, the fill shot (1 = the whole burst was
+late: filled behind everybody), the blocks the shots spread over, the crowd's rival shots. A reply median over 500 ms is a
+held burst. `deploy/seq_probe.py 35 3` (engine stopped, about $0.10 of gas) measures the intake on demand.
+
