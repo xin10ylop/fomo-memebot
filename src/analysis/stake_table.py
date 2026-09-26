@@ -1,7 +1,7 @@
 """stake_table.py: the rule the engine runs (fleets >= 2 by block k-2, second place, 300 blocks) re-priced at larger stakes with
 the audited model (fixed-ETH buyers behind us, the 3% supply cap, the exit's own impact), on the fit windows' fires and the
 paper windows' fires, tapes pulled in parallel from the public RPC.   python3 src/analysis/stake_table.py [workers=6]"""
-import json, gzip, sys, os, math, statistics as st, concurrent.futures as cf, time
+import json, gzip, sys, os, math, statistics as st, concurrent.futures as futures, time
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")); sys.path.insert(0, "src/analysis")
 import live_vs_table as lv
 W = int(sys.argv[1]) if len(sys.argv) > 1 else 6; sys.argv = ["x", "0.76", "0.71"]
@@ -33,7 +33,7 @@ def price(item):
     return None
 for name, (hours, files) in SETS.items():
     items = fires(files); t0 = time.time()
-    with cf.ThreadPoolExecutor(W) as ex: res = [x for x in ex.map(price, items) if x]
+    with futures.ThreadPoolExecutor(W) as ex: res = [x for x in ex.map(price, items) if x]
     print(f"\n=== {name}: {len(res)} of {len(items)} fires priced in {time.time()-t0:.0f} s; fixed-ETH buyers behind us, the 3% cap, the exit's impact; gas ${GAS:.2f}")
     print(f"{'stake':>6s} {'in (avg)':>9s} {'capped':>7s} {'return':>8s} {'win':>5s} {'$/burst':>8s} {'$/day':>7s} {'best':>8s} {'worst':>8s}")
     for s in STAKES:
