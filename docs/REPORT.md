@@ -3517,3 +3517,13 @@ had hit first (48 of 563 fit launches, 9 baseline fires): now whichever hit firs
 and the blind window (need more 6.4+ logs), exits outside the nine columns and other seat positions (need re-pulled tapes),
 stakes above $13 (need the fixed-ETH model on every launch), creator supply as a branch (tapes for all 663 launches).
 
+**Addendum 10, the night of Sep 25-26 against its prediction (22:25-08:02 UTC, engine 6.5).** Prediction: 17 qualifying
+launches, one sure fire (`0x0a6c1259` 22:27, +25.8%), two k−1 borderlines (−10.0%, +18.4%), 14 refused at −0.1%. Reading: the
+one fire, +25.8% (+$3.02), opened at shot 0 with 3 fleets; seven refusals, all with 0-1 fleets at the close (both
+borderlines refused: their second fleet sat in block k−1), mean −31%, four dead; nine never reached the gate (three
+creations in the last blocks of their second, the rest the pre-gate filters; among them the +96% one-fleet launch the
+gate would have refused anyway). Prediction and reading agree; the engine reports 6.5.
+
+Running tally (Sep 24 12:55 to Sep 26 08:02, 43 h): 14 fires, 5 wins, +21.5% mean, about +$27 at $13; 61 refused, mean
+about −4%, median about −10%. The go line: 14 of 15 fires; the refused set below zero; the fired mean above +10%.
+
