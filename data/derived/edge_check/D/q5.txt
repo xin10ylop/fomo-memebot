@@ -1,0 +1,35 @@
+(a) SUPPLY by UTC day: covered hours, qualifying launches per hour, the rule's fires per hour
+  Sep 18  covered  10.5 h  launches  104 (9.87/h)  fires  13 (1.23/h)
+  Sep 19  covered  13.2 h  launches   37 (2.81/h)  fires   1 (0.08/h)
+  Sep 20  covered  10.6 h  launches   42 (3.98/h)  fires   7 (0.66/h)
+  Sep 21  covered  24.0 h  launches  138 (5.75/h)  fires  20 (0.83/h)
+  Sep 22  covered  23.7 h  launches  170 (7.17/h)  fires  19 (0.80/h)
+  Sep 23  covered  16.6 h  launches   72 (4.34/h)  fires  13 (0.78/h)
+  Sep 24  covered  11.2 h  launches   55 (4.92/h)  fires   9 (0.80/h)
+  Sep 25  covered  23.1 h  launches   49 (2.12/h)  fires   4 (0.17/h)
+  Sep 26  covered  18.2 h  launches   47 (2.58/h)  fires   4 (0.22/h)
+  Sep 27  covered   4.2 h  launches    9 (2.16/h)  fires   1 (0.24/h)
+  fit    covered  97.9 h  launches 563 (5.75/h)  fires 73 (0.75/h)
+  recent covered  56.3 h  launches 160 (2.84/h)  fires 18 (0.32/h)
+
+(b) TREND of the fires' return in time (all 91, days since the first fire)
+  h15  slope -2.47 points a day, Spearman rho -0.20, one-sided permutation p (slope this negative) 0.059
+  h60  slope -2.70 points a day, Spearman rho -0.16, one-sided permutation p (slope this negative) 0.061
+  h150 slope -0.27 points a day, Spearman rho -0.07, one-sided permutation p (slope this negative) 0.457
+  h300 slope -2.96 points a day, Spearman rho -0.20, one-sided permutation p (slope this negative) 0.152
+  refused h15  slope -0.74 points a day (n 632)
+  refused h300 slope +0.45 points a day (n 632)
+
+(c) POSITION: the fires at second, third, fourth place in the seat block (model_eff, $13)
+  fit    behind 1: h15 +16.2% (win 66%)   h300 +26.3% (win 67%)
+  fit    behind 2: h15  +9.9% (win 55%)   h300 +20.1% (win 58%)
+  fit    behind 3: h15  +4.9% (win 48%)   h300 +15.1% (win 56%)
+  recent behind 1: h15 +12.8% (win 56%)   h300  +3.5% (win 39%)
+  recent behind 2: h15  +9.0% (win 44%)   h300  +0.5% (win 28%)
+  recent behind 3: h15  +7.3% (win 44%)   h300  -1.0% (win 28%)
+
+(d) THE LARGEST FIRE and the medians
+  fit    h15  mean +16.2%  without the largest (+129%) +14.7%  without the largest two +13.3%  median  +8.0%  10%-trimmed +12.3%
+  fit    h300 mean +26.3%  without the largest (+252%) +23.2%  without the largest two +20.1%  median +20.7%  10%-trimmed +18.9%
+  recent h15  mean +12.8%  without the largest (+86%)  +8.5%  without the largest two  +4.6%  median  +0.1%  10%-trimmed  +9.9%
+  recent h300 mean  +3.5%  without the largest (+168%)  -6.2%  without the largest two -10.2%  median  -6.6%  10%-trimmed  -3.4%

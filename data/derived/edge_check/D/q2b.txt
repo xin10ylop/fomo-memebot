@@ -1,0 +1,38 @@
+(1) BUNDLE DUMPS among the fires (bundle sold >= 10% of its tokens by the horizon)
+  fit    dump by E1+15 :  2/73 fires  -> their h15 -60.1% h300 -68.0% | the others h15 +18.4% h300 +29.0%
+  fit    dump by E1+300:  7/73 fires  -> their h15  +1.3% h300 -37.1% | the others h15 +17.8% h300 +33.0%
+  fit    first bundle sell after E1 (blocks, fires with any): [6, 9, 9, 19, 29, 46, 51, 53, 56, 65, 74, 77, 100, 117, 129, 141, 294, 343, 357, 375, 376, 384, 394, 490, 518, 531, 623, 627, 631]
+  recent dump by E1+15 :  0/18 fires  -> their h15  +nan% h300  +nan% | the others h15 +12.8% h300  +3.5%
+  recent dump by E1+300:  5/18 fires  -> their h15 +28.6% h300 -17.8% | the others h15  +6.7% h300 +11.6%
+  recent first bundle sell after E1 (blocks, fires with any): [5, 16, 18, 29, 69, 112, 269, 279, 358, 446]
+
+(2) FOLLOW-ON DEMAND: outsiders' ETH (not the bundle) bought after the seat block, mean / median per fire
+  fit    E1+1..15: 0.235 / 0.132 ETH    E1+16..60: 1.392 / 0.568 ETH
+  recent E1+1..15: 0.274 / 0.137 ETH    E1+16..60: 0.957 / 0.190 ETH
+
+(3) THE OPERATOR TEMPLATE (shared named wallet or creator, all launches in time order)
+  template of the Sep 27 00:10 fire: 15 launches, 14 fires
+   fit    fires 8: h15  +0.9%  h300 +10.9%   -> 21 17:15 -5%/+31% 21 17:28 +12%/+22% 22 00:57 -9%/+27% 22 13:29 -10%/+24% 22 17:53 -3%/-7% 23 18:41 +12%/+8% 23 18:54 +3%/-3% 23 19:24 +6%/-15%
+   recent fires 6: h15  +5.6%  h300 -13.6%   -> 24 17:16 -1%/+2% 24 17:58 +25%/-9% 24 20:42 -7%/+4% 25 16:24 +26%/+9% 26 23:53 +0%/-51% 27 00:10 -10%/-38%
+   fit    fires outside this template 65: h15 +18.1%  h300 +28.2%
+   recent fires outside this template 12: h15 +16.4%  h300 +12.0%
+
+(4) EVERY RECENT FIRE (h0 / h15 / h60 / h150 / h300; bundle sold by 15 / 300; outsider wallets in 15 blocks)
+  Sep 24 12:59 0xad1c5f76 fleets@k-2 2   +5.4%  -0.7% +20.9%  +4.8%  -4.5%   bundle sold   0% /   0%   ow15 4
+  Sep 24 14:52 0x2ad76f05 fleets@k-2 2   -4.2%  -9.9%  -3.0%  -8.1% -13.6%   bundle sold   0% /   0%   ow15 1
+  Sep 24 17:16 0x89f41f56 fleets@k-2 2   -3.0%  -0.6% -10.1%  -2.9%  +2.3%   bundle sold   0% /   0%   ow15 5
+  Sep 24 17:32 0x26d36c5e fleets@k-2 2  -11.5% -13.8% -13.7%  -4.7% +14.1%   bundle sold   2% /   2%   ow15 2
+  Sep 24 17:58 0xc63ab843 fleets@k-2 2   -3.3% +25.2%  +7.2%  +2.8%  -8.7%   bundle sold   0% /   0%   ow15 13
+  Sep 24 18:10 0xe65b85ad fleets@k-2 2  +77.6% +86.1% +84.0% +72.3% +58.0%   bundle sold   0% /  92%   ow15 6
+  Sep 24 18:44 0x95f60349 fleets@k-2 3  -11.9% +43.8% -27.5% -29.8% -17.4%   bundle sold   0% /  16%   ow15 8
+  Sep 24 19:20 0x9132d3db fleets@k-2 2   -5.3% +10.3% -25.8% -23.8% -19.9%   bundle sold   0% /  10%   ow15 8
+  Sep 24 20:42 0x56e76663 fleets@k-2 3   -7.2%  -7.2%  -4.5%  +5.4%  +3.7%   bundle sold   0% /   0%   ow15 0
+  Sep 25 00:33 0x9f834b70 fleets@k-2 2  -11.3% +70.0% +60.6% +138.6% +167.9%   bundle sold   0% /   0%   ow15 14
+  Sep 25 16:24 0xd43ed726 fleets@k-2 2   +6.6% +25.9% +15.4%  +6.5%  +9.0%   bundle sold   0% /   3%   ow15 12
+  Sep 25 20:47 0xe41e16e1 fleets@k-2 2   -5.9%  -8.0%  -4.4%  -4.4% -10.7%   bundle sold   0% /   0%   ow15 3
+  Sep 25 22:27 0x0a6c1259 fleets@k-2 3  -10.7%  +0.1% +24.8% +34.4% +25.4%   bundle sold   0% /   0%   ow15 6
+  Sep 26 09:24 0xc0190204 fleets@k-2 2   +0.4% +22.9% -33.3% -37.7% -41.4%   bundle sold   0% / 100%   ow15 7
+  Sep 26 16:05 0xee486806 fleets@k-2 2  -11.0% -11.0% -11.0% -11.0% -11.0%   bundle sold   0% /   0%   ow15 0
+  Sep 26 13:47 0xa80c4813 fleets@k-2 3   -2.4%  +7.2%  +4.3%  +4.4%  -2.8%   bundle sold   0% /   0%   ow15 2
+  Sep 26 23:53 0x2b7508b0 fleets@k-2 2   -0.4%  +0.0%  +4.7% +14.5% -50.5%   bundle sold   0% /  95%   ow15 3
+  Sep 27 00:10 0x80c0efae fleets@k-2 2  -10.0% -10.0% -10.0% +37.7% -37.6%   bundle sold   0% /  92%   ow15 0

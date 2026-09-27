@@ -1,0 +1,12 @@
+every qualifying launch, h15                   fit 563  +0.2% w 31% d  3% $ -43.6/d | recent 160  -0.7% w 25% d  0% $ -27.3/d | windows +29 -16 -112 -118
+every qualifying launch, h300                  fit 563  +3.0% w 40% d 21% $  +8.2/d | recent 160  +4.1% w 39% d 14% $ +12.7/d | windows -10 +8 +73 -158
+GATE (the rule), h15                           fit  73 +16.2% w 66% d  3% $ +32.5/d | recent  18 +12.8% w 56% d  0% $  +9.6/d | windows +47 +36 +14 +42
+GATE (the rule), h60                           fit  73 +16.2% w 66% d  3% $ +32.5/d | recent  18  +4.4% w 44% d  0% $  +1.7/d | windows +38 +33 +23 +46
+GATE (the rule), h150                          fit  73 +21.2% w 66% d  7% $ +44.2/d | recent  18 +11.1% w 56% d  0% $  +8.0/d | windows +15 +50 +59 +50
+GATE (the rule), h300                          fit  73 +26.3% w 67% d  8% $ +56.4/d | recent  18  +3.5% w 39% d 11% $  +0.9/d | windows +31 +61 +70 +58
+ORACLE crowd after the seat, h15               fit 255 +12.1% w 62% d  4% $ +79.3/d | recent  61 +13.3% w 56% d  0% $ +34.0/d | windows +147 +92 +18 +59
+ORACLE crowd after the seat, h300              fit 255 +17.7% w 60% d 16% $+125.7/d | recent  61 +21.2% w 59% d 10% $ +59.1/d | windows +169 +89 +163 +34
+ORACLE gate & crowd after, h15                 fit  56 +23.9% w 86% d  4% $ +38.9/d | recent  14 +19.7% w 71% d  0% $ +12.5/d | windows +49 +45 +21 +51
+ORACLE gate & crowd after, h300                fit  56 +34.7% w 79% d  9% $ +58.5/d | recent  14  +7.9% w 43% d 14% $  +3.9/d | windows +31 +58 +78 +67
+PROXY gate, h300 if ow15>=3 else h15           fit  73 +25.9% w 64% d  7% $ +55.5/d | recent  18  +3.6% w 33% d 11% $  +1.0/d | windows +30 +57 +73 +60
+PROXY gate, h150 if ow15>=3 else h15           fit  73 +20.6% w 60% d  7% $ +42.7/d | recent  18  +7.3% w 44% d  0% $  +4.4/d | windows +14 +47 +58 +52

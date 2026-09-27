@@ -1,0 +1,14 @@
+hold 15: n, mean, win   [ETH shot by k-2 >= 0.01 | < 0.01]
+  fleets@k-2 = 0               fit:    0             |  399  -1.9% w 26%   recent:    0             |  119  -2.8% w 18%
+  fleets@k-2 = 1               fit:   43  +1.5% w 40% |   48  -8.4% w 19%   recent:    6 +15.7% w 67% |   17  -6.6% w 24%
+  fleets@k-2 >= 2 (the rule)   fit:   61 +16.2% w 67% |   12 +16.3% w 58%   recent:   12 +14.5% w 50% |    6  +9.4% w 67%
+  all                          fit:  104 +10.1% w 56% |  459  -2.1% w 26%   recent:   18 +14.9% w 56% |  142  -2.7% w 21%
+  by fit window, ETH >= 0.01 (any fleets): sep1819   19 +16.8% w 74%  sep2021   49  +8.7% w 49%  sep2223   24  +6.9% w 50%  sep23day   12 +11.5% w 67%
+
+hold 300: n, mean, win   [ETH shot by k-2 >= 0.01 | < 0.01]
+  fleets@k-2 = 0               fit:    0             |  399  -0.8% w 35%   recent:    0             |  119  +2.4% w 38%
+  fleets@k-2 = 1               fit:   43  +2.3% w 44% |   48  -0.6% w 35%   recent:    6 +56.1% w 83% |   17  -2.1% w 35%
+  fleets@k-2 >= 2 (the rule)   fit:   61 +22.0% w 67% |   12 +48.4% w 67%   recent:   12 +11.7% w 50% |    6 -13.0% w 17%
+  all                          fit:  104 +13.8% w 58% |  459  +0.5% w 36%   recent:   18 +26.5% w 61% |  142  +1.2% w 37%
+  by fit window, ETH >= 0.01 (any fleets): sep1819   19 +13.7% w 68%  sep2021   49  +8.7% w 55%  sep2223   24 +21.9% w 58%  sep23day   12 +18.8% w 50%
+

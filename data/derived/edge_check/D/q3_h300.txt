@@ -1,0 +1,140 @@
+baseline: the rule, hold 300
+baseline h300                                  fit  73 +26.3% w 67% d  8% $ +56.4/d | recent  18  +3.5% w 39% d 11% $  +0.9/d | windows +31 +61 +70 +58
+
+== wallets>=t @k-2 (gate)
+wallets>=1                                     fit 138 +15.8% w 55% d 16% $ +59.6/d | recent  40  +8.6% w 42% d 10% $ +12.7/d | windows +29 +54 +100 +28   PASS-rev
+wallets>=2                                     fit  73 +20.6% w 58% d 10% $ +42.8/d | recent  20 +11.8% w 50% d  5% $  +9.7/d | windows +40 +31 +67 +14  
+wallets>=3                                     fit  46 +20.5% w 57% d  9% $ +26.9/d | recent  12  +5.9% w 50% d  8% $  +2.1/d | windows +11 +18 +54 +16  
+wallets>=4                                     fit  32 +18.1% w 53% d 12% $ +16.2/d | recent  10  +2.4% w 50% d 10% $  -0.1/d | windows +12 +19 +36 -49  
+wallets>=6                                     fit  23  +3.5% w 48% d 17% $  +0.7/d | recent   9  +6.7% w 56% d 11% $  +2.0/d | windows +9 +4 +3 -44  
+wallets>=10                                    fit  16  +1.1% w 38% d 25% $  -0.7/d | recent   6  +6.5% w 67% d 17% $  +1.2/d | windows +8 +5 -2 -44  
+   passes 0/6 (reverse 1); permuted feature: mean passes 0.00/6, share of permutations with >= 0 passes 1.00
+   fit-selected: wallets>=1 -> recent $+12.7/d (baseline $+0.9); gain +11.8; permuted gains >= this: 0.01
+
+== shots>=t @k-2 (gate)
+shots>=1                                       fit 164 +12.1% w 52% d 16% $ +51.2/d | recent  41  +8.9% w 44% d 10% $ +13.5/d | windows +21 +39 +97 +28  
+shots>=2                                       fit 135 +12.8% w 55% d 12% $ +44.9/d | recent  32 +12.3% w 53% d  9% $ +16.2/d | windows +27 +33 +78 +30  
+shots>=3                                       fit 129 +13.0% w 55% d 12% $ +43.9/d | recent  29 +11.9% w 55% d 10% $ +14.1/d | windows +28 +31 +82 +11  
+shots>=5                                       fit 116 +12.3% w 55% d 13% $ +36.8/d | recent  23 +17.0% w 57% d  9% $ +17.3/d | windows +29 +30 +56 +17  
+shots>=10                                      fit  95 +16.2% w 57% d 14% $ +42.2/d | recent  15  +9.1% w 60% d 13% $  +5.1/d | windows +29 +42 +61 +15  
+shots>=20                                      fit  68 +13.3% w 54% d 18% $ +23.7/d | recent  12  -2.7% w 58% d 17% $  -3.3/d | windows +24 +37 +30 -50  
+   passes 0/6 (reverse 0); permuted feature: mean passes 0.00/6, share of permutations with >= 0 passes 1.00
+   fit-selected: shots>=1 -> recent $+13.5/d (baseline $+0.9); gain +12.7; permuted gains >= this: 0.01
+
+== direct senders>=t @k-2 (gate)
+direct>=1                                      fit  20  -5.2% w 40% d 40% $  -5.0/d | recent   2 -30.3% w  0% d 50% $  -3.4/d | windows +0 +3 -21 +0  
+direct>=2                                      fit   1 -11.9% w  0% d  0% $  -0.5/d | recent   0  +nan% wnan% dnan% $  +0.0/d | windows +0 -1 +0 +0  
+direct>=3                                      fit   1 -11.9% w  0% d  0% $  -0.5/d | recent   0  +nan% wnan% dnan% $  +0.0/d | windows +0 -1 +0 +0  
+   passes 0/3 (reverse 0); permuted feature: mean passes 0.00/3, share of permutations with >= 0 passes 1.00
+
+== relays>=t @k-2 (gate)
+relays>=1                                      fit 152 +15.8% w 55% d 13% $ +65.8/d | recent  39 +10.9% w 46% d  8% $ +16.9/d | windows +21 +42 +141 +28   PASS-rev
+relays>=2                                      fit  66 +24.8% w 67% d  8% $ +47.8/d | recent  18  +3.5% w 39% d 11% $  +0.9/d | windows +31 +57 +47 +58  
+relays>=3                                      fit  24 +28.6% w 62% d  0% $ +20.3/d | recent   4  +2.2% w 50% d  0% $  -0.1/d | windows +1 -4 +54 +55  
+   passes 0/3 (reverse 1); permuted feature: mean passes 0.00/3, share of permutations with >= 0 passes 1.00
+   fit-selected: relays>=1 -> recent $+16.9/d (baseline $+0.9); gain +16.1; permuted gains >= this: 0.01
+
+== ETH shot>=e @k-2 (gate)
+eth>=0.01                                      fit 104 +13.8% w 58% d 12% $ +38.1/d | recent  18 +26.5% w 61% d  6% $ +22.4/d | windows +29 +27 +49 +69  
+eth>=0.05                                      fit  90 +14.7% w 57% d 10% $ +35.7/d | recent  18 +26.5% w 61% d  6% $ +22.4/d | windows +28 +17 +54 +69  
+eth>=0.1                                       fit  80 +16.1% w 57% d 10% $ +35.1/d | recent  16 +30.8% w 69% d  6% $ +23.5/d | windows +28 +17 +57 +50  
+eth>=0.3                                       fit  68 +16.9% w 56% d 12% $ +31.7/d | recent  12 +17.2% w 67% d  8% $  +9.1/d | windows +28 +14 +47 +59  
+eth>=1.0                                       fit  25 +37.7% w 68% d  8% $ +28.6/d | recent   3 +68.9% w100% d  0% $ +10.4/d | windows +21 +12 +43 +67  
+   passes 0/5 (reverse 0); permuted feature: mean passes 0.00/5, share of permutations with >= 0 passes 1.00
+   fit-selected: eth>=0.01 -> recent $+22.4/d (baseline $+0.9); gain +21.6; permuted gains >= this: 0.00
+
+== rule & ETH shot>=e
+rule&eth>=0.01                                 fit  61 +22.0% w 67% d  8% $ +38.5/d | recent  12 +11.7% w 50% d  8% $  +5.7/d | windows +37 +34 +40 +58  
+rule&eth>=0.05                                 fit  54 +24.8% w 67% d  7% $ +39.2/d | recent  12 +11.7% w 50% d  8% $  +5.7/d | windows +36 +32 +44 +58  
+rule&eth>=0.1                                  fit  48 +28.5% w 71% d  6% $ +40.5/d | recent  11 +13.7% w 55% d  9% $  +6.4/d | windows +36 +32 +50 +52  
+rule&eth>=0.3                                  fit  41 +30.9% w 71% d  7% $ +37.8/d | recent   8  -8.8% w 50% d 12% $  -4.7/d | windows +37 +31 +41 +59  
+rule&eth>=1.0                                  fit  22 +35.6% w 64% d  9% $ +23.6/d | recent   2  +8.9% w100% d  0% $  +0.7/d | windows +21 +6 +33 +67  
+   passes 0/5 (reverse 0); permuted feature: mean passes 0.00/5, share of permutations with >= 0 passes 1.00
+   fit-selected: rule&eth>=0.1 -> recent $+6.4/d (baseline $+0.9); gain +5.5; permuted gains >= this: 0.00
+
+== rule & skip seen-before creator/named
+rule&new-operator                              fit  42 +26.9% w 62% d  7% $ +33.3/d | recent   6 +36.3% w 50% d  0% $ +10.5/d | windows +49 +37 +28 -5  
+   passes 0/1 (reverse 0); permuted feature: mean passes 0.00/1, share of permutations with >= 0 passes 1.00
+
+== rule & skip template with past mean < m
+rule&tmpl_mean>=-0.2                           fit  72 +26.9% w 68% d  8% $ +57.0/d | recent  18  +3.5% w 39% d 11% $  +0.9/d | windows +31 +63 +70 +58  PASS 
+rule&tmpl_mean>=-0.1                           fit  72 +26.9% w 68% d  8% $ +57.0/d | recent  17  +4.3% w 41% d 12% $  +1.6/d | windows +31 +63 +70 +58  PASS  PASS-rev
+rule&tmpl_mean>=0.0                            fit  65 +26.4% w 65% d  9% $ +50.5/d | recent  15  +6.9% w 47% d 13% $  +3.4/d | windows +26 +52 +66 +58  
+rule&tmpl_mean>=0.1                            fit  59 +27.3% w 63% d  8% $ +47.5/d | recent  13  +9.8% w 46% d 15% $  +4.9/d | windows +33 +38 +66 +58  
+   passes 2/4 (reverse 1); permuted feature: mean passes 0.26/4, share of permutations with >= 2 passes 0.06
+   fit-selected: rule&tmpl_mean>=-0.2 -> recent $+0.9/d (baseline $+0.9); gain +0.0; permuted gains >= this: 0.83
+
+== rule & skip template >= n past launches
+rule&tmpl_n<1                                  fit  42 +26.9% w 62% d  7% $ +33.3/d | recent   6 +36.3% w 50% d  0% $ +10.5/d | windows +49 +37 +28 -5  
+rule&tmpl_n<2                                  fit  51 +23.5% w 61% d 10% $ +34.7/d | recent   7 +25.2% w 43% d 14% $  +8.3/d | windows +33 +34 +35 +39  
+rule&tmpl_n<3                                  fit  55 +28.3% w 64% d  9% $ +46.1/d | recent   9 +16.5% w 33% d 11% $  +6.5/d | windows +33 +36 +62 +64  
+rule&tmpl_n<5                                  fit  61 +28.5% w 67% d  8% $ +51.4/d | recent   9 +16.5% w 33% d 11% $  +6.5/d | windows +38 +40 +71 +64  
+   passes 0/4 (reverse 0); permuted feature: mean passes 0.14/4, share of permutations with >= 0 passes 1.00
+   fit-selected: rule&tmpl_n<5 -> recent $+6.5/d (baseline $+0.9); gain +5.7; permuted gains >= this: 0.06
+
+== rule, sell LAT after bundle sold >= x
+bundle-exit x>=1e-09 H150                      fit  73 +22.3% w 66% d  7% $ +47.0/d | recent  18  +7.3% w 56% d  6% $  +4.4/d | windows +19 +52 +59 +59  
+bundle-exit x>=1e-09 H300                      fit  73 +27.7% w 68% d  7% $ +59.7/d | recent  18  -1.4% w 33% d 11% $  -3.6/d | windows +35 +61 +76 +67  
+bundle-exit x>=1e-09 H600                      fit  73 +21.9% w 53% d 15% $ +46.1/d | recent  18  +0.0% w 44% d 17% $  -2.4/d | windows +43 +39 +61 +35  
+bundle-exit x>=0.05 H150                       fit  73 +21.5% w 66% d  7% $ +45.0/d | recent  18  +5.6% w 50% d  6% $  +2.8/d | windows +16 +50 +59 +55  
+bundle-exit x>=0.05 H300                       fit  73 +27.2% w 67% d  7% $ +58.6/d | recent  18  -1.9% w 33% d 11% $  -4.1/d | windows +33 +61 +74 +64  
+bundle-exit x>=0.05 H600                       fit  73 +21.3% w 52% d 16% $ +44.4/d | recent  18  +1.1% w 39% d 17% $  -1.4/d | windows +48 +31 +61 +31  
+bundle-exit x>=0.1 H150                        fit  73 +20.9% w 64% d  7% $ +43.5/d | recent  18  +5.5% w 50% d  6% $  +2.7/d | windows +16 +47 +59 +50  
+bundle-exit x>=0.1 H300                        fit  73 +26.3% w 64% d  7% $ +56.5/d | recent  18  -1.8% w 33% d 11% $  -4.0/d | windows +33 +57 +74 +58  
+bundle-exit x>=0.1 H600                        fit  73 +20.5% w 51% d 16% $ +42.6/d | recent  18  -1.6% w 39% d 22% $  -3.9/d | windows +47 +27 +61 +33  
+bundle-exit x>=0.25 H150                       fit  73 +21.3% w 66% d  7% $ +44.5/d | recent  18  +5.0% w 50% d  6% $  +2.3/d | windows +16 +50 +59 +50  
+bundle-exit x>=0.25 H300                       fit  73 +26.9% w 67% d  7% $ +57.8/d | recent  18  -1.5% w 33% d 11% $  -3.8/d | windows +33 +61 +73 +58  
+bundle-exit x>=0.25 H600                       fit  73 +20.7% w 52% d 16% $ +43.2/d | recent  18  -1.5% w 39% d 22% $  -3.8/d | windows +47 +28 +60 +36  
+bundle-exit x>=0.5 H150                        fit  73 +21.3% w 66% d  7% $ +44.5/d | recent  18  +5.0% w 50% d  6% $  +2.3/d | windows +16 +50 +59 +50  
+bundle-exit x>=0.5 H300                        fit  73 +26.8% w 67% d  8% $ +57.4/d | recent  18  -1.5% w 33% d 11% $  -3.8/d | windows +33 +61 +72 +58  
+bundle-exit x>=0.5 H600                        fit  73 +20.6% w 52% d 18% $ +42.8/d | recent  18  -1.5% w 39% d 22% $  -3.8/d | windows +47 +28 +59 +36  
+   passes 0/15 (reverse 0); permuted feature: mean passes 1.08/15, share of permutations with >= 0 passes 1.00
+   fit-selected: bundle-exit x>=1e-09 H300 -> recent $-3.6/d (baseline $+0.9); gain -4.5; permuted gains >= this: 0.93
+
+== rule, hold to H if outsider wallets(+1..15)>=m else 15
+crowd-hold ow15>=1 H60                         fit  73 +16.3% w 64% d  3% $ +32.7/d | recent  18  +4.2% w 44% d  0% $  +1.6/d | windows +36 +34 +24 +46  
+crowd-hold ow15>=1 H150                        fit  73 +20.8% w 62% d  7% $ +43.3/d | recent  18  +7.7% w 44% d  0% $  +4.8/d | windows +14 +49 +57 +50  
+crowd-hold ow15>=1 H300                        fit  73 +25.4% w 63% d  8% $ +54.2/d | recent  18  +4.4% w 33% d 11% $  +1.7/d | windows +30 +59 +67 +58  
+crowd-hold ow15>=2 H60                         fit  73 +16.4% w 64% d  3% $ +32.9/d | recent  18  +3.8% w 44% d  0% $  +1.2/d | windows +36 +36 +25 +39  
+crowd-hold ow15>=2 H150                        fit  73 +20.5% w 62% d  7% $ +42.7/d | recent  18  +7.6% w 44% d  0% $  +4.7/d | windows +14 +46 +59 +52  
+crowd-hold ow15>=2 H300                        fit  73 +25.4% w 63% d  7% $ +54.3/d | recent  18  +4.6% w 33% d 11% $  +1.9/d | windows +30 +56 +70 +60  
+crowd-hold ow15>=3 H60                         fit  73 +16.6% w 63% d  3% $ +33.3/d | recent  18  +4.0% w 44% d  0% $  +1.4/d | windows +36 +37 +25 +39  
+crowd-hold ow15>=3 H150                        fit  73 +20.6% w 60% d  7% $ +42.7/d | recent  18  +7.3% w 44% d  0% $  +4.4/d | windows +14 +47 +58 +52  
+crowd-hold ow15>=3 H300                        fit  73 +25.9% w 64% d  7% $ +55.5/d | recent  18  +3.6% w 33% d 11% $  +1.0/d | windows +30 +57 +73 +60  
+crowd-hold ow15>=4 H60                         fit  73 +14.2% w 63% d  3% $ +27.7/d | recent  18  +3.5% w 44% d  0% $  +0.9/d | windows +39 +22 +21 +41  
+crowd-hold ow15>=4 H150                        fit  73 +17.2% w 62% d  7% $ +34.8/d | recent  18  +6.3% w 44% d  0% $  +3.5/d | windows +15 +25 +55 +59  
+crowd-hold ow15>=4 H300                        fit  73 +21.7% w 63% d  7% $ +45.6/d | recent  18  +6.6% w 39% d  6% $  +3.8/d | windows +27 +33 +71 +62  
+crowd-hold ow15>=6 H60                         fit  73 +14.7% w 66% d  3% $ +28.8/d | recent  18  +2.9% w 39% d  0% $  +0.3/d | windows +50 +21 +16 +46  
+crowd-hold ow15>=6 H150                        fit  73 +16.2% w 63% d  5% $ +32.5/d | recent  18  +6.1% w 39% d  0% $  +3.3/d | windows +34 +20 +36 +65  
+crowd-hold ow15>=6 H300                        fit  73 +18.6% w 63% d  5% $ +38.2/d | recent  18  +6.6% w 33% d  6% $  +3.8/d | windows +44 +29 +37 +64  
+crowd-hold ow15>=8 H60                         fit  73 +15.1% w 66% d  3% $ +29.8/d | recent  18  +4.7% w 44% d  0% $  +2.0/d | windows +58 +22 +12 +47  
+crowd-hold ow15>=8 H150                        fit  73 +17.5% w 64% d  4% $ +35.5/d | recent  18  +8.3% w 44% d  0% $  +5.4/d | windows +51 +22 +31 +65  
+crowd-hold ow15>=8 H300                        fit  73 +19.2% w 64% d  4% $ +39.5/d | recent  18 +10.3% w 39% d  0% $  +7.3/d | windows +60 +24 +30 +76  
+   passes 0/18 (reverse 0); permuted feature: mean passes 0.49/18, share of permutations with >= 0 passes 1.00
+   fit-selected: crowd-hold ow15>=3 H300 -> recent $+1.0/d (baseline $+0.9); gain +0.1; permuted gains >= this: 0.72
+
+== rule, hold to H if outsider ETH(+1..15)>=e else 15
+crowd-hold oeth15>=0.05 H150                   fit  73 +18.8% w 62% d  5% $ +38.6/d | recent  18  +6.4% w 44% d  0% $  +3.6/d | windows +23 +29 +59 +52  
+crowd-hold oeth15>=0.05 H300                   fit  73 +23.3% w 63% d  5% $ +49.3/d | recent  18  +5.7% w 28% d  6% $  +3.0/d | windows +40 +35 +70 +60  
+crowd-hold oeth15>=0.1 H150                    fit  73 +16.8% w 58% d  5% $ +33.8/d | recent  18  +6.1% w 39% d  0% $  +3.3/d | windows +25 +21 +51 +52  
+crowd-hold oeth15>=0.1 H300                    fit  73 +20.2% w 58% d  5% $ +42.0/d | recent  18  +5.9% w 28% d  6% $  +3.1/d | windows +36 +26 +60 +60  
+crowd-hold oeth15>=0.2 H150                    fit  73 +18.8% w 63% d  4% $ +38.5/d | recent  18  +6.8% w 39% d  0% $  +4.0/d | windows +46 +19 +48 +63  
+crowd-hold oeth15>=0.2 H300                    fit  73 +21.0% w 62% d  4% $ +43.7/d | recent  18  +8.2% w 33% d  6% $  +5.3/d | windows +55 +17 +59 +69  
+crowd-hold oeth15>=0.5 H150                    fit  73 +17.3% w 64% d  4% $ +35.1/d | recent  18 +12.5% w 50% d  0% $  +9.3/d | windows +38 +21 +40 +65  
+crowd-hold oeth15>=0.5 H300                    fit  73 +20.8% w 64% d  4% $ +43.2/d | recent  18 +14.8% w 50% d  0% $ +11.5/d | windows +47 +22 +55 +76  
+   passes 0/8 (reverse 0); permuted feature: mean passes 0.23/8, share of permutations with >= 0 passes 1.00
+   fit-selected: crowd-hold oeth15>=0.05 H300 -> recent $+3.0/d (baseline $+0.9); gain +2.1; permuted gains >= this: 0.63
+
+summary: family | passes | permuted mean passes | fit-selected -> recent gain over baseline $/day | p (permuted gain >= real)
+  wallets>=t @k-2 (gate)                               0/6  null 0.00  wallets>=1  11.8  p 0.01
+  shots>=t @k-2 (gate)                                 0/6  null 0.00  shots>=1  12.7  p 0.01
+  direct senders>=t @k-2 (gate)                        0/3  null 0.00  None  None  p nan
+  relays>=t @k-2 (gate)                                0/3  null 0.00  relays>=1  16.1  p 0.01
+  ETH shot>=e @k-2 (gate)                              0/5  null 0.00  eth>=0.01  21.6  p 0.00
+  rule & ETH shot>=e                                   0/5  null 0.00  rule&eth>=0.1  5.5  p 0.00
+  rule & skip seen-before creator/named                0/1  null 0.00  None  None  p nan
+  rule & skip template with past mean < m              2/4  null 0.26  rule&tmpl_mean>=-0.2  0.0  p 0.83
+  rule & skip template >= n past launches              0/4  null 0.14  rule&tmpl_n<5  5.7  p 0.06
+  rule, sell LAT after bundle sold >= x                0/15  null 1.08  bundle-exit x>=1e-09 H300  -4.5  p 0.93
+  rule, hold to H if outsider wallets(+1..15)>=m else 15 0/18  null 0.49  crowd-hold ow15>=3 H300  0.1  p 0.72
+  rule, hold to H if outsider ETH(+1..15)>=e else 15   0/8  null 0.23  crowd-hold oeth15>=0.05 H300  2.1  p 0.63
