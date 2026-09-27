@@ -48,7 +48,7 @@ for l in L:
     if not last: holes += 1
     near = [e for e in errs if abs(e["t"] - l["T0"]) < 90]
     fk = f" fleets@k-2 {fleets_k2[cv]}" if cv in fleets_k2 else ""
-    print(f"{dt.datetime.fromtimestamp(l['T0'], dt.timezone.utc).strftime('%b %d')} {fmt(l['T0'])} {cv[:10]} tier {l.get('tier')} named {len(l.get('named') or [])} bundle {l.get('bundle_eth', 0):.3f}{fk} | {tag}{('' if not last else str(why(last))[:80])}"
+    print(f"{dt.datetime.fromtimestamp(l['T0'], dt.timezone.utc).strftime('%b %d')} {fmt(l['T0'])} {cv[:10]}{' tier %s' % l['tier'] if l.get('tier') is not None else ''} named {len(l.get('named') or [])}{' bundle %.3f' % l['bundle_eth'] if l.get('bundle_eth') is not None else ''}{fk} | {tag}{('' if not last else str(why(last))[:80])}"
           + (f"   [{'; '.join(e['ev'] + ' ' + fmt(e['t']) + ' ' + str(e.get('err') or e.get('what') or '')[:40] for e in near[:3])}]" if near else ""))
 n = sum(1 for l in L if not fires_only or fleets_k2.get(l["cv"].lower(), 0) >= 2)
 print(f"\n{n} launches{' (fires at k-2)' if fires_only else ''}, {holes} without a decision in the log")
