@@ -833,7 +833,11 @@ random (report: live, the first fire). Every evening, with the four commands of 
 
     sudo python3 src/analysis/intake_readout.py /var/log/sniper/engine.jsonl.1 /var/log/sniper/engine.jsonl | tail -8
 
-The log rotates at 00:00 UTC (logrotate, copytruncate): yesterday's events are in `engine.jsonl.1`, older days in
+    # 6. every launch the prediction listed against the engine's disposition of it (FIRE / GATE / PRE-gate filter / hole)
+    sudo python3 src/analysis/engine_vs_chain.py data/derived/live_vs_table/launches_<window>.json
+
+A `NO EVENT` or `CREATION ONLY` line is a hole: the engine never decided on a launch the chain qualifies, and the
+errors within 90 s are printed beside it. The log rotates at 00:00 UTC (logrotate, copytruncate): yesterday's events are in `engine.jsonl.1`, older days in
 `.2.gz` and on. `paper_day.py` reads them all by itself; `intake_readout.py` and any ad-hoc `grep` or python over the
 log must name `.1` too when the window crosses midnight (Sep 27: the night's first 76 minutes seemed empty until
 `.1` was read).
