@@ -39,7 +39,7 @@ def price(it):
             L["rows"] = sorted(L["rows"] + [lv.row_of(x) for x in more], key=lambda r: (r["bn"], r["li"])); ts = L["ts"]; T0 = L["T0"]
             bE1 = next((n for n in range(b0 + 1, b0 + 30) if ts.get(n, 0) == T0 + 1), None)
             if bE1 is None: return None
-            return dict(it, **{s: model_eff(L, s / E, bE1, 1, HOLD) for s in STAKES})
+            out = dict(it); out.update({s: model_eff(L, s / E, bE1, 1, HOLD) for s in STAKES}); return out
         except Exception as e:
             err = e; time.sleep(2 * (attempt + 1))
     print(f"  unpriced {cv[:10]}: {str(err)[:90]}", file=sys.stderr); return None
