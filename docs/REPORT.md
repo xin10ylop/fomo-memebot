@@ -3793,3 +3793,11 @@ count (`eng` column, "ENGINE (k-2 after registration)" line in `predict_window.p
 the sequential test are scored on it. Every reviewer since 24.35 priced the tables' population, not the engine's; on the
 engine's population the per-fire edge at the chosen hold did not decline.
 
+*The engine's fires at larger stakes (`src/analysis/stake_engine.py`, `data/derived/live_vs_table/stake_engine.txt`).* With the
+11-block exit the return per fire barely falls with size (fit +23.0% at $13, +21.4% at $200; recent +22.2%, +20.8%), and
+the 3% cap starts binding at $300. The dollars are set by the fire rate: 14.0 engine fires a day in the fit windows,
+4.7 since Sep 24. At full fill: $200 makes $595 a day at the fit's rate and $193 at today's; $500 (about $375 deployed)
+$1,072 and $378. The live mix (half the bursts fill, a third of the fills land third) takes roughly 60% off those. $800
+a day needs the fit period's launch supply, about three times today's, and a $300 stake at full fill; at today's supply
+one seat tops out near $380 a day at full fill.
+
