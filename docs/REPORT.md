@@ -3751,3 +3751,12 @@ evening reading checks from here.
 
 **Decision:** HOLD_BLOCKS 9, the median of the three, inside all three plateaus.
 
+*The September live fills at every hold (`src/analysis/live_fills_holds.py`, `data/derived/live_vs_table/live_fills_holds.json`).*
+The 34 single fills of Sep 17-20 re-priced from OUR real entry (block, position, ETH) at every exit from 1 to 60
+blocks and at 100-600. The 12 fills with a crowd ahead of us in the block, the rule's ancestors: real result +7.4%
+(sold at 15-31 blocks); modelled +8.4% at block 9, +9.5% at 10, +8.6% at 11, +5.8% at 15, +3.7% at 30, −4.1% at 60,
++1.9% at 300. The 9 winners: +20.8-21.9% at 9-13, +19.6% at 15, +14% at 40, +8.6% at 60. The 22 fills with nobody
+ahead: negative at every exit under 60 and positive only from 100 on, the market's drift. So the real trades say what
+the sweep says: the crowd's gain is complete by block 10-13, and the 300-block hold never had support in the trades
+that were actually made. Twelve fills: a shape, not a level.
+
