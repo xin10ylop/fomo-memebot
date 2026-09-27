@@ -1,0 +1,18 @@
+(1) bundle dump (named sold >= 50% of their tokens within 300 blocks of the seat): fit 5/73, recent 4/18; Fisher one-sided p 0.0721
+    fit   dumped n  5 mean -58.2% median -57.9% win  0% | not n 68 mean +32.5% median +21.9% win 72%
+    recent dumped n  4 mean -17.9% median -39.5% win 25% | not n 14 mean  +9.5% median  -3.7% win 43%
+
+(2) counterfactuals on the same tapes, second place, 300 blocks, $13
+    fit    actual n 73 mean +26.3% median +20.7% win 67%
+           bundle sells removed n 73 mean +30.1% median +21.6% win 70%
+           and outsiders' buys removed too n 73 mean -37.7% median -40.4% win  3%
+    recent actual n 18 mean  +3.5% median  -6.6% win 39%
+           bundle sells removed n 18 mean +1010.7% median  -2.2% win 39%
+           and outsiders' buys removed too n 18 mean -36.1% median -35.0% win  6%
+    gap fit - recent (means): actual +22.9%; with the bundle's sells removed in both -980.6%; with outsiders' buys also removed -1.6%
+    fit    without 0xe65b85ad: actual mean +26.3% median +20.7%; bundle sells removed mean +30.1% median +21.6%
+    recent without 0xe65b85ad: actual mean +0.2% median -8.7%; bundle sells removed mean +9.0% median -2.8%
+
+(3) 'new fleet' fires in time order (burn-in Sep 18-19: its fires only register addresses)
+    fit  with a first-seen fleet n 33 mean +28.3% median +24.3% win 73% | all fleets seen before n 26 mean +27.8% median  +8.1% win 58%
+    rec  with a first-seen fleet n 11 mean -12.7% median  -8.7% win 36% | all fleets seen before n  7 mean +28.8% median  -2.8% win 43%

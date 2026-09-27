@@ -1,0 +1,119 @@
+=== per-fire features, fit (73) vs Sep 24-27 (18): mean / median
+k (blocks after b0 in the creation second)           fit n 73 mean   6.616 median   6.000   recent n 18 mean   6.278 median   6.000
+fleets at k-2                                        fit n 73 mean   2.507 median   2.000   recent n 18 mean   2.222 median   2.000
+fleets at k (end of creation second)                 fit n 73 mean   4.205 median   4.000   recent n 18 mean   4.278 median   3.500
+fleets incl. the seat block                          fit n 73 mean   7.219 median   7.000   recent n 18 mean   6.444 median   4.500
+rival shots by k-2                                   fit n 73 mean  22.110 median   9.000   recent n 18 mean  16.889 median   6.500
+rival shots in the creation second                   fit n 73 mean  90.370 median  48.000   recent n 18 mean  53.556 median  28.000
+rival shots in the seat block                        fit n 73 mean  50.425 median  27.000   recent n 18 mean  30.111 median  21.000
+buys in the seat block                               fit n 73 mean   5.233 median   5.000   recent n 18 mean   3.944 median   2.500
+ETH bought in the seat block                         fit n 73 mean   0.440 median   0.397   recent n 18 mean   0.313 median   0.274
+ETH of the buy ahead of us                           fit n 73 mean   0.141 median   0.060   recent n 18 mean   0.153 median   0.191
+bundle ETH (e1_multi)                                fit n 73 mean   1.180 median   0.725   recent n 18 mean   1.041 median   0.738
+tier                                                 fit n 73 mean   0.026 median   0.028   recent n 18 mean   0.025 median   0.027
+named wallets                                        fit n 73 mean  12.575 median  13.000   recent n 18 mean  13.667 median  14.000
+named tokens bought by the seat (M)                  fit n 73 mean 355.969 median 305.489   recent n 18 mean 344.418 median 305.499
+fleet+early tokens bought by the seat (M)            fit n 73 mean  79.520 median  72.966   recent n 18 mean  63.720 median  65.671
+share of the named's tokens sold by seat+15          fit n 73 mean   0.028 median   0.000   recent n 18 mean   0.001 median   0.000
+... by seat+60                                       fit n 73 mean   0.030 median   0.000   recent n 18 mean   0.071 median   0.000
+... by seat+300                                      fit n 73 mean   0.076 median   0.000   recent n 18 mean   0.228 median   0.000
+share of fleet+early tokens sold by seat+15          fit n 67 mean   0.136 median   0.000   recent n 17 mean   0.159 median   0.000
+... by seat+60                                       fit n 67 mean   0.375 median   0.322   recent n 17 mean   0.444 median   0.397
+... by seat+300                                      fit n 67 mean   0.507 median   0.528   recent n 17 mean   0.694 median   0.783
+block of the first named sell after the seat         fit n 15 mean  64.133 median  56.000   recent n  8 mean  99.625 median  49.000
+outsider ETH bought after the seat second, to seat+15 fit n 73 mean   0.069 median   0.010   recent n 18 mean   0.038 median   0.005
+... seat+16..60                                      fit n 73 mean   1.392 median   0.568   recent n 18 mean   0.943 median   0.095
+... seat+61..300                                     fit n 73 mean   0.492 median   0.248   recent n 18 mean   0.576 median   0.251
+outsider ETH bought, total to seat+300               fit n 73 mean   1.953 median   0.830   recent n 18 mean   1.557 median   0.695
+ETH sold by the named to seat+300                    fit n 73 mean   0.077 median   0.000   recent n 18 mean   0.256 median   0.000
+ETH sold by fleets+early to seat+300                 fit n 73 mean   0.227 median   0.177   recent n 18 mean   0.254 median   0.231
+creator's own buy in the creation second, share of supply fit n 73 mean   0.022 median   0.017   recent n 18 mean   0.018 median   0.015
+
+=== which fleets (the addresses counted at k-2): fires they appear in, and the mean return of those fires
+  0x460b1f818ce34db07458c6347896069ebef19bf2  fit  22 fires  +51.9%   recent  3 fires   -4.8%
+  0xbd7c6f67d5de0afa094a236c1a7e38e4cde2f264  fit  16 fires  +13.7%   recent  5 fires  -14.6%
+  0x19078e5c68760e500eeeb3f515f0c5a14c12669b  fit  16 fires  +13.6%   recent  4 fires  +37.5%
+  0x2ddcda583ca0a6b2eb0ad35236703a6dcfe2eb2a  fit  12 fires  +49.7%   recent  1 fires  +14.1%
+  0x96d7b1eec86e8ca83b9cbf8d742867eb706a1c73  fit   9 fires  +13.4%   recent  3 fires  +51.5%
+  0x5b8e11e3b122c2858d30968be23172874c8ff73b  fit   5 fires  +42.6%   recent  3 fires  +23.3%
+  0x593e06ebbc117424e5edc9d3390027c6c291b4c9  fit   7 fires   -9.3%   recent  1 fires  -11.0%
+  0xf6e55480c5939da146092301e388654879c6e6fb  fit   7 fires  +41.2%   recent  0 fires   +nan%
+  0x6e15979eb9ab78d280c882f115550368aa29faab  fit   6 fires   +7.0%   recent  1 fires  -13.6%
+  0xfa348a805e5665a279fdc0f826f9b034211cfcbe  fit   6 fires  +48.2%   recent  1 fires   -2.8%
+  0x7c09cd59f8d4296efdd40e1d9368ce3af86513cd  fit   4 fires  -11.7%   recent  2 fires  -18.7%
+  0x3947a7978f24859a461b51c50e898e0ccd54296e  fit   5 fires   +5.7%   recent  0 fires   +nan%
+  0x5e86d4ff745006da4bf97c6899b76493d1707d74  fit   5 fires  +10.5%   recent  0 fires   +nan%
+  0x1f9798c90376f683ac01b687db07dd6af1b15134  fit   4 fires  +86.6%   recent  0 fires   +nan%
+  0x13bff8a000bae1a8c47906583234008032a77513  fit   2 fires   -5.1%   recent  2 fires   -2.5%
+  0xb6b9ea9df265da5f5d638e179aae467e6a02ddd0  fit   3 fires   +8.4%   recent  0 fires   +nan%
+  0xc2fba49d1c987532523f96c49fc0fb26d7f43e6b  fit   3 fires  -10.6%   recent  0 fires   +nan%
+  0x25b5a7d07f4239c1769dafec979276df55ca7f2c  fit   3 fires   +8.4%   recent  0 fires   +nan%
+  0x050a0e1d2c1976dfc2fe409fd6ff1f8342439be6  fit   3 fires  +45.0%   recent  0 fires   +nan%
+  0x6365087feea0caf79bc47d6a204639248be501d1  fit   2 fires  -20.6%   recent  0 fires   +nan%
+  0x65050a9b7e5075a2ba5ced7b1b64ee66262c40dc  fit   1 fires  +67.0%   recent  1 fires  +58.0%
+  0x493a479bc096a9bd9f75d58cb8ec34fec6f2d8a2  fit   2 fires +109.3%   recent  0 fires   +nan%
+  0x5d7b12fed3be7fce3de42b48a8bd6080ccd17677  fit   2 fires   -1.9%   recent  0 fires   +nan%
+  0xc1466b4122ffbcdf1b2c662f4577ff9bc6e336bd  fit   2 fires   +3.7%   recent  0 fires   +nan%
+  0xe492912f37c2a4eca45d42dc67548f4c6cd7ce2b  fit   2 fires  -10.0%   recent  0 fires   +nan%
+  addresses at k-2 in recent fires never seen at k-2 in a fit fire: 12 of 24; recent fires with at least one such: 11 of 18
+  recent fires whose k-2 fleets are all fit-era fleets: 7, mean +28.8%
+
+=== the busiest shooters over the whole population (share of qualifying launches shot at in blocks 0..k)
+  fit: launches 563, mean distinct shooters (fleets) per launch in the creation second 1.62
+  rec: launches 160, mean distinct shooters (fleets) per launch in the creation second 1.58
+  0xf9af9f3881b49382f1a77a61e0db08cd7a3f16ba  fit  8.2%  recent 33.1%
+  0xa95fe1ca2f3905fe50ef125475bd215d4502efe4  fit 27.9%  recent  4.4%
+  0x6c56103c6af4891be46cb3666c1fa354cc79eaca  fit 12.8%  recent 13.1%
+  0x6320b456f2f5da787edf8734e41a4a9ca3c144f3  fit  9.6%  recent 13.8%
+  0x19078e5c68760e500eeeb3f515f0c5a14c12669b  fit  8.2%  recent  7.5%
+  0x460b1f818ce34db07458c6347896069ebef19bf2  fit  8.0%  recent  5.0%
+  0x96d7b1eec86e8ca83b9cbf8d742867eb706a1c73  fit  4.3%  recent  7.5%
+  0x5b8e11e3b122c2858d30968be23172874c8ff73b  fit  4.3%  recent  6.2%
+  0xf300b2c038828a142804387d2edf33961db1a73b  fit  5.5%  recent  2.5%
+  0xbd7c6f67d5de0afa094a236c1a7e38e4cde2f264  fit  3.0%  recent  3.1%
+  0xadf2dfe02965151ee5e62a03ac7efaea2ac18907  fit  0.2%  recent  5.6%
+  0x2124f1fa592aec7facb25bbafaed834f05c3216c  fit  5.2%  recent  0.0%
+  0x2ddcda583ca0a6b2eb0ad35236703a6dcfe2eb2a  fit  3.0%  recent  1.2%
+  0xfa348a805e5665a279fdc0f826f9b034211cfcbe  fit  1.1%  recent  2.5%
+  0xf6e55480c5939da146092301e388654879c6e6fb  fit  3.6%  recent  0.0%
+
+=== composition: the fit's mean in each bucket, re-weighted to the recent fires' mix
+  hour (UTC, 6-h bins)         recent mix {0: 2, 6: 1, 12: 8, 18: 7}  fit counts {0: 8, 6: 5, 12: 26, 18: 34}  fit bucket means {0: 0.637, 6: 0.156, 12: 0.265, 18: 0.19}  -> expected +27.1%
+  tier                         recent mix {0.02: 7, 0.025: 2, 0.029: 1, 0.03: 8}  fit counts {0.02: 25, 0.024: 1, 0.025: 9, 0.028: 2, 0.03: 36}  fit bucket means {0.02: 0.194, 0.024: 0.179, 0.025: 0.232, 0.028: 0.367, 0.03: 0.316}  -> expected +25.6%
+  k (<=5, 6-7, 8+)             recent mix {0: 4, 6: 10, 8: 4}  fit counts {0: 13, 6: 39, 8: 21}  fit bucket means {0: 0.52, 6: 0.128, 8: 0.355}  -> expected +26.6%
+  bundle ETH (<0.5, <1, >=1)   recent mix {0: 3, 0.5: 10, 1: 5}  fit counts {0: 18, 0.5: 32, 1: 23}  fit bucket means {0: 0.172, 0.5: 0.171, 1: 0.463}  -> expected +25.2%
+  fleets at k-2 (2, 3+)        recent mix {2: 14, 3: 4}  fit counts {2: 46, 3: 27}  fit bucket means {2: 0.267, 3: 0.256}  -> expected +26.5%
+
+=== serial launchers: fires whose creator launched another qualifying launch in the same period
+  fit: 5 of 73 fires by repeat creators, mean +28.8%; repeat creators' share of all launches 3%
+  rec: 1 of 18 fires by repeat creators, mean -41.4%; repeat creators' share of all launches 2%
+  recent fires whose creator also launched in the fit windows: 0 of 18
+
+=== fires whose k-2 fleets include a broad shooter (>= 20% of the period's launches) vs not
+  fit: broad shooters ['0xa95fe1ca2f3905fe50ef125475bd215d4502efe4']; fires with one 0 mean +nan%; without 73 mean +26.3%; still >= 2 fleets without the broad ones: 73 mean +26.3%
+  rec: broad shooters ['0xf9af9f3881b49382f1a77a61e0db08cd7a3f16ba']; fires with one 0 mean +nan%; without 18 mean +3.5%; still >= 2 fleets without the broad ones: 18 mean +3.5%
+  recent fires with an address never counted in a fit fire: 11 mean -12.7%
+   Sep 24 12:59 0xad1c5f76 h300  -4.5% k 6 fleets@k-2 2 0x19078e(fit,8%) 0xf2c69d(NEW,1%)  named sold by +300 0% outsider ETH 1.57
+   Sep 24 14:52 0x2ad76f05 h300 -13.6% k 8 fleets@k-2 2 0x5b8e11(fit,6%) 0x6e1597(fit,1%)  named sold by +300 0% outsider ETH 0.22
+   Sep 24 17:16 0x89f41f56 h300  +2.3% k 5 fleets@k-2 2 0xad4adc(NEW,0%) 0xbd7c6f(fit,3%)  named sold by +300 0% outsider ETH 0.32
+   Sep 24 17:32 0x26d36c5e h300 +14.1% k 9 fleets@k-2 2 0x2ddcda(fit,1%) 0x460b1f(fit,5%)  named sold by +300 2% outsider ETH 5.22
+   Sep 24 17:58 0xc63ab843 h300  -8.7% k 6 fleets@k-2 2 0x13bff8(fit,2%) 0x93658d(NEW,0%)  named sold by +300 0% outsider ETH 0.10
+   Sep 24 18:10 0xe65b85ad h300 +58.0% k 7 fleets@k-2 2 0x5b8e11(fit,6%) 0x65050a(fit,1%)  named sold by +300 92% outsider ETH 1.98
+   Sep 24 18:44 0x95f60349 h300 -17.4% k 8 fleets@k-2 3 0x460b1f(fit,5%) 0x61afd3(NEW,3%) 0x7c09cd(fit,2%)  named sold by +300 16% outsider ETH 1.74
+   Sep 24 19:20 0x9132d3db h300 -19.9% k 3 fleets@k-2 2 0x7c09cd(fit,2%) 0xd9db98(NEW,1%)  named sold by +300 10% outsider ETH 1.84
+   Sep 24 20:42 0x56e76663 h300  +3.7% k 6 fleets@k-2 3 0x13bff8(fit,2%) 0xaa164c(NEW,0%) 0xbd7c6f(fit,3%)  named sold by +300 0% outsider ETH 0.30
+   Sep 25 00:33 0x9f834b70 h300 +167.9% k 4 fleets@k-2 2 0x19078e(fit,8%) 0x96d7b1(fit,8%)  named sold by +300 0% outsider ETH 7.60
+   Sep 25 16:24 0xd43ed726 h300  +9.0% k 7 fleets@k-2 2 0x85fc0f(NEW,0%) 0xbd7c6f(fit,3%)  named sold by +300 3% outsider ETH 0.17
+   Sep 25 20:47 0xe41e16e1 h300 -10.7% k 5 fleets@k-2 2 0x19078e(fit,8%) 0x96d7b1(fit,8%)  named sold by +300 0% outsider ETH 0.89
+   Sep 25 22:27 0x0a6c1259 h300 +25.4% k 7 fleets@k-2 3 0x2d1e1d(NEW,2%) 0x5b8e11(fit,6%) 0xace809(NEW,1%)  named sold by +300 0% outsider ETH 4.26
+   Sep 26 09:24 0xc0190204 h300 -41.4% k 6 fleets@k-2 2 0x2d1e1d(NEW,2%) 0xfbc14e(NEW,2%)  named sold by +300 100% outsider ETH 0.01
+   Sep 26 16:05 0xee486806 h300 -11.0% k 6 fleets@k-2 2 0x460b1f(fit,5%) 0x593e06(fit,2%)  named sold by +300 0% outsider ETH 0.00
+   Sep 26 13:47 0xa80c4813 h300  -2.8% k 8 fleets@k-2 3 0x19078e(fit,8%) 0x96d7b1(fit,8%) 0xfa348a(fit,2%)  named sold by +300 0% outsider ETH 0.63
+   Sep 26 23:53 0x2b7508b0 h300 -50.5% k 6 fleets@k-2 2 0x14e2b9(NEW,0%) 0xbd7c6f(fit,3%)  named sold by +300 95% outsider ETH 0.42
+   Sep 27 00:10 0x80c0efae h300 -37.6% k 6 fleets@k-2 2 0x4da731(NEW,0%) 0xbd7c6f(fit,3%)  named sold by +300 92% outsider ETH 0.76
+
+=== composition by crowd size (rival shots; k-2 is known at the decision, the rest after it)
+  rival shots by k-2 (<6, 6-19, 20+) recent mix {0: 7, 6: 7, 20: 4}  fit counts {0: 16, 6: 36, 20: 21}  fit bucket means {0: 0.218, 6: 0.175, 20: 0.448}  -> expected +25.3%
+  rival shots creation sec (<25, 25-79, 80+) recent mix {0: 7, 25: 7, 80: 4}  fit counts {0: 24, 25: 23, 80: 26}  fit bucket means {0: 0.111, 25: 0.19, 80: 0.469}  -> expected +22.1%
+  buys in the seat block (<=2, 3-5, 6+) recent mix {2: 9, 5: 7, 6: 2}  fit counts {2: 19, 5: 22, 6: 32}  fit bucket means {2: 0.086, 5: 0.318, 6: 0.331}  -> expected +20.3%
+  fleets incl. seat block (<=4, 5-8, 9+) recent mix {4: 9, 8: 6, 9: 3}  fit counts {4: 17, 8: 34, 9: 22}  fit bucket means {4: 0.22, 8: 0.206, 9: 0.384}  -> expected +24.3%

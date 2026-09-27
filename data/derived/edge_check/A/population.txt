@@ -1,0 +1,69 @@
+=== the gate's lift: fired (fleets >= 2 at k-2) vs refused, hold_grid behind1_15_h300
+fit     all   563 mean  +3.3% med  -7.2% win  41% dead  21%
+        fired   73 mean +26.7% med +21.0% win  67% dead   8%
+        refused  490 mean  -0.2% med  -8.7% win  37% dead  23%
+        lift (fired - refused mean) +26.9%
+recent  all   160 mean  +4.3% med  -5.0% win  40% dead  14%
+        fired   18 mean  +3.7% med  -6.4% win  39% dead  11%
+        refused  142 mean  +4.4% med  -5.0% win  40% dead  15%
+        lift (fired - refused mean) -0.7%
+
+=== by fleets at k-2 (0, 1, 2, 3+)
+fit     fleets 0   399 mean  -0.5% med  -9.1% win  36% dead  23%
+fit     fleets 1    91 mean  +1.1% med  -5.3% win  41% dead  23%
+fit     fleets 2    46 mean +27.1% med +23.1% win  72% dead  13%
+fit     fleets 3+   27 mean +26.0% med  +1.2% win  59% dead   0%
+recent  fleets 0   119 mean  +2.7% med  -5.2% win  39% dead  16%
+recent  fleets 1    23 mean +13.4% med  -4.2% win  48% dead   9%
+recent  fleets 2    14 mean  +4.1% med  -9.5% win  36% dead  14%
+recent  fleets 3+    4 mean  +2.5% med  +0.6% win  50% dead   0%
+
+=== by fleets at k-1 >= 2 (the borderline view) and at k (end of the creation second) >= 2
+fit     k-1>=2  147 mean +19.5% med +11.3% win  60% dead  12%
+fit     k>=2    251 mean +13.3% med  +1.3% win  53% dead  14%
+fit     k-1>=2 but k-2<2 (the added borderline)   74 mean +12.4% med  +1.7% win  53% dead  15%
+recent  k-1>=2   41 mean +13.3% med  -0.5% win  46% dead  10%
+recent  k>=2     67 mean +10.2% med  -0.5% win  45% dead  10%
+recent  k-1>=2 but k-2<2 (the added borderline)   23 mean +20.8% med  +3.8% win  52% dead   9%
+
+=== by UTC day: launches, fires, fires per launch, fired mean, refused mean
+Sep 18  launches 104  fires  13 ( 12%)  fired   13 mean +19.0% med  +1.2% win  69% dead  23%
+        refused   91 mean  +2.0% med  -7.8% win  41% dead  24%
+Sep 19  launches  37  fires   1 (  3%)  fired    1 mean +22.5% med +22.5% win 100% dead   0%
+        refused   36 mean  -3.6% med  -0.8% win  50% dead  28%
+Sep 20  launches  42  fires   7 ( 17%)  fired    7 mean +29.2% med +36.5% win  71% dead   0%
+        refused   35 mean  -7.0% med  -8.7% win  29% dead  11%
+Sep 21  launches 138  fires  20 ( 14%)  fired   20 mean +27.4% med +22.6% win  75% dead   0%
+        refused  118 mean  +1.8% med  -8.9% win  36% dead  21%
+Sep 22  launches 170  fires  19 ( 11%)  fired   19 mean +22.4% med +20.6% win  63% dead  16%
+        refused  151 mean  +3.6% med  -8.8% win  38% dead  25%
+Sep 23  launches  72  fires  13 ( 18%)  fired   13 mean +38.5% med  +0.3% win  54% dead   0%
+        refused   59 mean -11.5% med -14.0% win  27% dead  24%
+Sep 24  launches  55  fires   9 ( 16%)  fired    9 mean  +1.8% med  -4.3% win  44% dead   0%
+        refused   46 mean  +6.3% med -10.1% win  30% dead   9%
+Sep 25  launches  49  fires   4 (  8%)  fired    4 mean +48.4% med +17.5% win  75% dead   0%
+        refused   45 mean  +3.0% med  -3.9% win  38% dead  16%
+Sep 26  launches  47  fires   4 (  9%)  fired    4 mean -26.3% med -26.1% win   0% dead  50%
+        refused   43 mean  +0.8% med  +3.4% win  51% dead  19%
+Sep 27  launches   9  fires   1 ( 11%)  fired    1 mean -37.5% med -37.5% win   0% dead   0%
+        refused    8 mean +21.0% med  +6.1% win  50% dead  25%
+
+=== by window
+sep1819       launches 141 fires  14  fired   14 mean +19.3% med  +4.4% win  71% dead  21%  | refused mean  +0.4%
+sep2021       launches 189 fires  29  fired   29 mean +26.5% med +23.2% win  72% dead   0%  | refused mean  -1.0%
+sep2223       launches 175 fires  20  fired   20 mean +35.9% med +22.5% win  65% dead  15%  | refused mean  +3.0%
+sep23day      launches  58 fires  10  fired   10 mean +19.2% med  -1.4% win  50% dead   0%  | refused mean -10.0%
+sep24paper    launches  51 fires   9  fired    9 mean  +1.8% med  -4.3% win  44% dead   0%  | refused mean  +5.2%
+sep25night    launches   8 fires   1  fired    1 mean +169.2% med +169.2% win 100% dead   0%  | refused mean +30.4%
+sep25am       launches   4 fires   0  fired    0  | refused mean -10.2%
+sep25pm       launches  22 fires   1  fired    1 mean  +9.2% med  +9.2% win 100% dead   0%  | refused mean  +6.7%
+sep25eve      launches   7 fires   0  fired    0  | refused mean  +0.4%
+sep25eve2     launches   9 fires   1  fired    1 mean -10.5% med -10.5% win   0% dead   0%  | refused mean -12.1%
+sep26night    launches  17 fires   1  fired    1 mean +25.8% med +25.8% win 100% dead   0%  | refused mean  +0.5%
+sep26am       launches  13 fires   1  fired    1 mean -41.3% med -41.3% win   0% dead 100%  | refused mean  -3.5%
+sep26pm       launches  15 fires   1  fired    1 mean -11.0% med -11.0% win   0% dead   0%  | refused mean  +8.3%
+sep26restart  launches   1 fires   1  fired    1 mean  -2.6% med  -2.6% win   0% dead   0%  | refused mean  +nan%
+sep27night    launches  13 fires   2  fired    2 mean -44.0% med -44.0% win   0% dead  50%  | refused mean +10.2%
+
+=== bootstrap of the lift (fired mean - refused mean): fit 95% [+12.6%, +42.1%]; recent 95% [-20.6%, +24.9%]
+    fit lift - recent lift: 95% [-1.4%, +53.0%], P(<= 0) 0.0301; share of recent-lift draws >= the fit's point lift: 0.0186

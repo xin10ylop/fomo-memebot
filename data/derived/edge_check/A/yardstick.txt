@@ -1,0 +1,16 @@
+fit     n= 73  mine h300 +26.32%  reach_table model_eff +26.32%  hold_grid behind1_15_h300 +26.69%  max|mine-model_eff| 0.0000  max|mine-hold_grid| 0.0217
+recent  n= 18  mine h300 +3.46%  reach_table model_eff +3.46%  hold_grid behind1_15_h300 +3.70%  max|mine-model_eff| 0.0000  max|mine-hold_grid| 0.0129
+fit: implied buy fee minus tier by second after creation (median, n): {0: (0.0, 992), 1: (0.0618, 660), 2: (0.0019, 240), 3: (0.0, 2603)}  sell fee minus tier: median -0.00000, 1-99% [-0.0000, 0.0000], n 2664
+recent: implied buy fee minus tier by second after creation (median, n): {0: (0.0, 258), 1: (0.0618, 151), 2: (0.0019, 41), 3: (0.0, 558)}  sell fee minus tier: median -0.00000, 1-99% [-0.0000, 0.0000], n 682
+
+=== yardstick checks
+fit: fires 73; crowd files with no token (approvals would count as fleets): fires 0, all launches 0; k != tape's (bE1-b0-1): []
+     tiers [0.02, 0.024, 0.025, 0.028, 0.03]; bundle ETH min 0.320 median 0.725 max 4.304 (n 73); tapes short of the exit: []
+     return change if ETH were $1,800 / $3,500 instead of $2,570: max |0.0066| / |0.0041|
+rec: fires 18; crowd files with no token (approvals would count as fleets): fires 0, all launches 0; k != tape's (bE1-b0-1): []
+     tiers [0.02, 0.025, 0.029, 0.03]; bundle ETH min 0.314 median 0.738 max 4.236 (n 18); tapes short of the exit: []
+     return change if ETH were $1,800 / $3,500 instead of $2,570: max |0.0041| / |0.0026|
+
+=== the engine's creator-supply filter (creator buy >= 1% of supply in the creation second) applied to both sets
+fit: creator >= 1%:  64 mean +28.9% win  67%   creator < 1% (the engine skips):   9 mean  +7.7% win  67%
+rec: creator >= 1%:  16 mean  +4.6% win  38%   creator < 1% (the engine skips):   2 mean  -5.7% win  50%

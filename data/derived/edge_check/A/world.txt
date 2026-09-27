@@ -1,0 +1,23 @@
+=== blocks in the creation second after b0 (k), every qualifying launch
+  fit    n 563 mean k 5.46  distribution {0: 1, 1: 52, 2: 38, 3: 46, 4: 53, 5: 52, 6: 98, 7: 89, 8: 80, 9: 54}
+  recent n 160 mean k 5.17  distribution {1: 12, 2: 20, 3: 16, 4: 14, 5: 22, 6: 23, 7: 19, 8: 16, 9: 18}
+=== blocks per second, seconds T0+1 and T0+2 (the tapes' stamps b0..b0+30, fires)
+  fit  second +1: mean 9.85 blocks {8: 2, 9: 7, 10: 64}; second +2: mean 9.95 {9: 4, 10: 69}
+  rec  second +1: mean 9.94 blocks {9: 1, 10: 17}; second +2: mean 9.89 {9: 2, 10: 16}
+=== creation selector of every fire's creation tx: {'f85f8e41': 91}
+=== runtime code (current state; a curve's code does not change unless it is a proxy)
+  fit  Sep 18 16:54 0x975a9fc7 code 10229 bytes sha256 440da97996519c0e
+  fit  Sep 21 07:19 0xcff943f5 code 10229 bytes sha256 77bf0c8d13054b24
+  fit  Sep 22 15:04 0x0ecc98c6 code 10229 bytes sha256 36fb7a6d2505c3a9
+  fit  Sep 23 19:52 0x6ff3cd2b code 10229 bytes sha256 6d0749bdccdc417f
+  rec  Sep 24 12:59 0xad1c5f76 code 10229 bytes sha256 b2177bc34cf6e3fd
+  rec  Sep 24 18:44 0x95f60349 code 10229 bytes sha256 6d9520e4af1eeaab
+  rec  Sep 25 22:27 0x0a6c1259 code 10229 bytes sha256 36a7849cfd19577c
+  rec  Sep 27 00:10 0x80c0efae code 10229 bytes sha256 287c9d7762b0d8bb
+  the 8 curves' codes differ from the first at 44 byte positions, in 6 runs: [(1509, 1), (2906, 1), (3975, 1), (5039, 1), (5821, 20), (7395, 20)] (embedded immutables if short and fixed)
+  factory 0xe33e9e47 code 4416 bytes sha256 4c9df70cd2d8532a
+=== fires after our first live burst (Sep 26 09:24 UTC) vs the recent fires before it
+  before n 13 h300 mean +15.8%  h15 +17.0%  rival shots by k-2 19.8  seat-block buys 4.5  outsider ETH to +300 2.02  named sold by +300 9%
+  after  n 5 h300 mean -28.7%  h15 +1.8%  rival shots by k-2 9.4  seat-block buys 2.6  outsider ETH to +300 0.36  named sold by +300 57%
+  sells per block at seat+297..303 0.025 vs seat+200..296 0.034 (fit)
+  sells per block at seat+297..303 0.048 vs seat+200..296 0.068 (rec)

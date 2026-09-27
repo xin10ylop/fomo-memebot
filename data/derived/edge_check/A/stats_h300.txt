@@ -1,0 +1,20 @@
+column 300
+fit    n  73 mean +26.3% median +20.7% sd 0.591 se 0.069 win 49/73 dead 6/73
+recent n  18 mean  +3.5% median  -6.6% sd 0.480 se 0.113 win 7/18 dead 2/18
+difference of means +22.9%; Welch t 1.72
+bootstrap: P(mean of 18 fires drawn from the fit <= +3.5%) = 0.0338
+bootstrap 95% interval: recent mean [-14.5%, +27.3%]; fit - recent [-4.0%, +46.4%]; P(diff <= 0) 0.0455
+permutation (one-sided, difference of means >= +22.9%): p = 0.0550
+Mann-Whitney U 882 (null 657), z 2.24, one-sided p 0.0125
+permutation of medians (difference +27.3%): p = 0.0099
+wins 49/73 vs 7/18: Fisher one-sided p (recent wins this few or fewer) = 0.0276
+60-h stretches of the fit (96 h covered, 384 starts, wrapping): fires per stretch 33-61; mean return min +20.1%, 5th pct +23.5%, median +25.4%; share <= +3.5%: 0.000
+   (no wrap: the first 60 h hold 43 fires, mean +23.8%; the last 60 h +25.4%)
+runs of 18 consecutive fit fires (56): mean min +9.1%, max +48.3%; share <= +3.5%: 0.000
+longest losing run: fit 5 of 73, recent 5 of 18 (last five recent: [-0.414, -0.028, -0.11, -0.505, -0.376])
+P(a run of >= 5 losers somewhere in 18 fires drawn from the fit) = 0.0375
+sd of all 91 fires 0.576; fires needed to tell +26% from 0 (one-sided 5%, power 80%): 30
+log likelihood ratio (fit mean vs zero) on the 18 recent fires: -1.39 (>0 favours the fit; |LLR| > 2.94 is a 95/5 SPRT boundary)
+recent split: Sep 24-25 windows n  12 mean +15.0% median  -1.1% sd 0.524 se 0.151 win 6/12 dead 0/12
+              Sep 25 22:27 onwards n   6 mean -19.6% median -24.3% sd 0.288 se 0.117 win 1/6 dead 2/6
+SPRT drift per fire 0.104: if the true mean is 0, about 15 more fires reach the lower boundary (-2.94); if it is the fit's, about 41 reach the upper; recent rate 7.2 fires/day -> 2.1 and 5.8 days
