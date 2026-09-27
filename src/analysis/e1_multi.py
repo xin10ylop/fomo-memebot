@@ -22,7 +22,7 @@ def call(m, p):
     return r["result"]
 def stamps(lo, hi):
     out = {}
-    for attempt in range(4):
+    for attempt in range(8):
         need = [n for n in range(lo, hi + 1) if n not in out]
         if not need: break
         r = post([{"jsonrpc": "2.0", "id": n, "method": "eth_getBlockByNumber", "params": [hex(n), False]} for n in need])
@@ -30,6 +30,8 @@ def stamps(lo, hi):
             for x in r:
                 if x.get("result"): out[x["id"]] = int(x["result"]["timestamp"], 16)
         if len(out) < hi - lo + 1: time.sleep(1.5 * (attempt + 1))
+    if len(out) < hi - lo + 1:                                     # Sep 27: an incomplete stamp map used to drop the launch without an error (bE1/bE2 None, or the bundle loop stopping early)
+        raise RuntimeError(f"stamps incomplete: {len(out)} of {hi - lo + 1} blocks")
     return out
 head = int(call("eth_blockNumber", []), 16) - 60 - int(BACK_H * 3600 * 9.9); lo = head - int(HOURS * 3600 * 9.9)
 t_lo = int(call("eth_getBlockByNumber", [hex(lo), False])["timestamp"], 16); t_hi = int(call("eth_getBlockByNumber", [hex(head), False])["timestamp"], 16)
@@ -107,11 +109,14 @@ def one(item):
         out["res"][f"E1_last_h60tp50_{int(stake)}"] = score(bE1, "last", SUR[1], 60, stake, tp=0.5)
     return out
 def safe(item):
-    try: return one(item)
-    except Exception as e:
-        errors.append(str(e)[:80]); return None
+    for attempt in range(4):                                         # Sep 27: three launches of one window were lost to throttling; retry before giving up, and count what is given up
+        try: return one(item)
+        except Exception as e:
+            err = e; time.sleep(3 * (attempt + 1))
+    errors.append(f"{item[1][1]}: {str(err)[:80]}"); return None
 errors = []
 with cf.ThreadPoolExecutor(3) as ex: res = [r for r in ex.map(safe, list(cre.items())) if r]
-print("launch errors:", len(errors), errors[:3])
-json.dump({"t_lo": t_lo, "t_hi": t_hi, "creations": len(cre), "launches": res}, open(OUT, "w"))
+print("launch errors:", len(errors), errors[:5], file=sys.stderr); print("launch errors:", len(errors), errors[:5])
+if errors: print(f"WARNING: {len(errors)} launches could not be read and are NOT in this window; rerun before trusting it", file=sys.stderr)
+json.dump({"t_lo": t_lo, "t_hi": t_hi, "creations": len(cre), "launches": res, "errors": errors}, open(OUT, "w"))
 print(f"{time.strftime('%b %d %H:%M', time.gmtime(t_lo))}-{time.strftime('%b %d %H:%M', time.gmtime(t_hi))} UTC: {len(cre)} creations, {len(res)} qualifying -> {OUT}")
