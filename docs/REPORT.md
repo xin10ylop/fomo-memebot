@@ -3709,3 +3709,45 @@ change to the rule since 24.31 that rests on more than one window, and I should 
 when 24.34's searches showed it was carried by one window. The expectation is now $3-10 a day at $13, not $56, and the
 sequential test decides within the week whether even that holds.
 
+### 24.37 The hold sweep (Sep 27): every exit from 1 to 1,200 blocks, three independent reviewers
+
+Brief `data/derived/edge_check/BRIEF3.md`; reports `E/`, `F/`, `G/` (each rebuilt the pricing, matched `model_eff` to
+zero difference on tens of thousands of checks, extended every tape to b0+1,240 and reproduced 24.35-24.36 exactly).
+All three were asked the same thing and did not read each other.
+
+**Verdicts: E h = 9 (plateau 3-23), F h = 8 (plateau 3-23), G h = 9 (plateau 7-16).** Setting 15 sits inside every
+plateau; the step is small and the same in all three: the sell that lands two to four blocks after the setting should
+land at blocks 10-13 after the seat, not 17-19.
+
+**The curve has two humps.** A short peak at exit block 10-13 in BOTH periods (fit +19.5%, recent +15.7% at block 11;
++16.2% and +12.6% at 15) and a long hump at 100-350 that belongs to Sep 20-23 only (fit +27% at 334-340; recent +3.0%
+at 300 and negative past 400, nothing recovers out to 1,200). Chosen on the fit alone the hold is 337 and reads +2.9%
+on the recent set: it fails. Chosen on the recent alone it is 11 exact (setting 8-9 as the engine lands it) and reads
++19.1-19.5% on the fit: it holds. Chosen on Sep 18-21 it is 334 and its +18.7% on Sep 22-27 is all Sep 22-23; on
+Sep 24-27 it reads +3.0%. Leave-one-window-out inside the fit always picks 311-341 and wins 3 of 4 held-out fit
+windows: the long hold was real until Sep 23 and is not now.
+
+**Why the value falls after block 11 (G, F).** 80-100% of the tokens sold in blocks 12-15 after the seat are sold by
+the wallets that bought in the seat block, whose own hold is 12-17 blocks (the first-seat wallet's 14.5-block hold of
+24.29); a third of fires in both periods have such a sell in blocks 11-16. A sell landing at 11-13 gets out ahead of
+that wave; one landing at 13-15 sits inside it, which is what rules out setting 11 and setting 15.
+
+**Robustness.** Fire by fire, setting 8-9 beats 15 by +2.5 to +3.6 points on every set (bootstrap 91-99.8%; 3 of 4
+fit windows; 6-7 of the 8-10 days with fires; every landing lag from 1 to 5 blocks). The bootstrapped optimum over
+1-60 has median 11 on every set. Two-stage exits (8, 6 and 32 variants across the three): none beats the best fixed
+hold on both periods; stops trigger on one-block dumps and sell at −30% to −35%; G's one passing take-profit is a
+spike (1 of 24 neighbouring cells, one fire carrying it).
+
+**Dollars at $13, recent returns, 0.32 fires an hour (full fill / live mix):** setting 15 $9.7 / $2.9 a day, setting
+8-9 $12.2-12.5 / $4.1-4.3, the fit's 334 $0.4 / −$1.6. The change is worth about $1.20 a day at the live mix; its
+value is the plateau, not the dollar.
+
+**Caveats the three share.** The recent level is imprecise (95% interval at h 9: +3.9% to +25.1%); the gain rests on
+the seat-block buyers keeping their 12-15 block exit; and it assumes the engine's sell lands 2-4 blocks after the
+setting, measured on one live trade (302 for 300). At a 6-block lag setting 9 is worth what 15 is now. The engine
+counts the hold in feed blocks from the fill it sees (`still_holding`), and if the token has to be resolved at exit
+(`token_resolved_at_exit`) the sell can slip a second: the landed exit block of every fill is the first thing the
+evening reading checks from here.
+
+**Decision:** HOLD_BLOCKS 9, the median of the three, inside all three plateaus.
+

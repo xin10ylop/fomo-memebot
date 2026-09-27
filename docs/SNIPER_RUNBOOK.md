@@ -940,3 +940,22 @@ against +15.5%, sd 0.33, boundaries ±2.94) stops the strategy at its lower boun
 upper one, about 30-35 fires either way.
 
 Switched at 11:17 UTC on Sep 27: version 6.5, stake 13, hold_blocks 15, kill_usd 24. The 15-block test counts from here.
+
+## 5t. The hold: 15 to 9 (Sep 27, report 24.37)
+
+Three reviewers priced every exit from 1 to 1,200 blocks: the peak is at exit block 10-13 in both periods, the sell
+lands 2-4 blocks after the setting, so the setting is 9 (E: 9, F: 8, G: 9; 15 inside every plateau).
+
+    sudo systemctl stop sniper-engine
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }
+    set_kv HOLD_BLOCKS 9
+    sudo systemctl start sniper-engine && sleep 5 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"hold_blocks": [0-9]*\|"kill_usd": [0-9.]*\|"stake": \[[^]]*\]'
+
+The readings: `paper_day.py ... --hold 9` scores the exit at block 9 (the model's sell at E1+9; the engine lands
+2-4 later, both are printed by live_vs_table as `landed@our exit(+N blocks)`); the prediction with `HOLD=15` (the
+grid has h15, not h9: a 15-block reading is a conservative proxy until the grid gets h9). **The first thing to check
+after every fill:** the landed exit block. Above +13 the sell is inside the seat-block sellers' wave and the setting
+must come down or the exit path be looked at (`token_resolved_at_exit` events mean the token was resolved at the
+sell, which costs up to a second). The stops of 5s stand: KILL_USD 24, back to paper under 3 fills in the first 10
+bursts, the sequential test on the chain-scored fires (H0 +2.5%, H1 about +19%, sd 0.34).
+
