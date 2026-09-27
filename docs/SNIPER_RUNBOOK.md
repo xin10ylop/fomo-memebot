@@ -939,3 +939,4 @@ than 3 of the first 10 live bursts fill; the sequential test of 24.36 on the cha
 against +15.5%, sd 0.33, boundaries ±2.94) stops the strategy at its lower boundary and permits the stake step at its
 upper one, about 30-35 fires either way.
 
+Switched at 11:17 UTC on Sep 27: version 6.5, stake 13, hold_blocks 15, kill_usd 24. The 15-block test counts from here.
