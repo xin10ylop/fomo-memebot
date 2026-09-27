@@ -959,3 +959,4 @@ must come down or the exit path be looked at (`token_resolved_at_exit` events me
 sell, which costs up to a second). The stops of 5s stand: KILL_USD 24, back to paper under 3 fills in the first 10
 bursts, the sequential test on the chain-scored fires (H0 +2.5%, H1 about +19%, sd 0.34).
 
+Switched at 11:53 UTC on Sep 27: version 6.5, stake 13, hold_blocks 9, kill_usd 24. No fill since the 11:17 restart at 15, so the 9-block test counts from here.
