@@ -6,9 +6,9 @@ The rule is unchanged: fleets >= 2 at block k-2, a 35-shot burst for seat E1. Ev
 
 The sweep covers every h from 1 to 1,200. What it shows:
 
-- **Every set has the same short hump.** Exit blocks 7-14 peak at 11-13 in the fit, the recent windows, Sep 18-21, Sep 22-27 and the medians, and every curve drops about 3 points between blocks 12 and 15. Today's 15 sits just past that drop.
+- **Every set has the same short hump.** Exit blocks 7-14 peak at 11-13 in the fit, the recent windows, Sep 18-21, Sep 22-27 and the medians, and every curve drops 2-3 points between blocks 12 and 15. Today's 15 sits just past that drop.
   - At exit block 11 the fit reads +19.5% and the recent +15.7%. At 15 they read +16.2% and +12.6%.
-  - The drop has a mechanism. Snipers who bought in the first two seconds sell 12-17 blocks after their own buy (`drop.txt`). About a third of the fires in both periods have such a sell in E1+11..16.
+  - The drop has a mechanism. Snipers who bought in the first two seconds sell most often 12-17 blocks after their own buy (`drop.txt`). About a third of the fires in both periods have such a sell in E1+11..16.
 - **The long hold has broken.** On the fit the curve climbs to +27% at 334-340, with a plateau from 101 to 393. On the recent windows it falls apart. The fires make +13-14% at 200-260, then lose 10 points between 260 and 280 as two fires dump in single blocks (0x80c0efae −92 points at block 279, 0x2b7508b0 −74 at 269). They read +3% at 300 and between −3.6% and +3.2% everywhere from 400 to 1,200.
   - The recent windows' lift over the refused launches is +15.7 points at 15 and −0.7 at 300.
 - **Choices and their out-of-sample readings:**
@@ -189,7 +189,7 @@ How to read the three choices:
 | recent | 16 (46% in 1-9, 40% in 201-300) | +15.0% [+4.2, +27.6] | +12.3% [+0.5, +26.5] | +2.9% [−15.1, +25.9] | 92% | 7% |
 
 - The optimal h is bimodal in every set. Most fit resamples pick the long hold, and most recent resamples pick the short one.
-- When a fit resample picks a short hold, it picks 11 (5.2% of resamples). When a recent resample picks a long one, it picks 241 (23%) or 210-235.
+- When a fit resample picks a short hold, it picks 11 (5.2% of resamples). When a recent resample picks a long one, it picks 241 (23%), 210-235 or 593 (4%).
 - The recent 95% interval for S = 8 is +4.2% to +27.6%. For S = 334, 45% of recent resamples are negative.
 
 **Fire by fire against S = 15** (`landed.txt`, paired bootstrap, gain in points [95%], P(gain > 0)):
