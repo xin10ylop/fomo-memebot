@@ -3618,3 +3618,7 @@ so the week at $13 is the test and its stop is set before the money is at stake:
 after about $10 of loss from the $33.66 the wallet and relay hold, and the stake does not rise until the running mean
 of the live fires is positive over at least 15 of them.
 
+**Live ended Sep 27 09:02 UTC, back to paper.** Total live: two bursts, one fill, −$0.68. The machine did what the
+paper does; the edge measured on the four fit windows has not appeared in the 60 hours since (18 fires, +3.5%, the
+last five negative). The rule keeps being scored on the chain daily; re-entry criteria in runbook 5r.
+

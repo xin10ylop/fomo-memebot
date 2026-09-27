@@ -899,3 +899,18 @@ URL is typed into the env file by hand and never pasted anywhere:
     set_kv CHAIN_POLL_S 10
     sudo systemctl start sniper-engine
 
+## 5r. Back to paper, Sep 27 09:02 UTC
+
+Live from Sep 26 09:15 to Sep 27 09:02 UTC: two bursts, one fill (−2.6%), P&L −$0.68 on a base of 0.015412 ETH (the
+$17.90 top-up included); the wallet and relay keep their ETH. Reason: the rule's fires on the chain since Sep 24 (18
+fires, the engine's population, 300-block hold) average +3.5%, 39% win, the last five all lost; the backtest's 73 fires
+at +26% were fitted on Sep 18-23 and the edge has not shown since. The engine runs with `SEND_MODULE=` empty: it fires
+paper shots at the same moments and the evening reading scores them on the chain for free.
+
+Every evening, unchanged: the prediction first, then steps 2 (paper_day, `--from` the previous reading's end), 6
+(engine_vs_chain) and 5 (intake readout: nothing to read while paper). Step 1 (balance) once a week.
+
+Re-entry: `SEND_MODULE=/etc/sniper/send_step.py` (runbook 5q), at $13, only when the trailing 20 fires of the rule on the
+chain are positive on average with at least 55% wins, and with KILL_USD set to about $10 under the wallet-plus-relay
+figure at the switch. Not before, whatever a single good day looks like.
+
