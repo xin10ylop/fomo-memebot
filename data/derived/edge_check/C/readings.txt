@@ -1,0 +1,125 @@
+=== A. every reading at every hold (second place, $13; $/day at the period's own fire rate: fit 73 fires / 96 h; recent 0.32 fires an hour)
+--- fit: 563 launches, 73 fires
+  all launches, h15                             563  mean  +0.2%  med  -8.6%  win  31%  dead  3%  se  1.1%  t +0.15  $/fire -0.31
+  the rule's fires, h15                          73  mean +16.2%  med  +8.0%  win  66%  dead  3%  se  4.0%  t +4.10  $/fire +1.78  $/day  +32.5
+  refused, h15                                  490  mean  -2.2%  med  -9.4%  win  26%  dead  3%  se  1.0%  t -2.18  $/fire -0.62   lift +18.5%
+  all launches, h30                             563  mean  +0.3%  med  -8.3%  win  34%  dead  5%  se  1.4%  t +0.24  $/fire -0.29
+  the rule's fires, h30                          73  mean +16.1%  med  +8.5%  win  64%  dead  3%  se  4.0%  t +4.02  $/fire +1.76  $/day  +32.1
+  refused, h30                                  490  mean  -2.0%  med  -9.5%  win  29%  dead  5%  se  1.4%  t -1.40  $/fire -0.59   lift +18.1%
+  all launches, h60                             563  mean  +1.1%  med  -8.5%  win  34%  dead  7%  se  1.8%  t +0.65  $/fire -0.18
+  the rule's fires, h60                          73  mean +16.2%  med  +9.3%  win  66%  dead  3%  se  4.3%  t +3.80  $/fire +1.78  $/day  +32.5
+  refused, h60                                  490  mean  -1.1%  med  -9.5%  win  30%  dead  8%  se  1.9%  t -0.59  $/fire -0.47   lift +17.3%
+  all launches, h150                            563  mean  +2.8%  med  -6.8%  win  39%  dead 12%  se  2.1%  t +1.31  $/fire +0.03
+  the rule's fires, h150                         73  mean +21.2%  med +12.4%  win  66%  dead  7%  se  5.8%  t +3.63  $/fire +2.42  $/day  +44.2
+  refused, h150                                 490  mean  +0.0%  med  -8.5%  win  36%  dead 13%  se  2.2%  t +0.01  $/fire -0.33   lift +21.1%
+  all launches, h300                            563  mean  +3.0%  med  -7.2%  win  40%  dead 21%  se  2.6%  t +1.13  $/fire +0.06
+  the rule's fires, h300                         73  mean +26.3%  med +20.7%  win  67%  dead  8%  se  6.9%  t +3.80  $/fire +3.09  $/day  +56.4
+  refused, h300                                 490  mean  -0.5%  med  -8.9%  win  36%  dead 23%  se  2.8%  t -0.17  $/fire -0.39   lift +26.8%
+  all launches, h600                            563  mean  +2.2%  med  -9.0%  win  39%  dead 31%  se  3.1%  t +0.73  $/fire -0.04
+  the rule's fires, h600                         73  mean +19.6%  med +10.8%  win  52%  dead 19%  se  7.9%  t +2.49  $/fire +2.22  $/day  +40.5
+  refused, h600                                 490  mean  -0.4%  med -10.5%  win  37%  dead 33%  se  3.3%  t -0.11  $/fire -0.38   lift +20.0%
+--- rec: 172 launches, 19 fires
+  all launches, h15                             172  mean  -1.4%  med  -9.6%  win  24%  dead  1%  se  1.7%  t -0.78  $/fire -0.51
+  the rule's fires, h15                          19  mean +12.6%  med  +0.1%  win  58%  dead  0%  se  6.4%  t +1.97  $/fire +1.30  $/day  +10.0
+  refused, h15                                  153  mean  -3.1%  med  -9.8%  win  20%  dead  1%  se  1.8%  t -1.77  $/fire -0.73   lift +15.7%
+  all launches, h30                             172  mean  -1.7%  med  -9.7%  win  22%  dead  3%  se  2.5%  t -0.68  $/fire -0.55
+  the rule's fires, h30                          19  mean  +6.7%  med  -0.7%  win  42%  dead  0%  se  7.2%  t +0.93  $/fire +0.54  $/day   +4.2
+  refused, h30                                  153  mean  -2.7%  med -10.0%  win  20%  dead  4%  se  2.7%  t -1.03  $/fire -0.69   lift +9.4%
+  all launches, h60                             172  mean  -1.1%  med  -9.4%  win  34%  dead  6%  se  2.2%  t -0.51  $/fire -0.48
+  the rule's fires, h60                          19  mean  +4.1%  med  -3.0%  win  42%  dead  0%  se  6.6%  t +0.61  $/fire +0.20  $/day   +1.5
+  refused, h60                                  153  mean  -1.8%  med  -9.6%  win  33%  dead  7%  se  2.4%  t -0.75  $/fire -0.56   lift +5.8%
+  all launches, h150                            172  mean  +2.9%  med  -5.0%  win  42%  dead 10%  se  2.9%  t +1.01  $/fire +0.05
+  the rule's fires, h150                         19  mean +10.4%  med  +2.8%  win  53%  dead  0%  se  9.1%  t +1.14  $/fire +1.02  $/day   +7.9
+  refused, h150                                 153  mean  +2.0%  med  -5.5%  win  41%  dead 11%  se  3.1%  t +0.66  $/fire -0.07   lift +8.4%
+  all launches, h300                            172  mean  +3.6%  med  -5.0%  win  40%  dead 15%  se  3.4%  t +1.08  $/fire +0.14
+  the rule's fires, h300                         19  mean  +3.0%  med  -4.9%  win  37%  dead 11%  se 10.7%  t +0.28  $/fire +0.06  $/day   +0.5
+  refused, h300                                 153  mean  +3.7%  med  -5.1%  win  40%  dead 15%  se  3.5%  t +1.05  $/fire +0.15   lift -0.7%
+  all launches, h600                            172  mean  +5.2%  med  -5.0%  win  42%  dead 20%  se  4.4%  t +1.18  $/fire +0.34
+  the rule's fires, h600                         19  mean  -0.9%  med -14.4%  win  42%  dead 26%  se 13.5%  t -0.06  $/fire -0.44  $/day   -3.4
+  refused, h600                                 153  mean  +5.9%  med  -4.7%  win  42%  dead 20%  se  4.7%  t +1.27  $/fire +0.44   lift -6.8%
+
+=== B. the post-seat crowd (the discovery's variable), outsiders only; is it still what pays? (oracle, not tradable)
+  fit a15 wallets >= 4         n 179 (32%)  h15 +17.7%  h60 +17.7%  h300 +21.8%   of which rule fires  42
+  fit a15 wallets <= 1         n 276 (49%)  h15 -10.9%  h60 -11.7%  h300 -11.4%   of which rule fires  18
+  fit seat buys behind >= 3    n 173 (31%)  h15 +15.1%  h60 +15.1%  h300 +21.4%   of which rule fires  47
+  fit seat buys behind 0       n 237 (42%)  h15  -8.9%  h60  -7.9%  h300  -9.5%   of which rule fires   9
+  rec a15 wallets >= 4         n  43 (25%)  h15 +20.2%  h60 +22.4%  h300 +34.4%   of which rule fires  11
+  rec a15 wallets <= 1         n  91 (53%)  h15 -10.3%  h60 -12.7%  h300 -13.1%   of which rule fires   4
+  rec seat buys behind >= 3    n  35 (20%)  h15  +9.8%  h60 +12.4%  h300 +18.0%   of which rule fires   6
+  rec seat buys behind 0       n  78 (45%)  h15  -8.7%  h60  -6.4%  h300  +0.9%   of which rule fires   3
+
+=== C. is the pre-tick gate a proxy for the post-seat crowd? (means, fires vs refused)
+  fit sb_n           fires mean   4.329 med   4.000   refused mean   1.696 med   1.000   ratio of means  2.55
+  fit sb_eth         fires mean   0.299 med   0.196   refused mean   0.083 med   0.005   ratio of means  3.61
+  fit a15_w          fires mean   4.986 med   4.000   refused mean   2.694 med   1.000   ratio of means  1.85
+  fit a15_eth        fires mean   0.235 med   0.132   refused mean   0.107 med   0.020   ratio of means  2.19
+  fit a16_60_eth     fires mean   1.392 med   0.568   refused mean   0.722 med   0.154   ratio of means  1.93
+  fit a16_60_w       fires mean  13.397 med   5.000   refused mean   9.720 med   3.000   ratio of means  1.38
+  fit named_sold300  fires mean   0.075 med   0.000   refused mean   0.216 med   0.000   ratio of means  0.35
+  fit P(a15 wallets >= 4 | fire) 58%   P(... | refused) 28%
+  rec sb_n           fires mean   2.947 med   2.000   refused mean   1.242 med   1.000   ratio of means  2.37
+  rec sb_eth         fires mean   0.162 med   0.105   refused mean   0.049 med   0.002   ratio of means  3.29
+  rec a15_w          fires mean   5.263 med   5.000   refused mean   2.190 med   1.000   ratio of means  2.40
+  rec a15_eth        fires mean   0.275 med   0.147   refused mean   0.097 med   0.008   ratio of means  2.83
+  rec a16_60_eth     fires mean   0.975 med   0.249   refused mean   1.009 med   0.645   ratio of means  0.97
+  rec a16_60_w       fires mean  13.158 med   5.000   refused mean  16.856 med  18.000   ratio of means  0.78
+  rec named_sold300  fires mean   0.200 med   0.000   refused mean   0.112 med   0.000   ratio of means  1.78
+  rec P(a15 wallets >= 4 | fire) 58%   P(... | refused) 21%
+
+=== D. the combination, tradable: the rule's gate, then at E1+12 hold to H if the outsiders' distinct buyers in E1+1..E1+12 >= N, else sell at E1+15
+  fit H 60: N1 +16.3%  N2 +16.3%  N3 +16.3%  N4 +14.1%  N5 +14.1%  N6 +14.7%  N8 +15.8%   (h15 +16.2%, h60 +16.2%)
+  fit H150: N1 +20.8%  N2 +20.5%  N3 +19.9%  N4 +16.5%  N5 +15.7%  N6 +16.7%  N8 +19.5%   (h15 +16.2%, h150 +21.2%)
+  fit H300: N1 +25.5%  N2 +25.3%  N3 +25.4%  N4 +20.9%  N5 +18.4%  N6 +18.6%  N8 +20.9%   (h15 +16.2%, h300 +26.3%)
+  rec H 60: N1  +3.9%  N2  +3.6%  N3  +6.4%  N4  +6.2%  N5  +5.1%  N6  +6.1%  N8  +6.8%   (h15 +12.6%, h60 +4.1%)
+  rec H150: N1  +7.2%  N2  +7.1%  N3  +9.2%  N4  +9.1%  N5  +8.8%  N6  +9.4%  N8 +10.1%   (h15 +12.6%, h150 +10.4%)
+  rec H300: N1  +3.9%  N2  +4.1%  N3  +9.2%  N4  +9.3%  N5  +9.5%  N6 +10.1%  N8 +11.8%   (h15 +12.6%, h300 +3.0%)
+  fitted on fit: N 1 H 300 fit +25.5%  -> recent +3.9%  (recent h15 +12.6%, h300 +3.0%)
+  fitted on recent: N 10 H 300 recent +15.0%  -> fit +19.9%  (fit h15 +16.2%, h300 +26.3%)
+  null test: real gain over the best fixed hold on fit -0.9%, over h15 on recent -8.7%;  permuted feature does at least as well on both in 611/2000 = 30.6%
+
+=== E. the rule at 15 against 300 blocks, by window, by position (first / second / third in the seat block)
+  sep1819       14 fires  h15 +27.5%  h60 +22.5%  h150 +10.7%  h300 +18.9%
+  sep2021       29 fires  h15 +16.4%  h60 +15.4%  h150 +21.6%  h300 +26.2%
+  sep2223       20 fires  h15  +9.0%  h60 +13.4%  h150 +30.2%  h300 +35.5%
+  sep23day      10 fires  h15 +14.4%  h60 +15.4%  h150 +16.5%  h300 +18.9%
+  sep24paper     9 fires  h15 +14.8%  h60  +3.1%  h150  +1.8%  h300  +1.5%
+  sep25night     1 fires  h15 +70.0%  h60 +60.6%  h150 +138.6%  h300 +167.9%
+  sep25pm        1 fires  h15 +25.9%  h60 +15.4%  h150  +6.5%  h300  +9.0%
+  sep25eve2      1 fires  h15  -8.0%  h60  -4.4%  h150  -4.4%  h300 -10.7%
+  sep26night     1 fires  h15  +0.1%  h60 +24.8%  h150 +34.4%  h300 +25.4%
+  sep26am        1 fires  h15 +22.9%  h60 -33.3%  h150 -37.7%  h300 -41.4%
+  sep26pm        1 fires  h15 -11.0%  h60 -11.0%  h150 -11.0%  h300 -11.0%
+  sep26restart   1 fires  h15  +7.2%  h60  +4.3%  h150  +4.4%  h300  -2.8%
+  sep27night     2 fires  h15  -5.0%  h60  -2.7%  h150 +26.1%  h300 -44.1%
+  gapA           1 fires  h15  +8.2%  h60  -1.4%  h150  -1.0%  h300  -4.9%
+  fit first  h15 +27.6%  h300 +40.8%   (second: h15 +16.2%  h300 +26.3%)
+  fit third  h15  +9.9%  h300 +20.1%   (second: h15 +16.2%  h300 +26.3%)
+  rec first  h15 +25.2%  h300 +13.9%   (second: h15 +12.6%  h300  +3.0%)
+  rec third  h15  +8.4%  h300  -0.3%   (second: h15 +12.6%  h300  +3.0%)
+
+=== F. day by day, Sep 18-27 (UTC day of the creation), the rule's fires, h15 and h300, $ at $13 after gas
+  Sep 18  launches 104  fires 13   h15 +28.2% win  85% $+43.36 (cum  +43.36)   h300 +18.6% win  69% $+27.20 (cum  +27.20)
+  Sep 19  launches  37  fires  1   h15 +18.1% win 100% $ +2.02 (cum  +45.38)   h300 +22.1% win 100% $ +2.54 (cum  +29.74)
+  Sep 20  launches  42  fires  7   h15 +29.3% win  86% $+24.31 (cum  +69.69)   h300 +28.8% win  71% $+23.91 (cum  +53.65)
+  Sep 21  launches 138  fires 20   h15 +14.5% win  60% $+31.17 (cum +100.86)   h300 +27.1% win  75% $+63.77 (cum +117.42)
+  Sep 22  launches 170  fires 19   h15  +7.9% win  42% $+13.26 (cum +114.12)   h300 +22.0% win  63% $+48.10 (cum +165.52)
+  Sep 23  launches  72  fires 13   h15 +11.9% win  77% $+15.75 (cum +129.88)   h300 +38.1% win  54% $+60.13 (cum +225.65)
+  Sep 24  launches  55  fires  9   h15 +14.8% win  44% $+14.35 (cum +144.23)   h300  +1.5% win  44% $ -1.17 (cum +224.48)
+  Sep 25  launches  49  fires  4   h15 +22.0% win  75% $+10.13 (cum +154.36)   h300 +47.9% win  75% $+23.59 (cum +248.07)
+  Sep 26  launches  54  fires  5   h15  +5.5% win  80% $ +1.91 (cum +156.27)   h300 -22.1% win   0% $-16.02 (cum +232.04)
+  Sep 27  launches  14  fires  1   h15 -10.0% win   0% $ -1.63 (cum +154.64)   h300 -37.6% win   0% $ -5.22 (cum +226.83)
+
+=== G. the dumps and the thin demand: the rule's fires split by the bundle's selling by E1+300 (> 10% of its tokens) and by outsider ETH in E1+16..60
+  fit bundle dumped (>10% by +300)       7 (10%)  h15  +1.3%  h60  -9.1%  h300 -37.1%
+  fit bundle held                       66 (90%)  h15 +17.8%  h60 +18.9%  h300 +33.0%
+  fit outsider ETH +16..60 < 0.2        35 (48%)  h15  +6.0%  h60  +5.0%  h300  +8.2%
+  fit outsider ETH +16..60 >= 0.2       38 (52%)  h15 +25.7%  h60 +26.6%  h300 +43.0%
+  rec bundle dumped (>10% by +300)       5 (26%)  h15 +28.6%  h60  +3.6%  h300 -17.8%
+  rec bundle held                       14 (74%)  h15  +6.8%  h60  +4.2%  h300 +10.4%
+  rec outsider ETH +16..60 < 0.2         9 (47%)  h15  +3.9%  h60  -5.0%  h300 -16.4%
+  rec outsider ETH +16..60 >= 0.2       10 (53%)  h15 +20.3%  h60 +12.2%  h300 +20.5%
+
+=== H. paired h15 - h300 on the rule's fires
+  fit n  73  mean h15-h300 -10.1%  se 6.2%  t -1.63
+  rec n  19  mean h15-h300 +9.5%  se 8.4%  t +1.14
+  all n  92  mean h15-h300 -6.0%  se 5.3%  t -1.15

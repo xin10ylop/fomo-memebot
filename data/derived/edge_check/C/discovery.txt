@@ -1,0 +1,57 @@
+=== 1. the fills (sep17_20_fills.json): single fills by who was ahead in the seat block
+  nobody ahead    n 22  first-in-block -1.5%  at our position h15 -1.5%  actual -3.9%  win 27%  mean hold 19 blocks
+  somebody ahead  n 12  first-in-block +17.7%  at our position h15 +5.8%  actual +7.4%  win 67%  mean hold 23 blocks
+  all             n 34  first-in-block +5.2%  at our position h15 +1.0%  actual +0.1%  win 41%  mean hold 20 blocks
+
+=== 2. winners (actual > +5%) against the rest (winners_anatomy.json, all 43 filled launches, multi-fills included)
+  winners 12, rest 31   (mean / median)
+  buys behind us in the seat block                           winners    5.167 /    4.500   rest    1.452 /    1.000
+  ETH behind us in the seat block                            winners    0.340 /    0.240   rest    0.060 /    0.013
+  buys in the next 15 blocks                                 winners    6.667 /    7.500   rest    2.226 /    2.000
+  distinct wallets, next 15 blocks                           winners    5.500 /    5.500   rest    2.032 /    2.000
+  ETH, next 15 blocks                                        winners    0.234 /    0.193   rest    0.053 /    0.005
+  price +15 blocks vs our entry                              winners    0.364 /    0.292   rest    0.050 /    0.018
+  price +60                                                  winners    0.325 /    0.223   rest    0.019 /    0.016
+  price +150                                                 winners    0.316 /    0.214   rest    0.163 /    0.077
+  price +600                                                 winners    0.316 /    0.316   rest    0.205 /    0.027
+  first-in-block model (h15)                                 winners    0.281 /    0.251   rest   -0.042 /   -0.086
+  actual                                                     winners    0.218 /    0.202   rest   -0.090 /   -0.095
+  fills (multi-fill count)                                   winners    2.500 /    1.000   rest    2.000 /    1.000
+  wallets firing by the last creation block (anatomy's unit) winners    7.750 /    4.000   rest   11.935 /    8.000
+  wallets firing by block k-2 (anatomy's unit)               winners    1.000 /    0.000   rest    0.065 /    0.000
+  named wallets                                              winners    9.833 /    8.500   rest    9.516 /    9.000
+  somebody ahead of us (ahead > 0)                           winners    0.583 /    1.000   rest    0.226 /    0.000
+  share of the rest whose price at +600 was above our entry: 16/31   winners: 7/12
+  single fills only:
+    winners  n  9  seat-behind 6.4  next-15 buys 5.9 from 5.0 wallets  +15 +35%  +60 +22%  +150 +27%  +600 +12%
+    rest     n 25  seat-behind 1.7  next-15 buys 2.4 from 2.2 wallets  +15 +6%  +60 +6%  +150 +24%  +600 +30%
+
+=== 3. the same launches in the fit's crowd pull (crowd_raw_sep1819): the rule's pre-tick count, the engine's unit
+  23 of 43 filled launches are in the fit's population (the rest were outside the tables' filters or before Sep 18 13:27)
+  rule fires (fleets >= 2 at k-2)  n  2  winners  2  actual +35.2%  first +64.4%  seat-behind 4.5  next-15 wallets 8.5  +60 +72%  +600 +154%
+  rule refuses                     n 21  winners  5  actual -2.7%  first +3.7%  seat-behind 2.2  next-15 wallets 3.0  +60 +5%  +600 +3%
+  per launch: when, cv, actual, winner, fleets k-2, wallets k-2, fleets end of second, k, seat-behind, next-15 wallets
+   Sep 18 15:26 0xf3a9f809  -2.1% .  f0 w0 fend3 k4  sb  2  a15w  1
+   Sep 18 16:42 0x511f1f88 +24.2% W  f1 w0 fend2 k6  sb 12  a15w  7
+   Sep 18 16:56 0x482b6bcd  -2.7% .  f0 w0 fend2 k7  sb  3  a15w  8
+   Sep 18 17:50 0xaddd8312  +7.7% W  f0 w0 fend1 k5  sb  5  a15w  2
+   Sep 18 18:15 0x429eca1b -14.4% .  f0 w0 fend0 k5  sb  0  a15w  3
+   Sep 18 18:36 0xe7bc27c2 +48.1% W  f2 w2 fend3 k5  sb  4  a15w 13
+   Sep 18 18:44 0xf6bf73ea +22.3% W  f3 w3 fend5 k8  sb  5  a15w  4
+   Sep 18 20:12 0xd40f1361  -5.7% .  f0 w0 fend2 k8  sb  3  a15w  3
+   Sep 18 21:52 0x0fa7e6dd -11.9% .  f0 w0 fend0 k6  sb  0  a15w  0
+   Sep 18 21:57 0x02d962e4 -55.3% .  f0 w0 fend0 k9  sb  0  a15w  1
+   Sep 19 02:27 0x12b78114  +0.4% .  f0 w0 fend2 k3  sb  2  a15w  2
+   Sep 19 06:44 0x267f1314 -15.4% .  f0 w0 fend0 k5  sb  1  a15w  4
+   Sep 19 07:14 0x73340ab8  +2.8% .  f0 w0 fend0 k6  sb  2  a15w  3
+   Sep 19 08:01 0x9fec8af5  +9.5% W  f0 w0 fend2 k6  sb  1  a15w  4
+   Sep 19 08:53 0xf08e4638  -9.5% .  f0 w0 fend7 k2  sb  0  a15w  5
+   Sep 19 10:44 0xe59034ef  -8.3% .  f0 w0 fend1 k6  sb  1  a15w  0
+   Sep 19 10:55 0x85ec0b6f  +5.0% .  f0 w0 fend0 k3  sb  3  a15w  4
+   Sep 19 11:25 0xdcd71241 +42.0% W  f0 w0 fend2 k5  sb  3  a15w  7
+   Sep 19 11:47 0xf61127ee -11.9% .  f0 w0 fend0 k6  sb  0  a15w  0
+   Sep 19 11:59 0x1ab4ca11 -11.9% .  f0 w0 fend0 k6  sb  0  a15w  0
+   Sep 19 12:28 0xc98afc99 -11.7% .  f0 w0 fend0 k3  sb  1  a15w  1
+   Sep 19 12:52 0x83c4d8ba -10.0% .  f0 w0 fend1 k8  sb  2  a15w  2
+   Sep 19 13:07 0xf8ff6744 +21.6% W  f0 w0 fend4 k9  sb  6  a15w  6
+  Spearman, fleets at k-2 vs next-15 wallets: +0.44; vs seat-behind buys: +0.52;  next-15 wallets vs actual: +0.64;  fleets at k-2 vs actual: +0.54  (n 23)

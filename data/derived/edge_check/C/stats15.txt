@@ -1,0 +1,48 @@
+=== 1. the recent fires one by one (second place, $13): h15, h300, the bundle's share sold by +300, outsider ETH E1+16..60
+  Sep 24 12:59 0xad1c5f76 sep24paper   f_k2 2  h15   -0.7%  h300   -4.5%  bundle sold   0%  outsider ETH16-60 1.52
+  Sep 24 14:52 0x2ad76f05 sep24paper   f_k2 2  h15   -9.9%  h300  -13.6%  bundle sold   0%  outsider ETH16-60 0.13
+  Sep 24 17:16 0x89f41f56 sep24paper   f_k2 2  h15   -0.6%  h300   +2.3%  bundle sold   0%  outsider ETH16-60 0.01
+  Sep 24 17:32 0x26d36c5e sep24paper   f_k2 2  h15  -13.8%  h300  +14.1%  bundle sold   2%  outsider ETH16-60 4.39
+  Sep 24 17:58 0xc63ab843 sep24paper   f_k2 2  h15  +25.2%  h300   -8.7%  bundle sold   0%  outsider ETH16-60 0.00
+  Sep 24 18:10 0xe65b85ad sep24paper   f_k2 2  h15  +86.1%  h300  +58.0%  bundle sold  63%  outsider ETH16-60 0.25
+  Sep 24 18:44 0x95f60349 sep24paper   f_k2 3  h15  +43.8%  h300  -17.4%  bundle sold  16%  outsider ETH16-60 1.24
+  Sep 24 19:20 0x9132d3db sep24paper   f_k2 2  h15  +10.3%  h300  -19.9%  bundle sold  10%  outsider ETH16-60 1.52
+  Sep 24 20:42 0x56e76663 sep24paper   f_k2 3  h15   -7.2%  h300   +3.7%  bundle sold   0%  outsider ETH16-60 0.04
+  Sep 25 00:33 0x9f834b70 sep25night   f_k2 2  h15  +70.0%  h300 +167.9%  bundle sold   0%  outsider ETH16-60 5.71
+  Sep 25 16:24 0xd43ed726 sep25pm      f_k2 2  h15  +25.9%  h300   +9.0%  bundle sold   3%  outsider ETH16-60 0.02
+  Sep 25 20:47 0xe41e16e1 sep25eve2    f_k2 2  h15   -8.0%  h300  -10.7%  bundle sold   0%  outsider ETH16-60 0.93
+  Sep 25 22:27 0x0a6c1259 sep26night   f_k2 3  h15   +0.1%  h300  +25.4%  bundle sold   0%  outsider ETH16-60 0.81
+  Sep 26 09:24 0xc0190204 sep26am      f_k2 2  h15  +22.9%  h300  -41.4%  bundle sold 100%  outsider ETH16-60 0.00
+  Sep 26 13:47 0xa80c4813 sep26restart f_k2 3  h15   +7.2%  h300   -2.8%  bundle sold   0%  outsider ETH16-60 0.60
+  Sep 26 16:05 0xee486806 sep26pm      f_k2 2  h15  -11.0%  h300  -11.0%  bundle sold   0%  outsider ETH16-60 0.00
+  Sep 26 18:47 0x45bbf47f gapA         f_k2 2  h15   +8.2%  h300   -4.9%  bundle sold   0%  outsider ETH16-60 1.31
+  Sep 26 23:53 0x2b7508b0 sep27night   f_k2 2  h15   +0.0%  h300  -50.5%  bundle sold  95%  outsider ETH16-60 0.06
+  Sep 27 00:10 0x80c0efae sep27night   f_k2 2  h15  -10.0%  h300  -37.6%  bundle sold  92%  outsider ETH16-60 0.00
+
+=== 2. h15: recent 19 fires mean +12.6% (95% bootstrap +1.5% to +25.6%; P(mean <= break-even 2.54%) 4.2%)  median +0.1%  leave-one-out min +8.5% max +14.0%  trimmed (drop best and worst) +9.8%
+      fit 73 fires mean +16.2% (95% +8.8% to +24.2%), median +8.0%; 19 fires drawn from the fit's read <= the recent mean in 32.7%
+      sd per fire: fit 0.338, recent 0.278, pooled 0.326
+
+=== 2. h300: recent 19 fires mean +3.0% (95% bootstrap -14.1% to +26.0%; P(mean <= break-even 2.54%) 51.8%)  median -4.9%  leave-one-out min -6.1% max +6.0%  trimmed (drop best and worst) -3.5%
+      fit 73 fires mean +26.3% (95% +13.6% to +40.5%), median +20.7%; 19 fires drawn from the fit's read <= the recent mean in 2.7%
+      sd per fire: fit 0.591, recent 0.467, pooled 0.573
+
+  recent h15 without its two best fires (+86%, +70%): +4.9% on 17;  paper stretch (Sep 24 12:55 - Sep 26 09:15) h15 +17.0% (13), after h15 +2.9% (6)
+
+=== 3. $/day at the recent supply (0.32 fires an hour = 7.7 a day), per burst after $0.33 gas
+  h 15 at the fit    per-fire return: full fill at second place $+1.78/burst $ +13.7/day $  +95.6/week;   live mix (fill 1 burst in 2, 2/3 second, 1/3 third) $+0.59/burst $  +4.5/day $  +31.6/week
+  h 15 at the recent per-fire return: full fill at second place $+1.30/burst $ +10.0/day $  +70.1/week;   live mix (fill 1 burst in 2, 2/3 second, 1/3 third) $+0.40/burst $  +3.0/day $  +21.3/week
+        weekly sd at 54 fires (recent per-fire $ sd 3.62): $27
+  h300 at the fit    per-fire return: full fill at second place $+3.09/burst $ +23.7/day $ +166.2/week;   live mix (fill 1 burst in 2, 2/3 second, 1/3 third) $+1.25/burst $  +9.6/day $  +67.0/week
+  h300 at the recent per-fire return: full fill at second place $+0.06/burst $  +0.5/day $   +3.3/week;   live mix (fill 1 burst in 2, 2/3 second, 1/3 third) $-0.21/burst $  -1.6/day $  -11.1/week
+        weekly sd at 54 fires (recent per-fire $ sd 6.07): $45
+
+=== 4. sequential tests on chain-scored fires (Wald SPRT, alpha = beta = 0.05, boundaries +-2.94; normal likelihood, sd per fire as given)
+  keep (h300): H1 the fit's mean +26.3%, H0 0; sd 0.573.  LLR on the 19 recent fires -1.54
+     from zero (a fresh start at the next fire): if H1 true 32 fires on average (accepts H1 98%); if H0 true 26 fires (accepts H1 7%)
+     continuing from the recent LLR:              if H1 true 39 fires (accepts H1 86%); if H0 true 14 fires (accepts H1 1%)
+     at 7.7 fires a day: fresh 4.1 / 3.3 days; continuing 5.1 / 1.9 days
+  h15: H1 the fit's h15 mean +16.2%, H0 break-even +2.5%; sd 0.326.  LLR on the 19 recent fires +0.78
+     from zero (a fresh start at the next fire): if H1 true 35 fires on average (accepts H1 97%); if H0 true 32 fires (accepts H1 6%)
+     continuing from the recent LLR:              if H1 true 27 fires (accepts H1 99%); if H0 true 36 fires (accepts H1 12%)
+     at 7.7 fires a day: fresh 4.6 / 4.1 days; continuing 3.6 / 4.7 days

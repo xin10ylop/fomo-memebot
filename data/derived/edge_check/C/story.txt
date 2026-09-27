@@ -1,0 +1,33 @@
+(a) the real fills Sep 17-20: 43 launches, net -0.00911 ETH = $-23.42 at 2570 before gas; single fills 34, net $+0.81; multi-fills $-24.23
+    single fills with somebody ahead (the discovery's 12): net $+13.34 before gas, $+9.38 after $0.33 a burst; held 15-31 blocks
+
+(b)+(c) by window: the rule's fires and the refused at h15 and h300; premium = h300 - h15; lift = fires - refused
+  sep1819  launches 141 fires  14   fires h15 +27.5% h300 +18.9% premium  -8.6%   refused h15  +1.5% h300  +0.2% premium  -1.3%   lift h15 +26.0% h300 +18.7%
+  sep2021  launches 189 fires  29   fires h15 +16.4% h300 +26.2% premium  +9.8%   refused h15  -1.1% h300  -1.2% premium  -0.1%   lift h15 +17.5% h300 +27.3%
+  sep2223  launches 175 fires  20   fires h15  +9.0% h300 +35.5% premium +26.4%   refused h15  -5.1% h300  +2.7% premium  +7.7%   lift h15 +14.1% h300 +32.8%
+  sep23day launches  58 fires  10   fires h15 +14.4% h300 +18.9% premium  +4.5%   refused h15  -6.8% h300 -10.1% premium  -3.3%   lift h15 +21.3% h300 +29.0%
+  rec      launches 172 fires  19   fires h15 +12.6% h300  +3.0% premium  -9.5%   refused h15  -3.1% h300  +3.7% premium  +6.8%   lift h15 +15.7% h300  -0.7%
+  share of the fit's summed h300-h15 premium from sep1819: -16%
+  share of the fit's summed h300-h15 premium from sep2021: +38%
+  share of the fit's summed h300-h15 premium from sep2223: +72%
+  share of the fit's summed h300-h15 premium from sep23day: +6%
+  fit without sep2223: 53 fires h15 +18.9% h300 +22.9%
+
+    day by day, lift (fires - refused)
+  Sep 18 fires 13 refused  91  lift h15 +26.9%   lift h300 +16.9%
+  Sep 19 fires  1 refused  36  lift h15 +16.2%   lift h300 +25.9%
+  Sep 20 fires  7 refused  35  lift h15 +27.0%   lift h300 +36.0%
+  Sep 21 fires 20 refused 118  lift h15 +15.6%   lift h300 +25.5%
+  Sep 22 fires 19 refused 151  lift h15 +13.3%   lift h300 +18.7%
+  Sep 23 fires 13 refused  59  lift h15 +19.0%   lift h300 +49.8%
+  Sep 24 fires  9 refused  46  lift h15 +17.4%   lift h300  -4.5%
+  Sep 25 fires  4 refused  45  lift h15 +22.6%   lift h300 +45.2%
+  Sep 26 fires  5 refused  49  lift h15  +8.5%   lift h300 -23.2%
+  Sep 27 fires  1 refused  13  lift h15  +3.8%   lift h300 -46.2%
+
+(d) the gate as a proxy, by window: post-seat crowd (outsiders' distinct buyers E1+1..15, mean), late demand (outsider ETH E1+16..60, median), dumps (bundle sold > 10% by +300)
+  sep1819  a15 wallets fires  6.4 refused  3.4   late ETH median fires  1.30 refused  0.11   dumps fires  14% refused  32%
+  sep2021  a15 wallets fires  4.4 refused  2.6   late ETH median fires  0.08 refused  0.08   dumps fires   7% refused  27%
+  sep2223  a15 wallets fires  4.5 refused  2.4   late ETH median fires  0.68 refused  0.22   dumps fires  15% refused  25%
+  sep23day a15 wallets fires  5.7 refused  2.2   late ETH median fires  0.19 refused  0.34   dumps fires   0% refused  31%
+  rec      a15 wallets fires  5.3 refused  2.2   late ETH median fires  0.25 refused  0.65   dumps fires  26% refused  12%
