@@ -831,7 +831,12 @@ stop between trades, i.e. when `sudo grep -c '"ev": "trade_done"' ...` equals th
 The sequencer's transaction intake holds a burst about a second on the biggest crowds and about one burst in twenty at
 random (report: live, the first fire). Every evening, with the four commands of 5q:
 
-    sudo python3 src/analysis/intake_readout.py /var/log/sniper/engine.jsonl | tail -8
+    sudo python3 src/analysis/intake_readout.py /var/log/sniper/engine.jsonl.1 /var/log/sniper/engine.jsonl | tail -8
+
+The log rotates at 00:00 UTC (logrotate, copytruncate): yesterday's events are in `engine.jsonl.1`, older days in
+`.2.gz` and on. `paper_day.py` reads them all by itself; `intake_readout.py` and any ad-hoc `grep` or python over the
+log must name `.1` too when the window crosses midnight (Sep 27: the night's first 76 minutes seemed empty until
+`.1` was read).
 
 One line per burst: the sequencer's reply time (median / max ms), filled or not, the fill shot (1 = the whole burst was
 late: filled behind everybody), the blocks the shots spread over, the crowd's rival shots. A reply median over 500 ms is a
