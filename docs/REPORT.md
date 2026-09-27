@@ -3605,3 +3605,16 @@ public node throttles the seat path under a launch's burst of reads; the seat pa
 bookkeeping poll at 10 s so the month's allowance holds (runbook 5q). Money lost to the switch: none (both fires were
 modelled losers); launches lost to it: at least two.
 
+*The aim's share, and the last sixty hours of fires (Sep 27, `reach_table.py`, `data/derived/live_vs_table/reach_table.txt`).*
+From the chain alone (the first named buy's block against the creation's place in its second) 72 of the fit windows' 73
+fires look reachable, but the same measure calls last night's two aim-skipped fires reachable too (k = 6, first named buy
+two blocks after the creation, the engine at the aim 509 and 628 ms after seeing the creation), so the engine's resolve
+takes longer than the chain shows and the aim's true share cannot be sized from the chain; it is between 1 in 73 and 2
+in 8, and step 6 of the evening reading accumulates it. The other number matters more: the rule's fires on the chain
+since Sep 24 (18 fires in 60 hours, the engine's own population, 300-block hold) average +3.5%, 39% win, 11% dead, about
+$1 a day at $13, against +26.3% on the four fit windows; the five fires of Sep 26-27 all lost (−41%, −3%, −11%, −51%,
+−38%). Eighteen fires cannot separate a bad stretch from a lost edge (the standard error of the mean is about 9 points),
+so the week at $13 is the test and its stop is set before the money is at stake: KILL_USD 24, i.e. the engine stops
+after about $10 of loss from the $33.66 the wallet and relay hold, and the stake does not rise until the running mean
+of the live fires is positive over at least 15 of them.
+

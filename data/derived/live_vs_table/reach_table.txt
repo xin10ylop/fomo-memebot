@@ -1,0 +1,31 @@
+
+=== fit (4 windows, 96 h): 73 of 73 fires priced in 125 s
+all fires (the tables)              73 fires  mean +26.3%  win 67%  dead  8%  $/day at $13    +56  at $200   +803
+reachable, j <= k-2                 72 fires  mean +26.3%  win 67%  dead  8%  $/day at $13    +56  at $200   +792
+reachable, j <= k-3 (stricter)      70 fires  mean +27.5%  win 67%  dead  7%  $/day at $13    +57  at $200   +807
+not reachable (j > k-2)              1 fires  mean +25.7%  win 100%  dead  0%  $/day at $13     +1  at $200    +12
+
+=== paper+live (Sep 24-27, 60 h): 18 of 18 fires priced in 32 s
+all fires (the tables)              18 fires  mean  +3.5%  win 39%  dead 11%  $/day at $13     +1  at $200     +3
+reachable, j <= k-2                 18 fires  mean  +3.5%  win 39%  dead 11%  $/day at $13     +1  at $200     +3
+reachable, j <= k-3 (stricter)      17 fires  mean  +4.8%  win 41%  dead 12%  $/day at $13     +2  at $200    +21
+not reachable (j > k-2)            0 fires
+  per fire (the engine's real disposition is in engine_vs_chain):
+   Sep 24 12:59 0xad1c5f76 k 6 j 1 reachable True  h300 -4.5%
+   Sep 24 14:52 0x2ad76f05 k 8 j 2 reachable True  h300 -13.6%
+   Sep 24 17:16 0x89f41f56 k 5 j 2 reachable True  h300 +2.3%
+   Sep 24 17:32 0x26d36c5e k 9 j 1 reachable True  h300 +14.1%
+   Sep 24 17:58 0xc63ab843 k 6 j 2 reachable True  h300 -8.7%
+   Sep 24 18:10 0xe65b85ad k 7 j 1 reachable True  h300 +58.0%
+   Sep 24 18:44 0x95f60349 k 8 j 1 reachable True  h300 -17.4%
+   Sep 24 19:20 0x9132d3db k 3 j 1 reachable True  h300 -19.9%
+   Sep 24 20:42 0x56e76663 k 6 j 2 reachable True  h300 +3.7%
+   Sep 25 00:33 0x9f834b70 k 4 j 1 reachable True  h300 +167.9%
+   Sep 25 16:24 0xd43ed726 k 7 j 2 reachable True  h300 +9.0%
+   Sep 25 20:47 0xe41e16e1 k 5 j 1 reachable True  h300 -10.7%
+   Sep 25 22:27 0x0a6c1259 k 7 j 1 reachable True  h300 +25.4%
+   Sep 26 09:24 0xc0190204 k 6 j 1 reachable True  h300 -41.4%
+   Sep 26 13:47 0xa80c4813 k 8 j 1 reachable True  h300 -2.8%
+   Sep 26 16:05 0xee486806 k 6 j 1 reachable True  h300 -11.0%
+   Sep 26 23:53 0x2b7508b0 k 6 j 2 reachable True  h300 -50.5%
+   Sep 27 00:10 0x80c0efae k 6 j 2 reachable True  h300 -37.6%
