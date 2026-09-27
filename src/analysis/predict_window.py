@@ -7,17 +7,18 @@ blind window before registration) are not applied here, so the engine fires on a
 import json, gzip, sys, os, math, time, statistics as st
 sys.argv_saved = list(sys.argv); raw_f, hg_f, la_f = sys.argv[1:4]; sys.argv = ["x", "0.76", "0.71"]
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "crowd_rules.py")).read().split("rules = [")[0])   # cums, view, at, US, STAKE, GAS
+HOLD = int(os.environ.get("HOLD", "300"))                                                                      # the hold the return column shows (HOLD=15 from Sep 27, runbook 5s)
 R = json.load(gzip.open(raw_f, "rt")) if raw_f.endswith(".gz") else json.load(open(raw_f)); H = {r["cv"]: r for r in json.load(open(hg_f))}
 L = {l["cv"].lower(): l for l in json.load(open(la_f))}
 rows = []
 for r in R:
-    h = H.get(r["cv"]); x = h.get("behind1_15_h300") if h else None
+    h = H.get(r["cv"]); x = h.get(f"behind1_15_h{HOLD}") if h else None
     if x is None or (isinstance(x, float) and math.isnan(x)): continue
     cw, cf = cums(r); k = r["k"]; rows.append({"cv": r["cv"], "T0": r["T0"], "k": k, "cf": cf, "ret": x, "hour": L.get(r["cv"], {}).get("hour")})
 rows.sort(key=lambda r: r["T0"])
 print(f"{len(rows)} qualifying launches scored, {time.strftime('%b %d %H:%M', time.gmtime(rows[0]['T0']))} - {time.strftime('%b %d %H:%M', time.gmtime(rows[-1]['T0']))} UTC")
 views = {"k-1": lambda r: at(r["cf"], r["k"] - 1), "tick's shot (0.76)": lambda r: at(r["cf"], view(r["k"], 0.76)), "k-2": lambda r: at(r["cf"], r["k"] - 2)}
-print(f"{'when':13s} {'launch':11s} {'k':>2s} {'fleets by block':24s} {'k-1':>4s} {'tick':>4s} {'k-2':>4s} {'behind1 h300':>13s}")
+print(f"{'when':13s} {'launch':11s} {'k':>2s} {'fleets by block':24s} {'k-1':>4s} {'tick':>4s} {'k-2':>4s} {'behind1 h' + str(HOLD):>13s}")
 for r in rows:
     print(f"{time.strftime('%b %d %H:%M', time.gmtime(r['T0'])):13s} {r['cv'][:10]:11s} {r['k']:2d} {str(r['cf']):24s} {views['k-1'](r):4d} {views[chr(116)+'ick'+chr(39)+'s shot (0.76)'](r) if False else at(r['cf'], view(r['k'], 0.76)):4d} {views['k-2'](r):4d} {r['ret']:+13.1%}")
 print()

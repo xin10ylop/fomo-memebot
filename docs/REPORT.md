@@ -3659,3 +3659,53 @@ the recent fires but the pooled 91 still lean to 300, weakly.
 lift over the refused at 300 blocks and the dump rate among fires against refused, per day. Live fills come about once
 a day, so the chain is the faster test by far.
 
+### 24.36 The edge check, round 2 (Sep 27): the strategy re-read from its discovery, by two more reviewers
+
+Brief: `data/derived/edge_check/BRIEF2.md` (the whole story, 24.28 to 24.35, with every artefact); reports and scripts
+`C/REPORT.md`, `D/REPORT.md`; both rebuilt round 1's tapes and pricing exactly and pulled the 85 fit tapes round 1
+lacked, so all 723 launches are priced on one yardstick (`model_eff`, second place in E1, $13, gas $0.33).
+
+**Verdict, unanimous: CHANGE the hold, keep the gate and the stake.** Fleets >= 2 at k-2 stays; sell 15 blocks after
+the seat instead of 300.
+
+| the gate's fires, by hold | fit, 73 fires | recent, 18-19 fires |
+|---|---|---|
+| 15 blocks | +16.2%, $1.78 a fire | +12.6-12.8%, $1.30 a fire |
+| 300 blocks (as run) | +26.3%, $3.09 a fire | +3.0-3.5%, $0.06 a fire |
+| lift over the refused, 15 blocks | +18.5 points | +15.3-15.7 points |
+| lift over the refused, 300 blocks | +26.8 points | −0.7 points |
+
+**Why 15 is the discovery's own horizon.** The September winners were +35% at 15 blocks and +12% at 600 (single
+fills), their gain complete by block 15; the late rise that justified the long hold belonged to the losers (+5% at
+15, +21-30% at 600), which is the market drifting, not the crowd. The real profit the strategy ever made was 12 fills
+on crowd launches held 15-31 blocks. 72% of the fit's 300-over-15 premium came from the Sep 22-23 window alone, the
+window the hold was chosen on; without it the fit reads +18.9% at 15 against +22.9% at 300. Both failure mechanisms
+of round 1 act after block 15: no recent fire's bundle dumped within 15 blocks (the five that dumped by 300 made
++28.6% at 15 and −17.8% at 300), and outsiders' buying in the first 15 blocks is unchanged (median 0.13 ETH in both
+periods) while after block 15 it fell from 0.57 to 0.19. The gate still predicts the crowd after the seat equally
+well in both periods (77-78% of fires). Selling anywhere between +10 and +20 blocks gives 12-15% recently, so a late
+landing costs little. The 15-block hold has the smallest spread (sd 0.33 against 0.58 at 300).
+
+**What does not pass.** Rules that name no fleet (wallet counts, shots, ETH shot, direct vs relay, the bundle's own
+sells as an exit, creator and template history, the post-seat crowd as a hold rule): nothing beats the rule on the fit
+at 15 blocks under 24.34's null-test discipline; at 300 blocks permuted features pass 59% of the time, so passes there
+mean nothing. The one exception is wallets >= 2 at k-2 (+12.2% fit, +12.8% recent), the same rule in the other unit.
+
+**Not proven, and small.** The recent 15-block mean rests on two fires (without them +4.6-4.9%, median +0.1%); the
+hold was chosen after seeing the recent data, so the test starts fresh; D measures a slow decline of the 15-block
+return of 2.5 points a day since Sep 18 (p 0.06), the last six fires +1.5-2.9% at 15 blocks. At today's launch supply
+(2.7-2.8 qualifying an hour, 0.32 fires an hour) the 15-block rule is worth $10 a day at $13 at full fill, about $3 a
+day with the live fill mix, and the last ten hours' supply (0.6-1.3 qualifying an hour) would halve that again.
+
+**The test both give.** A sequential probability ratio test on each chain-scored fire's 15-block return: the gas
+break-even +2.5% against +15.5%, sd 0.33, boundaries ±2.94; the lower boundary stops the strategy, the upper one
+allows the stake to rise; about 30-35 fires either way, 4-5 days at 0.32 fires an hour. Round 1's 300-block test runs
+alongside on the same fires. Back to paper if fewer than 3 of the first 10 live bursts fill (below a 30% fill rate the
+15-block rule loses money when landing third).
+
+**My reading.** I agree with the change. It is the horizon the real trades were made on, it is positive in both
+periods and on every fit window, and everything that broke since Sep 24 happens after block 15. It is also the first
+change to the rule since 24.31 that rests on more than one window, and I should have questioned the 300-block hold
+when 24.34's searches showed it was carried by one window. The expectation is now $3-10 a day at $13, not $56, and the
+sequential test decides within the week whether even that holds.
+

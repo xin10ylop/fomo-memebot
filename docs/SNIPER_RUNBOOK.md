@@ -921,3 +921,21 @@ $33.66 they held at the switch. Base for the status line unchanged (0.015412 ETH
 do the fires come at the predicted moments, do they fill where the model says, and is the running mean of the live
 fires positive after 15 of them. The stake rises only on the third. The daily commands are those of 5q (six steps).
 
+## 5s. The hold: 300 blocks to 15 (Sep 27, report 24.36)
+
+Two reviewers with the whole story, unanimous: keep the gate (fleets >= 2 at k-2) and the $13 stake, sell 15 blocks
+after the seat. Both periods positive at 15 (+16.2% fit, +12.7% recent), the failure mechanisms of 24.35 act after
+block 15, the September winners were complete by block 15. Switch (the engine reads the env at start):
+
+    sudo systemctl stop sniper-engine
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }
+    set_kv HOLD_BLOCKS 15
+    sudo systemctl start sniper-engine && sleep 5 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"hold_blocks": [0-9]*\|"kill_usd": [0-9.]*\|"stake": \[[^]]*\]'
+
+The evening reading scores the 15-block hold from here: `paper_day.py ... --hold 15`, and the prediction is built
+with `HOLD=15 python3 src/analysis/predict_window.py ...` (the h15 column of the same hold grid). Expectation at $13
+and today's supply: $3-10 a day. Stops: KILL_USD stays at about $10 under wallet plus relay; back to paper if fewer
+than 3 of the first 10 live bursts fill; the sequential test of 24.36 on the chain-scored fires (break-even +2.5%
+against +15.5%, sd 0.33, boundaries ±2.94) stops the strategy at its lower boundary and permits the stake step at its
+upper one, about 30-35 fires either way.
+
