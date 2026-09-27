@@ -3801,3 +3801,15 @@ $1,072 and $378. The live mix (half the bursts fill, a third of the fills land t
 a day needs the fit period's launch supply, about three times today's, and a $300 stake at full fill; at today's supply
 one seat tops out near $380 a day at full fill.
 
+*Reading, Sep 27 11:53-18:07 UTC (hold 9 live).* Every one of the 16 predicted launches is in the engine's log with a
+decision (`engine_vs_chain`: 0 holes). Nine gate refusals with 0-1 fleets (modelled −1.3% behind one at 11 blocks),
+three aim skips, three creator-supply skips, and one fire: 17:06 `0x4fed869a` (k = 3), where the engine registered the
+curve with the feed at block 1 and counted 2 fleets from that same block, so shots in the registration block DO count
+when the registration wins the race against the feed loop (24.38's proxy, which drops the whole block, is the
+conservative side; at 12:47 the same race was lost). The gate opened at +30 ms, the tick's own moment, so the 25 shots
+that left landed behind the five fleets already in the seat block; at that last position the curve gave 693,526 tokens
+against a minOut of 729,366 and every shot reverted: no fill, $0.12 of gas, against a model of +47% in second place
+and −2.5% at the last. P&L −$0.80. The chain's answer and the engine's agree on all 16; the one burst shows the case
+the tables cannot price, a crowd that becomes visible only at the tick, which the guard turns into gas instead of a
+back-of-block fill.
+
