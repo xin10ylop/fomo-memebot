@@ -3621,4 +3621,6 @@ of the live fires is positive over at least 15 of them.
 **Live ended Sep 27 09:02 UTC, back to paper.** Total live: two bursts, one fill, −$0.68. The machine did what the
 paper does; the edge measured on the four fit windows has not appeared in the 60 hours since (18 fires, +3.5%, the
 last five negative). The rule keeps being scored on the chain daily; re-entry criteria in runbook 5r.
+Live again at 09:03 UTC the same morning at the owner's decision, at $13 with the stop at KILL_USD 24 (about $10 of
+loss); the recommendation to stay in paper until the rule's trailing 20 fires are positive stands on the record.
 

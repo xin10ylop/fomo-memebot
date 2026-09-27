@@ -914,3 +914,10 @@ Re-entry: `SEND_MODULE=/etc/sniper/send_step.py` (runbook 5q), at $13, only when
 chain are positive on average with at least 55% wins, and with KILL_USD set to about $10 under the wallet-plus-relay
 figure at the switch. Not before, whatever a single good day looks like.
 
+### 5r, live again, Sep 27 09:03 UTC (the owner's decision)
+
+Live at $13 with KILL_USD 24: the engine stops itself when wallet plus relay fall under $24, about $10 under the
+$33.66 they held at the switch. Base for the status line unchanged (0.015412 ETH). The week's questions, in order:
+do the fires come at the predicted moments, do they fill where the model says, and is the running mean of the live
+fires positive after 15 of them. The stake rises only on the third. The daily commands are those of 5q (six steps).
+
