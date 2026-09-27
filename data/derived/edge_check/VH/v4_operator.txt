@@ -1,0 +1,42 @@
+  Sep 18 14:41 sep1819    0x732ef190 bundle 4.2327 dev 0.0530 sum 4.286 named 15 fire_eng False fire_tab False
+  Sep 19 03:19 sep1819    0x2bcd5d8c bundle 1.6408 dev 0.0912 sum 1.732 named 7 fire_eng False fire_tab False
+  Sep 21 01:32 sep2021    0x0e61f225 bundle 4.2327 dev 0.0530 sum 4.286 named 15 fire_eng True fire_tab True
+  Sep 21 23:51 sep2021    0x033bc29a bundle 4.2329 dev 0.0528 sum 4.286 named 25 fire_eng True fire_tab True
+  Sep 22 00:36 sep2021    0xcee448cc bundle 4.1375 dev 0.1924 sum 4.330 named 20 fire_eng True fire_tab True
+  Sep 22 00:55 sep2021    0x0a8b7499 bundle 4.1793 dev 0.1506 sum 4.330 named 20 fire_eng False fire_tab False
+  Sep 22 17:24 sep2223    0x59217e68 bundle 1.3692 dev 0.0353 sum 1.405 named 5 fire_eng False fire_tab False
+  Sep 22 22:27 sep2223    0xc7349e7e bundle 4.3035 dev 0.0264 sum 4.330 named 13 fire_eng True fire_tab True
+  Sep 23 06:00 sep2223    0xe8bcf407 bundle 4.2193 dev 0.1106 sum 4.330 named 24 fire_eng True fire_tab True
+  Sep 23 16:36 sep23day   0x6c1b04e3 bundle 4.2788 dev 0.0069 sum 4.286 named 19 fire_eng False fire_tab False
+  Sep 23 19:28 sep23day   0x0bf85d57 bundle 4.2684 dev 0.0173 sum 4.286 named 13 fire_eng True fire_tab True
+  Sep 23 19:52 sep23day   0x6ff3cd2b bundle 4.1440 dev 0.0530 sum 4.197 named 13 fire_eng True fire_tab True
+  Sep 25 20:05 sep25eve   0x8aba714f bundle 4.2577 dev 0.0722 sum 4.330 named 22 fire_eng False fire_tab False
+  Sep 26 01:25 sep26night 0xeb90afaa bundle 4.2143 dev 0.0714 sum 4.286 named 22 fire_eng False fire_tab False
+  Sep 26 04:09 sep26night 0x419e7c20 bundle 2.5068 dev 0.0912 sum 2.598 named 7 fire_eng False fire_tab False
+  Sep 26 16:05 sep26pm    0xee486806 bundle 4.2359 dev 0.0718 sum 4.308 named 22 fire_eng False fire_tab True
+  Sep 26 23:20 sep27night 0xca4c39f2 bundle 1.6465 dev 0.0175 sum 1.664 named 11 fire_eng False fire_tab False
+  Sep 27 13:01 sep27pm    0x6bc6d430 bundle 4.2327 dev    n/a sum    n/a named 4 fire_eng False fire_tab False
+  Sep 27 18:21 sep27eve   0x86d1ab77 bundle 4.2327 dev    n/a sum    n/a named 14 fire_eng False fire_tab False
+  Sep 27 18:42 sep27eve   0xfa8efc53 bundle 1.6465 dev    n/a sum    n/a named 11 fire_eng False fire_tab False
+  Sep 27 21:12 sep27eve   0xa6929b03 bundle 4.2327 dev    n/a sum    n/a named 15 fire_eng True fire_tab True
+  Sep 27 21:27 sep27eve   0x96803325 bundle 4.2327 dev    n/a sum    n/a named 15 fire_eng True fire_tab True
+22 launches, 231 pairs, 6 with any shared named wallet, 6 with >= 3 shared
+   Sep 22 00:36 0xcee448cc (4.137) x Sep 22 00:55 0x0a8b7499 (4.179): 20 shared (named 20/20)
+   Sep 25 20:05 0x8aba714f (4.258) x Sep 26 01:25 0xeb90afaa (4.214): 22 shared (named 22/22)
+   Sep 25 20:05 0x8aba714f (4.258) x Sep 26 16:05 0xee486806 (4.236): 20 shared (named 22/22)
+   Sep 26 01:25 0xeb90afaa (4.214) x Sep 26 16:05 0xee486806 (4.236): 20 shared (named 22/22)
+   Sep 26 23:20 0xca4c39f2 (1.647) x Sep 27 18:42 0xfa8efc53 (1.647): 11 shared (named 11/11)
+   Sep 27 21:12 0xa6929b03 (4.233) x Sep 27 21:27 0x96803325 (4.233): 15 shared (named 15/15)
+
+fires dropped by the cap (engine or tables): 10; overlapping pairs among them:
+   Sep 27 21:12 0xa6929b03 x Sep 27 21:27 0x96803325: 15
+   Sep 21 01:32 0x0e61f225: earlier launches sharing >= 3 named: 0 
+   Sep 21 23:51 0x033bc29a: earlier launches sharing >= 3 named: 0 
+   Sep 22 00:36 0xcee448cc: earlier launches sharing >= 3 named: 0 
+   Sep 22 22:27 0xc7349e7e: earlier launches sharing >= 3 named: 0 
+   Sep 23 06:00 0xe8bcf407: earlier launches sharing >= 3 named: 0 
+   Sep 23 19:28 0x0bf85d57: earlier launches sharing >= 3 named: 0 
+   Sep 23 19:52 0x6ff3cd2b: earlier launches sharing >= 3 named: 0 
+   Sep 26 16:05 0xee486806: earlier launches sharing >= 3 named: 2 Sep 25 20:05 0x8aba714f b 4.26, Sep 26 01:25 0xeb90afaa b 4.21
+   Sep 27 21:12 0xa6929b03: earlier launches sharing >= 3 named: 0 
+   Sep 27 21:27 0x96803325: earlier launches sharing >= 3 named: 1 Sep 27 21:12 0xa6929b03 b 4.23

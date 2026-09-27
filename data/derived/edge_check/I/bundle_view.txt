@@ -1,0 +1,82 @@
+launches with bundle > 1.5 ETH: bundle ETH on the chain by block k-5 / k-2 / whole creation second (tape), fires marked
+  Sep 18 14:41 0x732ef190 sep1819    k  9 bundle 4.233: by k-5 4.233, by k-2 4.233, all 4.233  fire ..  h11 -10.0% h15 -10.0% h300 -10.0%
+  Sep 18 17:50 0xaddd8312 sep1819    k  5 bundle 1.767: by k-5 0.000, by k-2 1.767, all 1.767  fire ..  h11  -4.1% h15  -4.1% h300 -13.3%
+  Sep 18 18:15 0x429eca1b sep1819    k  5 bundle 2.664: by k-5 0.000, by k-2 2.664, all 2.664  fire ..  h11  -9.3% h15  -9.3% h300 -18.3%
+  Sep 18 19:36 0x8a5732e2 sep1819    k  3 bundle 1.697: by k-5 0.000, by k-2 1.697, all 1.697  fire ..  h11  -2.1% h15  +3.6% h300 -17.3%
+  Sep 18 20:12 0xd40f1361 sep1819    k  8 bundle 1.767: by k-5 1.767, by k-2 1.767, all 1.767  fire ..  h11  -7.5% h15  -8.6% h300 +115.4%
+  Sep 18 20:15 0xe28fc4fd sep1819    k  6 bundle 2.580: by k-5 2.580, by k-2 2.580, all 2.580  fire ..  h11 -11.1% h15 -11.1% h300 -86.9%
+  Sep 18 20:17 0x8d93dd4c sep1819    k  8 bundle 1.767: by k-5 1.767, by k-2 1.767, all 1.767  fire ..  h11 -10.0% h15 -10.0% h300 -10.2%
+  Sep 18 22:05 0x8a944df9 sep1819    k  7 bundle 2.772: by k-5 2.772, by k-2 2.772, all 2.772  fire TE  h11 +22.1% h15  +7.8% h300  -4.7%
+  Sep 18 22:25 0x578ef4c5 sep1819    k  7 bundle 1.924: by k-5 1.924, by k-2 1.924, all 1.924  fire TE  h11 +14.9% h15 +14.9% h300 +92.0%
+  Sep 18 22:27 0x2815d974 sep1819    k  9 bundle 2.758: by k-5 2.758, by k-2 2.758, all 2.758  fire TE  h11 +13.3% h15 +13.3% h300  +0.9%
+  Sep 19 03:19 0x2bcd5d8c sep1819    k  9 bundle 1.641: by k-5 1.641, by k-2 1.641, all 1.641  fire ..  h11 -10.3% h15 -10.3% h300 -17.7%
+  Sep 20 18:56 0xaff83cc3 sep2021    k  8 bundle 1.908: by k-5 1.908, by k-2 1.908, all 1.908  fire ..  h11 +77.5% h15 +46.9% h300 +66.0%
+  Sep 20 21:40 0x602c2a55 sep2021    k  5 bundle 1.507: by k-5 0.000, by k-2 1.507, all 1.507  fire ..  h11 +11.5% h15 +14.2% h300 -22.4%
+  Sep 21 01:32 0x0e61f225 sep2021    k  4 bundle 4.233: by k-5 0.000, by k-2 4.233, all 4.233  fire TE  h11 -10.0% h15 -10.0% h300 -10.0%
+  Sep 21 18:26 0x83135d5a sep2021    k  6 bundle 1.592: by k-5 1.592, by k-2 1.592, all 1.592  fire ..  h11  -9.9% h15  -9.9% h300  -7.4%
+  Sep 21 20:10 0xe52ce83c sep2021    k  8 bundle 1.568: by k-5 1.568, by k-2 1.568, all 1.568  fire ..  h11 +21.6% h15 +27.4% h300 +180.9%
+  Sep 21 21:10 0x982ec685 sep2021    k  5 bundle 1.697: by k-5 0.000, by k-2 1.697, all 1.697  fire ..  h11  -5.8% h15  -5.3% h300 -14.8%
+  Sep 21 23:51 0x033bc29a sep2021    k  8 bundle 4.233: by k-5 4.233, by k-2 4.233, all 4.233  fire TE  h11 -10.0% h15 -10.0% h300 -10.0%
+  Sep 22 00:11 0x5703b4d7 sep2021    k  2 bundle 2.015: by k-5 0.000, by k-2 0.000, all 2.015  fire ..  h11  -0.2% h15  -0.2% h300 -21.0%
+  Sep 22 00:18 0x9c861776 sep2021    k  4 bundle 3.131: by k-5 0.000, by k-2 3.131, all 3.131  fire ..  h11 -13.0% h15 -13.2% h300 -33.1%
+  Sep 22 00:36 0xcee448cc sep2021    k  9 bundle 4.137: by k-5 4.137, by k-2 4.137, all 4.137  fire TE  h11 -11.9% h15 -11.9% h300 -11.9%
+  Sep 22 00:55 0x0a8b7499 sep2021    k  1 bundle 4.179: by k-5 0.000, by k-2 0.000, all 4.179  fire ..  h11 -11.9% h15 -11.9% h300 -11.9%
+  Sep 22 07:19 0x43b75c2c sep2223    k  3 bundle 1.697: by k-5 0.000, by k-2 1.697, all 1.697  fire ..  h11 +44.3% h15 +25.4% h300 +20.2%
+  Sep 22 11:46 0x123ba0a9 sep2223    k  2 bundle 2.405: by k-5 0.000, by k-2 0.000, all 2.405  fire ..  h11 +14.7% h15 +15.6% h300 -17.1%
+  Sep 22 17:00 0x28371ffe sep2223    k  8 bundle 1.697: by k-5 1.697, by k-2 1.697, all 1.697  fire TE  h11 +11.1% h15  -3.0% h300 +39.8%
+  Sep 22 17:39 0xf475dfc2 sep2223    k  7 bundle 1.545: by k-5 1.545, by k-2 1.545, all 1.545  fire ..  h11  -0.9% h15 +23.7% h300 +48.8%
+  Sep 22 18:06 0x5c2f7152 sep2223    k  1 bundle 1.688: by k-5 0.000, by k-2 0.000, all 1.688  fire ..  h11 +30.5% h15 +11.1% h300 +109.8%
+  Sep 22 18:44 0xfe84adae sep2223    k  1 bundle 2.102: by k-5 0.000, by k-2 0.000, all 2.102  fire ..  h11 +49.7% h15 +55.7% h300 -12.2%
+  Sep 22 19:59 0xe49ffece sep2223    k  1 bundle 1.697: by k-5 0.000, by k-2 0.000, all 1.697  fire ..  h11  -8.3% h15  -8.3% h300 -79.6%
+  Sep 22 20:16 0x84fb8bc8 sep2223    k  5 bundle 2.279: by k-5 0.000, by k-2 0.000, all 2.279  fire ..  h11  -0.4% h15  -0.4% h300  -0.2%
+  Sep 22 20:46 0xac8a2c12 sep2223    k  1 bundle 4.024: by k-5 0.000, by k-2 0.000, all 4.024  fire ..  h11  -8.6% h15  -8.6% h300  -2.9%
+  Sep 22 21:07 0xde81c961 sep2223    k  5 bundle 2.169: by k-5 0.000, by k-2 2.169, all 2.169  fire ..  h11 +24.4% h15 +25.4% h300 +98.8%
+  Sep 22 21:11 0x778b0c2a sep2223    k  4 bundle 2.301: by k-5 0.000, by k-2 2.301, all 2.301  fire ..  h11  +6.4% h15  +6.4% h300  -6.3%
+  Sep 22 21:46 0xfcf83691 sep2223    k  2 bundle 1.568: by k-5 0.000, by k-2 0.000, all 1.568  fire ..  h11 +48.9% h15 +22.0% h300 +80.9%
+  Sep 22 22:27 0xc7349e7e sep2223    k  4 bundle 4.304: by k-5 0.000, by k-2 4.304, all 4.304  fire TE  h11 -11.9% h15 -11.9% h300 -11.9%
+  Sep 22 22:36 0x077cccf4 sep2223    k  5 bundle 2.158: by k-5 0.000, by k-2 2.158, all 2.158  fire TE  h11 +105.9% h15 +105.9% h300 +105.9%
+  Sep 23 03:52 0x06be811d sep2223    k  9 bundle 2.004: by k-5 0.000, by k-2 2.004, all 2.004  fire ..  h11 -11.9% h15 -11.9% h300 -16.9%
+  Sep 23 04:47 0xcf797677 sep2223    k  4 bundle 2.169: by k-5 0.000, by k-2 2.169, all 2.169  fire TE  h11  +2.8% h15  +2.8% h300 +66.5%
+  Sep 23 06:00 0xe8bcf407 sep2223    k  8 bundle 4.219: by k-5 4.219, by k-2 4.219, all 4.219  fire TE  h11 -11.9% h15 -11.9% h300 -11.9%
+  Sep 23 13:31 0xf5737a75 sep23day   k  7 bundle 1.563: by k-5 1.563, by k-2 1.563, all 1.563  fire ..  h11 -11.9% h15 -11.9% h300 -25.5%
+  Sep 23 14:42 0x74608565 sep23day   k  3 bundle 3.125: by k-5 0.000, by k-2 3.125, all 3.125  fire ..  h11 -11.6% h15 -19.9% h300 -35.3%
+  Sep 23 16:20 0x0352d69e sep23day   k  9 bundle 2.169: by k-5 2.169, by k-2 2.169, all 2.169  fire TE  h11 +56.3% h15 +37.8% h300 +72.5%
+  Sep 23 16:36 0x6c1b04e3 sep23day   k  2 bundle 4.279: by k-5 0.000, by k-2 0.000, all 4.279  fire ..  h11 -10.0% h15 -10.0% h300 -10.0%
+  Sep 23 19:03 0x1e0ea463 sep23day   k  1 bundle 1.870: by k-5 0.000, by k-2 0.000, all 1.870  fire ..  h11 +89.1% h15 +64.0% h300 +11.0%
+  Sep 23 19:09 0x38bd4e62 sep23day   k  2 bundle 2.169: by k-5 0.000, by k-2 0.000, all 2.169  fire ..  h11 +66.7% h15 +66.7% h300 +66.7%
+  Sep 23 19:28 0x0bf85d57 sep23day   k  6 bundle 4.268: by k-5 4.268, by k-2 4.268, all 4.268  fire TE  h11 -10.0% h15 -10.0% h300 -10.0%
+  Sep 23 19:52 0x6ff3cd2b sep23day   k  6 bundle 4.144: by k-5 4.144, by k-2 4.144, all 4.144  fire TE  h11 -10.0% h15 -10.0% h300 -10.0%
+  Sep 24 14:53 0x2c9aef6e sep24paper k  2 bundle 1.767: by k-5 0.000, by k-2 0.000, all 1.767  fire ..  h11  -8.4% h15  -8.4% h300 +31.0%
+  Sep 24 17:32 0x26d36c5e sep24paper k  9 bundle 1.899: by k-5 1.899, by k-2 1.899, all 1.899  fire TE  h11 -13.8% h15 -13.8% h300 +14.1%
+  Sep 24 18:05 0xcd182c24 sep24paper k  5 bundle 2.691: by k-5 0.000, by k-2 2.691, all 2.691  fire ..  h11 -10.1% h15 -21.3% h300 -40.8%
+  Sep 24 18:24 0xd0a8c5aa sep24paper k  4 bundle 1.500: by k-5 0.000, by k-2 0.000, all 1.500  fire ..  h11  -4.9% h15  -1.1% h300 -10.2%
+  Sep 24 19:51 0x4c03de0b sep24paper k  7 bundle 2.266: by k-5 2.266, by k-2 2.266, all 2.266  fire ..  h11 -11.1% h15 -11.1% h300 -21.6%
+  Sep 24 20:23 0x057d2437 sep24paper k  4 bundle 1.545: by k-5 0.000, by k-2 1.545, all 1.545  fire ..  h11 +51.7% h15 +54.5% h300 +189.0%
+  Sep 24 20:46 0x7314c766 sep24paper k  5 bundle 1.697: by k-5 0.000, by k-2 1.697, all 1.697  fire ..  h11 -11.9% h15 -11.9% h300 -19.8%
+  Sep 25 00:33 0x9f834b70 sep25night k  4 bundle 1.545: by k-5 0.000, by k-2 1.545, all 1.545  fire TE  h11 +82.3% h15 +70.0% h300 +167.9%
+  Sep 25 02:15 0x980a17cf sep25night k  1 bundle 1.545: by k-5 0.000, by k-2 0.000, all 1.545  fire ..  h11 +10.1% h15 +35.5% h300 +133.0%
+  Sep 25 02:18 0xc8fd95a3 sep25night k  7 bundle 1.545: by k-5 1.545, by k-2 1.545, all 1.545  fire ..  h11 -21.5% h15 -21.8% h300 -78.4%
+  Sep 25 07:12 0x4f9427c3 sep25am    k  2 bundle 1.936: by k-5 0.000, by k-2 0.000, all 1.936  fire ..  h11  -9.7% h15  -9.7% h300 -12.9%
+  Sep 25 15:01 0x0a327f7c sep25pm    k  6 bundle 2.097: by k-5 2.097, by k-2 2.097, all 2.097  fire ..  h11 -10.3% h15  -7.8% h300  -2.8%
+  Sep 25 15:28 0xba059c17 sep25pm    k  9 bundle 1.776: by k-5 1.776, by k-2 1.776, all 1.776  fire ..  h11 -11.9% h15 -11.9% h300 -11.9%
+  Sep 25 17:33 0x218330b1 sep25pm    k  6 bundle 2.099: by k-5 2.099, by k-2 2.099, all 2.099  fire ..  h11 -10.1% h15 -18.4% h300 +17.0%
+  Sep 25 20:05 0x8aba714f sep25eve   k  3 bundle 4.258: by k-5 0.000, by k-2 4.258, all 4.258  fire ..  h11 -11.9% h15 -11.9% h300 -11.9%
+  Sep 25 20:07 0xf45fa520 sep25eve   k  9 bundle 1.545: by k-5 1.545, by k-2 1.545, all 1.545  fire ..  h11  +9.2% h15 +24.2% h300 +67.3%
+  Sep 26 01:25 0xeb90afaa sep26night k  3 bundle 4.214: by k-5 0.000, by k-2 4.214, all 4.214  fire ..  h11 -10.0% h15 -10.0% h300 -10.0%
+  Sep 26 04:09 0x419e7c20 sep26night k  5 bundle 2.507: by k-5 0.000, by k-2 2.507, all 2.507  fire ..  h11 -11.1% h15 -11.1% h300  -4.4%
+  Sep 26 11:29 0x0c55377f sep26am    k  2 bundle 3.386: by k-5 0.000, by k-2 0.000, all 3.386  fire ..  h11 -10.6% h15 -10.6% h300 -24.5%
+  Sep 26 16:05 0xee486806 sep26pm    k  6 bundle 4.236: by k-5 4.236, by k-2 4.236, all 4.236  fire T.  h11 -11.0% h15 -11.0% h300 -11.0%
+  Sep 26 23:20 0xca4c39f2 sep27night k  6 bundle 1.647: by k-5 1.647, by k-2 1.647, all 1.647  fire ..  h11  -6.8% h15 -20.5% h300 -36.7%
+  Sep 27 13:01 0x6bc6d430 sep27pm    k 1 bundle 4.233  (no tape)  fire ..
+  Sep 27 16:27 0xc3bffc1f sep27pm    k 3 bundle 2.187  (no tape)  fire ..
+  Sep 27 18:21 0x86d1ab77 sep27eve   k 3 bundle 4.233  (no tape)  fire ..
+  Sep 27 18:42 0xfa8efc53 sep27eve   k 8 bundle 1.647  (no tape)  fire ..
+  Sep 27 19:16 0x50ffa5f4 sep27eve   k 3 bundle 1.545  (no tape)  fire ..
+  Sep 27 21:12 0xa6929b03 sep27eve   k 8 bundle 4.233  (no tape)  fire TE
+  Sep 27 21:27 0x96803325 sep27eve   k 7 bundle 4.233  (no tape)  fire TE
+
+flat launches (seat return within 0.2 points of the fee floor (1 - tier - 6.18%)(1 - tier) - 1) by bundle size, all launches:
+  bundle (0.0, 1.0] ETH: 629 launches, flat at h15 152 ( 24%), flat at h300  24 (  4%); tables' fires 68, flat at h15 3
+  bundle (1.0, 2.0] ETH:  88 launches, flat at h15  12 ( 14%), flat at h300   4 (  5%); tables' fires 15, flat at h15 0
+  bundle (2.0, 3.0] ETH:  21 launches, flat at h15   1 (  5%), flat at h300   0 (  0%); tables' fires 5, flat at h15 0
+  bundle (3.0, 99.0] ETH:  21 launches, flat at h15  17 ( 81%), flat at h300  17 ( 81%); tables' fires 10, flat at h15 10

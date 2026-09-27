@@ -1,0 +1,55 @@
+population: fit 563, rec 172, late 24; bundle missing 0
+fit/rec launches with no curves return (silently dropped by stats?): 0
+late fires with no h15 price: []
+hours: rec 66.79, rec+late 76.23
+
+pop     h  period    filter   n   mean   win  dead   $total   $/day
+engine  11 fit       none     56 +23.0%  73%   2%  +149.01  +37.25
+engine  11 fit       cap3.0   49 +27.8%  84%   2%  +161.18  +40.29
+engine  11 rec       none     13 +22.2%  77%   0%   +33.26  +11.95
+engine  11 rec       cap3.0   13 +22.2%  77%   0%   +33.26  +11.95
+engine  15 fit       none     56 +18.6%  68%   2%  +117.15  +29.29
+engine  15 fit       cap3.0   49 +22.8%  78%   2%  +129.31  +32.33
+engine  15 rec       none     13 +18.0%  62%   0%   +26.13   +9.39
+engine  15 rec       cap3.0   13 +18.0%  62%   0%   +26.13   +9.39
+engine  15 rec+late  none     17 +13.6%  53%   0%   +24.48   +7.71
+engine  15 rec+late  cap3.0   15 +16.8%  60%   0%   +27.75   +8.74
+tables  11 fit       none     73 +19.5%  68%   3%  +160.93  +40.23
+tables  11 fit       cap3.0   66 +22.7%  76%   3%  +173.09  +43.27
+tables  11 rec       none     19 +15.7%  68%   0%   +32.56  +11.70
+tables  11 rec       cap3.0   18 +17.2%  72%   0%   +34.32  +12.33
+tables  15 fit       none     73 +16.2%  66%   3%  +129.88  +32.47
+tables  15 fit       cap3.0   66 +19.1%  73%   3%  +142.04  +35.51
+tables  15 rec       none     19 +12.6%  58%   0%   +24.76   +8.90
+tables  15 rec       cap3.0   18 +13.9%  61%   0%   +26.52   +9.53
+tables  15 rec+late  none     25 +10.0%  52%   0%   +24.09   +7.58
+tables  15 rec+late  cap3.0   22 +12.7%  59%   0%   +29.11   +9.16
+
+fit engine fires with bundle in (2,3]: 5 mean h11 +40.1%: 2.772:+22.1%, 2.758:+13.3%, 2.158:+105.9%, 2.169:+2.8%, 2.169:+56.3%
+fit engine fires with bundle in (1.5,3]: 7 h11 2.158:+105.9%, 2.169:+56.3%, 2.772:+22.1%, 1.924:+14.9%, 2.758:+13.3%, 1.697:+11.1%, 2.169:+2.8%
+
+launches above 3 ETH: 21; h15 max -8.6%; flat h15==h300: 17
+
+capped fires (either count) : whole-second bundle / by k-2 / engine-close (stop at first taxed outsider buy) / engine-close by k-2
+  0x0e61f225 fit  k 4 bundle 4.233 / k-2 4.233 / eclose 4.233 / eclose k-2 4.233
+  0x033bc29a fit  k 8 bundle 4.233 / k-2 4.233 / eclose 4.233 / eclose k-2 4.233
+  0xcee448cc fit  k 9 bundle 4.137 / k-2 4.137 / eclose 4.137 / eclose k-2 4.137
+  0xc7349e7e fit  k 4 bundle 4.304 / k-2 4.304 / eclose 4.304 / eclose k-2 4.304
+  0xe8bcf407 fit  k 8 bundle 4.219 / k-2 4.219 / eclose 4.219 / eclose k-2 4.219
+  0x0bf85d57 fit  k 6 bundle 4.268 / k-2 4.268 / eclose 4.268 / eclose k-2 4.268
+  0x6ff3cd2b fit  k 6 bundle 4.144 / k-2 4.144 / eclose 4.144 / eclose k-2 4.144
+  0xee486806 rec  k 6 bundle 4.236 / k-2 4.236 / eclose 4.236 / eclose k-2 4.236
+  0xa6929b03 late k 8 bundle 4.233  NO TAPE
+  0x96803325 late k 7 bundle 4.233  NO TAPE
+fires whose cap-3.0 decision changes on the k-2 view: 0
+fires whose cap-3.0 decision changes on the engine-close k-2 view: 0 []
+
+causal template: brute-force rebuild (only strictly earlier launches) vs I's incremental flags: 0 disagreements of 759; flagged 67
+
+null, cap 3.0, 20,000 draws, seeds 0/1/2 (p_fit, p_rec, p_both):
+  engine  h11 rec       drop 7/0: (0.0004, 1.000, 0.0004)  (0.0007, 1.000, 0.0007)  (0.0005, 1.000, 0.0005)
+  engine  h15 rec       drop 7/0: (0.0024, 1.000, 0.0024)  (0.0032, 1.000, 0.0032)  (0.0023, 1.000, 0.0023)
+  engine  h15 rec+late  drop 7/2: (0.0027, 0.036, 0.0001)  (0.0021, 0.034, 0.0000)  (0.0027, 0.037, 0.0001)
+  tables  h11 rec       drop 7/1: (0.0027, 0.102, 0.0003)  (0.0022, 0.108, 0.0003)  (0.0031, 0.101, 0.0003)
+  tables  h15 rec       drop 7/1: (0.0054, 0.102, 0.0004)  (0.0059, 0.108, 0.0006)  (0.0059, 0.101, 0.0005)
+  tables  h15 rec+late  drop 7/3: (0.0053, 0.010, 0.0001)  (0.0061, 0.010, 0.0001)  (0.0050, 0.010, 0.0001)

@@ -960,3 +960,19 @@ sell, which costs up to a second). The stops of 5s stand: KILL_USD 24, back to p
 bursts, the sequential test on the chain-scored fires (H0 +2.5%, H1 about +19%, sd 0.34).
 
 Switched at 11:53 UTC on Sep 27: version 6.5, stake 13, hold_blocks 9, kill_usd 24. No fill since the 11:17 restart at 15, so the 9-block test counts from here.
+
+## 5u. The bundle cap: BUNDLE_MAX_ETH 3.0 (Sep 28, report 24.39)
+
+Two reviewers and two verifiers, unanimous: refuse launches whose creation-second bundle is over 3.0 ETH (one serial
+operator's 4.2 ETH template, flat at the fee floor on all 21 such launches). Never worse in any window, chosen on one
+period and read on the other, null 0 of 2,000. Switch (the engine reads the env at start; no fill should be open:
+`sudo grep -c '"ev": "trade_done"'` equals the trade_decision count):
+
+    sudo systemctl stop sniper-engine
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }
+    set_kv BUNDLE_MAX_ETH 3.0
+    sudo systemctl start sniper-engine && sleep 5 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"hold_blocks": [0-9]*\|"kill_usd": [0-9.]*\|"stake": \[[^]]*\]\|"bundle_max_eth": [0-9.]*'
+
+The prediction's population still lists these launches (e1_multi has no cap); the engine's refusal reads
+`bundle N ETH > 3.0` in engine_vs_chain, a PRE line, as intended.
+

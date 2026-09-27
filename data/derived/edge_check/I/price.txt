@@ -1,0 +1,249 @@
+hours: fit 96.0; rec 66.8 (window bounds; the launches' own T0 spans give 54.4); rec+late 76.2 (T0 spans 62.6)
+
+######## ENGINE population, exit h11 ########
+
+  -- fit (96.0 h) --
+  none          56 fires  mean +23.0%  med +14.1%  win  73%  dead  2%  $+149.01 total  $+37.25/day   d$/day  +0.00   removes  0
+  cap1.0        34 fires  mean +23.7%  med +17.2%  win  82%  dead  3%  $ +93.44 total  $+23.36/day   d$/day -13.89   removes 22: mean +22.0% $+55.57
+  cap1.5        42 fires  mean +27.1%  med +17.9%  win  81%  dead  2%  $+134.06 total  $+33.52/day   d$/day  -3.74   removes 14: mean +10.8% $+14.95
+  cap2.0        44 fires  mean +26.5%  med +17.2%  win  82%  dead  2%  $+136.78 total  $+34.20/day   d$/day  -3.06   removes 12: mean +10.4% $+12.23
+  cap3.0        49 fires  mean +27.8%  med +17.7%  win  84%  dead  2%  $+161.18 total  $+40.29/day   d$/day  +3.04   removes  7: mean -10.8% $-12.16
+  tmpl          52 fires  mean +23.7%  med +14.1%  win  71%  dead  2%  $+142.74 total  $+35.68/day   d$/day  -1.57   removes  4: mean +14.6% $ +6.28
+  tmpl+cap1.0   30 fires  mean +24.9%  med +17.2%  win  80%  dead  3%  $ +87.16 total  $+21.79/day   d$/day -15.46   removes 26: mean +20.8% $+61.85
+  tmpl+cap1.5   38 fires  mean +28.4%  med +19.6%  win  79%  dead  3%  $+127.78 total  $+31.95/day   d$/day  -5.31   removes 18: mean +11.6% $+21.23
+  tmpl+cap2.0   40 fires  mean +27.6%  med +17.2%  win  80%  dead  2%  $+130.50 total  $+32.63/day   d$/day  -4.63   removes 16: mean +11.4% $+18.51
+  tmpl+cap3.0   45 fires  mean +29.0%  med +17.7%  win  82%  dead  2%  $+154.90 total  $+38.72/day   d$/day  +1.47   removes 11: mean  -1.6% $ -5.88
+
+  -- rec (66.8 h) --
+  none          13 fires  mean +22.2%  med +11.9%  win  77%  dead  0%  $ +33.26 total  $+11.95/day   d$/day  +0.00   removes  0
+  cap1.0         9 fires  mean +15.8%  med +11.9%  win  78%  dead  0%  $ +15.55 total  $ +5.59/day   d$/day  -6.36   removes  4: mean +36.6% $+17.71
+  cap1.5        11 fires  mean +20.0%  med +11.9%  win  82%  dead  0%  $ +25.02 total  $ +8.99/day   d$/day  -2.96   removes  2: mean +34.2% $ +8.24
+  cap2.0        13 fires  mean +22.2%  med +11.9%  win  77%  dead  0%  $ +33.26 total  $+11.95/day   d$/day  +0.00   removes  0
+  cap3.0        13 fires  mean +22.2%  med +11.9%  win  77%  dead  0%  $ +33.26 total  $+11.95/day   d$/day  +0.00   removes  0
+  tmpl           8 fires  mean +30.8%  med +15.0%  win 100%  dead  0%  $ +29.44 total  $+10.58/day   d$/day  -1.37   removes  5: mean  +8.4% $ +3.82
+  tmpl+cap1.0    5 fires  mean +17.3%  med +11.9%  win 100%  dead  0%  $  +9.60 total  $ +3.45/day   d$/day  -8.50   removes  8: mean +25.3% $+23.66
+  tmpl+cap1.5    7 fires  mean +23.5%  med +11.9%  win 100%  dead  0%  $ +19.07 total  $ +6.85/day   d$/day  -5.10   removes  6: mean +20.7% $+14.19
+  tmpl+cap2.0    8 fires  mean +30.8%  med +15.0%  win 100%  dead  0%  $ +29.44 total  $+10.58/day   d$/day  -1.37   removes  5: mean  +8.4% $ +3.82
+  tmpl+cap3.0    8 fires  mean +30.8%  med +15.0%  win 100%  dead  0%  $ +29.44 total  $+10.58/day   d$/day  -1.37   removes  5: mean  +8.4% $ +3.82
+
+  -- fit by window (hours = the window's T0 span) --
+  sep1819   (23.1 h) none          11 fires  mean +20.4%  med +14.9%  win  91%  dead  0%  $ +25.60 total  $+26.55/day
+  sep1819   (23.1 h) cap1.0         6 fires  mean +20.2%  med +13.9%  win  83%  dead  0%  $ +13.80 total  $+14.31/day
+  sep1819   (23.1 h) cap1.5         8 fires  mean +21.8%  med +13.9%  win  88%  dead  0%  $ +20.06 total  $+20.80/day
+  sep1819   (23.1 h) cap2.0         9 fires  mean +21.1%  med +14.9%  win  89%  dead  0%  $ +21.67 total  $+22.47/day
+  sep1819   (23.1 h) cap3.0        11 fires  mean +20.4%  med +14.9%  win  91%  dead  0%  $ +25.60 total  $+26.55/day
+  sep1819   (23.1 h) tmpl          11 fires  mean +20.4%  med +14.9%  win  91%  dead  0%  $ +25.60 total  $+26.55/day
+  sep1819   (23.1 h) tmpl+cap2.0    9 fires  mean +21.1%  med +14.9%  win  89%  dead  0%  $ +21.67 total  $+22.47/day
+  sep2021   (34.8 h) none          20 fires  mean +25.3%  med +19.1%  win  60%  dead  0%  $ +59.28 total  $+40.93/day
+  sep2021   (34.8 h) cap1.0        13 fires  mean +33.2%  med +28.3%  win  77%  dead  0%  $ +51.87 total  $+35.81/day
+  sep2021   (34.8 h) cap1.5        17 fires  mean +31.7%  med +28.3%  win  71%  dead  0%  $ +64.42 total  $+44.48/day
+  sep2021   (34.8 h) cap2.0        17 fires  mean +31.7%  med +28.3%  win  71%  dead  0%  $ +64.42 total  $+44.48/day
+  sep2021   (34.8 h) cap3.0        17 fires  mean +31.7%  med +28.3%  win  71%  dead  0%  $ +64.42 total  $+44.48/day
+  sep2021   (34.8 h) tmpl          19 fires  mean +25.3%  med +12.9%  win  58%  dead  0%  $ +56.33 total  $+38.89/day
+  sep2021   (34.8 h) tmpl+cap2.0   16 fires  mean +32.1%  med +30.7%  win  69%  dead  0%  $ +61.47 total  $+42.44/day
+  sep2223   (29.3 h) none          15 fires  mean +21.3%  med +11.6%  win  73%  dead  7%  $ +36.56 total  $+29.95/day
+  sep2223   (29.3 h) cap1.0         8 fires  mean  +6.3%  med +14.2%  win  75%  dead 12%  $  +3.92 total  $ +3.21/day
+  sep2223   (29.3 h) cap1.5        10 fires  mean +22.3%  med +19.1%  win  80%  dead 10%  $ +25.73 total  $+21.08/day
+  sep2223   (29.3 h) cap2.0        11 fires  mean +21.3%  med +16.8%  win  82%  dead  9%  $ +26.85 total  $+21.99/day
+  sep2223   (29.3 h) cap3.0        13 fires  mean +26.4%  med +16.8%  win  85%  dead  8%  $ +40.31 total  $+33.02/day
+  sep2223   (29.3 h) tmpl          15 fires  mean +21.3%  med +11.6%  win  73%  dead  7%  $ +36.56 total  $+29.95/day
+  sep2223   (29.3 h) tmpl+cap2.0   11 fires  mean +21.3%  med +16.8%  win  82%  dead  9%  $ +26.85 total  $+21.99/day
+  sep23day  ( 8.8 h) none          10 fires  mean +23.7%  med +12.9%  win  80%  dead  0%  $ +27.57 total  $+75.60/day
+  sep23day  ( 8.8 h) cap1.0         7 fires  mean +28.7%  med +16.8%  win 100%  dead  0%  $ +23.85 total  $+65.38/day
+  sep23day  ( 8.8 h) cap1.5         7 fires  mean +28.7%  med +16.8%  win 100%  dead  0%  $ +23.85 total  $+65.38/day
+  sep23day  ( 8.8 h) cap2.0         7 fires  mean +28.7%  med +16.8%  win 100%  dead  0%  $ +23.85 total  $+65.38/day
+  sep23day  ( 8.8 h) cap3.0         8 fires  mean +32.2%  med +17.4%  win 100%  dead  0%  $ +30.84 total  $+84.55/day
+  sep23day  ( 8.8 h) tmpl           7 fires  mean +29.2%  med +16.8%  win  71%  dead  0%  $ +24.25 total  $+66.49/day
+  sep23day  ( 8.8 h) tmpl+cap2.0    4 fires  mean +42.0%  med +24.0%  win 100%  dead  0%  $ +20.52 total  $+56.26/day
+
+######## ENGINE population, exit h15 ########
+
+  -- fit (96.0 h) --
+  none          56 fires  mean +18.6%  med +11.1%  win  68%  dead  2%  $+117.15 total  $+29.29/day   d$/day  +0.00   removes  0
+  cap1.0        34 fires  mean +19.7%  med +12.4%  win  76%  dead  3%  $ +75.73 total  $+18.93/day   d$/day -10.35   removes 22: mean +17.0% $+41.42
+  cap1.5        42 fires  mean +22.4%  med +15.5%  win  76%  dead  2%  $+108.29 total  $+27.07/day   d$/day  -2.21   removes 14: mean  +7.4% $ +8.86
+  cap2.0        44 fires  mean +21.6%  med +13.9%  win  75%  dead  2%  $+109.18 total  $+27.30/day   d$/day  -1.99   removes 12: mean  +7.6% $ +7.97
+  cap3.0        49 fires  mean +22.8%  med +13.3%  win  78%  dead  2%  $+129.31 total  $+32.33/day   d$/day  +3.04   removes  7: mean -10.8% $-12.16
+  tmpl          52 fires  mean +19.1%  med +11.1%  win  65%  dead  2%  $+111.77 total  $+27.94/day   d$/day  -1.34   removes  4: mean +12.9% $ +5.38
+  tmpl+cap1.0   30 fires  mean +20.6%  med +15.5%  win  73%  dead  3%  $ +70.36 total  $+17.59/day   d$/day -11.70   removes 26: mean +16.4% $+46.79
+  tmpl+cap1.5   38 fires  mean +23.4%  med +18.7%  win  74%  dead  3%  $+102.92 total  $+25.73/day   d$/day  -3.56   removes 18: mean  +8.6% $+14.23
+  tmpl+cap2.0   40 fires  mean +22.5%  med +16.5%  win  72%  dead  2%  $+103.80 total  $+25.95/day   d$/day  -3.34   removes 16: mean  +9.0% $+13.34
+  tmpl+cap3.0   45 fires  mean +23.7%  med +14.9%  win  76%  dead  2%  $+123.94 total  $+30.98/day   d$/day  +1.70   removes 11: mean  -2.2% $ -6.79
+
+  -- rec (66.8 h) --
+  none          13 fires  mean +18.0%  med  +7.2%  win  62%  dead  0%  $ +26.13 total  $ +9.39/day   d$/day  +0.00   removes  0
+  cap1.0         9 fires  mean +10.2%  med  +7.2%  win  56%  dead  0%  $  +8.94 total  $ +3.21/day   d$/day  -6.18   removes  4: mean +35.6% $+17.19
+  cap1.5        11 fires  mean +16.2%  med  +7.2%  win  64%  dead  0%  $ +19.48 total  $ +7.00/day   d$/day  -2.39   removes  2: mean +28.1% $ +6.65
+  cap2.0        13 fires  mean +18.0%  med  +7.2%  win  62%  dead  0%  $ +26.13 total  $ +9.39/day   d$/day  +0.00   removes  0
+  cap3.0        13 fires  mean +18.0%  med  +7.2%  win  62%  dead  0%  $ +26.13 total  $ +9.39/day   d$/day  +0.00   removes  0
+  tmpl           8 fires  mean +27.7%  med +15.1%  win  75%  dead  0%  $ +26.16 total  $ +9.40/day   d$/day  +0.01   removes  5: mean  +2.5% $ -0.03
+  tmpl+cap1.0    5 fires  mean +13.1%  med  +7.2%  win  60%  dead  0%  $  +6.84 total  $ +2.46/day   d$/day  -6.93   removes  8: mean +21.1% $+19.30
+  tmpl+cap1.5    7 fires  mean +21.6%  med  +7.2%  win  71%  dead  0%  $ +17.38 total  $ +6.25/day   d$/day  -3.14   removes  6: mean +13.8% $ +8.75
+  tmpl+cap2.0    8 fires  mean +27.7%  med +15.1%  win  75%  dead  0%  $ +26.16 total  $ +9.40/day   d$/day  +0.01   removes  5: mean  +2.5% $ -0.03
+  tmpl+cap3.0    8 fires  mean +27.7%  med +15.1%  win  75%  dead  0%  $ +26.16 total  $ +9.40/day   d$/day  +0.01   removes  5: mean  +2.5% $ -0.03
+
+  -- rec+late (76.2 h) --
+  none          17 fires  mean +13.6%  med  +0.1%  win  53%  dead  0%  $ +24.48 total  $ +7.71/day   d$/day  +0.00   removes  0
+  cap1.0        11 fires  mean  +9.9%  med  +7.2%  win  55%  dead  0%  $ +10.55 total  $ +3.32/day   d$/day  -4.39   removes  6: mean +20.4% $+13.93
+  cap1.5        13 fires  mean +15.0%  med  +7.2%  win  62%  dead  0%  $ +21.10 total  $ +6.64/day   d$/day  -1.07   removes  4: mean  +9.0% $ +3.38
+  cap2.0        15 fires  mean +16.8%  med  +7.2%  win  60%  dead  0%  $ +27.75 total  $ +8.74/day   d$/day  +1.03   removes  2: mean -10.0% $ -3.26
+  cap3.0        15 fires  mean +16.8%  med  +7.2%  win  60%  dead  0%  $ +27.75 total  $ +8.74/day   d$/day  +1.03   removes  2: mean -10.0% $ -3.26
+  tmpl          12 fires  mean +18.2%  med  +3.7%  win  58%  dead  0%  $ +24.51 total  $ +7.72/day   d$/day  +0.01   removes  5: mean  +2.5% $ -0.03
+  tmpl+cap1.0    7 fires  mean +11.8%  med  +7.2%  win  57%  dead  0%  $  +8.45 total  $ +2.66/day   d$/day  -5.05   removes 10: mean +14.9% $+16.03
+  tmpl+cap1.5    9 fires  mean +18.8%  med  +7.2%  win  67%  dead  0%  $ +19.00 total  $ +5.98/day   d$/day  -1.73   removes  8: mean  +7.8% $ +5.48
+  tmpl+cap2.0   10 fires  mean +23.9%  med +15.0%  win  70%  dead  0%  $ +27.77 total  $ +8.74/day   d$/day  +1.04   removes  7: mean  -1.1% $ -3.29
+  tmpl+cap3.0   10 fires  mean +23.9%  med +15.0%  win  70%  dead  0%  $ +27.77 total  $ +8.74/day   d$/day  +1.04   removes  7: mean  -1.1% $ -3.29
+
+  -- fit by window (hours = the window's T0 span) --
+  sep1819   (23.1 h) none          11 fires  mean +24.2%  med +14.9%  win  82%  dead  0%  $ +31.02 total  $+32.16/day
+  sep1819   (23.1 h) cap1.0         6 fires  mean +29.5%  med +21.1%  win  67%  dead  0%  $ +21.02 total  $+21.79/day
+  sep1819   (23.1 h) cap1.5         8 fires  mean +28.8%  med +21.1%  win  75%  dead  0%  $ +27.34 total  $+28.35/day
+  sep1819   (23.1 h) cap2.0         9 fires  mean +27.3%  med +18.1%  win  78%  dead  0%  $ +28.94 total  $+30.01/day
+  sep1819   (23.1 h) cap3.0        11 fires  mean +24.2%  med +14.9%  win  82%  dead  0%  $ +31.02 total  $+32.16/day
+  sep1819   (23.1 h) tmpl          11 fires  mean +24.2%  med +14.9%  win  82%  dead  0%  $ +31.02 total  $+32.16/day
+  sep1819   (23.1 h) tmpl+cap2.0    9 fires  mean +27.3%  med +18.1%  win  78%  dead  0%  $ +28.94 total  $+30.01/day
+  sep2021   (34.8 h) none          20 fires  mean +19.2%  med +11.8%  win  60%  dead  0%  $ +43.37 total  $+29.94/day
+  sep2021   (34.8 h) cap1.0        13 fires  mean +27.2%  med +28.3%  win  77%  dead  0%  $ +41.64 total  $+28.75/day
+  sep2021   (34.8 h) cap1.5        17 fires  mean +24.5%  med +25.9%  win  71%  dead  0%  $ +48.51 total  $+33.49/day
+  sep2021   (34.8 h) cap2.0        17 fires  mean +24.5%  med +25.9%  win  71%  dead  0%  $ +48.51 total  $+33.49/day
+  sep2021   (34.8 h) cap3.0        17 fires  mean +24.5%  med +25.9%  win  71%  dead  0%  $ +48.51 total  $+33.49/day
+  sep2021   (34.8 h) tmpl          19 fires  mean +18.6%  med +10.7%  win  58%  dead  0%  $ +39.77 total  $+27.45/day
+  sep2021   (34.8 h) tmpl+cap2.0   16 fires  mean +24.1%  med +19.4%  win  69%  dead  0%  $ +44.91 total  $+31.00/day
+  sep2223   (29.3 h) none          15 fires  mean +16.6%  med  +5.1%  win  60%  dead  7%  $ +27.33 total  $+22.39/day
+  sep2223   (29.3 h) cap1.0         8 fires  mean  +1.5%  med  +8.3%  win  62%  dead 12%  $  -1.03 total  $ -0.85/day
+  sep2223   (29.3 h) cap1.5        10 fires  mean +16.6%  med +15.4%  win  70%  dead 10%  $ +18.34 total  $+15.02/day
+  sep2223   (29.3 h) cap2.0        11 fires  mean +14.9%  med +11.6%  win  64%  dead  9%  $ +17.62 total  $+14.43/day
+  sep2223   (29.3 h) cap3.0        13 fires  mean +20.9%  med +11.6%  win  69%  dead  8%  $ +31.09 total  $+25.47/day
+  sep2223   (29.3 h) tmpl          15 fires  mean +16.6%  med  +5.1%  win  60%  dead  7%  $ +27.33 total  $+22.39/day
+  sep2223   (29.3 h) tmpl+cap2.0   11 fires  mean +14.9%  med +11.6%  win  64%  dead  9%  $ +17.62 total  $+14.43/day
+  sep23day  ( 8.8 h) none          10 fires  mean +14.4%  med  +5.3%  win  80%  dead  0%  $ +15.43 total  $+42.31/day
+  sep23day  ( 8.8 h) cap1.0         7 fires  mean +18.0%  med  +6.0%  win 100%  dead  0%  $ +14.11 total  $+38.68/day
+  sep23day  ( 8.8 h) cap1.5         7 fires  mean +18.0%  med  +6.0%  win 100%  dead  0%  $ +14.11 total  $+38.68/day
+  sep23day  ( 8.8 h) cap2.0         7 fires  mean +18.0%  med  +6.0%  win 100%  dead  0%  $ +14.11 total  $+38.68/day
+  sep23day  ( 8.8 h) cap3.0         8 fires  mean +20.5%  med  +8.9%  win 100%  dead  0%  $ +18.70 total  $+51.26/day
+  sep23day  ( 8.8 h) tmpl           7 fires  mean +17.5%  med  +4.6%  win  71%  dead  0%  $ +13.66 total  $+37.45/day
+  sep23day  ( 8.8 h) tmpl+cap2.0    4 fires  mean +26.3%  med +17.9%  win 100%  dead  0%  $ +12.34 total  $+33.82/day
+
+######## TABLES population, exit h11 ########
+
+  -- fit (96.0 h) --
+  none          73 fires  mean +19.5%  med +12.9%  win  68%  dead  3%  $+160.93 total  $+40.23/day   d$/day  +0.00   removes  0
+  cap1.0        50 fires  mean +18.9%  med +14.4%  win  74%  dead  4%  $+106.27 total  $+26.57/day   d$/day -13.66   removes 23: mean +20.8% $+54.65
+  cap1.5        59 fires  mean +21.6%  med +14.9%  win  73%  dead  3%  $+145.97 total  $+36.49/day   d$/day  -3.74   removes 14: mean +10.8% $+14.95
+  cap2.0        61 fires  mean +21.3%  med +14.9%  win  74%  dead  3%  $+148.69 total  $+37.17/day   d$/day  -3.06   removes 12: mean +10.4% $+12.23
+  cap3.0        66 fires  mean +22.7%  med +14.9%  win  76%  dead  3%  $+173.09 total  $+43.27/day   d$/day  +3.04   removes  7: mean -10.8% $-12.16
+  tmpl          62 fires  mean +20.3%  med +12.2%  win  68%  dead  3%  $+143.18 total  $+35.79/day   d$/day  -4.44   removes 11: mean +15.0% $+17.75
+  tmpl+cap1.0   40 fires  mean +19.4%  med +14.8%  win  72%  dead  5%  $ +87.60 total  $+21.90/day   d$/day -18.33   removes 33: mean +19.6% $+73.32
+  tmpl+cap1.5   48 fires  mean +23.1%  med +16.8%  win  73%  dead  4%  $+128.22 total  $+32.06/day   d$/day  -8.18   removes 25: mean +12.6% $+32.70
+  tmpl+cap2.0   50 fires  mean +22.7%  med +15.8%  win  74%  dead  4%  $+130.94 total  $+32.74/day   d$/day  -7.50   removes 23: mean +12.6% $+29.98
+  tmpl+cap3.0   55 fires  mean +24.3%  med +16.8%  win  76%  dead  4%  $+155.34 total  $+38.83/day   d$/day  -1.40   removes 18: mean  +4.9% $ +5.59
+
+  -- rec (66.8 h) --
+  none          19 fires  mean +15.7%  med  +5.7%  win  68%  dead  0%  $ +32.56 total  $+11.70/day   d$/day  +0.00   removes  0
+  cap1.0        14 fires  mean +11.7%  med  +7.0%  win  71%  dead  0%  $ +16.61 total  $ +5.97/day   d$/day  -5.73   removes  5: mean +27.1% $+15.95
+  cap1.5        16 fires  mean +15.1%  med  +7.0%  win  75%  dead  0%  $ +26.08 total  $ +9.37/day   d$/day  -2.33   removes  3: mean +19.2% $ +6.49
+  cap2.0        18 fires  mean +17.2%  med  +7.0%  win  72%  dead  0%  $ +34.32 total  $+12.33/day   d$/day  +0.63   removes  1: mean -11.0% $ -1.76
+  cap3.0        18 fires  mean +17.2%  med  +7.0%  win  72%  dead  0%  $ +34.32 total  $+12.33/day   d$/day  +0.63   removes  1: mean -11.0% $ -1.76
+  tmpl          10 fires  mean +24.1%  med +10.1%  win  90%  dead  0%  $ +28.09 total  $+10.09/day   d$/day  -1.61   removes  9: mean  +6.4% $ +4.47
+  tmpl+cap1.0    6 fires  mean +15.4%  med +10.1%  win 100%  dead  0%  $ +10.01 total  $ +3.60/day   d$/day  -8.10   removes 13: mean +15.9% $+22.55
+  tmpl+cap1.5    8 fires  mean +21.3%  med +10.1%  win 100%  dead  0%  $ +19.48 total  $ +7.00/day   d$/day  -4.70   removes 11: mean +11.7% $+13.09
+  tmpl+cap2.0    9 fires  mean +28.0%  med +11.9%  win 100%  dead  0%  $ +29.85 total  $+10.73/day   d$/day  -0.98   removes 10: mean  +4.6% $ +2.72
+  tmpl+cap3.0    9 fires  mean +28.0%  med +11.9%  win 100%  dead  0%  $ +29.85 total  $+10.73/day   d$/day  -0.98   removes 10: mean  +4.6% $ +2.72
+
+  -- fit by window (hours = the window's T0 span) --
+  sep1819   (23.1 h) none          14 fires  mean +22.9%  med +19.9%  win  93%  dead  0%  $ +37.00 total  $+38.37/day
+  sep1819   (23.1 h) cap1.0         9 fires  mean +24.1%  med +22.4%  win  89%  dead  0%  $ +25.20 total  $+26.13/day
+  sep1819   (23.1 h) cap1.5        11 fires  mean +24.5%  med +22.4%  win  91%  dead  0%  $ +31.46 total  $+32.62/day
+  sep1819   (23.1 h) cap2.0        12 fires  mean +23.7%  med +20.0%  win  92%  dead  0%  $ +33.07 total  $+34.29/day
+  sep1819   (23.1 h) cap3.0        14 fires  mean +22.9%  med +19.9%  win  93%  dead  0%  $ +37.00 total  $+38.37/day
+  sep1819   (23.1 h) tmpl          14 fires  mean +22.9%  med +19.9%  win  93%  dead  0%  $ +37.00 total  $+38.37/day
+  sep1819   (23.1 h) tmpl+cap2.0   12 fires  mean +23.7%  med +20.0%  win  92%  dead  0%  $ +33.07 total  $+34.29/day
+  sep2021   (34.8 h) none          29 fires  mean +21.1%  med +12.9%  win  59%  dead  0%  $ +70.08 total  $+48.38/day
+  sep2021   (34.8 h) cap1.0        21 fires  mean +25.8%  med +14.9%  win  71%  dead  0%  $ +63.59 total  $+43.90/day
+  sep2021   (34.8 h) cap1.5        26 fires  mean +24.8%  med +14.4%  win  65%  dead  0%  $ +75.22 total  $+51.93/day
+  sep2021   (34.8 h) cap2.0        26 fires  mean +24.8%  med +14.4%  win  65%  dead  0%  $ +75.22 total  $+51.93/day
+  sep2021   (34.8 h) cap3.0        26 fires  mean +24.8%  med +14.4%  win  65%  dead  0%  $ +75.22 total  $+51.93/day
+  sep2021   (34.8 h) tmpl          22 fires  mean +21.8%  med  +8.5%  win  55%  dead  0%  $ +54.99 total  $+37.96/day
+  sep2021   (34.8 h) tmpl+cap2.0   19 fires  mean +26.9%  med +12.9%  win  63%  dead  0%  $ +60.13 total  $+41.51/day
+  sep2223   (29.3 h) none          20 fires  mean +12.6%  med  +9.5%  win  60%  dead 10%  $ +26.27 total  $+21.52/day
+  sep2223   (29.3 h) cap1.0        13 fires  mean  -1.2%  med  +7.9%  win  54%  dead 15%  $  -6.36 total  $ -5.21/day
+  sep2223   (29.3 h) cap1.5        15 fires  mean +10.5%  med +11.0%  win  60%  dead 13%  $ +15.45 total  $+12.65/day
+  sep2223   (29.3 h) cap2.0        16 fires  mean +10.5%  med +11.1%  win  62%  dead 12%  $ +16.56 total  $+13.57/day
+  sep2223   (29.3 h) cap3.0        18 fires  mean +15.4%  med +11.1%  win  67%  dead 11%  $ +30.03 total  $+24.60/day
+  sep2223   (29.3 h) tmpl          19 fires  mean +13.4%  med +11.0%  win  63%  dead 11%  $ +26.94 total  $+22.07/day
+  sep2223   (29.3 h) tmpl+cap2.0   15 fires  mean +11.4%  med +11.1%  win  67%  dead 13%  $ +17.23 total  $+14.11/day
+  sep23day  ( 8.8 h) none          10 fires  mean +23.7%  med +12.9%  win  80%  dead  0%  $ +27.57 total  $+75.60/day
+  sep23day  ( 8.8 h) cap1.0         7 fires  mean +28.7%  med +16.8%  win 100%  dead  0%  $ +23.85 total  $+65.38/day
+  sep23day  ( 8.8 h) cap1.5         7 fires  mean +28.7%  med +16.8%  win 100%  dead  0%  $ +23.85 total  $+65.38/day
+  sep23day  ( 8.8 h) cap2.0         7 fires  mean +28.7%  med +16.8%  win 100%  dead  0%  $ +23.85 total  $+65.38/day
+  sep23day  ( 8.8 h) cap3.0         8 fires  mean +32.2%  med +17.4%  win 100%  dead  0%  $ +30.84 total  $+84.55/day
+  sep23day  ( 8.8 h) tmpl           7 fires  mean +29.2%  med +16.8%  win  71%  dead  0%  $ +24.25 total  $+66.49/day
+  sep23day  ( 8.8 h) tmpl+cap2.0    4 fires  mean +42.0%  med +24.0%  win 100%  dead  0%  $ +20.52 total  $+56.26/day
+
+######## TABLES population, exit h15 ########
+
+  -- fit (96.0 h) --
+  none          73 fires  mean +16.2%  med  +8.0%  win  66%  dead  3%  $+129.88 total  $+32.47/day   d$/day  +0.00   removes  0
+  cap1.0        50 fires  mean +16.3%  med +11.7%  win  72%  dead  4%  $ +89.28 total  $+22.32/day   d$/day -10.15   removes 23: mean +16.1% $+40.60
+  cap1.5        59 fires  mean +18.3%  med +11.9%  win  71%  dead  3%  $+121.02 total  $+30.25/day   d$/day  -2.21   removes 14: mean  +7.4% $ +8.86
+  cap2.0        61 fires  mean +17.9%  med +11.9%  win  70%  dead  3%  $+121.91 total  $+30.48/day   d$/day  -1.99   removes 12: mean  +7.6% $ +7.97
+  cap3.0        66 fires  mean +19.1%  med +12.2%  win  73%  dead  3%  $+142.04 total  $+35.51/day   d$/day  +3.04   removes  7: mean -10.8% $-12.16
+  tmpl          62 fires  mean +16.8%  med  +9.3%  win  63%  dead  3%  $+115.17 total  $+28.79/day   d$/day  -3.68   removes 11: mean +12.8% $+14.70
+  tmpl+cap1.0   40 fires  mean +16.7%  med +12.0%  win  68%  dead  5%  $ +73.76 total  $+18.44/day   d$/day -14.03   removes 33: mean +15.6% $+56.12
+  tmpl+cap1.5   48 fires  mean +19.6%  med +12.6%  win  69%  dead  4%  $+106.32 total  $+26.58/day   d$/day  -5.89   removes 25: mean  +9.8% $+23.56
+  tmpl+cap2.0   50 fires  mean +19.0%  med +12.6%  win  68%  dead  4%  $+107.20 total  $+26.80/day   d$/day  -5.67   removes 23: mean +10.1% $+22.67
+  tmpl+cap3.0   55 fires  mean +20.3%  med +12.9%  win  71%  dead  4%  $+127.33 total  $+31.83/day   d$/day  -0.64   removes 18: mean  +3.6% $ +2.54
+
+  -- rec (66.8 h) --
+  none          19 fires  mean +12.6%  med  +0.1%  win  58%  dead  0%  $ +24.76 total  $ +8.90/day   d$/day  +0.00   removes  0
+  cap1.0        14 fires  mean  +7.7%  med  +3.6%  win  57%  dead  0%  $  +9.32 total  $ +3.35/day   d$/day  -5.55   removes  5: mean +26.3% $+15.44
+  cap1.5        16 fires  mean +12.1%  med  +3.7%  win  62%  dead  0%  $ +19.87 total  $ +7.14/day   d$/day  -1.76   removes  3: mean +15.1% $ +4.89
+  cap2.0        18 fires  mean +13.9%  med  +3.7%  win  61%  dead  0%  $ +26.52 total  $ +9.53/day   d$/day  +0.63   removes  1: mean -11.0% $ -1.76
+  cap3.0        18 fires  mean +13.9%  med  +3.7%  win  61%  dead  0%  $ +26.52 total  $ +9.53/day   d$/day  +0.63   removes  1: mean -11.0% $ -1.76
+  tmpl          10 fires  mean +22.1%  med  +8.8%  win  70%  dead  0%  $ +25.41 total  $ +9.13/day   d$/day  +0.23   removes  9: mean  +2.0% $ -0.65
+  tmpl+cap1.0    6 fires  mean +12.6%  med  +8.8%  win  67%  dead  0%  $  +7.84 total  $ +2.82/day   d$/day  -6.08   removes 13: mean +12.6% $+16.92
+  tmpl+cap1.5    8 fires  mean +20.2%  med  +8.8%  win  75%  dead  0%  $ +18.39 total  $ +6.61/day   d$/day  -2.29   removes 11: mean  +7.0% $ +6.37
+  tmpl+cap2.0    9 fires  mean +25.8%  med +10.3%  win  78%  dead  0%  $ +27.17 total  $ +9.76/day   d$/day  +0.86   removes 10: mean  +0.7% $ -2.40
+  tmpl+cap3.0    9 fires  mean +25.8%  med +10.3%  win  78%  dead  0%  $ +27.17 total  $ +9.76/day   d$/day  +0.86   removes 10: mean  +0.7% $ -2.40
+
+  -- rec+late (76.2 h) --
+  none          25 fires  mean +10.0%  med  +0.0%  win  52%  dead  0%  $ +24.09 total  $ +7.58/day   d$/day  +0.00   removes  0
+  cap1.0        18 fires  mean  +7.6%  med  +3.6%  win  56%  dead  0%  $ +11.91 total  $ +3.75/day   d$/day  -3.83   removes  7: mean +15.9% $+12.18
+  cap1.5        20 fires  mean +11.2%  med  +3.7%  win  60%  dead  0%  $ +22.46 total  $ +7.07/day   d$/day  -0.51   removes  5: mean  +5.0% $ +1.63
+  cap2.0        22 fires  mean +12.7%  med  +3.7%  win  59%  dead  0%  $ +29.11 total  $ +9.16/day   d$/day  +1.58   removes  3: mean -10.3% $ -5.02
+  cap3.0        22 fires  mean +12.7%  med  +3.7%  win  59%  dead  0%  $ +29.11 total  $ +9.16/day   d$/day  +1.58   removes  3: mean -10.3% $ -5.02
+  tmpl          15 fires  mean +15.5%  med  +7.2%  win  60%  dead  0%  $ +25.22 total  $ +7.94/day   d$/day  +0.36   removes 10: mean  +1.7% $ -1.14
+  tmpl+cap1.0    9 fires  mean +11.9%  med +10.3%  win  67%  dead  0%  $ +10.92 total  $ +3.44/day   d$/day  -4.15   removes 16: mean  +8.9% $+13.17
+  tmpl+cap1.5   11 fires  mean +17.6%  med +10.3%  win  73%  dead  0%  $ +21.47 total  $ +6.76/day   d$/day  -0.82   removes 14: mean  +4.0% $ +2.62
+  tmpl+cap2.0   12 fires  mean +21.9%  med +12.0%  win  75%  dead  0%  $ +30.24 total  $ +9.52/day   d$/day  +1.94   removes 13: mean  -1.1% $ -6.16
+  tmpl+cap3.0   12 fires  mean +21.9%  med +12.0%  win  75%  dead  0%  $ +30.24 total  $ +9.52/day   d$/day  +1.94   removes 13: mean  -1.1% $ -6.16
+
+  -- fit by window (hours = the window's T0 span) --
+  sep1819   (23.1 h) none          14 fires  mean +27.5%  med +20.6%  win  86%  dead  0%  $ +45.38 total  $+47.06/day
+  sep1819   (23.1 h) cap1.0         9 fires  mean +32.8%  med +24.0%  win  78%  dead  0%  $ +35.38 total  $+36.68/day
+  sep1819   (23.1 h) cap1.5        11 fires  mean +31.7%  med +24.0%  win  82%  dead  0%  $ +41.70 total  $+43.24/day
+  sep1819   (23.1 h) cap2.0        12 fires  mean +30.3%  med +23.6%  win  83%  dead  0%  $ +43.30 total  $+44.90/day
+  sep1819   (23.1 h) cap3.0        14 fires  mean +27.5%  med +20.6%  win  86%  dead  0%  $ +45.38 total  $+47.06/day
+  sep1819   (23.1 h) tmpl          14 fires  mean +27.5%  med +20.6%  win  86%  dead  0%  $ +45.38 total  $+47.06/day
+  sep1819   (23.1 h) tmpl+cap2.0   12 fires  mean +30.3%  med +23.6%  win  83%  dead  0%  $ +43.30 total  $+44.90/day
+  sep2021   (34.8 h) none          29 fires  mean +16.4%  med +10.7%  win  62%  dead  0%  $ +52.15 total  $+36.00/day
+  sep2021   (34.8 h) cap1.0        21 fires  mean +21.3%  med +12.9%  win  76%  dead  0%  $ +51.24 total  $+35.37/day
+  sep2021   (34.8 h) cap1.5        26 fires  mean +19.5%  med +12.6%  win  69%  dead  0%  $ +57.29 total  $+39.55/day
+  sep2021   (34.8 h) cap2.0        26 fires  mean +19.5%  med +12.6%  win  69%  dead  0%  $ +57.29 total  $+39.55/day
+  sep2021   (34.8 h) cap3.0        26 fires  mean +19.5%  med +12.6%  win  69%  dead  0%  $ +57.29 total  $+39.55/day
+  sep2021   (34.8 h) tmpl          22 fires  mean +16.0%  med  +8.1%  win  55%  dead  0%  $ +38.55 total  $+26.61/day
+  sep2021   (34.8 h) tmpl+cap2.0   19 fires  mean +20.2%  med +12.4%  win  63%  dead  0%  $ +43.69 total  $+30.16/day
+  sep2223   (29.3 h) none          20 fires  mean  +9.0%  med  +0.1%  win  50%  dead 10%  $ +16.92 total  $+13.86/day
+  sep2223   (29.3 h) cap1.0        13 fires  mean  -4.2%  med  -2.6%  win  46%  dead 15%  $ -11.45 total  $ -9.38/day
+  sep2223   (29.3 h) cap1.5        15 fires  mean  +6.6%  med  +5.1%  win  53%  dead 13%  $  +7.92 total  $ +6.49/day
+  sep2223   (29.3 h) cap2.0        16 fires  mean  +6.0%  med  +1.2%  win  50%  dead 12%  $  +7.20 total  $ +5.90/day
+  sep2223   (29.3 h) cap3.0        18 fires  mean +11.4%  med  +3.9%  win  56%  dead 11%  $ +20.67 total  $+16.93/day
+  sep2223   (29.3 h) tmpl          19 fires  mean  +9.7%  med  +2.8%  win  53%  dead 11%  $ +17.58 total  $+14.40/day
+  sep2223   (29.3 h) tmpl+cap2.0   15 fires  mean  +6.6%  med  +5.1%  win  53%  dead 13%  $  +7.87 total  $ +6.45/day
+  sep23day  ( 8.8 h) none          10 fires  mean +14.4%  med  +5.3%  win  80%  dead  0%  $ +15.43 total  $+42.31/day
+  sep23day  ( 8.8 h) cap1.0         7 fires  mean +18.0%  med  +6.0%  win 100%  dead  0%  $ +14.11 total  $+38.68/day
+  sep23day  ( 8.8 h) cap1.5         7 fires  mean +18.0%  med  +6.0%  win 100%  dead  0%  $ +14.11 total  $+38.68/day
+  sep23day  ( 8.8 h) cap2.0         7 fires  mean +18.0%  med  +6.0%  win 100%  dead  0%  $ +14.11 total  $+38.68/day
+  sep23day  ( 8.8 h) cap3.0         8 fires  mean +20.5%  med  +8.9%  win 100%  dead  0%  $ +18.70 total  $+51.26/day
+  sep23day  ( 8.8 h) tmpl           7 fires  mean +17.5%  med  +4.6%  win  71%  dead  0%  $ +13.66 total  $+37.45/day
+  sep23day  ( 8.8 h) tmpl+cap2.0    4 fires  mean +26.3%  med +17.9%  win 100%  dead  0%  $ +12.34 total  $+33.82/day

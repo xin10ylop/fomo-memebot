@@ -1,0 +1,223 @@
+the brief's filter: shares >= 3 named wallets with a template of >= 5 earlier launches
+  fit tables: 11 of 73 fires flagged; all launches flagged 52 of 563
+  fit engine: 4 of 56 fires flagged; all launches flagged 52 of 563
+  rec tables: 10 of 25 fires flagged; all launches flagged 15 of 196
+  rec engine: 5 of 17 fires flagged; all launches flagged 15 of 196
+
+templates (final groups) with >= 5 launches, in order of the first launch:
+
+  template 0: 11 launches Sep 18 13:59 - Sep 25 14:31, 6 named wallets in its union
+    Sep 18 13:59 sep1819      0x136b6e9d named  4 bundle 0.367  tab 0 eng 0            h11 -11.3% h15 -11.3%  earlier in template  0 
+    Sep 18 17:52 sep1819      0xccac86eb named  4 bundle 0.367  tab 0 eng 0            h11 -11.3% h15 -11.3%  earlier in template  1 
+    Sep 18 19:10 sep1819      0x7a349f16 named  4 bundle 0.670  tab 0 eng 0            h11 -11.8% h15 -11.8%  earlier in template  2 
+    Sep 18 20:42 sep1819      0x0e490bb7 named  4 bundle 0.671  tab 0 eng 0            h11 -11.9% h15  -7.5%  earlier in template  3 
+    Sep 18 21:19 sep1819      0x774ea85a named  4 bundle 0.660  tab 0 eng 0            h11 -54.4% h15 -54.4%  earlier in template  4 
+    Sep 18 21:35 sep1819      0x40cdca89 named  4 bundle 0.660  tab 0 eng 0            h11  -5.4% h15  -5.4%  earlier in template  5 FLAGGED
+    Sep 18 21:47 sep1819      0x3cd13561 named  4 bundle 0.660  tab 0 eng 0            h11  -5.6% h15  -5.6%  earlier in template  6 FLAGGED
+    Sep 18 21:52 sep1819      0x0fa7e6dd named  4 bundle 0.660  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  7 FLAGGED
+    Sep 18 21:57 sep1819      0x02d962e4 named  4 bundle 0.660  tab 0 eng 0            h11 -11.8% h15 -11.8%  earlier in template  8 FLAGGED
+    Sep 18 23:10 sep1819      0xa41c957e named  4 bundle 0.660  tab 0 eng 0            h11 -11.8% h15 -11.8%  earlier in template  9 FLAGGED
+    Sep 25 14:31 sep25pm      0x4cfd8e6e named  5 bundle 0.894  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template 10 FLAGGED
+
+  template 10: 21 launches Sep 18 16:13 - Sep 21 16:16, 268 named wallets in its union
+    Sep 18 16:13 sep1819      0x04912d44 named 22 bundle 0.446  tab 0 eng 0            h11 +59.0% h15 +47.4%  earlier in template  0 
+    Sep 18 16:42 sep1819      0x511f1f88 named 23 bundle 0.725  tab 1 eng 0            h11 +15.7% h15 +15.7%  earlier in template  0 
+    Sep 18 16:54 sep1819      0x975a9fc7 named 20 bundle 0.760  tab 2 eng 1  fire-tab  h11 +46.7% h15 +51.9%  earlier in template  1 
+    Sep 18 17:34 sep1819      0x46ce738f named 23 bundle 0.752  tab 1 eng 0            h11  +9.5% h15  +9.5%  earlier in template  1 
+    Sep 18 18:30 sep1819      0xf52e5349 named 23 bundle 0.724  tab 2 eng 1  fire-tab  h11 +26.1% h15 +43.1%  earlier in template  2 
+    Sep 18 19:02 sep1819      0x8645a418 named 16 bundle 0.532  tab 1 eng 0            h11  -0.9% h15  -0.9%  earlier in template  2 
+    Sep 18 20:00 sep1819      0x0f42cae3 named 22 bundle 0.728  tab 1 eng 0            h11  +3.0% h15  +3.3%  earlier in template  3 
+    Sep 18 21:59 sep1819      0x50bc8e61 named 22 bundle 0.725  tab 2 eng 1  fire-tab  h11 +22.4% h15 +23.1%  earlier in template  3 
+    Sep 18 22:25 sep1819      0x945a7544 named 22 bundle 0.770  tab 1 eng 0            h11  +9.5% h15 +13.4%  earlier in template  4 
+    Sep 18 23:18 sep1819      0x5af4caee named 22 bundle 0.726  tab 1 eng 0            h11 +18.0% h15 +16.2%  earlier in template  9 FLAGGED
+    Sep 20 17:24 sep2021      0xca5e3150 named 23 bundle 0.678  tab 2 eng 2  FIRE-eng  h11 +25.3% h15 +30.3%  earlier in template 10 FLAGGED
+    Sep 20 17:57 sep2021      0x10c2dcca named 23 bundle 0.777  tab 2 eng 1  fire-tab  h11 +14.0% h15 +14.7%  earlier in template 11 FLAGGED
+    Sep 20 18:13 sep2021      0x9f21cbb6 named 23 bundle 1.142  tab 1 eng 0            h11  -7.8% h15  -7.8%  earlier in template 12 FLAGGED
+    Sep 20 19:08 sep2021      0x262d4d0b named 23 bundle 0.764  tab 1 eng 0            h11  +1.8% h15  -1.6%  earlier in template 13 FLAGGED
+    Sep 20 20:53 sep2021      0x5853a1d0 named 23 bundle 0.779  tab 1 eng 0            h11 +11.7% h15 +11.7%  earlier in template 14 FLAGGED
+    Sep 20 23:49 sep2021      0x6ab6ede5 named 23 bundle 0.783  tab 1 eng 0            h11  +8.0% h15  +8.4%  earlier in template 15 FLAGGED
+    Sep 21 12:02 sep2021      0xc20adb7a named 23 bundle 0.772  tab 2 eng 1  fire-tab  h11  -0.8% h15  +2.4%  earlier in template 16 FLAGGED
+    Sep 21 12:33 sep2021      0x5e4bddb3 named 22 bundle 1.101  tab 2 eng 1  fire-tab  h11  -4.5% h15  -3.8%  earlier in template 17 FLAGGED
+    Sep 21 14:37 sep2021      0x8cc0b1f4 named 22 bundle 0.694  tab 2 eng 1  fire-tab  h11 +38.4% h15 +31.6%  earlier in template 18 FLAGGED
+    Sep 21 15:03 sep2021      0xfdd87517 named 21 bundle 0.657  tab 2 eng 1  fire-tab  h11 +14.9% h15  +4.7%  earlier in template 19 FLAGGED
+    Sep 21 16:16 sep2021      0xf7af6adf named 21 bundle 0.675  tab 2 eng 1  fire-tab  h11 +46.7% h15 +42.4%  earlier in template 20 FLAGGED
+
+  template 12: 11 launches Sep 18 16:23 - Sep 23 04:26, 86 named wallets in its union
+    Sep 18 16:23 sep1819      0xa4c30439 named 14 bundle 0.750  tab 0 eng 0            h11 +33.8% h15 +34.2%  earlier in template  0 
+    Sep 18 16:56 sep1819      0x482b6bcd named 14 bundle 0.850  tab 0 eng 0            h11  +6.1% h15  -0.4%  earlier in template  0 
+    Sep 18 19:03 sep1819      0xd37435f3 named  9 bundle 0.320  tab 0 eng 0            h11 +36.8% h15 +34.4%  earlier in template  1 
+    Sep 18 19:54 sep1819      0x272f7ffd named 13 bundle 0.400  tab 0 eng 0            h11  -0.5% h15 -16.6%  earlier in template  1 
+    Sep 18 21:11 sep1819      0xd2c7ae65 named 12 bundle 0.550  tab 0 eng 0            h11 -15.2% h15  -3.4%  earlier in template  0 
+    Sep 18 21:14 sep1819      0x31d5efd6 named 14 bundle 0.580  tab 0 eng 0            h11  -4.4% h15 -16.9%  earlier in template  2 
+    Sep 18 21:17 sep1819      0xa0c5480b named 12 bundle 0.650  tab 0 eng 0            h11 -12.2% h15 -22.3%  earlier in template  2 
+    Sep 18 23:30 sep1819      0x5f3a6a5d named 15 bundle 0.350  tab 1 eng 0            h11  -7.7% h15  -9.3%  earlier in template  4 
+    Sep 21 11:26 sep2021      0x4ed5142b named 18 bundle 0.800  tab 0 eng 0            h11 -27.0% h15 -14.4%  earlier in template  8 FLAGGED
+    Sep 21 23:49 sep2021      0x0f17b9d4 named 14 bundle 0.800  tab 0 eng 0            h11  -6.1% h15  -6.1%  earlier in template  9 FLAGGED
+    Sep 23 04:26 sep2223      0x1eb97415 named 17 bundle 1.000  tab 1 eng 1            h11  +4.0% h15  +4.5%  earlier in template 10 FLAGGED
+
+  template 26: 5 launches Sep 18 18:04 - Sep 18 19:41, 22 named wallets in its union
+    Sep 18 18:04 sep1819      0x4fb9415f named 16 bundle 0.580  tab 0 eng 0            h11  +9.3% h15  +9.3%  earlier in template  0 
+    Sep 18 19:00 sep1819      0xcb87284c named 16 bundle 0.580  tab 0 eng 0            h11  -9.2% h15  +3.0%  earlier in template  1 
+    Sep 18 19:20 sep1819      0xedc15910 named 15 bundle 0.580  tab 1 eng 1            h11 -10.8% h15 -10.8%  earlier in template  2 
+    Sep 18 19:34 sep1819      0x7acef3d7 named 15 bundle 0.580  tab 0 eng 0            h11  -8.7% h15  -8.7%  earlier in template  3 
+    Sep 18 19:41 sep1819      0xa8ea4627 named 15 bundle 0.540  tab 0 eng 0            h11  -6.1% h15  -6.1%  earlier in template  4 
+
+  template 32: 13 launches Sep 18 18:45 - Sep 22 09:52, 81 named wallets in its union
+    Sep 18 18:45 sep1819      0x2838106d named 25 bundle 0.927  tab 0 eng 0            h11  -7.9% h15  -7.7%  earlier in template  0 
+    Sep 18 20:16 sep1819      0xd2f0dcac named 20 bundle 0.927  tab 0 eng 0            h11  -9.7% h15  -9.7%  earlier in template  1 
+    Sep 18 22:16 sep1819      0x6067127c named 20 bundle 0.962  tab 0 eng 0            h11  -9.4% h15  -9.4%  earlier in template  2 
+    Sep 18 22:23 sep1819      0xfeca9bb4 named 20 bundle 0.928  tab 0 eng 0            h11 -10.0% h15 -10.0%  earlier in template  3 
+    Sep 19 08:32 sep1819      0xd4ebbe5c named 20 bundle 0.593  tab 0 eng 0            h11  -9.9% h15  -9.9%  earlier in template  4 
+    Sep 20 19:23 sep2021      0xf4a32117 named 22 bundle 0.943  tab 0 eng 0            h11 -10.0% h15 -10.0%  earlier in template  5 FLAGGED
+    Sep 20 20:08 sep2021      0xb82df106 named 18 bundle 0.825  tab 0 eng 0            h11  -9.7% h15  -9.7%  earlier in template  6 FLAGGED
+    Sep 20 20:42 sep2021      0xc60a1345 named 20 bundle 0.812  tab 1 eng 0            h11  -4.6% h15  -4.6%  earlier in template  7 FLAGGED
+    Sep 20 21:06 sep2021      0x3b2bf495 named 18 bundle 0.854  tab 1 eng 0            h11 -10.0% h15 -10.0%  earlier in template  8 FLAGGED
+    Sep 21 17:12 sep2021      0x2ab7d5e6 named 20 bundle 0.594  tab 0 eng 0            h11  -9.7% h15  -9.7%  earlier in template  9 FLAGGED
+    Sep 21 23:51 sep2021      0x44e8dd87 named 21 bundle 0.570  tab 0 eng 0            h11 -10.0% h15 -10.0%  earlier in template 10 FLAGGED
+    Sep 22 09:39 sep2223      0x2a20bf66 named 16 bundle 0.552  tab 1 eng 0            h11  -9.6% h15  -9.6%  earlier in template 11 FLAGGED
+    Sep 22 09:52 sep2223      0x153933d2 named 11 bundle 0.537  tab 0 eng 0            h11  -9.6% h15  -9.6%  earlier in template 12 FLAGGED
+
+  template 48: 7 launches Sep 18 20:40 - Sep 18 23:13, 17 named wallets in its union
+    Sep 18 20:40 sep1819      0x7dd76a77 named  4 bundle 0.378  tab 0 eng 0            h11 -11.4% h15 -11.4%  earlier in template  0 
+    Sep 18 20:44 sep1819      0x5e1b8442 named  4 bundle 0.436  tab 0 eng 0            h11 -11.0% h15 -11.0%  earlier in template  1 
+    Sep 18 20:51 sep1819      0xb34da355 named  4 bundle 0.398  tab 0 eng 0            h11 -11.7% h15 -11.7%  earlier in template  2 
+    Sep 18 21:00 sep1819      0x8dad27c2 named  4 bundle 0.440  tab 0 eng 0            h11 -11.7% h15 -12.2%  earlier in template  3 
+    Sep 18 21:14 sep1819      0x909ebd39 named  4 bundle 0.390  tab 0 eng 0            h11 -12.2% h15 -12.2%  earlier in template  4 
+    Sep 18 22:57 sep1819      0xf0601475 named  4 bundle 0.333  tab 0 eng 0            h11  -9.5% h15  -9.5%  earlier in template  5 FLAGGED
+    Sep 18 23:13 sep1819      0x88b11f8f named 17 bundle 0.333  tab 0 eng 0            h11  -7.8% h15  -8.4%  earlier in template  6 FLAGGED
+
+  template 72: 7 launches Sep 19 06:44 - Sep 26 18:47, 30 named wallets in its union
+    Sep 19 06:44 sep1819      0x267f1314 named 17 bundle 1.201  tab 0 eng 0            h11  -8.4% h15  -9.6%  earlier in template  0 
+    Sep 21 17:17 sep2021      0x6eaa65a5 named 17 bundle 1.253  tab 3 eng 3  FIRE-eng  h11 +67.8% h15 +67.0%  earlier in template  1 
+    Sep 22 17:21 sep2223      0x6d0ba2c1 named 10 bundle 1.253  tab 0 eng 0            h11 -10.3% h15 -10.3%  earlier in template  2 
+    Sep 22 17:39 sep2223      0xf475dfc2 named 20 bundle 1.545  tab 0 eng 0            h11  -0.9% h15 +23.7%  earlier in template  3 
+    Sep 24 16:36 sep24paper   0x5cd9b8c0 named 13 bundle 1.008  tab 0 eng 0            h11  -9.9% h15 -10.5%  earlier in template  4 
+    Sep 24 17:32 sep24paper   0x26d36c5e named 19 bundle 1.899  tab 2 eng 2  FIRE-eng  h11 -13.8% h15 -13.8%  earlier in template  5 FLAGGED
+    Sep 26 18:47 gapA         0x45bbf47f named  7 bundle 0.799  tab 2 eng 2  FIRE-eng  h11 +21.3% h15  +8.2%  earlier in template  6 FLAGGED
+
+  template 109: 10 launches Sep 20 19:53 - Sep 20 23:07, 7 named wallets in its union
+    Sep 20 19:53 sep2021      0x6297365c named  4 bundle 0.331  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  0 
+    Sep 20 20:48 sep2021      0xaaa0aaf7 named  7 bundle 0.369  tab 0 eng 0            h11 -10.9% h15 -10.9%  earlier in template  1 
+    Sep 20 20:50 sep2021      0x0a18972f named  7 bundle 0.358  tab 0 eng 0            h11 -11.2% h15 -11.2%  earlier in template  2 
+    Sep 20 21:03 sep2021      0x2b623f6a named  4 bundle 0.360  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  3 
+    Sep 20 21:17 sep2021      0xd9948259 named  4 bundle 0.350  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  4 
+    Sep 20 21:28 sep2021      0x3bff3056 named  4 bundle 0.350  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  5 FLAGGED
+    Sep 20 21:38 sep2021      0xa101f203 named  4 bundle 0.388  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  6 FLAGGED
+    Sep 20 21:41 sep2021      0xf9112f3d named  4 bundle 0.388  tab 1 eng 0            h11 -11.9% h15 -11.9%  earlier in template  7 FLAGGED
+    Sep 20 22:45 sep2021      0x5c6e5f9d named  4 bundle 0.370  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  8 FLAGGED
+    Sep 20 23:07 sep2021      0x90afa8e8 named  4 bundle 0.360  tab 1 eng 0            h11 -11.9% h15 -11.9%  earlier in template  9 FLAGGED
+
+  template 140: 6 launches Sep 21 13:39 - Sep 21 14:24, 15 named wallets in its union
+    Sep 21 13:39 sep2021      0xf5c6d918 named  7 bundle 0.470  tab 0 eng 0            h11 -11.5% h15 -11.5%  earlier in template  0 
+    Sep 21 13:42 sep2021      0x1b8d36df named  7 bundle 0.441  tab 0 eng 0            h11 -11.5% h15 -11.5%  earlier in template  1 
+    Sep 21 13:59 sep2021      0x2a16103b named  8 bundle 0.405  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  2 
+    Sep 21 14:13 sep2021      0x59521053 named 15 bundle 0.676  tab 0 eng 0            h11 -11.6% h15 -13.8%  earlier in template  3 
+    Sep 21 14:16 sep2021      0xa4b5769c named 15 bundle 0.631  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  4 
+    Sep 21 14:24 sep2021      0x8541b2a0 named 14 bundle 0.377  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  5 FLAGGED
+
+  template 154: 7 launches Sep 21 15:28 - Sep 21 22:30, 33 named wallets in its union
+    Sep 21 15:28 sep2021      0x17d5eac5 named 30 bundle 0.362  tab 0 eng 0            h11 +15.5% h15 +30.8%  earlier in template  0 
+    Sep 21 16:09 sep2021      0x0c07cab4 named 30 bundle 0.455  tab 0 eng 0            h11 +30.0% h15 +46.7%  earlier in template  1 
+    Sep 21 17:11 sep2021      0x4533ec2d named 27 bundle 0.444  tab 0 eng 0            h11 +19.9% h15 +36.2%  earlier in template  2 
+    Sep 21 17:47 sep2021      0xf183b829 named 30 bundle 0.430  tab 0 eng 0            h11 +31.2% h15 +54.0%  earlier in template  3 
+    Sep 21 20:08 sep2021      0xa0f50473 named 27 bundle 0.481  tab 1 eng 1            h11 +31.0% h15 +35.4%  earlier in template  4 
+    Sep 21 21:26 sep2021      0x4d476e31 named 27 bundle 0.384  tab 0 eng 0            h11 +34.3% h15 +56.8%  earlier in template  5 FLAGGED
+    Sep 21 22:30 sep2021      0xd551697e named 24 bundle 0.424  tab 0 eng 0            h11 +41.3% h15 +60.0%  earlier in template  6 FLAGGED
+
+  template 164: 17 launches Sep 21 17:15 - Sep 27 14:04, 218 named wallets in its union
+    Sep 21 17:15 sep2021      0x127a8272 named 17 bundle 0.511  tab 2 eng 0  fire-tab  h11  -5.5% h15  -5.5%  earlier in template  0 
+    Sep 21 17:28 sep2021      0x82b04e57 named 23 bundle 0.751  tab 2 eng 1  fire-tab  h11 +11.4% h15 +12.4%  earlier in template  1 
+    Sep 21 20:34 sep2021      0xa21417f4 named 28 bundle 1.053  tab 1 eng 0            h11  -3.7% h15  -3.4%  earlier in template  2 
+    Sep 22 00:57 sep2021      0xef439ad4 named 22 bundle 0.709  tab 2 eng 1  fire-tab  h11  -8.6% h15  -8.6%  earlier in template  3 
+    Sep 22 13:29 sep2223      0xf297f823 named 22 bundle 0.715  tab 2 eng 1  fire-tab  h11  -9.7% h15  -9.7%  earlier in template  4 
+    Sep 22 17:53 sep2223      0x1e5c6b1a named 22 bundle 0.725  tab 2 eng 1  fire-tab  h11  -2.6% h15  -2.6%  earlier in template  5 FLAGGED
+    Sep 23 18:41 sep23day     0xb6df1c84 named 21 bundle 0.693  tab 3 eng 2  FIRE-eng  h11 +18.1% h15 +11.9%  earlier in template  6 FLAGGED
+    Sep 23 18:54 sep23day     0xe406d4a7 named 18 bundle 0.674  tab 3 eng 2  FIRE-eng  h11  +9.1% h15  +3.4%  earlier in template  7 FLAGGED
+    Sep 23 19:24 sep23day     0xdb208100 named 22 bundle 0.723  tab 3 eng 2  FIRE-eng  h11  +6.0% h15  +6.0%  earlier in template  8 FLAGGED
+    Sep 24 17:16 sep24paper   0x89f41f56 named 23 bundle 0.753  tab 2 eng 2  FIRE-eng  h11  -0.6% h15  -0.6%  earlier in template  9 FLAGGED
+    Sep 24 17:58 sep24paper   0xc63ab843 named 22 bundle 0.726  tab 2 eng 1  fire-tab  h11 +27.3% h15 +25.2%  earlier in template 10 FLAGGED
+    Sep 24 20:42 sep24paper   0x56e76663 named 22 bundle 0.703  tab 3 eng 2  FIRE-eng  h11  -7.2% h15  -7.2%  earlier in template 11 FLAGGED
+    Sep 25 16:24 sep25pm      0xd43ed726 named 22 bundle 0.706  tab 2 eng 2  FIRE-eng  h11 +42.4% h15 +25.9%  earlier in template 12 FLAGGED
+    Sep 26 23:53 sep27night   0x2b7508b0 named 22 bundle 0.678  tab 2 eng 1  fire-tab  h11  +1.9% h15  +0.0%  earlier in template 13 FLAGGED
+    Sep 27 00:10 sep27night   0x80c0efae named 13 bundle 0.405  tab 2 eng 1  fire-tab  h11 -10.0% h15 -10.0%  earlier in template 14 FLAGGED
+    Sep 27 12:47 sep27pm      0x7b2eac5e named 22 bundle 0.697  tab 2 eng 1  fire-tab  h11    n/a h15  -1.2%  earlier in template 15 FLAGGED
+    Sep 27 14:04 sep27pm      0x05a79870 named 22 bundle 0.669  tab 1 eng 0            h11    n/a h15  -6.5%  earlier in template 16 FLAGGED
+
+  template 169: 17 launches Sep 21 18:41 - Sep 25 15:54, 22 named wallets in its union
+    Sep 21 18:41 sep2021      0x9e358bc5 named 16 bundle 0.550  tab 0 eng 0            h11  -9.2% h15  -6.2%  earlier in template  0 
+    Sep 21 19:09 sep2021      0x266e7209 named 15 bundle 0.550  tab 1 eng 1            h11  -9.4% h15  -9.4%  earlier in template  1 
+    Sep 21 19:25 sep2021      0xe0033b8f named 14 bundle 0.550  tab 0 eng 0            h11  -9.4% h15  -9.4%  earlier in template  2 
+    Sep 21 19:44 sep2021      0xdb620440 named 16 bundle 0.550  tab 1 eng 1            h11  -9.8% h15  -9.8%  earlier in template  3 
+    Sep 21 20:03 sep2021      0xd2b2695c named 16 bundle 0.550  tab 0 eng 0            h11 -10.9% h15 -10.9%  earlier in template  4 
+    Sep 21 20:39 sep2021      0x8b6dcdea named 16 bundle 0.550  tab 0 eng 0            h11  -5.3% h15  -5.3%  earlier in template  5 FLAGGED
+    Sep 21 21:14 sep2021      0xab0f5249 named 13 bundle 0.550  tab 1 eng 1            h11 -10.7% h15 -10.7%  earlier in template  6 FLAGGED
+    Sep 22 15:11 sep2223      0x7056fce8 named  9 bundle 0.550  tab 1 eng 1            h11 -10.9% h15 -10.9%  earlier in template  7 FLAGGED
+    Sep 22 15:28 sep2223      0xda43491e named 11 bundle 0.550  tab 0 eng 0            h11 -11.0% h15 -11.0%  earlier in template  8 FLAGGED
+    Sep 22 20:56 sep2223      0x8d600460 named 13 bundle 0.550  tab 0 eng 0            h11  -9.8% h15  -9.8%  earlier in template  9 FLAGGED
+    Sep 22 21:24 sep2223      0xa30d7720 named 13 bundle 0.550  tab 1 eng 1            h11  -9.1% h15  -9.1%  earlier in template 10 FLAGGED
+    Sep 22 21:50 sep2223      0x95d265e4 named 15 bundle 0.550  tab 0 eng 0            h11  -8.9% h15 -10.4%  earlier in template 11 FLAGGED
+    Sep 23 16:49 sep23day     0x4948475d named 13 bundle 0.560  tab 1 eng 1            h11  -9.4% h15  -9.4%  earlier in template 12 FLAGGED
+    Sep 24 14:52 sep24paper   0x2ad76f05 named 15 bundle 0.750  tab 2 eng 1  fire-tab  h11  -4.1% h15  -9.9%  earlier in template 13 FLAGGED
+    Sep 24 15:19 sep24paper   0xe6e3ee98 named 15 bundle 0.760  tab 0 eng 0            h11  -8.1% h15  -8.1%  earlier in template 14 FLAGGED
+    Sep 24 21:33 sep24paper   0x57b60396 named 15 bundle 0.560  tab 0 eng 0            h11  +0.2% h15 -10.9%  earlier in template 15 FLAGGED
+    Sep 25 15:54 sep25pm      0x4f9b8025 named 14 bundle 0.560  tab 0 eng 0            h11  -9.8% h15  -9.8%  earlier in template 16 FLAGGED
+
+  template 191: 5 launches Sep 21 21:31 - Sep 21 22:22, 22 named wallets in its union
+    Sep 21 21:31 sep2021      0xba984723 named 22 bundle 0.574  tab 1 eng 0            h11 -10.0% h15 -10.0%  earlier in template  0 
+    Sep 21 21:38 sep2021      0x326863dd named 22 bundle 0.500  tab 0 eng 0            h11  -9.7% h15  -9.7%  earlier in template  1 
+    Sep 21 21:43 sep2021      0x73c9b334 named 22 bundle 0.450  tab 0 eng 0            h11  -6.6% h15  -6.6%  earlier in template  2 
+    Sep 21 22:14 sep2021      0xca1e99c9 named 22 bundle 0.530  tab 1 eng 0            h11  -7.3% h15  -7.3%  earlier in template  3 
+    Sep 21 22:22 sep2021      0xd27786e6 named 22 bundle 0.530  tab 1 eng 0            h11 -10.0% h15 -10.0%  earlier in template  4 
+
+  template 211: 5 launches Sep 22 00:36 - Sep 22 18:06, 21 named wallets in its union
+    Sep 22 00:36 sep2021      0xcee448cc named 20 bundle 4.137  tab 3 eng 3  FIRE-eng  h11 -11.9% h15 -11.9%  earlier in template  0 
+    Sep 22 00:55 sep2021      0x0a8b7499 named 20 bundle 4.179  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  1 
+    Sep 22 07:19 sep2223      0x43b75c2c named 20 bundle 1.697  tab 1 eng 0            h11 +44.3% h15 +25.4%  earlier in template  2 
+    Sep 22 17:00 sep2223      0x28371ffe named 20 bundle 1.697  tab 2 eng 2  FIRE-eng  h11 +11.1% h15  -3.0%  earlier in template  3 
+    Sep 22 18:06 sep2223      0x5c2f7152 named 20 bundle 1.688  tab 0 eng 0            h11 +30.5% h15 +11.1%  earlier in template  4 
+
+  template 214: 5 launches Sep 22 04:16 - Sep 26 01:48, 51 named wallets in its union
+    Sep 22 04:16 sep2223      0x50dd5611 named 14 bundle 0.531  tab 2 eng 0  fire-tab  h11 +11.0% h15  +8.0%  earlier in template  0 
+    Sep 22 21:24 sep2223      0x0fd962ae named 17 bundle 0.400  tab 0 eng 0            h11 +161.4% h15 +140.2%  earlier in template  1 
+    Sep 23 00:25 sep2223      0xff899c64 named 17 bundle 0.400  tab 0 eng 0            h11  +3.9% h15  +3.9%  earlier in template  2 
+    Sep 24 23:29 sep25night   0xb8b8f6d8 named 32 bundle 0.528  tab 0 eng 0            h11 +17.3% h15 +29.3%  earlier in template  3 
+    Sep 26 01:48 sep26night   0xf686e207 named  4 bundle 0.432  tab 0 eng 0            h11  -7.0% h15  -7.8%  earlier in template  4 
+
+  template 234: 5 launches Sep 22 13:07 - Sep 23 14:07, 27 named wallets in its union
+    Sep 22 13:07 sep2223      0xe07530aa named 13 bundle 0.407  tab 2 eng 0  fire-tab  h11  -7.3% h15  -7.3%  earlier in template  0 
+    Sep 22 15:28 sep2223      0x38b4386a named 13 bundle 0.727  tab 0 eng 0            h11  -2.5% h15  -1.8%  earlier in template  0 
+    Sep 22 15:51 sep2223      0x36975a4f named 10 bundle 0.442  tab 0 eng 0            h11 -11.0% h15 -11.0%  earlier in template  1 
+    Sep 22 18:41 sep2223      0x586f44bf named 12 bundle 0.371  tab 0 eng 0            h11 -11.0% h15 -11.0%  earlier in template  3 
+    Sep 23 14:07 sep23day     0x61b5aeb4 named 12 bundle 0.688  tab 0 eng 0            h11 -11.0% h15 -11.0%  earlier in template  4 
+
+  template 378: 7 launches Sep 23 16:59 - Sep 23 17:57, 13 named wallets in its union
+    Sep 23 16:59 sep23day     0xea50ba0f named 13 bundle 1.286  tab 0 eng 0            h11 -71.7% h15 -71.7%  earlier in template  0 
+    Sep 23 17:08 sep23day     0xd0ea4bd4 named 13 bundle 1.272  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  1 
+    Sep 23 17:19 sep23day     0xc4eec25d named 13 bundle 1.172  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  2 
+    Sep 23 17:41 sep23day     0xa29d184b named 13 bundle 1.072  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  3 
+    Sep 23 17:47 sep23day     0xe3c876c8 named  5 bundle 0.545  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  4 
+    Sep 23 17:53 sep23day     0x2bde8bc5 named  5 bundle 0.503  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  5 FLAGGED
+    Sep 23 17:57 sep23day     0xe56c7659 named  5 bundle 0.465  tab 0 eng 0            h11 -11.9% h15 -11.9%  earlier in template  6 FLAGGED
+
+  template 451: 5 launches Sep 25 15:45 - Sep 27 06:56, 15 named wallets in its union
+    Sep 25 15:45 sep25pm      0x36226fd7 named  5 bundle 0.457  tab 0 eng 0            h11  -0.5% h15  -0.5%  earlier in template  0 
+    Sep 26 11:42 sep26am      0x74bdd9e8 named  5 bundle 0.377  tab 0 eng 0            h11  -9.3% h15  -9.6%  earlier in template  1 
+    Sep 26 12:03 sep26am      0xe7789c57 named  5 bundle 0.457  tab 0 eng 0            h11  -8.9% h15  -9.7%  earlier in template  2 
+    Sep 26 16:17 sep26pm      0x96fba218 named  6 bundle 0.513  tab 0 eng 0            h11  -8.7% h15  -8.6%  earlier in template  3 
+    Sep 27 06:56 gapB         0xdff39853 named  6 bundle 0.430  tab 0 eng 0            h11  -9.4% h15  -9.5%  earlier in template  4 
+
+  template 462: 5 launches Sep 25 18:48 - Sep 25 21:16, 29 named wallets in its union
+    Sep 25 18:48 sep25pm      0xb216dd5a named  4 bundle 1.186  tab 0 eng 0            h11 -11.0% h15 -11.0%  earlier in template  0 
+    Sep 25 20:19 sep25eve     0x32290d40 named 23 bundle 1.100  tab 0 eng 0            h11 -11.9% h15 -11.7%  earlier in template  0 
+    Sep 25 20:32 sep25eve     0x5297a9a7 named  5 bundle 0.957  tab 0 eng 0            h11 -11.0% h15 -20.0%  earlier in template  1 
+    Sep 25 21:02 sep25eve2    0x8f438bd0 named 23 bundle 1.100  tab 0 eng 0            h11 -11.9% h15 -11.7%  earlier in template  2 
+    Sep 25 21:16 sep25eve2    0x5bc04166 named 10 bundle 0.957  tab 0 eng 0            h11 -11.6% h15 -12.2%  earlier in template  4 
+sensitivity shares>=2 size>=3: fit-tab 17/73, fit-eng 7/56, rec-tab 10/25, rec-eng 5/17
+sensitivity shares>=2 size>=5: fit-tab 11/73, fit-eng 4/56, rec-tab 10/25, rec-eng 5/17
+sensitivity shares>=2 size>=8: fit-tab 8/73, fit-eng 2/56, rec-tab 8/25, rec-eng 3/17
+sensitivity shares>=3 size>=3: fit-tab 16/73, fit-eng 6/56, rec-tab 10/25, rec-eng 5/17
+sensitivity shares>=3 size>=5: fit-tab 11/73, fit-eng 4/56, rec-tab 10/25, rec-eng 5/17
+sensitivity shares>=3 size>=8: fit-tab 8/73, fit-eng 2/56, rec-tab 8/25, rec-eng 3/17
+sensitivity shares>=5 size>=3: fit-tab 16/73, fit-eng 6/56, rec-tab 10/25, rec-eng 5/17
+sensitivity shares>=5 size>=5: fit-tab 11/73, fit-eng 4/56, rec-tab 10/25, rec-eng 5/17
+sensitivity shares>=5 size>=8: fit-tab 6/73, fit-eng 1/56, rec-tab 8/25, rec-eng 3/17

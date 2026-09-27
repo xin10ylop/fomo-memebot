@@ -3829,3 +3829,24 @@ launches. P&L −$1.36. The machine does what the tables say on every fill; the 
 two days are flat or negative on the chain, which is the edge question the sequential test on the engine's fires
 answers, not the machine's.
 
+### 24.39 The bundle cap (Sep 27-28, overnight): two reviewers, two verifiers, one setting
+
+Reports `data/derived/edge_check/H/`, `I/` (independent), verifications `VH/`, `VI/` (every number of both reports
+reproduced), synthesis `SYNTHESIS_template_cap.md`. Question: the serial operator's launch template (a bundle of about
+4.2 ETH from 15 named wallets, three of tonight's eight launches, a third of the recent fires, all flat at the fee
+floor) - can the rule exclude it, by a bundle cap or by a named-wallet template filter, under 24.34's discipline?
+
+**Verdict, unanimous: BUNDLE_MAX_ETH = 3.0; the template filter is nothing proven.** On the engine's population at exit
+block 11: fit 56 fires +23.0% ($37.3 a day) to 49 fires +27.8% ($40.3); recent 15 fires +17.9% ($9.4) to 13 fires
++22.2% ($10.5); the same direction on the tables' population and at 15 blocks; never worse in any fit window. Chosen
+on the fit alone it reads better on the recent set, and the reverse. A random drop of the same number of fires does as
+well on both periods in 0 of 2,000 draws. The cap removes ten fires across both periods and nothing else: all ten are
+the operator's 4.1-4.3 ETH bundles, all at the fee floor from the seat to block 300 because nobody buys after them; no
+fire lies between 2.77 and 4.14 ETH, so any cap in that gap selects the same fires, and caps of 2.0 or below cost the
+fit's five paying 2-3 ETH fires. All 21 launches above 3.0 ETH in the population are negative. The operator uses fresh
+named wallets almost every launch, so a template filter cannot see it (it drops paying fires and loses dollars on both
+periods, null 7.5%); the bundle size is its fingerprint. The setting exists in the engine (`BUNDLE_MAX_ETH`, 0 = off
+today) and is checked before the crowd gate, so the launch is refused before a burst is built: no gas, and no reliance
+on the minOut guard, which is what refused tonight's two. The dollars are small ($1-3 a day at $13); the value is that
+the engine stops spending bursts on launches that are flat by construction.
+

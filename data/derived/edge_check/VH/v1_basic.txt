@@ -1,0 +1,60 @@
+population 759
+T0 ties: 1
+
+launches with bundle > 3.0: 21
+  Sep 18 14:41 fit sep1819    0x732ef190 b 4.233 src tape          r11 -0.100 r15 -0.100 eng False tab False named 15 ret_src G/curves
+  Sep 21 01:32 fit sep2021    0x0e61f225 b 4.233 src tape          r11 -0.100 r15 -0.100 eng True tab True named 15 ret_src G/curves
+  Sep 21 23:51 fit sep2021    0x033bc29a b 4.233 src tape          r11 -0.100 r15 -0.100 eng True tab True named 25 ret_src G/curves
+  Sep 22 00:18 fit sep2021    0x9c861776 b 3.131 src tape          r11 -0.130 r15 -0.132 eng False tab False named 9 ret_src G/curves
+  Sep 22 00:36 fit sep2021    0xcee448cc b 4.137 src tape          r11 -0.119 r15 -0.119 eng True tab True named 20 ret_src G/curves
+  Sep 22 00:55 fit sep2021    0x0a8b7499 b 4.179 src tape          r11 -0.119 r15 -0.119 eng False tab False named 20 ret_src G/curves
+  Sep 22 20:46 fit sep2223    0xac8a2c12 b 4.024 src tape          r11 -0.086 r15 -0.086 eng False tab False named 16 ret_src G/curves
+  Sep 22 22:27 fit sep2223    0xc7349e7e b 4.304 src tape          r11 -0.119 r15 -0.119 eng True tab True named 13 ret_src G/curves
+  Sep 23 06:00 fit sep2223    0xe8bcf407 b 4.219 src tape          r11 -0.119 r15 -0.119 eng True tab True named 24 ret_src G/curves
+  Sep 23 14:42 fit sep23day   0x74608565 b 3.125 src tape          r11 -0.116 r15 -0.199 eng False tab False named 10 ret_src G/curves
+  Sep 23 16:36 fit sep23day   0x6c1b04e3 b 4.279 src tape          r11 -0.100 r15 -0.100 eng False tab False named 19 ret_src G/curves
+  Sep 23 19:28 fit sep23day   0x0bf85d57 b 4.268 src tape          r11 -0.100 r15 -0.100 eng True tab True named 13 ret_src G/curves
+  Sep 23 19:52 fit sep23day   0x6ff3cd2b b 4.144 src tape          r11 -0.100 r15 -0.100 eng True tab True named 13 ret_src G/curves
+  Sep 25 20:05 rec sep25eve   0x8aba714f b 4.258 src tape          r11 -0.119 r15 -0.119 eng False tab False named 22 ret_src G/curves
+  Sep 26 01:25 rec sep26night 0xeb90afaa b 4.214 src tape          r11 -0.100 r15 -0.100 eng False tab False named 22 ret_src G/curves
+  Sep 26 11:29 rec sep26am    0x0c55377f b 3.386 src tape          r11 -0.106 r15 -0.106 eng False tab False named 7 ret_src G/curves
+  Sep 26 16:05 rec sep26pm    0xee486806 b 4.236 src tape          r11 -0.110 r15 -0.110 eng False tab True named 22 ret_src G/curves
+  Sep 27 13:01 rec sep27pm    0x6bc6d430 b 4.233 src launches_file r11 -0.100 r15 -0.100 eng False tab False named 4 ret_src hold_grid(flat)
+  Sep 27 18:21 rec sep27eve   0x86d1ab77 b 4.233 src launches_file r11 -0.100 r15 -0.100 eng False tab False named 14 ret_src hold_grid(flat)
+  Sep 27 21:12 rec sep27eve   0xa6929b03 b 4.233 src launches_file r11 -0.100 r15 -0.100 eng True tab True named 15 ret_src hold_grid(flat)
+  Sep 27 21:27 rec sep27eve   0x96803325 b 4.233 src launches_file r11 -0.100 r15 -0.100 eng True tab True named 15 ret_src hold_grid(flat)
+all negative h11: True 21 range -0.1299628 -0.0862588
+all negative h15: True 21 range -0.1987828 -0.0862588
+ge4: 18 flat (r11==r15, r11 known) 18
+
+launches at the operator's sizes: 22
+  Sep 18 14:41 0x732ef190 b 4.2327 named 15 creator 0x7e204b0d
+  Sep 19 03:19 0x2bcd5d8c b 1.6408 named 7 creator 0x38dc0b26
+  Sep 21 01:32 0x0e61f225 b 4.2327 named 15 creator 0x13398a32
+  Sep 21 23:51 0x033bc29a b 4.2329 named 25 creator 0x0052bb21
+  Sep 22 00:36 0xcee448cc b 4.1375 named 20 creator 0xadb42393
+  Sep 22 00:55 0x0a8b7499 b 4.1793 named 20 creator 0x22a9b55b
+  Sep 22 17:24 0x59217e68 b 1.3692 named 5 creator 0x11821fc7
+  Sep 22 22:27 0xc7349e7e b 4.3035 named 13 creator 0x2dbf9d60
+  Sep 23 06:00 0xe8bcf407 b 4.2193 named 24 creator 0x33434d6c
+  Sep 23 16:36 0x6c1b04e3 b 4.2788 named 19 creator 0x18767106
+  Sep 23 19:28 0x0bf85d57 b 4.2684 named 13 creator 0x54d0d6be
+  Sep 23 19:52 0x6ff3cd2b b 4.1440 named 13 creator 0x7313f3e7
+  Sep 25 20:05 0x8aba714f b 4.2577 named 22 creator 0xf5df619a
+  Sep 26 01:25 0xeb90afaa b 4.2143 named 22 creator 0xa445d117
+  Sep 26 04:09 0x419e7c20 b 2.5068 named 7 creator 0xf96e07c5
+  Sep 26 16:05 0xee486806 b 4.2359 named 22 creator 0x18b804bf
+  Sep 26 23:20 0xca4c39f2 b 1.6465 named 11 creator 0x1067f31b
+  Sep 27 13:01 0x6bc6d430 b 4.2327 named 4 creator 0x31617b19
+  Sep 27 18:21 0x86d1ab77 b 4.2327 named 14 creator 0x94b83683
+  Sep 27 18:42 0xfa8efc53 b 1.6465 named 11 creator 0x73b0ce20
+  Sep 27 21:12 0xa6929b03 b 4.2327 named 15 creator 0xfc132c58
+  Sep 27 21:27 0x96803325 b 4.2327 named 15 creator 0xcf467d6f
+pairwise named overlaps > 0:
+  Sep 22 00:36 0xcee448cc x Sep 22 00:55 0x0a8b7499: 20 shared
+  Sep 25 20:05 0x8aba714f x Sep 26 01:25 0xeb90afaa: 22 shared
+  Sep 25 20:05 0x8aba714f x Sep 26 16:05 0xee486806: 20 shared
+  Sep 26 01:25 0xeb90afaa x Sep 26 16:05 0xee486806: 20 shared
+  Sep 26 23:20 0xca4c39f2 x Sep 27 18:42 0xfa8efc53: 11 shared
+  Sep 27 21:12 0xa6929b03 x Sep 27 21:27 0x96803325: 15 shared
+creators repeated among operator launches: []

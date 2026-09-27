@@ -1,0 +1,30 @@
+launches with bundle >= 2.5 ETH (whole second) or >= 2.5 ETH by k-2: whole second vs visible by block k-2 (the gate)
+  Sep 18 14:41 fit 0x732ef190 k  9 bundle 4.233 by k-2 4.233  eng 1 tab 1  h15 -10.0%
+  Sep 18 18:15 fit 0x429eca1b k  5 bundle 2.664 by k-2 2.664  eng 0 tab 0  h15  -9.3%
+  Sep 18 20:15 fit 0xe28fc4fd k  6 bundle 2.580 by k-2 2.580  eng 1 tab 1  h15 -11.1%
+  Sep 18 22:05 fit 0x8a944df9 k  7 bundle 2.772 by k-2 2.772  eng 3 tab 3 FIRE-eng  h15  +7.8%
+  Sep 18 22:27 fit 0x2815d974 k  9 bundle 2.758 by k-2 2.758  eng 2 tab 3 FIRE-eng  h15 +13.3%
+  Sep 21 01:32 fit 0x0e61f225 k  4 bundle 4.233 by k-2 4.233  eng 2 tab 2 FIRE-eng  h15 -10.0%
+  Sep 21 23:51 fit 0x033bc29a k  8 bundle 4.233 by k-2 4.233  eng 6 tab 6 FIRE-eng  h15 -10.0%
+  Sep 22 00:18 fit 0x9c861776 k  4 bundle 3.131 by k-2 3.131  eng 1 tab 1  h15 -13.2%
+  Sep 22 00:36 fit 0xcee448cc k  9 bundle 4.137 by k-2 4.137  eng 3 tab 3 FIRE-eng  h15 -11.9%
+  Sep 22 00:55 fit 0x0a8b7499 k  1 bundle 4.179 by k-2 0.000  eng 0 tab 0  h15 -11.9%
+  Sep 22 20:46 fit 0xac8a2c12 k  1 bundle 4.024 by k-2 0.000  eng 0 tab 0  h15  -8.6%
+  Sep 22 22:27 fit 0xc7349e7e k  4 bundle 4.304 by k-2 4.304  eng 3 tab 3 FIRE-eng  h15 -11.9%
+  Sep 23 06:00 fit 0xe8bcf407 k  8 bundle 4.219 by k-2 4.219  eng 2 tab 2 FIRE-eng  h15 -11.9%
+  Sep 23 14:42 fit 0x74608565 k  3 bundle 3.125 by k-2 3.125  eng 0 tab 0  h15 -19.9%
+  Sep 23 16:36 fit 0x6c1b04e3 k  2 bundle 4.279 by k-2 0.000  eng 0 tab 0  h15 -10.0%
+  Sep 23 19:28 fit 0x0bf85d57 k  6 bundle 4.268 by k-2 4.268  eng 3 tab 3 FIRE-eng  h15 -10.0%
+  Sep 23 19:52 fit 0x6ff3cd2b k  6 bundle 4.144 by k-2 4.144  eng 3 tab 4 FIRE-eng  h15 -10.0%
+  Sep 24 18:05 rec 0xcd182c24 k  5 bundle 2.691 by k-2 2.691  eng 1 tab 1  h15 -21.3%
+  Sep 25 20:05 rec 0x8aba714f k  3 bundle 4.258 by k-2 4.258  eng 0 tab 1  h15 -11.9%
+  Sep 26 01:25 rec 0xeb90afaa k  3 bundle 4.214 by k-2 4.214  eng 0 tab 1  h15 -10.0%
+  Sep 26 04:09 rec 0x419e7c20 k  5 bundle 2.507 by k-2 2.507  eng 1 tab 1  h15 -11.1%
+  Sep 26 11:29 rec 0x0c55377f k  2 bundle 3.386 by k-2 0.000  eng 0 tab 0  h15 -10.6%
+  Sep 26 16:05 rec 0xee486806 k  6 bundle 4.236 by k-2 4.236  eng 1 tab 2  h15 -11.0%
+  Sep 27 13:01 rec 0x6bc6d430 k  1 bundle 4.233 by k-2 no tape  eng 0 tab 0  h15 -10.0%
+  Sep 27 18:21 rec 0x86d1ab77 k  3 bundle 4.233 by k-2 no tape  eng 0 tab 1  h15 -10.0%
+  Sep 27 21:12 rec 0xa6929b03 k  8 bundle 4.233 by k-2 no tape  eng 3 tab 3 FIRE-eng  h15 -10.0%
+  Sep 27 21:27 rec 0x96803325 k  7 bundle 4.233 by k-2 no tape  eng 2 tab 2 FIRE-eng  h15 -10.0%
+fit: engine fires with a tape 56; dropped by a 3.0 ETH cap on the whole second 7, on the k-2 view 7; caught by both 7
+rec: engine fires with a tape 13; dropped by a 3.0 ETH cap on the whole second 0, on the k-2 view 0; caught by both 0

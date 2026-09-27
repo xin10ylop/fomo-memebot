@@ -1,0 +1,18 @@
+launches with a tape: 735 of 759; |file - tape| median 0.0000 ETH, 95th pct 0.0000, max 0.0000; differ by > 0.01 ETH: 0
+
+launches and fires by bundle (file value); caps are applied as bundle_eth <= cap:
+  fit  bundle (0.0, 1.0] ETH: 478 launches, tables fires 50, engine fires 34
+  fit  bundle (1.0, 1.5] ETH:  38 launches, tables fires  9, engine fires  8
+  fit  bundle (1.5, 2.0] ETH:  19 launches, tables fires  2, engine fires  2
+  fit  bundle (2.0, 3.0] ETH:  15 launches, tables fires  5, engine fires  5
+  fit  bundle (3.0, 99.0] ETH:  13 launches, tables fires  7, engine fires  7
+  rec  bundle (0.0, 1.0] ETH: 135 launches, tables fires 14, engine fires  9
+  rec  bundle (1.0, 1.5] ETH:  16 launches, tables fires  2, engine fires  2
+  rec  bundle (1.5, 2.0] ETH:  12 launches, tables fires  2, engine fires  2
+  rec  bundle (2.0, 3.0] ETH:   5 launches, tables fires  0, engine fires  0
+  rec  bundle (3.0, 99.0] ETH:   4 launches, tables fires  1, engine fires  0
+  late bundle (0.0, 1.0] ETH:  16 launches, tables fires  4, engine fires  2
+  late bundle (1.0, 1.5] ETH:   1 launches, tables fires  0, engine fires  0
+  late bundle (1.5, 2.0] ETH:   2 launches, tables fires  0, engine fires  0
+  late bundle (2.0, 3.0] ETH:   1 launches, tables fires  0, engine fires  0
+  late bundle (3.0, 99.0] ETH:   4 launches, tables fires  2, engine fires  2

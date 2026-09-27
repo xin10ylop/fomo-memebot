@@ -1,0 +1,40 @@
+population: 759 launches; fit 563, recent 196 (of which sep27pm+sep27eve 24, not in G/curves)
+  fit: tables fires 73, engine fires 56; without sep27pm/eve: tables 73, engine 56  (fleet_variants.txt: fit 73/56, recent 19/13)
+     tables on the curves' launches: h11 +19.5%  h15 +16.2%
+     engine on the curves' launches: h11 +23.0%  h15 +18.6%
+  rec: tables fires 25, engine fires 17; without sep27pm/eve: tables 19, engine 13  (fleet_variants.txt: fit 73/56, recent 19/13)
+     tables on the curves' launches: h11 +15.7%  h15 +12.6%
+     engine on the curves' launches: h11 +22.2%  h15 +18.0%
+
+(b) hold_grid behind1_15_h15 vs G r2[15]: 166 launches, median |diff| 0.00007, max 0.0130, > 0.005: 2
+    the 24 tape-less launches: 5 flat (h11 = h15), 19 not flat (no h11); engine fires among them 4, of which h11 known 2
+
+(c) bundle_eth from the tape vs launches file: 172 launches, median |diff| 0.000000 ETH, max 0.0000, > 0.01 ETH: 0
+    0xad1c5f76 tape 0.6052 file 0.6052
+    0xb90c8e37 tape 0.6560 file 0.6560
+    0xb8935d05 tape 0.5000 file 0.5000
+    0xe5ea3a5a tape 0.5200 file 0.5200
+    0xbda0fd53 tape 0.5300 file 0.5300
+    bundle source: tape 735, launches file 24
+
+(d) distinct hours from the windows' T0 spans: fit 95.96 h (brief: 96 h), recent 62.65 h
+    sep1819      141 launches  Sep 18 13:59 - Sep 19 13:07  23.14 h
+    sep2021      189 launches  Sep 20 14:11 - Sep 22 00:57  34.76 h
+    sep2223      175 launches  Sep 22 01:19 - Sep 23 06:37  29.30 h
+    sep23day      58 launches  Sep 23 11:23 - Sep 23 20:08   8.75 h
+    sep24paper    51 launches  Sep 24 12:59 - Sep 24 21:34   8.59 h
+    sep25night     8 launches  Sep 24 22:01 - Sep 25 05:21   7.33 h
+    sep25am        4 launches  Sep 25 07:12 - Sep 25 12:07   4.91 h
+    sep25pm       22 launches  Sep 25 13:35 - Sep 25 18:48   5.21 h
+    sep25eve       7 launches  Sep 25 19:28 - Sep 25 20:32   1.06 h
+    sep25eve2      9 launches  Sep 25 19:35 - Sep 25 21:34   1.99 h
+    sep26night    17 launches  Sep 25 22:27 - Sep 26 08:02   9.57 h
+    sep26am       13 launches  Sep 26 09:24 - Sep 26 12:14   2.84 h
+    sep26pm       15 launches  Sep 26 13:57 - Sep 26 17:28   3.51 h
+    sep26restart   1 launches  Sep 26 13:47 - Sep 26 13:47   0.00 h
+    sep27night    13 launches  Sep 26 22:38 - Sep 27 04:09   5.50 h
+    sep27pm       16 launches  Sep 27 12:11 - Sep 27 17:19   5.13 h
+    sep27eve       8 launches  Sep 27 18:21 - Sep 27 21:27   3.10 h
+    gapA           7 launches  Sep 26 18:00 - Sep 26 21:43   3.72 h
+    gapB           5 launches  Sep 27 06:56 - Sep 27 08:03   1.11 h
+    recent from the e1m files' t_lo..t_hi (the scan windows, 15 files): 76.23 h

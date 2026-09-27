@@ -1,0 +1,16 @@
+
+=== fit: 563 launches, 73 fires by the tables' count (check: fleets_k2 agrees on 563 of 563)
+  tables     73 fires  h11 +19.5%  h15 +16.2%  h300 +26.3%   $ at h11 after gas +160.93
+  nohelper   57 fires  h11 +21.1%  h15 +15.6%  h300 +26.7%   $ at h11 after gas +137.26
+  engine     56 fires  h11 +23.0%  h15 +18.6%  h300 +31.9%   $ at h11 after gas +149.01
+  both       54 fires  h11 +23.2%  h15 +17.5%  h300 +29.9%   $ at h11 after gas +145.29
+  fires that exist only because of a named-sender relay: 16  h11 +13.9%  h15 +18.4%  h300 +24.9%
+  fires the engine cannot see (a fleet only before registration): 17  h11 +7.9%  h15 +8.3%  h300 +7.8%
+
+=== recent: 172 launches, 19 fires by the tables' count (check: fleets_k2 agrees on 172 of 172)
+  tables     19 fires  h11 +15.7%  h15 +12.6%  h300  +3.0%   $ at h11 after gas  +32.56
+  nohelper   14 fires  h11 +17.0%  h15 +14.2%  h300 +10.2%   $ at h11 after gas  +26.29
+  engine     13 fires  h11 +22.2%  h15 +18.0%  h300 +15.3%   $ at h11 after gas  +33.26
+  both       11 fires  h11 +22.5%  h15 +19.0%  h300 +17.0%   $ at h11 after gas  +28.49
+  fires that exist only because of a named-sender relay: 5  h11 +12.2%  h15 +8.1%  h300 -17.1%
+  fires the engine cannot see (a fleet only before registration): 6  h11 +1.6%  h15 +0.8%  h300 -23.6%

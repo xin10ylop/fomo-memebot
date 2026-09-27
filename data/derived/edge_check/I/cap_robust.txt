@@ -1,0 +1,35 @@
+
+=== engine population
+  fit: every cap in [2.772, 4.137) ETH keeps the same fires as 3.0 (highest kept bundle 2.772, lowest removed 4.137)
+  rec+late: every cap in [1.899, 4.233) ETH keeps the same fires as 3.0 (highest kept bundle 1.899, lowest removed 4.233)
+   removes Sep 21 01:32 0x0e61f225 sep2021    bundle 4.233 named 15  h11 -10.0% h15 -10.0% h300 -10.0%  flat 15-300
+   removes Sep 21 23:51 0x033bc29a sep2021    bundle 4.233 named 25  h11 -10.0% h15 -10.0% h300 -10.0%  flat 15-300
+   removes Sep 22 00:36 0xcee448cc sep2021    bundle 4.137 named 20  h11 -11.9% h15 -11.9% h300 -11.9%  flat 15-300
+   removes Sep 22 22:27 0xc7349e7e sep2223    bundle 4.304 named 13  h11 -11.9% h15 -11.9% h300 -11.9%  flat 15-300
+   removes Sep 23 06:00 0xe8bcf407 sep2223    bundle 4.219 named 24  h11 -11.9% h15 -11.9% h300 -11.9%  flat 15-300
+   removes Sep 23 19:28 0x0bf85d57 sep23day   bundle 4.268 named 13  h11 -10.0% h15 -10.0% h300 -10.0%  flat 15-300
+   removes Sep 23 19:52 0x6ff3cd2b sep23day   bundle 4.144 named 13  h11 -10.0% h15 -10.0% h300 -10.0%  flat 15-300
+   removes Sep 27 21:12 0xa6929b03 sep27eve   bundle 4.233 named 15  h11   n/a h15 -10.0% h300 -10.0%  flat 15-300
+   removes Sep 27 21:27 0x96803325 sep27eve   bundle 4.233 named 15  h11   n/a h15 -10.0% h300 -10.0%  flat 15-300
+  fit h11: gain $+12.16 total = $+3.04/day; leave one launch out: the smallest remaining gain $+10.28 = $+2.57/day; if the guard refuses every one: $+0.33/day (gas only)
+  fit h15: gain $+12.16 total = $+3.04/day; leave one launch out: the smallest remaining gain $+10.28 = $+2.57/day; if the guard refuses every one: $+0.33/day (gas only)
+  rec+late h11: removes 2, gain $+3.26 total = $+1.03/day over 76.2 h; guard refuses all: $+0.12/day
+  rec+late h15: removes 2, gain $+3.26 total = $+1.03/day over 76.2 h; guard refuses all: $+0.12/day
+
+=== tables population
+  fit: every cap in [2.772, 4.137) ETH keeps the same fires as 3.0 (highest kept bundle 2.772, lowest removed 4.137)
+  rec+late: every cap in [1.899, 4.233) ETH keeps the same fires as 3.0 (highest kept bundle 1.899, lowest removed 4.233)
+   removes Sep 21 01:32 0x0e61f225 sep2021    bundle 4.233 named 15  h11 -10.0% h15 -10.0% h300 -10.0%  flat 15-300
+   removes Sep 21 23:51 0x033bc29a sep2021    bundle 4.233 named 25  h11 -10.0% h15 -10.0% h300 -10.0%  flat 15-300
+   removes Sep 22 00:36 0xcee448cc sep2021    bundle 4.137 named 20  h11 -11.9% h15 -11.9% h300 -11.9%  flat 15-300
+   removes Sep 22 22:27 0xc7349e7e sep2223    bundle 4.304 named 13  h11 -11.9% h15 -11.9% h300 -11.9%  flat 15-300
+   removes Sep 23 06:00 0xe8bcf407 sep2223    bundle 4.219 named 24  h11 -11.9% h15 -11.9% h300 -11.9%  flat 15-300
+   removes Sep 23 19:28 0x0bf85d57 sep23day   bundle 4.268 named 13  h11 -10.0% h15 -10.0% h300 -10.0%  flat 15-300
+   removes Sep 23 19:52 0x6ff3cd2b sep23day   bundle 4.144 named 13  h11 -10.0% h15 -10.0% h300 -10.0%  flat 15-300
+   removes Sep 26 16:05 0xee486806 sep26pm    bundle 4.236 named 22  h11 -11.0% h15 -11.0% h300 -11.0%  flat 15-300
+   removes Sep 27 21:12 0xa6929b03 sep27eve   bundle 4.233 named 15  h11   n/a h15 -10.0% h300 -10.0%  flat 15-300
+   removes Sep 27 21:27 0x96803325 sep27eve   bundle 4.233 named 15  h11   n/a h15 -10.0% h300 -10.0%  flat 15-300
+  fit h11: gain $+12.16 total = $+3.04/day; leave one launch out: the smallest remaining gain $+10.28 = $+2.57/day; if the guard refuses every one: $+0.33/day (gas only)
+  fit h15: gain $+12.16 total = $+3.04/day; leave one launch out: the smallest remaining gain $+10.28 = $+2.57/day; if the guard refuses every one: $+0.33/day (gas only)
+  rec+late h11: removes 3, gain $+5.02 total = $+1.58/day over 76.2 h; guard refuses all: $+0.18/day
+  rec+late h15: removes 3, gain $+5.02 total = $+1.58/day over 76.2 h; guard refuses all: $+0.18/day

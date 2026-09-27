@@ -1,0 +1,71 @@
+fit fire_eng: fires with tape 56; cap3.0 drops: e1_multi-rule 7, engine-rule whole 7, engine-rule k-2 7; same set: True
+    0xcee448cc e1 4.137 eng-whole 4.330 eng-k2 4.330 k 9
+    0xc7349e7e e1 4.304 eng-whole 4.330 eng-k2 4.330 k 4
+    0xe8bcf407 e1 4.219 eng-whole 4.330 eng-k2 4.330 k 8
+    0x0e61f225 e1 4.233 eng-whole 4.286 eng-k2 4.286 k 4
+    0x033bc29a e1 4.233 eng-whole 4.286 eng-k2 4.286 k 8
+    0x0bf85d57 e1 4.268 eng-whole 4.286 eng-k2 4.286 k 6
+    0x6ff3cd2b e1 4.144 eng-whole 4.197 eng-k2 4.197 k 6
+    0x8a944df9 e1 2.772 eng-whole 2.826 eng-k2 2.826 k 7
+    0x2815d974 e1 2.758 eng-whole 2.811 eng-k2 2.811 k 9
+    0xcf797677 e1 2.169 eng-whole 2.204 eng-k2 2.204 k 4
+    0x0352d69e e1 2.169 eng-whole 2.204 eng-k2 2.204 k 9
+    0x077cccf4 e1 2.158 eng-whole 2.193 eng-k2 2.193 k 5
+fit fire_tab: fires with tape 73; cap3.0 drops: e1_multi-rule 7, engine-rule whole 7, engine-rule k-2 7; same set: True
+    0xcee448cc e1 4.137 eng-whole 4.330 eng-k2 4.330 k 9
+    0xc7349e7e e1 4.304 eng-whole 4.330 eng-k2 4.330 k 4
+    0xe8bcf407 e1 4.219 eng-whole 4.330 eng-k2 4.330 k 8
+    0x0e61f225 e1 4.233 eng-whole 4.286 eng-k2 4.286 k 4
+    0x033bc29a e1 4.233 eng-whole 4.286 eng-k2 4.286 k 8
+    0x0bf85d57 e1 4.268 eng-whole 4.286 eng-k2 4.286 k 6
+    0x6ff3cd2b e1 4.144 eng-whole 4.197 eng-k2 4.197 k 6
+    0x8a944df9 e1 2.772 eng-whole 2.826 eng-k2 2.826 k 7
+    0x2815d974 e1 2.758 eng-whole 2.811 eng-k2 2.811 k 9
+    0xcf797677 e1 2.169 eng-whole 2.204 eng-k2 2.204 k 4
+    0x0352d69e e1 2.169 eng-whole 2.204 eng-k2 2.204 k 9
+    0x077cccf4 e1 2.158 eng-whole 2.193 eng-k2 2.193 k 5
+rec fire_eng: fires with tape 13; cap3.0 drops: e1_multi-rule 0, engine-rule whole 0, engine-rule k-2 0; same set: True
+    0x26d36c5e e1 1.899 eng-whole 1.953 eng-k2 1.953 k 9
+    0x9f834b70 e1 1.545 eng-whole 1.599 eng-k2 1.599 k 4
+    0x0a6c1259 e1 1.426 eng-whole 1.444 eng-k2 1.444 k 7
+    0xe65b85ad e1 1.225 eng-whole 1.148 eng-k2 1.148 k 7
+    0x95f60349 e1 0.841 eng-whole 0.933 eng-k2 0.933 k 8
+    0x45bbf47f e1 0.799 eng-whole 0.853 eng-k2 0.853 k 6
+    0x89f41f56 e1 0.753 eng-whole 0.760 eng-k2 0.760 k 5
+    0xd43ed726 e1 0.706 eng-whole 0.733 eng-k2 0.733 k 7
+    0x56e76663 e1 0.703 eng-whole 0.723 eng-k2 0.723 k 6
+    0xad1c5f76 e1 0.605 eng-whole 0.641 eng-k2 0.641 k 6
+    0xe41e16e1 e1 0.560 eng-whole 0.577 eng-k2 0.577 k 5
+    0xa80c4813 e1 0.388 eng-whole 0.406 eng-k2 0.406 k 8
+rec fire_tab: fires with tape 19; cap3.0 drops: e1_multi-rule 1, engine-rule whole 1, engine-rule k-2 1; same set: True
+    0xee486806 e1 4.236 eng-whole 4.308 eng-k2 4.308 k 6
+    0x26d36c5e e1 1.899 eng-whole 1.953 eng-k2 1.953 k 9
+    0x9f834b70 e1 1.545 eng-whole 1.599 eng-k2 1.599 k 4
+    0x0a6c1259 e1 1.426 eng-whole 1.444 eng-k2 1.444 k 7
+    0xe65b85ad e1 1.225 eng-whole 1.148 eng-k2 1.148 k 7
+    0x9132d3db e1 0.982 eng-whole 1.017 eng-k2 1.017 k 3
+    0x95f60349 e1 0.841 eng-whole 0.933 eng-k2 0.933 k 8
+    0x45bbf47f e1 0.799 eng-whole 0.853 eng-k2 0.853 k 6
+    0x89f41f56 e1 0.753 eng-whole 0.760 eng-k2 0.760 k 5
+    0x2ad76f05 e1 0.750 eng-whole 0.755 eng-k2 0.755 k 8
+    0xc63ab843 e1 0.726 eng-whole 0.753 eng-k2 0.753 k 6
+    0xd43ed726 e1 0.706 eng-whole 0.733 eng-k2 0.733 k 7
+
+all tape launches with e1 bundle > 3 or engine-rule > 3:
+  Sep 18 14:41 0x732ef190 k 9 e1 4.233 eng-whole 4.286 eng-k2 4.286 fire_eng False
+  Sep 21 01:32 0x0e61f225 k 4 e1 4.233 eng-whole 4.286 eng-k2 4.286 fire_eng True
+  Sep 21 23:51 0x033bc29a k 8 e1 4.233 eng-whole 4.286 eng-k2 4.286 fire_eng True
+  Sep 22 00:18 0x9c861776 k 4 e1 3.131 eng-whole 3.184 eng-k2 3.184 fire_eng False
+  Sep 22 00:36 0xcee448cc k 9 e1 4.137 eng-whole 4.330 eng-k2 4.330 fire_eng True
+  Sep 22 00:55 0x0a8b7499 k 1 e1 4.179 eng-whole 4.330 eng-k2 0.000 fire_eng False
+  Sep 22 20:46 0xac8a2c12 k 1 e1 4.024 eng-whole 4.041 eng-k2 0.000 fire_eng False
+  Sep 22 22:27 0xc7349e7e k 4 e1 4.304 eng-whole 4.330 eng-k2 4.330 fire_eng True
+  Sep 23 06:00 0xe8bcf407 k 8 e1 4.219 eng-whole 4.330 eng-k2 4.330 fire_eng True
+  Sep 23 14:42 0x74608565 k 3 e1 3.125 eng-whole 3.216 eng-k2 3.216 fire_eng False
+  Sep 23 16:36 0x6c1b04e3 k 2 e1 4.279 eng-whole 4.286 eng-k2 0.007 fire_eng False
+  Sep 23 19:28 0x0bf85d57 k 6 e1 4.268 eng-whole 4.286 eng-k2 4.286 fire_eng True
+  Sep 23 19:52 0x6ff3cd2b k 6 e1 4.144 eng-whole 4.197 eng-k2 4.197 fire_eng True
+  Sep 25 20:05 0x8aba714f k 3 e1 4.258 eng-whole 4.330 eng-k2 4.330 fire_eng False
+  Sep 26 01:25 0xeb90afaa k 3 e1 4.214 eng-whole 4.286 eng-k2 4.286 fire_eng False
+  Sep 26 11:29 0x0c55377f k 2 e1 3.386 eng-whole 3.516 eng-k2 0.130 fire_eng False
+  Sep 26 16:05 0xee486806 k 6 e1 4.236 eng-whole 4.308 eng-k2 4.308 fire_eng False
