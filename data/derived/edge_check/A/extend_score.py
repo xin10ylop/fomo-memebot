@@ -27,6 +27,8 @@ if chks:
         R = json.load(gzip.open(A + f"crowd_raw_{tag}.json.gz", "rt")); mine = {r["cv"] for r in R}
         base = [r for r in load_raw("sep27night")]; bc = {r["cv"] for r in base}
         print(f"\n=== completeness check {tag} against the committed sep27night: mine {len(mine)}, committed {len(bc)}, in both {len(mine & bc)}, only mine {len(mine - bc)}, only committed {len(bc - mine)}")
+        for r in base:
+            if r["cv"] not in mine: print(f"   only in the committed file: {hms(r['T0'])} {r['cv'][:10]} (T0 {r['T0']}, the window ends at {json.load(open(A + f'launches_{tag}.json'))['t_hi']})")
         for r in R:
             if r["cv"] not in bc: print(f"   missing from the committed file: {hms(r['T0'])} {r['cv'][:10]} fleets@k-2 {at(fleets_by_block(r), r['k'] - 2)}")
 if tags:
@@ -48,3 +50,8 @@ if tags:
     for w in REC: Hh.update({x["cv"]: x for x in json.load(open(D + HG[w]))})
     ref = [Hh[r["cv"]]["behind1_15_h300"] for r in all_launches(REC) if not is_fire(r)] + [x["h300"] for x in new_ref]
     print(f"   lift with the new stretches: fired {st.mean(allrec):+.1%} ({len(allrec)}) - refused {st.mean(ref):+.1%} ({len(ref)}) = {st.mean(allrec) - st.mean(ref):+.1%}")
+    step = st.mean(fit) ** 2 / (2 * sdp ** 2); hrs_new = sum((json.load(open(A + f"launches_{t}.json"))["t_hi"] - json.load(open(A + f"launches_{t}.json"))["t_lo"]) / 3600 for t in tags)
+    r_all = len(allrec) / (60 + hrs_new) * 24; r_new = max(len(new_fires), 1e-9) / hrs_new * 24
+    lo_n = (2.94 + llr) / step; hi_n = (2.94 - llr) / step
+    print(f"   sequential test: drift {step:.3f} per fire; about {lo_n:.0f} more fires to the lower boundary if the true mean is 0, {hi_n:.0f} to the upper if it is the fit's")
+    print(f"   fire rate: {len(allrec)} fires in {60 + hrs_new:.1f} h = {r_all:.1f}/day -> {lo_n / r_all:.1f} / {hi_n / r_all:.1f} days; the last {hrs_new:.1f} h alone: {len(new_fires)} fire(s) = {r_new:.1f}/day -> {lo_n / r_new:.1f} / {hi_n / r_new:.1f} days")

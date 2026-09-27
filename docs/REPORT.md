@@ -3624,3 +3624,38 @@ last five negative). The rule keeps being scored on the chain daily; re-entry cr
 Live again at 09:03 UTC the same morning at the owner's decision, at $13 with the stop at KILL_USD 24 (about $10 of
 loss); the recommendation to stay in paper until the rule's trailing 20 fires are positive stands on the record.
 
+### 24.35 The edge check (Sep 27): two independent reviewers on the drop since Sep 24
+
+Brief: `data/derived/edge_check/BRIEF.md`; reports and scripts: `data/derived/edge_check/A/REPORT.md`,
+`data/derived/edge_check/B/REPORT.md` (every number with its command). Both worked blind to each other and both
+rebuilt the fleet count and the pricing from scratch on fresh chain pulls.
+
+**Verdict, unanimous: the drop is real, not a measurement artefact.** The counts match `crowd_rules.cums` on all 723
+launches; the pricing reproduces +26.3% (73 fit fires) and +3.5% (18 recent) to the decimal; the fee schedule (6.18%
+in second +1, 0.19% in second +2, the tier on sells), the curve code and the block cadence are identical in both
+periods. Statistics: rank test p = 0.010-0.0125, bootstrap 3%, permutation 5%; no 60-hour stretch of the fit and no
+run of 18 consecutive fit fires reads as low as +3.5%. The recent mean's 95% interval is −14% to +27%: the size of
+what remains is open, its direction is not.
+
+**Where the money went.** Not in the seat: at a 15-block hold the recent fires still make +12.8% (fit +16.2%), and the
+whole qualifying population returns the same at 300 blocks in both periods (+3% and +4%). The rule's selection is
+what vanished: its lift over the launches it refuses went from +27 points to −1 at 300 blocks, while at 15 blocks
+it stands (+15 against +18). A: outsiders' buying after the seat fell (median outsider ETH in blocks +16 to +60 from
+0.57 to 0.095) and accounts for about 21 of the 26 points; the bundles' dumps for about 5. B: bundles that dump during
+the hold went from 10% of fires to 28% (the fit's fleets picked launches whose bundle held; now they do not), and one
+operator's named-wallet template is 6 of the 18 recent fires at −13.6%, its last two dumped 21-31 blocks before our
+exit; without it the recent fires average +12%.
+
+**Also missed by the daily readings.** The launch supply halved (5.9 to 2.7 qualifying launches an hour; fires an hour
+0.76 to 0.32), which alone takes $56 a day to $24 at the fit's per-fire return. The shooter roster turned over: the
+fit's best k−2 fleet (22 fires at +51.9%) has 3 recent fires at −4.8%; half the fleets counted in recent fires never
+appeared in a fit fire. Our own bursts were visible from Sep 19 inside the fit, with no damage, so the fleets'
+reaction to us is not the cause. Two stretches the windows skipped (Sep 26 17:38-22:38, Sep 27 04:09-09:20) add one
+fire, not a winner. No alternative (other views, wallets, a stop) restores the fit; the 15-block hold does better on
+the recent fires but the pooled 91 still lean to 300, weakly.
+
+**What settles it.** A sequential test on each new chain-scored fire: about 13-20 more fires if the edge is gone
+(two to three days at the chain rate), 43-56 if it is intact. The numbers to add to the evening reading: the fires'
+lift over the refused at 300 blocks and the dump rate among fires against refused, per day. Live fills come about once
+a day, so the chain is the faster test by far.
+

@@ -82,7 +82,7 @@ for x in fit:
     for a in x["fl_k2"]: cf[a] += 1; rf[a].append(x["ret"]["300"])
 for x in rec:
     for a in x["fl_k2"]: cr[a] += 1; rr[a].append(x["ret"]["300"])
-for a in sorted(set(cf) | set(cr), key=lambda a: -(cf[a] + cr[a]))[:25]:
+for a in sorted(set(cf) | set(cr), key=lambda a: (-(cf[a] + cr[a]), a))[:25]:
     print(f"  {a}  fit {cf[a]:3d} fires {st.mean(rf[a]) if rf[a] else float('nan'):+7.1%}   recent {cr[a]:2d} fires {st.mean(rr[a]) if rr[a] else float('nan'):+7.1%}")
 new = [a for a in cr if a not in cf]
 print(f"  addresses at k-2 in recent fires never seen at k-2 in a fit fire: {len(new)} of {len(cr)}; recent fires with at least one such: {sum(1 for x in rec if any(a in new for a in x['fl_k2']))} of {len(rec)}")
@@ -96,7 +96,7 @@ for s, L in pop.items():
         rel, snd, _ = shooters(r, r["k"]); c.update(rel | {t["fr"] for rows in r["blocks"][:r["k"] + 1] for t in rows if t["direct"] and not t["named_fr"] and t["fr"] not in US and not t["to_token"]})
     share[s] = {a: n / len(L) for a, n in c.items()}
     print(f"  {s}: launches {len(L)}, mean distinct shooters (fleets) per launch in the creation second {sum(c.values())/len(L):.2f}")
-for a in sorted(set(share["fit"]) | set(share["rec"]), key=lambda a: -(share["fit"].get(a, 0) + share["rec"].get(a, 0)))[:15]:
+for a in sorted(set(share["fit"]) | set(share["rec"]), key=lambda a: (-(share["fit"].get(a, 0) + share["rec"].get(a, 0)), a))[:15]:
     print(f"  {a}  fit {share['fit'].get(a, 0):5.1%}  recent {share['rec'].get(a, 0):5.1%}")
 # hour of day, tier, k, bundle: the fit's conditional means re-weighted to the recent mix
 print("\n=== composition: the fit's mean in each bucket, re-weighted to the recent fires' mix")

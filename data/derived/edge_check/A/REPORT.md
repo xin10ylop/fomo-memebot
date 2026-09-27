@@ -1,7 +1,15 @@
-**Verdict: REAL, not a measurement artefact. The recent fires are worse than the fit's (rank test p = 0.013, bootstrap
-p = 0.034, permutation of means p = 0.055). The rule's lift over the launches it refuses fell from +27 points to −1 point,
-while the qualifying population as a whole did not change (+3.3% → +4.3%). The loss is in outsiders' buying after the seat.
-How big the edge is now cannot be decided from 18 fires: the recent mean's 95% interval is −14% to +27%.**
+**Verdict: REAL, not a measurement artefact.**
+- **Same yardstick.** Separately written code, run on the same definitions, reproduces both numbers exactly (+26.32% fit,
+  +3.46% recent). The fee schedule, the contracts, the sequencer's cadence and the completeness of the data are
+  unchanged.
+- **The drop is unlikely to be chance.** With the stretches the committed windows skipped, the recent set is 19 fires at
+  +3.0%, against the fit's 73 at +26.3%: p = 0.010 on ranks, 0.028 by bootstrap, 0.047 by permutation of means.
+- **The rule stopped picking winners.** Its lift over the launches it refuses fell from +27 points to −1 point. The
+  qualifying population as a whole did not change (+3.3% → +4.3%).
+- **Where the money went.** The loss is outsiders' buying after the seat, not the seat itself. At 15 blocks the recent
+  fires still make +12.8%.
+- **Not yet settled: the size of today's edge.** The 18 committed fires put the recent mean's 95% interval at −14% to
+  +27%. If the edge is gone, about 13 more fires settle it (about 2 days at the 70-hour rate).
 
 # Edge check, reviewer A (Sep 27 2026)
 
@@ -223,9 +231,84 @@ gap to the rule is inside one standard error of about 11 points.
   recently.
 - **The market halved** (`python3 data/derived/edge_check/A/market.py` -> `market.txt`, e1_multi's own counts). Pons V2
   creations went from 382 to 204 an hour, and qualifying launches from 5.56 to 2.72 an hour. The qualifying share of
-  creations is about the same (1.46%, 1.33%). The recent windows include more night hours, which accounts for part of
-  this.
+  creations is about the same (1.46%, 1.33%). The hour mix explains a small part: applied to the hours the recent windows
+  cover, the fit's hour-by-hour rates predict 4.87 qualifying launches an hour, against 2.72 observed. Every 6-hour UTC
+  bucket is down 41-48%.
 - **Around our exit:** nobody is selling in front of the 300-block exit. Sells per block at seat+297..303 are 0.048
   against 0.068 at seat+200..296 on recent fires, and 0.025 against 0.034 on fit fires (`world.txt`). With 2 bursts and 1
   fill, the fleets' response to our bursts cannot be measured.
 
+## 6. The stretches the committed windows skipped, pulled and scored
+
+The committed "since" set has holes: Sep 26 17:38-22:38 (5.0 h), everything after Sep 27 04:09, and smaller gaps (Sep
+25 18:50-19:28, Sep 26 12:52-13:40). The committed windows also do not all use the same code path: `e1_multi.py` drops a
+launch silently on any RPC error. `python3 data/derived/edge_check/A/check_counts.py` shows that sep25eve2 lacks 20:07
+0xf45fa520 (k-1 borderline, +67.9%), which sits inside its range and is in sep25eve. sep25eve2 also lacks 19:28
+0x5ff7b2f8, which falls on its first minute. Neither is a fire.
+
+`extend_window.py` runs e1_multi's qualifying test, crowd_raw's pull and the tape, and retries every failure (4 passes).
+
+- `python3 data/derived/edge_check/A/extend_window.py "2026-09-26 17:38" "2026-09-26 22:38" gapA`: 961 creations, 0
+  unresolved, **7 qualifying, 1 fire** (18:47 0x45bbf47f, **−4.9%** at h300, +8.2% at h15).
+- `... "2026-09-27 04:09" "2026-09-27 09:20" gapB`: 530 creations, 0 unresolved, **6 qualifying, 0 fires** (one is the
+  04:09 launch already in sep27night, not counted twice).
+- Completeness check, `... "2026-09-26 22:38" "2026-09-27 04:09" chk27`, re-derives the committed sep27night window from
+  scratch. It finds 12 launches, all 12 in the committed file, which has 13; the 13th sits 8 s past my window's end and
+  gapB finds it. The two fires re-price to the same numbers (−50.5%, −37.6%). **The committed night file is complete,
+  and its fires reproduce from a fresh pull.**
+- `python3 data/derived/edge_check/A/extend_score.py gapA gapB chk27` -> `extend_score.txt`. The recent set becomes **19
+  fires, +3.0% mean, −4.9% median, 37% wins**. Bootstrap P = 0.028, permutation p = 0.047, Mann-Whitney p = 0.010, SPRT
+  LLR −1.54. The lift is fired +3.0% (19) minus refused +4.0% (153) = **−1.0 points**.
+- The market keeps thinning. The last 10.2 hours have 13 qualifying launches (1.3 an hour, against 5.56 in the fit and
+  2.72 in the committed recent windows) and 1 fire.
+
+## 7. What is being missed
+
+1. **The fired mean alone is the wrong daily gauge.** The whole population is unchanged (+3.3% → +4.3%). What changed is
+   the rule's selection: the lift went from +26.9 to −1.0 points. The prediction files already print a refused mean, at
+   k-1. Scoring the refused set at k-2 every day and tracking **fired − refused** separates a bad market from a lost
+   signal. On the recent data it reads as a lost signal.
+2. **The loss is in the demand after the first 15 blocks, not in the seat.** At h15 the recent fires hold +12.8% (fit
+   +16.2%). About 21 of the ~26 points of the gap are outsiders' buying after the seat second; the median outsider ETH
+   in seat+16..60 fell from 0.57 to 0.095. About 5 points are the bundle's dumps, with named wallets selling within 300
+   blocks on 8/18 recent fires against 15/73 in the fit. Without follow-on buyers the seat is −37% in both periods, so
+   entry cost, fees and the mechanics are not where the money went.
+3. **The shooters turned over.** Half of the addresses counted at k-2 in recent fires never appeared in a fit fire.
+   The fit's best k-2 fleet (0x460b1f81, +51.9% over 22 fires) is −4.8% over 3. The biggest late shooter changed from
+   0xa95fe1ca (28% → 4% of launches) to 0xf9af9f38 (8% → 33%). "Two fleets" is a count of addresses, and the addresses
+   behind it are not the same ones the fit priced. The split by new or old fleet (−12.7% on 11 fires against +28.8% on 7)
+   was found after looking and did not exist in the fit, so it has no evidential weight yet.
+4. **The market halved.** Creations per hour went 382 → 204 and are 102-192 in the last 10 h; qualifying launches per
+   hour went 5.56 → 2.72 → 1.3. Crowds at the fires are thinner: rival shots in the creation second median 48 → 28,
+   seat-block buys median 5 → 2.5. Weighted by the fit's own conditional means, the thinner crowds explain at most about
+   6 of the 23 points.
+5. **Not artefacts** (tested and ruled out): the scoring code, the fleet count, the view, the fee schedule, the 3% cap,
+   the ETH price, the tape length, the population filters, duplicated records, the engine's creator-supply filter, the
+   contracts, the sequencer's cadence, and the completeness of the Sep 26-27 night window.
+
+## 8. What would settle it, and by when
+
+- **Sequential test** on each new fire, fit mean (+26.3%) against 0, sd 0.576 (`extend_score.txt`). The LLR is −1.54 now,
+  and the boundaries are ±2.94. At a true mean of 0 it takes about **13 more fires** to cross the lower boundary; at the
+  fit's mean, about **43** to cross the upper.
+- At the 70-hour rate (6.5 fires a day) that is **2.0 days (about Sep 29)** in the first case and 6.5 days in the second.
+  At the last 10 hours' rate (2.4 a day) it is 5.6 and 18 days.
+- For comparison, 30 fires are needed to tell +26% from 0 at one-sided 5% with 80% power, from scratch (`stats_h300.txt`).
+- **The lift, fired minus refused**, should be computed with every day's prediction. A lift back above +15 points over the
+  next 13 fires would contradict a lost signal. A lift near 0 over those fires, together with the LLR crossing −2.94,
+  settles the question as a lost edge.
+- **The h15 exit** should be priced alongside h300 on every new fire. Today it is t +1.06 in the recent set and t −1.18
+  pooled, so it does not justify a change. The paired difference would need |t| > 2 over at least 30 recent fires to
+  justify a change.
+- **Live money** accumulates evidence more slowly than the chain. From Sep 26 09:15 to now the chain has 6 fires (09:24,
+  13:47, 16:05, 18:47, 23:53, 00:10). The engine sent 2 bursts and got 1 fill, so live fills come at about one a day, and
+  13 of them take about 13 days. The chain score (`reach_table.py` / `extend_score.py`) counts every fire and, if the
+  edge is gone, decides by about Sep 29.
+
+## Files (all in `data/derived/edge_check/A/`)
+
+`common.py` (loaders, independent fleet counter) · `check_counts.py` · `pull_tapes.py` -> `tapes.json.gz` (91 fire tapes) ·
+`price.py` -> `fires.json`, `price.txt` · `yardstick.py` -> `yardstick.txt` · `stats.py` -> `stats_h300.txt` ·
+`population.py` -> `population.txt` · `chain_change.py` -> `fires_features.json`, `chain_change.txt` · `decompose.py` ->
+`decompose.txt` · `alternatives.py` -> `alternatives.txt` · `world.py` -> `world.txt` · `market.py` -> `market.txt` ·
+`extend_window.py` -> `launches_/crowd_raw_/tapes_{gapA,gapB,chk27}` · `extend_score.py` -> `extend_score.txt`.

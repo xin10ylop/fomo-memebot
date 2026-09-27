@@ -17,3 +17,9 @@
   recent e1_sep24/e1m_sep27night.json       from Sep 26 22:38   5.52 h  creations   535 (  97/h)  qualifying   13 ( 2.4/h, 2.43% of creations)
   recent: 57.6 h, creations 204/h, qualifying 2.72/h, 1.33% of creations
 
+qualifying launches per covered hour, by UTC hour bucket (fit vs recent):
+  00-05 UTC: fit   30 in  13.3 h = 2.25/h   recent   22 in  16.6 h = 1.33/h
+  06-11 UTC: fit   35 in  13.6 h = 2.57/h   recent   19 in  12.7 h = 1.49/h
+  12-17 UTC: fit  138 in  22.4 h = 6.15/h   recent   58 in  16.0 h = 3.64/h
+  18-23 UTC: fit  185 in  20.3 h = 9.10/h   recent   58 in  12.3 h = 4.70/h
+  the fit's hourly rates on the recent windows' hours: 4.87/h expected, 2.72/h observed

@@ -14,9 +14,27 @@
    Sep 27 07:49 0x9afab1f4 k 6 fleets [0, 0, 0, 0, 0, 1, 1]      h15  -20.3% h300   +5.1%
    Sep 27 07:52 0x42d5a73f k 5 fleets [0, 0, 0, 0, 0, 0]      h15  -48.9% h300  -48.9%
    Sep 27 08:03 0x3b1b8c9a k 7 fleets [0, 0, 0, 0, 0, 0, 0, 0]      h15  -10.0% h300   +5.4%
+=== chk27: Sep 26 22:38 - Sep 27 04:09 UTC (5.52 h), creations 535, unresolved 0, qualifying 12, crowds 12, tapes 12
+   Sep 26 22:38 0xeb9703e0 k 2 fleets [0, 3, 3]      h15 +165.9% h300  -42.9%
+   Sep 26 22:43 0xa040fbe8 k 1 fleets [0, 1]      h15  +20.7% h300  +22.7%
+   Sep 26 23:20 0xca4c39f2 k 6 fleets [0, 1, 1, 1, 1, 1, 1]      h15  -20.5% h300  -36.7%
+   Sep 26 23:53 0x2b7508b0 k 6 fleets [0, 0, 2, 2, 2, 3, 3] FIRE h15   +0.0% h300  -50.5%
+   Sep 27 00:07 0x2f3ea771 k 1 fleets [0, 0]      h15   -6.1% h300 +201.7%
+   Sep 27 00:10 0x80c0efae k 6 fleets [0, 1, 2, 2, 2, 2, 2] FIRE h15  -10.0% h300  -37.6%
+   Sep 27 00:37 0xa84e71b1 k 2 fleets [0, 0, 0]      h15   -9.6% h300  +13.2%
+   Sep 27 00:53 0x502d3d7f k 7 fleets [0, 0, 0, 0, 0, 0, 0, 0]      h15  -10.0% h300  +27.0%
+   Sep 27 01:23 0x32456129 k 2 fleets [0, 0, 0]      h15  -10.0% h300  -12.2%
+   Sep 27 02:11 0x8877e8aa k 1 fleets [0, 0]      h15  -10.0% h300  +27.5%
+   Sep 27 03:00 0x7ee7228c k 2 fleets [0, 0, 2]      h15   -8.9% h300  -45.7%
+   Sep 27 03:22 0x005b0ff8 k 3 fleets [0, 0, 0, 0]      h15  -11.9% h300  -45.5%
+
+=== completeness check chk27 against the committed sep27night: mine 12, committed 13, in both 12, only mine 0, only committed 1
+   only in the committed file: Sep 27 04:09 0xf6dd9e5b (T0 1790482148, the window ends at 1790482140)
 
 new stretches: fires n   1 mean  -4.9% median  -4.9% win  0% dead  0%; refused n  11 mean  -1.9% median  -0.8% win 45% dead 18%
                fires at h15 n   1 mean  +8.2% median  +8.2% win 100% dead  0%
 recent updated: n  19 mean  +3.0% median  -4.9% win 37% dead 11%
    bootstrap P(18+ draws from the fit <= this mean) 0.0284; permutation p 0.0470; Mann-Whitney z 2.32 p 0.0102; SPRT LLR -1.54
    lift with the new stretches: fired +3.0% (19) - refused +4.0% (153) = -1.0%
+   sequential test: drift 0.105 per fire; about 13 more fires to the lower boundary if the true mean is 0, 43 to the upper if it is the fit's
+   fire rate: 19 fires in 70.2 h = 6.5/day -> 2.0 / 6.5 days; the last 10.2 h alone: 1 fire(s) = 2.4/day -> 5.6 / 18.1 days
