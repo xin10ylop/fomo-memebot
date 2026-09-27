@@ -3813,3 +3813,19 @@ and −2.5% at the last. P&L −$0.80. The chain's answer and the engine's agree
 the tables cannot price, a crowd that becomes visible only at the tick, which the guard turns into gas instead of a
 back-of-block fill.
 
+*Reading, Sep 27 18:07-21:27 UTC: the first fill on the 9-block setting, to the decimal.* Three bursts. 18:42
+`0xfa8efc53`: the gate opened at +30 ms, 25 shots left, 9 landed in the creation second (reverted, wrong second), 16 in
+the seat block, the first of them at index 4 behind one 0.001 ETH buy: filled in second place, 0.004823 ETH, sold at
+E1+11 (setting 9 plus the two-block landing lag, exactly the target of 24.37), −1.97% real against −2.0% modelled at
+every exit from 9 to 15: a flat launch, the fees minus nothing. 21:12 `0xa6929b03` and 21:27 `0x96803325`, both from
+the 4.233 ETH / 15-named-wallet template of reviewer B's serial operator: the gate was open at the build, 35 shots
+left on time, 27 and 16 landed in the seat block at index 2 with nothing ahead, and every one reverted: the template's
+bundle keeps buying through the whole creation second, so the price at the seat was far above the price at the build
+(225,507 tokens for $13 against about 700,000 on an ordinary launch) and the minOut guard refused the fill. The model
+says −10% for both at any exit, so the guard saved about $2.20 net of $0.38 of gas. The same template was refused at
+the gate at 18:21 (−10% modelled). Live since the switch: six bursts, two fills (−2.6%, −2.0%, both equal to the model),
+one held by the sequencer, one late at the tick and refused by the guard, two refused by the guard on the template's
+launches. P&L −$1.36. The machine does what the tables say on every fill; the launches the rule has picked in the last
+two days are flat or negative on the chain, which is the edge question the sequential test on the engine's fires
+answers, not the machine's.
+
