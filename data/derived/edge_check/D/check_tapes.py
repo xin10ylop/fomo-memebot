@@ -20,3 +20,10 @@ print(f"91 fires: {len(F)}; tapes whose event lists differ between A and B: {dif
 for g in ("fit", "recent"): print(f"{g:7s} fires h300 (B tapes): {c.summ(res[g], c.HOURS[g])}")
 cov = {g: sum(1 for r in R if r["grp"] == g) for g in ("fit", "recent")}; have = {g: sum(1 for r in R if r["grp"] == g and c.tape(r["cv"])) for g in ("fit", "recent")}
 print("launches with a tape:", have, "of", cov)
+# (4) the shot pull (pull_shots.py) against crowd_raw: the same transactions in every block
+if os.path.exists(c.DD + "shots.json.gz"):
+    raw = {r["cv"]: r for r in R}; S = json.load(gzip.open(c.DD + "shots.json.gz", "rt")); bad = 0; nb = 0
+    for s in S:
+        for a, b in zip(s["blocks"], raw[s["cv"]]["blocks"]):
+            nb += 1; bad += sorted((t["fr"], t["ix"]) for t in a) != sorted((t["fr"], t["ix"]) for t in b)
+    print(f"shots.json.gz: {len(S)} launches, {nb} blocks, blocks whose transactions differ from crowd_raw: {bad}")
