@@ -1,0 +1,49 @@
+=== setting s against setting 15 when both sells land d blocks late (paired mean +- se)
+  fit setting  8: d0 +17.6% vs +16.2% (+1.3%+-1.9%)  d2 +18.6% vs +15.4% (+3.3%+-2.1%)  d4 +19.1% vs +15.7% (+3.4%+-1.4%)  d6 +17.9% vs +16.9% (+1.1%+-1.5%)  d8 +16.2% vs +16.9% (-0.6%+-1.3%)
+  fit setting  9: d0 +17.0% vs +16.2% (+0.8%+-1.8%)  d2 +19.5% vs +15.4% (+4.1%+-2.0%)  d4 +18.8% vs +15.7% (+3.1%+-1.4%)  d6 +16.2% vs +16.9% (-0.7%+-1.3%)  d8 +15.4% vs +16.9% (-1.5%+-1.2%)
+  fit setting 10: d0 +18.6% vs +16.2% (+2.4%+-1.7%)  d2 +19.1% vs +15.4% (+3.7%+-1.7%)  d4 +17.9% vs +15.7% (+2.3%+-1.3%)  d6 +16.2% vs +16.9% (-0.6%+-1.3%)  d8 +15.5% vs +16.9% (-1.4%+-0.7%)
+  fit setting 11: d0 +19.5% vs +16.2% (+3.3%+-1.5%)  d2 +18.8% vs +15.4% (+3.4%+-1.7%)  d4 +16.2% vs +15.7% (+0.6%+-1.1%)  d6 +15.4% vs +16.9% (-1.5%+-1.1%)  d8 +15.7% vs +16.9% (-1.2%+-0.7%)
+  fit setting 9, d uniform on 2..8 (a slow sell): +17.6% against setting 15 +16.3%
+  rec setting  8: d0 +11.4% vs +12.6% (-1.2%+-3.4%)  d2 +14.2% vs +12.9% (+1.4%+-1.8%)  d4 +15.1% vs +12.0% (+3.1%+-2.5%)  d6 +12.5% vs +12.4% (+0.1%+-2.5%)  d8 +12.9% vs +9.5% (+3.4%+-3.0%)
+  rec setting  9: d0 +14.0% vs +12.6% (+1.4%+-1.7%)  d2 +15.7% vs +12.9% (+2.8%+-1.6%)  d4 +13.5% vs +12.0% (+1.5%+-2.6%)  d6 +12.6% vs +12.4% (+0.1%+-2.1%)  d8 +12.9% vs +9.5% (+3.4%+-3.0%)
+  rec setting 10: d0 +14.2% vs +12.6% (+1.7%+-1.7%)  d2 +15.1% vs +12.9% (+2.2%+-1.5%)  d4 +12.5% vs +12.0% (+0.5%+-2.5%)  d6 +12.9% vs +12.4% (+0.4%+-2.1%)  d8 +12.0% vs +9.5% (+2.5%+-2.3%)
+  rec setting 11: d0 +15.7% vs +12.6% (+3.2%+-1.6%)  d2 +13.5% vs +12.9% (+0.6%+-1.3%)  d4 +12.6% vs +12.0% (+0.5%+-2.1%)  d6 +12.9% vs +12.4% (+0.4%+-2.1%)  d8 +12.0% vs +9.5% (+2.6%+-2.3%)
+  rec setting 9, d uniform on 2..8 (a slow sell): +13.6% against setting 15 +11.5%
+
+=== setting 9 against 15, landing 2-4 blocks late, by fit window and by day (n fires; mean 9, mean 15, difference)
+  sep1819    14  +26.3% +26.1%   +0.1%  (fires better 5, worse 7)
+  sep2021    29  +20.1% +14.1%   +6.1%  (fires better 13, worse 8)
+  sep2223    20  +12.3%  +9.7%   +2.6%  (fires better 7, worse 4)
+  sep23day   10  +19.8% +16.4%   +3.3%  (fires better 4, worse 1)
+  Sep 18     13  +26.9% +28.2%   -1.3%  (fires better 4, worse 7)
+  Sep 19      1  +17.7%  -0.6%  +18.2%  (fires better 1, worse 0)
+  Sep 20      7  +30.5% +27.6%   +3.0%  (fires better 3, worse 3)
+  Sep 21     20  +19.6% +11.8%   +7.8%  (fires better 10, worse 5)
+  Sep 22     19  +11.1%  +8.9%   +2.2%  (fires better 6, worse 4)
+  Sep 23     13  +16.2% +13.0%   +3.2%  (fires better 5, worse 1)
+  Sep 24      9  +15.1% +16.5%   -1.3%  (fires better 3, worse 2)
+  Sep 25      4  +28.7% +22.6%   +6.1%  (fires better 3, worse 0)
+  Sep 26      5   +7.9%  +0.9%   +7.0%  (fires better 4, worse 0)
+  Sep 27      1  -10.0% -10.0%   +0.0%  (fires better 0, worse 0)
+
+=== leave one fire out: the smallest and largest paired gain of setting 9 over 15 (landing 2-4)
+  fit: +3.60%; leave-one-out min +3.07% max +4.13%; without the two largest gains +2.65%
+  rec: +2.47%; leave-one-out min +1.53% max +3.71%; without the two largest gains +0.85%
+
+=== the recent set's bump at h 130-270, and the short end, without the best fire at each h
+  h  11: +15.7%; without its best fire (0x9f834b70 +82%) +12.0%; median  +5.7%
+  h  15: +12.6%; without its best fire (0xe65b85ad +86%)  +8.5%; median  +0.1%
+  h 150: +10.4%; without its best fire (0x9f834b70 +139%)  +3.3%; median  +2.8%
+  h 200: +13.2%; without its best fire (0x9f834b70 +168%)  +4.6%; median  +2.9%
+  h 220: +13.8%; without its best fire (0x9f834b70 +168%)  +5.2%; median  +2.9%
+  h 260: +12.8%; without its best fire (0x9f834b70 +168%)  +4.2%; median  +0.8%
+  h 300:  +3.0%; without its best fire (0x9f834b70 +168%)  -6.1%; median  -4.9%
+
+=== the short end chosen on one set (settings 1..60, landing 2-4), read on another against setting 15 there (paired mean +- se)
+  choose on fit          -> setting  9 (+19.1%); read on rec      : +14.8% against 15 +12.3%  (+2.5% +- 1.9%)
+  choose on rec          -> setting  8 (+15.0%); read on fit      : +19.1% against 15 +15.5%  (+3.6% +- 1.6%)
+  choose on Sep18-21     -> setting 10 (+23.9%); read on Sep22-27 : +12.5% against 15 +11.2%  (+1.3% +- 0.9%)
+  choose on fit-sep1819  -> setting  8 (+18.0%); read on sep1819  : +23.7% against 15 +26.1%  (-2.4% +- 5.9%)
+  choose on fit-sep2021  -> setting 26 (+19.1%); read on sep2021  : +11.7% against 15 +14.1%  (-2.4% +- 3.1%)
+  choose on fit-sep2223  -> setting  9 (+21.7%); read on sep2223  : +12.3% against 15 +9.7%  (+2.6% +- 1.7%)
+  choose on fit-sep23day -> setting  9 (+19.0%); read on sep23day : +19.8% against 15 +16.4%  (+3.3% +- 2.1%)

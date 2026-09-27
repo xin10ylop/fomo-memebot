@@ -1,0 +1,5 @@
+path() against model_eff: 16170 comparisons on 735 launches, max |difference| 0.00e+00; launches without a seat block or tier: 0
+tape sources (A, C real stamps; B, D some synthesised): {'B': 536, 'A': 114, 'C': 85} ; extended to E1+1200: {True: 735}
+fit             73 fires  h15 +16.22%  h300 +26.32%  h1200 +19.21% on 73
+rec             19 fires  h15 +12.56%  h300 +3.01%  h1200 +0.49% on 19
+rec_committed   18 fires  h15 +12.81%  h300 +3.46%  h1200 +3.79% on 18
