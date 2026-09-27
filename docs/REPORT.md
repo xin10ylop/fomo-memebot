@@ -3760,3 +3760,36 @@ ahead: negative at every exit under 60 and positive only from 100 on, the market
 the sweep says: the crowd's gain is complete by block 10-13, and the 300-block hold never had support in the trades
 that were actually made. Twelve fills: a shape, not a level.
 
+### 24.38 The engine's own population (Sep 27, the 12:47 miss): better than the tables', in both periods
+
+At 12:47 UTC `0x7b2eac5e` read 2 fleets at k−2 on the chain and the engine refused it with one. The log shows why: the
+curve joined the engine's watch list when the feed stood at block 2 (`seq_watch`), after block 2 had been processed,
+and the first fleet's 22 shots were all in block 2. The engine starts a curve's attack count empty at registration and
+replays nothing, so shots in the blocks up to and including the first named buy's block are never counted. The tables
+count them. (That first fleet was also a contract called by 22 of the launch's own named wallets: the bundle's helper,
+which neither the tables nor the engine exclude, because both check the calldata for named wallets, not the sender.)
+
+`src/analysis/fleet_variants.py` (`data/derived/live_vs_table/fleet_variants.txt`) recounts every launch with the
+engine's registration: registration taken as the block of the first named buy, shots in blocks up to it dropped. The
+proxy matches all seven launches whose engine decision is known (five fires, two gate refusals). Returns from
+`edge_check/G/curves.json.gz` (second place, $13, exit h blocks after E1):
+
+| | fires | h11 (setting 9 as it lands) | h15 | h300 | win at 11 | dead at 11 |
+|---|---|---|---|---|---|---|
+| fit, the tables' count | 73 | +19.5% | +16.2% | +26.3% | | |
+| fit, the engine's count | 56 | **+23.0%** | +18.6% | +31.9% | 73% | 2% |
+| fit, fires only the tables see | 17 | +7.9% | +8.3% | +7.8% | | |
+| recent, the tables' count | 19 | +15.7% | +12.6% | +3.0% | | |
+| recent, the engine's count | 13 | **+22.2%** | +18.0% | +15.3% | 77% | 0% |
+| recent, fires only the tables see | 6 | +1.6% | +0.8% | −23.6% | | |
+
+The engine's population peaks at exit block 11 in both periods (plateau 9-13) and is positive at block 11 on every day
+of both periods (Sep 18 +21%, 20 +38%, 21 +22%, 22 +23%, 23 +19%, 24 +19%, 25 +32%, 26 +16%). The fires it cannot see,
+a fleet that shot no later than the team's own first buy, are the weak ones in both periods, and they carried much of
+the "deterioration" of 24.35 at 300 blocks. Dollars are about the same (fit $149 against $161 at block 11 over the four
+windows, recent $33 against $33), because the engine takes fewer fires at a higher return. So nothing to fix: the blind
+window is a filter the engine already applies and it selects the better fires; the prediction now prints the engine's
+count (`eng` column, "ENGINE (k-2 after registration)" line in `predict_window.py`) and the evening reconciliation and
+the sequential test are scored on it. Every reviewer since 24.35 priced the tables' population, not the engine's; on the
+engine's population the per-fire edge at the chosen hold did not decline.
+

@@ -14,13 +14,23 @@ rows = []
 for r in R:
     h = H.get(r["cv"]); x = h.get(f"behind1_15_h{HOLD}") if h else None
     if x is None or (isinstance(x, float) and math.isnan(x)): continue
-    cw, cf = cums(r); k = r["k"]; rows.append({"cv": r["cv"], "T0": r["T0"], "k": k, "cf": cf, "ret": x, "hour": L.get(r["cv"], {}).get("hour")})
+    cw, cf = cums(r); k = r["k"]
+    j = next((i for i, rw in enumerate(r["blocks"]) if any(t.get("named_fr") or t.get("named_data") for t in rw)), -1)   # 24.38: the engine registers the curve at the first named buy's block; shots in blocks <= j are never counted
+    fe = set()
+    for off, rw in enumerate(r["blocks"][: max(0, k - 1)]):
+        if off <= j: continue
+        for t in rw:
+            if t["to"] in US or t["to_token"] or t["fr"] in US: continue
+            if t["direct"]:
+                if not t["named_fr"]: fe.add(t["fr"])
+            elif not t["named_data"]: fe.add(t["to"])
+    rows.append({"cv": r["cv"], "T0": r["T0"], "k": k, "cf": cf, "ret": x, "hour": L.get(r["cv"], {}).get("hour"), "eng": len(fe)})
 rows.sort(key=lambda r: r["T0"])
 print(f"{len(rows)} qualifying launches scored, {time.strftime('%b %d %H:%M', time.gmtime(rows[0]['T0']))} - {time.strftime('%b %d %H:%M', time.gmtime(rows[-1]['T0']))} UTC")
-views = {"k-1": lambda r: at(r["cf"], r["k"] - 1), "tick's shot (0.76)": lambda r: at(r["cf"], view(r["k"], 0.76)), "k-2": lambda r: at(r["cf"], r["k"] - 2)}
-print(f"{'when':13s} {'launch':11s} {'k':>2s} {'fleets by block':24s} {'k-1':>4s} {'tick':>4s} {'k-2':>4s} {'behind1 h' + str(HOLD):>13s}")
+views = {"k-1": lambda r: at(r["cf"], r["k"] - 1), "tick's shot (0.76)": lambda r: at(r["cf"], view(r["k"], 0.76)), "k-2": lambda r: at(r["cf"], r["k"] - 2), "ENGINE (k-2 after registration)": lambda r: r["eng"]}
+print(f"{'when':13s} {'launch':11s} {'k':>2s} {'fleets by block':24s} {'k-1':>4s} {'tick':>4s} {'k-2':>4s} {'eng':>4s} {'behind1 h' + str(HOLD):>13s}")
 for r in rows:
-    print(f"{time.strftime('%b %d %H:%M', time.gmtime(r['T0'])):13s} {r['cv'][:10]:11s} {r['k']:2d} {str(r['cf']):24s} {views['k-1'](r):4d} {views[chr(116)+'ick'+chr(39)+'s shot (0.76)'](r) if False else at(r['cf'], view(r['k'], 0.76)):4d} {views['k-2'](r):4d} {r['ret']:+13.1%}")
+    print(f"{time.strftime('%b %d %H:%M', time.gmtime(r['T0'])):13s} {r['cv'][:10]:11s} {r['k']:2d} {str(r['cf']):24s} {views['k-1'](r):4d} {views[chr(116)+'ick'+chr(39)+'s shot (0.76)'](r) if False else at(r['cf'], view(r['k'], 0.76)):4d} {views['k-2'](r):4d} {r['eng']:4d} {r['ret']:+13.1%}")
 print()
 for name, f in views.items():
     fires = [r["ret"] for r in rows if f(r) >= 2]
