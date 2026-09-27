@@ -1,0 +1,49 @@
+
+choose on fit (73 fires), read on rec (19 fires), h in 1..600
+  optimum h = 337: fit mean +27.0% (se 7.0%, median +20.7%, win 67%, $ +3.18/fire)  ->  rec mean +2.9% (median -4.5%, win 42%, $ +0.05/fire)
+  plateau (mean >= +20.0%): contiguous h 101-393 (293 holds); anywhere: 329 of 600 holds, runs [(101, 393), (427, 431), (471, 486), (582, 596)]
+  rec over that contiguous plateau: mean of the means +7.0%, range -2.9% .. +14.2%; rec at h = 15: +12.6%; fit at h = 15: +16.2%
+
+choose on rec (19 fires), read on fit (73 fires), h in 1..600
+  optimum h = 11: rec mean +15.7% (se 6.4%, median +5.7%, win 68%, $ +1.71/fire)  ->  fit mean +19.5% (median +12.9%, win 68%, $ +2.20/fire)
+  plateau (mean >= +9.3%): contiguous h 7-23 (17 holds); anywhere: 155 of 600 holds, runs [(7, 23), (131, 268)]
+  fit over that contiguous plateau: mean of the means +17.1%, range +15.4% .. +19.5%; fit at h = 15: +16.2%; rec at h = 15: +12.6%
+
+choose on early (41 fires), read on late (51 fires), h in 1..600
+  optimum h = 334: early mean +26.1% (se 7.9%, median +23.0%, win 73%, $ +3.07/fire)  ->  late mean +18.7% (median +0.3%, win 53%, $ +2.10/fire)
+  plateau (mean >= +18.3%): contiguous h 149-374 (226 holds); anywhere: 344 of 600 holds, runs [(7, 30), (32, 62), (65, 65), (68, 73), (83, 85), (92, 93), (95, 145), (149, 374)]
+  late over that contiguous plateau: mean of the means +20.0%, range +16.2% .. +23.5%; late at h = 15: +10.6%; early at h = 15: +21.5%
+
+choose on late (51 fires), read on early (41 fires), h in 1..600
+  optimum h = 228: late mean +23.5% (se 8.5%, median +5.0%, win 59%, $ +2.73/fire)  ->  early mean +21.4% (median +18.1%, win 68%, $ +2.45/fire)
+  plateau (mean >= +15.0%): contiguous h 123-393 (271 holds); anywhere: 278 of 600 holds, runs [(11, 11), (115, 116), (118, 119), (123, 393), (584, 585)]
+  early over that contiguous plateau: mean of the means +22.0%, range +15.7% .. +26.1%; early at h = 15: +21.5%; late at h = 15: +10.6%
+
+choose on rec18 (18 fires), read on fit (73 fires), h in 1..600
+  optimum h = 11: rec18 mean +15.4% (se 6.8%, median +5.1%, win 67%, $ +1.67/fire)  ->  fit mean +19.5% (median +12.9%, win 68%, $ +2.20/fire)
+  plateau (mean >= +8.6%): contiguous h 6-26 (21 holds); anywhere: 172 of 600 holds, runs [(6, 26), (28, 28), (129, 278)]
+  fit over that contiguous plateau: mean of the means +16.9%, range +15.2% .. +19.5%; fit at h = 15: +16.2%; rec18 at h = 15: +12.8%
+
+the same choices over h = 1..1200 (tapes reach every launch to 1,200 blocks after the seat):
+
+choose on fit (73 fires), read on rec (19 fires), h in 1..1200
+  optimum h = 337: fit mean +27.0% (se 7.0%, median +20.7%, win 67%, $ +3.18/fire)  ->  rec mean +2.9% (median -4.5%, win 42%, $ +0.05/fire)
+  plateau (mean >= +20.0%): contiguous h 101-393 (293 holds); anywhere: 446 of 1200 holds, runs [(101, 393), (427, 431), (471, 486), (582, 596), (1055, 1171)]
+  rec over that contiguous plateau: mean of the means +7.0%, range -2.9% .. +14.2%; rec at h = 15: +12.6%; fit at h = 15: +16.2%
+
+choose on rec (19 fires), read on fit (73 fires), h in 1..1200
+  optimum h = 11: rec mean +15.7% (se 6.4%, median +5.7%, win 68%, $ +1.71/fire)  ->  fit mean +19.5% (median +12.9%, win 68%, $ +2.20/fire)
+  plateau (mean >= +9.3%): contiguous h 7-23 (17 holds); anywhere: 155 of 1200 holds, runs [(7, 23), (131, 268)]
+  fit over that contiguous plateau: mean of the means +17.1%, range +15.4% .. +19.5%; fit at h = 15: +16.2%; rec at h = 15: +12.6%
+
+choose on early (41 fires), read on late (51 fires), h in 1..1200
+  optimum h = 334: early mean +26.1% (se 7.9%, median +23.0%, win 73%, $ +3.07/fire)  ->  late mean +18.7% (median +0.3%, win 53%, $ +2.10/fire)
+  plateau (mean >= +18.3%): contiguous h 149-374 (226 holds); anywhere: 646 of 1200 holds, runs [(7, 30), (32, 62), (65, 65), (68, 73), (83, 85), (92, 93), (95, 145), (149, 374), (612, 612), (898, 951), (954, 1200)]
+  late over that contiguous plateau: mean of the means +20.0%, range +16.2% .. +23.5%; late at h = 15: +10.6%; early at h = 15: +21.5%
+
+optimum of the 11-block running mean of the curve (h 6..595), each set:
+  fit   smoothed optimum h = 337 (smoothed +26.9%, raw +27.0%)
+  rec   smoothed optimum h = 243 (smoothed +13.9%, raw +14.2%)
+  early smoothed optimum h = 337 (smoothed +26.0%, raw +26.0%)
+  late  smoothed optimum h = 240 (smoothed +23.4%, raw +23.3%)
+  all   smoothed optimum h = 248 (smoothed +23.0%, raw +23.4%)

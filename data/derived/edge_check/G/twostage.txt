@@ -1,0 +1,27 @@
+variants tried: 8 (6 triggered + 2 partial); fires: fit 73, recent 19
+
+=== lag 0 (sell lands 0 blocks after the decision)
+  fixed holds: h9: fit +17.0% rec +14.0%  h15: fit +16.2% rec +12.6%  h337: fit +27.0% rec +2.9%  h11: fit +19.5% rec +15.7%
+  tp   +20% hold   9: fit +13.3% (win 66%, dead 3%, triggered 25/73)  rec +12.6% (win 63%, dead 0%, triggered 5/19)  | beats h9 on both: no, beats h15 on both: no; worst-period margin over h9 -3.7 pts; null: permuted wins 0.2%, permuted margin >= real 82.4%, permuted mean fit +15.4% rec +12.3%
+  tp   +50% hold   9: fit +16.2% (win 66%, dead 3%, triggered 11/73)  rec +14.1% (win 63%, dead 0%, triggered 1/19)  | beats h9 on both: no, beats h15 on both: no; worst-period margin over h9 -0.8 pts; null: permuted wins 2.1%, permuted margin >= real 53.3%, permuted mean fit +16.5% rec +13.3%
+  tp   +20% hold 300: fit +18.7% (win 78%, dead 4%, triggered 49/73)  rec +16.6% (win 74%, dead 0%, triggered 11/19)  | beats h9 on both: YES, beats h15 on both: YES; worst-period margin over h9 +1.7 pts; null: permuted wins 3.6%, permuted margin >= real 0.6%, permuted mean fit +19.5% rec +5.7%
+  tp   +50% hold 300: fit +24.7% (win 73%, dead 4%, triggered 27/73)  rec  +3.4% (win 42%, dead 11%, triggered 3/19)  | beats h9 on both: no, beats h15 on both: no; worst-period margin over h9 -10.6 pts; null: permuted wins 0.0%, permuted margin >= real 69.3%, permuted mean fit +22.7% rec +4.1%
+  stop -20% hold   9: fit +17.1% (win 66%, dead 3%, triggered 1/73)  rec +14.0% (win 63%, dead 0%, triggered 0/19)  | beats h9 on both: no, beats h15 on both: YES; worst-period margin over h9 +0.0 pts; null: permuted wins 0.0%, permuted margin >= real 77.5%, permuted mean fit +17.0% rec +14.0%
+  stop -20% hold 300: fit +24.1% (win 64%, dead 5%, triggered 10/73)  rec  -0.2% (win 32%, dead 5%, triggered 6/19)  | beats h9 on both: no, beats h15 on both: no; worst-period margin over h9 -14.2 pts; null: permuted wins 0.0%, permuted margin >= real 87.4%, permuted mean fit +25.1% rec +3.8%
+  half at 9, half at 60: fit +16.7%  rec  +9.0%  | beats h9 on both: no, beats h15 on both: no (the average of the two single exits: rec +9.0%)
+  half at 9, half at 300: fit +21.7%  rec  +8.6%  | beats h9 on both: no, beats h15 on both: no (the average of the two single exits: rec +8.5%)
+
+=== lag 2 (sell lands 2 blocks after the decision)
+  fixed holds: h9: fit +19.5% rec +15.7%  h15: fit +15.4% rec +12.9%  h337: fit +26.9% rec +2.8%  h11: fit +18.8% rec +13.5%
+  tp   +20% hold   9: fit +15.5% (win 68%, dead 3%, triggered 25/73)  rec +15.1% (win 68%, dead 0%, triggered 5/19)  | beats h9 on both: no, beats h15 on both: YES; worst-period margin over h9 -4.0 pts; null: permuted wins 0.1%, permuted margin >= real 84.8%, permuted mean fit +17.7% rec +14.3%
+  tp   +50% hold   9: fit +18.1% (win 68%, dead 3%, triggered 11/73)  rec +15.7% (win 68%, dead 0%, triggered 1/19)  | beats h9 on both: no, beats h15 on both: YES; worst-period margin over h9 -1.4 pts; null: permuted wins 0.5%, permuted margin >= real 84.3%, permuted mean fit +18.9% rec +15.2%
+  tp   +20% hold 300: fit +20.2% (win 77%, dead 4%, triggered 49/73)  rec +18.8% (win 74%, dead 0%, triggered 11/19)  | beats h9 on both: YES, beats h15 on both: YES; worst-period margin over h9 +0.7 pts; null: permuted wins 1.2%, permuted margin >= real 0.4%, permuted mean fit +20.4% rec +6.5%
+  tp   +50% hold 300: fit +25.3% (win 70%, dead 4%, triggered 27/73)  rec  +4.3% (win 42%, dead 11%, triggered 3/19)  | beats h9 on both: no, beats h15 on both: no; worst-period margin over h9 -11.4 pts; null: permuted wins 0.0%, permuted margin >= real 60.1%, permuted mean fit +22.9% rec +4.4%
+  stop -20% hold   9: fit +19.5% (win 68%, dead 3%, triggered 1/73)  rec +15.7% (win 68%, dead 0%, triggered 0/19)  | beats h9 on both: no, beats h15 on both: YES; worst-period margin over h9 -0.0 pts; null: permuted wins 0.0%, permuted margin >= real 54.2%, permuted mean fit +19.5% rec +15.7%
+  stop -20% hold 300: fit +23.4% (win 62%, dead 5%, triggered 10/73)  rec  -2.4% (win 32%, dead 11%, triggered 6/19)  | beats h9 on both: no, beats h15 on both: no; worst-period margin over h9 -18.2 pts; null: permuted wins 0.0%, permuted margin >= real 94.9%, permuted mean fit +25.3% rec +3.4%
+  half at 9, half at 60: fit +17.9%  rec  +9.6%  | beats h9 on both: no, beats h15 on both: no (the average of the two single exits: rec +9.6%)
+  half at 9, half at 300: fit +23.0%  rec  +9.4%  | beats h9 on both: no, beats h15 on both: no (the average of the two single exits: rec +9.3%)
+
+fit: -20% stop crossings 10: mark the block before +2.0%, at the crossing -32.5%, 2 blocks later -37.5%; crossings that fell more than 20 points in that one block: 5
+
+rec: -20% stop crossings 6: mark the block before +16.0%, at the crossing -28.5%, 2 blocks later -35.9%; crossings that fell more than 20 points in that one block: 3

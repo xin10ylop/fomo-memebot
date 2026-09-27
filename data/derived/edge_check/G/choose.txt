@@ -1,0 +1,57 @@
+Sep 22-27 split: Sep22-23 (32 fires): h334 +28.1%, h337 +28.2%, h300 +28.6%, h15 +9.5%, h11 +14.7%, h9 +12.4%
+Sep 22-27 split: rec (19 fires): h334 +2.8%, h337 +2.9%, h300 +3.0%, h15 +12.6%, h11 +15.7%, h9 +14.0%
+
+=== choose on fit (73 fires), read on rec (19 fires)
+ range 1-600: optimum h = 337: +27.0% (se 7.0%) on fit; plateau (within 1 se, >= +20.0%) contiguous 101-393; all h within: 329 of 600 (101-393, 427-431, 471-486, 582-596)
+    read on rec: h337 +2.9%; plateau 101-393 averaged on rec +7.0% (range -2.9% to +14.2%); h15 +12.6%
+    paired h337 - h15: fit +10.8 pts (se 6.3), rec -9.6 pts (se 8.4); 11-block smoothed optimum h = 337: fit +27.0%, rec +2.9%
+ range 1-60: optimum h = 11: +19.5% (se 4.1%) on fit; plateau (within 1 se, >= +15.4%) contiguous 7-16; all h within: 52 of 60 (5, 7-16, 18-43, 46-60)
+    read on rec: h11 +15.7%; plateau 7-16 averaged on rec +13.2% (range +10.6% to +15.7%); h15 +12.6%
+    paired h11 - h15: fit +3.3 pts (se 1.5), rec +3.2 pts (se 1.6); 11-block smoothed optimum h = 12: fit +19.1%, rec +15.1%
+ range 1-1200: optimum h = 337: +27.0% (se 7.0%) on fit; plateau (within 1 se, >= +20.0%) contiguous 101-393; all h within: 446 of 1200 (101-393, 427-431, 471-486, 582-596, 1055-1171)
+    read on rec: h337 +2.9%; plateau 101-393 averaged on rec +7.0% (range -2.9% to +14.2%); h15 +12.6%
+    paired h337 - h15: fit +10.8 pts (se 6.3), rec -9.6 pts (se 8.4); 11-block smoothed optimum h = 337: fit +27.0%, rec +2.9%
+
+=== choose on rec (19 fires), read on fit (73 fires)
+ range 1-600: optimum h = 11: +15.7% (se 6.4%) on rec; plateau (within 1 se, >= +9.3%) contiguous 7-23; all h within: 155 of 600 (7-23, 131-268)
+    read on fit: h11 +19.5%; plateau 7-23 averaged on fit +17.1% (range +15.4% to +19.5%); h15 +16.2%
+    paired h11 - h15: rec +3.2 pts (se 1.6), fit +3.3 pts (se 1.5); 11-block smoothed optimum h = 243: rec +14.2%, fit +25.2%
+ range 1-60: optimum h = 11: +15.7% (se 6.4%) on rec; plateau (within 1 se, >= +9.3%) contiguous 7-23; all h within: 17 of 60 (7-23)
+    read on fit: h11 +19.5%; plateau 7-23 averaged on fit +17.1% (range +15.4% to +19.5%); h15 +16.2%
+    paired h11 - h15: rec +3.2 pts (se 1.6), fit +3.3 pts (se 1.5); 11-block smoothed optimum h = 14: rec +12.5%, fit +17.9%
+ range 1-1200: optimum h = 11: +15.7% (se 6.4%) on rec; plateau (within 1 se, >= +9.3%) contiguous 7-23; all h within: 155 of 1200 (7-23, 131-268)
+    read on fit: h11 +19.5%; plateau 7-23 averaged on fit +17.1% (range +15.4% to +19.5%); h15 +16.2%
+    paired h11 - h15: rec +3.2 pts (se 1.6), fit +3.3 pts (se 1.5); 11-block smoothed optimum h = 243: rec +14.2%, fit +25.2%
+
+=== choose on Sep18-21 (41 fires), read on Sep22-27 (51 fires)
+ range 1-600: optimum h = 334: +26.1% (se 7.9%) on Sep18-21; plateau (within 1 se, >= +18.3%) contiguous 149-374; all h within: 344 of 600 (7-30, 32-62, 65, 68-73, 83-85, 92-93, 95-145, 149-374)
+    read on Sep22-27: h334 +18.7%; plateau 149-374 averaged on Sep22-27 +20.0% (range +16.2% to +23.5%); h15 +10.6%
+    paired h334 - h15: Sep18-21 +4.7 pts (se 8.8), Sep22-27 +8.0 pts (se 6.6); 11-block smoothed optimum h = 337: Sep18-21 +26.0%, Sep22-27 +18.8%
+ range 1-60: optimum h = 13: +24.2% (se 4.8%) on Sep18-21; plateau (within 1 se, >= +19.4%) contiguous 7-17; all h within: 29 of 60 (7-17, 20-23, 32-35, 47-55, 58)
+    read on Sep22-27: h13 +12.4%; plateau 7-17 averaged on Sep22-27 +12.4% (range +10.6% to +15.1%); h15 +10.6%
+    paired h13 - h15: Sep18-21 +2.7 pts (se 1.4), Sep22-27 +1.8 pts (se 0.9); 11-block smoothed optimum h = 12: Sep18-21 +23.8%, Sep22-27 +13.8%
+ range 1-1200: optimum h = 334: +26.1% (se 7.9%) on Sep18-21; plateau (within 1 se, >= +18.3%) contiguous 149-374; all h within: 646 of 1200 (7-30, 32-62, 65, 68-73, 83-85, 92-93, 95-145, 149-374, 612, 898-951, 954-1200)
+    read on Sep22-27: h334 +18.7%; plateau 149-374 averaged on Sep22-27 +20.0% (range +16.2% to +23.5%); h15 +10.6%
+    paired h334 - h15: Sep18-21 +4.7 pts (se 8.8), Sep22-27 +8.0 pts (se 6.6); 11-block smoothed optimum h = 337: Sep18-21 +26.0%, Sep22-27 +18.8%
+
+=== choose on rec18 (18 fires), read on fit (73 fires)
+ range 1-600: optimum h = 11: +15.4% (se 6.8%) on rec18; plateau (within 1 se, >= +8.6%) contiguous 6-26; all h within: 172 of 600 (6-26, 28, 129-278)
+    read on fit: h11 +19.5%; plateau 6-26 averaged on fit +16.9% (range +15.2% to +19.5%); h15 +16.2%
+    paired h11 - h15: rec18 +2.6 pts (se 1.6), fit +3.3 pts (se 1.5); 11-block smoothed optimum h = 243: rec18 +15.0%, fit +25.2%
+ range 1-60: optimum h = 11: +15.4% (se 6.8%) on rec18; plateau (within 1 se, >= +8.6%) contiguous 6-26; all h within: 22 of 60 (6-26, 28)
+    read on fit: h11 +19.5%; plateau 6-26 averaged on fit +16.9% (range +15.2% to +19.5%); h15 +16.2%
+    paired h11 - h15: rec18 +2.6 pts (se 1.6), fit +3.3 pts (se 1.5); 11-block smoothed optimum h = 14: rec18 +12.0%, fit +17.9%
+ range 1-1200: optimum h = 11: +15.4% (se 6.8%) on rec18; plateau (within 1 se, >= +8.6%) contiguous 6-26; all h within: 172 of 1200 (6-26, 28, 129-278)
+    read on fit: h11 +19.5%; plateau 6-26 averaged on fit +16.9% (range +15.2% to +19.5%); h15 +16.2%
+    paired h11 - h15: rec18 +2.6 pts (se 1.6), fit +3.3 pts (se 1.5); 11-block smoothed optimum h = 243: rec18 +15.0%, fit +25.2%
+
+=== choose on Sep22-27 (51 fires), read on Sep18-21 (41 fires)
+ range 1-600: optimum h = 228: +23.5% (se 8.5%) on Sep22-27; plateau (within 1 se, >= +15.0%) contiguous 123-393; all h within: 278 of 600 (11, 115-116, 118-119, 123-393, 584-585)
+    read on Sep18-21: h228 +21.4%; plateau 123-393 averaged on Sep18-21 +22.0% (range +15.7% to +26.1%); h15 +21.5%
+    paired h228 - h15: Sep22-27 +12.9 pts (se 6.1), Sep18-21 -0.1 pts (se 8.2); 11-block smoothed optimum h = 240: Sep22-27 +23.3%, Sep18-21 +22.3%
+ range 1-60: optimum h = 11: +15.1% (se 5.0%) on Sep22-27; plateau (within 1 se, >= +10.0%) contiguous 4-30; all h within: 27 of 60 (4-30)
+    read on Sep18-21: h11 +23.3%; plateau 4-30 averaged on Sep18-21 +20.2% (range +16.7% to +24.2%); h15 +21.5%
+    paired h11 - h15: Sep22-27 +4.4 pts (se 1.4), Sep18-21 +1.8 pts (se 2.2); 11-block smoothed optimum h = 10: Sep22-27 +14.1%, Sep18-21 +22.3%
+ range 1-1200: optimum h = 228: +23.5% (se 8.5%) on Sep22-27; plateau (within 1 se, >= +15.0%) contiguous 123-393; all h within: 302 of 1200 (11, 115-116, 118-119, 123-393, 584-585, 726-749)
+    read on Sep18-21: h228 +21.4%; plateau 123-393 averaged on Sep18-21 +22.0% (range +15.7% to +26.1%); h15 +21.5%
+    paired h228 - h15: Sep22-27 +12.9 pts (se 6.1), Sep18-21 -0.1 pts (se 8.2); 11-block smoothed optimum h = 240: Sep22-27 +23.3%, Sep18-21 +22.3%

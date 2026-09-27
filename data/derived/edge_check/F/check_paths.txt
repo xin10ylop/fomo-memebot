@@ -1,0 +1,5 @@
+paths vs model_eff: 152 launches (92 fires + 60 refused), 182400 (launch, hold, place) pairs, max |difference| 0.00e+00
+partial exit limits (fraction 0 = the fixed hold; fraction 1 at 15 = the 15-block exit at every later h): max |difference| 0.00e+00
+fit                             73 fires  h15 +16.22%  h300 +26.32%
+recent, committed 11 windows    18 fires  h15 +12.81%  h300 +3.46%
+recent with the gap fire        19 fires  h15 +12.56%  h300 +3.01%

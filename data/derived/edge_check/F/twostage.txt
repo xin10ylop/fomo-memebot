@@ -1,0 +1,16 @@
+best fixed hold (exact block, in-sample): fit h 337 +27.0%; rec h 11 +15.7%
+fixed holds landing 2 late: h15 -> fit +15.4% rec +12.9%;  h9 -> fit +19.5% rec +15.7%;  h300 -> fit +26.4% rec +3.0%
+
+variant                      fit     rec  base fit base rec  triggered fit/rec  beats best both?  null: P(gain>=real) fit / rec   null variants beating best on both
+V1 TP +30% else 300       +23.0%   +8.3%    +26.4%    +3.0%   51% /  32%        no              32.7% / 21.2%                    0.1%
+V2 TP +60% else 300       +25.9%   -0.6%    +26.4%    +3.0%   30% /  11%        no              19.1% / 91.7%                    0.0%
+V3 stop -30% else 300     +26.9%   -3.6%    +26.4%    +3.0%    8% /  26%        no              16.3% / 96.0%                    0.0%
+V4 stop -20% else 15      +15.4%  +12.9%    +15.4%   +12.9%    3% /   0%        no              53.0% / 100.0%                    0.0%
+V5 half at 9, half at 300  +23.0%   +9.4%  (fixed 9: fit +19.5% rec +15.7%; fixed 300: fit +26.4% rec +3.0%)  beats best both? no
+V6 half at 15, half at 300  +20.9%   +8.0%  (fixed 15: fit +15.4% rec +12.9%; fixed 300: fit +26.4% rec +3.0%)  beats best both? no
+
+variants tried: 6; variants beating the best fixed hold on both periods: 0
+
+how the dumps happen (fires whose mark falls below -40% within 600 blocks): blocks from the last mark above -10% to the first below -40%
+   fit: 14 fires fall below -40%; one block: 8, 2-5 blocks: 1, more: 3, never above -10% after the seat: 2; gaps [1, 1, 1, 1, 1, 1, 1, 1, 2, 49, 125, 227]
+   rec: 6 fires fall below -40%; one block: 3, 2-5 blocks: 1, more: 2, never above -10% after the seat: 0; gaps [1, 1, 1, 2, 231, 382]
