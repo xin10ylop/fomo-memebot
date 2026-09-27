@@ -876,3 +876,17 @@ Symptom to watch (should print a time before the restart, then nothing new):
 
 `relay_ops.py deposit` refuses to run while the engine runs (same wallet, same nonce): stop, deposit, start.
 
+*Reversed the next morning (Sep 27).* The public node throttles the seat path: it answers 429 to the burst of reads a
+launch triggers (resolve, receipt, the creation block's clock), and the night's log shows one launch "not resolved in
+3 s" and one two-fleet launch skipped for "no confident boundary estimate" in the same second as a 429. The seat path
+goes back to the paid node; what ran the quota out was the bookkeeping loop at 3 s (nonce, gas, balances: about 50M
+compute units a month against a 30M allowance), so CHAIN_POLL_S goes to 10 (the value the paper box used), which
+fits the allowance with the shooters' refresh included. Logs stay on the public node (LOGS_RPC_URL). The paid node's
+URL is typed into the env file by hand and never pasted anywhere:
+
+    sudo systemctl stop sniper-engine
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }
+    set_kv RPC_URL 'https://<the HTTPS URL from the provider dashboard>'
+    set_kv CHAIN_POLL_S 10
+    sudo systemctl start sniper-engine
+

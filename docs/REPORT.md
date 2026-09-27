@@ -3596,3 +3596,12 @@ $1,000, $1,411 at $1,500) because the uncapped fires get worse while the capped 
 worst single fire is −$285 at $400 and −$318 from $500 up. One seat is therefore worth about $400-500 of stake at most;
 more money is idle on most launches, and a second seat (a second address behind the first) is unmodelled.
 
+*Night of Sep 26-27, reconciled so far.* The chain lists 13 qualifying launches in 22:38-04:09 UTC, two of them fires
+at k−2 (23:53 −50.5%, 00:10 −37.5%); the engine fired nothing and refused one at the gate. Its per-launch log explains
+the difference launch by launch: two launches with one named buyer on the feed (the bundle needs three; the tables need
+0.3 ETH), a launch "not resolved in 3 s", the 00:10 two-fleet launch skipped for "no confident boundary estimate" in the
+second the public node answered 429, and two pre-midnight launches (23:20, 23:53) still to be read from the log. The
+public node throttles the seat path under a launch's burst of reads; the seat path returns to the paid node with the
+bookkeeping poll at 10 s so the month's allowance holds (runbook 5q). Money lost to the switch: none (both fires were
+modelled losers); launches lost to it: at least two.
+
