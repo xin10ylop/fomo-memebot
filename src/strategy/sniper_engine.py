@@ -242,6 +242,18 @@ except Exception:
     sender_of = _sender_slow; SENDER_BACKEND = "eth_account"
 if REQUIRE_COINCURVE and SENDER_BACKEND != "coincurve-direct":
     raise SystemExit("coincurve is not usable: signature recovery would take 5 ms per transaction. pip install coincurve (deploy/ohio_setup.sh does).")
+_sender_backend = sender_of; _SENDER_CACHE = {}
+
+
+def sender_of(t):
+    """6.7 (review J): one recovery per transaction. The feed loop and the gate asked for the same shot's sender two or three times
+    (0.1 ms each, 4-7 ms on a busy frame before the tick); the cache answers the repeats in microseconds. Cleared at 20,000 entries."""
+    s = _SENDER_CACHE.get(t)
+    if s is None:
+        if len(_SENDER_CACHE) > 20000:
+            _SENDER_CACHE.clear()
+        s = _sender_backend(t); _SENDER_CACHE[t] = s
+    return s
 
 
 # ------------------------------------------------------------------------------------------------------------- transport
@@ -249,25 +261,67 @@ _CTX = ssl.create_default_context()                    # one TLS context for eve
 
 
 class Rpc:
-    def __init__(self, url, timeout=10):
-        u = urllib.parse.urlparse(url); self.host = u.netloc; self.path = u.path or "/"; self.local = threading.local(); self.timeout = timeout
+    """6.7 (review J): connections are pooled and shared across threads, not kept per thread. The resolver runs in a fresh thread for
+    every launch, so before 6.7 every launch paid a cold TLS handshake (4-10 ms in Ohio) on the seat path; a keepalive ping keeps the
+    seat node's pooled connections open."""
+    def __init__(self, url, timeout=10, keepalive_s=0.0):
+        u = urllib.parse.urlparse(url); self.host = u.netloc; self.path = u.path or "/"; self.timeout = timeout
+        self.pool = collections.deque(); self.plock = threading.Lock()
+        if keepalive_s > 0:
+            threading.Thread(target=self._keepalive, args=(keepalive_s,), daemon=True).start()
+
+    def _conn(self):
+        with self.plock:
+            if self.pool:
+                return self.pool.pop()
+        return http.client.HTTPSConnection(self.host, timeout=self.timeout, context=_CTX)
+
+    def _release(self, c):
+        with self.plock:
+            if len(self.pool) < 6:
+                self.pool.append(c); return
+        try:
+            c.close()
+        except Exception:
+            pass
+
+    def _keepalive(self, every):
+        body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_chainId", "params": []})
+        while True:
+            time.sleep(every)
+            with self.plock:
+                cs = list(self.pool); self.pool.clear()
+            if not cs:
+                cs = [http.client.HTTPSConnection(self.host, timeout=self.timeout, context=_CTX)]
+            for c in cs:
+                try:
+                    c.request("POST", self.path, body=body, headers=UA); c.getresponse().read(); self._release(c)
+                except Exception:
+                    try:
+                        c.close()
+                    except Exception:
+                        pass
 
     def call(self, method, params, tries=3):
         body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params})
         for i in range(tries):
+            c = self._conn(); err = None
             try:
-                c = getattr(self.local, "c", None)
-                if c is None:
-                    c = http.client.HTTPSConnection(self.host, timeout=self.timeout, context=_CTX); self.local.c = c
                 c.request("POST", self.path, body=body, headers=UA); r = c.getresponse(); d = json.loads(r.read())
-                if "error" in d:
-                    raise RuntimeError(d["error"])
-                return d["result"]
-            except Exception:
-                self.local.c = None
-                if i == tries - 1:
-                    raise
-                time.sleep(0.03)
+            except Exception as e:
+                err = e
+                try:
+                    c.close()
+                except Exception:
+                    pass
+            if err is None:
+                self._release(c)
+                if "error" not in d:
+                    return d["result"]
+                err = RuntimeError(d["error"])
+            if i == tries - 1:
+                raise err
+            time.sleep(0.03)
 
 
 class _Answers(list):
@@ -474,7 +528,7 @@ class Sender:
         return True
 
 
-rpc = Rpc(RPC_URL); rpc_logs = Rpc(LOGS_RPC_URL); rpc_seat = Rpc(RPC_URL, timeout=2.0)   # rpc_seat: the resolver's node on the seat path, nothing may hang there
+rpc = Rpc(RPC_URL); rpc_logs = Rpc(LOGS_RPC_URL); rpc_seat = Rpc(RPC_URL, timeout=2.0, keepalive_s=30.0)   # rpc_seat: the resolver's node on the seat path, nothing may hang there
 
 
 def get_logs(filt, tries=3, seat=False):
@@ -1974,10 +2028,10 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         else:
             shots = []; opened = gate is None; shut = False
             for i, tx in enumerate(txs):
-                while mono() < at[i] - 0.004:
-                    time.sleep(0.0005)
+                while mono() < at[i] - 0.0015:                        # 6.7 (review J): sleep to 1.5 ms before the shot, then yield the interpreter lock
+                    time.sleep(0.0002)                                   # each spin: the feed loop indexes the tick's blocks while the burst waits
                 while mono() < at[i]:
-                    pass
+                    time.sleep(0)
                 if not opened and not shut:                              # dry run: the sender's rule exactly (deploy/send_step.py): a shot is skipped until the
                     opened = bool(gate())                                # gate opens; if it is still shut at the shot scheduled at or after open_by, no later shot is sent
                     if opened:
@@ -2396,6 +2450,19 @@ def provider_creation(creator, txh, seen, ts, blk0, known=None):
 
 
 last_prune_holder = [0.0]
+_frames = {"ms": [], "busy": 0.0, "since": 0.0, "n": 0}
+
+
+def _frame_stat(seen):
+    """6.7 (review J): how long the feed loop holds each frame (decode plus indexing), so a slow decoder before the tick can be read
+    from the log instead of guessed: feed_stats once a minute with the median, p90 and max frame time and the loop's busy share."""
+    dt = mono() - seen; f = _frames; f["ms"].append(dt * 1000.0); f["busy"] += dt; f["n"] += 1
+    if f["since"] == 0.0:
+        f["since"] = seen
+    if seen - f["since"] >= 60.0:
+        ms = sorted(f["ms"]); n = len(ms)
+        log({"ev": "feed_stats", "frames": n, "ms_med": round(ms[n // 2], 2), "ms_p90": round(ms[min(n - 1, int(n * 0.9))], 2), "ms_max": round(ms[-1], 1), "busy_pct": round(100.0 * f["busy"] / max(1e-9, seen - f["since"]), 1)})
+        f["ms"] = []; f["busy"] = 0.0; f["since"] = seen; f["n"] = 0
 
 
 async def main():
@@ -2441,7 +2508,7 @@ async def main():
     load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 6.6, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.7, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
@@ -2465,7 +2532,7 @@ async def main():
                     seen = mono(); wall = time.time(); d = json.loads(raw)
                     if seen - last_prune > 30:
                         prune(seen); last_prune = seen
-                    for m in d.get("messages", []):
+                    for m in d.get("messages", []):                    # 6.7: the time this frame takes to index is measured below (feed_stats, once a minute)
                         inner = m["message"]["message"]; hdr = inner.get("header", {})
                         ts = int(hdr.get("timestamp", 0) or 0) if int(hdr.get("kind", 0) or 0) == 3 else 0   # L2 messages only: batch reports carry L1 time
                         if not ts:
@@ -2488,6 +2555,7 @@ async def main():
                                 state["feed_seq"] = max(state["feed_seq"], int(m.get("sequenceNumber") or 0))   # = the L2 block number
                             state["prev_seen"] = seen; state["prev_ts"] = ts
                             cond.notify_all()
+                    _frame_stat(seen)
         except Exception as e:
             refused = refused + 1 if ("rejected WebSocket connection" in str(e) or "HTTP 4" in str(e)) else 0        # an HTTP refusal, not a network drop
             blocked = "HTTP 403" in str(e)                                # their edge blocks an address for an hour after sustained rejections: do not feed the block

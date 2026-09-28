@@ -998,3 +998,33 @@ Every population launch as before (FIRE / GATE / PRE / NO EVENT), then `ENGINE O
 judged eligible that the population does not hold, and a summary `N engine-only`. After 6.6 an `ENGINE ONLY` line is
 a new kind of launch: read it from the chain before anything else (`e1_multi`'s scan prints the burned bundles it
 dropped: `N burned bundles` in its summary line, the list in the JSON's `burned`).
+
+## 5w. Engine 6.7: the review's four fixes (Sep 28, edge_check/J/LANGUAGE.md)
+
+An independent review of the "would Rust or C++ help" question (report 24.41's companion, `data/derived/edge_check/J/LANGUAGE.md`)
+found the interpreter's share of the seat path small but not zero, and four things worth fixing in Python:
+
+1. **One sender recovery per transaction.** The feed loop and the gate recovered the same rival shot's sender two or three times
+   (0.1 ms each; 4-7 ms on a busy frame just before the tick). Cached now.
+2. **The burst no longer spins holding the interpreter lock.** The sender waited for each shot's moment in a busy loop (4 ms a
+   shot, the whole burst), which starved the feed loop exactly while the gate needed it. It sleeps to 1.5 ms before the shot
+   and yields the lock on every spin turn. Same in the dry-run path.
+3. **Warm RPC connections on the seat path.** The resolver ran in a fresh thread per launch, and connections lived per thread,
+   so every launch paid a cold TLS handshake (4-10 ms). Connections are pooled across threads and the seat node's are pinged
+   every 30 s.
+4. **The feed loop's per-frame time is logged**: `feed_stats` once a minute (median, p90, max ms per frame, busy share). Read it
+   after a busy hour: `sudo grep -h '"ev": "feed_stats"' /var/log/sniper/engine.jsonl | tail -3`. A p90 over 2 ms before the
+   tick is the number the review says would cost the k-1 view.
+
+Not done: signing with coincurve directly (a bigger change in the transaction encoder; the gain is a fresher minOut, whose sign is
+unknown), and the review's instance advice (a c7a.large has two real cores; a c6i/c7i.large is one core with two threads).
+
+**PIN_CPU.** With PIN_CPU=1 the feed loop and the sender share one vCPU and shots go late when the decoder is busy (p90 2 ms,
+p99 6 ms in the review's measurement). On any box with two vCPUs, unpin: `set_kv PIN_CPU ""`. Deploy, with no fill open
+(`sudo grep -c '"ev": "trade_done"'` equals the trade_decision count):
+
+    cd ~/fomo-memebot && git pull && set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv PIN_CPU ""; sudo systemctl restart sniper-engine && sleep 5 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"hold_blocks": [0-9]*\|"kill_usd": [0-9.]*\|"stake": \[[^]]*\]\|"bundle_max_eth": [0-9.]*'
+
+Expected `"version": 6.7`, the rest unchanged. The send step on the box (`/etc/sniper/send_step.py`) is the operator's copy of
+`deploy/send_step.py`: copy the new one over it before the restart (`sudo cp ~/fomo-memebot/deploy/send_step.py /etc/sniper/send_step.py`)
+or fix 2 applies to the dry-run path only.

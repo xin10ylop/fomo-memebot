@@ -1,0 +1,14 @@
+view k-2 : fired  45 guard  27 fills  18 mean +25.6% med +14.2% win  78% $ +45.17 $ +6.45/d
+      fit  : fired  27 guard  18 fills   9 mean +45.3% med +31.5% win  89% $ +44.04 $+16.96/d
+      read : fired  18 guard   9 fills   9 mean  +6.0% med  +8.3% win  67% $  +1.13 $ +0.26/d
+view k-1 : fired 129 guard  61 fills  68 mean +15.9% med  +5.0% win  57% $ +97.92 $+13.99/d
+      fit  : fired  79 guard  42 fills  37 mean +22.6% med +11.6% win  59% $ +82.63 $+31.81/d
+      read : fired  50 guard  19 fills  31 mean  +7.9% med  +2.0% win  55% $ +15.29 $ +3.47/d
+view k   : fired 219 guard 118 fills 101 mean +11.6% med  +2.2% win  52% $ +80.65 $+11.52/d
+      fit  : fired 141 guard  85 fills  56 mean +16.7% med  +5.2% win  55% $ +75.36 $+29.02/d
+      read : fired  78 guard  33 fills  45 mean  +5.3% med  -0.3% win  49% $  +5.29 $ +1.20/d
+disposition class mismatches vs replay (k-1 reg): 0 []
+tape p2[11] vs grid behind1_13_h11: n=535 median |diff| 0.0000 p95 0.0012 max 0.0112
+tape p1[11] vs grid first_13_h11: n=215 median |diff| 0.0002 p95 0.0036 max 0.0152
+coverage (set, tape, return source): [(('fit', False, 'grid'), 36), (('fit', True, 'G'), 305), (('fit', True, 'grid'), 58), (('read', False, 'grid'), 61), (('read', True, 'G'), 15), (('read', True, 'grid'), 157)]
+fired, by tape: [(('fit', False), 8), (('fit', True), 71), (('read', False), 18), (('read', True), 32)]

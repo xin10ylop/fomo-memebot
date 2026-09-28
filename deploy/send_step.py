@@ -49,10 +49,10 @@ def make_burst(engine):
         bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + bytes(signer(keys[i] if keys else None).sign_transaction(tx).raw_transaction).hex()]}).encode() for i, tx in enumerate(txs)]
         t_signed = mono(); out = []; fired_at = []; opened = gate is None; opened_at = None; shut = False
         for i, body in enumerate(bodies):
-            while mono() < at[i] - 0.004:                               # a prebuilt burst waits for the boundary here: sleep, then spin the last 4 ms
-                time.sleep(0.0005)
-            while mono() < at[i]:
-                pass
+            while mono() < at[i] - 0.0015:                              # a prebuilt burst waits for the boundary here: sleep to 1.5 ms before the shot,
+                time.sleep(0.0002)                                       # then spin yielding the interpreter lock each turn (engine 6.7, review J: the old
+            while mono() < at[i]:                                        # 4 ms spin held the lock for the whole burst and starved the feed loop at the gate)
+                time.sleep(0)
             if not opened and not shut:
                 opened = bool(gate())
                 if opened:
