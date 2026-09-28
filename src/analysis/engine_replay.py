@@ -87,7 +87,8 @@ for lo, hi in merged:
 out = []; busy_until = 0.0; Y0 = E.Y0
 for r, l, h in launches:
     cv = l["cv"].lower(); t = l["T0"]; named = [a.lower() for a in (l.get("named") or r.get("named") or [])]; creator = (l.get("creator") or r.get("creator") or "").lower()
-    tb = round((l["tier"] - 0.01) * 10000); rec = {"cv": cv, "T0": t, "day": day(t), "bundle": l.get("bundle_eth", 0.0), "why": None}
+    tier = l.get("tier", h.get("tier")); tb = round((tier - 0.01) * 10000) if tier is not None else 0
+    rec = {"cv": cv, "T0": t, "day": day(t), "bundle": l.get("bundle_eth", h.get("bundle_eth_chain", 0.0)) or 0.0, "why": None}   # the older launch files: the bundle from the grid's tape
     reasons = []
     if not NO_REPEAT and prior_today(creator, t) > 0: reasons.append("creator repeat")
     tk0 = h.get("tk0") or 0.0

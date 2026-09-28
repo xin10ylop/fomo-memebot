@@ -53,14 +53,21 @@ def main():
     for f in sys.argv[1:]:
         for l in json.load(open(f)):
             try:
-                cv = l["cv"].lower(); b0 = l["b0"]
-                L = lv.launch(cv, b0 + l["same_second_blocks"] + 1)
+                cv = l["cv"].lower(); b0 = l["b0"]; k_ = l.get("same_second_blocks", l.get("k"))   # the older launch files (Sep 20-23) carry k, not same_second_blocks
+                L = lv.launch(cv, b0 + k_ + 1)
                 if L is None or L["tier"] is None: continue
                 ev = lv.call("eth_getLogs", [{"fromBlock": hex(b0 + 121), "toBlock": hex(b0 + 620), "address": cv, "topics": [[lv.BUY, lv.SELL]]}])
                 L["rows"] = sorted(L["rows"] + [lv.row_of(e) for e in ev], key=lambda r: (r["bn"], r["li"]))
                 ts = L["ts"]; T0 = L["T0"]; bE1 = next((n for n in range(b0 + 1, b0 + 30) if ts.get(n, 0) == T0 + 1), None)
                 if bE1 is None: continue
-                row = {"cv": cv, "T0": T0, "day": time.strftime("%b %d", time.gmtime(T0)), "creator": l.get("creator"), "bundle_eth": l.get("bundle_eth"), "k": l["same_second_blocks"], "bE1": bE1}
+                row = {"cv": cv, "T0": T0, "day": time.strftime("%b %d", time.gmtime(T0)), "creator": l.get("creator"), "bundle_eth": l.get("bundle_eth"), "k": k_, "bE1": bE1, "tier": L["tier"]}
+                Xc, Yc, bch = X0, Y0, 0.0                                                                    # the exempt bundle from the tape (e1_multi's rule), for launch files without it
+                for i_, r_ in enumerate(r for r in L["rows"] if ts.get(r["bn"]) == T0):
+                    if r_["k"] == "B" and 0 < r_["tk"] < Yc:
+                        net_ = Xc * r_["tk"] / (Yc - r_["tk"]); fee_ = 1 - net_ / r_["eth"] if r_["eth"] > 0 else 1.0; Xc, Yc = fold_buy(Xc, Yc, r_["tk"])
+                        if i_ > 0 and abs(fee_ - L["tier"]) <= 0.0008: bch += r_["eth"]
+                    elif r_["k"] == "S": Xc, Yc = fold_sell(Xc, Yc, r_["tk"])
+                row["bundle_eth_chain"] = bch
                 r0 = next((r for r in L["rows"] if r["bn"] == b0 and r["k"] == "B"), None)                      # the creator's launch-block buy: the engine's MIN_CREATOR_SUPPLY and MAX_CREATOR_BUY_ETH gates
                 row["tk0"] = r0["tk"] if r0 else None; row["init_buy_eth"] = r0["eth"] if r0 else None
                 # the engine's minOut guard (BURST_SLIP 7%): the tokens it sizes at the build, on the curve as the feed shows it two blocks before
