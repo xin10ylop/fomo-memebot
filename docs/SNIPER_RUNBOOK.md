@@ -1068,6 +1068,10 @@ realized 11-block returns) reaches its lower bound. The main test on the chain-s
    - the public IP changes unless an Elastic IP is attached: read it in the console and ssh to it; the engine starts on boot
      (Restart=always); check `nproc` prints 2 and `lscpu | grep 'Thread(s) per core'` prints 1, then the start line below.
    PIN_CPU stays empty: the two threads must be free to use both cores.
+   Done Sep 28: the instance i-001ea415c64ab3f58 reads c7a.large in us-east-2b; its public address became 18.188.14.68 (no Elastic
+   IP, so it changes on every stop and start: read it in the console or CloudShell, `aws ec2 describe-instances --region us-east-2
+   --query 'Reservations[].Instances[].[InstanceId,InstanceType,State.Name,PublicIpAddress]' --output table`). A CloudShell script
+   must never call `exit`: it closes the session.
 
 All three settings and the new send step in one paste (no fill open: the two counts equal):
 
