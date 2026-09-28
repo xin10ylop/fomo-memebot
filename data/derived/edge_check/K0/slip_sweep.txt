@@ -1,0 +1,30 @@
+--view k-2         slip 0.07 Sep24-28: fired 18 guard 9 fills 9 mean +6.0% med +8.3% win 67% $ +1.13  fires/24h 4.1 $/24h +0.26
+--view k-2         slip 0.15 Sep24-28: fired 18 guard 2 fills 16 mean +16.3% med +8.5% win 75% $ +27.96  fires/24h 4.1 $/24h +6.35
+--view k-2         slip 0.25 Sep24-28: fired 18 guard 0 fills 18 mean +17.9% med +9.3% win 78% $ +36.06  fires/24h 4.1 $/24h +8.19
+--view k-2         slip 0.40 Sep24-28: fired 18 guard 0 fills 18 mean +17.9% med +9.3% win 78% $ +36.06  fires/24h 4.1 $/24h +8.19
+--view k-1 --reg   slip 0.07 Sep24-28: fired 50 guard 19 fills 31 mean +7.9% med +2.0% win 55% $ +15.29  fires/24h 11.4 $/24h +3.47
+--view k-1 --reg   slip 0.15 Sep24-28: fired 50 guard 4 fills 46 mean +12.4% med +5.3% win 63% $ +57.59  fires/24h 11.4 $/24h +13.08
+--view k-1 --reg   slip 0.25 Sep24-28: fired 50 guard 0 fills 50 mean +12.6% med +5.9% win 64% $ +65.12  fires/24h 11.4 $/24h +14.79
+--view k-1 --reg   slip 0.40 Sep24-28: fired 50 guard 0 fills 50 mean +12.6% med +5.9% win 64% $ +65.12  fires/24h 11.4 $/24h +14.79
+--view k --reg     slip 0.07 Sep24-28: fired 78 guard 33 fills 45 mean +5.3% med -0.3% win 49% $ +5.29  fires/24h 17.7 $/24h +1.20
+--view k --reg     slip 0.15 Sep24-28: fired 78 guard 12 fills 66 mean +8.4% med +2.3% win 56% $ +46.44  fires/24h 17.7 $/24h +10.55
+--view k --reg     slip 0.25 Sep24-28: fired 78 guard 8 fills 70 mean +8.8% med +3.1% win 57% $ +53.97  fires/24h 17.7 $/24h +12.26
+--view k --reg     slip 0.40 Sep24-28: fired 78 guard 6 fills 72 mean +8.2% med +2.3% win 56% $ +51.36  fires/24h 17.7 $/24h +11.67
+
+--view k-2         slip 0.07 Sep21-23: fired 27 guard 18 fills 9 mean +45.3% med +31.5% win 89% $ +44.04  fires/24h 10.4 $/24h +17.00
+--view k-2         slip 0.25 Sep21-23: fired 27 guard 3 fills 24 mean +38.4% med +26.5% win 88% $ +111.02  fires/24h 10.4 $/24h +42.86
+--view k-1 --reg   slip 0.07 Sep21-23: fired 79 guard 42 fills 37 mean +22.6% med +11.6% win 59% $ +82.63  fires/24h 30.5 $/24h +31.90
+--view k-1 --reg   slip 0.25 Sep21-23: fired 79 guard 5 fills 74 mean +18.1% med +7.3% win 57% $ +148.20  fires/24h 30.5 $/24h +57.21
+
+=== usual view, slip 0.25, the whole week by day
+day     hours launch  PRE GATE fired guard fills   mean h11  median  win dead   $ total  fires/24h   $/24h
+Sep 21   14.3    121   34   66    21     0    21     +20.4%  +14.9%  62%   5%    +48.90       35.2  +81.87
+Sep 22   24.0    170   47   85    38     4    34     +16.8%   +5.0%  53%   3%    +61.91       38.0  +61.91
+Sep 23   23.8    108   21   67    20     1    19     +17.8%   +4.0%  58%   0%    +37.39       20.1  +37.64
+Sep 24   24.0     72   15   38    19     0    19     +14.0%   +3.6%  53%   0%    +28.38       19.0  +28.39
+Sep 25   24.0     53    9   31    13     0    13     +20.7%   +7.5%  92%   0%    +30.73       13.0  +30.73
+Sep 26   24.0     55   24   25     6     0     6      +4.7%   +5.2%  67%   0%     +1.72        6.0   +1.72
+Sep 27   24.0     47   13   23    11     0    11      +6.4%   +6.0%  55%   0%     +5.50       11.0   +5.50
+Sep 28    9.7      6    1    4     1     0     1      -6.8%   -6.8%   0%   0%     -1.21        2.5   -3.02
+week    167.8    632  164  339   129     5   124     +15.9%   +6.0%  60%   2%   +213.32       18.4  +30.50
+

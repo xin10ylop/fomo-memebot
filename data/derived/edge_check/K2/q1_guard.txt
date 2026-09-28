@@ -1,0 +1,60 @@
+== the usual view (k-1 + reg), every other setting live ==
+live (slip 7%) [fit]                   fired   79 guard   42 fills   37 mean  +22.6% med  +11.6% win  59% $  +82.63 $+31.93/d
+live (slip 7%) [read]                  fired   50 guard   19 fills   31 mean   +7.9% med   +2.0% win  55% $  +15.29 $ +3.47/d
+live (slip 7%) [all]                   fired  129 guard   61 fills   68 mean  +15.9% med   +5.0% win  57% $  +97.92 $+14.00/d
+  reverted bursts [fit]: n 42, second place h11 mean +13.7% med +2.2% win 55%, $ if filled +74.94 (gas already paid); the fills: n 37 mean +22.6%
+  reverted bursts [read]: n 19, second place h11 mean +20.2% med +11.5% win 79%, $ if filled +49.83 (gas already paid); the fills: n 31 mean +7.9%
+  reverted bursts [all]: n 61, second place h11 mean +15.7% med +7.9% win 62%, $ if filled +124.78 (gas already paid); the fills: n 68 mean +15.9%
+
+== reverted and filled bursts by the guard ratio q = tk_seat1 / tk_build (second place h11) ==
+  q in [0.00,0.50) fit : n   1 mean   -0.2% med   -0.2%
+  q in [0.00,0.50) read: n   0 mean   +nan% med   +nan%
+  q in [0.50,0.70) fit : n   0 mean   +nan% med   +nan%
+  q in [0.50,0.70) read: n   0 mean   +nan% med   +nan%
+  q in [0.70,0.80) fit : n   7 mean  +18.2% med   +7.9%
+  q in [0.70,0.80) read: n   1 mean  -10.1% med  -10.1%
+  q in [0.80,0.85) fit : n   5 mean   +7.7% med   -3.8%
+  q in [0.80,0.85) read: n   3 mean  +22.7% med  +18.2%
+  q in [0.85,0.90) fit : n  25 mean  +14.3% med   -2.2%
+  q in [0.85,0.90) read: n   9 mean  +19.6% med  +11.5%
+  q in [0.90,0.93) fit : n   4 mean  +13.5% med   +6.2%
+  q in [0.90,0.93) read: n   6 mean  +24.8% med   +6.5%
+  q in [0.93,0.97) fit : n  12 mean  +32.1% med  +23.4%
+  q in [0.93,0.97) read: n   6 mean  +16.4% med  +15.8%
+  q in [0.97,1.00) fit : n  25 mean  +18.1% med   +9.2%
+  q in [0.97,1.00) read: n  25 mean   +5.8% med   -1.6%
+  q in [1.00,9.00) fit : n   0 mean   +nan% med   +nan%
+  q in [1.00,9.00) read: n   0 mean   +nan% med   +nan%
+
+== the slip swept (the fire set is the same; only which bursts fill changes; reverted = -$0.33) ==
+  slip 0.03: fit fills  25/79 mean +18.1% $ +32.62 (+12.61/d) | read fills  25/50 mean  +5.8% $  +2.49 ( +0.57/d)
+  slip 0.05: fit fills  34/79 mean +22.4% $ +72.97 (+28.20/d) | read fills  28/50 mean  +6.6% $  +7.68 ( +1.74/d)
+  slip 0.07: fit fills  37/79 mean +22.6% $ +82.63 (+31.93/d) | read fills  31/50 mean  +7.9% $ +15.29 ( +3.47/d)
+  slip 0.10: fit fills  41/79 mean +21.7% $ +89.65 (+34.65/d) | read fills  37/50 mean +10.6% $ +34.60 ( +7.86/d)
+  slip 0.15: fit fills  66/79 mean +18.9% $+136.06 (+52.58/d) | read fills  46/50 mean +12.4% $ +57.59 (+13.08/d)
+  slip 0.20: fit fills  71/79 mean +18.1% $+141.05 (+54.51/d) | read fills  49/50 mean +13.0% $ +66.43 (+15.08/d)
+  slip 0.30: fit fills  78/79 mean +18.1% $+157.60 (+60.91/d) | read fills  50/50 mean +12.6% $ +65.12 (+14.79/d)
+  slip 0.50: fit fills  78/79 mean +18.1% $+157.60 (+60.91/d) | read fills  50/50 mean +12.6% $ +65.12 (+14.79/d)
+  slip 1.00: fit fills  79/79 mean +17.9% $+157.57 (+60.90/d) | read fills  50/50 mean +12.6% $ +65.12 (+14.79/d)
+
+== why the guard trips (taped fires): creation-second drift after the build view vs the buy ahead in E1 ==
+  fit: 71 taped fires, 34 guard trips: drift alone 2, the buy ahead alone 31, both 0, neither alone (compound) 1
+     trips from drift (first place < 93% of build)    n   2 second place h11 mean   +0.7%
+     trips from the buy ahead only (drift ok)         n  32 second place h11 mean  +15.2%
+  read: 32 taped fires, 14 guard trips: drift alone 0, the buy ahead alone 13, both 0, neither alone (compound) 1
+     trips from drift (first place < 93% of build)    n   0 second place h11 mean   +nan%
+     trips from the buy ahead only (drift ok)         n  14 second place h11 mean  +20.5%
+
+== conditioned guards (pass if q >= 0.93, or the condition) ==
+  fleets>=3 at view                                    fit fills  63 mean +21.2% $+147.89 | read fills  44 mean +11.3% $ +48.09 (+10.92/d)
+  fleets>=4                                            fit fills  52 mean +24.1% $+136.79 | read fills  35 mean +10.8% $ +32.75 (+7.44/d)
+  bundle<=1.5                                          fit fills  74 mean +17.5% $+142.69 | read fills  47 mean +12.1% $ +57.48 (+13.05/d)
+  bundle>1.5                                           fit fills  42 mean +22.6% $ +97.52 | read fills  34 mean  +8.9% $ +22.92 (+5.20/d)
+  tier 3%                                              fit fills  63 mean +20.1% $+138.41 | read fills  45 mean +11.9% $ +53.08 (+12.05/d)
+  tier <3%                                             fit fills  53 mean +18.6% $+101.79 | read fills  36 mean  +9.4% $ +27.33 (+6.21/d)
+  q>=0.85                                              fit fills  66 mean +18.9% $+136.06 | read fills  46 mean +12.4% $ +57.59 (+13.08/d)
+  q>=0.80                                              fit fills  71 mean +18.1% $+141.05 | read fills  49 mean +13.0% $ +66.43 (+15.08/d)
+  q>=0.70                                              fit fills  78 mean +18.1% $+157.60 | read fills  50 mean +12.6% $ +65.12 (+14.79/d)
+  drift ok (first>=0.93 build), any buy ahead [taped]  fit fills  69 mean +19.2% $+145.84 | read fills  45 mean +11.8% $ +52.52 (+11.93/d)
+  k>=5                                                 fit fills  68 mean +19.8% $+148.57 | read fills  46 mean +11.2% $ +50.50 (+11.47/d)
+  k<=4                                                 fit fills  48 mean +18.9% $ +91.63 | read fills  35 mean +10.2% $ +29.91 (+6.79/d)

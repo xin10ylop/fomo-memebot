@@ -1,0 +1,42 @@
+== (1) by assumed landing position, fires at k-1 with tapes; $ at $13 after gas (every fired burst pays $0.33) ==
+  land first  | fit 0.07: 69/71 fill +30.3% $+248.08  0.15: 69/71 fill +30.3% $+248.08  0.20: 70/71 fill +29.9% $+248.74 | read 0.07: 32/32 fill +23.9% $ +88.86  0.15: 32/32 fill +23.9% $ +88.86  0.20: 32/32 fill +23.9% $ +88.86
+  land second | fit 0.07: 37/71 fill +22.6% $ +85.22  0.15: 60/71 fill +20.0% $+132.85  0.20: 63/71 fill +19.0% $+131.94 | read 0.07: 18/32 fill +11.3% $ +16.00  0.15: 28/32 fill +15.4% $ +45.52  0.20: 31/32 fill +16.1% $ +54.31
+  land third  | fit 0.07: 26/71 fill  +8.5% $  +5.33  0.15: 48/71 fill +16.7% $ +80.77  0.20: 56/71 fill +12.6% $ +67.98 | read 0.07: 12/32 fill  +5.0% $  -2.76  0.15: 25/32 fill +10.0% $ +21.96  0.20: 27/32 fill +11.3% $ +29.10
+  land last   | fit 0.07: 16/71 fill  -3.7% $ -31.11  0.15: 25/71 fill  -3.6% $ -35.22  0.20: 40/71 fill  -4.5% $ -46.80 | read 0.07:  5/32 fill +11.2% $  -3.26  0.15: 19/32 fill  +2.9% $  -3.35  0.20: 25/32 fill  +4.6% $  +4.36
+  landing mix {'first': 0.25, 'second': 0.45, 'third': 0.15, 'last': 0.15}: fit 0.07 $ +96.50  0.15 $+128.63  0.20 $+124.73
+  landing mix {'first': 0.25, 'second': 0.45, 'third': 0.15, 'last': 0.15}: read 0.07 $ +28.51  0.15 $ +45.49  0.20 $ +51.67
+
+== (2) the gain (slip 0.20 minus 0.07, second place) by day, usual view ==
+  Sep 21:  8 bursts change, gain $+16.74; first E1 buyers: [('0x6c56103c', 4), ('0x924378f2', 2), ('0x16ebf6fa', 1)]
+  Sep 22: 13 bursts change, gain $ +3.33; first E1 buyers: [('0x6c56103c', 6), ('0x924378f2', 5), ('0xf9af9f38', 1)]
+  Sep 23: 13 bursts change, gain $+38.35; first E1 buyers: [('untaped', 8), ('0x924378f2', 5)]
+  Sep 24:  8 bursts change, gain $+28.47; first E1 buyers: [('untaped', 2), ('0x924378f2', 2), ('0x3c3cebcd', 1)]
+  Sep 25:  6 bursts change, gain $+16.21; first E1 buyers: [('0x6c56103c', 4), ('0x924378f2', 1), ('0x4c40c1a7', 1)]
+  Sep 26:  1 bursts change, gain $ +2.37; first E1 buyers: [('0x924378f2', 1)]
+  Sep 27:  3 bursts change, gain $ +4.09; first E1 buyers: [('untaped', 3)]
+  fit: 34 bursts, gain $+58.42; without the best 1 $+43.33, best 3 $+23.06; median gain per burst $-0.05; positive 17/34
+  read: 18 bursts, gain $+51.15; without the best 1 $+40.40, best 3 $+20.80; median gain per burst $+1.52; positive 15/18
+
+== (3) bootstrap of the read half's gain (resampling the changed bursts), 10,000 draws ==
+  fit: gain $+58.42, 90% interval $+14.53 to $+104.02, P(gain <= 0) = 0.014
+  read: gain $+51.15, 90% interval $+25.54 to $+79.51, P(gain <= 0) = 0.000
+
+== (4) dollars a day at $13 on the Sep 24-28 supply (read half, 105.7 h) ==
+  slip 0.07: fired  50 guard  19 fills  31 mean  +7.9% med  +2.0% win  55% $ +15.29 $ +3.47/d
+  slip 0.15: fired  50 guard   4 fills  46 mean +12.4% med  +5.3% win  63% $ +57.59 $+13.08/d
+  slip 0.20: fired  50 guard   1 fills  49 mean +13.0% med  +6.0% win  65% $ +66.43 $+15.09/d
+  Sep 26-28 only (57.7 h): slip 0.07 $-0.46, slip 0.20 $+6.01
+  view k-2: read slip 0.07 $+1.13 (9 fills) -> 0.20 $+36.06 (18 fills, +17.9%)
+  view k: read slip 0.07 $+5.29 (45 fills) -> 0.20 $+55.29 (69 fills, +9.0%)
+
+== (5) the sequential test (H0 +2.5%, H1 +19%, sd 0.34, bounds +-2.944) ==
+  true mean per fill +2.5%: drift per fill -0.118 -> fills to reach -2.94 about 25
+  true mean per fill +7.9%: drift per fill -0.041 -> fills to reach -2.94 about 72
+  true mean per fill +10.0%: drift per fill -0.011 -> fills to reach -2.94 about 275
+  true mean per fill +13.0%: drift per fill +0.032 -> fills to reach +2.94 about 92
+  true mean per fill +16.0%: drift per fill +0.075 -> fills to reach +2.94 about 39
+  true mean per fill +19.0%: drift per fill +0.118 -> fills to reach +2.94 about 25
+  fit slip 0.07: per-fill mean +22.6% sd 0.40 on 37 fills
+  fit slip 0.20: per-fill mean +18.1% sd 0.38 on 71 fills
+  read slip 0.07: per-fill mean +7.9% sd 0.25 on 31 fills
+  read slip 0.20: per-fill mean +13.0% sd 0.27 on 49 fills

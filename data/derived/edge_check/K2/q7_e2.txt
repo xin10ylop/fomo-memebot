@@ -1,0 +1,43 @@
+launches through every pre-gate: fit 278, read 151; with a tape and an E2 block: 365
+
+== (a) the live fires: E1 second place h11 against E2 at each place and hold (taped, E2 block known) ==
+  fit n 71: E1 second h11 +18.8%; E2 p1 h3 -4.3% h5 -7.4% h8 -7.2% h11 -5.4% h15 -3.9% h20 -4.0% h30 -2.6%; E2 p2 h3 -5.3% h5 -8.3% h8 -8.1% h11 -6.4% h15 -5.0% h20 -5.1% h30 -3.7%; E2 last h3 -6.2% h5 -9.2% h8 -9.0% h11 -7.3% h15 -5.9% h20 -6.0% h30 -4.6%
+  read n 32: E1 second h11 +15.4%; E2 p1 h3 -5.7% h5 -6.4% h8 -7.4% h11 -6.9% h15 -8.3% h20 -8.9% h30 -11.1%; E2 p2 h3 -5.8% h5 -6.5% h8 -7.5% h11 -6.9% h15 -8.4% h20 -8.9% h30 -11.2%; E2 last h3 -5.8% h5 -6.5% h8 -7.5% h11 -6.9% h15 -8.4% h20 -8.9% h30 -11.2%
+
+== (b) after a guard revert (7%): E2 first / second place ==
+  fit n 34: E1 second h11 (what the revert cost) +14.4%; E2 first h5 -10.0% h8 -10.2% h11 -9.5% h15 -8.1%; E2 second h5 -10.7% h8 -10.8% h11 -10.1% h15 -8.8%
+  read n 14: E1 second h11 (what the revert cost) +20.5%; E2 first h5 -8.9% h8 -9.6% h11 -9.2% h15 -12.7%; E2 second h5 -9.0% h8 -9.7% h11 -9.2% h15 -12.8%
+
+== (c) refused at the gate (fleets < 2 at k-1+reg), E2 taken when the E1 block shows a crowd; $ at $13 after $0.33 gas ==
+  fit: 183 refused launches with a tape; E2 first h11 all -6.2%, second -6.6%, last -6.9%
+     E1 ETH >= 0.1            n  66 | p1: h8  -8.4% h11  -8.2% $-92.44 p2: h8  -8.9% h11  -8.7% $-96.27 last: h8  -9.1% h11  -8.9% $-98.48
+     E1 ETH >= 0.3            n  26 | p1: h8 -11.3% h11 -11.7% $-47.98 p2: h8 -11.6% h11 -12.0% $-49.10 last: h8 -11.7% h11 -12.1% $-49.41
+     E1 ETH >= 0.5            n  13 | p1: h8 -14.5% h11 -15.2% $-30.03 p2: h8 -14.7% h11 -15.4% $-30.36 last: h8 -14.6% h11 -15.3% $-30.19
+     E1 ETH >= 1.0            n   2 | p1: h8  -8.2% h11  -8.2% $ -2.80 p2: h8  -8.2% h11  -8.2% $ -2.80 last: h8  -8.2% h11  -8.2% $ -2.80
+     fleets through E1 >= 2   n 128 | p1: h8  -6.9% h11  -6.4% $-149.20 p2: h8  -7.5% h11  -7.1% $-159.87 last: h8  -7.9% h11  -7.4% $-165.93
+     fleets through E1 >= 4   n  54 | p1: h8  -8.0% h11  -7.2% $-68.51 p2: h8  -8.5% h11  -7.7% $-72.20 last: h8  -8.8% h11  -8.1% $-74.68
+     E1 buys >= 5             n  20 | p1: h8  -8.7% h11  -8.0% $-27.46 p2: h8  -8.8% h11  -8.2% $-27.85 last: h8  -9.0% h11  -8.4% $-28.40
+     E1 buys >= 10            n   1 | p1: h8  -9.7% h11  -9.7% $ -1.59 p2: h8 -10.2% h11 -10.2% $ -1.66 last: h8 -11.2% h11 -11.2% $ -1.78
+  read: 79 refused launches with a tape; E2 first h11 all -5.8%, second -5.9%, last -6.0%
+     E1 ETH >= 0.1            n  25 | p1: h8  -3.0% h11  -2.3% $-15.68 p2: h8  -3.0% h11  -2.3% $-15.71 last: h8  -3.0% h11  -2.3% $-15.71
+     E1 ETH >= 0.3            n   8 | p1: h8  +2.5% h11  +5.3% $ +2.88 p2: h8  +2.5% h11  +5.3% $ +2.88 last: h8  +2.5% h11  +5.3% $ +2.88
+     E1 ETH >= 0.5            n   2 | p1: h8 -23.1% h11 -20.8% $ -6.07 p2: h8 -23.1% h11 -20.8% $ -6.07 last: h8 -23.1% h11 -20.8% $ -6.07
+     E1 ETH >= 1.0            n   0 | p1: h8  +nan% h11  +nan% $ +0.00 p2: h8  +nan% h11  +nan% $ +0.00 last: h8  +nan% h11  +nan% $ +0.00
+     fleets through E1 >= 2   n  51 | p1: h8  -4.8% h11  -4.5% $-46.62 p2: h8  -5.0% h11  -4.7% $-47.95 last: h8  -5.1% h11  -4.8% $-48.46
+     fleets through E1 >= 4   n  17 | p1: h8  -5.1% h11  -5.0% $-16.68 p2: h8  -5.7% h11  -5.6% $-18.00 last: h8  -5.9% h11  -5.8% $-18.51
+     E1 buys >= 5             n   8 | p1: h8 -10.8% h11 -10.7% $-13.79 p2: h8 -11.0% h11 -10.9% $-14.01 last: h8 -11.5% h11 -11.4% $-14.52
+     E1 buys >= 10            n   0 | p1: h8  +nan% h11  +nan% $ +0.00 p2: h8  +nan% h11  +nan% $ +0.00 last: h8  +nan% h11  +nan% $ +0.00
+
+== (c') the same rules on EVERY launch through the pre-gates, E2 in addition to E1 (a second seat) ==
+  fit all                      n 254 | p1: h11  -6.0% $-280.43 p2: h11  -6.6% $-300.22 last: h11  -7.0% $-314.12
+  fit E1 ETH >= 0.3            n  58 | p1: h11  -9.6% $-91.26 p2: h11 -10.2% $-96.14 last: h11 -11.0% $-101.76
+  fit E1 ETH >= 1.0            n   7 | p1: h11  -7.7% $ -9.29 p2: h11  -8.8% $-10.29 last: h11  -9.6% $-11.05
+  fit fleets through E1 >= 4   n 116 | p1: h11  -7.5% $-151.57 p2: h11  -8.1% $-161.17 last: h11  -8.8% $-171.29
+  read all                      n 111 | p1: h11  -6.1% $-124.37 p2: h11  -6.2% $-125.97 last: h11  -6.2% $-126.57
+  read E1 ETH >= 0.3            n  17 | p1: h11  -1.7% $ -9.46 p2: h11  -1.9% $ -9.72 last: h11  -1.9% $ -9.75
+  read E1 ETH >= 1.0            n   1 | p1: h11  +7.2% $ +0.61 p2: h11  +6.7% $ +0.55 last: h11  +6.7% $ +0.54
+  read fleets through E1 >= 4   n  41 | p1: h11  -5.8% $-44.58 p2: h11  -6.1% $-46.11 last: h11  -6.2% $-46.64
+
+== the launch files' own columns (e1_multi: first place, hold 15): E1 vs E2, launches through the pre-gates that carry them ==
+  fit n 24: E1 first h15 +1.1%, E1 last -15.9%, E2 first h15 -12.4%, E2 last -12.4%
+  read n 151: E1 first h15 +7.4%, E1 last -3.5%, E2 first h15 -4.2%, E2 last -5.2%

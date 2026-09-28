@@ -1,0 +1,35 @@
+
+==== guard slip 0.07 ====
+  base [fit]: fired 79 fills 37 $+82.63 (+31.93/d)
+  base [read]: fired 50 fills 31 $+15.29 (+3.47/d)
+  off: creator supply < 1%    | fit: +12 fires (-0), 10 fills mean  -6.2%, all fires at 2nd  -9.8%, d$  -12.00 (-4.64/d) | read: +8 fires (-0), 5 fills mean +13.4%, all fires at 2nd  +6.3%, d$   +6.08 (+1.38/d)
+  off: creator buy > 2 ETH    | fit: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d) | read: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d)
+  off: creator repeat         | fit: +3 fires (-0), 2 fills mean  +9.7%, all fires at 2nd +11.3%, d$   +1.54 (+0.59/d) | read: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d)
+  off: bundle count < 3       | fit: +1 fires (-0), 1 fills mean  +5.5%, all fires at 2nd  +5.5%, d$   +0.38 (+0.15/d) | read: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d)
+  off: bundle cap > 3.0 ETH   | fit: +7 fires (-0), 6 fills mean -11.0%, all fires at 2nd -11.0%, d$  -10.86 (-4.20/d) | read: +8 fires (-0), 8 fills mean -10.6%, all fires at 2nd -10.6%, d$  -13.67 (-3.10/d)
+  off: tier 100-200 bps       | fit: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d) | read: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d)
+  off: bundle floor 0.3 ETH   | fit: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d) | read: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d)
+
+==== guard slip 0.15 ====
+  base [fit]: fired 79 fills 66 $+136.06 (+52.58/d)
+  base [read]: fired 50 fills 46 $+57.59 (+13.08/d)
+  off: creator supply < 1%    | fit: +12 fires (-0), 10 fills mean  -6.2%, all fires at 2nd  -9.8%, d$  -12.00 (-4.64/d) | read: +8 fires (-0), 7 fills mean  +8.9%, all fires at 2nd  +6.3%, d$   +5.48 (+1.24/d)
+  off: creator buy > 2 ETH    | fit: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d) | read: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d)
+  off: creator repeat         | fit: +3 fires (-0), 3 fills mean +11.3%, all fires at 2nd +11.3%, d$   +3.43 (+1.33/d) | read: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d)
+  off: bundle count < 3       | fit: +1 fires (-0), 1 fills mean  +5.5%, all fires at 2nd  +5.5%, d$   +0.38 (+0.15/d) | read: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d)
+  off: bundle cap > 3.0 ETH   | fit: +7 fires (-0), 6 fills mean -11.0%, all fires at 2nd -11.0%, d$  -10.86 (-4.20/d) | read: +8 fires (-0), 8 fills mean -10.6%, all fires at 2nd -10.6%, d$  -13.67 (-3.10/d)
+  off: tier 100-200 bps       | fit: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d) | read: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d)
+  off: bundle floor 0.3 ETH   | fit: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d) | read: +0 fires (-0), 0 fills mean  +nan%, all fires at 2nd  +nan%, d$   +0.00 (+0.00/d)
+
+==== launches each filter flags (any, not only first) ====
+  fit: n 399; supply<1% 89, creator buy>2 0, repeat 14, bundle count<3 8, cap 11, tier out 0, floor 0
+  read: n 233; supply<1% 59, creator buy>2 0, repeat 3, bundle count<3 12, cap 10, tier out 0, floor 0
+
+==== creator-supply threshold swept (tk0 share of supply) ====
+  tk0 >= 0.000: slip 0.07: fit  91 fires $ +70.63 | read  58 fires $ +21.37 (+4.85/d)  ||  slip 0.15: fit  91 fires $+124.06 | read  58 fires $ +63.07 (+14.32/d)
+  tk0 >= 0.002: slip 0.07: fit  88 fires $ +73.08 | read  56 fires $ +23.13 (+5.25/d)  ||  slip 0.15: fit  88 fires $+126.51 | read  56 fires $ +64.83 (+14.72/d)
+  tk0 >= 0.005: slip 0.07: fit  84 fires $ +78.49 | read  53 fires $ +24.12 (+5.48/d)  ||  slip 0.15: fit  84 fires $+131.92 | read  53 fires $ +66.42 (+15.08/d)
+  tk0 >= 0.010: slip 0.07: fit  79 fires $ +82.63 | read  50 fires $ +15.29 (+3.47/d)  ||  slip 0.15: fit  79 fires $+136.06 | read  50 fires $ +57.59 (+13.08/d)
+  tk0 >= 0.020: slip 0.07: fit  35 fires $ +48.64 | read  15 fires $ +14.79 (+3.36/d)  ||  slip 0.15: fit  35 fires $ +77.89 | read  15 fires $ +36.16 (+8.21/d)
+  tk0 >= 0.030: slip 0.07: fit  12 fires $ +10.38 | read  11 fires $ +19.04 (+4.32/d)  ||  slip 0.15: fit  12 fires $ +23.16 | read  11 fires $ +38.86 (+8.82/d)
+  tk0 >= 0.050: slip 0.07: fit   1 fires $  -0.33 | read   0 fires $  +0.00 (+0.00/d)  ||  slip 0.15: fit   1 fires $  -1.26 | read   0 fires $  +0.00 (+0.00/d)

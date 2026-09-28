@@ -1,0 +1,33 @@
+== guard 0.07, lag 2: fixed exit 11: fit n=37 +22.59% | read n=18 +11.35%
+  take-profit        chosen on fit: tp 100% by 3                         fit +22.35% -> read +11.35% (+0.00%) | chosen on read: tp 75% by 9                          read +11.83% -> fit +21.54% (-1.04%) | beat fixed on both: 0/18
+  stop               chosen on fit: stop -15% by 3                       fit +22.59% -> read +11.35% (+0.00%) | chosen on read: stop -5% by 3                        read +11.35% -> fit +20.53% (-2.06%) | beat fixed on both: 0/15
+  tp+stop            chosen on fit: tp 100% / stop -20% by 9             fit +22.35% -> read +11.83% (+0.48%) | chosen on read: tp 100% / stop -10% by 9             read +11.83% -> fit +21.45% (-1.13%) | beat fixed on both: 0/12
+  seat-block sellers chosen on fit: sell on their first sell by 3        fit +21.91% -> read +11.35% (+0.00%) | chosen on read: sell on their first sell by 3        read +11.35% -> fit +21.91% (-0.68%) | beat fixed on both: 0/4
+  second-block read  chosen on fit: at h1: below -10% sell, else hold to 20 fit +25.32% -> read +11.63% (+0.29%) | chosen on read: at h1: below -10% sell, else hold to 13 read +13.42% -> fit +22.50% (-0.08%) | beat fixed on both: 8/27
+  momentum           chosen on fit: at h9 rising over 3 blocks: hold to 30 fit +32.05% -> read +13.02% (+1.68%) | chosen on read: at h9 rising over 3 blocks: hold to 30 read +13.02% -> fit +32.05% (+9.46%) | beat fixed on both: 2/4
+
+== guard 0.07, lag 4: fixed exit 11: fit n=37 +22.59% | read n=18 +11.35%
+  take-profit        chosen on fit: tp 100% by 3                         fit +22.19% -> read +11.35% (+0.00%) | chosen on read: tp 75% by 3                          read +11.35% -> fit +21.59% (-1.00%) | beat fixed on both: 0/18
+  stop               chosen on fit: stop -15% by 3                       fit +22.59% -> read +11.35% (+0.00%) | chosen on read: stop -5% by 3                        read +11.35% -> fit +20.63% (-1.96%) | beat fixed on both: 0/15
+  tp+stop            chosen on fit: tp 100% / stop -20% by 9             fit +22.19% -> read +11.35% (+0.00%) | chosen on read: tp 100% / stop -10% by 9             read +11.35% -> fit +21.31% (-1.28%) | beat fixed on both: 0/12
+  seat-block sellers chosen on fit: sell on their first sell by 3        fit +21.91% -> read +11.35% (+0.00%) | chosen on read: sell on their first sell by 3        read +11.35% -> fit +21.91% (-0.68%) | beat fixed on both: 0/4
+  second-block read  chosen on fit: at h1: below -10% sell, else hold to 20 fit +25.34% -> read +11.63% (+0.29%) | chosen on read: at h1: below -10% sell, else hold to 13 read +13.42% -> fit +22.52% (-0.07%) | beat fixed on both: 8/27
+  momentum           chosen on fit: at h9 rising over 3 blocks: hold to 30 fit +32.17% -> read +14.99% (+3.65%) | chosen on read: at h9 rising over 3 blocks: hold to 30 read +14.99% -> fit +32.17% (+9.59%) | beat fixed on both: 4/4
+
+== guard 0.20, lag 2: fixed exit 11: fit n=63 +18.97% | read n=31 +16.10%
+  take-profit        chosen on fit: tp 100% by 3                         fit +18.83% -> read +16.10% (+0.00%) | chosen on read: tp 100% by 9                         read +16.37% -> fit +18.70% (-0.27%) | beat fixed on both: 0/18
+  stop               chosen on fit: stop -5% by 3                        fit +19.39% -> read +11.45% (-4.65%) | chosen on read: stop -15% by 3                       read +16.10% -> fit +18.97% (+0.00%) | beat fixed on both: 0/15
+  tp+stop            chosen on fit: tp 100% / stop -20% by 9             fit +18.61% -> read +16.37% (+0.28%) | chosen on read: tp 100% / stop -20% by 9             read +16.37% -> fit +18.61% (-0.36%) | beat fixed on both: 0/12
+  seat-block sellers chosen on fit: sell on their first sell by 3        fit +18.57% -> read +16.07% (-0.03%) | chosen on read: sell on their first sell by 3        read +16.07% -> fit +18.57% (-0.40%) | beat fixed on both: 0/4
+  second-block read  chosen on fit: at h1: below -5% sell, else hold to 11 fit +19.39% -> read +11.45% (-4.65%) | chosen on read: at h2: below -10% sell, else hold to 11 read +13.09% -> fit +18.50% (-0.47%) | beat fixed on both: 0/27
+  momentum           chosen on fit: at h9 rising over 3 blocks: hold to 30 fit +23.09% -> read +13.43% (-2.66%) | chosen on read: at h9 rising over 3 blocks: hold to 13 read +15.19% -> fit +19.05% (+0.08%) | beat fixed on both: 0/4
+
+== guard 0.20, lag 4: fixed exit 11: fit n=63 +18.97% | read n=31 +16.10%
+  take-profit        chosen on fit: tp 100% by 3                         fit +18.73% -> read +16.10% (+0.00%) | chosen on read: tp 100% by 3                         read +16.10% -> fit +18.73% (-0.24%) | beat fixed on both: 0/18
+  stop               chosen on fit: stop -15% by 3                       fit +18.97% -> read +16.10% (+0.00%) | chosen on read: stop -15% by 3                       read +16.10% -> fit +18.97% (+0.00%) | beat fixed on both: 0/15
+  tp+stop            chosen on fit: tp 100% / stop -20% by 9             fit +18.63% -> read +16.10% (+0.00%) | chosen on read: tp 100% / stop -20% by 9             read +16.10% -> fit +18.63% (-0.34%) | beat fixed on both: 0/12
+  seat-block sellers chosen on fit: sell on their first sell by 3        fit +18.57% -> read +16.07% (-0.03%) | chosen on read: sell on their first sell by 3        read +16.07% -> fit +18.57% (-0.40%) | beat fixed on both: 0/4
+  second-block read  chosen on fit: at h1: below -5% sell, else hold to 11 fit +18.72% -> read +12.25% (-3.84%) | chosen on read: at h3: below -10% sell, else hold to 11 read +14.05% -> fit +18.51% (-0.46%) | beat fixed on both: 0/27
+  momentum           chosen on fit: at h9 rising over 3 blocks: hold to 30 fit +21.84% -> read +13.77% (-2.33%) | chosen on read: at h9 rising over 3 blocks: hold to 13 read +15.53% -> fit +17.81% (-1.16%) | beat fixed on both: 0/4
+
+fixed exit block h (guard 0.20 fills, taped): h3: +13.6%/+5.7%  h5: +13.9%/+7.3%  h7: +15.1%/+10.3%  h9: +16.6%/+15.4%  h11: +19.0%/+16.1%  h13: +17.8%/+15.5%  h15: +14.3%/+14.7%  h20: +17.0%/+14.4%  h30: +19.0%/+12.1%  h40: +21.9%/+9.3%  h60: +20.6%/+9.3%

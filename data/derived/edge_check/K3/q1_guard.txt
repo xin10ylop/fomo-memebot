@@ -1,0 +1,70 @@
+fires at the usual view (guard off): 129; A 79, B 50; with tapes 103
+
+1. the 7% guard: what the reverted bursts would have returned (h11, $13)
+  A   filled    second n= 37 mean +22.6% med +11.6% win 59% $ +96.49   | tapes n=37: first +25.4% second +22.6% third +17.8%
+  A   reverted  second n= 42 mean +13.7% med  +2.2% win 55% $ +61.08   | tapes n=34: first +34.1% second +14.3% third  +6.8%
+  B   filled    second n= 31 mean  +7.9% med  +2.0% win 55% $ +21.56   | tapes n=18: first +13.1% second +11.5% third  +6.5%
+  B   reverted  second n= 19 mean +20.2% med +11.5% win 79% $ +43.56   | tapes n=14: first +37.8% second +20.5% third +16.3%
+  all filled    second n= 68 mean +15.9% med  +5.0% win 57% $+118.05   | tapes n=55: first +21.4% second +19.0% third +14.1%
+  all reverted  second n= 61 mean +15.7% med  +7.9% win 62% $+104.65   | tapes n=48: first +35.2% second +16.1% third  +9.6%
+
+2. the reverted, by how far the price moved (tokens at second place / tokens sized at the build), h11 second place
+  ratio 0.85-0.93 A: n= 29 mean +14.2% med  +1.5% win 52% $ +43.86
+  ratio 0.85-0.93 B: n= 15 mean +21.7% med +11.5% win 80% $ +37.35
+  ratio 0.75-0.85 A: n=  8 mean +11.7% med  +2.2% win 62% $  +9.50
+  ratio 0.75-0.85 B: n=  4 mean +14.5% med +12.0% win 75% $  +6.21
+  ratio 0.60-0.75 A: n=  4 mean +18.1% med +15.1% win 75% $  +8.08
+  ratio 0.60-0.75 B: n=0
+  ratio 0.40-0.60 A: n=0
+  ratio 0.40-0.60 B: n=0
+  ratio 0.00-0.40 A: n=  1 mean  -0.2% med  -0.2% win  0% $  -0.35
+  ratio 0.00-0.40 B: n=0
+
+3. what moved the price (tapes): the curve before E1 (bundle / creation-second buys after the build's view) vs the one buy ahead in E1
+  A reverted with tapes 34: move mostly before E1 3 (n=  3 mean  +4.1% med  +1.5% win 67%); mostly the buy ahead 31 (n= 31 mean +15.3% med  +7.9% win 61%)
+  B reverted with tapes 14: move mostly before E1 1 (n=  1 mean +78.2% med +78.2% win 100%); mostly the buy ahead 13 (n= 13 mean +16.0% med +12.0% win 77%)
+
+4. slip sweep: $ over the period (fills ret*13-0.33, reverts -0.33), fills, mean per fill; the rule chosen on one period read on the other
+  slip  0.07  A: fired  79 rev  42 fills  37 mean +22.6% $ +82.63   B: fired  50 rev  19 fills  31 mean  +7.9% $ +15.29
+  slip  0.10  A: fired  79 rev  38 fills  41 mean +21.7% $ +89.65   B: fired  50 rev  13 fills  37 mean +10.6% $ +34.60
+  slip  0.15  A: fired  79 rev  13 fills  66 mean +18.9% $+136.06   B: fired  50 rev   4 fills  46 mean +12.4% $ +57.59
+  slip  0.20  A: fired  79 rev   8 fills  71 mean +18.1% $+141.05   B: fired  50 rev   1 fills  49 mean +13.0% $ +66.43
+  slip  0.25  A: fired  79 rev   5 fills  74 mean +18.1% $+148.20   B: fired  50 rev   0 fills  50 mean +12.6% $ +65.12
+  slip  0.30  A: fired  79 rev   1 fills  78 mean +18.1% $+157.60   B: fired  50 rev   0 fills  50 mean +12.6% $ +65.12
+  slip  0.40  A: fired  79 rev   1 fills  78 mean +18.1% $+157.60   B: fired  50 rev   0 fills  50 mean +12.6% $ +65.12
+  slip  0.50  A: fired  79 rev   1 fills  78 mean +18.1% $+157.60   B: fired  50 rev   0 fills  50 mean +12.6% $ +65.12
+  slip  0.70  A: fired  79 rev   1 fills  78 mean +18.1% $+157.60   B: fired  50 rev   0 fills  50 mean +12.6% $ +65.12
+  slip   off  A: fired  79 rev   0 fills  79 mean +17.9% $+157.57   B: fired  50 rev   0 fills  50 mean +12.6% $ +65.12
+  chosen on A: slip 0.3; on B $+65.12 against $+15.29 at 7% (difference $+49.83)
+  chosen on B: slip 0.2; on A $+141.05 against $+82.63 at 7% (difference $+58.42)
+
+   the fills a looser guard adds (the marginal bursts), at second place and (tapes) third place:
+  7% -> 0.15: A added n= 29 mean +14.2% med  +1.5% win 52% $ +53.43  | third place on tapes n=23 mean  +7.4% $+22.08
+  7% -> 0.15: B added n= 15 mean +21.7% med +11.5% win 80% $ +42.30  | third place on tapes n=10 mean +19.1% $+24.83
+  7% -> 0.3: A added n= 41 mean +14.1% med  +2.8% win 56% $ +74.97  | third place on tapes n=33 mean  +7.1% $+30.33
+  7% -> 0.3: B added n= 19 mean +20.2% med +11.5% win 79% $ +49.83  | third place on tapes n=14 mean +16.3% $+29.58
+  7% -> off: A added n= 42 mean +13.7% med  +2.2% win 55% $ +74.94  | third place on tapes n=34 mean  +6.8% $+30.19
+  7% -> off: B added n= 19 mean +20.2% med +11.5% win 79% $ +49.83  | third place on tapes n=14 mean +16.3% $+29.58
+
+5. guard keyed to the crowd: fleets at the gate's view >= F fire with no guard (or a looser one), else 7%
+  fleets >= 3 unguarded: A: fills  63 mean +21.2% $+147.89   B: fills  44 mean +11.3% $ +48.09
+  fleets >= 4 unguarded: A: fills  52 mean +24.1% $+136.79   B: fills  35 mean +10.8% $ +32.75
+  fleets >= 5 unguarded: A: fills  42 mean +24.2% $+106.03   B: fills  33 mean +10.9% $ +30.45
+  fleets >= 6 unguarded: A: fills  38 mean +21.9% $ +82.13   B: fills  33 mean +10.9% $ +30.45
+   the reverted bursts by the gate's fleet count (second place h11):
+    fleets 2-2 A: n= 16 mean  +4.7% med  -5.7% win 38%
+    fleets 2-2 B: n=  6 mean +21.8% med +19.2% win 67%
+    fleets 3-4 A: n= 21 mean +15.3% med  +7.9% win 67%
+    fleets 3-4 B: n= 11 mean +12.3% med  +9.0% win 82%
+    fleets 5-98 A: n=  5 mean +36.0% med +18.2% win 60%
+    fleets 5-98 B: n=  2 mean +58.3% med +58.3% win 100%
+
+   the reverted bursts by the bundle ETH (second place h11):
+    bundle 0.3-0.6 A: n=  5 mean  -1.7% med  -5.5% win 40%
+    bundle 0.3-0.6 B: n=  3 mean +31.8% med +18.2% win 100%
+    bundle 0.6-1.0 A: n= 26 mean  +6.6% med  -4.0% win 42%
+    bundle 0.6-1.0 B: n=  9 mean +19.6% med +12.0% win 100%
+    bundle 1.0-3.01 A: n= 11 mean +37.6% med +50.7% win 91%
+    bundle 1.0-3.01 B: n=  7 mean +16.0% med  -7.1% win 43%
+
+6. gas: 7% guard, the week: reverted bursts 61 x $0.33 = $20.13

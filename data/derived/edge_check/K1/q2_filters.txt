@@ -1,0 +1,24 @@
+population: tier range already 100-200 bps on all 632 (the tables' rule), bundle >= 0.3 ETH on all 632, creator buy > 2 ETH on 0:
+  so the tier, bundle-floor and creator-buy-cap filters remove nothing here and cannot be tested on disk.
+
+== guard 0.07: live settings  fit fired  79 guard  42 fills  37 mean +22.6% med +11.6% win  59% $ +82.63 $+31.81/d | read fired  50 guard  19 fills  31 mean  +7.9% med  +2.0% win  55% $ +15.29 $ +3.47/d
+  off: creator supply >= 1%               removes 148 (all, 2nd place h11: fit 89  -9.2%, read 59  -5.0%) | fit: +12 fires, 10 fills  -6.2% (med  -7.9%), filter's value $+12.00 | read: +8 fires, 5 fills +13.4% (med  +3.4%), filter's value $ -6.08
+  off: creator's first launch of the day  removes  17 (all, 2nd place h11: fit 14  +6.9%, read 3  -0.9%) | fit: +3 fires, 2 fills  +9.7% (med  +9.7%), filter's value $ -1.54 | read: +0 fires, 0 fills  +nan% (med  +nan%), filter's value $ +0.00
+  off: bundle >= 3 buyers                 removes  20 (all, 2nd place h11: fit 8  -7.5%, read 12 -10.4%) | fit: +1 fires, 1 fills  +5.5% (med  +5.5%), filter's value $ -0.38 | read: +0 fires, 0 fills  +nan% (med  +nan%), filter's value $ +0.00
+  off: bundle <= 3.0 ETH                  removes  21 (all, 2nd place h11: fit 11 -11.0%, read 10 -10.6%) | fit: +7 fires, 6 fills -11.0% (med -11.0%), filter's value $+10.86 | read: +8 fires, 8 fills -10.6% (med -10.0%), filter's value $+13.67
+
+== guard 0.20: live settings  fit fired  79 guard   8 fills  71 mean +18.1% med  +8.5% win  55% $+141.05 $+54.31/d | read fired  50 guard   1 fills  49 mean +13.0% med  +6.0% win  65% $ +66.43 $+15.09/d
+  off: creator supply >= 1%               removes 148 (all, 2nd place h11: fit 89  -9.2%, read 59  -5.0%) | fit: +12 fires, 11 fills  -5.2% (med  -7.3%), filter's value $+11.39 | read: +8 fires, 7 fills  +8.9% (med  -0.6%), filter's value $ -5.48
+  off: creator's first launch of the day  removes  17 (all, 2nd place h11: fit 14  +6.9%, read 3  -0.9%) | fit: +3 fires, 3 fills +11.3% (med +14.6%), filter's value $ -3.43 | read: +0 fires, 0 fills  +nan% (med  +nan%), filter's value $ +0.00
+  off: bundle >= 3 buyers                 removes  20 (all, 2nd place h11: fit 8  -7.5%, read 12 -10.4%) | fit: +1 fires, 1 fills  +5.5% (med  +5.5%), filter's value $ -0.38 | read: +0 fires, 0 fills  +nan% (med  +nan%), filter's value $ +0.00
+  off: bundle <= 3.0 ETH                  removes  21 (all, 2nd place h11: fit 11 -11.0%, read 10 -10.6%) | fit: +7 fires, 7 fills -11.0% (med -11.6%), filter's value $+12.36 | read: +8 fires, 8 fills -10.6% (med -10.0%), filter's value $+13.67
+
+== the creator-supply floor swept (guard 0.07 | guard 0.20), $ fit / $ read ==
+  floor 0.000: guard .07 fired  91/ 58 fills  47/ 36 $ +70.63/$ +21.37 | guard .20 fired  91/ 58 fills  82/ 56 $+129.66/$ +71.92
+  floor 0.001: guard .07 fired  88/ 58 fills  44/ 36 $ +73.08/$ +21.37 | guard .20 fired  88/ 58 fills  79/ 56 $+132.11/$ +71.92
+  floor 0.002: guard .07 fired  88/ 56 fills  44/ 34 $ +73.08/$ +23.13 | guard .20 fired  88/ 56 fills  79/ 54 $+132.11/$ +73.68
+  floor 0.005: guard .07 fired  84/ 53 fills  41/ 34 $ +78.49/$ +24.12 | guard .20 fired  84/ 53 fills  75/ 52 $+136.91/$ +75.27
+  floor 0.010: guard .07 fired  79/ 50 fills  37/ 31 $ +82.63/$ +15.29 | guard .20 fired  79/ 50 fills  71/ 49 $+141.05/$ +66.43
+  floor 0.015: guard .07 fired  47/ 23 fills  25/ 13 $ +55.40/$ +14.91 | guard .20 fired  47/ 23 fills  42/ 23 $ +84.20/$ +54.24
+  floor 0.020: guard .07 fired  35/ 15 fills  14/  8 $ +48.64/$ +14.79 | guard .20 fired  35/ 15 fills  30/ 15 $ +77.71/$ +42.64
+  floor 0.030: guard .07 fired  12/ 11 fills   4/  6 $ +10.38/$ +19.04 | guard .20 fired  12/ 11 fills   9/ 11 $ +23.16/$ +44.58

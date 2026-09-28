@@ -101,3 +101,22 @@ def ret(x, h=11, pos="behind1", stake=13):
     return x["ret"].get(f"{pos}_{stake}_h{h}")
 DAYS_B = 4 + 9.67 / 24                                          # Sep 24 00:00 - Sep 28 09:40
 DAYS_A = (calendar.timegm(time.strptime("2026-09-24", "%Y-%m-%d")) - calendar.timegm(time.strptime("2026-09-21 09:40", "%Y-%m-%d %H:%M"))) / 86400
+ALL_F = ("repeat", "supply", "nb", "cap")     # the filters that bind on this population (tier, bundle floor, creator buy > 2 never do: the tables' rule already holds them)
+def passes_filters(x, off=()):
+    return not any(f not in off for f in x["pre"] + x["gates"] if f in ALL_F or f not in ("tk0 missing",))
+def engine(x, view="k-1", reg=1, amin=2, off=(), slip=0.07, h=11):
+    """the engine's chain on one launch: 'filter' / 'gate' / 'guard' / 'fill'"""
+    if not passes_filters(x, off): return "filter"
+    if fleets_at(x, view, reg) < amin: return "gate"
+    if slip is not None and x["tk_build"] and x["tk_seat1"] and x["tk_seat1"] < (1 - slip) * x["tk_build"]: return "guard"
+    return "fill"
+def dollars(xs, disp, h=11, pos="behind1"):
+    """$ at $13: fills pay ret*13 - gas, guard reverts pay -gas"""
+    s = 0.0
+    for x, d in zip(xs, disp):
+        if d == "fill": s += ret(x, h, pos) * STAKE - GAS
+        elif d == "guard": s -= GAS
+    return s
+def summary(xs, **kw):
+    disp = [engine(x, **kw) for x in xs]; fills = [ret(x) for x, d in zip(xs, disp) if d == "fill"]
+    return {"fired": sum(d in ("fill", "guard") for d in disp), "guard": disp.count("guard"), "fills": len(fills), "mean": mean(fills), "usd": dollars(xs, disp), "rets": fills}

@@ -1,0 +1,66 @@
+== (a) the reverted bursts, priced (exit 11) ==
+  view k-2  fit : reverted  18  2nd +33.3% (med +20.3%, win 89%, 18)  3rd +26.3% (15)  1st +67.1% (15)  | fills   9 2nd +45.3% 3rd +35.5% (9)
+  view k-2  read: reverted   9  2nd +29.8% (med +18.2%, win 89%, 9)  3rd +25.3% (9)  1st +47.0% (9)  | fills   9 2nd  +6.0% 3rd  +3.3% (3)
+  view k-1  fit : reverted  42  2nd +13.7% (med  +2.2%, win 55%, 42)  3rd  +6.8% (34)  1st +34.1% (34)  | fills  37 2nd +22.6% 3rd +17.8% (37)
+  view k-1  read: reverted  19  2nd +20.2% (med +11.5%, win 79%, 19)  3rd +16.3% (14)  1st +37.8% (14)  | fills  31 2nd  +7.9% 3rd  +6.5% (18)
+  view k    fit : reverted  85  2nd  +9.2% (med  +1.5%, win 51%, 85)  3rd  +2.9% (74)  1st +25.9% (74)  | fills  56 2nd +16.7% 3rd +12.4% (55)
+  view k    read: reverted  33  2nd +15.5% (med  +6.7%, win 64%, 33)  3rd +11.6% (26)  1st +30.8% (26)  | fills  45 2nd  +5.3% 3rd  +2.4% (28)
+
+== (b) the drop at second place against the build, split (taped launches that fire at k-1) ==
+  guard passes (fills)   n= 55: creation-second part median   0.0%, buy-ahead part median   1.3%; reverts caused by the creation second alone (>=7% before the buy ahead): 0; first E1 buy median 0.0200 ETH
+  guard reverts          n= 48: creation-second part median   0.0%, buy-ahead part median  13.6%; reverts caused by the creation second alone (>=7% before the buy ahead): 2; first E1 buy median 0.2100 ETH
+  the buy ahead's size (ETH) among the reverted, sorted: [0.035, 0.04, 0.05, 0.111, 0.1487, 0.1487, 0.1487, 0.1487, 0.1487, 0.1487, 0.1487, 0.1487, 0.1487, 0.1487, 0.1487, 0.1487, 0.1487, 0.1487, 0.16, 0.171, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.238, 0.268, 0.268, 0.32, 0.32, 0.42, 0.45, 0.5, 0.5, 0.5, 0.5, 0.5, 0.585]
+
+== (c) the slip threshold (view k-1): fit | read ==
+  slip 0.05: fit fired  79 guard  45 fills  34 mean +22.4% med +11.5% win  56% $ +72.97 $+28.10/d | read fired  50 guard  22 fills  28 mean  +6.6% med  +1.9% win  54% $  +7.68 $ +1.74/d
+  slip 0.07: fit fired  79 guard  42 fills  37 mean +22.6% med +11.6% win  59% $ +82.63 $+31.81/d | read fired  50 guard  19 fills  31 mean  +7.9% med  +2.0% win  55% $ +15.29 $ +3.47/d
+  slip 0.10: fit fired  79 guard  38 fills  41 mean +21.7% med +11.4% win  61% $ +89.65 $+34.52/d | read fired  50 guard  13 fills  37 mean +10.6% med  +2.0% win  57% $ +34.60 $ +7.86/d
+  slip 0.12: fit fired  79 guard  25 fills  54 mean +17.0% med  +6.3% win  54% $ +93.35 $+35.94/d | read fired  50 guard   8 fills  42 mean +11.4% med  +3.1% win  60% $ +45.49 $+10.33/d
+  slip 0.15: fit fired  79 guard  13 fills  66 mean +18.9% med  +8.8% win  56% $+136.06 $+52.39/d | read fired  50 guard   4 fills  46 mean +12.4% med  +5.3% win  63% $ +57.59 $+13.08/d
+  slip 0.20: fit fired  79 guard   8 fills  71 mean +18.1% med  +8.5% win  55% $+141.05 $+54.31/d | read fired  50 guard   1 fills  49 mean +13.0% med  +6.0% win  65% $ +66.43 $+15.09/d
+  slip 0.25: fit fired  79 guard   5 fills  74 mean +18.1% med  +7.3% win  57% $+148.20 $+57.06/d | read fired  50 guard   0 fills  50 mean +12.6% med  +5.9% win  64% $ +65.12 $+14.79/d
+  slip 0.30: fit fired  79 guard   1 fills  78 mean +18.1% med  +8.2% win  58% $+157.60 $+60.68/d | read fired  50 guard   0 fills  50 mean +12.6% med  +5.9% win  64% $ +65.12 $+14.79/d
+  slip 0.40: fit fired  79 guard   1 fills  78 mean +18.1% med  +8.2% win  58% $+157.60 $+60.68/d | read fired  50 guard   0 fills  50 mean +12.6% med  +5.9% win  64% $ +65.12 $+14.79/d
+  slip 1.00: fit fired  79 guard   0 fills  79 mean +17.9% med  +7.9% win  57% $+157.57 $+60.67/d | read fired  50 guard   0 fills  50 mean +12.6% med  +5.9% win  64% $ +65.12 $+14.79/d
+  chosen on fit: 0.3 -> read $+65.12 vs 0.07 $+15.29;  chosen on read: 0.2 -> fit $+141.05 vs 0.07 $+82.63
+  view k-2: slip 0.07 fit $+44.04 read $+1.13 | guard off fit $+121.93 read $+36.06 (27/18 fills, mean +37.3%/+17.9%)
+  view k: slip 0.07 fit $+75.36 read $+5.29 | guard off fit $+176.95 read $+71.58 (141/78 fills, mean +12.2%/+9.6%)
+  the same with the reverted-and-now-filled priced at THIRD place (G r3; untaped kept at 2nd):
+    slip 0.07: fit $ +82.63 (37 fills +22.6%) | read $ +15.29 (31 fills +7.9%)
+    slip 0.10: fit $ +88.52 (41 fills +21.5%) | read $ +33.32 (37 fills +10.4%)
+    slip 0.15: fit $+110.39 (66 fills +15.9%) | read $ +52.71 (46 fills +11.6%)
+    slip 0.20: fit $+111.25 (71 fills +14.9%) | read $ +58.79 (49 fills +11.8%)
+    slip 1.00: fit $+124.38 (79 fills +14.6%) | read $ +57.47 (50 fills +11.4%)
+
+== (d) smart guards (view k-1) ==
+  current 7%                                     fit fired  79 guard  42 fills  37 mean +22.6% med +11.6% win  59% $ +82.63 $+31.81/d | read fired  50 guard  19 fills  31 mean  +7.9% med  +2.0% win  55% $ +15.29 $ +3.47/d
+  slip 20% when fleets>=3 else 7%                fit fired  79 guard  21 fills  58 mean +21.6% med +10.2% win  59% $+136.43 $+52.53/d | read fired  50 guard   6 fills  44 mean +11.3% med  +5.2% win  64% $ +48.09 $+10.92/d
+  slip 20% when fleets>=4 else 7%                fit fired  79 guard  31 fills  48 mean +24.4% med +12.7% win  58% $+126.35 $+48.65/d | read fired  50 guard  15 fills  35 mean +10.8% med  +3.6% win  60% $ +32.75 $ +7.44/d
+  slip 20% when fleets>=5 else 7%                fit fired  79 guard  38 fills  41 mean +23.5% med +11.6% win  59% $ +99.06 $+38.14/d | read fired  50 guard  17 fills  33 mean +10.9% med  +2.6% win  58% $ +30.45 $ +6.92/d
+  slip 20% when fleets>=6 else 7%                fit fired  79 guard  41 fills  38 mean +21.9% med +11.5% win  58% $ +82.13 $+31.62/d | read fired  50 guard  17 fills  33 mean +10.9% med  +2.6% win  58% $ +30.45 $ +6.92/d
+  off when fleets>=3 else 7%                     fit fired  79 guard  16 fills  63 mean +21.2% med  +9.2% win  62% $+147.89 $+56.94/d | read fired  50 guard   6 fills  44 mean +11.3% med  +5.2% win  64% $ +48.09 $+10.92/d
+  off when fleets>=4 else 7%                     fit fired  79 guard  27 fills  52 mean +24.1% med +12.7% win  62% $+136.79 $+52.67/d | read fired  50 guard  15 fills  35 mean +10.8% med  +3.6% win  60% $ +32.75 $ +7.44/d
+  off when fleets>=5 else 7%                     fit fired  79 guard  37 fills  42 mean +24.2% med +12.7% win  60% $+106.03 $+40.82/d | read fired  50 guard  17 fills  33 mean +10.9% med  +2.6% win  58% $ +30.45 $ +6.92/d
+  off when fleets>=6 else 7%                     fit fired  79 guard  41 fills  38 mean +21.9% med +11.5% win  58% $ +82.13 $+31.62/d | read fired  50 guard  17 fills  33 mean +10.9% med  +2.6% win  58% $ +30.45 $ +6.92/d
+  sized at the tick (buy ahead only) 7%          fit fired  79 guard  39 fills  40 mean +21.2% med +11.2% win  60% $ +84.24 $+32.44/d | read fired  50 guard  18 fills  32 mean +10.1% med  +2.3% win  56% $ +25.45 $ +5.78/d
+  sized at the tick (buy ahead only) 10%         fit fired  79 guard  36 fills  43 mean +20.7% med +11.0% win  60% $ +89.82 $+34.58/d | read fired  50 guard  14 fills  36 mean +11.1% med  +2.3% win  58% $ +35.53 $ +8.07/d
+  sized at the tick (buy ahead only) 15%         fit fired  79 guard  17 fills  62 mean +19.4% med  +9.2% win  60% $+130.56 $+50.27/d | read fired  50 guard   9 fills  41 mean +11.5% med  +3.6% win  61% $ +44.99 $+10.22/d
+  sized one block later (k-1 view) 7%            fit fired  79 guard  40 fills  39 mean +21.7% med +11.4% win  59% $ +84.04 $+32.36/d | read fired  50 guard  18 fills  32 mean +10.1% med  +2.3% win  56% $ +25.45 $ +5.78/d
+
+== (e) the reverted bursts by drop bucket, second place h11 (all views' k-1 fires) ==
+  drop 0.00-0.07 fit : n= 37 mean +22.6% median +11.6% win 59%
+  drop 0.00-0.07 read: n= 31 mean  +7.9% median  +2.0% win 55%
+  drop 0.07-0.10 fit : n=  4 mean +13.5% median  +6.2% win 75%
+  drop 0.07-0.10 read: n=  6 mean +24.8% median  +6.5% win 67%
+  drop 0.10-0.15 fit : n= 25 mean +14.3% median  -2.2% win 48%
+  drop 0.10-0.15 read: n=  9 mean +19.6% median +11.5% win 89%
+  drop 0.15-0.20 fit : n=  5 mean  +7.7% median  -3.8% win 40%
+  drop 0.15-0.20 read: n=  3 mean +22.7% median +18.2% win 100%
+  drop 0.20-0.30 fit : n=  7 mean +18.2% median  +7.9% win 86%
+  drop 0.20-0.30 read: n=  1 mean -10.1% median -10.1% win  0%
+  drop 0.30-1.00 fit : n=  1 mean  -0.2% median  -0.2% win  0%
+  drop 0.30-1.00 read: n=  0 mean  +nan% median  +nan% win  0%
+
+== (f) gas: every fired burst pays $0.33 whether it fills or reverts ==
+  fit: 42 reverted bursts = $13.86 of gas; 37 fills
+  read: 19 reverted bursts = $6.27 of gas; 31 fills

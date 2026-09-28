@@ -1,0 +1,120 @@
+
+===== rows_k1reg: 632 launches
+a. the guard: the reverted bursts had they filled (second place, exit 11) against the actual fills
+  fit: reverted bursts as fills                            n= 27 mean   +9.5% med  +1.5% win 52% $  +24.41
+  fit: actual fills                                        n= 32 mean  +24.9% med +12.7% win 59% $  +92.86
+  test: reverted bursts as fills                           n= 34 mean  +20.7% med +10.1% win 71% $  +80.24
+  test: actual fills                                       n= 36 mean   +7.9% med  +2.3% win 56% $  +25.19
+    reverted, seat/build tokens in [0.85,0.93)             n= 44 mean  +16.7% med  +8.7% win 61% $  +81.21
+    reverted, seat/build tokens in [0.75,0.85)             n= 12 mean  +12.6% med  +4.3% win 67% $  +15.71
+    reverted, seat/build tokens in [0.00,0.75)             n=  5 mean  +14.4% med  +7.9% win 60% $   +7.72
+b. launches the pre-gate filters removed: what they would do at this view's gate, then the guard
+  fit: PRE creator supply < 1%: 71 removed, 11 fire, fills n=  9 mean   -6.5% med  -8.5% win 11% $  -10.55
+  test: PRE creator supply < 1%: 76 removed, 12 fire, fills n=  6 mean  +10.6% med  -0.0% win 50% $   +6.29
+  fit: PRE creator repeat: 10 removed, 3 fire, fills       n=  2 mean   +9.7% med  +9.7% win 50% $   +1.87
+  test: PRE creator repeat: 7 removed, 0 fire, fills       n=0
+  fit: GATE bundle ETH > 3.0 (cap): 6 removed, 3 fire, fills n=  3 mean  -11.3% med -11.9% win  0% $   -5.39
+  test: GATE bundle ETH > 3.0 (cap): 14 removed, 12 fire, fills n= 11 mean  -10.6% med -10.0% win  0% $  -18.81
+  fit: GATE bundle 0 < 3: 2 removed, 1 fire, fills         n=  1 mean   +5.5% med  +5.5% win 100% $   +0.38
+  test: GATE bundle 0 < 3: 15 removed, 0 fire, fills       n=0
+  fit: GATE bundle 2 < 3: 0 removed, 0 fire, fills         n=0
+  test: GATE bundle 2 < 3: 1 removed, 0 fire, fills        n=0
+d. the same fills at first place vs second place (exit 11)
+  fit: second place                                        n= 32 mean  +24.9% med +12.7% win 59% $  +92.86
+  fit: first place                                         n=0
+  test: second place                                       n= 36 mean   +7.9% med  +2.3% win 56% $  +25.19
+  test: first place                                        n= 32 mean  +11.0% med  +2.7% win 53% $  +35.00
+e. exit rules on the fills that have a full curve (G): take-profit / stop checked block by block, else the fixed exit at 11
+  fit: fixed exit 11 (32 with a curve)                     n= 32 mean  +24.9% med +12.7% win 59% $  +92.86
+  fit: take +10% else 11                                   n= 32 mean  +18.5% med +11.4% win 59% $  +66.24
+  fit: take +10% / stop -10% else 11                       n= 32 mean  +17.8% med +11.4% win 59% $  +63.66
+  fit: take +20% else 11                                   n= 32 mean  +19.9% med +12.7% win 59% $  +72.15
+  fit: take +20% / stop -10% else 11                       n= 32 mean  +19.3% med +12.7% win 59% $  +69.58
+  fit: take +30% else 11                                   n= 32 mean  +20.8% med +12.7% win 59% $  +76.09
+  fit: take +30% / stop -10% else 11                       n= 32 mean  +20.2% med +12.7% win 59% $  +73.51
+  fit: take +50% else 11                                   n= 32 mean  +22.3% med +12.7% win 59% $  +82.02
+  fit: take +50% / stop -10% else 11                       n= 32 mean  +21.6% med +12.7% win 59% $  +79.44
+  fit: fixed exit 5                                        n= 32 mean  +17.1% med  +4.2% win 53% $  +60.39
+  fit: fixed exit 7                                        n= 32 mean  +18.4% med  +8.6% win 56% $  +66.09
+  fit: fixed exit 9                                        n= 32 mean  +21.0% med +10.3% win 59% $  +76.64
+  fit: fixed exit 13                                       n= 32 mean  +25.9% med +11.5% win 62% $  +97.03
+  fit: fixed exit 20                                       n= 32 mean  +27.9% med +12.0% win 66% $ +105.51
+  fit: fixed exit 30                                       n= 32 mean  +32.0% med +10.0% win 66% $ +122.55
+  test: fixed exit 11 (23 with a curve)                    n= 23 mean  +10.6% med  +3.5% win 65% $  +24.19
+  test: take +10% else 11                                  n= 23 mean   +5.5% med  +3.5% win 65% $   +8.72
+  test: take +10% / stop -10% else 11                      n= 23 mean   +4.7% med  +2.6% win 61% $   +6.57
+  test: take +20% else 11                                  n= 23 mean   +7.0% med  +3.5% win 65% $  +13.29
+  test: take +20% / stop -10% else 11                      n= 23 mean   +6.3% med  +2.6% win 61% $  +11.14
+  test: take +30% else 11                                  n= 23 mean   +8.3% med  +3.5% win 65% $  +17.31
+  test: take +30% / stop -10% else 11                      n= 23 mean   +7.6% med  +2.6% win 61% $  +15.16
+  test: take +50% else 11                                  n= 23 mean   +8.4% med  +3.5% win 65% $  +17.53
+  test: take +50% / stop -10% else 11                      n= 23 mean   +7.7% med  +2.6% win 61% $  +15.38
+  test: fixed exit 5                                       n= 23 mean   +3.8% med  +0.9% win 52% $   +3.88
+  test: fixed exit 7                                       n= 23 mean   +6.2% med  +2.6% win 57% $  +10.80
+  test: fixed exit 9                                       n= 23 mean  +10.2% med  +2.6% win 61% $  +22.85
+  test: fixed exit 13                                      n= 23 mean  +12.3% med  +5.0% win 61% $  +29.22
+  test: fixed exit 20                                      n= 23 mean  +10.6% med  +1.9% win 61% $  +24.09
+  test: fixed exit 30                                      n= 23 mean  +11.6% med  +0.4% win 52% $  +27.10
+g. the gate's threshold at this view (the engine's filters as now, then the guard; exit 11)
+  fit: fleets >= 1                                         n= 58 mean  +13.6% med  +0.3% win 50% $  +83.30
+  test: fleets >= 1                                        n= 69 mean   +2.5% med  -4.0% win 39% $   -0.38
+  fit: fleets >= 2                                         n= 32 mean  +24.9% med +12.7% win 59% $  +92.86
+  test: fleets >= 2                                        n= 36 mean   +7.9% med  +2.3% win 56% $  +25.19
+  fit: fleets >= 3                                         n= 14 mean  +37.7% med +29.9% win 71% $  +63.92
+  test: fleets >= 3                                        n= 15 mean  +12.3% med  +6.0% win 73% $  +18.99
+  fit: fleets >= 4                                         n=  6 mean  +59.6% med +49.6% win 100% $  +44.48
+  test: fleets >= 4                                        n=  8 mean  +14.5% med  +9.2% win 88% $  +12.42
+h. by tier and by bundle size, this view's fills (exit 11)
+  fit: tier 2%                                             n= 10 mean   +8.1% med  -1.7% win 40% $   +7.29
+  fit: tier 3%                                             n= 17 mean  +25.4% med +21.5% win 71% $  +50.44
+  fit: bundle < 0.6                                        n=  8 mean  +53.1% med +34.5% win 100% $  +52.56
+  fit: bundle 0.6-1.2                                      n= 21 mean   +5.8% med  -2.6% win 38% $   +8.85
+  fit: bundle >= 1.2                                       n=  3 mean  +83.2% med +105.9% win 100% $  +31.45
+  test: tier 2%                                            n=  8 mean   -3.5% med  -5.5% win 25% $   -6.33
+  test: tier 3%                                            n= 24 mean  +12.6% med  +6.0% win 62% $  +31.31
+  test: bundle < 0.6                                       n= 14 mean  +11.1% med  +3.1% win 57% $  +15.55
+  test: bundle 0.6-1.2                                     n= 16 mean   +6.5% med  +3.0% win 62% $   +8.24
+  test: bundle >= 1.2                                      n=  6 mean   +4.3% med  -5.8% win 33% $   +1.40
+
+===== rows_k2: 632 launches
+a. the guard: the reverted bursts had they filled (second place, exit 11) against the actual fills
+  fit: reverted bursts as fills                            n=  8 mean  +40.9% med +43.5% win 100% $  +39.85
+  fit: actual fills                                        n=  7 mean  +51.3% med +45.4% win 86% $  +44.35
+  test: reverted bursts as fills                           n= 19 mean  +28.5% med +18.2% win 84% $  +64.06
+  test: actual fills                                       n= 11 mean   +9.3% med  +8.6% win 73% $   +9.73
+    reverted, seat/build tokens in [0.85,0.93)             n= 17 mean  +33.3% med +16.8% win 88% $  +68.03
+    reverted, seat/build tokens in [0.75,0.85)             n=  7 mean  +31.1% med +44.1% win 86% $  +25.96
+    reverted, seat/build tokens in [0.00,0.75)             n=  3 mean  +28.0% med +22.4% win 100% $   +9.92
+b. launches the pre-gate filters removed: what they would do at this view's gate, then the guard
+  fit: PRE creator supply < 1%: 71 removed, 3 fire, fills  n=  2 mean   -6.8% med  -6.8% win  0% $   -2.42
+  test: PRE creator supply < 1%: 76 removed, 3 fire, fills n=0
+  fit: PRE creator repeat: 10 removed, 1 fire, fills       n=  1 mean  -11.6% med -11.6% win  0% $   -1.84
+  test: PRE creator repeat: 7 removed, 0 fire, fills       n=0
+  fit: GATE bundle ETH > 3.0 (cap): 6 removed, 3 fire, fills n=  3 mean  -11.3% med -11.9% win  0% $   -5.39
+  test: GATE bundle ETH > 3.0 (cap): 14 removed, 8 fire, fills n=  8 mean  -10.6% med -10.0% win  0% $  -13.67
+  fit: GATE bundle 0 < 3: 2 removed, 1 fire, fills         n=  1 mean   +5.5% med  +5.5% win 100% $   +0.38
+  test: GATE bundle 0 < 3: 15 removed, 0 fire, fills       n=0
+  fit: GATE bundle 2 < 3: 0 removed, 0 fire, fills         n=0
+  test: GATE bundle 2 < 3: 1 removed, 0 fire, fills        n=0
+d. the same fills at first place vs second place (exit 11)
+  fit: second place                                        n=  7 mean  +51.3% med +45.4% win 86% $  +44.35
+  fit: first place                                         n=0
+  test: second place                                       n= 11 mean   +9.3% med  +8.6% win 73% $   +9.73
+  test: first place                                        n= 11 mean  +12.4% med +13.1% win 73% $  +14.16
+e. exit rules on the fills that have a full curve (G): take-profit / stop checked block by block, else the fixed exit at 11
+  fit: fixed exit 11 (7 with a curve)                      n=  7 mean  +51.3% med +45.4% win 86% $  +44.35
+  fit: take +10% else 11                                   n=  7 mean  +39.8% med +40.8% win 86% $  +33.93
+  fit: take +10% / stop -10% else 11                       n=  7 mean  +39.8% med +40.8% win 86% $  +33.93
+  fit: take +20% else 11                                   n=  7 mean  +40.4% med +40.8% win 86% $  +34.47
+  fit: take +20% / stop -10% else 11                       n=  7 mean  +40.4% med +40.8% win 86% $  +34.47
+  fit: take +30% else 11                                   n=  7 mean  +40.5% med +40.8% win 86% $  +34.56
+  fit: take +30% / stop -10% else 11                       n=  7 mean  +40.5% med +40.8% win 86% $  +34.56
+  fit: take +50% else 11                                   n=  7 mean  +43.4% med +45.4% win 86% $  +37.16
+  fit: take +50% / stop -10% else 11                       n=  7 mean  +43.4% med +45.4% win 86% $  +37.16
+  fit: fixed exit 5                                        n=  7 mean  +46.9% med +45.4% win 86% $  +40.32
+  fit: fixed exit 7                                        n=  7 mean  +47.3% med +45.4% win 86% $  +40.74
+  fit: fixed exit 9                                        n=  7 mean  +47.9% med +45.4% win 86% $  +41.28
+  fit: fixed exit 13                                       n=  7 mean  +56.3% med +60.8% win 86% $  +48.91
+  fit: fixed exit 20                                       n=  7 mean  +56.3% med +33.5% win 100% $  +48.89
+  fit: fixed exit 30                                       n=  7 mean  +54.5% med +24.6% win 100% $  +47.26
+  test: fixed exit 11 (5 with a curve)                     n=  5 mean  +14.1% med +16.8% win 80% $   +7.50

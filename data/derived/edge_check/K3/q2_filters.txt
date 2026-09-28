@@ -1,0 +1,39 @@
+filters that never bind on this population (the tables' qualifying rule already applies them): tier 100-200 bps (all 632 inside),
+bundle >= 0.3 ETH (minimum 0.300), creator buy <= 2 ETH (none above). No launch outside them is on disk with a return: untestable here.
+
+== repeat: removes 17 launches, 16 of them by this filter alone
+   slip 0.07 A: launches  13 fired   3 fills   2 n=  2 mean  +9.7% med  +9.7% win 50%  $   +1.54  | all fired at second place: n=  3 mean +11.3% med +14.6% win 67%
+   slip 0.07 B: launches   3 fired   0 fills   0 n=0  $   +0.00  | all fired at second place: n=0
+   slip 0.25 A: launches  13 fired   3 fills   3 n=  3 mean +11.3% med +14.6% win 67%  $   +3.43  | all fired at second place: n=  3 mean +11.3% med +14.6% win 67%
+   slip 0.25 B: launches   3 fired   0 fills   0 n=0  $   +0.00  | all fired at second place: n=0
+   population (no gate) A: removed n= 13 mean  +7.9% med  -9.8% win 38% | kept n=279 mean  +2.4% med  -6.6% win 34%
+   population (no gate) B: removed n=  3 mean  -0.9% med -10.0% win 33% | kept n=151 mean  +2.8% med  -6.6% win 34%
+== supply: removes 148 launches, 144 of them by this filter alone
+   slip 0.07 A: launches  87 fired  12 fills  10 n= 10 mean  -6.2% med  -7.9% win 10%  $  -12.00  | all fired at second place: n= 12 mean  -9.8% med  -7.9% win 17%
+   slip 0.07 B: launches  57 fired   8 fills   5 n=  5 mean +13.4% med  +3.4% win 60%  $   +6.08  | all fired at second place: n=  8 mean  +6.3% med  -2.3% win 38%
+   slip 0.25 A: launches  87 fired  12 fills  11 n= 11 mean  -5.2% med  -7.3% win 18%  $  -11.39  | all fired at second place: n= 12 mean  -9.8% med  -7.9% win 17%
+   slip 0.25 B: launches  57 fired   8 fills   7 n=  7 mean  +8.9% med  -0.6% win 43%  $   +5.48  | all fired at second place: n=  8 mean  +6.3% med  -2.3% win 38%
+   population (no gate) A: removed n= 87 mean  -9.2% med -10.0% win  9% | kept n=279 mean  +2.4% med  -6.6% win 34%
+   population (no gate) B: removed n= 57 mean  -4.8% med  -9.3% win 11% | kept n=151 mean  +2.8% med  -6.6% win 34%
+== nb: removes 20 launches, 18 of them by this filter alone
+   slip 0.07 A: launches   8 fired   1 fills   1 n=  1 mean  +5.5% med  +5.5% win 100%  $   +0.38  | all fired at second place: n=  1 mean  +5.5% med  +5.5% win 100%
+   slip 0.07 B: launches  10 fired   0 fills   0 n=0  $   +0.00  | all fired at second place: n=0
+   slip 0.25 A: launches   8 fired   1 fills   1 n=  1 mean  +5.5% med  +5.5% win 100%  $   +0.38  | all fired at second place: n=  1 mean  +5.5% med  +5.5% win 100%
+   slip 0.25 B: launches  10 fired   0 fills   0 n=0  $   +0.00  | all fired at second place: n=0
+   population (no gate) A: removed n=  8 mean  -7.5% med  -9.3% win 12% | kept n=279 mean  +2.4% med  -6.6% win 34%
+   population (no gate) B: removed n= 10 mean -10.1% med -11.8% win 10% | kept n=151 mean  +2.8% med  -6.6% win 34%
+== cap: removes 21 launches, 20 of them by this filter alone
+   slip 0.07 A: launches  10 fired   7 fills   6 n=  6 mean -11.0% med -11.0% win  0%  $  -10.86  | all fired at second place: n=  7 mean -11.0% med -11.6% win  0%
+   slip 0.07 B: launches  10 fired   8 fills   8 n=  8 mean -10.6% med -10.0% win  0%  $  -13.67  | all fired at second place: n=  8 mean -10.6% med -10.0% win  0%
+   slip 0.25 A: launches  10 fired   7 fills   7 n=  7 mean -11.0% med -11.6% win  0%  $  -12.36  | all fired at second place: n=  7 mean -11.0% med -11.6% win  0%
+   slip 0.25 B: launches  10 fired   8 fills   8 n=  8 mean -10.6% med -10.0% win  0%  $  -13.67  | all fired at second place: n=  8 mean -10.6% med -10.0% win  0%
+   population (no gate) A: removed n= 10 mean -11.1% med -11.7% win  0% | kept n=279 mean  +2.4% med  -6.6% win 34%
+   population (no gate) B: removed n= 10 mean -10.6% med -10.0% win  0% | kept n=151 mean  +2.8% med  -6.6% win 34%
+
+== creator supply threshold (tk0 / 1e9), filter alone varied, the rest live, slip 7% and 25%
+  supply >= 0.00%: A@7%: fills  47 mean +16.5% $ +70.63  B@7%: fills  36 mean  +8.7% $ +21.37  A@25%: fills  85 mean +15.1% $+136.81  B@25%: fills  57 mean +12.1% $ +70.60
+  supply >= 0.25%: A@7%: fills  44 mean +17.9% $ +73.08  B@7%: fills  34 mean  +9.4% $ +23.46  A@25%: fills  82 mean +15.8% $+139.26  B@25%: fills  55 mean +12.7% $ +72.69
+  supply >= 0.50%: A@7%: fills  41 mean +19.9% $ +78.49  B@7%: fills  34 mean  +9.4% $ +24.12  A@25%: fills  78 mean +16.9% $+144.06  B@25%: fills  53 mean +13.3% $ +73.95
+  supply >= 1.00%: A@7%: fills  37 mean +22.6% $ +82.63  B@7%: fills  31 mean  +7.9% $ +15.29  A@25%: fills  74 mean +18.1% $+148.20  B@25%: fills  50 mean +12.6% $ +65.12
+  supply >= 2.00%: A@7%: fills  14 mean +33.1% $ +48.64  B@7%: fills   8 mean +19.0% $ +14.79  A@25%: fills  32 mean +23.1% $ +84.66  B@25%: fills  15 mean +24.4% $ +42.64
+  supply >= 3.00%: A@7%: fills   4 mean +27.6% $ +10.38  B@7%: fills   6 mean +29.1% $ +19.04  A@25%: fills   9 mean +23.2% $ +23.16  B@25%: fills  11 mean +33.7% $ +44.58

@@ -1,0 +1,54 @@
+launches passing the filters with tapes: 366 (A 255, B 111)
+
+1. E2 return (h11 from the E2 entry, $13) by class; E1 second place alongside
+  7% fills          A n= 37: E2 first  -1.7% (win 22%)  second  -2.9%  third  -3.6% | E1 second +22.6%  | E2 block buys median 0
+  7% fills          B n= 18: E2 first  -5.1% (win 17%)  second  -5.1%  third  -5.1% | E1 second +11.3%  | E2 block buys median 0.0
+  7% guard reverts  A n= 34: E2 first  -9.5% (win 15%)  second -10.2%  third -10.4% | E1 second +14.3%  | E2 block buys median 0.0
+  7% guard reverts  B n= 14: E2 first  -9.2% (win 14%)  second  -9.2%  third  -9.3% | E1 second +20.3%  | E2 block buys median 0.0
+  gate refused      A n=184: E2 first  -6.2% (win 14%)  second  -6.6%  third  -6.8% | E1 second  -3.2%  | E2 block buys median 0.0
+  gate refused      B n= 79: E2 first  -5.8% (win  9%)  second  -5.9%  third  -6.0% | E1 second  -3.4%  | E2 block buys median 0
+  all               A n=255: E2 first  -6.0% (win 15%)  second  -6.6%  third  -6.8% | E1 second  +2.9%  | E2 block buys median 0
+  all               B n=111: E2 first  -6.1% (win 11%)  second  -6.2%  third  -6.2% | E1 second  +2.0%  | E2 block buys median 0
+
+2. E2 on a read of E1 (buys in the seat block >= N, or E1 ETH >= t), on the launches the E1 chain did NOT fill (7% guard), E2 at second place (pessimistic) and first;
+   $ at $13 (ret*13 - 0.33); threshold chosen on one period, read on the other
+  E2 second place:
+    e1_nbuy >= 2    : A n=132  -7.7% $-175.34   B n= 55  -7.7% $ -73.39
+    e1_nbuy >= 3    : A n= 95  -8.6% $-137.12   B n= 37  -8.1% $ -51.33
+    e1_nbuy >= 4    : A n= 69  -9.9% $-111.34   B n= 20  -9.2% $ -30.44
+    e1_nbuy >= 5    : A n= 41  -9.7% $ -65.13   B n= 10  -9.9% $ -16.13
+    e1_nbuy >= 6    : A n= 30 -11.4% $ -54.30   B n=  4  -4.8% $  -3.84
+    e1_nbuy >= 8    : A n= 11  -9.4% $ -17.10   B n=  1  +6.7% $  +0.54
+    e1_nbuy >= 10   : A n=  2  -2.7% $  -1.37   B n=  1  +6.7% $  +0.54
+    e1_eth >= 0.05 : A n=120  -7.6% $-157.97   B n= 47  -5.6% $ -49.92
+    e1_eth >= 0.1  : A n= 99  -9.2% $-151.22   B n= 39  -4.8% $ -37.27
+    e1_eth >= 0.2  : A n= 75  -9.6% $-117.93   B n= 25  -4.7% $ -23.69
+    e1_eth >= 0.3  : A n= 45 -11.3% $ -81.09   B n= 16  -2.4% $ -10.27
+    e1_eth >= 0.5  : A n= 28 -13.2% $ -57.39   B n=  4 -13.2% $  -8.16
+    e1_eth >= 0.8  : A n= 12 -12.1% $ -22.87   B n=  1  +6.7% $  +0.54
+    chosen on A: ('e1_nbuy', 10) -> B: n=1 +6.7% $+0.54
+    chosen on B: ('e1_nbuy', 8) -> A: n=11 -9.4% $-17.10
+  E2 first place:
+    e1_nbuy >= 2    : A n=132  -7.1% $-165.18   B n= 55  -7.5% $ -71.96
+    e1_nbuy >= 3    : A n= 95  -8.0% $-130.07   B n= 37  -7.8% $ -49.85
+    e1_nbuy >= 4    : A n= 69  -9.4% $-107.47   B n= 20  -9.0% $ -29.88
+    e1_nbuy >= 5    : A n= 41  -9.4% $ -63.72   B n= 10  -9.7% $ -15.86
+    e1_nbuy >= 6    : A n= 30 -10.9% $ -52.56   B n=  4  -4.3% $  -3.56
+    e1_nbuy >= 8    : A n= 11  -8.8% $ -16.19   B n=  1  +7.2% $  +0.61
+    e1_nbuy >= 10   : A n=  2  -2.5% $  -1.31   B n=  1  +7.2% $  +0.61
+    e1_eth >= 0.05 : A n=120  -7.0% $-148.46   B n= 47  -5.5% $ -48.82
+    e1_eth >= 0.1  : A n= 99  -8.7% $-144.53   B n= 39  -4.8% $ -37.11
+    e1_eth >= 0.2  : A n= 75  -9.0% $-112.47   B n= 25  -4.7% $ -23.53
+    e1_eth >= 0.3  : A n= 45 -10.9% $ -78.75   B n= 16  -2.3% $ -10.14
+    e1_eth >= 0.5  : A n= 28 -12.8% $ -55.84   B n=  4 -13.0% $  -8.10
+    e1_eth >= 0.8  : A n= 12 -11.5% $ -21.92   B n=  1  +7.2% $  +0.61
+    chosen on A: ('e1_nbuy', 10) -> B: n=1 +7.2% $+0.61
+    chosen on B: ('e1_nbuy', 8) -> A: n=11 -8.8% $-16.19
+
+3. a second seat: E2 first / second place on the launches the E1 chain filled (our E1 buy of $13 moves the E2 price by < 1%, ignored)
+  A n=37: E2 first n= 37 mean  -1.7% med  -4.4% win 22% $ -20.20 | second n= 37 mean  -2.9% med  -4.6% win 19% $ -26.32
+  B n=18: E2 first n= 18 mean  -5.1% med  -5.9% win 17% $ -17.87 | second n= 18 mean  -5.1% med  -5.9% win 17% $ -17.94
+
+4. one place earlier in E1 (what a finer step could buy if it moved the landing): fires at the usual view, guard off
+  A n=71: first +29.6% vs second +18.6%: +10.9% a fire
+  B n=32: first +23.9% vs second +15.3%: +8.6% a fire

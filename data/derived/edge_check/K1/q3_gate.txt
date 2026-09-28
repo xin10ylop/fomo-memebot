@@ -1,0 +1,70 @@
+== guard 0.07: ATTACK_MIN by view   (fit | read)
+  k-2   >= 1: fit fired  67 guard  33 fills  34 mean +14.6% med  +0.9% win  50% $ +42.30 $+16.29/d | read fired  46 guard  18 fills  28 mean  +4.6% med  +0.0% win  50% $  +1.72 $ +0.39/d
+  k-2   >= 2: fit fired  27 guard  18 fills   9 mean +45.3% med +31.5% win  89% $ +44.04 $+16.96/d | read fired  18 guard   9 fills   9 mean  +6.0% med  +8.3% win  67% $  +1.13 $ +0.26/d
+  k-2   >= 3: fit fired  11 guard   8 fills   3 mean +67.2% med +60.8% win 100% $ +22.57 $ +8.69/d | read fired   5 guard   2 fills   3 mean  +8.1% med  +8.3% win 100% $  +1.52 $ +0.35/d
+  k-2   >= 4: fit fired   3 guard   2 fills   1 mean +21.5% med +21.5% win 100% $  +1.81 $ +0.70/d | read fired   0 guard   0 fills   0 mean  +nan% med  +nan% win nan% $  +0.00 $ +0.00/d
+  k-2r  >= 1: fit fired  77 guard  37 fills  40 mean +12.2% med  -0.9% win  48% $ +38.28 $+14.74/d | read fired  51 guard  19 fills  32 mean  +4.7% med  -3.1% win  47% $  +2.88 $ +0.65/d
+  k-2r  >= 2: fit fired  40 guard  22 fills  18 mean +27.4% med +15.9% win  67% $ +50.82 $+19.57/d | read fired  24 guard  12 fills  12 mean  +7.8% med  +7.2% win  67% $  +4.28 $ +0.97/d
+  k-2r  >= 3: fit fired  16 guard  12 fills   4 mean +76.9% med +83.4% win 100% $ +34.69 $+13.36/d | read fired   6 guard   2 fills   4 mean  +4.3% med  +7.2% win  75% $  +0.26 $ +0.06/d
+  k-2r  >= 4: fit fired   3 guard   2 fills   1 mean +21.5% med +21.5% win 100% $  +1.81 $ +0.70/d | read fired   1 guard   0 fills   1 mean +10.1% med +10.1% win 100% $  +0.98 $ +0.22/d
+  k-1n  >= 1: fit fired 140 guard  69 fills  71 mean +10.2% med  -1.9% win  42% $ +47.55 $+18.31/d | read fired  77 guard  27 fills  50 mean  +4.9% med  -1.2% win  48% $  +6.66 $ +1.51/d
+  k-1n  >= 2: fit fired  72 guard  40 fills  32 mean +25.0% med +14.4% win  62% $ +80.35 $+30.94/d | read fired  47 guard  18 fills  29 mean  +8.9% med  +2.6% win  59% $ +18.12 $ +4.12/d
+  k-1n  >= 3: fit fired  32 guard  23 fills   9 mean +50.1% med +38.4% win 100% $ +48.10 $+18.52/d | read fired  23 guard  12 fills  11 mean +12.8% med  +6.0% win  73% $ +10.74 $ +2.44/d
+  k-1n  >= 4: fit fired  20 guard  14 fills   6 mean +44.7% med +29.9% win 100% $ +28.29 $+10.89/d | read fired   9 guard   3 fills   6 mean +14.8% med  +7.2% win  83% $  +8.58 $ +1.95/d
+  k-1   >= 1: fit fired 151 guard  76 fills  75 mean  +9.7% med  -1.9% win  43% $ +44.75 $+17.23/d | read fired  82 guard  31 fills  51 mean  +4.6% med  -1.6% win  47% $  +3.71 $ +0.84/d
+  k-1   >= 2: fit fired  79 guard  42 fills  37 mean +22.6% med +11.6% win  59% $ +82.63 $+31.81/d | read fired  50 guard  19 fills  31 mean  +7.9% med  +2.0% win  55% $ +15.29 $ +3.47/d
+  k-1   >= 3: fit fired  41 guard  26 fills  15 mean +32.6% med +21.5% win  73% $ +50.06 $+19.27/d | read fired  26 guard  13 fills  13 mean +10.4% med  +6.0% win  69% $  +9.08 $ +2.06/d
+  k-1   >= 4: fit fired  22 guard  15 fills   7 mean +53.5% med +38.4% win 100% $ +41.40 $+15.94/d | read fired  11 guard   4 fills   7 mean +14.1% med  +8.3% win  86% $  +9.23 $ +2.10/d
+  k     >= 1: fit fired 212 guard 117 fills  95 mean  +6.1% med  -4.5% win  38% $  +5.85 $ +2.25/d | read fired 108 guard  45 fills  63 mean  +2.4% med  -4.2% win  38% $ -16.19 $ -3.68/d
+  k     >= 2: fit fired 141 guard  85 fills  56 mean +16.7% med  +5.2% win  55% $ +75.36 $+29.02/d | read fired  78 guard  33 fills  45 mean  +5.3% med  -0.3% win  49% $  +5.29 $ +1.20/d
+  k     >= 3: fit fired  82 guard  53 fills  29 mean +27.6% med +16.9% win  69% $ +76.87 $+29.60/d | read fired  45 guard  19 fills  26 mean +12.0% med  +6.0% win  65% $ +25.63 $ +5.82/d
+  k     >= 4: fit fired  44 guard  31 fills  13 mean +38.2% med +31.5% win  92% $ +49.99 $+19.25/d | read fired  22 guard  11 fills  11 mean  +8.7% med  +6.0% win  73% $  +5.12 $ +1.16/d
+
+== guard 0.20: ATTACK_MIN by view   (fit | read)
+  k-2   >= 1: fit fired  67 guard   9 fills  58 mean +15.4% med  +5.0% win  53% $ +93.91 $+36.16/d | read fired  46 guard   2 fills  44 mean +11.0% med  +5.3% win  59% $ +47.68 $+10.83/d
+  k-2   >= 2: fit fired  27 guard   5 fills  22 mean +39.5% med +26.5% win  86% $+104.08 $+40.07/d | read fired  18 guard   0 fills  18 mean +17.9% med  +9.3% win  78% $ +36.06 $ +8.19/d
+  k-2   >= 3: fit fired  11 guard   2 fills   9 mean +44.8% med +49.1% win  78% $ +48.81 $+18.79/d | read fired   5 guard   0 fills   5 mean +13.7% med  +8.3% win 100% $  +7.27 $ +1.65/d
+  k-2   >= 4: fit fired   3 guard   1 fills   2 mean  +8.8% med  +8.8% win  50% $  +1.31 $ +0.50/d | read fired   0 guard   0 fills   0 mean  +nan% med  +nan% win nan% $  +0.00 $ +0.00/d
+  k-2r  >= 1: fit fired  77 guard  10 fills  67 mean +14.0% med  +2.5% win  52% $ +96.37 $+37.11/d | read fired  51 guard   2 fills  49 mean +10.4% med  +4.5% win  57% $ +49.59 $+11.26/d
+  k-2r  >= 2: fit fired  40 guard   5 fills  35 mean +25.7% med +14.9% win  69% $+103.78 $+39.96/d | read fired  24 guard   0 fills  24 mean +17.0% med  +9.3% win  79% $ +45.01 $+10.22/d
+  k-2r  >= 3: fit fired  16 guard   2 fills  14 mean +47.1% med +42.7% win  86% $ +80.37 $+30.94/d | read fired   6 guard   0 fills   6 mean +10.2% med  +7.2% win  83% $  +6.01 $ +1.36/d
+  k-2r  >= 4: fit fired   3 guard   1 fills   2 mean  +8.8% med  +8.8% win  50% $  +1.31 $ +0.50/d | read fired   1 guard   0 fills   1 mean +10.1% med +10.1% win 100% $  +0.98 $ +0.22/d
+  k-1n  >= 1: fit fired 140 guard  13 fills 127 mean  +7.7% med  -3.2% win  40% $ +80.54 $+31.01/d | read fired  77 guard   2 fills  75 mean  +8.0% med  +2.6% win  55% $ +52.55 $+11.93/d
+  k-1n  >= 2: fit fired  72 guard   7 fills  65 mean +20.1% med  +9.2% win  57% $+146.29 $+56.33/d | read fired  47 guard   1 fills  46 mean +13.6% med  +6.0% win  67% $ +65.70 $+14.92/d
+  k-1n  >= 3: fit fired  32 guard   5 fills  27 mean +31.7% med +18.2% win  70% $+100.63 $+38.75/d | read fired  23 guard   0 fills  23 mean +16.6% med  +8.3% win  78% $ +42.05 $ +9.55/d
+  k-1n  >= 4: fit fired  20 guard   4 fills  16 mean +37.9% med +29.0% win  75% $ +72.29 $+27.83/d | read fired   9 guard   0 fills   9 mean +24.2% med +12.0% win  89% $ +25.30 $ +5.75/d
+  k-1   >= 1: fit fired 151 guard  20 fills 131 mean  +7.5% med  -3.2% win  40% $ +77.74 $+29.93/d | read fired  82 guard   6 fills  76 mean  +7.8% med  +2.3% win  54% $ +49.59 $+11.26/d
+  k-1   >= 2: fit fired  79 guard   8 fills  71 mean +18.1% med  +8.5% win  55% $+141.05 $+54.31/d | read fired  50 guard   1 fills  49 mean +13.0% med  +6.0% win  65% $ +66.43 $+15.09/d
+  k-1   >= 3: fit fired  41 guard   5 fills  36 mean +25.1% med +13.2% win  64% $+103.86 $+39.99/d | read fired  26 guard   0 fills  26 mean +14.9% med  +7.2% win  77% $ +41.88 $ +9.51/d
+  k-1   >= 4: fit fired  22 guard   4 fills  18 mean +39.5% med +29.0% win  72% $ +85.12 $+32.77/d | read fired  11 guard   0 fills  11 mean +21.2% med +10.1% win  91% $ +26.70 $ +6.06/d
+  k     >= 1: fit fired 212 guard  54 fills 158 mean  +5.5% med  -4.0% win  38% $ +42.38 $+16.32/d | read fired 108 guard  17 fills  91 mean  +5.2% med  -1.6% win  46% $ +26.03 $ +5.91/d
+  k     >= 2: fit fired 141 guard  34 fills 107 mean +12.0% med  -0.0% win  50% $+120.33 $+46.33/d | read fired  78 guard   9 fills  69 mean  +9.0% med  +3.6% win  58% $ +55.29 $+12.56/d
+  k     >= 3: fit fired  82 guard  21 fills  61 mean +21.9% med +11.1% win  62% $+146.82 $+56.53/d | read fired  45 guard   2 fills  43 mean +13.5% med  +7.5% win  72% $ +60.63 $+13.77/d
+  k     >= 4: fit fired  44 guard  10 fills  34 mean +27.2% med +14.2% win  68% $+105.80 $+40.74/d | read fired  22 guard   0 fills  22 mean +14.7% med  +6.8% win  77% $ +34.65 $ +7.87/d
+
+== guard 0.07: an extra condition on top of fleets>=2 @k-1 (live: fit $+82.63, read $+15.29); threshold chosen on one half, read on the other
+  wallets@k-1            chosen on fit: <=10     fit $ +85.00 -> read $ +19.14 (30 fills, live $+15.29) | chosen on read: >=2      read $ +20.17 -> fit $ +78.29 (33 fills, live $+82.63)
+  txs@k-1                chosen on fit: >=5      fit $ +84.97 -> read $ +16.88 (29 fills, live $+15.29) | chosen on read: >=11     read $ +19.91 -> fit $ +62.85 (27 fills, live $+82.63)
+  growth k-2->k-1        chosen on fit: >=1      fit $ +85.00 -> read $ +11.88 (27 fills, live $+15.29) | chosen on read: >=2      read $ +24.82 -> fit $ +65.69 (21 fills, live $+82.63)
+  fleets k minus k-1     chosen on fit: <=4      fit $ +82.77 -> read $ +15.95 (31 fills, live $+15.29) | chosen on read: >=1      read $ +18.87 -> fit $ +76.64 (19 fills, live $+82.63)
+  fleets@k-1             chosen on fit: <=7      fit $ +82.96 -> read $ +15.29 (31 fills, live $+15.29) | chosen on read: <=6      read $ +15.62 -> fit $ +67.79 (36 fills, live $+82.63)
+  bundle ETH             chosen on fit: >=0.3    fit $ +82.63 -> read $ +15.29 (31 fills, live $+15.29) | chosen on read: <=1.69661 read $ +17.80 -> fit $ +68.00 (35 fills, live $+82.63)
+  named wallets          chosen on fit: >=3      fit $ +82.63 -> read $ +15.29 (31 fills, live $+15.29) | chosen on read: <=7      read $ +27.07 -> fit $ +40.15 (17 fills, live $+82.63)
+  k (blocks in 2nd 0)    chosen on fit: >=3      fit $ +82.96 -> read $ +15.29 (31 fills, live $+15.29) | chosen on read: <=5      read $ +18.47 -> fit $ +21.59 (10 fills, live $+82.63)
+  hour UTC               chosen on fit: >=5      fit $ +86.94 -> read $ +18.27 (28 fills, live $+15.29) | chosen on read: >=5      read $ +18.27 -> fit $ +86.94 (34 fills, live $+82.63)
+  tier bps               chosen on fit: >=100    fit $ +82.63 -> read $ +15.29 (31 fills, live $+15.29) | chosen on read: >=120    read $ +22.60 -> fit $ +78.31 (27 fills, live $+82.63)
+  creator supply %       chosen on fit: <=3.48129 fit $ +85.33 -> read $ +18.31 (29 fills, live $+15.29) | chosen on read: >=2.5    read $ +19.04 -> fit $ +22.70 (7 fills, live $+82.63)
+
+== guard 0.20: an extra condition on top of fleets>=2 @k-1 (live: fit $+141.05, read $+66.43); threshold chosen on one half, read on the other
+  wallets@k-1            chosen on fit: >=0      fit $+141.05 -> read $ +66.43 (49 fills, live $+66.43) | chosen on read: <=27     read $ +68.72 -> fit $+136.89 (68 fills, live $+141.05)
+  txs@k-1                chosen on fit: >=5      fit $+144.48 -> read $ +66.59 (46 fills, live $+66.43) | chosen on read: <=71     read $ +68.72 -> fit $+134.42 (67 fills, live $+141.05)
+  growth k-2->k-1        chosen on fit: <=4      fit $+141.88 -> read $ +49.41 (45 fills, live $+66.43) | chosen on read: >=0      read $ +66.43 -> fit $+141.05 (71 fills, live $+141.05)
+  fleets k minus k-1     chosen on fit: <=4      fit $+141.69 -> read $ +60.62 (47 fills, live $+66.43) | chosen on read: >=0      read $ +66.43 -> fit $+141.05 (71 fills, live $+141.05)
+  fleets@k-1             chosen on fit: <=7      fit $+141.88 -> read $ +66.43 (49 fills, live $+66.43) | chosen on read: >=0      read $ +66.43 -> fit $+141.05 (71 fills, live $+141.05)
+  bundle ETH             chosen on fit: >=0.3    fit $+141.05 -> read $ +66.43 (49 fills, live $+66.43) | chosen on read: <=1.69661 read $ +70.74 -> fit $+111.88 (66 fills, live $+141.05)
+  named wallets          chosen on fit: >=3      fit $+141.05 -> read $ +66.43 (49 fills, live $+66.43) | chosen on read: >=3      read $ +66.43 -> fit $+141.05 (71 fills, live $+141.05)
+  k (blocks in 2nd 0)    chosen on fit: >=3      fit $+141.38 -> read $ +66.43 (49 fills, live $+66.43) | chosen on read: <=8      read $ +69.50 -> fit $+133.33 (68 fills, live $+141.05)
+  hour UTC               chosen on fit: >=3      fit $+145.82 -> read $ +58.34 (45 fills, live $+66.43) | chosen on read: >=0      read $ +66.43 -> fit $+141.05 (71 fills, live $+141.05)
+  tier bps               chosen on fit: >=100    fit $+141.05 -> read $ +66.43 (49 fills, live $+66.43) | chosen on read: >=100    read $ +66.43 -> fit $+141.05 (71 fills, live $+141.05)
+  creator supply %       chosen on fit: <=3.48129 fit $+146.52 -> read $ +63.73 (46 fills, live $+66.43) | chosen on read: >=0.01   read $ +66.43 -> fit $+141.05 (71 fills, live $+141.05)
+

@@ -1,0 +1,27 @@
+== by position, exit 11, fires at k-1 (taped) ==
+  first      fit n= 71 +29.6% med +15.3% win 79% | read n= 32 +23.9% med +11.7% win 75%
+  second     fit n= 71 +18.6% med  +9.1% win 61% | read n= 32 +15.3% med  +5.8% win 72%
+  third      fit n= 71 +12.6% med  +3.7% win 55% | read n= 32 +10.8% med  -0.0% win 50%
+  fourth     fit n= 71  +8.3% med  +2.3% win 52% | read n= 32  +9.2% med  -0.6% win 50%
+  last in E1 fit n= 71  -0.4% med  -4.3% win 35% | read n= 32  +4.0% med  -4.5% win 34%
+
+== second place by the first E1 buy's size (the buy ahead of us), exit 11 ==
+  ahead 0.000-0.015 ETH: fit n= 15 +12.0% med  +9.2% win 60% | read n= 12 +14.2% med  +3.0% win 75%   first place here: fit +12.6% read +15.0%
+  ahead 0.015-0.050 ETH: fit n= 15 +19.1% med  +1.5% win 53% | read n=  4  +1.2% med  -8.4% win 25%   first place here: fit +22.2% read  +4.2%
+  ahead 0.050-0.140 ETH: fit n= 10 +38.2% med +24.0% win 70% | read n=  3 +35.8% med +21.3% win 100%   first place here: fit +44.1% read +40.9%
+  ahead 0.140-0.250 ETH: fit n= 22 +12.8% med  +3.7% win 55% | read n= 10 +16.7% med +12.4% win 80%   first place here: fit +28.3% read +32.4%
+  ahead 0.250-10.000 ETH: fit n=  9 +21.3% med +22.4% win 78% | read n=  3 +13.1% med  +5.7% win 67%   first place here: fit +56.9% read +40.4%
+  nobody in E1 (we would be alone): fit n=  0  +nan% med  +nan% win  0% | read n=  0  +nan% med  +nan% win  0%
+
+== by the number of other buys in the seat block (the crowd that lands with us), second place, exit 11 ==
+  0-0 buys: fit n=  0  +nan% med  +nan% win  0% | read n=  0  +nan% med  +nan% win  0%
+  1-1 buys: fit n=  2  -7.6% med  -7.6% win  0% | read n=  3  +7.7% med -10.0% win 33%
+  2-3 buys: fit n= 20  -1.0% med  -4.1% win 25% | read n= 12 +12.8% med  +7.4% win 67%
+  4-6 buys: fit n= 26 +18.7% med +10.1% win 65% | read n= 14 +14.3% med  +5.3% win 79%
+  7-98 buys: fit n= 23 +37.9% med +21.5% win 91% | read n=  3 +37.6% med +32.5% win 100%
+
+== the whole taped population (every qualifying launch, fired or not), by position, exit 11 ==
+  p1     fit n=363  +5.4% med  -5.1% win 40% | read n=172  +3.3% med  -7.9% win 34%
+  p2     fit n=363  -0.1% med  -8.6% win 29% | read n=172  -0.9% med  -9.4% win 26%
+  p3     fit n=363  -2.8% med  -9.5% win 25% | read n=172  -3.2% med  -9.8% win 18%
+  plast  fit n=363  -7.0% med  -9.9% win 17% | read n=172  -5.6% med -10.0% win 13%

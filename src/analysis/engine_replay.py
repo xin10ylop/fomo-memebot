@@ -19,13 +19,14 @@ def flag(k):
     if k in args: args.remove(k); return True
     return False
 T0 = calendar.timegm(time.strptime(arg("--from", "2026-09-21 09:40"), "%Y-%m-%d %H:%M")); T1 = calendar.timegm(time.strptime(arg("--to", "2026-09-28 09:40"), "%Y-%m-%d %H:%M"))
-HOLD = int(arg("--hold", "11")); NO_CAP = flag("--no-cap"); NO_REPEAT = flag("--no-repeat"); VIEW = arg("--view", "k-2"); REG = flag("--reg")   # --reg: count the registration block's shots (the engine does when its launch thread wins the race: 3 of 4 live cases)
+HOLD = int(arg("--hold", "11")); NO_CAP = flag("--no-cap"); NO_REPEAT = flag("--no-repeat"); VIEW = arg("--view", "k-2"); REG = flag("--reg"); DUMP = arg("--dump"); SLIP = float(arg("--slip", "0.07"))   # --slip: the minOut guard's tolerance to test (the live BURST_SLIP is 0.07)   # --dump file.json: every launch's row (disposition, fleets at k-2/k-1/k, guard ratio, returns by position and hold)   # --reg: count the registration block's shots (the engine does when its launch thread wins the race: 3 of 4 live cases)
 LIVE = {"SEND_MODULE": "", "PRIVATE_KEY": "", "LOG_PATH": "/tmp/engine_replay.jsonl", "SEAT": "E1", "ATTACK_MIN": "2", "GATE_CLOSE_MS": "36", "TRADE_HOURS": "",
         "MIN_FOLLOW_ETH_60": "0", "TIER_MIN_BPS": "100", "TIER_MAX_BPS": "200", "BUNDLE_MIN": "3", "BUNDLE_MIN_ETH": "0.3", "BUNDLE_MAX_ETH": "0" if NO_CAP else "3.0",
         "MIN_CREATOR_SUPPLY": "0.01", "MAX_CREATOR_BUY_ETH": "2", "HOLD_BLOCKS": "9", "BURST_SLIP": "0.07", "BURST_N": "35", "STAKE_MIN": "13", "STAKE_MAX": "13",
         "WALLET": "0xe0686dc72b04c12ceefeea75e286e4ef7c056f01", "RELAY": "0xe8e98c3514d5bd83fdd01360896f2382b861a720"}
 for k, v in LIVE.items(): os.environ[k] = v
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."); os.chdir(ROOT); sys.path.insert(0, "src/strategy"); import sniper_engine as E
+_argv = sys.argv; sys.argv = ["x", "0.76", "0.71"]; exec(open("src/analysis/crowd_rules.py").read().split("rules = [")[0]); sys.argv = _argv   # cums, at (the tables' count per block, for the dump)
 STAKE, GAS = 13.0, 0.33; BUSY_S = 6.0
 D = "data/derived/live_vs_table"
 KNOWN = {"sep2021": ("2026-09-20 13:26", "2026-09-22 01:02"), "sep2223": ("2026-09-22 01:02", "2026-09-23 06:35"), "sep23day": ("2026-09-23 10:22", "2026-09-23 20:20"), "sep24_paper": ("2026-09-24 12:38", "2026-09-24 21:36")}
@@ -123,8 +124,9 @@ for r, l, h in launches:
     if gates: rec["why"] = "GATE " + gates[0]; out.append(rec); continue
     rec["fired"] = True
     tb_, ts1 = h.get("tk_build_13"), h.get("tk_seat1_13")
+    rec["guard_ratio"] = (ts1 / tb_) if (tb_ and ts1) else None
     if not (tb_ and ts1): no_guard += 1
-    if tb_ and ts1 and ts1 < (1 - E.BURST_SLIP) * tb_:
+    if tb_ and ts1 and ts1 < (1 - SLIP) * tb_:
         rec["why"] = "GUARD no fill"; rec["usd"] = -GAS; out.append(rec); continue
     ret = h.get(f"behind1_13_h{HOLD}")
     if ret is None: rec["why"] = "no return column"; out.append(rec); continue
@@ -152,5 +154,13 @@ big = sorted(fills, key=lambda x: -x["ret"])[:6]
 print("largest fills: " + ", ".join(f"{time.strftime('%b %d %H:%M', time.gmtime(x['T0']))} {x['cv'][:10]} {x['ret']:+.0%}" for x in big))
 if len(fills) > 1:
     rest = [x["ret"] for x in fills if x is not big[0]]; print(f"without the largest: mean {st.mean(rest):+.1%} on {len(rest)} fills, ${sum(x * STAKE - GAS for x in rest):+.2f}")
+if DUMP:
+    for x in out:
+        r, l, h = rows[x["cv"]]; cw, cf = cums(r); k = r["k"]
+        x.update({"k": k, "cf": cf, "f_k2": at(cf, k - 2), "f_k1": at(cf, k - 1), "f_k": at(cf, k), "tier": l.get("tier", h.get("tier")), "tk0": h.get("tk0"), "init_buy_eth": h.get("init_buy_eth"), "named": len(l.get("named") or r.get("named") or []),
+                  "guard_ratio": x.get("guard_ratio") if x.get("guard_ratio") is not None else ((h.get("tk_seat1_13") / h.get("tk_build_13")) if (h.get("tk_build_13") and h.get("tk_seat1_13")) else None),
+                  "ret": {hh: h.get(f"behind1_13_h{hh}") for hh in (9, 11, 13, 15, 30, 60)}, "ret_first": {hh: h.get(f"first_13_h{hh}") for hh in (9, 11, 13, 15)},
+                  "tp50_h600": h.get("behind1_13_tp50_h600"), "stop20_h600": h.get("behind1_13_stop20_h600"), "src": h.get("src")})
+    json.dump(out, open(DUMP, "w")); print(f"dumped {len(out)} rows to {DUMP}", file=sys.stderr)
 if flag("--list"):
     for x in out: print(f"  {time.strftime('%b %d %H:%M', time.gmtime(x['T0']))} {x['cv'][:10]} bundle {x['bundle']:.3f} fleets {x.get('fleets', '-')} | {x['why']}" + (f" {x['ret']:+.1%}" if "ret" in x else ""))
