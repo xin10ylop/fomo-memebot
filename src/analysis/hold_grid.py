@@ -2,8 +2,10 @@
 
     python3 src/analysis/hold_grid.py data/derived/live_vs_table/launches_141_creators.json data/derived/live_vs_table/launches_175_sep2223.json
 
-Holds 15, 30, 60, 150, 300, 600 blocks; a take-profit variant (sell when the curve is +50% over our entry, else at the hold);
-a stop variant (sell at -20%, else at the hold). Our stake $15 and $100. Skipped launches: none (every qualifying launch)."""
+Holds 9, 11, 13, 15, 30, 60, 150, 300, 600 blocks; a take-profit variant (sell when the curve is +50% over our entry, else at the hold);
+a stop variant (sell at -20%, else at the hold). Our stake $13 (live), $15 and $100. Skipped launches: none (every qualifying launch).
+Sep 28 (report 24.41): per launch also the creator's launch-block buy (tk0, init_buy_eth) and the engine's minOut guard inputs at $13
+(tk_build_13 on the k-2 view, tk_seat1_13 behind one, tk_last_13 at the last position), for engine_replay.py."""
 import json, sys, statistics as st, time
 sys.path.insert(0, "src/analysis"); import live_vs_table as lv
 from live_vs_table import fold_buy, fold_sell, X0, Y0, OURS, SUR, CAP
@@ -58,8 +60,17 @@ def main():
                 L["rows"] = sorted(L["rows"] + [lv.row_of(e) for e in ev], key=lambda r: (r["bn"], r["li"]))
                 ts = L["ts"]; T0 = L["T0"]; bE1 = next((n for n in range(b0 + 1, b0 + 30) if ts.get(n, 0) == T0 + 1), None)
                 if bE1 is None: continue
-                row = {"cv": cv, "T0": T0, "day": time.strftime("%b %d", time.gmtime(T0))}
-                for stake in (15.0, 100.0):
+                row = {"cv": cv, "T0": T0, "day": time.strftime("%b %d", time.gmtime(T0)), "creator": l.get("creator"), "bundle_eth": l.get("bundle_eth"), "k": l["same_second_blocks"], "bE1": bE1}
+                r0 = next((r for r in L["rows"] if r["bn"] == b0 and r["k"] == "B"), None)                      # the creator's launch-block buy: the engine's MIN_CREATOR_SUPPLY and MAX_CREATOR_BUY_ETH gates
+                row["tk0"] = r0["tk"] if r0 else None; row["init_buy_eth"] = r0["eth"] if r0 else None
+                # the engine's minOut guard (BURST_SLIP 7%): the tokens it sizes at the build, on the curve as the feed shows it two blocks before
+                # the seat block (the k-2 view), against the tokens the seat gives behind one buy and at the last position (report 24.41)
+                for stake in (13.0,):
+                    info = {}; model_path(L, stake / E, bE1, 1, (11,), info=info); row["tk_seat1_13"] = info.get("tk")
+                    info = {}; model_path(L, stake / E, bE1, 10 ** 6, (11,), info=info); row["tk_last_13"] = info.get("tk")
+                    Lb = dict(L); Lb["rows"] = [r for r in L["rows"] if r["bn"] <= bE1 - 3]
+                    info = {}; model_path(Lb, stake / E, bE1, 0, (11,), info=info); row["tk_build_13"] = info.get("tk")
+                for stake in (13.0, 15.0, 100.0):
                     for pos, nah in (("first", 0), ("behind1", 1)):
                         o = model_path(L, stake / E, bE1, nah, HOLDS, tp=0.5, stop=0.2)
                         for h in HOLDS: row[f"{pos}_{int(stake)}_h{h}"] = o[h]
