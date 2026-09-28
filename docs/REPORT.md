@@ -4053,3 +4053,25 @@ the two launches of 12:18 and 12:23 unseen because the engine stayed inactive af
 refused by the tier gate (outside the population by definition; the reverse check now says so instead of counting them),
 and one launch at 12:30 after the scan's end, refused at the gate. No burst, P&L +$0.03. The new `feed_stats` line on the
 two-core box: 599 frames a minute, median 0.2 ms, p90 0.7 ms, max 3 ms, the loop busy 0.3% of the time.
+
+*Reading, Sep 28 12:40 - 17:00 UTC: the first window on 5y's settings, and the first that pays.* Written first from the
+chain (`prediction_sep28eve.txt`): twenty qualifying launches, five with a crowd before the tick; the engine's chain at
+the new guard priced them +$21 at the usual view, −$1.56 at the old 7% (three of the five reverted). The engine fired
+the five and reconciles launch by launch (`engine_vs_chain`: 0 holes; twelve gate refusals and three aim skips, all on
+launches modelled negative; one miss, 12:52 `0x98f4e88b`, skipped for "bundle 0 < 3" on the feed while the chain shows a
+0.71 ETH exempt bundle, −1.9% modelled, to be read from the log).
+
+| burst | landed | real | model at the landed exit |
+|---|---|---|---|
+| 14:55 `0x95129ff1` | the sequencer held the burst 3.9 s behind 429 rival shots; every shot late | gas | +31% at second place |
+| 15:30 `0xffb0d66a` | **first in E1**, ten buys behind it worth 1.3 ETH (two of them the fixed-size first buyers of 24.42, 0.149 and 0.585 ETH, behind us this time); sold at E1+12 | **+98.4% (+$12.36)** | +73.7%: our sell landed at index 17 of the exit block, before the 27.5M-token dump at index 30 that the model folds in |
+| 15:33 `0xbb14a5da` | last, behind four fleets, 23% under the sizing | gas | the guard at 20% still refuses it |
+| 15:36 `0x0c5816d3` | index 4, two buys ahead (0.159 ETH): the first fill of the class the 7% guard refused | −7.1% (−$0.89) | −7.1% |
+| 16:33 `0x65f237db` | index 2, one 0.010 ETH buy ahead | +2.9% (+$0.36) | +3.0% |
+
+P&L +$11.80 since the switch (from +$0.03 at 12:40). Live so far: fourteen bursts, eight fills, realized mean +13.0%,
++$13.01 on the fills. The chain-scored sequential test on the engine's fires: fourteen fires, mean +13.2%, log-likelihood
+ratio +0.49 (from −1.29), undecided and now leaning to the edge. The new parts measured on their first bursts: 35 shots
+signed directly in 3.8-3.9 ms (23 before), the latest shot of any burst 0.13 ms behind schedule, the gate open at the
+build on all five fires. The public node now caps `eth_getLogs` at 30,000 blocks; `live_vs_table` reads in that size and
+caches between runs.
