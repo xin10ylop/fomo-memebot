@@ -4189,3 +4189,15 @@ the cap are the same under both engines and above 3.0 on the tables' own figure 
 window above, fixed before deploy. Hygiene notes from the refuters for 6.9, none worth money: importing the engine
 module writes a sender-addresses probe to the log (a replay tool's noise); the nonce release after a gate refusal could
 wake the poll instead of waiting for it; the top-ups could advance the local nonce; the 2 s retry could back off.
+
+*Reading, Sep 28 21:00 - 22:05 UTC: engine 6.8 deployed at 22:03, a quiet hour, reconciled.* Written first from the chain
+(`prediction_sep28late.txt`): three qualifying launches, none with two fleets before the tick, no fire at any view, all
+three modelled −4% to −9%. The engine: two bursts built and never opened (21:06, 21:14: zero fleets by the tick's shot,
+no shot sent, both modelled −4% and −9% behind one), and one new skip reason at 21:27 `0x6d11e170`, "no confident
+boundary estimate to aim at" (zero fleets too, so nothing lost; its frequency is the thing to count tomorrow:
+`sudo grep -c 'no confident boundary' /var/log/sniper/engine.jsonl`). Reconciled both ways: 0 holes, 0 engine-only, 5
+tier-refused outside the population. The two review counts: "not fresh" 2 in the log (19:44:59 and one more outside the
+population's windows), "bundle 0 < 3" 1 (the 12:52 case, engine 6.7). Signing 3.8 ms, shots within 0.06 ms of schedule;
+the sequencer's reply 103 ms median on eleven bursts with under 300 rival shots, 418 ms median and 4.2 s max on the four
+with more. The deploy: no fill open (nine bursts, seven fills, seven closed), `"version": 6.8`, settings unchanged. P&L
++$11.70 at the hour's ETH price, ten fills, unchanged.
