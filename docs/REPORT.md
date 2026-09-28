@@ -3926,3 +3926,17 @@ drops (≥ 0.3 ETH taxed in the creation second, no exempt bundle) in the scan's
 **Exposure.** One launch in about 770 (761 in the population, one burned), refused by the gate on its own account,
 and modelled +145% had it fired: no basis to call the class good or bad, and the denylist removes only the helper
 seen. The night's tally stands: eight bursts, four fills, +$1.04. The night reading's open item is closed.
+
+*Reading, Sep 28 05:33 - 10:00 UTC (engine 6.6 live from the morning restart).* Written first from the chain
+(`prediction_sep28am.txt`): 413 creations in four hours, two qualifying launches, one fire by every count. The engine
+did exactly that: 07:52 `0x93eb8d50` refused (0 fleets, −11.9% modelled), 08:43 `0x2ef7ec18` fired, 35 shots, the
+33rd the first to land in the seat block (the earlier ones in the creation second, reverted), tx index 1 with nothing
+ahead and three buys behind, sold 11 blocks after the fill: −6.5% real against −6.5% modelled at the landed exit
+(−$0.82). `engine_vs_chain` both ways: 0 holes, 0 engine-only. P&L +$0.03 since the switch (the fill and the
+burst's gas took back the night's gain).
+
+Live so far: nine bursts, five fills (−2.6%, −2.0%, +30.6%, −10.0%, −6.5%; realized mean +1.9%, and +1.9% is what the
+model gives at the exits they really got), four no-fills. The sequential test on the chain-scored fires (behind one
+at 11 blocks; H0 +2.5%, H1 +19%, sd 0.34, bounds ±2.94): nine fires, mean +0.7%, log-likelihood ratio −0.74, leaning
+to no edge and undecided; at the recent backtest's +22% a fire it would take about ten more fires to cross the upper
+bound, and about ten losing ones to cross the lower. Stake stays $13; the lower bound sends the engine back to paper.
