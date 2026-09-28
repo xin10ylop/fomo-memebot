@@ -1,0 +1,44 @@
+
+== view k2: fired bursts by window, $ at $13 (fills) for each slip
+ slip              Sep 21-23        Sep 24-28 09:40     Sep 28 09:40-21:00
+ 0.07      +44.04 ( 9 of 27)       +1.13 ( 9 of 18)       -1.32 ( 0 of  4)
+ 0.10      +44.04 ( 9 of 27)      +22.07 (12 of 18)      +15.99 ( 3 of  4)
+ 0.15      +90.85 (19 of 27)      +27.96 (16 of 18)      +15.99 ( 3 of  4)
+ 0.20     +104.08 (22 of 27)      +36.06 (18 of 18)      +15.99 ( 3 of  4)
+ 0.25     +111.02 (24 of 27)      +36.06 (18 of 18)      +18.28 ( 4 of  4)
+ 0.30     +121.93 (27 of 27)      +36.06 (18 of 18)      +18.28 ( 4 of  4)
+
+== view k1reg: fired bursts by window, $ at $13 (fills) for each slip
+ slip              Sep 21-23        Sep 24-28 09:40     Sep 28 09:40-21:00
+ 0.07      +82.63 (37 of 79)      +15.29 (31 of 50)       -3.11 ( 4 of 10)
+ 0.10      +89.65 (41 of 79)      +34.60 (37 of 50)      +14.21 ( 7 of 10)
+ 0.15     +136.06 (66 of 79)      +57.59 (46 of 50)      +18.21 ( 8 of 10)
+ 0.20     +141.05 (71 of 79)      +66.43 (49 of 50)      +18.21 ( 8 of 10)
+ 0.25     +148.20 (74 of 79)      +65.12 (50 of 50)      +20.49 ( 9 of 10)
+ 0.30     +157.60 (78 of 79)      +65.12 (50 of 50)      +20.49 ( 9 of 10)
+
+today's fired launches at the usual view: guard ratio (seat tokens / sized tokens), second-place h11, E1-last h15 ($10)
+  12:52 0x98f4e88b ratio 0.996  second -1.9%  E1_last -4.1%  FILL
+  14:55 0x95129ff1 ratio 0.881  second +30.8%  E1_last +27.0%  FILL
+  15:30 0xffb0d66a ratio 0.91  second +132.7%  E1_last -14.3%  FILL
+  15:33 0xbb14a5da ratio 0.903  second +9.6%  E1_last -21.3%  FILL
+  15:36 0x0c5816d3 ratio 0.994  second +2.1%  E1_last -19.2%  FILL
+  16:33 0x65f237db ratio 0.992  second +3.0%  E1_last -11.0%  FILL
+  18:52 0xe7e91780 ratio 0.969  second -1.7%  E1_last -6.4%  FILL
+  19:15 0x22d509a8 ratio 0.909  second -9.1%  E1_last -12.2%  FILL
+  19:44 0x2c38692a ratio 0.185  second -18.2%  E1_last -18.4%  GUARD no fill
+  19:44 0x057d1ffe ratio 0.751  second +17.6%  E1_last -29.7%  GUARD no fill
+  admitted class (ratio 0.80-0.93) at second place, Sep 21-23: n=34 mean +13.2% median -0.4% win 17/34
+  admitted class (ratio 0.80-0.93) at second place, Sep 24-28 09:40: n=18 mean +21.9% median +11.7% win 15/18
+  admitted class (ratio 0.80-0.93) at second place, Sep 28 09:40-21:00: n=4 mean +41.0% median +20.2% win 3/4
+
+== view kreg: fired bursts by window, $ at $13 (fills) for each slip
+ slip              Sep 21-23        Sep 24-28 09:40     Sep 28 09:40-21:00
+ 0.07     +75.36 (56 of 141)       +5.29 (45 of 78)       +3.51 ( 6 of 19)
+ 0.10     +84.87 (64 of 141)      +23.17 (52 of 78)      +12.17 (10 of 19)
+ 0.15   +115.47 (101 of 141)      +46.44 (66 of 78)      +20.07 (12 of 19)
+ 0.20   +120.33 (107 of 141)      +55.29 (69 of 78)      +20.07 (12 of 19)
+ 0.25   +127.48 (110 of 141)      +53.97 (70 of 78)      +22.36 (13 of 19)
+ 0.30   +126.42 (118 of 141)      +53.97 (70 of 78)      +22.36 (13 of 19)
+
+admitted fills' sequential test after 15:36 (-7.1%): LLR -0.25 (bounds +-2.94); per fill at the class's week mean +15%: +0.061, so about 48 fills to the upper bound at that mean

@@ -1,0 +1,35 @@
+fires since 12:27 at any view (the replay prices second place; g = seat tokens / build tokens):
+  12:52 0x98f4e88b views k1reg kreg  g 0.996  7% fill  h11 -1.9%
+  14:08 0x11735c81 views kreg  g 0.638  revert at 20%  h11 -10.8%
+  14:55 0x95129ff1 views k1reg kreg  g 0.881  ADMITTED  h11 +30.8%
+  15:30 0xffb0d66a views k2 k1reg kreg  g 0.91  ADMITTED  h11 +132.7%
+  15:33 0xbb14a5da views k2 k1reg kreg  g 0.903  ADMITTED  h11 +9.6%
+  15:36 0x0c5816d3 views k1reg kreg  g 0.994  7% fill  h11 +2.1%
+  15:38 0x9f47062a views kreg  g 0.992  7% fill  h11 -0.9%
+  16:33 0x65f237db views k1reg kreg  g 0.992  7% fill  h11 +3.0%
+  16:42 0x026b66f2 views kreg  g 0.853  ADMITTED  h11 +30.0%
+  17:39 0x5ca0bb0d views kreg  g 0.992  7% fill  h11 +74.6%
+  18:34 0x270830b6 views kreg  g 0.168  revert at 20%  h11 -1.4%
+  18:52 0xe7e91780 views k1reg kreg  g 0.969  7% fill  h11 -1.7%
+  19:15 0x22d509a8 views k2 k1reg kreg  g 0.909  ADMITTED  h11 -9.1%
+  19:36 0x36a1a0d8 views kreg  g 0.625  revert at 20%  h11 +3.7%
+  19:44 0x2c38692a views k1reg kreg  g 0.185  revert at 20%  h11 -18.2%
+  19:44 0x057d1ffe views k2 k1reg kreg  g 0.751  revert at 20%  h11 +17.6%
+  20:13 0x21e3ea52 views kreg  g 0.904  ADMITTED  h11 -66.6%
+  20:20 0xf19138d5 views kreg  g 0.585  revert at 20%  h11 +1.4%
+
+the admitted class on the week, usual view (fires with 0.80 <= g < 0.93), h11 at second place:
+  fit  g >= 0.93 (fills at 7%)      n= 37 mean +22.6% median +11.6% win 59%  $ +96.49
+  fit  0.80-0.93 (admitted)         n= 34 mean +13.2% median  -0.4% win 50%  $ +47.20
+  fit    of which 0.85-0.93         n= 29 mean +14.2% median  +1.5% win 52%  $ +43.86
+  fit    of which 0.80-0.85         n=  5 mean  +7.7% median  -3.8% win 40%  $  +3.34
+  fit  g < 0.80 (reverts at 20%)    n=  8 mean +15.9% median  +5.3% win 75%  $ +13.88
+  read g >= 0.93 (fills at 7%)      n= 35 mean  +7.0% median  +2.0% win 54%  $ +20.43
+  read 0.80-0.93 (admitted)         n= 22 mean +25.3% median +11.7% win 82%  $ +65.20
+  read   of which 0.85-0.93         n= 19 mean +25.8% median +11.5% win 79%  $ +57.35
+  read   of which 0.80-0.85         n=  3 mean +22.7% median +18.2% win 100%  $  +7.85
+  read g < 0.80 (reverts at 20%)    n=  3 mean  -3.6% median -10.1% win 33%  $  -2.39
+
+live admitted fills so far: 1 (-7.1%); class LLR -0.25 (bounds +-2.94)
+one more fill at -7% moves it by -0.25; at the read mean of the class the upper bound needs about 22 fills
+the rollback rule (5y 1): back to 0.15 if most of the first ten admitted fills land last in the seat block or later; today 1 of 10 (index 4 of 5+ buys, not last)

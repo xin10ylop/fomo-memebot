@@ -5,5 +5,7 @@ SCR = os.environ.get("R2_SCRATCH", "/tmp/claude-0/-home-user-fomo-memebot/a7a596
 ROOT = "/home/user/fomo-memebot"; SRC = os.path.join(ROOT, "src/analysis/engine_replay.py")
 code = open(SRC).read().replace('"LOG_PATH": "/tmp/engine_replay.jsonl"', '"LOG_PATH": "%s/engine_replay.jsonl"' % SCR)
 assert SCR in code
-sys.argv = [SRC] + sys.argv[1:]
+a = sys.argv[1:]
+if "--dump" in a: i = a.index("--dump"); a[i + 1] = os.path.abspath(a[i + 1])   # engine_replay chdirs to the repo root: keep the dump in this folder
+sys.argv = [SRC] + a
 exec(compile(code, SRC, "exec"), {"__file__": SRC, "__name__": "__main__"})

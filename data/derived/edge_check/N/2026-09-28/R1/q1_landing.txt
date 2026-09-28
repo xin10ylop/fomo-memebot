@@ -1,0 +1,27 @@
+when         launch      k shots in CS in E1 E1 pos  head-to-head vs rivals in E1 (True = we were ahead)
+09-26 13:47 0xa80c4813  8    35    25    10      1  pre  0xfa348a:L 0x6d9b26:W 0xf9af9f:W 0x19078e:W 0x96d7b1:W 0x6320b4:W
+09-27 17:06 0x4fed869a  3    25    10    15      6  pre  0xf2c69d:L 0x6c5610:L 0x2124f1:L 0x460b1f:L 0xfa348a:W 0x36522c:W 0x3e7c18:W 0x6320b4:W
+09-27 18:42 0xfa8efc53  8    25     9    16      1  pre  0x3ba17c:L 0xfee8a9:W 0x2124f1:W 0x3e7c18:W 0xe15de4:W 0x62ef1b:W 0x2c05c1:W
+09-27 21:12 0xa6929b03  8    35     8    27      0  pre  0x06b085:W 0x2124f1:W 0x5bc235:W
+09-27 21:27 0x96803325  7    35    19    16      0  pre  0x06b085:W 0x2124f1:W
+09-27 23:37 0x5169929b  4    35    16    19      2  pre  0x06b085:L 0x2124f1:L 0xb86b0f:W
+09-28 00:10 0x9ce5ad2f  5    15     0    15      2  pre  0x2124f1:L 0x06b085:L
+09-28 08:43 0x2ef7ec18  6    35    32     3      0  pre  0x2124f1:W 0x96d7b1:W 0x19078e:W
+09-28 15:30 0xffb0d66a  6    35    13    22      0  post 0x6c5610:W 0xadf2df:W 0xf2c69d:W 0x460b1f:W 0xfa348a:W 0x5bc235:W 0x3da529:W 0xdf3841:W 0xfee8a9:W 0x02c771:W 0x6320b4:W
+09-28 15:33 0xbb14a5da  5    28     0    28     42  post 0x6c5610:L 0x19078e:L 0x6320b4:L 0x96d7b1:L 0xfa348a:L 0xadf2df:L 0xf388c5:L 0x3e7c18:L 0x5bc235:L
+09-28 15:36 0x0c5816d3  9    35    13    22      3  post 0xadf2df:L 0x6c5610:L 0xf2c69d:W 0x5bc235:W
+09-28 16:33 0x65f237db  8    35     7    28      1  post 0xadf2df:L 0x5bc235:W 0x6320b4:W 0xa2a3de:W 0xe49291:W 0x8ff455:W
+09-28 18:52 0xe7e91780  5    35    17    18      0  post 0x6320b4:W 0xadf2df:W 0xf388c5:W 0x8ff455:W 0x3e7c18:W
+09-28 19:15 0x22d509a8  4    35     9    26      0  post 0x23e4dd:W 0x19078e:W 0x96d7b1:W
+
+(bursts held by the sequencer past E1, 22:09 Sep 27 and 14:55 Sep 28, have no row in blocks <= k+1 and are not listed)
+pre  : 8 bursts in E1, first at position 0 in 3, head-to-head won 24 of 34 (71%), mean share of shots landing in the creation second 45%
+post : 6 bursts in E1, first at position 0 in 3, head-to-head won 26 of 38 (68%), mean share of shots landing in the creation second 28%
+head-to-head rate pre 0.71 post 0.68: to tell them apart at 80% power needs about 7076 head-to-head pairs a side
+first in E1: pre 3/8, post 3/6: Fisher p = 1.00
+head-to-head: pre 24/34, post 26/38: Fisher p = 1.00
+bursts needed per side to tell P(first) 40% from 70% at 80% power: 42
+bursts needed per side to tell P(first) 50% from 75% at 80% power: 58
+on-time gate only, pre: first 3/7, head-to-head 24/32 (75%)
+on-time gate only, post: first 3/5, head-to-head 26/29 (90%)
+  Fisher p first = 1.00; head-to-head = 0.19

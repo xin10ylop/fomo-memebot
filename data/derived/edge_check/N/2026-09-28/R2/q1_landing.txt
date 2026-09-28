@@ -1,0 +1,26 @@
+burst                    k  ours in creation s / in E1   rival txs ahead of our first E1 shot   our E1 buyer position (of)
+09-26 13:47:18 0xa80c4813 old  8   25 / 10         1         2 (7)
+09-27 17:06:12 0x4fed869a old  3   10 / 15         6      None (7)
+09-27 18:42:46 0xfa8efc53 old  8    9 / 16         1         2 (7)
+09-27 21:12:46 0xa6929b03 old  8    8 / 27         0      None (None)
+09-27 21:27:50 0x96803325 old  7   19 / 16         0      None (None)
+09-27 23:37:38 0x5169929b old  4   16 / 19         2      None (None)
+09-28 00:10:07 0x9ce5ad2f old  5    0 / 15         2         2 (2)
+09-28 08:43:40 0x2ef7ec18 old  6   32 /  3         0         1 (4)
+09-28 15:30:14 0xffb0d66a NEW  6   13 / 22         0         1 (11)
+09-28 15:33:07 0xbb14a5da NEW  5    0 / 28        42      None (9)
+09-28 15:36:15 0x0c5816d3 NEW  9   13 / 22         3         3 (6)
+09-28 16:33:25 0x65f237db NEW  8    7 / 28         1         2 (8)
+09-28 18:52:53 0xe7e91780 NEW  5   17 / 18         0         1 (6)
+09-28 19:15:43 0x22d509a8 NEW  4    9 / 26         0         1 (4)
+old: bursts with shots in E1 8, first in E1 (no rival tx ahead) 3, rival txs ahead median 1.0
+new: bursts with shots in E1 6, first in E1 (no rival tx ahead) 3, rival txs ahead median 0.5
+Fisher one-sided p (new lands first more often than old), bursts: 0.53
+Fisher one-sided p, fills (old 1 of 5 first in E1, new 3 of 5): 0.26;  as the brief counts (2 of 5 vs 4 of 5): 0.26
+fills per arm to tell 40% from 80% first (one-sided 5%, power 80%): 18
+fills per arm to tell 40% from 60% first (one-sided 5%, power 80%): 77
+fills per arm to tell 30% from 50% first (one-sided 5%, power 80%): 74
+new-setting landings to reject a fixed 40% baseline if the truth is 60%: 38
+new-setting landings to reject a fixed 40% baseline if the truth is 80%: 9
+first minus second at h11, fills Sep 21-23: n=16 mean first +38.5% second +21.2% gap +17.3% median gap +17.0%
+first minus second at h11, fills Sep 24-28: n=54 mean first +22.3% second +14.5% gap +7.7% median gap +3.8%
