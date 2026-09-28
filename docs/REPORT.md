@@ -4075,3 +4075,15 @@ ratio +0.49 (from −1.29), undecided and now leaning to the edge. The new parts
 signed directly in 3.8-3.9 ms (23 before), the latest shot of any burst 0.13 ms behind schedule, the gate open at the
 build on all five fires. The public node now caps `eth_getLogs` at 30,000 blocks; `live_vs_table` reads in that size and
 caches between runs.
+
+*Reading, Sep 28 17:00 - 21:00 UTC: a flat evening, reconciled.* Written first from the chain (`prediction_sep28night2.txt`):
+23 qualifying launches, two fires at the floor view and four at the usual, all modelled small or negative (−$1 to −$3 at
+$13); the two +75% launches of the evening (17:39, 20:24) had their crowd only in the tick's own block. The engine: two
+bursts, both landing first in the seat block and both flat (18:52 +1.3% real against +1.3% modelled, +$0.16; 19:15 +0.0%
+against +0.0%), fourteen gate refusals and two creator-supply skips as predicted, one aim skip on a zero-fleet launch,
+and one new pre-gate reason: 19:44:59 `0x057d1ffe`, "nonce/gas not fresh (RPC)", the bookkeeping poll older than 30 s at
+the moment of the launch (the replay's verdict for it is a guard revert, so nothing lost; its frequency is the thing to
+read: `sudo grep -c 'nonce/gas not fresh' /var/log/sniper/engine.jsonl`). One shot 2.49 ms late on a gated burst at
+20:20 (no shot sent), the rest under 0.1 ms. `engine_vs_chain` both ways: 0 holes, 0 engine-only, 26 tier-refused
+outside the population. P&L +$11.76. Ten fills now: realized mean +10.5%, the model at their landed exits +8.1%, +$13.18
+net on the fills. The chain-scored sequential test: sixteen fires, mean +10.9%, log-likelihood ratio +0.03, undecided.
