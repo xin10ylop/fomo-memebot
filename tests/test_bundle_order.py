@@ -1,4 +1,4 @@
-"""Engine 6.5: the watch's replay folds the feed's earlier buys in chronological order. Before, direct buys came first, so a
+"""Engine 6.5: the watch's replay folds the feed's earlier buys in chronological order; engine 6.8: the bundle never closes at a stranger's shot. Before, direct buys came first, so a
 stranger's (reverting) shot at block 2 closed the bundle before the helper's named buys at block 1 were folded, and the
 launch was refused with "bundle 0 < 3" (Sep 25: 0xd43ed726, the afternoon's only sure fire; 0xba059c17; Sep 24: 0x56e76663).
 
@@ -26,8 +26,12 @@ check("curve_buys returns the helper (block 1) before the stranger's shot (block
 w = E.watch_curve(CV, 1e7, T0, set(NAMED), CREATOR, blk0=100, tax_bps=200)
 check("the bundle is the helper's three named buyers", w["bundle"] == 3 and w["wallets"] == NAMED)
 check("the bundle's ETH is the helper's value", abs(w["bundle_eth"] - 0.4) < 1e-9)
-check("the stranger's later shot closes the bundle after it was counted", w.get("bundle_closed") is True)
+check("engine 6.8: a stranger's shot never closes the bundle (the tables count every exempt named buy in the window)", not w.get("bundle_closed"))
 # the old order (direct buys first) must not come back: a second stranger shot at block 3 must not reopen or zero anything
 E.fold_buy(w, T0, STRANGER, 0.02, 103, CV, "59a87bc1")
 check("later strangers change nothing", w["bundle"] == 3 and abs(w["bundle_eth"] - 0.4) < 1e-9)
+# 6.8 (Sep 28 12:52, report 24.43): a named wallet buying AFTER a stranger's shot in the creation window is still the team's bundle
+w["named"] = set(NAMED) | {"0x" + "66" * 20}
+E.fold_buy(w, T0, "0x" + "66" * 20, 0.05, 104, CV, "59a87bc1")
+check("a named direct buy after the stranger still counts (bundle 4, 0.45 ETH)", w["bundle"] == 4 and abs(w["bundle_eth"] - 0.45) < 1e-9)
 print(f"\n{passed} checks passed")
