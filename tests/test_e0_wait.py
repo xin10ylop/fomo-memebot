@@ -107,14 +107,17 @@ check("stale buys of the same wallets on another curve are not taken for the bun
 # transactions to another address, the curve comes from the chain resolve started in parallel
 SENDERS = {}
 E.sender_of = lambda raw: SENDERS[raw]
-def helper_bundle(k, curve, wallets, eth=0.15, name_curve=False, delay_s=0.05, resolved=True):
+def helper_bundle(k, curve, wallets, eth=0.15, name_curve=False, delay_s=0.05, resolved=True, sel="aededc1a"):
+    """each named wallet calls a per-launch helper that buys in the wallet's name (selector aededc1a on the chain: 61 of 761 population
+    launches bundle this way and no other, five more templates on ten launches; engine 6.6 counts any such call unless the helper is a known
+    self-buyer). sel='4d819a2a' is the Sep 28 02:51 helper that buys in its own name: taxed 97%, no bundle (TAXED_HELPER_SELS)."""
     tok = "0x" + ("b%d" % k) * 20
     def feed():
         time.sleep(delay_s)
         for i, w in enumerate(wallets):
             raw = ("h%d-%d" % (k, i)).encode(); SENDERS[raw] = w
-            data = bytes.fromhex("9f56b0c8") + bytes(12) + bytes.fromhex((curve if name_curve else tok)[2:]) + bytes(64)
-            E.state["valtx"].append([E.mono(), T, None, eth, data, raw, 1000, "0x" + "5e" * 20, "9f56b0c8"])
+            data = bytes.fromhex(sel) + bytes(12) + bytes.fromhex((curve if name_curve else tok)[2:]) + bytes(64)
+            E.state["valtx"].append([E.mono(), T, None, eth, data, raw, 1000, "0x" + "5e" * 20, sel])
         with E.cond:
             E.cond.notify_all()
     threading.Thread(target=feed, daemon=True).start()
@@ -140,6 +143,13 @@ W = wallets(9); E.state["busy_until"] = 0.0; helper_bundle(9, cv9, wallets(19)) 
 E._handle_creation(c9, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
 s9 = events(c9, "skip", wait=1.0)
 check("helper calls from unnamed wallets are not a bundle: skipped", bool(s9) and any("0 named" in str(e.get("why")) for e in s9), str([e.get("why") for e in s9]))
+# 9b. engine 6.6 (report 24.40): the named wallets call a helper that buys in ITS OWN name (Sep 28 02:51, selector 4d819a2a, 0.997 ETH taxed 97%):
+# the curve credits the buys to the helper, an outsider, so they are no bundle: skipped with 0 named buyers, whatever their ETH
+c9b, cv9b = "0x" + "9b" * 20, "0x" + "ab" * 20
+W = wallets(29); E.state["busy_until"] = 0.0; helper_bundle(29, cv9b, W, eth=0.33, name_curve=True, sel="4d819a2a")
+E._handle_creation(c9b, E.ZERO, int(0.035e18), E.mono(), T, set(W), 1000, tax_bps=100)
+s9b = events(c9b, "skip", wait=1.0)
+check("named wallets through a helper that buys in its own name (4d819a2a): not a bundle, skipped", bool(s9b) and any("0 named" in str(e.get("why")) for e in s9b) and not events(c9b, "trade_decision", wait=0.2), str([e.get("why") for e in s9b]))
 # 10. a helper bundle that lands 5 blocks after the creation, past E0_BUNDLE_MAX_BLOCKS=3: not the seat's bundle (the honest table's 0.3 s)
 c10, cv10 = "0x" + "aa" * 20, "0x" + "b0" * 20
 W = wallets(10); E.state["busy_until"] = 0.0
@@ -147,7 +157,7 @@ def late_feed():
     time.sleep(0.05)
     for i, w in enumerate(W):
         raw = ("late-%d" % i).encode(); SENDERS[raw] = w
-        E.state["valtx"].append([E.mono(), T, None, 0.15, bytes.fromhex("9f56b0c8") + bytes(96), raw, 1005, "0x" + "5e" * 20, "9f56b0c8"])
+        E.state["valtx"].append([E.mono(), T, None, 0.15, bytes.fromhex("aededc1a") + bytes(96), raw, 1005, "0x" + "5e" * 20, "9f56b0c8"])
     with E.cond:
         E.cond.notify_all()
 threading.Thread(target=late_feed, daemon=True).start()

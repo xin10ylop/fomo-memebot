@@ -61,16 +61,19 @@ def one(item):
         d = e["data"][2:]; w = [int(d[i:i + 64], 16) / 1e18 for i in range(0, len(d), 64)]; bn = int(e["blockNumber"], 16); who = "0x" + e["topics"][2][-40:] if len(e["topics"]) > 2 else None
         rows.append((bn, "B" if e["topics"][0] == BUY else "S", w[0] if e["topics"][0] == BUY else w[1], w[1] if e["topics"][0] == BUY else w[0], who))
     if not rows or rows[0][1] != "B" or rows[0][0] != b0: return None
-    X, Y = X0, Y0; bundle_eth = 0.0; i = 0
+    X, Y = X0, Y0; bundle_eth = 0.0; taxed_eth = 0.0; i = 0
     while i < len(rows) and ts.get(rows[i][0], 9e18) == T0:
         bn, k, eth, tk, who = rows[i]
         if k == "B":
             if 0 < tk < Y:
                 net = X * tk / (Y - tk); fee = 1 - net / eth if eth > 0 else 1; X, Y = fold_buy(X, Y, tk)
                 if i > 0 and abs(fee - tier) <= 0.0008: bundle_eth += eth
+                elif i > 0 and fee > 0.5: taxed_eth += eth
         else: X, Y = fold_sell(X, Y, tk)
         i += 1
-    if bundle_eth < 0.3: return None
+    if bundle_eth < 0.3:
+        if taxed_eth >= 0.3: burned.append({"cv": cv, "b0": b0, "T0": T0, "named": len(named), "taxed_eth": round(taxed_eth, 4), "bundle_eth": round(bundle_eth, 4)})   # Sep 28 02:51 (report 24.40): a team's bundle paid the creation-second tax (a helper buying in its own name); the engine's feed count read it as a bundle
+        return None
     X1, Y1 = X, Y; rest = rows[i:]
     bE1 = next((n for n in range(b0 + 1, b0 + 25) if ts.get(n, 0) == T0 + 1), None); bE2 = next((n for n in range(b0 + 1, b0 + 25) if ts.get(n, 0) == T0 + 2), None)
     if bE1 is None or bE2 is None: return None
@@ -114,9 +117,9 @@ def safe(item):
         except Exception as e:
             err = e; time.sleep(3 * (attempt + 1))
     errors.append(f"{item[1][1]}: {str(err)[:80]}"); return None
-errors = []
+errors = []; burned = []
 with cf.ThreadPoolExecutor(3) as ex: res = [r for r in ex.map(safe, list(cre.items())) if r]
 print("launch errors:", len(errors), errors[:5], file=sys.stderr); print("launch errors:", len(errors), errors[:5])
 if errors: print(f"WARNING: {len(errors)} launches could not be read and are NOT in this window; rerun before trusting it", file=sys.stderr)
-json.dump({"t_lo": t_lo, "t_hi": t_hi, "creations": len(cre), "launches": res, "errors": errors}, open(OUT, "w"))
-print(f"{time.strftime('%b %d %H:%M', time.gmtime(t_lo))}-{time.strftime('%b %d %H:%M', time.gmtime(t_hi))} UTC: {len(cre)} creations, {len(res)} qualifying -> {OUT}")
+json.dump({"t_lo": t_lo, "t_hi": t_hi, "creations": len(cre), "launches": res, "errors": errors, "burned": burned}, open(OUT, "w"))
+print(f"{time.strftime('%b %d %H:%M', time.gmtime(t_lo))}-{time.strftime('%b %d %H:%M', time.gmtime(t_hi))} UTC: {len(cre)} creations, {len(res)} qualifying, {len(burned)} burned bundles (>= 0.3 ETH taxed in the creation second, no exempt bundle) -> {OUT}")

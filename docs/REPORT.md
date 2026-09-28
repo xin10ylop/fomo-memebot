@@ -3874,3 +3874,55 @@ Refused at the gate with the crowd arriving after the tick: 02:51 `0xf74581b5`, 
 no gate before the tick can take. The bundle cap (24.39) went live at 05:3x after this window; both template bursts
 of the night would have been refused before the build.
 
+
+### 24.40 The bundle that burned: the engine's feed count against the curve's tax (engine 6.6)
+
+**The launch.** Sep 28 02:51:54 UTC, curve `0xf74581b5da33224e774317dd59e51d25c14407e4`, creator `0x89942e73…`,
+2%-tier token, 18 wallets named in the creation calldata, and the creation transaction carried only the creator's
+0.0371 ETH buy. The creation second held nine blocks. In blocks +5 to +7, sixteen of the named wallets each sent one
+value call to a helper contract `0x65050a9b…` (selector `4d819a2a`, calldata naming the token and the curve and no
+wallet), 0.997 ETH together. The helper bought in its own name and forwarded the tokens, and the curve taxed every
+buy 97% plus the 1% fee: 5.6M tokens, 0.56% of the supply, for 0.997 ETH. The engine's feed count, the named
+wallets' value calls within nine blocks of the creation, read the seven calls the feed had shown by block +6 as a
+0.4859 ETH bundle and called the launch eligible; the gate refused it (no fleet before the tick; the crowd of
+eighteen came in the seat block). The scorer modelled +145% behind one because one percent of that ETH had reached
+the curve, so the price was still at the floor when the crowd arrived. The pipeline scores a bundle by the fee the
+chain shows (buys in the creation second at the tier fee, e1_multi), found none, and left the launch out of the
+population: the "not found" of the night reading.
+
+**What the population says about the tax.** The 723 launches with tapes (`edge_check/B` and `D`), every
+creation-second buy classified by its fee, the curve's buyer and the transaction: 6,035 exempt buys, every one with a
+wallet named in the creation as the curve's buyer (1,902 direct buys, 614 through the bundler that lists its
+recipients, `6f49227e`, the rest through per-launch helper contracts that forward the sender: 61 launches through the
+`aededc1a` template and nothing else, ten more through five other templates, `7bc1d5d9`, `9547dd5b`, `cce7ec13`,
+`153e66e6`, and one with no buy); 18 taxed buys, every one an outsider paying 93–98%; not one taxed buy by a named
+wallet. The exemption is keyed to the buyer's identity. A helper that buys in its own name is an outsider to the
+curve whatever wallet called it, and the tax reaches nothing but the helper: the ETH does not enter the reserve
+(the model's next buy, 0.01 ETH at block +9, matches the chain only without it).
+
+**Three rules considered and refused.** (1) Count a named wallet's helper call only when its calldata names a
+wallet: refuses 66 of 761 population launches (9%), the `aededc1a` template among them, and with it the 00:10 fill's
+launch. (2) An allowlist of helper selectors: refuses the ten launches on the five minor templates and every new one,
+and a new template appears every few days (Sep 18–19, 22–23, 26). (3) Reading the curve's Buy events at the gate: the
+burned buys land 0.5–0.7 s after the creation, so a read at watch time refuses good bundles that land late, and a read
+at the tick adds a chain round trip to the seat's path.
+
+**Engine 6.6.** A denylist, `TAXED_HELPER_SELS` (default `4d819a2a`, comma-separated in the env): a named wallet's
+value call through a helper on it is no bundle buy. The fold is corrected for what the chain shows: a creation-second
+buy whose buyer is not exempt (an outsider's, or a named wallet's through a self-buying helper) puts one percent of its
+ETH on the curve, not the whole net (the tables' fold; before 6.6 the outsiders' 93–98% buys were folded as full buys,
+15 launches of 723 and 0.6 ETH in all). A named sender's own buy counts as a direct bundle buy only when the call goes
+to the curve. Seventeen test scripts pass; `tests/test_e0_wait.py` case 9b is the 02:51 helper (sixteen named calls,
+0.33 ETH each, selector `4d819a2a`: skipped with 0 named buyers), and the per-launch helper of the population is
+its default helper now (`aededc1a`, counted).
+
+**Two instruments.** `engine_vs_chain.py` now runs the reverse direction too: every launch the engine judged eligible
+(fired, or refused at the gate) that the chain's population does not hold prints an `ENGINE ONLY` line with the
+engine's bundle, and the summary counts them; `--from`/`--to` bound the reading's window, without which a launch
+after the population's last one is outside the script's span (02:51 was). `e1_multi.py` counts the burned bundles it
+drops (≥ 0.3 ETH taxed in the creation second, no exempt bundle) in the scan's summary line and the JSON's
+`burned` list, so the class's frequency is read from every window from now on.
+
+**Exposure.** One launch in about 770 (761 in the population, one burned), refused by the gate on its own account,
+and modelled +145% had it fired: no basis to call the class good or bad, and the denylist removes only the helper
+seen. The night's tally stands: eight bursts, four fills, +$1.04. The night reading's open item is closed.

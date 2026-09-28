@@ -80,7 +80,8 @@ TAKE_PROFIT = float(os.environ.get("TAKE_PROFIT", "0.5"))                # sell 
 SEAT = os.environ.get("SEAT", "E2").upper(); EXEMPT = os.environ.get("EXEMPT", "0") == "1"
 BUNDLE_MIN = int(os.environ.get("BUNDLE_MIN", "3" if SEAT in ("E1", "E2") else "0"))
 BUNDLE_MIN_ETH = float(os.environ.get("BUNDLE_MIN_ETH", "0.3"))
-BUNDLE_MAX_ETH = float(os.environ.get("BUNDLE_MAX_ETH", "0"))     # 0 = no cap. A team that puts in more than this has already taken the move: Sep 12-16 those launches paid -0.7%, the rest +8.5% (audit_combo)
+BUNDLE_MAX_ETH = float(os.environ.get("BUNDLE_MAX_ETH", "0"))
+TAXED_HELPER_SELS = {x.strip().lower().replace("0x", "") for x in os.environ.get("TAXED_HELPER_SELS", "4d819a2a").split(",") if x.strip()}   # 6.6: helper selectors that buy in the helper's own name, taxed 97% in the creation second (report 24.40)     # 0 = no cap. A team that puts in more than this has already taken the move: Sep 12-16 those launches paid -0.7%, the rest +8.5% (audit_combo)
 OUT1_MAX = int(os.environ.get("OUT1_MAX", "0"))
 OUT1_MIN_ETH = float(os.environ.get("OUT1_MIN_ETH", "0"))                 # second-one outsider buys below this size do not count (0 = all count; 0.01 makes the gate immune to planted dust)
 OUT2_MAX = int(os.environ.get("OUT2_MAX", "0"))                          # non-named buys visible in the seat's second before we send
@@ -923,13 +924,22 @@ def watch_curve(curve, tk0, feed_ts, named, creator, blk0=None, tax_bps=None):
     for b in curve_buys(curve, feed_ts):
         ts_, snd, val, seen = b[:4]; blk = b[4] if len(b) > 4 else None
         buyers = named_in(b[7], named) if len(b) > 7 else None                 # a helper call: its recipients are the bundle
-        if buyers and snd in named:
-            buyers = buyers | {snd}
+        if snd in named and len(b) > 7 and not taxed_helper(b[6]):             # 6.6: a named sender's helper call buys in its name, unless the helper is a known self-buyer
+            buyers = (buyers or set()) | {snd}
         fold_buy(w, ts_, snd, val, blk, b[5] if len(b) > 5 else None, b[6] if len(b) > 6 else None, buyers=buyers or None)
     for seen, tk in state["sells"].get(curve, []):
         fold_sell(w, tk)
     state["watch"][curve] = w
     return w
+
+
+def taxed_helper(sel):
+    """6.6 (report 24.40): the curve exempts a creation-second buy from the 97% tax when its buyer is a wallet named in the creation;
+    a named wallet's value call to a helper is a bundle buy whenever the helper buys in the wallet's name (the bundler listing its
+    recipients, 6f49227e, and six per-launch helper templates that forward the sender: 71 of 761 population launches bundle through
+    those and nothing else, a new template every few days, so no allowlist). The one helper seen buying in its own name and paying
+    the tax (Sep 28 02:51, selector 4d819a2a: sixteen named buys, 0.997 ETH, 0.56% of the supply) is named here and is no bundle."""
+    return bool(sel) and str(sel).lower().replace("0x", "") in TAXED_HELPER_SELS
 
 
 def named_in(data, named):
@@ -989,8 +999,15 @@ def fold_buy(w, ts_, snd, val, blk=None, to=None, sel=None, buyers=None):
     non-named sender whose transaction names the curve in second one or two: a direct buy, a value-carrying router buy, or a
     value-less router call (a router buy paid in tokens). A sender whose counted attempts never land (a bot whose second-one buys
     revert on the surcharge) is learned from the chain at scoring time and ignored after three misses."""
+    # 6.6 (Sep 28 02:51, report 24.40): the curve exempts the launch's named wallets from the creation-second tax only when they are
+    # its buyer: a direct buy, or a helper buying in their name (the callers pass those as buyers; 723 launches, 6,035 exempt buys,
+    # every one with a named buyer; every taxed one an outsider paying 93-98%). Anyone else's creation-second buy, a named wallet's
+    # through a self-buying helper included, puts one percent of its ETH on the curve (the tables' fold), not the whole net, and is no bundle.
+    direct = to is None or to == w.get("curve")
+    exempt = bool(buyers) or ((snd in w["named"] or snd == w["creator"]) and direct)
+    taxed = ts_ == w["ts0"] and not exempt and snd != WALLET
     if val > 0:
-        net = val * (1 - w.get("tax", 0.01)); X, Y = w["X"], w["Y"]; tk = Y - X * Y / (X + net); w["X"] = X + net; w["Y"] = Y - tk   # the token's own tax from the calldata, not a flat 1%
+        net = val * (0.01 if taxed else 1 - w.get("tax", 0.01)); X, Y = w["X"], w["Y"]; tk = Y - X * Y / (X + net); w["X"] = X + net; w["Y"] = Y - tk   # the token's own tax from the calldata, not a flat 1%
     w["buys"] += 1
     in_creation = (blk - w["blk0"] <= 9) if (blk is not None and w.get("blk0") is not None) else (ts_ == w["ts0"])
     if buyers:                                                            # one helper transaction buying for several named wallets: the bundle is its buyers, its ETH the value (24.18)
@@ -998,7 +1015,7 @@ def fold_buy(w, ts_, snd, val, blk=None, to=None, sel=None, buyers=None):
             w["bundle"] += len(buyers); w["wallets"] |= set(buyers); w["bundle_eth"] += val
         return
     if snd in w["named"] or snd == w["creator"]:
-        if in_creation and not w.get("bundle_closed"):
+        if in_creation and not w.get("bundle_closed") and direct:
             w["bundle"] += 1; w["wallets"].add(snd); w["bundle_eth"] += val   # buys and distinct wallets: the tables count buys (no sender in the event data)
     elif snd != WALLET:
         if in_creation and not w.get("bundle_closed"):                          # the tables end the bundle at the first taxed buy (an outsider paying 93-98% in the creation second)
@@ -1641,7 +1658,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
                         e[2] = sender_of(e[5])
                     except Exception:
                         e[2] = "?"
-                if e[2] in named:
+                if e[2] in named and not taxed_helper(e[8] if len(e) > 8 else None):   # 6.6: a named sender's helper call buys in its name, unless the helper is a known self-buyer (taxed)
                     buyers = buyers | {e[2]}
                 if buyers:
                     out.append((e[1], e[2], e[3], blk, e[7] if len(e) > 7 else None, e[8] if len(e) > 8 else None, e[4], True, frozenset(buyers)))
@@ -2189,7 +2206,7 @@ def index_message(inner, ts, seen):
                 for cv, w in list(watched.items()):                                  # a snapshot: the score and creation threads add and pop watched curves while this loop runs
                     if w["cb"] in data or (w["tb"] is not None and w["tb"] in data):    # a router names the curve or the token (Sep 11: a router buying by token was invisible)
                         e[2] = sender_of(t); bs = named_in(data, w["named"])
-                        fold_buy(w, ts, e[2], val, state["blocks"], to_hex, sel.hex(), buyers=(bs | ({e[2]} if e[2] in w["named"] else set())) or None)
+                        fold_buy(w, ts, e[2], val, state["blocks"], to_hex, sel.hex(), buyers=(bs | ({e[2]} if e[2] in w["named"] and not taxed_helper(sel.hex()) else set())) or None)   # 6.6: a known self-buying helper is no bundle
                 continue
             if watched and val == 0 and sel not in (BUY_SEL, SELL_SEL):
                 for cv, w in list(watched.items()):                                  # a snapshot: the score and creation threads add and pop watched curves while this loop runs
@@ -2424,7 +2441,7 @@ async def main():
     load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 6.5, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.6, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

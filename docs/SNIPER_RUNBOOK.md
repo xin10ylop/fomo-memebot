@@ -976,3 +976,25 @@ period and read on the other, null 0 of 2,000. Switch (the engine reads the env 
 The prediction's population still lists these launches (e1_multi has no cap); the engine's refusal reads
 `bundle N ETH > 3.0` in engine_vs_chain, a PRE line, as intended.
 
+
+## 5v. Engine 6.6: the burned bundle (Sep 28, report 24.40)
+
+The 02:51 launch the night reading could not find: its team's bundle went through a helper that bought in its own
+name, the curve taxed it 97%, the pipeline saw no bundle, the engine's feed count saw 0.49 ETH. Engine 6.6 names that
+helper's selector on a denylist (`TAXED_HELPER_SELS`, default `4d819a2a`; add selectors comma-separated with
+`set_kv TAXED_HELPER_SELS 4d819a2a,<next>` when a reading shows another `ENGINE ONLY` launch of the kind) and folds
+a taxed creation-second buy as the chain does (one percent of its ETH). Deploy, with no fill open
+(`sudo grep -c '"ev": "trade_done"'` equals the trade_decision count):
+
+    cd ~/fomo-memebot && git pull && sudo systemctl restart sniper-engine && sleep 5 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"hold_blocks": [0-9]*\|"kill_usd": [0-9.]*\|"stake": \[[^]]*\]\|"bundle_max_eth": [0-9.]*'
+
+Expected: `"version": 6.6`, the rest unchanged (stake 13, hold_blocks 9, kill_usd 24, bundle_max_eth 3.0).
+
+Step 6 of the reading now takes the window and reports both directions:
+
+    sudo python3 src/analysis/engine_vs_chain.py data/derived/live_vs_table/launches_<window>.json --crowd data/derived/live_vs_table/crowd_raw_<window>.json.gz --from "<start>" --to "<end>"
+
+Every population launch as before (FIRE / GATE / PRE / NO EVENT), then `ENGINE ONLY` lines for launches the engine
+judged eligible that the population does not hold, and a summary `N engine-only`. After 6.6 an `ENGINE ONLY` line is
+a new kind of launch: read it from the chain before anything else (`e1_multi`'s scan prints the burned bundles it
+dropped: `N burned bundles` in its summary line, the list in the JSON's `burned`).
