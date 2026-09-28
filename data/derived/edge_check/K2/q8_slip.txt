@@ -59,3 +59,10 @@
   slip 1.00: fit $-0.892/fire $-27.22/d | read $-0.217/fire $ -2.46/d
   chosen on fit: 0.05; on read: $-0.300/fire vs $-0.300 at 0.07 (+0.00/d); 0.15 on read: +0.76/d
   chosen on read: 0.30; on fit: $-0.859/fire vs $-0.483 at 0.07 (-11.48/d); 0.15 on fit: -2.45/d
+
+== (4) Wald SPRT on the fills the 7% guard would have refused: expected fills to a decision ==
+  true mean +21.7% (read, second place)          drift +0.1563/fill -> about 19 fills to the upper bound
+  true mean +14.2% (fit, second place)           drift +0.0492/fill -> about 60 fills to the upper bound
+  true mean +19% (H1)                            drift +0.1178/fill -> about 25 fills to the upper bound
+  true mean +2.5% (H0)                           drift -0.1178/fill -> about 25 fills to the lower bound
+  true mean -2.5% (the 17:06 last-place case)    drift -0.1891/fill -> about 16 fills to the lower bound

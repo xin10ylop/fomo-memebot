@@ -266,9 +266,7 @@ class Rpc:
     seat node's pooled connections open."""
     def __init__(self, url, timeout=10, keepalive_s=0.0):
         u = urllib.parse.urlparse(url); self.host = u.netloc; self.path = u.path or "/"; self.timeout = timeout
-        self.pool = collections.deque(); self.plock = threading.Lock()
-        if keepalive_s > 0:
-            threading.Thread(target=self._keepalive, args=(keepalive_s,), daemon=True).start()
+        self.pool = collections.deque(); self.plock = threading.Lock(); self.keepalive_s = keepalive_s; self._ka = False   # the keepalive starts on the first call, not at import (analysis scripts import the engine)
 
     def _conn(self):
         with self.plock:
@@ -303,6 +301,8 @@ class Rpc:
                         pass
 
     def call(self, method, params, tries=3):
+        if self.keepalive_s > 0 and not self._ka:
+            self._ka = True; threading.Thread(target=self._keepalive, args=(self.keepalive_s,), daemon=True).start()
         body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params})
         for i in range(tries):
             c = self._conn(); err = None

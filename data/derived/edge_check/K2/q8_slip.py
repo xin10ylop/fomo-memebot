@@ -51,3 +51,9 @@ for lab, mix in MIX.items():
     for per, other in (("fit", "read"), ("read", "fit")):
         best = max(SLIPS, key=lambda s: res[(s, per)])
         print(f"  chosen on {per}: {best:.2f}; on {other}: ${res[(best, other)]:+.3f}/fire vs ${res[(0.07, other)]:+.3f} at 0.07 ({(res[(best, other)] - res[(0.07, other)]) * summ(R[0.07], other)['fires_day']:+.2f}/d); 0.15 on {other}: {(res[(0.15, other)] - res[(0.07, other)]) * summ(R[0.07], other)['fires_day']:+.2f}/d")
+# (4) the sequential test's arithmetic for the incremental fills (Wald, H0 +2.5%, H1 +19%, sd 0.34, bounds +-ln(19) = +-2.94)
+import math
+m0, m1, sd = 0.025, 0.19, 0.34; A = math.log(19); k_ = (m1 - m0) / sd ** 2
+print("\n== (4) Wald SPRT on the fills the 7% guard would have refused: expected fills to a decision ==")
+for lab, m in (("true mean +21.7% (read, second place)", 0.217), ("true mean +14.2% (fit, second place)", 0.142), ("true mean +19% (H1)", 0.19), ("true mean +2.5% (H0)", 0.025), ("true mean -2.5% (the 17:06 last-place case)", -0.025)):
+    d = k_ * (m - (m0 + m1) / 2); print(f"  {lab:46s} drift {d:+.4f}/fill -> about {A / abs(d):.0f} fills to the {'upper' if d > 0 else 'lower'} bound")
