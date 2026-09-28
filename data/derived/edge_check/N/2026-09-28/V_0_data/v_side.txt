@@ -1,0 +1,46 @@
+(a) 6.7 bundle >= 3 but closed with fewer named buys than 6.8 counts (usual horizon, mode A): 6.7's bundle ETH ~ chain ETH x b7/b8
+  Sep 21 12:33 0x5e4bddb3 6.7 17/6.8 22 chain 1.101 ETH ~6.7 0.851 | FILL 
+  Sep 22 18:38 0x8113ecb2 6.7 8/6.8 9 chain 0.453 ETH ~6.7 0.403 | GUARD no fill 
+  Sep 23 04:26 0x1eb97415 6.7 13/6.8 17 chain 1.000 ETH ~6.7 0.765 | FILL 
+  Sep 24 18:10 0xe65b85ad 6.7 18/6.8 24 chain 1.225 ETH ~6.7 0.919 | FILL 
+  5 launches partially counted by 6.7
+
+(b) the replay's own bundle refusals at the usual view (the crowd rows show fewer than 3 named buyers or the ETH is out of range)
+  fit  Sep 21 17:10 0xe49260fe GATE bundle 0 < 3            chain 0.352 ETH fleets 3 tier 0.03 h11 +5.5%
+  fit  Sep 21 23:51 0x033bc29a GATE bundle ETH > 3.0 (cap)  chain 4.233 ETH fleets 7 tier 0.02 h11 -10.0%
+  fit  Sep 22 00:18 0x9c861776 GATE bundle ETH > 3.0 (cap)  chain 3.131 ETH fleets 1 tier 0.02 h11 -13.0%
+  fit  Sep 22 00:36 0xcee448cc GATE bundle ETH > 3.0 (cap)  chain 4.137 ETH fleets 3 tier 0.03 h11 -11.9%
+  fit  Sep 22 00:55 0x0a8b7499 GATE bundle ETH > 3.0 (cap)  chain 4.179 ETH fleets 0 tier 0.03 h11 -11.9%
+  fit  Sep 22 18:08 0x8bed8351 GATE bundle 0 < 3            chain 0.680 ETH fleets 1 tier 0.02 h11 -9.5%
+  fit  Sep 22 20:46 0xac8a2c12 GATE bundle ETH > 3.0 (cap)  chain 4.024 ETH fleets 0 tier 0.03 h11 -8.6%
+  fit  Sep 22 22:27 0xc7349e7e GATE bundle ETH > 3.0 (cap)  chain 4.304 ETH fleets 5 tier 0.03 h11 -11.9%
+  fit  Sep 23 06:00 0xe8bcf407 GATE bundle ETH > 3.0 (cap)  chain 4.219 ETH fleets 3 tier 0.03 h11 -11.9%
+  fit  Sep 23 14:42 0x74608565 GATE bundle ETH > 3.0 (cap)  chain 3.125 ETH fleets 2 tier 0.03 h11 -11.6%
+  fit  Sep 23 19:28 0x0bf85d57 GATE bundle ETH > 3.0 (cap)  chain 4.268 ETH fleets 3 tier 0.02 h11 -10.0%
+  fit  Sep 23 19:48 0x8d5936cc GATE bundle 0 < 3            chain 0.400 ETH fleets 0 tier 0.03 h11 -9.0%
+  fit  Sep 23 19:52 0x6ff3cd2b GATE bundle ETH > 3.0 (cap)  chain 4.144 ETH fleets 4 tier 0.02 h11 -10.0%
+  fit  Sep 23 20:08 0x657b410f GATE bundle 0 < 3            chain 0.500 ETH fleets 0 tier 0.03 h11 -11.9%
+  fit  Sep 23 21:03 0x3c26916e GATE bundle 0 < 3            chain 0.500 ETH fleets 0 tier 0.03 h11 -6.4%
+  fit  Sep 23 21:54 0x4f2eb771 GATE bundle 0 < 3            chain 0.780 ETH fleets 0 tier 0.03 h11 -11.9%
+  fit  Sep 23 22:10 0xedacae4f GATE bundle 0 < 3            chain 0.780 ETH fleets 0 tier 0.03 h11 -9.5%
+  fit  Sep 23 22:31 0x193d5e77 GATE bundle 0 < 3            chain 0.700 ETH fleets 1 tier 0.03 h11 -6.9%
+  read Sep 24 03:08 0x3004f034 GATE bundle 0 < 3            chain 0.700 ETH fleets 0 tier 0.03 h11 -9.4%
+  read Sep 24 11:56 0x3ba4df00 GATE bundle 0 < 3            chain 0.500 ETH fleets 0 tier 0.03 h11 -11.8%
+  read Sep 24 13:47 0xb8935d05 GATE bundle 0 < 3            chain 0.500 ETH fleets 0 tier 0.03 h11 -11.9%
+  read Sep 24 14:12 0xe5ea3a5a GATE bundle 0 < 3            chain 0.520 ETH fleets 0 tier 0.03 h11 -11.9%
+  read Sep 24 14:22 0xbda0fd53 GATE bundle 0 < 3            chain 0.530 ETH fleets 0 tier 0.03 h11 -11.9%
+  read Sep 24 15:15 0xbf0577df GATE bundle 0 < 3            chain 0.550 ETH fleets 0 tier 0.03 h11 +1.1%
+  read Sep 24 15:31 0x8eaf5a6e GATE bundle 0 < 3            chain 0.510 ETH fleets 0 tier 0.03 h11 -11.8%
+  read Sep 24 15:54 0x8e0a5c79 GATE bundle 0 < 3            chain 0.600 ETH fleets 0 tier 0.03 h11 -11.9%
+  read Sep 24 16:11 0x243a0a0f GATE bundle 0 < 3            chain 0.500 ETH fleets 0 tier 0.03 h11 -11.9%
+  read Sep 24 19:14 0xdb94d8b7 GATE bundle 2 < 3            chain 0.580 ETH fleets 0 tier 0.02 h11 -10.0%
+  read Sep 25 19:22 0x9cb64713 GATE bundle ETH > 3.0 (cap)  chain 4.137 ETH fleets 3 tier 0.03 h11 -11.9%
+  read Sep 25 20:05 0x8aba714f GATE bundle ETH > 3.0 (cap)  chain 4.258 ETH fleets 3 tier 0.03 h11 -11.9%
+  read Sep 26 01:25 0xeb90afaa GATE bundle ETH > 3.0 (cap)  chain 4.214 ETH fleets 4 tier 0.02 h11 -10.0%
+  read Sep 26 11:29 0x0c55377f GATE bundle ETH > 3.0 (cap)  chain 3.386 ETH fleets 0 tier 0.03 h11 -10.6%
+  read Sep 26 16:05 0xee486806 GATE bundle ETH > 3.0 (cap)  chain 4.236 ETH fleets 2 tier 0.025 h11 -11.0%
+  read Sep 27 13:01 0x6bc6d430 GATE bundle ETH > 3.0 (cap)  chain 4.233 ETH fleets 0 tier 0.02 h11 -10.0%
+  read Sep 27 18:21 0x86d1ab77 GATE bundle ETH > 3.0 (cap)  chain 4.233 ETH fleets 3 tier 0.02 h11 -10.0%
+  read Sep 27 21:12 0xa6929b03 GATE bundle ETH > 3.0 (cap)  chain 4.233 ETH fleets 3 tier 0.02 h11 -10.0%
+  read Sep 27 21:27 0x96803325 GATE bundle ETH > 3.0 (cap)  chain 4.233 ETH fleets 2 tier 0.02 h11 -10.0%
+  read Sep 27 23:37 0x5169929b GATE bundle ETH > 3.0 (cap)  chain 4.233 ETH fleets 4 tier 0.02 h11 -10.0%

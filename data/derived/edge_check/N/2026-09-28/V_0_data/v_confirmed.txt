@@ -1,0 +1,16 @@
+view k2
+  fit : bot n=3 $+3.36 || confirmed (bot+direct) n=3 $+3.36, without its largest $+1.32
+  read: bot n=3 $+4.94 || confirmed (bot+direct) n=3 $+4.94, without its largest $-0.28
+  week confirmed n=6 $+8.29; without the largest $+3.08; without the two largest $+1.04
+view k1reg
+  fit : bot n=10 $+14.38 | direct n=2 $-8.99 | other n=2 $+12.01 || confirmed (bot+direct) n=12 $+5.39, without its largest $-0.35
+  read: bot n=6 $+2.66 || confirmed (bot+direct) n=6 $+2.66, without its largest $-2.56
+  week confirmed n=18 $+8.04; without the largest $+2.30; without the two largest $-2.91
+view kreg
+  fit : bot n=10 $+14.38 | direct n=2 $-8.99 | other n=2 $+12.01 || confirmed (bot+direct) n=12 $+5.39, without its largest $-0.35
+  read: bot n=6 $+2.66 | other n=1 $-1.88 || confirmed (bot+direct) n=6 $+2.66, without its largest $-2.56
+  week confirmed n=18 $+8.04; without the largest $+2.30; without the two largest $-2.91
+
+'other' closers at the usual view:
+  Sep 22 04:16 0x50dd5611 $+1.11 closer 0xf05de1b0 -> 0x5b8e11e3 0x33bfe246; 6.7 bundle if that call carries no value: 14; chain bundle 0.531 ETH, k 4
+  Sep 22 18:56 0x39501200 $+10.90 closer 0xf4937e57 -> 0x5b8e11e3 0xd7311a37; 6.7 bundle if that call carries no value: 4; chain bundle 0.368 ETH, k 8

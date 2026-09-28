@@ -1091,8 +1091,9 @@ then the slip.
 
 Sep 28 12:52 `0x98f4e88b` was skipped "bundle 0 < 3" while the chain shows a 0.71 ETH exempt bundle from 22 named wallets: two
 strangers' shots sat in the bundle's block ahead of it, and the engine closed its bundle count at the first outsider's buy, a rule
-the tables never had (e1_multi counts every exempt named buy in the creation window). On the week's population that rule skips 33
-of 632 launches. Engine 6.8 drops it. Also: the "nonce/gas not fresh (RPC)" gate (19:44:59) now allows 60 s instead of 30 and the
+the tables never had (e1_multi counts every exempt named buy in the creation window). On the week the rule cost 21 launches the
+engine would otherwise have fired or gated on (18 usual-view fires, +$8.04 together, one fill carrying the read half: worth $0,
+a correctness fix; report 24.43). Engine 6.8 drops it. Also: the "nonce/gas not fresh (RPC)" gate (19:44:59) now allows 60 s instead of 30 and the
 bookkeeping poll retries 2 s after a failed read instead of waiting the whole interval. Deploy with the morning reading, no fill
 open (the two counts equal):
 

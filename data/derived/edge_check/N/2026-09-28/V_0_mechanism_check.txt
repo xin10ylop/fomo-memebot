@@ -1,0 +1,62 @@
+V_0: 6.7 vs 6.8 bundle gates at the engine's read (the block its bundle wait passes), real values from D where known
+launches past the pre-gates in the replay: 518; bundle never visible before the tick (wait fails, both engines skip): 180
+6.8 admits, 6.7 refused: 21 | 6.8 refuses, 6.7 admitted: 0 | both refuse: 14
+  6.7's reasons on the added set: [('bundle 0', 21)]
+  6.8's reasons on the removed set: []
+  both refuse, 6.8's reasons: [('ETH > 3.0', 12), ('bundle 1 < 3', 2)]
+
+the added set at the usual view (k-1 + registration), crowd gate as the replay counts it:
+  Sep 21 12:02 0xc20adb7a k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (23, 0.772) vals real | replay FILL                   fleets 3 h11 -0.8% $-0.43
+  Sep 21 14:37 0x8cc0b1f4 k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (22, 0.694) vals real | replay FILL                   fleets 2 h11 +38.4% $+4.66
+  Sep 21 15:03 0xfdd87517 k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (21, 0.657) vals real | replay FILL                   fleets 3 h11 +14.9% $+1.60
+  Sep 21 16:16 0xf7af6adf k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (21, 0.675) vals real | replay FILL                   fleets 3 h11 +46.7% $+5.74
+  Sep 21 17:15 0x127a8272 k 6 read@blk 3 (k-3) 6.7 (0, 0.0) bundle 0 < 3   6.8 (17, 0.511) vals real | replay FILL                   fleets 3 h11 -5.5% $-1.04
+  Sep 21 17:28 0x82b04e57 k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (23, 0.751) vals real | replay FILL                   fleets 2 h11 +11.4% $+1.16
+  Sep 21 20:00 0xe7d3fec3 k 8 read@blk 1 (k-7) 6.7 (0, 0.0) bundle 0 < 3   6.8 (10, 0.841) vals real | replay GATE attackers 1 < 2   fleets 1
+  Sep 22 17:24 0x59217e68 k 8 read@blk 2 (k-6) 6.7 (0, 0.0) bundle 0 < 3   6.8 (5, 1.369) vals real | replay GATE attackers 1 < 2   fleets 1
+  Sep 22 17:53 0x1e5c6b1a k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (22, 0.725) vals real | replay FILL                   fleets 2 h11 -2.6% $-0.67
+  Sep 22 22:49 0x75d95c67 k 7 read@blk 2 (k-5) 6.7 (0, 0.0) bundle 0 < 3   6.8 (20, 0.768) vals real | replay FILL                   fleets 2 h11 -57.8% $-7.85
+  Sep 22 22:59 0xc3a219c7 k 8 read@blk 2 (k-6) 6.7 (0, 0.0) bundle 0 < 3   6.8 (20, 0.768) vals real | replay FILL                   fleets 2 h11 -6.2% $-1.14
+  Sep 23 18:41 0xb6df1c84 k 6 read@blk 3 (k-3) 6.7 (0, 0.0) bundle 0 < 3   6.8 (21, 0.693) vals real | replay FILL                   fleets 5 h11 +18.2% $+2.04
+  Sep 23 18:54 0xe406d4a7 k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (18, 0.674) vals real | replay FILL                   fleets 3 h11 +9.2% $+0.86
+  Sep 23 19:24 0xdb208100 k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (22, 0.723) vals real | replay FILL                   fleets 3 h11 +6.0% $+0.45
+  Sep 24 20:42 0x56e76663 k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (22, 0.703) vals real | replay FILL                   fleets 3 h11 -7.2% $-1.26
+  Sep 25 15:28 0xba059c17 k 9 read@blk 3 (k-6) 6.7 (0, 0.0) bundle 0 < 3   6.8 (18, 1.776) vals real | replay GATE attackers 1 < 2   fleets 1
+  Sep 25 16:24 0xd43ed726 k 7 read@blk 3 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (13, 0.427) vals real | replay FILL                   fleets 2 h11 +42.7% $+5.21
+  Sep 25 22:22 0x18de1d35 k 7 read@blk 2 (k-5) 6.7 (0, 0.0) bundle 0 < 3   6.8 (22, 0.66) vals placeholder | replay FILL                   fleets 4 h11 +10.1% $+0.98
+  Sep 26 23:53 0x2b7508b0 k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (22, 0.678) vals real | replay FILL                   fleets 3 h11 +2.0% $-0.07
+  Sep 27 00:10 0x80c0efae k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (13, 0.405) vals real | replay FILL                   fleets 2 h11 -10.0% $-1.63
+  Sep 28 12:52 0x98f4e88b k 6 read@blk 2 (k-4) 6.7 (0, 0.0) bundle 0 < 3   6.8 (22, 0.66) vals placeholder | replay FILL                   fleets 3 h11 -1.9% $-0.57
+  floor k-2      fit 3 fires $+3.36 ($+1.30/day) | read 3 fires $+4.94 ($+1.02/day)
+  usual k-1+reg  fit 12 fires $+5.39 ($+2.08/day) | read 6 fires $+2.66 ($+0.55/day)
+  ceiling k+reg  fit 12 fires $+5.39 ($+2.08/day) | read 7 fires $+0.78 ($+0.16/day)
+
+R1's 20 usual-view fires vs this replay's added fires: in both 18, R1 only ['0x39501200', '0x50dd5611'], here only []
+
+where the bundle becomes readable, block offset before the tick (k - g), fired launches at the usual view:
+  added by 6.8       n= 18 k-3:2 k-4:13 k-5:2 k-6:1
+  admitted by both   n= 87 k-1:1 k-2:11 k-3:13 k-4:15 k-5:15 k-6:10 k-7:16 k-8:6
+
+the first stranger in the added launches (sender, target): [(('0x8191c327', '0xbd7c6f67'), 16), (('0xd91abf0e', '0x7250689f'), 1), (('0xf6e55480', '0x59217e68'), 1), (('0x16ebf6fa', '0x2ddcda58'), 1), (('0xf6e55480', '0xc3a219c7'), 1)]
+
+R1's usual-view fires not in the added set here:
+  Sep 22 18:56 0x39501200 read@blk 6 k 8 6.7 (3, 0.325) [] 6.8 (3, 0.325) [] vals real | replay bundle 0.368 FILL $+10.90
+  Sep 22 04:16 0x50dd5611 read@blk 2 k 4 6.7 (11, 0.46) [] 6.8 (11, 0.46) [] vals real | replay bundle 0.531 FILL $+1.11
+
+both engines refuse at their read while the replay's bundle gates pass (an engine-vs-model gap 6.8 does not touch):
+  Sep 21 23:51 0x033bc29a 6.7 (25, 15.478) 6.8 (25, 15.478) ETH > 3.0  vals real | replay bundle 4.233 GATE bundle ETH > 3.0 (c fleets 7
+  Sep 22 00:18 0x9c861776 6.7 (9, 3.131) 6.8 (9, 3.131) ETH > 3.0  vals real | replay bundle 3.131 GATE bundle ETH > 3.0 (c fleets 1
+  Sep 22 00:36 0xcee448cc 6.7 (20, 7.345) 6.8 (20, 7.345) ETH > 3.0  vals real | replay bundle 4.137 GATE bundle ETH > 3.0 (c fleets 3
+  Sep 22 22:27 0xc7349e7e 6.7 (13, 7.856) 6.8 (13, 7.856) ETH > 3.0  vals real | replay bundle 4.304 GATE bundle ETH > 3.0 (c fleets 5
+  Sep 23 06:00 0xe8bcf407 6.7 (24, 9.033) 6.8 (24, 9.033) ETH > 3.0  vals real | replay bundle 4.219 GATE bundle ETH > 3.0 (c fleets 3
+  Sep 23 14:42 0x74608565 6.7 (10, 3.125) 6.8 (10, 3.125) ETH > 3.0  vals real | replay bundle 3.125 GATE bundle ETH > 3.0 (c fleets 2
+  Sep 23 19:28 0x0bf85d57 6.7 (13, 4.888) 6.8 (13, 4.888) ETH > 3.0  vals real | replay bundle 4.268 GATE bundle ETH > 3.0 (c fleets 3
+  Sep 23 19:52 0x6ff3cd2b 6.7 (13, 4.144) 6.8 (13, 4.144) ETH > 3.0  vals real | replay bundle 4.144 GATE bundle ETH > 3.0 (c fleets 4
+  Sep 25 20:05 0x8aba714f 6.7 (22, 5.903) 6.8 (22, 5.903) ETH > 3.0  vals real | replay bundle 4.258 GATE bundle ETH > 3.0 (c fleets 3
+  Sep 26 01:25 0xeb90afaa 6.7 (22, 9.98) 6.8 (22, 9.98) ETH > 3.0  vals real | replay bundle 4.214 GATE bundle ETH > 3.0 (c fleets 4
+  Sep 26 11:29 0x0c55377f 6.7 (7, 3.386) 6.8 (7, 3.386) ETH > 3.0  vals real | replay bundle 3.386 GATE bundle ETH > 3.0 (c fleets 0
+  Sep 26 16:05 0xee486806 6.7 (22, 6.816) 6.8 (22, 6.816) ETH > 3.0  vals real | replay bundle 4.236 GATE bundle ETH > 3.0 (c fleets 2
+  Sep 27 03:00 0x7ee7228c 6.7 (1, 0.42) 6.8 (1, 0.42) bundle 1 < 3 vals real | replay bundle 0.420 GATE attackers 0 < 2     fleets 0
+  Sep 27 03:22 0x005b0ff8 6.7 (1, 0.42) 6.8 (1, 0.42) bundle 1 < 3 vals real | replay bundle 0.420 GATE attackers 0 < 2     fleets 0
+
+never readable before the tick by this reconstruction: 180 launches, 34 of them usual-view replay fires ($+39.07): [('GATE attackers 0', 95), ('FILL', 31), ('GATE attackers 1', 25), ('GATE bundle 0 < ', 17), ('GATE bundle ETH ', 8)]

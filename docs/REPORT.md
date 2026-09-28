@@ -4126,14 +4126,20 @@ position; the fifth (15:30) beat it because the sell landed before a dump in the
   have filled at 7% too. Today's P&L is therefore not evidence for 0.20; the week is. Keep 0.20, the rule stands.
 - **The 12:52 skip ("bundle 0 < 3" on a 0.71 ETH exempt bundle).** Both reviewers reproduced it from engine 6.7's
   `fold_buy`: a stranger's relay call sat at index 3 of block 2, the team's 22 helper buys from index 14 on in the same
-  block, and the engine closed its bundle count at the stranger's call, a rule the tables never had. The two earlier
-  live cases of the same skip (Sep 24 `0x56e76663`, Sep 25 `0xd43ed726`) fit the same pattern. On the week the rule
-  skips 28 to 36 gate-reaching launches (an upper bound: it assumes every stranger's call naming the curve carries value;
-  3 if only direct buys close), 20 of them usual-view fires: Sep 21–23 14 fires +$17.39, Sep 24–28 5 or 6 fires +$2.66 to
-  +$3.23, today 1 fire −$0.57. The assistant's own count in 5z on the week to Sep 28 09:40: 33 of 632, at the usual view
-  11 fills +$14.04 fit and 8 fills +$6.59 read. Every projection so far (24.41, the K round, the predictions) already
-  counted these launches as fires, so the fix closes a gap between the live engine and the model rather than adding
-  an edge: about +$0.5 a day on the read half, $0 ± $1. Engine 6.8 (committed 21:07, not deployed) removes the closing.
+  block, and the engine closed its bundle count at the stranger's call, a rule the tables never had. The data refuter
+  folded every launch of the week through both engines itself: 6.8 admits 21 launches that 6.7 refused and refuses none
+  that 6.7 admitted; in 16 of the affected fires the closing call is the same bot (`0x8191c327` to `0xbd7c6f67`), the one
+  that closed the bundle live on Sep 25 16:24 `0xd43ed726` (so that skip, which 24.3x blamed on a pre-6.5 ordering bug,
+  was this rule too: the bot sits before the team in chain order) and today. The reviewers' "20 fires, +$17 fit" was too
+  high: two of the twenty (`0x39501200` +$10.90, `0x50dd5611` +$1.11) are closed by a relay never seen closing a bundle
+  live, and 6.7 fires on both anyway. On the confirmed set at the usual view: fit 12 fires +$5.39 (−$0.35 without its
+  largest), read 6 fires +$2.66 (−$2.56 without its largest, `0xd43ed726` +$5.21), the week 18 fires +$8.04, −$2.91
+  without the two largest; bootstrap chance the read half is at or below $0: 0.34. The assistant's own count in 5z (33 of
+  632 launches, all outsider calls assumed to carry value) was the same upper bound. No side effect at the ETH gates: none
+  of the five launches 6.7 counted partly crosses 0.3 or 3.0 ETH under 6.8. **The gain claim is refuted; the fix is not**:
+  engine 6.8 (committed 21:07, not deployed) is a correctness fix worth $0, verified by the log condition (no "bundle N < 3"
+  on a launch whose chain bundle has three or more exempt buyers), and nothing is booked for it until about twenty such
+  fires are scored live.
 - **The 19:44:59 skip ("nonce/gas not fresh").** Not the stale poll the addendum assumed. Eight seconds earlier the
   19:44:51 launch was refused at the gate, and every gate refusal after the reservation calls `release_reservation`,
   which sets the nonce to None and makes the next launch wait for the bookkeeping poll; the poll runs every 10 s on the
@@ -4159,8 +4165,17 @@ position; the fifth (15:30) beat it because the sell landed before a dump in the
   On the two-core box the engine's gate view is the usual view (k−1 with the registration block); the Sep 26–28
   calibration (k−2 on five of ten) predates it. Predictions from now on quote the usual view as the centre.
 
-*Verdict.* Deploy engine 6.8 with the morning reading (runbook 5z); change nothing else. Expected about +$0.5 a day at
-$13 on the Sep 24–28 supply, $0 on today's. Watch rules: the guard class (1 of 10 admitted fills, back to 0.15 if most
+*Verdict.* Deploy engine 6.8 with the morning reading (runbook 5z); change nothing else. Expected $0: a correctness
+fix, not an edge (the reviewers' +$0.5 a day did not survive the data refuter). Watch rules: the guard class (1 of 10 admitted fills, back to 0.15 if most
 of the first ten land last or later); the step (back to 3 ms / 80 ms if three or more of the next ten bursts put no shot
 before the tick, or if every shot of a burst lands in the creation second); the chain-scored sequential test (sixteen
-fires, +0.03) as the master switch. Both refuters' verdicts on the one proposal are recorded below when they land.
+fires, +0.03) as the master switch.
+
+*The refuters.* Both reviewers proposed the same single change, so one pair of refuters covered it. The data refuter
+(`N/2026-09-28/V_0_data.md`) reproduced every row of both reviewers (0 of 685 differ), then broke the dollar claim as
+above: "the gain is refuted, the correctness fix is not; deploy it with an expected value of $0 and verify it by the log
+condition". The mechanism refuter's first run was cut by a container restart with its check written
+(`V_0_mechanism_check.txt`: 21 admitted, 0 removed, the two unconfirmed closers, no decision changed at the ETH gates)
+and its verdict unwritten; it was re-run and its verdict is in `V_0_mechanism.md`. Two hygiene notes from the refuters
+for 6.9, neither worth money: importing the engine module writes a sender-addresses probe to the log (a replay tool's
+noise), and the nonce release after a gate refusal could wake the poll instead of waiting for it.
