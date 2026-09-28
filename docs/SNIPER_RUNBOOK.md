@@ -1044,3 +1044,40 @@ reading's `landed` line gives the index and the buy ahead: a fill behind a buy t
 Move to 0.20 once ten admitted fills have landed at index 3 or better; back to 0.07 if most of the first ten land last in the
 seat block or in a later block, or when the admitted fills' own sequential test (H0 +2.5%, H1 +19%, sd 0.34, ±2.94, on their
 realized 11-block returns) reaches its lower bound. The main test on the chain-scored fires runs as before.
+
+## 5y. The four follow-ups of 5w/5x, done together (Sep 28)
+
+1. **BURST_SLIP 0.20** (24.42's second step, taken at once on the owner's call): the two reviewers who chose 0.20 chose it on the
+   Sep 24-28 read; the cost is more deep landings filling (a last-in-block fill loses about what a revert costs in gas). Back to
+   0.15 if most of the first ten admitted fills (tokens 7-20% under the build's sizing) land last in the seat block or later.
+2. **The burst step as a live landing test: BURST_STEP_MS 2, BURST_LEAD_MS 46** (was 3 and 80). The 35 shots now run from 46 ms
+   before the estimated boundary to 22 ms after it instead of 80 before to 22 after: the same coverage on the late side (the
+   side that decides whether any shot lands past the tick), twice the shot density at the tick. A first-place landing is worth
+   9-11 points over second (24.42), and nothing on disk can price where a finer step lands, so this is measured live: the
+   `landed` line's index on each fill. Back to 3 / 80 if the first ten bursts show more all-creation-second bursts (every shot
+   reverted, `buy_reverted` with "all in the creation second") or worse landing indices than the ten before.
+3. **Direct signing** (`deploy/send_step.py`): each shot is signed straight with coincurve, proved once per key against
+   eth_account on a probe transaction (a key that differs is signed through eth_account for good); the `sent_burst` event logs
+   `sign_ms` and `signed_direct`. The build's lead (`t_build`, 82.5 ms before the burst) is unchanged; it can be shortened once
+   `sign_ms` is read from the log.
+4. **The instance: c7a.large** (two physical cores, no simultaneous multithreading; about $73 a month against $62). The AWS
+   connector of the assistant's session needs re-authorising, so by hand in the console, when no fill is open:
+   - on the box: `sudo systemctl stop sniper-engine`
+   - EC2 console, us-east-2, the instance: Instance state -> Stop instance; wait for Stopped
+   - Actions -> Instance settings -> Change instance type -> c7a.large -> Apply; then Instance state -> Start
+   - the public IP changes unless an Elastic IP is attached: read it in the console and ssh to it; the engine starts on boot
+     (Restart=always); check `nproc` prints 2 and `lscpu | grep 'Thread(s) per core'` prints 1, then the start line below.
+   PIN_CPU stays empty: the two threads must be free to use both cores.
+
+All three settings and the new send step in one paste (no fill open: the two counts equal):
+
+    sudo grep -c '"ev": "trade_done"' /var/log/sniper/engine.jsonl; sudo grep -c '"ev": "trade_decision"' /var/log/sniper/engine.jsonl
+    cd ~/fomo-memebot && git pull && sudo cp deploy/send_step.py /etc/sniper/send_step.py && set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv BURST_SLIP 0.20; set_kv BURST_STEP_MS 2; set_kv BURST_LEAD_MS 46; sudo systemctl restart sniper-engine && sleep 5 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"hold_blocks": [0-9]*\|"kill_usd": [0-9.]*\|"stake": \[[^]]*\]\|"bundle_max_eth": [0-9.]*\|"burst": \[[^]]*\]'
+
+Expected `"burst": [35, 2.0, 46.0, 0.2]`, version 6.7, the rest unchanged. After the first burst: `sudo grep -h '"ev": "sent_burst"'
+/var/log/sniper/engine.jsonl | tail -1 | grep -o '"sign_ms": [0-9.]*\|"signed_direct": [0-9]*\|"late_ms": \[[^]]*\]'` shows the
+signing time, the shots signed directly (35 expected) and each shot's lateness.
+
+Three timing changes at once (the guard, the step, the cores) cannot be told apart in the readings; the readings judge the
+combination by the fills' landing index and the sequential test, and the rollback order if landings worsen is the step first,
+then the slip.

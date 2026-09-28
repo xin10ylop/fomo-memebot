@@ -42,11 +42,49 @@ def make_burst(engine):
             cache[k] = Account.from_key(k)
         return cache[k]
 
+    # engine 6.7 (review J): the shots signed straight with coincurve, about 0.1 ms each against 0.65 ms through eth_account (35 shots:
+    # 4 ms, not 23). Legacy EIP-155 transactions only (the engine builds every shot with gasPrice). Each key is proved once against
+    # eth_account on a probe transaction before it is used; a key whose two signatures differ is signed through eth_account for good.
+    fast = {}
+    try:
+        from coincurve import PrivateKey as _PK
+        import rlp
+        from eth_utils import keccak, to_checksum_address
+
+        def _int(x):
+            return x if isinstance(x, int) else int(x, 16)
+
+        def _fast_sign(pk, tx):
+            data = tx.get("data", b""); data = bytes.fromhex(data[2:]) if isinstance(data, str) else bytes(data)
+            f = [_int(tx["nonce"]), _int(tx["gasPrice"]), _int(tx["gas"]), bytes.fromhex(tx["to"][2:]), _int(tx["value"]), data]
+            cid = int(tx["chainId"]); sig = _PK(pk).sign_recoverable(keccak(rlp.encode(f + [cid, 0, 0])), hasher=None)
+            return rlp.encode(f + [sig[64] + 35 + 2 * cid, int.from_bytes(sig[:32], "big"), int.from_bytes(sig[32:64], "big")])
+
+        PROBE = {"to": to_checksum_address("0x" + "ab" * 20), "value": 1, "data": "0x0102", "gas": 21000, "gasPrice": 7, "nonce": 3, "chainId": 4663}
+
+        def fast_key(k):
+            """the key's bytes when its direct signature equals eth_account's on the probe, else None (proved once per key)"""
+            if k not in fast:
+                acct = signer(k); pk = bytes(acct.key)
+                try:
+                    fast[k] = pk if _fast_sign(pk, PROBE) == bytes(acct.sign_transaction(PROBE).raw_transaction) else None
+                except Exception:
+                    fast[k] = None
+            return fast[k]
+
+        def sign_raw(k, tx):
+            pk = fast_key(k) if "gasPrice" in tx and "maxFeePerGas" not in tx else None
+            return (_fast_sign(pk, tx) if pk else bytes(signer(k).sign_transaction(tx).raw_transaction)), bool(pk)
+    except Exception:
+        def sign_raw(k, tx):
+            return bytes(signer(k).sign_transaction(tx).raw_transaction), False
+
     def submit_burst(txs, at, label, keys=None, gate=None, open_by=None):
         """engine 6.2: with gate (a callable), a shot is sent only once gate() is true; shots before that are skipped (they would have
         landed in the tax second and reverted anyway), and if the gate is still shut at the shot scheduled after open_by no later shot
         is sent at all. A skipped shot is (None, None) in the result."""
-        bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + bytes(signer(keys[i] if keys else None).sign_transaction(tx).raw_transaction).hex()]}).encode() for i, tx in enumerate(txs)]
+        t_sign0 = mono(); raws = [sign_raw(keys[i] if keys else None, tx) for i, tx in enumerate(txs)]; n_fast = sum(1 for _, f in raws if f)
+        bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + raw.hex()]}).encode() for raw, _ in raws]
         t_signed = mono(); out = []; fired_at = []; opened = gate is None; opened_at = None; shut = False
         for i, body in enumerate(bodies):
             while mono() < at[i] - 0.0015:                              # a prebuilt burst waits for the boundary here: sleep to 1.5 ms before the shot,
@@ -62,7 +100,7 @@ def make_burst(engine):
             if not opened:
                 fired_at.append(mono()); out.append((None, None)); continue
             fired_at.append(mono()); out.append(engine.SENDER.fire_slot(body, i))
-        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "shooters": bool(keys), "gated": sum(1 for h, _ in out if h is None), "gate_opened_at_shot": opened_at, "sign_ms": round(1000 * (t_signed - (at[0] - 0.0015 * len(txs))), 1),
+        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "shooters": bool(keys), "gated": sum(1 for h, _ in out if h is None), "gate_opened_at_shot": opened_at, "sign_ms": round(1000 * (t_signed - t_sign0), 1), "signed_direct": n_fast,
                     "shot_ms": [round(1000 * (t - at[0]), 1) for t in fired_at], "late_ms": [round(1000 * (t - a), 2) for t, a in zip(fired_at, at)]})
         return out
     return submit_burst
