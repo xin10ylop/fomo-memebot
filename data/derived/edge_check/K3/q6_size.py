@@ -1,9 +1,9 @@
 """q6_size.py (K3): the return per fire by stake (second place, E1+11, 3% cap, later buys folded by their ETH), on the engine's fills with
-tapes (usual view; guard 7% and 25%), per period, and split by bundle ETH and by fleets at the gate.
+tapes (usual view; guard 7% and 20%), per period, and split by bundle ETH and by fleets at the gate.
     python3 data/derived/edge_check/K3/q6_size.py > data/derived/edge_check/K3/q6_size.txt"""
 import sys, os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from common import *
 X = load_dump(); ST = (13, 25, 50, 100, 200, 400, 800)
-for slip in (0.07, 0.25):
+for slip in (0.07, 0.20):
     fills = [x for x in X if engine(x, slip=slip) == "fill" and tape(x["cv"])]
     for x in fills:
         L = tape(x["cv"]); x["S"] = {}

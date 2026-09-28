@@ -1,7 +1,7 @@
 """q5_exit.py (K3): exit rules against the fixed hold, second place, $13, on the engine's fills (usual view) with tapes. Every rule reads the
 curve as the feed shows it at block E1+h and its sell lands LAG blocks later (LAG 2, and 3 as a check); a rule that never triggers sells
 where the live setting lands (E1+11). Parameters chosen on one period, read on the other. Two fill sets: the live 7% guard (55 with tapes)
-and the 25% guard (101 with tapes).
+and the 20% guard (94 with tapes).
     python3 data/derived/edge_check/K3/q5_exit.py > data/derived/edge_check/K3/q5_exit.txt"""
 import sys, os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from common import *
 X = load_dump(); BASE = 11
@@ -27,7 +27,7 @@ def exit_val(x, rule, lag):
     return V[BASE]
 RULES = [("hold", h) for h in (3, 5, 7, 9, 10, 11, 12, 13, 15, 20, 30)] + [("tp", t) for t in (0.1, 0.2, 0.3, 0.5, 0.8)] + [("stop", s) for s in (0.05, 0.1, 0.15, 0.2, 0.3)] + \
         [("seatsell", 0)] + [("read", (h, t)) for h in (1, 2, 3, 5) for t in (-0.12, -0.08, -0.04, 0.0)] + [("extend", (hh, t)) for hh in (15, 20, 30) for t in (0.2, 0.5)]
-for slip in (0.07, 0.25):
+for slip in (0.07, 0.20):
     fills = prep([x for x in X if engine(x, slip=slip) == "fill" and tape(x["cv"])])
     A = [x for x in fills if period(x) == "A"]; B = [x for x in fills if period(x) == "B"]
     print(f"\n=== fills at guard {slip:.0%}: A {len(A)}, B {len(B)} (with tapes); fixed E1+11: A {mean([x['V'][11] for x in A]):+.1%}, B {mean([x['V'][11] for x in B]):+.1%}")

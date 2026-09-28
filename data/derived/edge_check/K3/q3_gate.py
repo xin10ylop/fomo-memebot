@@ -1,11 +1,11 @@
 """q3_gate.py (K3): the crowd gate. Fleet threshold 0-4 at every view (k-2 without / with the registration block, k-1, k), at the live
-guard (7%) and at 25%; then second signals added to the live gate (2 fleets at k-1), each threshold chosen on one period and read on the
+guard (7%) and at 20%; then second signals added to the live gate (2 fleets at k-1), each threshold chosen on one period and read on the
 other, with a null (the same number of fires dropped at random, 2,000 draws).
     python3 data/derived/edge_check/K3/q3_gate.py > data/derived/edge_check/K3/q3_gate.txt"""
 import sys, os, random; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from common import *
 X = load_dump()
 print("1. fleet threshold x view (h11, $13, gas $0.33 a burst): per period fired / fills / mean per fill / $ ; B's $ a day in brackets")
-for slip in (0.07, 0.25):
+for slip in (0.07, 0.20):
     print(f" guard {slip:.0%}")
     for view, reg in (("k-2", 0), ("k-2", 1), ("k-1", 1), ("k", 1)):
         for amin in (0, 1, 2, 3, 4):
@@ -24,7 +24,7 @@ for x in base: x["F"] = feats(x)
 def usd_of(xs, slip): return sum((ret(x) * 13 - GAS) if engine(x, slip=slip) == "fill" else (-GAS if engine(x, slip=slip) == "guard" else 0.0) for x in xs)
 print("\n2. a second signal on the live gate (fleets >= 2 at k-1): keep fires with feature >= t (or <= t); t chosen on one period, read on the other")
 rnd = random.Random(11)
-for slip in (0.07, 0.25):
+for slip in (0.07, 0.20):
     print(f" guard {slip:.0%}; base: A {sum(period(x)=='A' for x in base)} fires ${usd_of([x for x in base if period(x)=='A'], slip):+.2f}, B {sum(period(x)=='B' for x in base)} fires ${usd_of([x for x in base if period(x)=='B'], slip):+.2f}")
     for fn in base[0]["F"]:
         vals = sorted(set(x["F"][fn] for x in base))

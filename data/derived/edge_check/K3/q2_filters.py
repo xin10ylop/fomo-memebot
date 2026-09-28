@@ -1,6 +1,6 @@
 """q2_filters.py (K3): each pre-gate filter switched off alone, everything else as live (usual view k-1 with registration, 2 fleets,
 7% guard, h11, $13): the launches it alone removes, what they would do at the gate and after the guard, per period. Also with the
-guard at 25% (q1's alternative), since the guard decides what a readmitted launch is worth.
+guard at 20% (the recommendation), since the guard decides what a readmitted launch is worth.
     python3 data/derived/edge_check/K3/q2_filters.py > data/derived/edge_check/K3/q2_filters.txt"""
 import sys, os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from common import *
 X = load_dump(); VIEW = dict(view="k-1", reg=1)
@@ -10,7 +10,7 @@ for F in ALL_F:
     only = [x for x in X if F in (x["pre"] + x["gates"]) and passes_filters(x, off=(F,))]
     anyF = [x for x in X if F in (x["pre"] + x["gates"])]
     print(f"== {F}: removes {len(anyF)} launches, {len(only)} of them by this filter alone")
-    for slip in (0.07, 0.25):
+    for slip in (0.07, 0.20):
         for p in ("A", "B"):
             xs = [x for x in only if period(x) == p]; d = [engine(x, off=(F,), slip=slip, **VIEW) for x in xs]
             f = [ret(x) for x, dd in zip(xs, d) if dd == "fill"]; fired_ret = [ret(x) for x, dd in zip(xs, d) if dd in ("fill", "guard")]
@@ -20,10 +20,10 @@ for F in ALL_F:
         v = [ret(x) for x in only if period(x) == p]; w = [ret(x) for x in X if period(x) == p and passes_filters(x)]
         print(f"   population (no gate) {p}: removed {fmt(v)} | kept {fmt(w)}")
 # the supply filter's threshold: what if 1% were 0.5% or 2%?
-print("\n== creator supply threshold (tk0 / 1e9), filter alone varied, the rest live, slip 7% and 25%")
+print("\n== creator supply threshold (tk0 / 1e9), filter alone varied, the rest live, slip 7% and 20%")
 for thr in (0.0, 0.0025, 0.005, 0.01, 0.02, 0.03):
     cells = []
-    for slip in (0.07, 0.25):
+    for slip in (0.07, 0.20):
         for p in ("A", "B"):
             xs = [x for x in X if period(x) == p and passes_filters(x, off=("supply",)) and (x["tk0"] or 0) >= thr * 1e9]
             d = [engine(x, off=("supply",), slip=slip, **VIEW) for x in xs]; f = [ret(x) for x, dd in zip(xs, d) if dd == "fill"]

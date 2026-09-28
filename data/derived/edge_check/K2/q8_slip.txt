@@ -1,0 +1,61 @@
+== (1) the replay's convention: second place, all 129 usual-view fires ==
+  slip 0.05: fit  34/79 $ +72.97 (+28.20/d) | read  28/50 $  +7.68 ( +1.74/d)
+  slip 0.07: fit  37/79 $ +82.63 (+31.93/d) | read  31/50 $ +15.29 ( +3.47/d)
+  slip 0.10: fit  41/79 $ +89.65 (+34.65/d) | read  37/50 $ +34.60 ( +7.86/d)
+  slip 0.12: fit  54/79 $ +93.35 (+36.08/d) | read  42/50 $ +45.49 (+10.33/d)
+  slip 0.15: fit  66/79 $+136.06 (+52.58/d) | read  46/50 $ +57.59 (+13.08/d)
+  slip 0.20: fit  71/79 $+141.05 (+54.51/d) | read  49/50 $ +66.43 (+15.08/d)
+  slip 0.25: fit  74/79 $+148.20 (+57.28/d) | read  50/50 $ +65.12 (+14.79/d)
+  slip 0.30: fit  78/79 $+157.60 (+60.91/d) | read  50/50 $ +65.12 (+14.79/d)
+  slip 1.00: fit  79/79 $+157.57 (+60.90/d) | read  50/50 $ +65.12 (+14.79/d)
+  chosen on fit: slip 0.30; on read $+65.12 against $+15.29 at 0.07
+  chosen on read: slip 0.20; on fit $+141.05 against $+82.63 at 0.07
+
+  slip 0.15 vs 0.07: 44 bursts fill instead of reverting
+    fit: n 29 mean +14.2% (95% +2.5%..+27.1%), median +1.5%, win 52%; gain $+53.43 (+20.65/d); without the largest (+116%) $+38.33
+    read: n 15 mean +21.7% (95% +6.4%..+38.7%), median +11.5%, win 80%; gain $+42.30 (+9.61/d); without the largest (+83%) $+31.56
+    gain by day: Sep 21 +17.46, Sep 22 +10.85, Sep 23 +25.12, Sep 24 +22.00, Sep 25 +16.21, Sep 27 +4.09
+
+  slip 0.20 vs 0.07: 52 bursts fill instead of reverting
+    fit: n 34 mean +13.2% (95% +1.2%..+25.7%), median +1.5%, win 50%; gain $+58.42 (+22.58/d); without the largest (+116%) $+43.33
+    read: n 18 mean +21.9% (95% +9.3%..+36.4%), median +12.0%, win 83%; gain $+51.15 (+11.61/d); without the largest (+83%) $+40.40
+    gain by day: Sep 21 +16.74, Sep 22 +3.33, Sep 23 +38.35, Sep 24 +28.47, Sep 25 +16.21, Sep 26 +2.37, Sep 27 +4.09
+
+== (2) live mix (first 3/8, second 3/8, last 1/8, E1+2 1/8): expected $ per fire and per day (taped fires; the day rate uses the period's fires a day at the usual view) ==
+  slip 0.05: fit $+1.601/fire $+48.87/d | read $+1.037/fire $+11.78/d
+  slip 0.07: fit $+1.661/fire $+50.71/d | read $+1.165/fire $+13.23/d
+  slip 0.10: fit $+1.695/fire $+51.76/d | read $+1.452/fire $+16.49/d
+  slip 0.12: fit $+1.676/fire $+51.17/d | read $+1.410/fire $+16.01/d
+  slip 0.15: fit $+1.897/fire $+57.92/d | read $+1.552/fire $+17.62/d
+  slip 0.20: fit $+1.848/fire $+56.42/d | read $+1.710/fire $+19.41/d
+  slip 0.25: fit $+1.877/fire $+57.31/d | read $+1.701/fire $+19.31/d
+  slip 0.30: fit $+1.928/fire $+58.87/d | read $+1.716/fire $+19.49/d
+  slip 1.00: fit $+1.945/fire $+59.37/d | read $+1.689/fire $+19.17/d
+  chosen on fit: 1.00; on read: $+1.689/fire vs $+1.165 at 0.07 (+5.95/d); 0.15 on read: +4.39/d
+  chosen on read: 0.30; on fit: $+1.928/fire vs $+1.661 at 0.07 (+8.16/d); 0.15 on fit: +7.22/d
+
+== (2) deeper mix (first 1/4, second 1/4, third 1/4, last 1/8, E1+5 1/8): expected $ per fire and per day (taped fires; the day rate uses the period's fires a day at the usual view) ==
+  slip 0.05: fit $+1.012/fire $+30.90/d | read $+0.646/fire $ +7.34/d
+  slip 0.07: fit $+1.076/fire $+32.86/d | read $+0.732/fire $ +8.31/d
+  slip 0.10: fit $+1.268/fire $+38.71/d | read $+1.050/fire $+11.92/d
+  slip 0.12: fit $+1.287/fire $+39.31/d | read $+0.997/fire $+11.32/d
+  slip 0.15: fit $+1.490/fire $+45.49/d | read $+1.153/fire $+13.09/d
+  slip 0.20: fit $+1.390/fire $+42.45/d | read $+1.274/fire $+14.46/d
+  slip 0.25: fit $+1.405/fire $+42.89/d | read $+1.291/fire $+14.65/d
+  slip 0.30: fit $+1.461/fire $+44.61/d | read $+1.305/fire $+14.82/d
+  slip 1.00: fit $+1.471/fire $+44.92/d | read $+1.268/fire $+14.40/d
+  chosen on fit: 0.15; on read: $+1.153/fire vs $+0.732 at 0.07 (+4.79/d); 0.15 on read: +4.79/d
+  chosen on read: 0.30; on fit: $+1.461/fire vs $+1.076 at 0.07 (+11.76/d); 0.15 on fit: +12.64/d
+
+== (2) worst: last 1/2, E1+2 1/4, E1+5 1/4: expected $ per fire and per day (taped fires; the day rate uses the period's fires a day at the usual view) ==
+  slip 0.05: fit $-0.469/fire $-14.33/d | read $-0.300/fire $ -3.41/d
+  slip 0.07: fit $-0.483/fire $-14.74/d | read $-0.300/fire $ -3.41/d
+  slip 0.10: fit $-0.499/fire $-15.22/d | read $-0.091/fire $ -1.03/d
+  slip 0.12: fit $-0.519/fire $-15.84/d | read $-0.203/fire $ -2.30/d
+  slip 0.15: fit $-0.563/fire $-17.20/d | read $-0.233/fire $ -2.65/d
+  slip 0.20: fit $-0.767/fire $-23.43/d | read $-0.134/fire $ -1.52/d
+  slip 0.25: fit $-0.813/fire $-24.83/d | read $-0.139/fire $ -1.58/d
+  slip 0.30: fit $-0.859/fire $-26.23/d | read $-0.088/fire $ -1.00/d
+  slip 1.00: fit $-0.892/fire $-27.22/d | read $-0.217/fire $ -2.46/d
+  chosen on fit: 0.05; on read: $-0.300/fire vs $-0.300 at 0.07 (+0.00/d); 0.15 on read: +0.76/d
+  chosen on read: 0.30; on fit: $-0.859/fire vs $-0.483 at 0.07 (-11.48/d); 0.15 on fit: -2.45/d
