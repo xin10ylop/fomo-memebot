@@ -1,0 +1,72 @@
+
+=================== --view k-2
+engine replay, week Sep 21 09:40 - Sep 28 09:40 UTC: 632 qualifying launches, 168 covered hours of 168; view k-2 after the registration block, hold 11, cap 3.0, creator-repeat gate on; pieces 28
+
+day     hours launch  PRE GATE fired guard fills   mean h11  median  win dead   $ total  fires/24h   $/24h
+Sep 21   14.3    121   34   81     6     3     3     +33.6%  +45.4%  67%   0%    +11.12       10.0  +18.61
+Sep 22   24.0    170   47  114     9     5     4     +64.6%  +63.7% 100%   0%    +30.60        9.0  +30.60
+Sep 23   23.8    108   21   75    12    10     2     +24.2%  +24.2% 100%   0%     +2.32       12.1   +2.34
+Sep 24   24.0     72   15   50     7     4     3      -2.5%   -7.2%  33%   0%     -3.27        7.0   -3.27
+Sep 25   24.0     53    9   39     5     4     1     +10.1%  +10.1% 100%   0%     -0.34        5.0   -0.34
+Sep 26   24.0     55   24   28     3     1     2     +14.9%  +14.9% 100%   0%     +2.88        3.0   +2.88
+Sep 27   24.0     47   13   32     2     0     2     +14.4%  +14.4% 100%   0%     +3.08        2.0   +3.08
+Sep 28    9.7      6    1    4     1     0     1      -6.8%   -6.8%   0%   0%     -1.21        2.5   -3.02
+week    167.8    632  164  423    45    27    18     +25.6%  +14.2%  78%   0%    +45.17        6.4   +6.46
+
+by hold, the same fills:
+  h9    18 fills  mean +23.8%  median +13.8%  win 78%  $  +49.67
+  h11   18 fills  mean +25.6%  median +14.2%  win 78%  $  +54.08
+  h13   18 fills  mean +27.6%  median +14.2%  win 78%  $  +58.70
+  h15   18 fills  mean +22.4%  median  +9.5%  win 72%  $  +46.56
+
+dispositions: GATE attackers 0 < 2 317, PRE creator supply < 1% 147, GATE attackers 1 < 2 68, GUARD no fill 27, GATE bundle ETH > 3.0 (cap) 20, FILL 18, PRE creator repeat 17, GATE bundle 0 < 3 17, GATE bundle 2 < 3 1
+largest fills: Sep 22 22:54 0x5b551473 +119%, Sep 22 22:36 0x077cccf4 +106%, Sep 21 21:38 0x8089a5f8 +61%, Sep 21 21:17 0x96b870ae +45%, Sep 23 18:46 0xe681ef7d +31%, Sep 27 19:22 0x3341b8c1 +23%
+without the largest: mean +20.1% on 17 fills, $+38.91
+
+=================== --view k-1 --reg
+engine replay, week Sep 21 09:40 - Sep 28 09:40 UTC: 632 qualifying launches, 168 covered hours of 168; view k-1 with the registration block, hold 11, cap 3.0, creator-repeat gate on; pieces 28
+
+day     hours launch  PRE GATE fired guard fills   mean h11  median  win dead   $ total  fires/24h   $/24h
+Sep 21   14.3    121   34   66    21     9    12     +20.8%  +19.1%  67%   0%    +25.57       35.2  +42.81
+Sep 22   24.0    170   47   85    38    18    20     +27.3%  +10.4%  55%   0%    +58.38       38.0  +58.38
+Sep 23   23.8    108   21   67    20    15     5      +8.1%   +4.0%  60%   0%     -1.32       20.1   -1.33
+Sep 24   24.0     72   15   38    19     9    10      +5.8%   -2.3%  40%   0%     +1.22       19.0   +1.22
+Sep 25   24.0     53    9   31    13     6     7     +20.7%   +7.5% 100%   0%    +14.52       13.0  +14.52
+Sep 26   24.0     55   24   25     6     1     5      +2.0%   +2.0%  60%   0%     -0.65        6.0   -0.65
+Sep 27   24.0     47   13   23    11     3     8      +4.8%   -3.1%  38%   0%     +1.41       11.0   +1.41
+Sep 28    9.7      6    1    4     1     0     1      -6.8%   -6.8%   0%   0%     -1.21        2.5   -3.02
+week    167.8    632  164  339   129    61    68     +15.9%   +5.0%  57%   0%    +97.92       18.4  +14.00
+
+by hold, the same fills:
+  h9    68 fills  mean +13.8%  median  +3.1%  win 56%  $  +99.56
+  h11   68 fills  mean +15.9%  median  +5.0%  win 57%  $ +118.05
+  h13   68 fills  mean +16.6%  median  +5.2%  win 59%  $ +124.23
+  h15   68 fills  mean +13.9%  median  +2.5%  win 56%  $ +100.53
+
+dispositions: GATE attackers 0 < 2 197, PRE creator supply < 1% 147, GATE attackers 1 < 2 104, FILL 68, GUARD no fill 61, GATE bundle ETH > 3.0 (cap) 20, PRE creator repeat 17, GATE bundle 0 < 3 17, GATE bundle 2 < 3 1
+largest fills: Sep 22 21:24 0x0fd962ae +161%, Sep 22 22:54 0x5b551473 +119%, Sep 25 05:21 0x2c296eee +107%, Sep 22 22:36 0x077cccf4 +106%, Sep 22 18:56 0x39501200 +86%, Sep 21 21:38 0x8089a5f8 +61%
+without the largest: mean +13.7% on 67 fills, $+97.39
+
+=================== --view k --reg
+engine replay, week Sep 21 09:40 - Sep 28 09:40 UTC: 632 qualifying launches, 168 covered hours of 168; view k with the registration block, hold 11, cap 3.0, creator-repeat gate on; pieces 28
+
+day     hours launch  PRE GATE fired guard fills   mean h11  median  win dead   $ total  fires/24h   $/24h
+Sep 21   14.3    121   34   41    46    25    21     +14.9%  +11.4%  57%   0%    +25.57       77.0  +42.81
+Sep 22   24.0    170   47   65    58    31    27     +22.8%   +6.4%  59%   0%    +60.92       58.0  +60.92
+Sep 23   23.8    108   21   50    37    29     8      +1.0%   -5.9%  38%   0%    -11.12       37.2  -11.20
+Sep 24   24.0     72   15   29    28    15    13      +6.2%   -1.6%  46%   0%     +1.26       28.0   +1.26
+Sep 25   24.0     53    9   22    22     9    13      +9.9%   +2.6%  62%   0%     +9.44       22.0   +9.44
+Sep 26   24.0     55   24   21    10     3     7      +1.0%   +2.0%  57%   0%     -2.38       10.0   -2.38
+Sep 27   24.0     47   13   18    16     6    10      +3.9%   -2.6%  40%   0%     -0.18       16.0   -0.18
+Sep 28    9.7      6    1    3     2     0     2      -8.4%   -8.4%   0%   0%     -2.85        5.0   -7.07
+week    167.8    632  164  249   219   118   101     +11.6%   +2.2%  52%   0%    +80.65       31.3  +11.53
+
+by hold, the same fills:
+  h9   101 fills  mean +10.2%  median  +0.8%  win 52%  $ +100.34
+  h11  101 fills  mean +11.6%  median  +2.2%  win 52%  $ +119.59
+  h13  101 fills  mean +11.4%  median  +2.2%  win 51%  $ +116.70
+  h15  101 fills  mean  +9.3%  median  -0.3%  win 50%  $  +88.38
+
+dispositions: PRE creator supply < 1% 147, GUARD no fill 118, GATE attackers 0 < 2 110, FILL 101, GATE attackers 1 < 2 101, GATE bundle ETH > 3.0 (cap) 20, PRE creator repeat 17, GATE bundle 0 < 3 17, GATE bundle 2 < 3 1
+largest fills: Sep 22 21:24 0x0fd962ae +161%, Sep 22 22:54 0x5b551473 +119%, Sep 25 05:21 0x2c296eee +107%, Sep 22 22:36 0x077cccf4 +106%, Sep 22 18:56 0x39501200 +86%, Sep 21 21:38 0x8089a5f8 +61%
+without the largest: mean +10.1% on 100 fills, $+98.93

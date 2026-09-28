@@ -3940,3 +3940,49 @@ model gives at the exits they really got), four no-fills. The sequential test on
 at 11 blocks; H0 +2.5%, H1 +19%, sd 0.34, bounds ±2.94): nine fires, mean +0.7%, log-likelihood ratio −1.29, leaning
 to no edge and undecided; at the recent backtest's +22% a fire it would take about 26 more fires to cross the upper
 bound, and about six −10% fires to cross the lower. Stake stays $13; the lower bound sends the engine back to paper.
+
+### 24.41 The week through the engine's own chain (Sep 21 09:40 - Sep 28 09:40 UTC, one basis)
+
+Asked for on Sep 28: the last seven days on the engine's logic alone, no paper or live reading mixed in. Built as
+`src/analysis/engine_replay.py` on the readings' own pipeline: every qualifying launch of the tables' rule (632 in 168
+hours, 35 of them scanned for the first time on Sep 28: the gaps of Sep 23-24, Sep 26 evening, Sep 27 morning and six
+seams), each launch's crowd file and hold grid (`hold_grid.py` now prices holds 9/11/13 at the live stake and records
+the creator's launch-block buy and the engine's minOut sizing), the engine's gates in its order with the live settings
+of runbook 5q-5u (tier 100-200 bps, creator buy at least 1% of supply and at most 2 ETH, a creator's first launch of the
+UTC day from the week's 41,364 creations, bundle 3 buyers and 0.3-3.0 ETH, one position at a time), the crowd gate counted
+by the engine's own `note_attack` / `attack_fleets` (the seam test's equality with the tables' count, 563 launches), the
+minOut guard at BURST_SLIP 7% on the tokens the engine sizes at the build against the tokens second place gives (the
+grid's inputs, equal to the tapes' on all 85 shared launches), and the fill priced at $13 by the model the five live
+fills reconcile to, sold 11 blocks after the fill, gas $0.33 a burst. Reviewer G's second-place curve (`edge_check/G`)
+stands in where a grid was pending and agrees with the grid to 0.4% at worst on 51 shared launches.
+
+**The gate's view, calibrated on the ten live bursts of Sep 26-28** (their recorded fleet counts against the chain's
+count per block): the engine's view at the gate sat at block k-2 five times, k-1 twice, k (the tick's own block) once,
+and two fired on any view; the registration block's shots counted in three of the four races it ran. So the replay is
+shown at three views: k-2 without the registration block (the floor), k-1 with it (the engine's usual view), k with it
+(the ceiling). Not replayable from the chain, and only ever removing fires: the aim ("no confident boundary estimate"),
+a sequencer hold, the resolve limit.
+
+| view | fired | guard no-fill | fills | mean per fill (h11) | median | win | $ week at $13 | fires a day |
+|---|---|---|---|---|---|---|---|---|
+| floor, k-2 | 45 | 27 | 18 | +25.6% | +14.2% | 78% | +45.17 | 6.4 |
+| usual, k-1 | 129 | 61 | 68 | +15.9% | +5.0% | 57% | +97.92 | 18.4 |
+| ceiling, k | 219 | 118 | 101 | +11.6% | +2.2% | 52% | +80.65 | 31.3 |
+
+By day at the usual view (fills / mean / $): Sep 21 12 / +21% / +25.6; Sep 22 20 / +27% / +58.4; Sep 23 5 / +8% / −1.3;
+Sep 24 10 / +6% / +1.2; Sep 25 7 / +21% / +14.5; Sep 26 5 / +2% / −0.7; Sep 27 8 / +5% / +1.4; Sep 28 (10 h) 1 / −7% / −1.2.
+The full print is `data/derived/live_vs_table/engine_replay_week_sep21_28.txt`.
+
+**What it says.** (1) The engine's own filters take most of the population before the crowd gate: 147 launches for a
+creator buy under 1% of supply, 17 for a creator's repeat, 20 for the cap, 17 for a bundle under three buyers. (2) The
+minOut guard reverts about half of the bursts that fire (47% at the usual view; live, four of ten): the engine fills
+only when it lands nearly first in the seat block. The tables never priced that; their "second place" was paid on every
+fire. (3) At the usual view the week pays $98 at $13, $14 a day, and $84 of it is Sep 21-22. From Sep 23 on it is $15 in
+5.4 days, under $3 a day; on Sep 26-28, the days the engine was live, it is −$0.45. (4) The fire rate at the usual view
+fell from 35-38 a day on Sep 21-22 to 6-11 a day on Sep 26-27, the supply break of 24.38 in the engine's own count.
+(5) The fills' returns are flat across holds 9-13 (+13.8 to +16.6% mean on the same 68 fills) and lower at 15.
+
+**Limits.** The repeat gate is modelled from every creation of the day; the engine's own counter is seeded from a block
+estimate and restarts with the engine, so live it is weaker than this. The guard is modelled at second place; a burst
+landing first passes it with more room, one landing deeper less. The view is a range because the engine's is: the
+feed's delivery against the gate's close decides it launch by launch.
