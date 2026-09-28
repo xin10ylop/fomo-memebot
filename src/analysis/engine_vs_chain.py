@@ -65,6 +65,11 @@ for cv, evs in by_curve.items():
     if cv in pop: continue
     dec = [e for e in evs if e["ev"] in ("trade_decision", "eligible_not_traded") and t0 <= e["t"] <= t1]
     if dec: only.append((dec[0]["t"], cv, dec[-1]))
-for t, cv, e in sorted(only):
+outside = [(t, cv, e) for t, cv, e in only if "token tax" in str(why(e)) or e.get("tax_bps") is None or not (100 <= (e.get("tax_bps") or 0) <= 200)]   # the tier gate: outside the tables' population by definition (tier 2-3%)
+after = [(t, cv, e) for t, cv, e in only if (t, cv, e) not in outside and t > L[-1]["T0"] + 60]                                                        # after the population's last launch: the scan ended before it
+real = [x for x in only if x not in outside and x not in after]
+for t, cv, e in sorted(real):
     print(f"{dt.datetime.fromtimestamp(t, dt.timezone.utc).strftime('%b %d')} {fmt(t)} {cv[:10]} | ENGINE ONLY (not in the chain's population): {e['ev']} bundle {e.get('bundle_eth')} ETH named {e.get('named_wallets')} tax {e.get('tax_bps')} | {str(why(e))[:80]}")
-print(f"\n{n} launches{' (fires at k-2)' if fires_only else ''}, {holes} without a decision in the log, {len(only)} engine-only (eligible on the feed, absent from the chain's population)")
+for t, cv, e in sorted(after):
+    print(f"{dt.datetime.fromtimestamp(t, dt.timezone.utc).strftime('%b %d')} {fmt(t)} {cv[:10]} | after the scan's last launch (not scored): {e['ev']} bundle {e.get('bundle_eth')} ETH | {str(why(e))[:80]}")
+print(f"\n{n} launches{' (fires at k-2)' if fires_only else ''}, {holes} without a decision in the log, {len(real)} engine-only (eligible on the feed, absent from the chain's population), {len(outside)} refused by the tier gate (outside the population), {len(after)} after the scan")

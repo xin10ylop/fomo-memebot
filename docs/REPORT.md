@@ -4044,3 +4044,12 @@ sequential test (H0 +2.5%, H1 +19%, sd 0.34, ±2.94): about 19 fills reach the u
 +2.5%, one to two weeks. Back to 0.07 on the lower bound, or if most of the first ten admitted fills land last in E1 or later.
 The main test on the chain-scored fires is unchanged: it already scores every fire at second place, which is what the wallet
 earns once the guard stops refusing them. Reports and scripts: `edge_check/K0`..`K3`.
+
+*Reading, Sep 28 10:00 - 12:40 UTC (the four changes of 5y live from 12:27).* Written first from the chain
+(`prediction_sep28pm.txt`): ten qualifying launches, no fire at any view (at most one fleet before the tick), every one
+modelled −6 to −12%. The engine: five gate refusals, one creator-supply skip, two aim skips on zero-fleet launches, and
+the two launches of 12:18 and 12:23 unseen because the engine stayed inactive after the resize until started by hand
+(the service is enabled at boot now). Six "engine only" lines, all explained: four tier-1% tokens and one 4%-tier token
+refused by the tier gate (outside the population by definition; the reverse check now says so instead of counting them),
+and one launch at 12:30 after the scan's end, refused at the gate. No burst, P&L +$0.03. The new `feed_stats` line on the
+two-core box: 599 frames a minute, median 0.2 ms, p90 0.7 ms, max 3 ms, the loop busy 0.3% of the time.
