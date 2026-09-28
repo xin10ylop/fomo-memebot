@@ -19,7 +19,7 @@ def flag(k):
     if k in args: args.remove(k); return True
     return False
 T0 = calendar.timegm(time.strptime(arg("--from", "2026-09-21 09:40"), "%Y-%m-%d %H:%M")); T1 = calendar.timegm(time.strptime(arg("--to", "2026-09-28 09:40"), "%Y-%m-%d %H:%M"))
-HOLD = int(arg("--hold", "11")); NO_CAP = flag("--no-cap"); NO_REPEAT = flag("--no-repeat"); VIEW = arg("--view", "k-2")
+HOLD = int(arg("--hold", "11")); NO_CAP = flag("--no-cap"); NO_REPEAT = flag("--no-repeat"); VIEW = arg("--view", "k-2"); REG = flag("--reg")   # --reg: count the registration block's shots (the engine does when its launch thread wins the race: 3 of 4 live cases)
 LIVE = {"SEND_MODULE": "", "PRIVATE_KEY": "", "LOG_PATH": "/tmp/engine_replay.jsonl", "SEAT": "E1", "ATTACK_MIN": "2", "GATE_CLOSE_MS": "36", "TRADE_HOURS": "",
         "MIN_FOLLOW_ETH_60": "0", "TIER_MIN_BPS": "100", "TIER_MAX_BPS": "200", "BUNDLE_MIN": "3", "BUNDLE_MIN_ETH": "0.3", "BUNDLE_MAX_ETH": "0" if NO_CAP else "3.0",
         "MIN_CREATOR_SUPPLY": "0.01", "MAX_CREATOR_BUY_ETH": "2", "HOLD_BLOCKS": "9", "BURST_SLIP": "0.07", "BURST_N": "35", "STAKE_MIN": "13", "STAKE_MAX": "13",
@@ -46,17 +46,19 @@ for lf in sorted(glob.glob(f"{D}/launches_*.json")):
     pieces.append((n, lf, cf, hg if os.path.exists(hg) else None, sp))
 cre = collections.defaultdict(list)
 if os.path.exists(f"{D}/creations_week.json.gz"):
-    for c in json.load(gzip.open(f"{D}/creations_week.json.gz", "rt")): cre[c["creator"].lower()].append(c["ts"])
+    for c in json.load(gzip.open(f"{D}/creations_week.json.gz", "rt")): cre[c["creator"].lower()].append((c["ts"], c["cv"].lower()))
 else: NO_REPEAT = True; print("creations_week.json.gz missing: the creator-repeat gate is not applied", file=sys.stderr)
-def prior_today(creator, t):
-    d0 = t - (t % 86400); return sum(1 for x in cre.get(creator, ()) if d0 <= x < t - 1)
+def prior_today(creator, t, cv):
+    """the creator's other creations earlier in the UTC day (the file's timestamps are interpolated between hourly anchors, so the launch
+    itself is excluded by its curve, not by its time, and a creation within two minutes after is not counted as earlier)"""
+    d0 = t - (t % 86400); return sum(1 for x, c in cre.get(creator, ()) if c != cv and d0 <= x < t + 120)
 def fleets(r, cv, named, creator, token, upto):
     """the engine's count on the feed's view through block offset `upto`, after the curve's registration (the first named block)"""
     E.state["watch"].clear(); w = E.watch_curve(cv, 1e7, 1_700_000_000, set(named), creator, blk0=r["b0"], tax_bps=200)
     w["tb"] = bytes.fromhex(token[2:]) if token else None
     j = next((i for i, rw in enumerate(r["blocks"]) if any(t.get("named_fr") or t.get("named_data") for t in rw)), -1)
     for off, rows in enumerate(r["blocks"][: upto + 1]):
-        if off <= j: continue
+        if off < j or (off == j and not REG): continue
         for t in rows:
             E.sender_of = (lambda fr: (lambda tx: fr))(t["fr"])
             data = bytes.fromhex(t["sel"][2:]) if t["direct"] else (bytes.fromhex(t["sel"][2:]) + b"\0" * 12 + bytes.fromhex(cv[2:]) + b"".join(b"\0" * 12 + bytes.fromhex(a[2:]) for a in named if t["named_data"]))
@@ -101,7 +103,7 @@ for r, l, h in launches:
     tier = l.get("tier", h.get("tier")); tb = round((tier - 0.01) * 10000) if tier is not None else 0
     rec = {"cv": cv, "T0": t, "day": day(t), "bundle": l.get("bundle_eth", h.get("bundle_eth_chain", 0.0)) or 0.0, "why": None}   # the older launch files: the bundle from the grid's tape
     reasons = []
-    if not NO_REPEAT and prior_today(creator, t) > 0: reasons.append("creator repeat")
+    if not NO_REPEAT and prior_today(creator, t, cv) > 0: reasons.append("creator repeat")
     tk0 = h.get("tk0")
     if tk0 is None: no_tk0 += 1                                            # the older pieces' grids are not in yet: the creator-supply gate cannot be applied there (counted)
     elif tk0 <= 0 or tk0 >= Y0: reasons.append("no launch-block buy")
@@ -115,7 +117,7 @@ for r, l, h in launches:
     if E.BUNDLE_MAX_ETH > 0 and rec["bundle"] > E.BUNDLE_MAX_ETH: gates.append("bundle ETH > 3.0 (cap)")
     if tb < E.TIER_MIN_BPS or tb > E.TIER_MAX_BPS: gates.append("tier")
     if t < busy_until: gates.append("position open")
-    k = r["k"]; upto = k - 2 if VIEW == "k-2" else k - 1
+    k = r["k"]; upto = {"k-2": k - 2, "k-1": k - 1, "k": k}[VIEW]
     fl = fleets(r, cv, named, creator, r.get("token"), upto); rec["fleets"] = fl
     if fl < E.ATTACK_MIN: gates.append(f"attackers {fl} < {E.ATTACK_MIN}")
     if gates: rec["why"] = "GATE " + gates[0]; out.append(rec); continue
@@ -127,7 +129,8 @@ for r, l, h in launches:
     ret = h.get(f"behind1_13_h{HOLD}")
     if ret is None: rec["why"] = "no return column"; out.append(rec); continue
     rec["why"] = "FILL"; rec["ret"] = ret; rec["usd"] = ret * STAKE - GAS; rec["rets"] = {hh: h.get(f"behind1_13_h{hh}") for hh in (9, 11, 13, 15)}; busy_until = t + BUSY_S; out.append(rec)
-print(f"engine replay, week {time.strftime('%b %d %H:%M', time.gmtime(T0))} - {time.strftime('%b %d %H:%M', time.gmtime(T1))} UTC: {len(out)} qualifying launches, {sum(hours.values()):.0f} covered hours of {(T1 - T0) / 3600:.0f}; view {VIEW}, hold {HOLD}, cap {'off' if NO_CAP else '3.0'}, creator-repeat gate {'off' if NO_REPEAT else 'on'}; pieces {len(pieces)}")
+print(f"engine replay, week {time.strftime('%b %d %H:%M', time.gmtime(T0))} - {time.strftime('%b %d %H:%M', time.gmtime(T1))} UTC: {len(out)} qualifying launches, {sum(hours.values()):.0f} covered hours of {(T1 - T0) / 3600:.0f}; view {VIEW}{' with the registration block' if REG else ' after the registration block'}, hold {HOLD}, cap {'off' if NO_CAP else '3.0'}, creator-repeat gate {'off' if NO_REPEAT else 'on'}; pieces {len(pieces)}")
+print("the engine's gate view on the ten live bursts of Sep 26-28 sat at k-2 five times, k-1 twice, k once (two fired on any view); the registration block counted in three of four races: k-2 without it is the floor, k with it the ceiling")
 if pending or no_tk0 or no_guard: print(f"NOT COMPLETE: {len(pending)} launches without a return yet (grids still running); creator-supply gate not applicable on {no_tk0} launches, minOut guard on {no_guard} fired launches (no grid fields for the older pieces yet)")
 days = sorted(set(x["day"] for x in out) | set(hours), key=lambda d: time.strptime(d + " 2026", "%b %d %Y"))
 print(f"\n{'day':7s} {'hours':>5s} {'launch':>6s} {'PRE':>4s} {'GATE':>4s} {'fired':>5s} {'guard':>5s} {'fills':>5s}  {'mean h%d' % HOLD:>9s} {'median':>7s} {'win':>4s} {'dead':>4s}  {'$ total':>8s}  {'fires/24h':>9s} {'$/24h':>7s}")
