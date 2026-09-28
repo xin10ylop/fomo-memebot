@@ -45,14 +45,24 @@ def stamps(lo, hi):
 def fold_buy(X, Y, tk): return X + X * tk / (Y - tk), Y - tk
 def fold_sell(X, Y, tk): return X - X * tk / (Y + tk), Y + tk
 def pad(a): return "0x" + "0" * 24 + a[2:]
+CACHE = os.environ.get("LVT_CACHE", "/tmp/live_vs_table_events.json")   # Sep 28: the public node caps eth_getLogs at 30,000 blocks a call; our events are read once and extended
 def load_events(path):
     if path and os.path.exists(path): return json.load(open(path))
-    head = int(call("eth_blockNumber", []), 16); lo = head - int(6.5 * 86400 * 9.9); out = []; b = lo
+    head = int(call("eth_blockNumber", []), 16) - 2; lo = head - int(6.5 * 86400 * 9.9); out = []
+    try:
+        c = json.load(open(CACHE)); out = [l for l in c["events"] if int(l["blockNumber"], 16) >= lo]; b = max(lo, c["head"] + 1)
+    except Exception:
+        b = lo
     while b <= head:
-        e = min(head, b + 249_999)
+        e = min(head, b + 29_999)
         for who in OURS: out += call("eth_getLogs", [{"fromBlock": hex(b), "toBlock": hex(e), "topics": [[BUY, SELL], None, pad(who)]}])
         b = e + 1
-    out.sort(key=lambda l: (int(l["blockNumber"], 16), int(l["logIndex"], 16))); return out
+    out.sort(key=lambda l: (int(l["blockNumber"], 16), int(l["logIndex"], 16)))
+    try:
+        json.dump({"head": head, "events": out}, open(CACHE, "w"))
+    except Exception:
+        pass
+    return out
 def row_of(e):
     d = e["data"][2:]; w = [int(d[i:i + 64], 16) / 1e18 for i in range(0, len(d), 64)]; bn = int(e["blockNumber"], 16)
     who = ("0x" + e["topics"][2][-40:]).lower() if len(e["topics"]) > 2 else None; k = "B" if e["topics"][0] == BUY else "S"
