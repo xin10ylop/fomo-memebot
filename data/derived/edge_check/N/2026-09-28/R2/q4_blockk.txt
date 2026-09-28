@@ -1,0 +1,40 @@
+refused at the usual view (engine fleets at k-1 < 2), whole week Sep 21 09:40 - Sep 28 21:00
+  fit  Sep 21-23: n=200 block-k crowd  31%  fire all: mean  -3.7% $-177.06 ($-0.89/fire)
+    of them with a block-k crowd: fk>=2: n= 62 block-k crowd 100%  fire all: mean  +4.9% $ -20.72 ($-0.33/fire) | without: fk<2: n=138 block-k crowd   0%  fire all: mean  -7.6% $-156.34 ($-1.13/fire)
+  read Sep 24-28: n=141 block-k crowd  26%  fire all: mean  -1.5% $ -92.86 ($-0.66/fire)
+    of them with a block-k crowd: fk>=2: n= 37 block-k crowd 100%  fire all: mean  +3.8% $  -9.28 ($-0.25/fire) | without: fk<2: n=104 block-k crowd   0%  fire all: mean  -3.4% $ -83.58 ($-0.80/fire)
+
+threshold rules on the refused set: chosen on one half ($ max, >= 5 fires), read on the other
+feature                                               chosen on fit              read on Sep 24-28               chosen on read              read on Sep 21-23
+f1 (fleets at k-1)                                 >=1: n=72 $-63.3              n=43 -1.1% $-17.9             >=1: n=43 $-17.9              n=72 -5.5% $-63.3
+w1 (wallets at k-1)                                >=3: n=27 $-31.7              n=17 +11.2% $-0.1              >=2: n=19 $+3.2              n=27 -5.1% $-31.7
+k (blocks in the second)                            >=9: n=14 $-7.0               n=10 -1.3% $-5.0              >=9: n=10 $-5.0               n=14 -1.1% $-7.0
+bundle ETH                                    >=1.56825: n=10 $-1.7              n=10 -9.3% $-11.9        <=0.315218: n=6 $-1.6               n=10 -1.5% $-2.7
+named wallets                                      >=24: n=5 $+11.7                n=4 -7.1% $-4.4             >=23: n=7 $-10.0              n=5 +27.6% $+11.7
+creator supply share                        >=0.0454274: n=22 $+3.4              n=18 +8.4% $-20.2         >=0.015: n=79 $-19.7            n=133 -3.7% $-108.8
+creator buy ETH                                 >=0.082: n=22 $+3.4              n=18 +8.4% $-20.2        <=0.017316: n=5 $-1.7                n=6 -2.4% $-2.4
+heat (crowded launches, last 60 min)                 >=8: n=8 $+1.7                n=0 +nan% $+0.0              >=5: n=7 $+11.8              n=64 -2.4% $-61.8
+hour UTC                                             <=0: n=5 $-5.6               n=5 -11.5% $-7.6              >=22: n=6 $-4.7              n=20 -4.3% $-19.3
+tier                                            <=0.02: n=28 $-21.1               n=10 +1.4% $-4.0           <=0.02: n=10 $-4.0              n=28 -2.8% $-21.1
+
+block-k crowd rate among the refused, by fleets at k-1 and by heat
+  f1 0-0: fit n=128 crowd@k  18% fire  -2.7% $-113.7 | read n= 98 crowd@k  14% fire  -1.7% $ -75.0
+  f1 1-1: fit n= 72 crowd@k  54% fire  -5.5% $ -63.3 | read n= 43 crowd@k  53% fire  -1.1% $ -17.9
+  heat 0-0: fit n= 17 crowd@k  29% fire  -6.8% $ -22.9 | read n= 45 crowd@k  27% fire  -3.4% $ -38.1
+  heat 1-2: fit n= 64 crowd@k  31% fire  -2.6% $ -31.9 | read n= 65 crowd@k  22% fire  +0.9% $ -34.0
+  heat 3-99: fit n=119 crowd@k  31% fire  -3.9% $-122.3 | read n= 31 crowd@k  35% fire  -3.9% $ -20.8
+  w1 0-0: fit n=128 crowd@k  17% fire  -3.3% $-115.0 | read n= 97 crowd@k  14% fire  -3.4% $ -75.4
+  w1 1-1: fit n= 45 crowd@k  49% fire  -4.2% $ -30.4 | read n= 25 crowd@k  44% fire  -4.2% $ -20.7
+  w1 2-999: fit n= 27 crowd@k  67% fire  -5.1% $ -31.7 | read n= 19 crowd@k  63% fire +11.6% $  +3.2
+  k 0-3: fit n= 55 crowd@k  44% fire  +9.1% $ -20.0 | read n= 46 crowd@k  28% fire  +1.9% $ -34.6
+  k 4-6: fit n= 62 crowd@k  32% fire  -5.1% $ -39.9 | read n= 58 crowd@k  24% fire  -4.6% $ -46.4
+  k 7-99: fit n= 83 crowd@k  22% fire -11.2% $-117.2 | read n= 37 crowd@k  27% fire  -0.9% $ -12.0
+
+today's refused launches that paid >= +20% at second place: their pre-tick features
+  14:20 0x17e8753f ret +30.0% f1 0 w1 0 fk 0 k 1 bundle 0.39 named 3 cs 0.010 heat 1 tier 0.03
+  15:45 0x12ed5fcb ret +22.9% f1 1 w1 2 fk 1 k 7 bundle 0.48 named 4 cs 0.015 heat 5 tier 0.028999999999999998
+  16:42 0x026b66f2 ret +30.0% f1 1 w1 1 fk 2 k 5 bundle 0.61 named 4 cs 0.020 heat 1 tier 0.03
+  17:39 0x5ca0bb0d ret +74.6% f1 1 w1 3 fk 4 k 8 bundle 0.48 named 4 cs 0.015 heat 1 tier 0.028999999999999998
+  17:48 0xe15c30e8 ret +21.5% f1 0 w1 0 fk 1 k 1 bundle 0.79 named 3 cs 0.010 heat 1 tier 0.02
+  18:42 0xd8ab4369 ret +58.7% f1 0 w1 0 fk 0 k 7 bundle 0.78 named 4 cs 0.020 heat 1 tier 0.03
+  20:24 0x868ed457 ret +74.8% f1 0 w1 0 fk 0 k 5 bundle 1.24 named 4 cs 0.025 heat 5 tier 0.03

@@ -24,3 +24,7 @@ new-setting landings to reject a fixed 40% baseline if the truth is 60%: 38
 new-setting landings to reject a fixed 40% baseline if the truth is 80%: 9
 first minus second at h11, fills Sep 21-23: n=16 mean first +38.5% second +21.2% gap +17.3% median gap +17.0%
 first minus second at h11, fills Sep 24-28: n=54 mean first +22.3% second +14.5% gap +7.7% median gap +3.8%
+
+burst offset (tick minus estimate, ms) from the shots in the creation second
+  old 3/80: [-80, -56, -53, -50, -32, -23, -5, 16]  median -41 ms; bursts with no shot in the creation second (all late) 1 of 8; with every landed shot in the creation second 0
+  new 2/46: [-46, -32, -28, -20, -20, -12]  median -24 ms; bursts with no shot in the creation second (all late) 1 of 6; with every landed shot in the creation second 0

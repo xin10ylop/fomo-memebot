@@ -4087,3 +4087,80 @@ read: `sudo grep -c 'nonce/gas not fresh' /var/log/sniper/engine.jsonl`). One sh
 20:20 (no shot sent), the rest under 0.1 ms. `engine_vs_chain` both ways: 0 holes, 0 engine-only, 26 tier-refused
 outside the population. P&L +$11.76. Ten fills now: realized mean +10.5%, the model at their landed exits +8.1%, +$13.18
 net on the fills. The chain-scored sequential test: sixteen fires, mean +10.9%, log-likelihood ratio +0.03, undecided.
+
+### 24.43 The first nightly review: Sep 28's trades, two reviewers, two refuters each (engine 6.8)
+
+*The routine.* From tonight on, the day's trades get the same treatment the strategy round got: a written brief
+(`data/derived/edge_check/N/BRIEF_nightly.md`: the rule, the live settings, the tools, the day's facts reconciled
+launch by launch, six fixed questions), two independent reviewers on it in parallel, then two refuters per proposal
+(one on the data, one on the mechanism), and the assistant's own cross-check of every number that decides. A
+proposal survives only if it pays in both halves of the week at the engine's usual view, has a live verification and
+a rollback, and neither refuter breaks it. One change a night at most. The six questions: did the day's settings change
+show up in the landings; the guard-admitted class's tally against its rule; each new skip reason, its cause in the
+engine and its price; the winners the rule cannot take, and whether anything before the tick predicts them; anything
+else the day suggests, with out-of-sample numbers; the verdict.
+
+*The day's facts.* The new settings (guard 0.20, step 2 ms, lead 46 ms, direct signing, the c7a.large box) went live at
+12:27. To 21:00: seven bursts, five fills, +$11.73. The replay through 21:00 (685 launches on the week, guard 0.20) gives
+the same window at the usual view 10 fires, 8 fills, +$18.21 at second place, of which the 15:30 fill is +$16.9; the
+floor 4 fires +$15.99, the ceiling 18 fires +$20.40. Four of the five live fills equal the model at their landing
+position; the fifth (15:30) beat it because the sell landed before a dump in the exit block (24.42's addendum).
+
+*What both reviewers found, and what the assistant checked.*
+
+- **The landings.** Corrected: since the switch three of five fills landed first in the seat block (15:30, 18:52, 19:15),
+  16:33 second, 15:36 third of six; the brief's "four of five" counted the 08:43 fill, which ran on the old settings. On
+  bursts, first in the seat block with no rival transaction ahead: 3 of 8 before, 3 of 6 after (Fisher p 0.53). The share
+  of our shots landing in the creation second fell from 45% to 28%. Read from the shots that did land there, the new bursts
+  sat 12 to 46 ms before the tick (median 24 ms); the 46 ms lead leaves about 22 ms of margin, and one burst (15:33) overran
+  it: no shot before the tick, 42 rival transactions ahead, landed last, reverted by the guard. Runbook 5y's rollback rule
+  watches the early tail (every shot in the creation second: 0 of 6); the late tail is the one that showed. Telling a 40%
+  first-place rate from 70% takes about 42 bursts a side and the before side is frozen at 8, so the before/after test
+  cannot settle it; the box's `sent_burst` lateness and the creation-second share can. First beats second by 8 to 17
+  points at the 11-block exit, so the step is worth about $1 a day if it is real. Keep it, watch both tails.
+- **The guard-admitted class.** One live admitted fill (15:36, two buys ahead, −7.1% real and modelled, not last): 1 of
+  10 toward the checkpoint, the class's own likelihood ratio −0.25. The guard refused the one deep landing (15:33, 23%
+  under the sizing, last of nine, −21.3% modelled at last place). Today alone, which no earlier review fitted on: usual
+  view 0.07 −$3.11 against 0.20 +$18.21; floor −$1.32 against +$15.99; ceiling +$3.51 against +$20.07. Live, the guard
+  change moved exactly one outcome (15:36, −$0.92); the two band fires that paid (15:30, 19:15) landed first and would
+  have filled at 7% too. Today's P&L is therefore not evidence for 0.20; the week is. Keep 0.20, the rule stands.
+- **The 12:52 skip ("bundle 0 < 3" on a 0.71 ETH exempt bundle).** Both reviewers reproduced it from engine 6.7's
+  `fold_buy`: a stranger's relay call sat at index 3 of block 2, the team's 22 helper buys from index 14 on in the same
+  block, and the engine closed its bundle count at the stranger's call, a rule the tables never had. The two earlier
+  live cases of the same skip (Sep 24 `0x56e76663`, Sep 25 `0xd43ed726`) fit the same pattern. On the week the rule
+  skips 28 to 36 gate-reaching launches (an upper bound: it assumes every stranger's call naming the curve carries value;
+  3 if only direct buys close), 20 of them usual-view fires: Sep 21–23 14 fires +$17.39, Sep 24–28 5 or 6 fires +$2.66 to
+  +$3.23, today 1 fire −$0.57. The assistant's own count in 5z on the week to Sep 28 09:40: 33 of 632, at the usual view
+  11 fills +$14.04 fit and 8 fills +$6.59 read. Every projection so far (24.41, the K round, the predictions) already
+  counted these launches as fires, so the fix closes a gap between the live engine and the model rather than adding
+  an edge: about +$0.5 a day on the read half, $0 ± $1. Engine 6.8 (committed 21:07, not deployed) removes the closing.
+- **The 19:44:59 skip ("nonce/gas not fresh").** Not the stale poll the addendum assumed. Eight seconds earlier the
+  19:44:51 launch was refused at the gate, and every gate refusal after the reservation calls `release_reservation`,
+  which sets the nonce to None and makes the next launch wait for the bookkeeping poll; the poll runs every 10 s on the
+  live box (`CHAIN_POLL_S 10`, runbook 5s), so a launch inside that window is gated. Both reviewers priced the path with
+  the code's 3 s default; the assistant re-priced it with the live 10 s: on the week 4 build-stage launches fell inside
+  a release window, 1.56 of them gated in expectation, 0.81 fires, and those fires were worth −$0.52 together. Worth $0.
+  The 60 s widening in 6.8 aims at the other path (a slow poll) and is harmless; a wake of the poll at release (an event
+  instead of the sleep) would close the window to one RPC call and is the 6.9 candidate, hygiene only. Its frequency is
+  the thing to read in the morning: `sudo grep -c 'not fresh' /var/log/sniper/engine.jsonl`.
+- **The winners the rule cannot take.** Refused launches at the usual view: 200 on the fit half, 141 on the read half.
+  About 30% of them get their crowd in the tick's own block, and those pay +4.9% / +3.8% at second place; but fired
+  at the live guard even a perfect oracle for that crowd loses (fit 62 fires −$20.72, read 37 fires −$9.28), because
+  most of them revert or land deep; only guard off pays, and guard off is unsafe. Eleven pre-tick signals (fleets,
+  wallets and shots at k−1, fleets at k−2 and k, bundle ETH, named wallets, tier, creator supply, the crowd rate of the
+  last ten launches, minutes since the last launch, the hour) were each chosen on one half and read on the other; none
+  gains both ways. The no-crowd winners (18:42, 20:24) sit in a class paying −7.6% / −3.4%. No.
+- **Everything else, tested and dropped.** Slip 0.25 (+$7 fit, +$1 read against 0.20, on one or two launches, and it
+  would have filled the 15:33 deep landing); dropping the team's forward-sender helper from the fleet count (9 fires
+  depend on it, +$4 in each half); any split of the current fires by tier, bundle size, fleets, k or heat (none loses in
+  both halves, so no filter); the hold (11 blocks best or tied in every window).
+- **The calibration moved.** Of the eight usual-view fires that reached the engine's crowd gate today it took seven,
+  three of them with fewer than two fleets at k−2 (15:36, 16:33, 18:52), and refused the one with none at k−2 (19:44:51).
+  On the two-core box the engine's gate view is the usual view (k−1 with the registration block); the Sep 26–28
+  calibration (k−2 on five of ten) predates it. Predictions from now on quote the usual view as the centre.
+
+*Verdict.* Deploy engine 6.8 with the morning reading (runbook 5z); change nothing else. Expected about +$0.5 a day at
+$13 on the Sep 24–28 supply, $0 on today's. Watch rules: the guard class (1 of 10 admitted fills, back to 0.15 if most
+of the first ten land last or later); the step (back to 3 ms / 80 ms if three or more of the next ten bursts put no shot
+before the tick, or if every shot of a burst lands in the creation second); the chain-scored sequential test (sixteen
+fires, +0.03) as the master switch. Both refuters' verdicts on the one proposal are recorded below when they land.

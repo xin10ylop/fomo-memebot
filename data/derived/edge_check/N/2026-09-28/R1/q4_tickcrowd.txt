@@ -1,0 +1,42 @@
+refused at the usual view (engine count at k-1 < 2), second place h11, 0.20 guard:
+  fit  all n=200 mean  -3.7% win 25% $-177.06 | crowd only in block k n= 62 mean  +4.9% win 47% $ -20.72 | no crowd by k n=138 mean  -7.6% win 15% $-156.34 | P(block-k crowd) 31%
+  read all n=141 mean  -1.5% win 21% $ -92.86 | crowd only in block k n= 37 mean  +3.8% win 41% $  -9.28 | no crowd by k n=104 mean  -3.4% win 13% $ -83.58 | P(block-k crowd) 26%
+
+added fires on refused launches: signal chosen on one half (max $, n >= 4), read on the other; also P(block-k crowd) inside the rule
+  fl_k1     >= 1      chosen on fit : n= 72 $ -63.32 (P blk-k 54%) -> other half n= 43 $ -17.90 (P blk-k 53%)
+  fl_k1     >= 1      chosen on read: n= 43 $ -17.90 (P blk-k 53%) -> other half n= 72 $ -63.32 (P blk-k 54%)
+  w_k1      >= 5      chosen on fit : n=  4 $  -3.91 (P blk-k 25%) -> other half n=  5 $  +0.80 (P blk-k 60%)
+  w_k1      >= 2      chosen on read: n= 19 $  +3.24 (P blk-k 63%) -> other half n= 27 $ -31.69 (P blk-k 67%)
+  shots_k1  >= 10     chosen on fit : n= 28 $ -20.11 (P blk-k 61%) -> other half n= 13 $  +2.52 (P blk-k 77%)
+  shots_k1  >= 10     chosen on read: n= 13 $  +2.52 (P blk-k 77%) -> other half n= 28 $ -20.11 (P blk-k 61%)
+  f_k2      >= 1      chosen on fit : n= 20 $ -14.97 (P blk-k 55%) -> other half n= 17 $  +8.19 (P blk-k 47%)
+  f_k2      >= 1      chosen on read: n= 17 $  +8.19 (P blk-k 47%) -> other half n= 20 $ -14.97 (P blk-k 55%)
+  k         <  3      chosen on fit : n= 43 $ -14.19 (P blk-k 44%) -> other half n= 36 $ -11.88 (P blk-k 31%)
+  k         >= 8      chosen on read: n= 22 $  -5.38 (P blk-k 36%) -> other half n= 45 $ -55.40 (P blk-k 20%)
+  bundle    >= 1.5    chosen on fit : n= 12 $  -4.02 (P blk-k 50%) -> other half n= 14 $ -16.04 (P blk-k 36%)
+  bundle    >= 2.0    chosen on read: n=  5 $  -7.19 (P blk-k 20%) -> other half n=  3 $  -0.16 (P blk-k 100%)
+  named     >= 20     chosen on fit : n= 14 $  +0.59 (P blk-k 36%) -> other half n=  9 $ -13.43 (P blk-k 11%)
+  named     >= 20     chosen on read: n=  9 $ -13.43 (P blk-k 11%) -> other half n= 14 $  +0.59 (P blk-k 36%)
+  tier      <  0.025  chosen on fit : n= 41 $ -27.72 (P blk-k 29%) -> other half n= 11 $  -5.60 (P blk-k 45%)
+  tier      <  0.025  chosen on read: n= 11 $  -5.60 (P blk-k 45%) -> other half n= 41 $ -27.72 (P blk-k 29%)
+  tk0       >= 0.05   chosen on fit : n= 12 $  -9.17 (P blk-k 25%) -> other half n=  3 $  -2.85 (P blk-k 33%)
+  tk0       >= 0.02   chosen on read: n= 57 $ -23.62 (P blk-k 21%) -> other half n=120 $-100.13 (P blk-k 31%)
+  heat10    <  0.2    chosen on fit : n=  7 $  -6.46 (P blk-k 43%) -> other half n=  1 $  -0.33 (P blk-k 100%)
+  heat10    <  0.3    chosen on read: n= 13 $ -12.91 (P blk-k 31%) -> other half n= 17 $ -11.37 (P blk-k 41%)
+  gap_min   >= 20     chosen on fit : n= 34 $ -29.12 (P blk-k 35%) -> other half n= 60 $ -61.71 (P blk-k 27%)
+  gap_min   <  10     chosen on read: n= 53 $  -3.19 (P blk-k 28%) -> other half n=132 $-114.25 (P blk-k 30%)
+
+signals whose chosen rule gains in BOTH directions (chosen on fit reads > 0 on read AND chosen on read reads > 0 on fit):
+  none
+
+a perfect oracle for the block-k crowd (fire on every refused launch whose engine count at k reaches 2), by guard:
+  fit  slip 0.07: 62 fires, 19 fills mean  +5.3%, $  -7.27 ($-2.81/day)
+  fit  slip 0.20: 62 fires, 36 fills mean  -0.1%, $ -20.72 ($-8.01/day)
+  fit  slip 0.30: 62 fires, 40 fills mean  -2.1%, $ -31.18 ($-12.05/day)
+  fit  slip 1.00: 62 fires, 62 fills mean  +4.9%, $ +19.38 ($+7.49/day)
+       largest: Sep 23 19:09 +67% g 0.16, Sep 22 19:05 +60% g 0.41, Sep 22 18:44 +50% g 0.19
+  read slip 0.07: 37 fires, 16 fills mean  +4.2%, $  -3.38 ($-0.70/day)
+  read slip 0.20: 37 fires, 24 fills mean  +0.9%, $  -9.28 ($-1.92/day)
+  read slip 0.30: 37 fires, 24 fills mean  +0.9%, $  -9.28 ($-1.92/day)
+  read slip 1.00: 37 fires, 37 fills mean  +3.8%, $  +5.90 ($+1.22/day)
+       largest: Sep 26 22:38 +154% g 0.6, Sep 28 17:39 +75% g 0.99, Sep 28 16:42 +30% g 0.85

@@ -1,0 +1,7 @@
+view k2: 4 eligible launches within 12 s of a release (1 of them fires, $-0.33); expected refused by the normal 3 s loop: 0.00 fires, $+0.00 on the week (178 h)
+view k1reg: 4 eligible launches within 12 s of a release (2 of them fires, $-1.92); expected refused by the normal 3 s loop: 0.00 fires, $+0.00 on the week (178 h)
+   Sep 22 10:58:07 0x82b83d15  3.5 s after a release  p(refused, normal loop) 0.00  no fire
+   Sep 22 13:29:36 0xf297f823  6.5 s after a release  p(refused, normal loop) 0.00  fire -1.59
+   Sep 23 17:57:25 0xe56c7659  8.5 s after a release  p(refused, normal loop) 0.00  no fire
+   Sep 28 19:44:59 0x057d1ffe  6.0 s after a release  p(refused, normal loop) 0.00  fire -0.33
+view kreg: 4 eligible launches within 12 s of a release (2 of them fires, $-1.92); expected refused by the normal 3 s loop: 0.00 fires, $+0.00 on the week (178 h)

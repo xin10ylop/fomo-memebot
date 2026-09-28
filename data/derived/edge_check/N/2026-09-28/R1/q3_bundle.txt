@@ -1,0 +1,35 @@
+12:52 0x98f4e88b, block 2 in chain order: ['OUT 0xbd7c6f67', 'named 0x33f8b61d', 'named 0x33f8b61d', 'named 0x33f8b61d'] ...
+  engine watch_curve, outsider's tx carries value (valtx): bundle 0, closed True
+  engine watch_curve, outsider's tx carries no value (not recorded): bundle 22, closed True
+
+the week (Sep 21 09:40 - Sep 28 21:00): launches that reach the crowd gate in the replay, the engine's bundle count on the chain's rows
+  ok                        444 launches | k2: 43 fires (fit 24, read 19) $+147.83 | k1reg: 119 fires (fit 65, read 54) $+205.64 | kreg: 212 fires (fit 124, read 88) $+179.16
+  closed by a value tx       28 launches | k2: 6 fires (fit 3, read 3) $+8.29 | k1reg: 18 fires (fit 12, read 6) $+29.04 | kreg: 23 fires (fit 15, read 8) $+25.84
+  closed by a direct buy      8 launches | k2: 0 fires (fit 0, read 0) $+0.00 | k1reg: 2 fires (fit 2, read 0) $-8.99 | kreg: 3 fires (fit 2, read 1) $-9.32
+
+fires at risk (usual view):
+  closed by a value tx   Sep 21 12:02 0xc20adb7a FILL           h11 -0.8%  $-0.43
+  closed by a value tx   Sep 21 14:37 0x8cc0b1f4 FILL           h11 +38.4%  $+4.66
+  closed by a value tx   Sep 21 15:03 0xfdd87517 FILL           h11 +14.9%  $+1.60
+  closed by a value tx   Sep 21 16:16 0xf7af6adf FILL           h11 +46.7%  $+5.74
+  closed by a value tx   Sep 21 17:15 0x127a8272 FILL           h11 -5.5%  $-1.04
+  closed by a value tx   Sep 21 17:28 0x82b04e57 FILL           h11 +11.4%  $+1.16
+  closed by a value tx   Sep 22 04:16 0x50dd5611 FILL           h11 +11.0%  $+1.11
+  closed by a value tx   Sep 22 17:53 0x1e5c6b1a FILL           h11 -2.6%  $-0.67
+  closed by a value tx   Sep 22 18:56 0x39501200 FILL           h11 +86.4%  $+10.90
+  closed by a value tx   Sep 23 18:41 0xb6df1c84 FILL           h11 +18.2%  $+2.04
+  closed by a value tx   Sep 23 18:54 0xe406d4a7 FILL           h11 +9.2%  $+0.86
+  closed by a value tx   Sep 23 19:24 0xdb208100 FILL           h11 +6.0%  $+0.45
+  closed by a value tx   Sep 24 20:42 0x56e76663 FILL           h11 -7.2%  $-1.26
+  closed by a value tx   Sep 25 16:24 0xd43ed726 FILL           h11 +42.7%  $+5.21
+  closed by a value tx   Sep 25 22:22 0x18de1d35 FILL           h11 +10.1%  $+0.98
+  closed by a value tx   Sep 26 23:53 0x2b7508b0 FILL           h11 +2.0%  $-0.07
+  closed by a value tx   Sep 27 00:10 0x80c0efae FILL           h11 -10.0%  $-1.63
+  closed by a value tx   Sep 28 12:52 0x98f4e88b FILL           h11 -1.9%  $-0.57
+  closed by a direct buy Sep 22 22:49 0x75d95c67 FILL           h11 -57.8%  $-7.85
+  closed by a direct buy Sep 22 22:59 0xc3a219c7 FILL           h11 -6.2%  $-1.14
+
+what engine 6.8 (no close) adds over 6.7 on these launches, $ at 0.20 by period (fit 2.59 days, read 4.85 days):
+  k2     fit 3 fires $+3.36 ($+1.30/day) | read 3 fires $+4.94 ($+1.02/day)
+  k1reg  fit 14 fires $+17.39 ($+6.72/day) | read 6 fires $+2.66 ($+0.55/day)
+  kreg   fit 17 fires $+16.40 ($+6.34/day) | read 9 fires $+0.12 ($+0.02/day)

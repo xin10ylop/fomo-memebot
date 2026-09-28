@@ -1101,3 +1101,25 @@ open (the two counts equal):
 
 Expected `"version": 6.8`, the rest unchanged. The morning reading's `engine_vs_chain` should show no more `PRE bundle 0 < 3` on
 population launches; `sudo grep -c 'not fresh' /var/log/sniper/engine.jsonl` counts the nonce gate's refusals of the day.
+
+## 5aa. The nightly routine (from Sep 28, report 24.43)
+
+After the last reading of the day, with the day's launches reconciled both ways (`engine_vs_chain`, `live_vs_table`):
+
+1. Append the day's facts to `data/derived/edge_check/N/BRIEF_nightly.md` (bursts with their landing index and real
+   against modelled return, every new skip reason with its launch, the gate refusals against the prediction, the guard
+   class tally, the signing and feed numbers, the sequential test). The six questions at the top of the brief stay.
+2. Two independent reviewers on the brief in parallel (each in its own folder `N/<date>/R1`, `R2`, with the replay
+   dumped at all three views and every number in a script next to its text), then two refuters per proposal, one on
+   the data and one on the mechanism, each told to refute by default. A proposal survives only if it pays in both halves
+   at the usual view, has a live verification and a rollback, and neither refuter breaks it.
+3. The assistant re-computes every number that decides (the reviewers' rows are on disk), writes the report section,
+   the runbook entry and the morning paste, and commits. One change a night at most; a correctness fix (live engine
+   diverging from the model) counts as the change.
+4. The morning reading verifies the change live before anything else is touched.
+
+What tonight settled for the readings: the engine's gate view on the two-core box is the usual view (k−1 with the
+registration block), so predictions quote it as the centre with the floor and ceiling as the range. The 19:44:59
+"nonce/gas not fresh" skip is the release path (a gate refusal 8 s earlier set the nonce to None; the live poll is
+every 10 s), worth $0 on the week; count it each morning with `sudo grep -c 'not fresh' /var/log/sniper/engine.jsonl`.
+The step's second rollback tail: three or more of the next ten bursts with no shot before the tick means a longer lead.

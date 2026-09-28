@@ -53,3 +53,11 @@ v = [(x["ret_first"]["11"], x["ret"]["11"], x["T0"]) for x in R if x["why"] == "
 for lab, lo, hi in (("Sep 21-23", 0, 1790208000), ("Sep 24-28", 1790208000, 2e9)):
     w = [(f, s) for f, s, t in v if lo <= t < hi]
     if w: print(f"first minus second at h11, fills {lab}: n={len(w)} mean first {st.mean(f for f, s in w):+.1%} second {st.mean(s for f, s in w):+.1%} gap {st.mean(f - s for f, s in w):+.1%} median gap {st.median(f - s for f, s in w):+.1%}")
+# the burst's offset against the tick, from the shots that landed in the creation second: shots run from -LEAD to +22 ms around the
+# estimated boundary, STEP apart, so n shots before the tick means the tick came at about n*STEP - LEAD ms from the estimate
+# (negative: the tick came earlier than the estimate / our shots arrived later than planned). Old 3 ms / 80 ms (runbook 5y), new 2 / 46.
+print("\nburst offset (tick minus estimate, ms) from the shots in the creation second")
+for lab, post, step, lead in (("old 3/80", False, 3, 80), ("new 2/46", True, 2, 46)):
+    v = [x for x in rows if x["post"] == post]
+    offs = [x["in_creation"] * step - lead for x in v]
+    print(f"  {lab}: {sorted(offs)}  median {st.median(offs):+.0f} ms; bursts with no shot in the creation second (all late) {sum(x['in_creation'] == 0 for x in v)} of {len(v)}; with every landed shot in the creation second {sum(x['in_e1'] == 0 for x in v)}")
