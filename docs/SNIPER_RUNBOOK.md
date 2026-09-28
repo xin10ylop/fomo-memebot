@@ -1086,3 +1086,18 @@ signing time, the shots signed directly (35 expected) and each shot's lateness.
 Three timing changes at once (the guard, the step, the cores) cannot be told apart in the readings; the readings judge the
 combination by the fills' landing index and the sequential test, and the rollback order if landings worsen is the step first,
 then the slip.
+
+## 5z. Engine 6.8: the bundle no longer closes at a stranger's shot; the nonce gate (Sep 28 night, report 24.43)
+
+Sep 28 12:52 `0x98f4e88b` was skipped "bundle 0 < 3" while the chain shows a 0.71 ETH exempt bundle from 22 named wallets: two
+strangers' shots sat in the bundle's block ahead of it, and the engine closed its bundle count at the first outsider's buy, a rule
+the tables never had (e1_multi counts every exempt named buy in the creation window). On the week's population that rule skips 33
+of 632 launches. Engine 6.8 drops it. Also: the "nonce/gas not fresh (RPC)" gate (19:44:59) now allows 60 s instead of 30 and the
+bookkeeping poll retries 2 s after a failed read instead of waiting the whole interval. Deploy with the morning reading, no fill
+open (the two counts equal):
+
+    sudo grep -c '"ev": "trade_done"' /var/log/sniper/engine.jsonl; sudo grep -c '"ev": "trade_decision"' /var/log/sniper/engine.jsonl
+    cd ~/fomo-memebot && git pull && sudo systemctl restart sniper-engine && sleep 5 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"burst": \[[^]]*\]\|"stake": \[[^]]*\]\|"hold_blocks": [0-9]*\|"kill_usd": [0-9.]*\|"bundle_max_eth": [0-9.]*'
+
+Expected `"version": 6.8`, the rest unchanged. The morning reading's `engine_vs_chain` should show no more `PRE bundle 0 < 3` on
+population launches; `sudo grep -c 'not fresh' /var/log/sniper/engine.jsonl` counts the nonce gate's refusals of the day.

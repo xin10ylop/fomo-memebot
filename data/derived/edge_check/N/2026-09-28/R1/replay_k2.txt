@@ -1,0 +1,24 @@
+engine replay, week Sep 21 09:40 - Sep 28 21:00 UTC: 685 qualifying launches, 178 covered hours of 179; view k-2 after the registration block, hold 11, cap 3.0, creator-repeat gate on; pieces 31
+the engine's gate view on the ten live bursts of Sep 26-28 sat at k-2 five times, k-1 twice, k once (two fired on any view); the registration block counted in three of four races: k-2 without it is the floor, k with it the ceiling
+
+day     hours launch  PRE GATE fired guard fills   mean h11  median  win dead   $ total  fires/24h   $/24h
+Sep 21   14.3    121   34   81     6     1     5     +50.2%  +60.8%  80%   0%    +30.66       10.0  +51.34
+Sep 22   24.0    170   47  114     9     2     7     +46.1%  +21.5% 100%   0%    +38.96        9.0  +38.96
+Sep 23   23.8    108   21   75    12     2    10     +29.6%  +17.6%  80%   0%    +34.46       12.1  +34.69
+Sep 24   24.0     72   15   50     7     0     7     +16.1%   +8.6%  57%   0%    +12.38        7.0  +12.38
+Sep 25   24.0     53    9   39     5     0     5     +28.0%  +10.1% 100%   0%    +16.56        5.0  +16.56
+Sep 26   24.0     55   24   28     3     0     3     +16.0%  +18.2% 100%   0%     +5.25        3.0   +5.25
+Sep 27   24.0     47   13   32     2     0     2     +14.4%  +14.4% 100%   0%     +3.08        2.0   +3.08
+Sep 28   20.3     59    4   50     5     1     4     +31.6%   +1.4%  50%   0%    +14.78        5.9  +17.46
+week    178.5    685  167  469    49     6    43     +30.8%  +16.9%  81%   0%   +156.13        6.6  +20.99
+
+by hold, the same fills:
+  h9    43 fills  mean +28.0%  median +16.1%  win 81%  $ +142.33
+  h11   43 fills  mean +30.8%  median +16.9%  win 81%  $ +158.11
+  h13   43 fills  mean +26.7%  median +12.0%  win 77%  $ +135.03
+  h15   43 fills  mean +22.3%  median +10.4%  win 70%  $ +110.57
+
+dispositions: GATE attackers 0 < 2 357, PRE creator supply < 1% 150, GATE attackers 1 < 2 74, FILL 43, GATE bundle ETH > 3.0 (cap) 20, PRE creator repeat 17, GATE bundle 0 < 3 17, GUARD no fill 6, GATE bundle 2 < 3 1
+largest fills: Sep 28 15:30 0xffb0d66a +133%, Sep 22 22:54 0x5b551473 +119%, Sep 23 17:46 0xdf8f1e1c +116%, Sep 22 22:36 0x077cccf4 +106%, Sep 25 00:33 0x9f834b70 +83%, Sep 21 16:16 0x875dcce6 +83%
+without the largest: mean +28.4% on 42 fills, $+141.18
+dumped 685 rows to data/derived/edge_check/N/2026-09-28/R1/rows_k2.json
