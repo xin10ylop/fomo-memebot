@@ -1028,3 +1028,19 @@ p99 6 ms in the review's measurement). On any box with two vCPUs, unpin: `set_kv
 Expected `"version": 6.7`, the rest unchanged. The send step on the box (`/etc/sniper/send_step.py`) is the operator's copy of
 `deploy/send_step.py`: copy the new one over it before the restart (`sudo cp ~/fomo-memebot/deploy/send_step.py /etc/sniper/send_step.py`)
 or fix 2 applies to the dry-run path only.
+
+## 5x. BURST_SLIP 0.15 (Sep 28, report 24.42: four analyses, one change)
+
+The minOut guard at 7% reverted half the bursts on a buy ahead that marks the crowd that pays; the relay's one-buy rule does the
+guard's original job. Switch with 5w's deploy (engine 6.7, the new send step, PIN_CPU unpinned), no fill open:
+
+    sudo grep -c '"ev": "trade_done"' /var/log/sniper/engine.jsonl; sudo grep -c '"ev": "trade_decision"' /var/log/sniper/engine.jsonl
+    cd ~/fomo-memebot && git pull && sudo cp deploy/send_step.py /etc/sniper/send_step.py && set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv PIN_CPU ""; set_kv BURST_SLIP 0.15; sudo systemctl restart sniper-engine && sleep 5 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"hold_blocks": [0-9]*\|"kill_usd": [0-9.]*\|"stake": \[[^]]*\]\|"bundle_max_eth": [0-9.]*\|"burst": \[[^]]*\]'
+
+Expected: `"version": 6.7` and `"burst": [35, 4, 8, 0.15]`, the rest unchanged (stake 13, hold 9, kill 24, cap 3.0).
+
+**What to watch.** Fills per burst should rise from about half to most; `buy_reverted` events become rare. On every fill the
+reading's `landed` line gives the index and the buy ahead: a fill behind a buy that moved the price 7-15% is the admitted class.
+Move to 0.20 once ten admitted fills have landed at index 3 or better; back to 0.07 if most of the first ten land last in the
+seat block or in a later block, or when the admitted fills' own sequential test (H0 +2.5%, H1 +19%, sd 0.34, ±2.94, on their
+realized 11-block returns) reaches its lower bound. The main test on the chain-scored fires runs as before.

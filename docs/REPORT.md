@@ -3986,3 +3986,61 @@ fell from 35-38 a day on Sep 21-22 to 6-11 a day on Sep 26-27, the supply break 
 estimate and restarts with the engine, so live it is weaker than this. The guard is modelled at second place; a burst
 landing first passes it with more room, one landing deeper less. The view is a range because the engine's is: the
 feed's delivery against the gate's close decides it launch by launch.
+
+### 24.42 The strategy round: the assistant and three independent reviewers on the same brief (Sep 28)
+
+Brief `edge_check/K/BRIEF.md`: more fills and a better P&L, tested on the data on disk, fit on Sep 21-23 and read on Sep 24-28
+or the reverse, every proposal with its count. Four analyses, none reading the others: K0 (the assistant), K1, K2, K3 (three
+reviewers on the Opus model). All four rebuilt section 24.41's week exactly before changing anything.
+
+**One change, found by all four: the minOut guard.** At BURST_SLIP 7% the engine reverts a burst whenever the buy ahead of it in
+the seat block moved the price 7% or more. Those bursts, had they filled at second place (the model folds the buy ahead in), pay
+what the fills pay: the week +15.7% on 61 against +15.9% on 68; on Sep 24-28 +20.2% on 19 (win 79-84%) against the fills' +7.9%.
+In 44 of the 48 reverts with a tape the cause is the one buy ahead, not the creation second's drift; three fixed-size first
+buyers (0.21, 0.149 and 0.5 ETH) account for 34 of them, and they faded after Sep 25. The guard's designed job, refusing a second
+fill of our own (24.20), is done by the BuyOnce relay's `AlreadyBought` at any stake; a creation-second landing still reverts at
+any slip under 90% (the 97% tax leaves 3% of the sized tokens). No "smarter" guard (loosen at 3+ fleets, by bundle, by tier,
+sized at the tick) beats a flat one in both periods.
+
+| slip | Sep 21-23 $ (fills of 79 bursts) | Sep 24-28 $ (fills of 50) |
+|---|---|---|
+| 0.07 (live) | +82.6 (37) | +15.3 (31) |
+| 0.15 | +136.1 (66) | +57.6 (46) |
+| 0.20 | +141.1 (71) | +66.4 (49) |
+| 0.30 | +157.6 (78) | +65.1 (50) |
+
+Out of sample: chosen on Sep 21-23 the slip is 0.30, which adds $49.8 on Sep 24-28; chosen on Sep 24-28 it is 0.20, which adds
+$58.4 on Sep 21-23. Same direction at the floor view (+$1.1 to +$36.1) and the ceiling (+$5.3 to +$55.3). Bootstrap of the read
+gain +$25 to +$80 (90%), 15 of 18 changed bursts positive. Recommendations: K0 0.15 (0.25 as the ceiling), K1 0.20, K2 0.15,
+K3 0.20.
+
+**Its downside, measured (K0, K2).** A looser guard also fills a burst that lands deep: last in E1 (−0.4% / +4.0% at h11) or in the
+next second (E2: −5 to −8% in every variant). At 0.15 a last-in-E1 landing passes on 22 of 59 fit and 35 of 70 read fires, an E2
+landing on 36 / 46; at 0.25 on 39 / 53 and 44 / 60. Charged at the live landing mix (of eight live bursts that landed: three first,
+three second, one last, one first in E1+2) the change is +$7 a day on fit and +$4 on read at 0.15; under a worst case where every
+burst lands last or late it is −$2.5 / +$0.8 a day at 0.15 and $6-10 a day worse at 0.20 and above. Live evidence on the class
+the change admits is one burst (Sep 27 17:06, last place at 0.884 of the sized tokens: −2.5% at 0.15).
+
+**Decision: BURST_SLIP 0.15 now, 0.20 after the first ten admitted fills land at index 3 or better** (runbook 5x). Expected on the
+Sep 24-28 supply at $13: +$10 a day if every burst lands second, +$4-5 a day at the live landing mix, +$2-3 a day on Sep 26-28's
+thinner supply. It does not fix the supply fall; it stops the engine throwing away its best-crowded fires.
+
+**Everything else, tested and not adopted (all four agree).** Filters: the bundle cap earns its keep in both periods (+$10.9 /
++$13.7); creator supply ≥ 1% flips sign (+$12 fit, −$6 read on five fills): keep; creator repeat and the bundle-buyer floor block
+three and one fires: too small; the tier range, the 0.3 ETH floor and the 2 ETH creator cap never bind on disk: untestable. Gate:
+two fleets at the usual view is best in both periods at both guards; three at the tick's block is about equal but the engine
+cannot know a block is k before E1; nine second signals (growth k−2 to k−1, wallets, bundle bands, tier, k, named, hour, creator
+supply) none gains both ways. Position: first +30 / +24%, second +19 / +15%, third +13 / +11%, last −0.4 / +4%; behind a buy of
+0.15 ETH or more second place still pays +24.5% (21) and +14.0% (9). Exit: 80 rules (take-profit 10-80%, stops 5-30%, both, a sell
+on the seat buyers' first sell, early reads, momentum, trails) and none beats the fixed E1+11 in both periods; holds 9-13 flat;
+keep HOLD_BLOCKS 9. Size: −0.7 to −1.5 points per $100 up to $200, the 3% cap binding from about $218; no raise before the
+sequential test's upper bound. More fills: E2 negative in every variant (−5 to −12%), as a retry after a revert −9%, as a second
+seat −2 to −6%; a second seat in E1 is a doubled stake; a finer burst step and the launches the tables exclude are not testable
+from disk.
+
+**Verifying the change live** (all four): the reading's `landed` line already prints each fill's index and the buy ahead; the
+admitted class is a fill with tokens 7-15% under the build's sizing. Score those fills' realized 11-block returns on their own
+sequential test (H0 +2.5%, H1 +19%, sd 0.34, ±2.94): about 19 fills reach the upper bound at the read mean, 16 the lower at
++2.5%, one to two weeks. Back to 0.07 on the lower bound, or if most of the first ten admitted fills land last in E1 or later.
+The main test on the chain-scored fires is unchanged: it already scores every fire at second place, which is what the wallet
+earns once the guard stops refusing them. Reports and scripts: `edge_check/K0`..`K3`.
