@@ -34,13 +34,16 @@ def span_of(n):
     for f in glob.glob(f"data/derived/*/e1m_{n}.json"):
         d = json.load(open(f)); return d["t_lo"], d["t_hi"]
     return KNOWN.get(n) and tuple(calendar.timegm(time.strptime(x, "%Y-%m-%d %H:%M")) for x in KNOWN[n])
-pieces = []
+GC = {x["cv"].lower(): x for x in json.load(gzip.open("data/derived/edge_check/G/curves.json.gz", "rt"))} if os.path.exists("data/derived/edge_check/G/curves.json.gz") else {}
+TB = json.load(gzip.open(f"{D}/tape_bundles.json.gz", "rt")) if os.path.exists(f"{D}/tape_bundles.json.gz") else {}   # the exempt bundle, the creator's buy and the tier from the edge review's tapes (B, D), for the older launch files   # reviewer G's second-place return at every exit block ($13): the same model, agrees with the grid to 0.4% at worst on 51 shared launches
+pieces = []; SKIP = ("141_creators", "175_sep2223", "oos_sep2021", "today_sep23", "sep1819")
 for lf in sorted(glob.glob(f"{D}/launches_*.json")):
     n = os.path.basename(lf)[9:-5]; hg = f"{D}/hold_grid_week_{n}.json"
+    if n in SKIP: continue
     cf = next((c for c in (f"{D}/crowd_raw_{CROWD_ALIAS.get(n, n)}.json.gz", f"{D}/crowd_raw_{CROWD_ALIAS.get(n, n)}.json") if os.path.exists(c)), None)
     sp = span_of(n)
-    if not (cf and os.path.exists(hg) and sp) or sp[1] < T0 or sp[0] > T1: continue
-    pieces.append((n, lf, cf, hg, sp))
+    if not (cf and sp) or sp[1] < T0 or sp[0] > T1: continue
+    pieces.append((n, lf, cf, hg if os.path.exists(hg) else None, sp))
 cre = collections.defaultdict(list)
 if os.path.exists(f"{D}/creations_week.json.gz"):
     for c in json.load(gzip.open(f"{D}/creations_week.json.gz", "rt")): cre[c["creator"].lower()].append(c["ts"])
@@ -66,13 +69,21 @@ def bundle_buyers(r, named):
             if t.get("named_fr") and t["fr"].lower() in nm: s.add(t["fr"].lower())
             if t.get("named_data"): helper = True
     return len(nm) if helper else len(s)
-rows = {}; cover = []
+rows = {}; cover = []; pending = set(); no_tk0 = 0; no_guard = 0
 for n, lf, cf, hg, sp in pieces:
-    L = {l["cv"].lower(): l for l in json.load(open(lf))}; H = {h["cv"].lower(): h for h in json.load(open(hg))}
+    L = {l["cv"].lower(): l for l in json.load(open(lf))}; H = {h["cv"].lower(): h for h in json.load(open(hg))} if hg else {}
     R = json.load(gzip.open(cf, "rt")) if cf.endswith(".gz") else json.load(open(cf)); cover.append((max(sp[0], T0), min(sp[1], T1)))
     for r in R:
-        cv = r["cv"].lower(); l = L.get(cv); h = H.get(cv)
-        if not l or not h or not (T0 <= l["T0"] <= T1) or cv in rows: continue
+        cv = r["cv"].lower(); l = L.get(cv); h = H.get(cv) or {}; g = GC.get(cv)
+        if not l or not (T0 <= l["T0"] <= T1) or cv in rows: continue
+        tbv = TB.get(cv)
+        if tbv:
+            h = dict(h)
+            for kk in ("bundle_eth_chain", "tk0", "init_buy_eth", "tier", "tk_build_13", "tk_seat1_13", "tk_last_13"):
+                if h.get(kk) is None and (kk if kk != "bundle_eth_chain" else "bundle_eth") in tbv: h[kk] = tbv[kk if kk != "bundle_eth_chain" else "bundle_eth"]
+        if g and not h.get("behind1_13_h11"):
+            h = dict(h); h.update({f"behind1_13_h{hh}": g["r2"][hh] for hh in (9, 11, 13, 15)}); h["src"] = "G"
+        if not h.get("behind1_13_h11"): pending.add(cv); continue
         rows[cv] = (r, l, h)
 launches = sorted(rows.values(), key=lambda x: x[1]["T0"])
 cover.sort(); merged = []
@@ -91,8 +102,9 @@ for r, l, h in launches:
     rec = {"cv": cv, "T0": t, "day": day(t), "bundle": l.get("bundle_eth", h.get("bundle_eth_chain", 0.0)) or 0.0, "why": None}   # the older launch files: the bundle from the grid's tape
     reasons = []
     if not NO_REPEAT and prior_today(creator, t) > 0: reasons.append("creator repeat")
-    tk0 = h.get("tk0") or 0.0
-    if tk0 <= 0 or tk0 >= Y0: reasons.append("no launch-block buy")
+    tk0 = h.get("tk0")
+    if tk0 is None: no_tk0 += 1                                            # the older pieces' grids are not in yet: the creator-supply gate cannot be applied there (counted)
+    elif tk0 <= 0 or tk0 >= Y0: reasons.append("no launch-block buy")
     elif tk0 < E.MIN_CREATOR_SUPPLY * Y0: reasons.append("creator supply < 1%")
     if (h.get("init_buy_eth") or 0.0) > E.MAX_CREATOR_BUY_ETH: reasons.append("creator buy > 2 ETH")
     if reasons: rec["why"] = "PRE " + reasons[0]; out.append(rec); continue
@@ -109,12 +121,14 @@ for r, l, h in launches:
     if gates: rec["why"] = "GATE " + gates[0]; out.append(rec); continue
     rec["fired"] = True
     tb_, ts1 = h.get("tk_build_13"), h.get("tk_seat1_13")
+    if not (tb_ and ts1): no_guard += 1
     if tb_ and ts1 and ts1 < (1 - E.BURST_SLIP) * tb_:
         rec["why"] = "GUARD no fill"; rec["usd"] = -GAS; out.append(rec); continue
     ret = h.get(f"behind1_13_h{HOLD}")
     if ret is None: rec["why"] = "no return column"; out.append(rec); continue
     rec["why"] = "FILL"; rec["ret"] = ret; rec["usd"] = ret * STAKE - GAS; rec["rets"] = {hh: h.get(f"behind1_13_h{hh}") for hh in (9, 11, 13, 15)}; busy_until = t + BUSY_S; out.append(rec)
 print(f"engine replay, week {time.strftime('%b %d %H:%M', time.gmtime(T0))} - {time.strftime('%b %d %H:%M', time.gmtime(T1))} UTC: {len(out)} qualifying launches, {sum(hours.values()):.0f} covered hours of {(T1 - T0) / 3600:.0f}; view {VIEW}, hold {HOLD}, cap {'off' if NO_CAP else '3.0'}, creator-repeat gate {'off' if NO_REPEAT else 'on'}; pieces {len(pieces)}")
+if pending or no_tk0 or no_guard: print(f"NOT COMPLETE: {len(pending)} launches without a return yet (grids still running); creator-supply gate not applicable on {no_tk0} launches, minOut guard on {no_guard} fired launches (no grid fields for the older pieces yet)")
 days = sorted(set(x["day"] for x in out) | set(hours), key=lambda d: time.strptime(d + " 2026", "%b %d %Y"))
 print(f"\n{'day':7s} {'hours':>5s} {'launch':>6s} {'PRE':>4s} {'GATE':>4s} {'fired':>5s} {'guard':>5s} {'fills':>5s}  {'mean h%d' % HOLD:>9s} {'median':>7s} {'win':>4s} {'dead':>4s}  {'$ total':>8s}  {'fires/24h':>9s} {'$/24h':>7s}")
 def summarize(rs, label, hrs=None):
