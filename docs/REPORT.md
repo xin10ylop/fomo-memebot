@@ -3850,3 +3850,27 @@ today) and is checked before the crowd gate, so the launch is refused before a b
 on the minOut guard, which is what refused tonight's two. The dollars are small ($1-3 a day at $13); the value is that
 the engine stops spending bursts on launches that are flat by construction.
 
+*Reading, Sep 27 21:27 - Sep 28 05:33 UTC: the first winning fill, and the P&L positive.* Four bursts, two fills, read
+from the chain (`prediction_sep28night.txt`, the fills by our Buy/Sell events):
+
+| burst | what happened | real | model at the exit |
+|---|---|---|---|
+| 21:27 `0x96803325` | the 4.2 ETH template, minOut guard, no fill | gas | −10% |
+| 22:09 `0x40814a54` | the sequencer held the burst 659 ms (369 rival shots); the first shot landed in block E1+2, first in its block; sold 17 blocks after the fill at E1+19 | **+30.6% (+$3.81)** | +26% at E1+13, +28% at E1+15, −1.6% at E1+11 |
+| 23:37 `0x5169929b` | the template again (bundle 2.5 ETH class), guard, no fill | gas | −10% |
+| 00:10 `0x9ce5ad2f` | second place in the seat block, one buy ahead; sold at E1+12 | −10.0% (−$1.24) | −10.0% at every exit |
+
+P&L +$1.04 since the switch. Live so far: eight bursts, four fills (−2.6%, −2.0%, +30.6%, −10.0%, mean +4.0%), each
+equal to the model at the exit it really got; four no-fills that a fill would have lost more on. The winner is the
+sequencer-held case of 24.33: the burst landed a second late, alone in its block, and the price ran after block 11,
+so the late sell caught it; at the intended exit the same seat modelled −1.6%. Chance in our favour, and priced as such.
+
+Two things measured: (1) the sell lands 11 to 17 blocks after the fill (11 on 18:42, 12 on 00:10, 17 on 22:09 when the
+sequencer was slow), because the hold counts feed blocks from the fill's detection, about two blocks after the fill,
+and the sell's own landing adds two to six: the effective exit is E1+11 to E1+13 on a normal minute and later when
+the sequencer is held. (2) The engine fired twice on launches the chain's k−2 count refuses (22:09, 00:10: 2 fleets at
+block k−1, the feed having delivered it before the tick): its live view runs between k−2 and k−1, as 24.33 said.
+Refused at the gate with the crowd arriving after the tick: 02:51 `0xf74581b5`, modelled +145% behind one, the case
+no gate before the tick can take. The bundle cap (24.39) went live at 05:3x after this window; both template bursts
+of the night would have been refused before the build.
+
