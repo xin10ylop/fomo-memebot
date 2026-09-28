@@ -3937,6 +3937,6 @@ burst's gas took back the night's gain).
 
 Live so far: nine bursts, five fills (−2.6%, −2.0%, +30.6%, −10.0%, −6.5%; realized mean +1.9%, and +1.9% is what the
 model gives at the exits they really got), four no-fills. The sequential test on the chain-scored fires (behind one
-at 11 blocks; H0 +2.5%, H1 +19%, sd 0.34, bounds ±2.94): nine fires, mean +0.7%, log-likelihood ratio −0.74, leaning
-to no edge and undecided; at the recent backtest's +22% a fire it would take about ten more fires to cross the upper
-bound, and about ten losing ones to cross the lower. Stake stays $13; the lower bound sends the engine back to paper.
+at 11 blocks; H0 +2.5%, H1 +19%, sd 0.34, bounds ±2.94): nine fires, mean +0.7%, log-likelihood ratio −1.29, leaning
+to no edge and undecided; at the recent backtest's +22% a fire it would take about 26 more fires to cross the upper
+bound, and about six −10% fires to cross the lower. Stake stays $13; the lower bound sends the engine back to paper.
