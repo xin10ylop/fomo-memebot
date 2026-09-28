@@ -1,0 +1,88 @@
+launches past the pre-gates with crowd rows: 518; with a tape (Buy events, fees): 392
+
+Q1. fold_buy's categories after 6.8 against the tables' exempt rule (creation second, blocks 0..min(k,9)); launches with a tape; tx value from D where it has the tx (count shown), else 0
+  392 launches. per category and side: txs (with D value) | tx value (engine ETH) | Buy events: exempt n/ETH, taxed n/ETH, other n | txs with no Buy
+  COUNTED helper naming buyers                 after 6.7's close      5 (    5) |    5.521 | ex   67   5.521  tax   0  0.000  oth   0 | no buy    0
+  COUNTED helper naming buyers                 before               323 (  318) |  322.764 | ex 1844 290.844  tax   0  0.000  oth   0 | no buy    0
+  COUNTED named direct                         after 6.7's close     26 (   26) |    1.216 | ex   26   1.216  tax   0  0.000  oth   0 | no buy    0
+  COUNTED named direct                         before               634 (  632) |   40.774 | ex  633  41.588  tax   0  0.000  oth   0 | no buy    1
+  COUNTED named via helper                     after 6.7's close    320 (  320) |   10.375 | ex  320  10.375  tax   0  0.000  oth   0 | no buy    0
+  COUNTED named via helper                     before               147 (  147) |    5.303 | ex  147   5.303  tax   0  0.000  oth   0 | no buy    0
+          outsider direct                      after 6.7's close     40 (   40) |    2.244 | ex    0   0.000  tax   2  0.030  oth   0 | no buy   38
+          outsider direct                      before                28 (   28) |    0.358 | ex    0   0.000  tax   1  0.001  oth   0 | no buy   27
+          outsider value call                  after 6.7's close   4289 ( 4107) |  281.332 | ex    0   0.000  tax   0  0.000  oth   0 | no buy 4289
+          outsider value call                  before               194 (  190) |   12.980 | ex    0   0.000  tax   0  0.000  oth   0 | no buy  194
+          value-less call (not folded in s0)   after 6.7's close   4295 ( 4295) |    0.000 | ex    0   0.000  tax   0  0.000  oth   0 | no buy 4295
+          value-less call (not folded in s0)   before              4846 ( 4846) |    0.000 | ex    0   0.000  tax   0  0.000  oth   0 | no buy 4846
+  the tables' exempt ETH, 361.169 in all, by the engine category of its transaction: helper naming buyers 296.365, named direct 42.804, named via helper 15.678, not in crowd rows 6.321
+  exempt buys the engine does not count: 61, 6.321 ETH, by launch:
+    Sep 21 17:10 0xe49260fe 8 buys 0.353 ETH, category [('not in crowd rows', 8)] | replay GATE bundle 0 < 3, tables' bundle 0.352
+    Sep 22 18:08 0x8bed8351 10 buys 0.680 ETH, category [('not in crowd rows', 10)] | replay GATE bundle 0 < 3, tables' bundle 0.680
+    Sep 23 19:48 0x8d5936cc 5 buys 0.400 ETH, category [('not in crowd rows', 5)] | replay GATE bundle 0 < 3, tables' bundle 0.400
+    Sep 23 20:08 0x657b410f 5 buys 0.500 ETH, category [('not in crowd rows', 5)] | replay GATE bundle 0 < 3, tables' bundle 0.500
+    Sep 24 13:47 0xb8935d05 3 buys 0.500 ETH, category [('not in crowd rows', 3)] | replay GATE bundle 0 < 3, tables' bundle 0.500
+    Sep 24 14:12 0xe5ea3a5a 3 buys 0.520 ETH, category [('not in crowd rows', 3)] | replay GATE bundle 0 < 3, tables' bundle 0.520
+    Sep 24 14:22 0xbda0fd53 3 buys 0.530 ETH, category [('not in crowd rows', 3)] | replay GATE bundle 0 < 3, tables' bundle 0.530
+    Sep 24 15:15 0xbf0577df 3 buys 0.550 ETH, category [('not in crowd rows', 3)] | replay GATE bundle 0 < 3, tables' bundle 0.550
+    Sep 24 15:31 0x8eaf5a6e 3 buys 0.510 ETH, category [('not in crowd rows', 3)] | replay GATE bundle 0 < 3, tables' bundle 0.510
+    Sep 24 15:54 0x8e0a5c79 3 buys 0.600 ETH, category [('not in crowd rows', 3)] | replay GATE bundle 0 < 3, tables' bundle 0.600
+    Sep 24 16:11 0x243a0a0f 3 buys 0.500 ETH, category [('not in crowd rows', 3)] | replay GATE bundle 0 < 3, tables' bundle 0.500
+    Sep 24 18:10 0xe65b85ad 2 buys 0.099 ETH, category [('not in crowd rows', 2)] | replay FILL, tables' bundle 1.225
+    Sep 24 19:14 0xdb94d8b7 10 buys 0.580 ETH, category [('not in crowd rows', 10)] | replay GATE bundle 2 < 3, tables' bundle 0.580
+
+Q2. 6.7 vs 6.8 at EVERY read offset 0..k (the engine's own watch_curve / fold_buy, D's values, placeholders 0.03 / 0.01 where D has none)
+  (launch, offset) pairs: {'6.8 admits': 118}; launches 6.8 admits at some offset: 25
+  6.8 refuses where 6.7 admits: 0 []
+  6.7 admits with a partial count (6.8 counts more): 14 (launch, offset) pairs on 6 launches; closest to the cap (3.0 - 6.8 ETH):
+    (1.899, 'Sep 21 12:33', '0x5e4bddb3', 2, 6, (17, 0.882), (22, 1.101))
+    (1.899, 'Sep 21 12:33', '0x5e4bddb3', 3, 6, (17, 0.882), (22, 1.101))
+    (1.899, 'Sep 21 12:33', '0x5e4bddb3', 4, 6, (17, 0.882), (22, 1.101))
+    (1.899, 'Sep 21 12:33', '0x5e4bddb3', 5, 6, (17, 0.882), (22, 1.101))
+    (1.899, 'Sep 21 12:33', '0x5e4bddb3', 6, 6, (17, 0.882), (22, 1.101))
+    Sep 21 12:33 0x5e4bddb3 6.8 (22, 1.101) vs 6.7 (17, 0.882) at offset 2 of k 6 | tables' exempt ETH 1.101 | values real | replay FILL
+    Sep 23 04:26 0x1eb97415 6.8 (17, 1.0) vs 6.7 (13, 0.778) at offset 5 of k 6 | tables' exempt ETH 1.000 | values real | replay FILL
+    Sep 23 11:55 0xac4d55df 6.8 (17, 0.589) vs 6.7 (16, 0.555) at offset 6 of k 6 | tables' exempt ETH 0.589 | values real | replay GATE attackers
+    Sep 22 04:16 0x50dd5611 6.8 (14, 0.531) vs 6.7 (11, 0.46) at offset 3 of k 4 | tables' exempt ETH 0.531 | values real | replay FILL
+    Sep 21 21:55 0x73e23380 6.8 (5, 0.411) vs 6.7 (4, 0.38) at offset 3 of k 3 | tables' exempt ETH 0.411 | values real | replay FILL
+    Sep 22 18:56 0x39501200 6.8 (4, 0.368) vs 6.7 (3, 0.325) at offset 7 of k 8 | tables' exempt ETH 0.368 | values real | replay FILL
+  the largest 6.8 bundle ETH among the launches 6.8 newly admits (read at k): 1.776 (0xba059c17, tables 1.776)
+  a stranger's shot can only ADD to 6.8's count (asserted on every pair): the floor and the count can only newly pass; the cap is the only gate 6.8 can newly fail
+
+  one position: replay rows 'GATE position open' at the usual view: 0
+
+  contested launch? launches past the pre-gates, the model's h11 at second place (rows_k1reg 'ret'), by what sits ahead of the team's third exempt buy (tapes):
+    neither                                            all: n=389 mean h11  +1.8% median  -7.4% | usual-view fires n=102 $+188.07 ($+1.84/fire)
+    a taxed stranger's Buy ahead of the 3rd exempt buy all: n=  0 mean h11  +nan% median  +nan% | usual-view fires n=  0 $  +0.00 ($+nan/fire)
+    a stranger's direct buy call ahead of the team     all: n=  3 mean h11  -2.6% median  -6.2% | usual-view fires n=  1 $  -1.14 ($-1.14/fire)
+    R1's 'closed by a direct buy': any stranger's direct call before the 3rd counted tx all: n= 38 mean h11  +5.3% median  -5.8% | usual-view fires n= 20 $ +23.46 ($+1.17/fire)
+
+Q3. the engine's bundle ETH (6.8, read at k-1) against the tables' exempt ETH, launches with a tape
+  engine > 3.0 at k-1: 12 launches; tables' exempt ETH (whole creation second) > 3.0 on 12; replay verdicts: [('GATE bundle ETH > 3.0 (cap', 12)]
+    helper naming buyers     txs   12 tx value   81.085 ETH | their Buy events  200: exempt  47.656 taxed  0.000 | txs without a Buy 0
+    Sep 21 23:51 0x033bc29a engine  15.478 (25 buyers) | tables  4.233 (to k-1  4.233) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 22 00:18 0x9c861776 engine   3.131 (9 buyers) | tables  3.131 (to k-1  3.131) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 22 00:36 0xcee448cc engine   7.345 (20 buyers) | tables  4.137 (to k-1  4.137) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 22 22:27 0xc7349e7e engine   7.856 (13 buyers) | tables  4.304 (to k-1  4.304) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 23 06:00 0xe8bcf407 engine   9.033 (24 buyers) | tables  4.219 (to k-1  4.219) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 23 14:42 0x74608565 engine   3.125 (10 buyers) | tables  3.125 (to k-1  3.125) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 23 19:28 0x0bf85d57 engine   4.888 (13 buyers) | tables  4.268 (to k-1  4.268) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 23 19:52 0x6ff3cd2b engine   4.144 (13 buyers) | tables  4.144 (to k-1  4.144) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 25 20:05 0x8aba714f engine   5.903 (22 buyers) | tables  4.258 (to k-1  4.258) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 26 01:25 0xeb90afaa engine   9.980 (22 buyers) | tables  4.214 (to k-1  4.214) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 26 11:29 0x0c55377f engine   3.386 (7 buyers) | tables  3.386 (to k-1  3.386) | replay GATE bundle ETH > 3.0 (cap)
+    Sep 26 16:05 0xee486806 engine   6.816 (22 buyers) | tables  4.236 (to k-1  4.236) | replay GATE bundle ETH > 3.0 (cap)
+  same horizon (both to block k-1), every value real (D): 385 launches; engine and tables on different sides of 0.3 or 3.0: 11
+    engine ETH / tables' exempt ETH to k-1 where both > 0: median 1.000, above 1.05 on 9, below 0.95 on 11
+    engine > tables x1.05: 0xd551697e 0.517/0.424 (GATE attacke); 0x033bc29a 15.478/4.233 (GATE bundle ); 0xcee448cc 7.345/4.137 (GATE bundle ); 0xc7349e7e 7.856/4.304 (GATE bundle ); 0xe8bcf407 9.033/4.219 (GATE bundle ); 0x0bf85d57 4.888/4.268 (GATE bundle ); 0x8aba714f 5.903/4.258 (GATE bundle ); 0xeb90afaa 9.980/4.214 (GATE bundle ); 0xee486806 6.816/4.236 (GATE bundle )
+    engine < tables x0.95: 0xe49260fe 0.000/0.352 (GATE bundle ); 0x8bed8351 0.000/0.680 (GATE bundle ); 0x8d5936cc 0.000/0.400 (GATE bundle ); 0x657b410f 0.000/0.500 (GATE bundle ); 0xb8935d05 0.000/0.500 (GATE bundle ); 0xbda0fd53 0.000/0.530 (GATE bundle ); 0x8eaf5a6e 0.000/0.510 (GATE bundle ); 0x8e0a5c79 0.000/0.600 (GATE bundle ); 0x243a0a0f 0.000/0.500 (GATE bundle ); 0xe65b85ad 1.126/1.225 (FILL); 0xdb94d8b7 0.000/0.580 (GATE bundle )
+    Sep 21 15:28 0x17d5eac5 engine  0.362 tables  0.362 (to k-1  0.000) | replay GATE attackers 0 < 2     fleets 0 h11 0.155
+    Sep 21 17:10 0xe49260fe engine  0.000 tables  0.352 (to k-1  0.352) | replay GATE bundle 0 < 3        fleets 3 h11 0.055
+    Sep 22 18:08 0x8bed8351 engine  0.000 tables  0.680 (to k-1  0.680) | replay GATE bundle 0 < 3        fleets 1 h11 -0.095
+    Sep 23 19:48 0x8d5936cc engine  0.000 tables  0.400 (to k-1  0.400) | replay GATE bundle 0 < 3        fleets 0 h11 -0.09
+    Sep 23 20:08 0x657b410f engine  0.000 tables  0.500 (to k-1  0.500) | replay GATE bundle 0 < 3        fleets 0 h11 -0.119
+    Sep 24 13:47 0xb8935d05 engine  0.000 tables  0.500 (to k-1  0.500) | replay GATE bundle 0 < 3        fleets 0 h11 -0.119
+    Sep 24 14:22 0xbda0fd53 engine  0.000 tables  0.530 (to k-1  0.530) | replay GATE bundle 0 < 3        fleets 0 h11 -0.119
+    Sep 24 15:31 0x8eaf5a6e engine  0.000 tables  0.510 (to k-1  0.510) | replay GATE bundle 0 < 3        fleets 0 h11 -0.118
+    Sep 24 15:54 0x8e0a5c79 engine  0.000 tables  0.600 (to k-1  0.600) | replay GATE bundle 0 < 3        fleets 0 h11 -0.119
+    Sep 24 16:11 0x243a0a0f engine  0.000 tables  0.500 (to k-1  0.500) | replay GATE bundle 0 < 3        fleets 0 h11 -0.119
+    Sep 24 19:14 0xdb94d8b7 engine  0.000 tables  0.580 (to k-1  0.580) | replay GATE bundle 2 < 3        fleets 0 h11 -0.1

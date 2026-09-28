@@ -1943,7 +1943,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             gates.append("seat's second not seen in time (stale feed): not sending")
         if SEAT == "E0" and state.get("detect") == "provider" and not E0_ALLOW_PROVIDER:
             gates.append("detection on the provider path (the sequencer feed is down): a send this late is second one, not the seat (E0_ALLOW_PROVIDER=1 after measuring the lag)")
-        if state["nonce"] is None or mono() - state["chain_at"] > 60:                 # 6.8: 60 s (was 30): our own sends advance the nonce locally; the poll retries 2 s after a failure
+        if state["nonce"] is None or mono() - state["chain_at"] > 30:                 # 30 s: the wallet's top-up sends (shooter_topup, relay_topup) do not advance the local nonce, so a wider window could admit a stale one (6.8 review); the poll retries 2 s after a failure
             gates.append("nonce/gas not fresh (RPC)")
         ready = SHOOTERS
         if SHOOTERS and SEND is not None:

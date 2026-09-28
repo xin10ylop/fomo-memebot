@@ -4146,8 +4146,12 @@ position; the fifth (15:30) beat it because the sell landed before a dump in the
   live box (`CHAIN_POLL_S 10`, runbook 5s), so a launch inside that window is gated. Both reviewers priced the path with
   the code's 3 s default; the assistant re-priced it with the live 10 s: on the week 4 build-stage launches fell inside
   a release window, 1.56 of them gated in expectation, 0.81 fires, and those fires were worth −$0.52 together. Worth $0.
-  The 60 s widening in 6.8 aims at the other path (a slow poll) and is harmless; a wake of the poll at release (an event
-  instead of the sleep) would close the window to one RPC call and is the 6.9 candidate, hygiene only. Its frequency is
+  The 60 s widening 6.8 first carried aimed at the other path (a slow poll) and rested on a false premise, caught by the
+  mechanism refuter: the wallet's own top-up sends (shooter and relay top-ups) do not advance the local nonce, so a
+  wider window could admit a launch with a stale nonce during a slow shooter top-up (bounded harm: the shooters still
+  fire, the approve is refused and re-sent at the exit, the sell leaves 1.5 to 2.5 s late). It was reverted to 30 s
+  before deploy; 6.8 keeps the 2 s retry after a failed poll. A wake of the poll at release (an event instead of the
+  sleep) would close the real window to one RPC call and is the 6.9 candidate, hygiene only. Its frequency is
   the thing to read in the morning: `sudo grep -c 'not fresh' /var/log/sniper/engine.jsonl`.
 - **The winners the rule cannot take.** Refused launches at the usual view: 200 on the fit half, 141 on the read half.
   About 30% of them get their crowd in the tick's own block, and those pay +4.9% / +3.8% at second place; but fired
@@ -4176,6 +4180,12 @@ fires, +0.03) as the master switch.
 above: "the gain is refuted, the correctness fix is not; deploy it with an expected value of $0 and verify it by the log
 condition". The mechanism refuter's first run was cut by a container restart with its check written
 (`V_0_mechanism_check.txt`: 21 admitted, 0 removed, the two unconfirmed closers, no decision changed at the ETH gates)
-and its verdict unwritten; it was re-run and its verdict is in `V_0_mechanism.md`. Two hygiene notes from the refuters
-for 6.9, neither worth money: importing the engine module writes a sender-addresses probe to the log (a replay tool's
-noise), and the nonce release after a gate refusal could wake the poll instead of waiting for it.
+and its verdict unwritten; it was re-run (`V_0_mechanism.md`): not refuted. Every buy 6.8 adds is one the tables call
+exempt (351 transactions after 6.7's close, 17.1 ETH, 413 buy events, none taxed, none reverted); read at every block
+from 0 to k on 518 launches, 6.8 refuses nothing 6.7 admitted and admits 25 launches 6.7 refused, the largest newly
+admitted bundle 1.78 ETH, well under the 3.0 cap; the closing calls are other snipers' creation-second shots that never
+buy (the main one sent 188 such calls and bought on none), so the close protected nothing. The 12 launches refused at
+the cap are the same under both engines and above 3.0 on the tables' own figure too. Its one finding was the nonce
+window above, fixed before deploy. Hygiene notes from the refuters for 6.9, none worth money: importing the engine
+module writes a sender-addresses probe to the log (a replay tool's noise); the nonce release after a gate refusal could
+wake the poll instead of waiting for it; the top-ups could advance the local nonce; the 2 s retry could back off.
