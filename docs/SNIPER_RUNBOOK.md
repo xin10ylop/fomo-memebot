@@ -1096,9 +1096,12 @@ engine would otherwise have fired or gated on (18 usual-view fires, +$8.04 toget
 a correctness fix; report 24.43). Engine 6.8 drops it. Also: the bookkeeping poll retries 2 s after a failed read instead of waiting the whole
 interval. The freshness window stays 30 s (a first draft widened it to 60 s; the review found that the wallet's top-up sends do
 not advance the local nonce, so a wider window could admit a stale one). The 19:44:59 skip was the release path (5aa), not this. Deploy with the morning reading, no fill
-open (the two counts equal):
+open. `trade_decision` is logged per burst and `trade_done` per closed fill, so their counts differ by the bursts that never
+filled (Sep 29 morning: 9 and 7, the 14:55 hold and the 15:33 revert); the open check is the last landing or close event:
 
-    sudo grep -c '"ev": "trade_done"' /var/log/sniper/engine.jsonl; sudo grep -c '"ev": "trade_decision"' /var/log/sniper/engine.jsonl
+    sudo grep -h '"ev": "burst_landing"\|"ev": "trade_done"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"ev": "[a-z_]*"\|"filled": [0-9]*'
+
+`trade_done` or `burst_landing` with `"filled": 0` means nothing is open; `"filled": 1` means wait for its `trade_done`.
     cd ~/fomo-memebot && git pull && sudo systemctl restart sniper-engine && sleep 5 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*\|"burst": \[[^]]*\]\|"stake": \[[^]]*\]\|"hold_blocks": [0-9]*\|"kill_usd": [0-9.]*\|"bundle_max_eth": [0-9.]*'
 
 Expected `"version": 6.8`, the rest unchanged. The morning reading's `engine_vs_chain` should show no more `PRE bundle 0 < 3` on
