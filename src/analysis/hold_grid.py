@@ -45,7 +45,7 @@ def model_path(L, stake_eth, entry_block, n_ahead, holds, tp=None, stop=None, in
             j += 1
         out[h] = (X * tk / (Y + tk) * (1 - tier)) / g - 1
     return out
-HOLDS = (15, 30, 60, 150, 300, 600)
+HOLDS = (9, 11, 13, 15, 30, 60, 150, 300, 600)      # Sep 28: 9/11/13 added, the live setting (9) and where its sell lands (11-13)
 def main():
     res = []
     for f in sys.argv[1:]:
