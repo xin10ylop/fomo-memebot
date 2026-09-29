@@ -4201,3 +4201,31 @@ population's windows), "bundle 0 < 3" 1 (the 12:52 case, engine 6.7). Signing 3.
 the sequencer's reply 103 ms median on eleven bursts with under 300 rival shots, 418 ms median and 4.2 s max on the four
 with more. The deploy: no fill open (nine bursts, seven fills, seven closed), `"version": 6.8`, settings unchanged. P&L
 +$11.70 at the hour's ETH price, ten fills, unchanged.
+
+*Reading, Sep 28 21:00 - Sep 29 06:17 UTC: the first night on engine 6.8, reconciled.* Written first from the chain
+(`prediction_sep29night.txt`): eleven qualifying launches; floor view no fire, usual view two fires (00:49 `0x9e1802f5`
++18.2%, 00:53 `0x435b6e58` −10.9%, +$0.75 net at second place), ceiling view those two plus two guard reverts (21:06,
+00:57); three launches behind the creator-supply pre-gate (23:30, 00:23, 01:31), among them the night's two best (+8.3%,
++20.1% at second place); seven refused at every view, all modelled negative. The engine: four bursts, four fills, all in
+the seat block. 00:49 landed first, +18.7% real against +18.7% modelled at first place (+$2.32); 00:53 landed first,
+−8.2% against −8.2% (−$1.02); 00:57 `0xaaa0c9b6` landed eighth with one 0.005 ETH buy ahead, −10.0% against −10.0%
+(−$1.25): the engine's gate saw the tick's own block on that one (the ceiling view), and the replay's guard revert did not
+happen because the crowd it counted never bought in the seat block; 23:30 `0x8ac64434` is the second engine-only launch
+(a 0.42 ETH bundle by the engine's nine-block count, absent from the tables' creation-second population; the first, Sep 28
+14:16, was refused at the gate), four fleets at the open, landed first, +0.5% against +0.5% (+$0.06). Every fill equals
+its model at its landing position. Gate refusals, the creator-supply skips and the 21:27 boundary skip all as predicted;
+both ways 0 holes, 21 tier-refused outside the population. The night: four fills, +$0.11 before burst gas, P&L +$11.46
+(from +$11.70, the rest the ETH price). Fourteen fills now: realized mean +7.6%, +$13.28 net on the fills.
+
+The tallies. Gate view on the two-core box: k−1 on three of tonight's four bursts, k on one (the usual view is the centre,
+confirmed). Landing since the settings switch: first in the seat block on 6 of 9 fills. Guard-admitted class: still 1 of 10
+(tonight's fills had at most a 0.005 ETH buy ahead). Signing 3.8 to 3.9 ms, the latest shot 0.17 ms behind schedule. The
+chain-scored sequential test: eighteen fires, mean +10.1%, log-likelihood ratio −0.17 (bounds ±2.94), undecided. The
+review counts since the log rotated at midnight: "not fresh" 0, "bundle 0 < 3" 0, "no confident boundary estimate" 3
+(the three are not among the population's launches after midnight, so they fell on engine-only launches; their times are
+the morning's open question, since that skip would also block a real fire).
+
+The creator-supply gate, priced on the week because it refused the night's two best launches (`engine_replay` at the
+usual view, guard 0.20, the gate off; scratch rows): it refuses 153 launches, 23 of which would fire. Sep 21–23: 10 fires,
+−$10.88, win 11%. Sep 24–29: 13 fires, +$6.63, win 50%, of which last night's two +$3.04. Opposite signs in the two halves,
+so nothing changes; it goes into tonight's brief as a watch item with these numbers.
