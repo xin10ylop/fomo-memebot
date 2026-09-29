@@ -4386,3 +4386,11 @@ hole, the downtime; 0 engine-only; 2 tier-refused outside the population. Counts
 "bundle 0 < 3" 0, `feed2_error` 0, `venue` 5 (one per restart of the day, no alarm). Fifteen fills: realized mean +7.5%,
 +$14.00 net on the fills; P&L +$12.27. Landing since the settings switch: first on 6 of 10. The chain-scored sequential
 test: nineteen fires, mean +10.0%, log-likelihood ratio −0.22, undecided. The $25 window has no fill yet.
+
+*Reading, Sep 29 11:57 - 13:52 UTC: quiet, reconciled.* Two qualifying launches, no fire at the floor or usual view; 12:06 was
+created in the last block of its second (the engine's "no confident boundary estimate" skip, as established this morning),
+13:24 `0x2a85912e` had its two fleets only in the tick's block (unopened burst, no shot sent, modelled −5.7%). Both ways 0
+holes, 0 engine-only, 3 tier-refused outside the population; no nonce skips, no second-socket errors, no alarms. P&L +$12.28,
+no $25 fill yet. One detail: the first burst after the restart signed in 22.4 ms (the direct signer proves each key on its
+first use), the earlier ones in 3.8; the shots still left within 0.13 ms of schedule because signing happens at the build,
+but the send step now proves every key at load so the first burst after a restart signs in 4 ms like the rest.
