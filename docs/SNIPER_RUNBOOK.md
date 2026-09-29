@@ -1246,3 +1246,12 @@ every 20 minutes and the two front addresses are 0.04 ms apart, so the ping pin 
 re-measurement. Set `SEQ_PIN_IP 3.141.111.43` (the paste above) so the choice is the race's, not the ping's.
 **Set Sep 29 ~11:45 UTC:** `SEQ_PIN_IP 3.141.111.43`, the log reads `pinned 3.141.111.43, pin_by race`. Everything of the day is
 now live: 6.9, the $25 stake, both feed sockets, the venue guard, the gas cap, the race pin.
+
+## 5ae. Send step: keys proved at load (Sep 29)
+
+The direct signer proves each key against eth_account on its first use, so the first burst after every restart signed in 22 ms
+(13:24 today) instead of 4. The send step now proves the wallet's key and every shooter key at load. Deploy with no fill open:
+
+    cd ~/fomo-memebot && git pull -q && sudo cp deploy/send_step.py /etc/sniper/send_step.py && sudo systemctl restart sniper-engine && sleep 6 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*'
+
+Check: the next burst's `sign_ms` in the reading's sent_burst line is about 4, not 22.

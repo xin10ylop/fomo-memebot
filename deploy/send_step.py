@@ -75,6 +75,14 @@ def make_burst(engine):
         def sign_raw(k, tx):
             pk = fast_key(k) if "gasPrice" in tx and "maxFeePerGas" not in tx else None
             return (_fast_sign(pk, tx) if pk else bytes(signer(k).sign_transaction(tx).raw_transaction)), bool(pk)
+
+        try:                                                              # 6.9: prove every key at load; the first burst after a restart used to sign in 22 ms (the proofs), the rest in 4
+            fast_key(None)
+            for _k in os.environ.get("SHOOTER_KEYS", "").split(","):
+                if _k.strip():
+                    fast_key(_k.strip())
+        except Exception:
+            pass
     except Exception:
         def sign_raw(k, tx):
             return bytes(signer(k).sign_transaction(tx).raw_transaction), False
