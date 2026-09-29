@@ -1171,3 +1171,9 @@ What it is for: the gate reads the blocks before the tick from the feed, and the
 less lag means the last pre-tick block is seen 60 ms earlier (a fuller gate view, reliably the usual view) and the boundary
 estimate has a fifth of the jitter, which is what sets the 46 ms lead; a shorter lead lands first more often (first beats
 second by 9 points on the week).
+
+**Result (Sep 29 13:15 UTC, same two minutes):** use2-az1 probe p5 45 / p10 53 / median 97 / p90 136 ms; the engine box in
+use2-az2 p5 45 / p10 52 / median 102 / p90 138 ms. No difference: the vendor's zone claim does not hold for the public feed
+as we see it, so the box stays where it is. The second-socket result repeated on the probe box (B earlier on 99% of
+messages, 5.5 ms median), so the earlier-of-two feed is a real, small gain (4-6 ms) and stays on the 6.9 list. The probe
+instance was terminated after the test.
