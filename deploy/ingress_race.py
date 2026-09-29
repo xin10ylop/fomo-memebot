@@ -59,10 +59,18 @@ def main():
         sys.exit(f"{HOST} resolves to {ips}: nothing to race")
     conns = {ip: connect(ip) for ip in ips}
     print(f"{len(ips)} addresses for {HOST}: {ips}; {ROUNDS} rounds")
+    try:
+        print(f"gas per round: estimate {int(rpc(url, 'eth_estimateGas', [{'from': wallet, 'to': wallet, 'value': '0x0'}]), 16)} units at {int(rpc(url, 'eth_gasPrice', []), 16) / 1e9:.3f} gwei")
+    except Exception as ex:
+        print("gas estimate failed:", str(ex)[:80])
     wins = {ip: 0 for ip in ips}; none = 0; ties = 0; reply_ms = {ip: [] for ip in ips}; win_ms = []; spread_ms = []
     for r in range(ROUNDS):
         nonce = int(rpc(url, "eth_getTransactionCount", [wallet, "pending"]), 16); gp = int(rpc(url, "eth_gasPrice", []), 16) * 2
-        tx = {"to": wallet, "value": 0, "gas": 21000, "gasPrice": gp, "nonce": nonce, "chainId": 4663, "data": b""}
+        try:                                                              # Nitro's intrinsic gas includes the L1 posting cost: 21,000 is "intrinsic gas too low"
+            gas = int(int(rpc(url, "eth_estimateGas", [{"from": wallet, "to": wallet, "value": "0x0"}]), 16) * 2)
+        except Exception:
+            gas = 300_000
+        tx = {"to": wallet, "value": 0, "gas": gas, "gasPrice": gp, "nonce": nonce, "chainId": 4663, "data": b""}
         body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + bytes(acct.sign_transaction(tx).raw_transaction).hex()]}).encode()
         order = ips[r % len(ips):] + ips[:r % len(ips)]                   # rotate the thread order every round
         bar = threading.Barrier(len(ips)); out = {}
