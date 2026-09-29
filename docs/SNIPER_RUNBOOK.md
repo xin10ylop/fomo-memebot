@@ -1172,7 +1172,7 @@ less lag means the last pre-tick block is seen 60 ms earlier (a fuller gate view
 estimate has a fifth of the jitter, which is what sets the 46 ms lead; a shorter lead lands first more often (first beats
 second by 9 points on the week).
 
-**Result (Sep 29 13:15 UTC, same two minutes):** use2-az1 probe p5 45 / p10 53 / median 97 / p90 136 ms; the engine box in
+**Result (Sep 29 ~10:40 UTC, same two minutes):** use2-az1 probe p5 45 / p10 53 / median 97 / p90 136 ms; the engine box in
 use2-az2 p5 45 / p10 52 / median 102 / p90 138 ms. No difference: the vendor's zone claim does not hold for the public feed
 as we see it, so the box stays where it is. The second-socket result repeated on the probe box (B earlier on 99% of
 messages, 5.5 ms median), so the earlier-of-two feed is a real, small gain (4-6 ms) and stays on the 6.9 list. The probe
@@ -1207,7 +1207,7 @@ Expected: `"version": 6.9`, `stake_min 25 / stake_max 25`, a `venue` line with 3
 the relay above 0.0095 ETH in the status. If `feed2_connected` is missing after a minute (`sudo grep -c feed2 ...`), the feed
 refused the second socket; the engine runs on one as before.
 
-**Deployed Sep 29 ~14:40 UTC:** `relay_ops.py deposit` refuses while the engine runs (same wallet, same nonce), so the order is
+**Deployed Sep 29 ~11:15 UTC:** `relay_ops.py deposit` refuses while the engine runs (same wallet, same nonce), so the order is
 stop, deposit, start. After it: version 6.9, venue 3 / 9900, stake 25 / 25, both feed sockets connected, relay 0.010270 ETH
 ($27.90), capital 0.019923 ETH, P&L +$12.26 (a fill landed during the day, +$0.80). The $25 window starts here: twenty fills.
 
@@ -1226,7 +1226,7 @@ race, not the ping (an engine change: `SEQ_PIN_IP`). If it is near 50/50 with a 
 (the loser rejected free) would cut arrival variance, at the cost of 70 warm sockets; that is a separate decision after the
 number exists. Nothing is deployed from this probe by itself.
 
-**Result (Sep 29 ~15:30 UTC, 30 rounds, engine stopped for it):** the name resolves to 3.136.74.196, 3.141.111.43 and
+**Result (Sep 29 ~11:30 UTC, 30 rounds, engine stopped for it):** the name resolves to 3.136.74.196, 3.141.111.43 and
 3.142.9.34; reply medians 60.3 / 60.3 / 60.0 ms (inclusion latency, identical), local send spread 0.16 ms. Race wins:
 **3.141.111.43 25 of 30 (83%)**, 3.136.74.196 5 (17%), 3.142.9.34 0. Ping cannot tell the three apart; the race can. Engine
 6.9 now takes `SEQ_PIN_IP` (the race winner is pinned when it answers, the fastest ping otherwise; the `sender_addresses` log
@@ -1241,8 +1241,8 @@ If `pinned` is not 3.141.111.43, with no fill open:
 
 Re-run the race monthly (addresses and routing change); a pin that stops answering falls back to the ping automatically.
 
-**Checked Sep 29 15:40 UTC:** the engine pinned 3.141.111.43 at that moment (pings 0.87 / 0.83 / 2.08 ms), but it re-measures
+**Checked Sep 29 11:35 UTC:** the engine pinned 3.141.111.43 at that moment (pings 0.87 / 0.83 / 2.08 ms), but it re-measures
 every 20 minutes and the two front addresses are 0.04 ms apart, so the ping pin can flip to the 17% address at any
 re-measurement. Set `SEQ_PIN_IP 3.141.111.43` (the paste above) so the choice is the race's, not the ping's.
-**Set Sep 29 ~15:50 UTC:** `SEQ_PIN_IP 3.141.111.43`, the log reads `pinned 3.141.111.43, pin_by race`. Everything of the day is
+**Set Sep 29 ~11:45 UTC:** `SEQ_PIN_IP 3.141.111.43`, the log reads `pinned 3.141.111.43, pin_by race`. Everything of the day is
 now live: 6.9, the $25 stake, both feed sockets, the venue guard, the gas cap, the race pin.
