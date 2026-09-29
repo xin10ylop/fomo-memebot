@@ -4496,3 +4496,38 @@ and pulls the liquidity when an outsider buys first, can only be answered by buy
 (a small contract that buys with ETH and sells from its own balance, so no approvals slow the exit), detection of the launch
 from the feed (the launch is a PositionManager multicall whose calldata carries the pool key), and a sell at a fixed hold.
 Five to ten trades at $3 each answer it: a trap shows as pulls within a second or two on most of them.
+
+### 24.46 How Pons creators make big money (Sep 28 census)
+
+`src/analysis/pons_creator_census.py` and `pons_creator_profit.py`: every Pons V2 launch of Sep 28 (4,166) and every curve trade in
+the six hours after each (287,075), with the creator side (the creator, the creation's sender and the wallets it named exempt)
+separated from everyone else. The curve's Buy and Sell events carry the platform fee (1%, plus the snipe tax) and, as a separate
+field, the creator tax (0 to 20%, 2 to 3% typical), so creator income is exact: the tax on every trade plus the creator side's own
+sales minus its own buys minus the launch fee (0.0005 ETH). 3,530 launches priced in ETH or USDG; unsold tokens valued at zero.
+
+*The population.* The median launch loses $2.45 (the launch fee and a little more); 29% of launches end in profit; 121 made over
+$1,000 and none over $10,000. 3,003 creators: 850 in profit; the top 30 (1%) take 46% of all creator profit and the top 10 take
+30%. The money comes from outside buyers, who put $7.07M into these curves and took $6.36M out: they lost $0.71M in the day, of
+which $0.20M went to creators as tax and $0.20M to the platform as fees and snipe tax.
+
+*The big earners are machines, and their edge is the creator's seat.* The creator's buy is part of the creation transaction:
+first, at the lowest price on the curve, with no snipe tax. Everyone else pays more to follow.
+
+| operator pattern (fingerprint) | launches | wallets | creator's buy | sells after | in profit | profit, the day |
+|---|---|---|---|---|---|---|
+| serial "big buy, patient dump" | 91 | 1 | $2,250 | about 13 min | 92% | $66,449 (median $793 a launch) |
+| fresh wallet per launch, 2% tax | 19 | 19 | $320 | about 30 s | 89% | $20,476 (a few big wins) |
+| $800 buy, no tax, fast dump | 32 | 13 | $800 | about 14 s | 97% | $13,621 |
+| named exempt bundle, 3% tax | 4 | 4 | $3,220 | about 3 s | 100% | $9,030 |
+| one real hit living on the tax | 1 | 1 | $142 | never sold | yes | $5,203, all of it tax on $88k of buying |
+
+The top operator alone took $66,000 in a day: about four launches an hour, each with a $2,250 buy at the bottom of the curve, about
+34 outside buyers following each one, and a sale about 13 minutes later. Outside research on pump.fun found the same thing on the
+buyers' side: bots and traders treat a big creator buy as a quality signal (a dev buy of 1 SOL or more was the best single filter
+in one public backtest), and the operators sell into exactly that. Other operators spread launches over fresh wallets, because
+the bots favour first-time creators (report 13.3), or fake early demand with a named bundle that sells to the snipers within
+seconds. The creator tax matters only on the rare real hit: 2 to 3% of a token's whole trading volume, for as long as it trades.
+
+What it takes: capital for the creator buy (about $2,000 a launch for the top pattern), automation for dozens of launches a day,
+and outside buyers who keep following. The median creator loses; what the winners share is scale, the first seat, and a
+counterparty (auto-buying bots and retail) that pays them.
