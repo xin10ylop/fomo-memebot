@@ -1241,5 +1241,6 @@ If `pinned` is not 3.141.111.43, with no fill open:
 
 Re-run the race monthly (addresses and routing change); a pin that stops answering falls back to the ping automatically.
 
-**Checked Sep 29 15:40 UTC:** the engine already pins 3.141.111.43 (pings 0.87 / 0.83 / 2.08 ms; the ping order matched the
-race order this time), so `SEQ_PIN_IP` stays unset; the setting is there for the day the two disagree.
+**Checked Sep 29 15:40 UTC:** the engine pinned 3.141.111.43 at that moment (pings 0.87 / 0.83 / 2.08 ms), but it re-measures
+every 20 minutes and the two front addresses are 0.04 ms apart, so the ping pin can flip to the 17% address at any
+re-measurement. Set `SEQ_PIN_IP 3.141.111.43` (the paste above) so the choice is the race's, not the ping's.
