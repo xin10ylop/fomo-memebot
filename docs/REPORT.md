@@ -4374,3 +4374,15 @@ one none. The engine had pinned by ping, which cannot see this; 6.9 pins the rac
 the fallback. What it is worth is not measurable from the race alone: an 83% arrival advantage over the other paths means a
 consistent few milliseconds, the same order as the burst's 2 ms spacing, so it goes straight into landing order and is
 read on the next fills' landing index.
+
+*Reading, Sep 29 06:17 - 11:57 UTC: one fill as predicted, reconciled.* Written first from the chain (`prediction_sep29day.txt`):
+five qualifying launches, one fire at the usual view (09:23 `0x2a4da181`, four fleets in the block before the tick, +7.6% at
+second place), none at the floor, four refused at every view (−9% to −11%). The engine (6.8 at $13 until the 6.9 deploy at
+about 11:15): 09:23 fired with the gate opening at shot 9, 18 ms into the burst, because the crowd showed only in the last
+pre-tick block; landed fourth with two buys ahead (0.159 ETH), +5.8% real against +5.8% modelled at the landed exit (seat
+−12 points, hold +13), +$0.72. 08:21 and 09:34 unopened bursts as predicted, 07:42 the creator-supply pre-gate as
+predicted, 11:22 never seen: the engine was stopped for the ingress race (refused at every view anyway). Both ways: one
+hole, the downtime; 0 engine-only; 2 tier-refused outside the population. Counts since the log rotated: "not fresh" 0,
+"bundle 0 < 3" 0, `feed2_error` 0, `venue` 5 (one per restart of the day, no alarm). Fifteen fills: realized mean +7.5%,
++$14.00 net on the fills; P&L +$12.27. Landing since the settings switch: first on 6 of 10. The chain-scored sequential
+test: nineteen fires, mean +10.0%, log-likelihood ratio −0.22, undecided. The $25 window has no fill yet.
