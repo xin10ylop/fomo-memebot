@@ -4242,3 +4242,43 @@ restarted after the 03:01 feed reconnect on a late reference flip; the aim is th
 list (hygiene, no money): split that skip message into "seat's second already open" and "no confident estimate"; make
 the shooter and relay top-ups advance the local nonce; wake the bookkeeping poll at a reservation release; make the
 replay refuse k = 1 launches explicitly rather than by the gates' accident.
+
+### 24.44 What is holding the P&L down, sized on our own data, and what the web has to say (Sep 29)
+
+*Part A: the problems, sized.* Basis: the engine's decision chain replayed on the week Sep 21 09:40 to Sep 29 06:17 at the
+usual view and the live guard (696 qualifying launches, 130 modelled fills at second place, +$229.61 at $13, `scratch
+rows_cs_k1reg`), and the fourteen live fills since Sep 26 (+$13.28 net on the fills, P&L +$11.46). Ranked by what each
+costs or withholds per week at the $13 stake.
+
+1. **The supply of fireable launches, not in our control: about $60 a week.** The same rule modelled $42, $63 and $38 a day
+   on Sep 21–23 and $2 to $18 a day since Sep 26 (fills a day 20–33, then 6–11). Nothing in the engine changed between
+   those days; the launchpad's crowd did. Three quarters of the week's money came between 16:00 and 24:00 UTC, but by
+   half the hour buckets do not agree (00–06 UTC −$2 on the fit half, +$30 on the read half; 06–12 +$14 then −$7), so a
+   trading-hours rule stays off, as the K round found.
+2. **The stake, in our control, blocked by our own test: everything scales with it.** At $13 a +7.6% fill is $0.95. The
+   capacity model says the curve takes $200 linearly; the rule was "no raise before the sequential test decides", and
+   the test cannot decide: it pits a +2.5% mean against +19%, and at the observed +10% chain-scored (+7.6% realized) its
+   expected drift is −0.01 a fire, so it drifts nowhere. The week's chain-scored mean is +16.1% (n = 130, standard error
+   3 points); the live realized mean is +7.6% (n = 14, standard error about 9). This is the largest lever and it needs a
+   decision rule the data can meet (Part C).
+3. **Fees: 8.9% of the stake on every fill, 36% of the gross move.** The 6.18% seat surcharge plus the token's 2–3% tier.
+   The seat with the 0.19% surcharge (E2) lands too deep (tested, rejected). The 2% tier tokens are worse launches, not
+   better ones (+8.2% / +4.8% by half against +21.7% / +15.4% for the 3% tier), and still positive in both halves, so no
+   tier filter. Fixed by the venue.
+4. **Landing second instead of first: 9.3 points a fill, about $60 a week left.** The model at first place averages
+   +25.4% against +16.1% at second; live we land first on 6 of 9 fills since the settings switch. The remaining 40% is
+   worth about $60 a week at $13 if every fill landed first, which is the prize for anything that improves ordering.
+5. **The sequencer's hold under big crowds: about $10 to $20 a week.** 14:55 on Sep 28 (429 rival shots) held our burst
+   3.9 s and we missed a fill modelled at +30.8% (+$4). Bursts with 300 or more rival shots: 4 of 15 so far, 2 filled.
+6. **The engine's take of the model's fires is now fine.** Since the switch the replay fires 12 times at the usual view;
+   the engine took 8 (7 fills, 1 guard revert on a last-place landing), was held once (14:55), missed the 12:52 one to
+   the closing rule (fixed in 6.8), and the two 19:44 launches were guard reverts in the model too. Nothing left here.
+7. **Launches the rule cannot take, all tested: nothing to take.** Crowds only in the tick's block (an oracle still loses
+   after the guard); creations in the last block of their second (never aimable); the creator-supply gate (opposite
+   signs in the two halves); the 3.0 ETH cap (its refusals pay −10.8%, win 0%: the cap earns its keep); the creator-repeat
+   gate (17 launches, +5.5%: too small to matter either way).
+8. **Gas on reverted bursts: $3.63 a week.** Eleven guard reverts on the week; unopened bursts cost nothing.
+
+The order of the levers is therefore: the stake (Part C), then ordering and the sequencer path (Part B, the research),
+then nothing until the supply comes back. The tail matters: the top five fills of the week are 25% of the gains, and the
+worst two (−58%, −53%) are last-place landings the guard now refuses.
