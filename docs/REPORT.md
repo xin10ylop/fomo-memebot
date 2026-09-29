@@ -4531,3 +4531,31 @@ seconds. The creator tax matters only on the rare real hit: 2 to 3% of a token's
 What it takes: capital for the creator buy (about $2,000 a launch for the top pattern), automation for dozens of launches a day,
 and outside buyers who keep following. The median creator loses; what the winners share is scale, the first seat, and a
 counterparty (auto-buying bots and retail) that pays them.
+
+### 24.47 What draws genuine buyers to a Pons launch (Sep 27 and Sep 28)
+
+`src/analysis/pons_launch_features.py` reads each launch's own description from its creation call (name, symbol, image, description
+and the five social slots are all on-chain); `pons_demand.py` measures the demand. Genuine buyers are outside wallets that are
+neither the creator side nor auto-buying bots (wallets that bought 20 or more different launches that day: 244 and 171 of them).
+"Real demand" = 20 or more genuine buyers in six hours. Operators (10+ launches a day) are set apart. 3,267 and 2,924 one-off or
+small-serial launches; every finding below holds on both days.
+
+*Base rate.* 8.4% and 6.6% of launches drew real demand; 1.1-1.2% filled the curve (4.2 ETH); the median launch drew $0 of genuine
+money; the mean creator tax earned was about $60.
+
+*What matters, in order.*
+
+1. **The creator's own buy.** Real demand: 1% under $50, 3-4% at $50-200, 11-17% at $200-1,000, 37-41% at $1,000 and more (6-12% filled).
+   Buyers read the creator's buy as a signal, which is why operators exploit it (24.46).
+2. **Within a $200-1,000 buy, presentation and no tax.** Website plus Telegram: 37% and 52% drew real demand, against 10-14% with a
+   website alone and 9-12% with neither. No creator tax: 26% and 34%, against 7% and 11% with one. Under $200 nothing helps (1-7%).
+   Above $1,000 the top groups are bundle launches (named exempt wallets plus a tax), which is the operators' playbook.
+3. **Not factors on Pons:** an X link (three quarters of launches have one, and it shows no lift), a copied name or symbol (no penalty,
+   unlike pump.fun's copycats), the hour of the day.
+
+*What an honest creator earns.* A creator who buys $200-1,000 at launch, never sells before six hours and then exits the whole
+buy on the curve (plus any creator tax): median -10% and -8% of the buy with a tax (24% and 31% of launches in profit, mean +30%
+and +41% from a few hits), median -17% and -12% without one (8-10% in profit). The genuine buyers that presentation attracts
+come and go within the six hours; the creator who waits holds tokens worth less than the entry. An honest launch is a lottery
+ticket whose price is the launch fee plus the creator's buy, with a negative median and a positive mean only when a creator tax
+lets the rare hit pay for the misses; that is the same answer section 13.2 gave for Sep 3.
