@@ -4303,3 +4303,61 @@ therefore a risk decision, not a data one: the data says the edge is probably po
 zero. The recommendation is to keep $13 until the 30-fill bound clears (mean above +10.1%), then step to $25 for a
 20-fill mechanism check, then $50; a losing 20-fill window at any step goes back one step. If the owner accepts a one
 in five chance of a −$17 to −$30 window now, the step to $25 can start today with the same rollback.
+
+*Part B: the web, six researchers (venue, L2 engineering, strategy papers, video and social, open-source repos, economics),
+61 findings saved in `data/derived/edge_check/N/research_sep29.json`, judged by the assistant against our data and setup
+(the judge agents were cancelled to save credits; the two zone measurements above were the only spend on the box).*
+
+Confirmed as already in place, nothing to do: the burst goes to the bare sequencer ingress (`sequencer.mainnet`, Envoy,
+no Cloudflare) on 35 pre-warmed sockets pinned to the best of the sequencer's per-zone addresses, one request per shot,
+never batched; Robinhood Chain orders strictly by arrival (Timeboost off, verified from the feed's message format and
+L2BEAT); the tax formula is `9900 >> (elapsed·14 / 3)` bps, read live from the factory on Sep 29: 3 s and 9900 bps, so
+the seat costs exactly the 6.18% we model.
+
+Tested on Sep 29 and rejected: the availability-zone claim (a vendor's measurement put our zone use2-az2 at 97 ms feed
+lag against 27 ms elsewhere; our own probe from a throwaway instance in use2-az1 read 45/53 ms p5/p10 against 45/52 on
+the box, in the same two minutes; the box stays). The "full pre-tick block spills into E1" explanation of the holds: on
+the week's 141 fires the block before the tick holds 14 transactions at the median and 99 at most, and the guard reverts
+have fewer, not more (8); the crowd lands in the tick's own block (105 at the median for the reverts against 39 for the
+fills), so there is no pre-tick fullness signal to gate on.
+
+Explained, no rule to add: every public Pons sniper (bodkin, dzo, loxley, the PumpDev API) buys at the 0.19% second, 1.2
+to 2.1 s after detection, with +80% / −35% / trailing exits, so our 11-block sell lands into their entry wave, which is
+why that exit tested best; the exempt-bundle rings (15 to 25 named wallets, one curve-emptying buy 1 to 3 blocks after
+creation, $15 to 18M extracted, The Block Sep 27) are the launches our 3.0 ETH cap refuses (−10.8%, win 0%), and the
+named-wallet count itself does not separate our fills (15 to 22 named: +29.7% / +8.0% by half; 22 or more: +11.8% /
++10.2%); the time-of-day concentration is structural to launchpad sniping (Pine Analytics, Solana insiders 14:00–23:00
+UTC); the fall in fireable launches tracks the venue's volume (DefiLlama: Pons V2 $173M a day at the Sep 6 peak, $56M
+on Sep 21, $21 to 28M on Sep 26–28) with an elasticity near 1.5, and the crowd's fuel is new-wallet inflow, so it is not
+ours to fix; the capacity math (a 1.68 ETH phantom reserve) gives own-impact of about 1% each way at $25, 2% at $50 and
+4.5% plus a 5% exit discount at $200, which caps the stake plan at $50 rather than the model's $200.
+
+Rejected on mechanism: conditional transactions (`eth_sendRawTransactionConditional` with a timestamp floor would let
+the sequencer drop creation-second landings free of gas, but the condition is checked at arrival against the latest
+sealed header, so a shot sent 46 ms before the tick is rejected, not queued; the `knownAccounts` form cannot see our own
+first fill inside the same block, so it saves nothing on a burst); the nonce-gap pre-positioning trick (Nitro splices a
+nonce-too-high transaction behind its predecessor, no queue jump); paid relays ($200 a day against a $13 stake); a
+process split or a rewrite (the feed loop indexes a frame in 0.2 ms and the shots leave within 0.1 ms of schedule; the
+sequencer's own inclusion latency is the 100 ms); pre-tick prediction of the tick-block crowd and any hour rule (already
+tested on our data, Part A).
+
+Adopted for engine 6.9, three small items with a measured or structural basis: (1) two feed sockets, index whichever
+delivers first (measured on two boxes: the second socket is 3.8 to 5.5 ms earlier on 98 to 99% of messages; the public
+feed allows two per address); (2) a factory guard: read `snipeTaxSeconds` and `snipeTaxStartBps` at start and hourly and
+stop firing with an alarm if they are not 3 and 9900, since both are owner-settable and the docs, the source and the
+chain already disagree (5 s, 15 s, 3 s), and a 5 s setting would turn the E1 seat into a 24.75% surcharge overnight; (3)
+the shots' gas-price cap, today twice the base fee, raised to a multiple that a crowd's fee ramp cannot exceed (Nitro
+drops a transaction whose cap is under the base fee instead of delaying it, and only the base fee is charged, so the
+cap is free), keeping the gas gate's cost estimate on the base fee.
+
+To test next, cheap and on the box: a same-nonce race between two of the sequencer's addresses (sign one harmless
+transaction, send it to both at once, fifty rounds; the winner's share tells whether a two-path fan-out of every shot,
+the loser rejected free as a duplicate, would move landing order; the vendor's 60/40 was against the official path from
+the same region). Watch items for the readings: the factory parameters (a one-line read), a Priority Gas Auction canary
+(Arbitrum One replaced arrival ordering with 125 ms fee-bid rounds on Sep 24, 2026, and any Arbitrum chain can enable
+it; if Robinhood does, first place becomes a fee bid and the burst design must change), the compliance filter (a voided
+shot burns its full gas limit; a revert does not), and the venue's daily volume as the supply gauge.
+
+Later, needing data we do not hold yet: creation-time features the papers rate highly elsewhere (social links present,
+copycat names, fresh-wallet funder clusters), and the two no-tax venues on the same chain (pools.trade, hood.fun) where
+the crowd fires in the creation block and the seat model does not apply.

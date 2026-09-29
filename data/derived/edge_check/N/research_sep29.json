@@ -1,0 +1,983 @@
+{
+ "research:venue": {
+  "findings": [
+   {
+    "title": "The bare sequencer ingress (sequencer.mainnet.chain.robinhood.com) is a separate, non-Cloudflare endpoint in us-east-2 that accepts only eth_sendRawTransaction",
+    "urls": [
+     "https://docs.robinhood.com/chain/connecting",
+     "https://blockrazor.io/blog/RobinhoodChainRPC/",
+     "https://github.com/Leonardo20222/robinBundler-toolkit"
+    ],
+    "source_type": "official docs",
+    "claim": "Robinhood's connecting page lists three distinct hosts: rpc.mainnet.chain.robinhood.com (public RPC), feed.mainnet.chain.robinhood.com (feed) and sequencer.mainnet.chain.robinhood.com (sequencer). Probed today from this box: rpc.* and feed.* resolve to customer-origin.offchainlabs.com on Cloudflare (2606:4700::, cf-ray IAD; rpc returned 429 on a handful of eth_calls, feed returned 403 with retry-after 1978 s), whereas sequencer.* is a CNAME to ac23019b22f1ae5a-sequencer.ue2v1.rhm.arbitrum-internal.io with three AWS us-east-2 A records (3.136.74.196, 3.141.111.43, 3.142.9.34), served by istio-envoy over HTTP/2, and it rejects eth_chainId/eth_blockNumber/net_version ('method does not exist/is not available') while eth_sendRawTransaction is wired ('missing value for required argument 0'). BlockRazor's benchmark also names https://sequencer.mainnet.chain.robinhood.com as 'the official sequencer endpoint' and Robinhood docs say the public RPC is rate-limited and not for latency-sensitive use.",
+    "relevance": "Sequencer reply latency (100 ms median, up to 4 s) and first-vs-second landing (9 points). If the engine submits via rpc.* or a provider, every shot crosses a Cloudflare edge and a rate limiter before reaching the Nitro sequencer; the three sequencer IPs are almost certainly one NLB listener per AZ, so one of them is same-AZ with our c7a.large (~0.1-0.3 ms) and the other two are cross-AZ (~0.5-1 ms).",
+    "test": "From the c7a.large: (1) confirm which host the engine's sendRawTransaction actually hits; (2) measure TCP-connect RTT to each of the three IPs 200 times and pin the lowest with --resolve; (3) A/B 100 same-nonce pairs (one via the current path, one via the pinned sequencer IP over a pre-warmed HTTP/2 connection) and count which lands first and the reply latency distribution; (4) read our zone id from IMDS (/latest/meta-data/placement/availability-zone-id) so the AZ mapping is explicit.",
+    "confidence": "high"
+   },
+   {
+    "title": "Sequencer is in AWS us-east-2 on Offchain Labs' RaaS, and the public feed's lag inside Ohio is 27-97 ms p50 / 85-953 ms p99 depending on AZ (use2-az2 is the bad one)",
+    "urls": [
+     "https://blockrazor.io/products/robinhood/",
+     "https://docs.blockrazor.io/streams/node-stream/robinhood-chain/sequencer-feed-ultra",
+     "https://latency.glassnode.com/robinhood/status",
+     "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed"
+    ],
+    "source_type": "measured writeup",
+    "claim": "The sequencer CNAME 'ue2v1.rhm.arbitrum-internal.io' and Glassnode's probe page both place the sequencer in AWS us-east-2 (Ohio). BlockRazor measured the official feed (feed.mainnet, Cloudflare-fronted) against its node-direct feed on 13,251 blocks on 10 Sep 2026 from the three Ohio zones: use2-az1 p50 28.0 ms / p99 85.8 ms behind; use2-az3 p50 27.3 ms / p99 111.7 ms; use2-az2 p50 97.4 ms / p99 953.1 ms / max 1,616 ms. The chainstack decoder README adds: the feed is rate-limited per client (not per connection), a fresh connection replays ~124 s (1,203 messages) of backlog unless you send the Arbitrum-Requested-Sequence-Number header, and there is a separate delayed-feed host ~500 ms behind.",
+    "relevance": "The 2-fleet gate is computed from blocks seen before the E1 tick and the burst is aimed relative to feed-observed block phase. With p50 lag of 1/4 to 1 block and p99 of 1-9 blocks, the gate under-counts fleets in the last blocks before the tick and the phase estimate jitters; being in use2-az2 would make this roughly 3x worse. 'Launches whose crowd appears only in the tick's own block cannot be taken' may partly be feed lag rather than true absence.",
+    "test": "Log feed message arrival time minus (previous arrival + 100 ms) for a day and report p50/p99 by hour; compare fleet counts computed live at decision time vs recomputed post-hoc from the full feed for the same launches (how many launches flip across the 2-fleet threshold); read our zone id; if we are in use2-az2 or p99 lag > 100 ms, launch a second c7a.large in use2-az1/az3 and repeat. Always reconnect with the sequence-number header and keep one feed client per IP.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Nitro block-building rules verified on this chain: 32M gas per block, 95 KB calldata per block, arrival-order retry queue, 1024-slot submit queue with 12 s timeout, and blocks-per-second is not fixed at 10",
+    "urls": [
+     "https://docs.arbitrum.io/run-arbitrum-node/sequencer/run-sequencer-node",
+     "https://docs.arbitrum.io/how-arbitrum-works/deep-dives/sequencer",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/sequencer.go",
+     "https://docs.arbitrum.io/how-arbitrum-works/deep-dives/sequencer"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "ArbGasInfo.getGasAccountingParams() on chain 4663 returns speedLimitPerSecond = 7,000,000, gasPoolMax = 32,000,000, maxTxGasLimit = 32,000,000 (so the per-block gas cap is 32M, same as Arbitrum One); Arbitrum docs state a block also closes at 95,000 bytes of calldata. In sequencer.go, a tx that does not fit gets core.ErrGasLimitReached and is pushed to txRetryQueue, which is drained first in the next block (FCFS is preserved across block boundaries); publishTransactionToQueue blocks on a 1024-slot channel until queue-timeout (default 12 s); eth_sendRawTransaction only returns after the tx has been executed in a block (queueItem.returnResult). Sampling 1,500 consecutive blocks today (09:15 UTC, a quiet hour) via publicnode: max gasUsed 10.1M, max 73 txs, max block size 75,965 bytes, ~160k gas per tx in the busiest blocks; blocks per timestamp-second were 10 in 137 of 151 seconds but 6, 9 and 19 in the others (Arbitrum docs: under load the sequencer produces blocks faster than nominal).",
+    "relevance": "Explains 'under crowds of 400+ rival shots the sequencer holds our burst for seconds and we miss': at ~160k gas per buy attempt the E1 block holds at most ~200 attempts by gas (or ~250-300 by bytes), so a 400+ crowd necessarily spills into 2-3 blocks and the serial execution of 32M-gas blocks takes hundreds of ms each. It also changes the model of the E1 race: everything that arrives between the cut of the last E0 block and the cut of the first E1 block lands in the E1 block in arrival order, so the top slot goes to the fleet whose first shot arrived earliest after the previous block was cut, not to whoever is closest to the second boundary; a burst starting only 46 ms before the boundary can be first only when the previous block was cut inside that 46 ms window (consistent with ~60% first). And 'hold 11 blocks' is 0.6-1.8 s of wall time, not 1.1 s.",
+    "test": "From our feed archive and receipts: for each fill compute our first shot's index in its block, the number of rival buy attempts ahead of us, the block's gasUsed and size vs the 32M/95 KB caps, and our send time relative to the arrival of the previous block. If rivals ahead of us were sent before our -46 ms start, simulate starting the burst one full block earlier (~-110 ms) and keeping 2 ms spacing; cost is only the extra BuyOnce no-ops (~30-50k gas each at today's 0.02 gwei floor = $0.003, or ~$0.06 at the Sep-3 0.5 gwei peak). Separately, re-express the 11-block hold in seconds using actual block timestamps and check whether the sell realized differently in seconds with 19 blocks/s.",
+    "confidence": "high"
+   },
+   {
+    "title": "The tax schedule is owner-mutable and has already been changed once: docs say 5 s, source default 15 s, live factory says 3 s; a change to 2 s or back to 5 s flips the E1 seat",
+    "urls": [
+     "https://docs.ponsfamily.com/v2",
+     "https://raw.githubusercontent.com/ponsdotdev/pons-labs/main/contractsV2/src/v2/PonsV2LaunchFactory.sol",
+     "https://casatrick.substack.com/p/pons-sniper-bot-robinhood-chain",
+     "https://github.com/ponsdotdev/pons-labs/issues/10",
+     "https://docs.bitquery.io/docs/blockchain/robinhood/pons-api/"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "Live reads today on the V2 factory 0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e (confirmed as the factory by Bitquery's Pons API docs and docs.ponsfamily.com): snipeTaxStartBps() = 9900, snipeTaxSeconds() = 3, maxCreatorTaxBps() = 1000, launchFee() = 0.0005 ETH, owner() = 0x263ed295dafae1d9aadd6e56c4b6f9f38ee019dd. The official docs describe a 5-second decay ('about 25% at 1 s, ~3% at 2 s'), and the public source defaults to 15 s; the decay formula that reproduces our measured 99% / 6.18% / 0.19% is bps = 9900 >> ((elapsed_seconds * 14) / snipeTaxSeconds). Setters setSnipeTaxSeconds (0xd1ec471a) and setSnipeTaxStartBps (0xb20e51af) are onlyOwner with caps MAX_SNIPE_TAX_SECONDS = 60 and MAX_SNIPE_TAX_START_BPS = 9900; exemption list max 32 addresses, fixed at creation, launcher and creator-fee recipient auto-exempt; fee caps curve <= 10%, creator tax <= 10%, total <= 20%. Issue #10 shows the published curve source lacks the snipe-tax code, so deployed bytecode differs from the repo. Arithmetic: seconds = 5 gives E1 = 24.75%; seconds = 2 gives E1 = 9900 >> 7 = 0.77%; seconds = 4 gives E1 = 9900 >> 3 = 12.4%.",
+    "relevance": "Fees take 36% of the gross move and the whole seat model (E1 = 6.18%) rests on one owner-settable integer that has already moved from 5 to 3. A move to 2 s would make E1 nearly free (and crowd it); a move back to 5 s would make every E1 fill a loser before the guard even fires.",
+    "test": "Poll snipeTaxSeconds() and snipeTaxStartBps() on the factory once per block from the feed (or watch feed calldata for selectors 0xd1ec471a / 0xb20e51af from the owner) and recompute the seat table and a kill-switch automatically; backfill the factory's call history to date the 5-to-3 change (Blockscout is Cloudflare-gated from datacenter IPs; use robinscan.io or Bitquery's Calls cube) and check whether our Sep 21-29 backtest window straddles it.",
+    "confidence": "high"
+   },
+   {
+    "title": "Venue supply is collapsing on independent data: Pons daily fees fell 47% from the Sep 21-23 window to Sep 26-28 and 88% from the Sep 5 peak; launches ~36k/day peak to ~6k; the 90-day Robinhood-Wallet gas subsidy ended Sep 29",
+    "urls": [
+     "https://api.llama.fi/summary/fees/pons?dataType=dailyFees",
+     "https://ambcrypto.com/pons-crypto-revenue-plunges-88-can-price-avoid-a-drop-to-0-50/",
+     "https://cryptoticker.io/en/robinhood-chain-ecosystem-end-of-free-gas/",
+     "https://bitquery.io/investigations/pons-launchpad"
+    ],
+    "source_type": "measured writeup",
+    "claim": "DefiLlama daily Pons fees (USD): Sep 5 11,418,716 (peak); Sep 14 5,347,714; Sep 21 3,389,265; Sep 22 2,580,573; Sep 23 2,444,706; Sep 24 1,817,273; Sep 25 1,608,949; Sep 26 1,680,957; Sep 27 1,310,993; Sep 28 1,461,061; Sep 29 (partial) 1,338,354. Robinhood Chain gas fees: Sep 9 $1.055M -> Sep 27 $68k, Sep 28 $108k. AMBCrypto (Sep 28): daily launches ~36,000 at peak to ~6,000; PONS buybacks from >$1M/day to ~$200k. Bitquery (Aug 3-Sep 3): 207,893 launches, 1.55% graduated, median graduation 4 min, median creator earnings $15.73. Cryptoticker: the 90-day Robinhood Wallet fee subsidy that started Jul 1 expired Sep 29, with 7-day average chain fees ($5.93M) already under half the 30-day average ($12.44M) before the deadline.",
+    "relevance": "The measured fall in fireable launches (20-33/day Sep 21-23 to 6-11/day Sep 26-27) tracks the venue's fee series almost 1:1, so it is exogenous supply, not a gate artifact; the 16:00-24:00 UTC concentration will thin further, and the subsidy end adds a new step from today.",
+    "test": "Regress daily fireable-launch count (Sep 21-29) on DefiLlama daily Pons fees; use the fitted ratio as a daily fill-budget forecast and as the regime switch; compare Sep 29-Oct 2 against the fit to quantify the post-subsidy step.",
+    "confidence": "high"
+   },
+   {
+    "title": "Timeboost / express lane is confirmed off on Robinhood Chain (feed messages carry no express-lane bitmap); ordering is strict arrival order at the sequencer",
+    "urls": [
+     "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed",
+     "https://l2beat.com/layer2s/projects/robinhood",
+     "https://crypto.news/robinhood-chain-arbitrum-revenue-share/",
+     "https://docs.robinhood.com/chain/"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "chainstack's decoder README: the blockMetadata field that carries Timeboost's express-lane bitmap on every Arbitrum One message is absent on Robinhood Chain, 'no express lane, no bidding'. L2BEAT lists a single Robinhood sequencer/batch poster (0xDaa5...87F4, ArbOS 61) with no Timeboost. Robinhood docs: 'order is determined strictly by the arrival time at the sequencer; no transaction can bypass others by paying higher fees' (PumpDev measured median tips ~0.02 gwei, i.e. nobody pays for priority). crypto.news notes Timeboost adoption is a 'live question' because its MEV revenue would fall under the 10% Arbitrum DAO share (Robinhood has paid ~$200k on $2M+ revenue).",
+    "relevance": "Confirms there is nothing to buy: the 9-point first-vs-second gap can only be closed by arrival time. It is also the one venue change that would end the E1 game overnight (express-lane controller gets a 200 ms head start per round).",
+    "test": "Add a watchdog on the feed that alerts when blockMetadata becomes non-empty or when an ExpressLaneAuction contract appears; no action otherwise.",
+    "confidence": "high"
+   },
+   {
+    "title": "BlockRazor's Ohio benchmark shows the official submission path is beatable even in-region: 60.46% same-nonce wins over 703 rounds; their node-direct feed is 0 ms vs 27-97 ms for the public feed",
+    "urls": [
+     "https://blockrazor.io/products/robinhood/",
+     "https://blockrazor.io/blog/RobinhoodChainRPC/",
+     "https://docs.blockrazor.io/streams/node-stream/robinhood-chain/sequencer-feed-ultra"
+    ],
+    "source_type": "anecdote",
+    "claim": "Vendor benchmark (Sep 10, 2026): from Ohio, 703 same-nonce pairs sent simultaneously to BlockRazor's Ohio endpoint and to the official sequencer endpoint -> BlockRazor first 60.46%; 703 distinct-nonce rounds -> earlier block/index 54.62%. From Frankfurt/Singapore/Tokyo 65-70%. Feed: node-required Ultra feed 0.000 ms at all percentiles vs official feed p50 27-97 ms; priced $200/day or $2,000/month; tx-sending endpoints exist in Frankfurt, Ohio, Singapore, Tokyo, pricing not published, 'create an account and start for free'. Their feed URLs: wss://us.robinhood-feeder.blockrazor.io/ws/ultra/{token} and jp.*.",
+    "relevance": "First-vs-second landing (60% live). If a third party wins 60/40 against the official ingress from the same region, the official path has several ms of removable jitter; that is exactly the margin between first and second in a 2 ms-spaced burst. At $13 stakes the paid feed is not justifiable, but a free trial of tx-sending is a cheap experiment and the same-nonce A/B is the right measurement method regardless.",
+    "test": "Open a free account, get the Ohio tx-sending endpoint, and run our own 100-pair same-nonce A/B against the pinned sequencer IP; expected value = (delta first-landing rate) x 9 points x fills/day; adopt only if the delta survives 200 pairs and the price is below that.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Robinhood's ArbOS 61 compliance filter voids transactions after sequencing (status 0x0, no logs, gas burned): ~150 per day chain-wide, no published criteria",
+    "urls": [
+     "https://xroot.dev/blog/robinhood-chain-read-directly",
+     "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed",
+     "https://l2beat.com/layer2s/projects/robinhood"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "An authorized filterer (0xebDc18A1...24b7) registers tx hashes in the ArbFilteredTransactionsManager precompile (0x...74); the state transition then forcibly fails those transactions, which still appear in blocks with status 0x0 and gas fully burned; 6,092 filtered in the first six weeks (~150/day), active since 30 Jun 2026 14:53 UTC. L2BEAT flags the count rising from 278 to 6,086 by July. chainstack's rhfeed exposes is_filtered_call(tx_hash) to test a hash against the precompile.",
+    "relevance": "A silent miss mode: a voided shot looks like an ordinary revert in our receipts. If a relay contract or a burst of 35 near-identical transactions from 35 wallets ever matches whatever heuristic the filterer uses, fills disappear without any error from the sequencer.",
+    "test": "For every landed shot with status 0 in the live log since Sep 26, call the precompile (or rhfeed.is_filtered_call) with the tx hash and count matches; add the check to the post-fill audit so a filtered shot is classified separately from a guard revert.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Every public Pons sniper (bodkin, dzo, loxley, Trustdev, PumpDev API) waits for tax <= 300 bps or 19 bps and enters 1.1-2.1 s after detection; none play E1, so the E1 competitors are private fleets and the public bots are the E2/E3 wave we sell into",
+    "urls": [
+     "https://github.com/Phosphenq/bodkin",
+     "https://github.com/maaks9n/dzo",
+     "https://github.com/shmidtqq65/loxley",
+     "https://github.com/Trustdev-eth/pons-sniper-bot-v1-v2",
+     "https://pumpdev.io/pons-trade-api"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "bodkin and dzo poll currentSnipeTaxBps(address) every 150 ms and fire at 0.18-0.31% tax, measured 1.1-2.1 s after websocket detection; loxley fires below a 300 bps ceiling; the Trustdev bot 'rejects blind first-block buy'; PumpDev's hosted trade API builds a tx in ~200 ms and enforces amountOutMin from recent trades. Their shared exits: +80% take-profit, -35% stop, 25% trailing, 45-min max hold, 'DEV SOLD' trigger on deployer CurveSell. Public-RPC capacity they report: 8 parallel calls OK, 16 -> ~50% rejected, batch of 12 rejected. 24h stats they logged for Sep 3: 24,462 launches / 559 graduations.",
+    "relevance": "Our 11-block hold sells ~1.1 s after the E1 block, i.e. ~2.1 s after creation, which is exactly when this cohort's buys land (E2/E3); their -35% stops and dev-sold triggers are the sell pressure that follows. Explains why the 11-block exit tested best and gives an external prior for what the E2/E3 flow looks like.",
+    "test": "From the feed, for each of the 130 modelled fills count E2 and E3 buy attempts and their total quote size, and check the correlation with our realized exit; if E2+E3 size predicts exit quality, it is a free post-entry sizing signal for the sell (split sell vs single sell at block 11), not a new gate.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Exempt-bundle rug launches (53 launches, $18.4M, Jul 10-Sep 21) dump 'one second after launch', i.e. at E1; the exemption list is visible in the creation calldata",
+    "urls": [
+     "https://www.theblock.co/news/defi/2026-09-27-onchain-analyst-links-18-4-million-in-robinhood-chain-memecoin-extractions-to-single-rug-pull-operation-416960",
+     "https://finance.yahoo.com/markets/crypto/articles/pons-v2-exemptions-put-robinhood-103042949.html",
+     "https://raw.githubusercontent.com/ponsdotdev/pons-labs/main/contractsV2/src/v2/PonsV2LaunchFactory.sol"
+    ],
+    "source_type": "measured writeup",
+    "claim": "Wazz (@WazzCrypto, Sep 27) and The Block: one operation ran 53 launches; creators exempted 15-25 wallets, one transaction 1-3 blocks after creation bought for all of them (emptying the curve into Uniswap v4), creators and exempt wallets kept 82-86% of supply, and 'sellers began moving tokens one second after launch'; 25 of the 53 used one unverified 'commercial bundling tool' contract created Aug 28. The exemption list is an explicit argument of launchToken(..., address[] snipeTaxExemptions) / launchTokenFor(..., originalDeployer, address[] snipeTaxExemptions), so its length is decodable from the TokenLaunched transaction's calldata on the feed before the E1 tick. No Pons or Robinhood countermeasure has been announced.",
+    "relevance": "An E1 buyer is the designated exit liquidity for these launches; they also produce large, visible 'crowds' (exempt buys at second 0 plus fleets chasing them), which may be what the 2-fleet gate is selecting for. This is new external evidence on which launches to skip, not a re-proposal of the nine rejected signals unless one of them was already 'exemption-list length'.",
+    "test": "Decode snipeTaxExemptions length and the launchTokenFor forwarder address from the creation tx for the 696 qualifying launches; split the 130 modelled fills by list length (0 / 1-5 / 6+) and by use of the Aug-28 bundler contract and compare realized outcome and guard-miss rate.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Gas is not a hidden cost at today's floor, but it was 25x higher three weeks ago: base fee 0.02 gwei now (floor) vs 0.511 gwei on Sep 3; block gas price responds to sustained load above 7M gas/s",
+    "urls": [
+     "https://bitquery.io/investigations/robinhood-chain-gas-price-25x",
+     "https://pumpdev.io/pons-trade-api"
+    ],
+    "source_type": "measured writeup",
+    "claim": "Bitquery: base fee 0.02 gwei on Aug 22 to 0.511 gwei on Sep 3 (25x); median swap fee $0.012 to $0.48; the chain ran at ~40M gas/s against a 7M gas/s speed limit (getGasAccountingParams confirms speedLimitPerSecond = 7,000,000, pricing inertia 102, backlog tolerance 10). Today's latest block shows baseFeePerGas 0.020078 gwei and gas backlog 0. PumpDev reports median tips ~0.02 gwei and a 100 gwei priority-fee ceiling (tips buy nothing under FCFS).",
+    "relevance": "Cost per fill: a 35-shot burst with 34 no-ops at ~30-50k gas each is ~$0.003 per no-op now but was ~$0.06-0.10 per no-op (up to ~$3 per burst, 25% of a $13 stake) during the Sep 3 regime; the model's linear capacity to $200 should include gas by regime, and any decision to widen the burst (finding 3) must be priced at the crowd-time base fee, which rises precisely when crowds are 400+.",
+    "test": "Join each live burst's 35 receipts to baseFeePerGas and compute realized gas per fill as a percent of stake, split by crowd size; add ArbGasInfo.getGasBacklog() (0x1d5b5c20) to the per-launch telemetry so gas cost is forecast before the burst rather than after.",
+    "confidence": "high"
+   }
+  ],
+  "dead_ends": [
+   "Verified on-chain source for the V2 factory/curve: Blockscout API and UI are Cloudflare-challenged from datacenter IPs (403 'Just a moment'), robinscan.io/hoodscan.co/stonkscan.io return 404/301 for the smart-contract API; the official ponsdotdev/pons-labs repo's PonsV2BondingCurve.sol has no snipe-tax code at all (issue #10), so the deployed bytecode cannot be read from any public source I could reach; only the live getters were readable.",
+   "Glassnode latency status page for Robinhood Chain (latency.glassnode.com/robinhood/status): 0/0 probes online, no numbers.",
+   "YouTube: three videos surfaced (two from 'dontdothat44' \u2014 '10000% ROI free download' style spam \u2014 and one Moon Dev short 'I built a Robinhood chain sniper bot'); YouTube pages redirect to a Google captcha, oEmbed gives only titles, and Moon Dev's GitHub has no Robinhood repo. No techniques or numbers.",
+   "casatrickdev/robinhood-trading-tools: sniper and bundler are 'not live'; read-only SDK and indexer only. Leonardo20222/robinBundler-toolkit: mock DEX adapter, no addresses, no measurements. 0xfnzero/rbh-trade-sdk: calldata generator, no submission or latency data.",
+   "BlockRazor's Robinhood transaction-sending endpoint hostnames and pricing are not on public doc pages (only the feed pricing $200/day is published).",
+   "No public repo, post, Dune or Bitquery investigation describes E1-seat fleets (multi-wallet bursts aimed at the first block of the second) or identifies who wins first-block on Pons; the 'first-buyer' analyses found are all about the 99% same-second losers.",
+   "No Pons or Robinhood announcement of any fee, tier or snipe-tax change, and no response to the Sep 27 rug-pull report; the only evidence of parameter change is the docs (5 s) vs live (3 s) discrepancy.",
+   "Robinhood's own support article on Robinhood Chain mainnet does not state the gas-subsidy end date; the Sep 29 date comes from cryptoticker (90 days from Jul 1).",
+   "Envio HyperRPC requires an API token; the official public RPC returned 429 after a handful of eth_calls and 403 on a 200-item batch; publicnode accepted 100-item batches fine."
+  ]
+ },
+ "research:l2eng": {
+  "findings": [
+   {
+    "title": "Submit to the documented direct sequencer host (Envoy, HTTP/2, no Cloudflare), not the Cloudflare-fronted public RPC",
+    "urls": [
+     "https://docs.robinhood.com/chain/connecting",
+     "https://latency.glassnode.com/robinhood/status",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/forwarder.go",
+     "https://blockrazor.io/blog/RobinhoodChainRPC/"
+    ],
+    "source_type": "official docs",
+    "claim": "Robinhood documents a dedicated sequencer endpoint, https://sequencer.mainnet.chain.robinhood.com (plus wss://feed.mainnet.chain.robinhood.com and a delayed backup feed ~500 ms behind). Probed today: the sequencer host answers with 'server: istio-envoy', negotiates HTTP/2, has no Cloudflare headers, and exposes only eth_sendRawTransaction and eth_sendRawTransactionConditional (eth_chainId/eth_call return -32601). The public https://rpc.mainnet.chain.robinhood.com is behind Cloudflare (cf-ray, server: cloudflare) and its sendRawTransaction is relayed by a full node's forwarder; nitro's DefaultNodeForwarderConfig keeps MaxIdleConnections=1 to the sequencer, so a 35-shot burst through the RPC path opens fresh connections under load. Glassnode places the sequencer in AWS us-east-2 (Ohio) with ~3 ms submit RTT from Ohio vs 140 ms Tokyo. Neither host accepts a WebSocket upgrade (HTTP 400).",
+    "relevance": "Landing second on ~40% of fills and the 'sequencer holds our burst for seconds under 400+ shots' both depend on the ingress path. If any shot goes through the Cloudflare RPC or a third-party RPC, it carries extra hops plus the forwarder's single idle connection; the direct Envoy host with pre-warmed HTTP/2 streams removes them.",
+    "test": "Same-nonce pair races (BlockRazor's method: 50+ pairs, identical nonce, different recipient per path) from the c7a.large between the direct host and the current path; also curl -w timings (connect/TLS/first-byte) to the direct host from us-east-2a/b/c micro-instances to pick the AZ with the lowest RTT.",
+    "confidence": "high"
+   },
+   {
+    "title": "Never JSON-RPC-batch the burst: nitro's sendRawTransaction blocks until sequenced and geth batches run sequentially",
+    "urls": [
+     "https://raw.githubusercontent.com/OffchainLabs/go-ethereum/master/rpc/handler.go",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/sequencer.go"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "In nitro, PublishTransaction pushes the tx into txQueue and then waits on resultChan, which is only fulfilled after the tx is included in a block (queue-timeout 12 s, abort deadline 24 s). That is why the measured 'reply' is ~100 ms median: it is inclusion latency, not network RTT. geth's handleBatch processes the elements of a JSON-RPC batch one at a time in a single goroutine (msg := callBuffer.nextCall(); resp := h.handleCallMsg(cp, msg)), whereas each single-message call gets its own goroutine via startCallProc. A batch of 35 sendRawTransaction calls therefore serializes 35 inclusion waits (blocks apart). Over HTTP/1.1 one in-flight request per connection applies, so 35 concurrent shots need 35 keep-alive connections or HTTP/2 multiplexing (the Envoy sequencer host negotiates h2).",
+    "relevance": "Shot spacing of 2 ms is only real if every shot is an independent request on its own connection/stream; any batching or connection-pool cap (e.g. an HTTP client limited to 10 connections per host) silently turns the burst into a queue and costs first place.",
+    "test": "Inspect the client transport (max connections per host, h2 enabled, pre-warmed TLS) and check block positions of the 35 shots on a dry launch: they should occupy contiguous positions; a gap of a whole block between shots indicates serialization.",
+    "confidence": "high"
+   },
+   {
+    "title": "Exact E1 block composition rule from nitro source: retry queue first, then arrival order; overflow triggers are 32M gas or 95,000 bytes per block",
+    "urls": [
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/sequencer.go",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/arbos/block_processor.go",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/arbos/l2pricing/model.go"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "createBlock waits for the first queued tx, then drains txQueue non-blockingly for at most ReadFromTxQueueTimeout (10 ms default), then takes the block timestamp with time.Now().Unix() AFTER the drain, and the loop re-arms at nextBlock = callTime + MaxBlockSpeed (RH chain: measured exactly 10 blocks per second over 61 consecutive blocks 75543052-75543112). Items are taken from txRetryQueue before txQueue; txRetryQueue holds transactions that failed the previous block with ErrGasLimitReached, which happens when blockGasLeft < 21000 (ArbOS >= 50 counts gas actually used; RH runs ArbOS 61, PerBlockGasLimit measured via ArbGasInfo.getGasAccountingParams = 32,000,000, speed limit 7,000,000 gas/s) or when the block's summed raw tx bytes exceed MaxTxDataSize (95,000 bytes default). At drain time any tx whose maxFeePerGas is below the last block's baseFee is dropped (ErrFeeCapTooLow); RH base fee floats around 20.0-20.4e6 wei. Held nonce-too-high txs (1 s cache) are re-inserted directly after their predecessor by precheckNonces, not at the head.",
+    "relevance": "Explains the 400+ crowd failure: 400 shots x ~250 bytes exceeds 95 KB, so the last block of the creation second overflows and its overflow leads the E1 block regardless of who arrives first after the boundary; such launches are structurally unwinnable by arrival timing and should be gated out early. Also gives the precise semantics for the 46 ms aim: E1 = first drain whose completion time crosses the second.",
+    "test": "For every crowded launch in the Sep 21-29 set, pull the block before E1 with full txs: if gasUsed is ~32M or the sum of RLP tx sizes is ~95 KB, the E1 leaders were overflow. Correlate with the fills that missed; if it explains them, add 'previous block near cap' as a no-fire condition and reclaim the wasted shots.",
+    "confidence": "high"
+   },
+   {
+    "title": "eth_sendRawTransactionConditional is live on the Robinhood sequencer host: shots can be dropped at the sequencer for free instead of reverting on-chain",
+    "urls": [
+     "https://docs.arbitrum.io/build-decentralized-apps/arbitrum-vs-ethereum/rpc-methods",
+     "https://eips.ethereum.org/EIPS/eip-7796",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/tx_pre_checker.go"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "Probing sequencer.mainnet.chain.robinhood.com with eth_sendRawTransactionConditional returns 'missing options param', i.e. the method is enabled there. Options: knownAccounts (address -> storage root or slot:value), timestampMin/Max (L2 header time), blockNumberMin/Max (L1 block). The pre-checker validates the options against the latest header and again against a state at least RequiredStateAge=2 s old (walking back at most 4 blocks), and the sequencer's preTxFilter re-checks them at block creation; a failing tx is rejected with -32003 and consumes neither gas nor a nonce. Consequence: timestampMin in the future is rejected at submission (cannot pre-position), but timestampMax = creation+1 drops any shot that would land in E2 or later, and a knownAccounts condition on the curve's reserve slot makes 'first buyer or nothing' free.",
+    "relevance": "Fees and wasted shots: today the BuyOnce relay handles late or losing shots by reverting on-chain (gas + nonce consumed, and the reverted shot still occupies bytes in the block that count toward the 95 KB cap). A sequencer-side rejection keeps the wallet nonce intact and keeps our own losing shots out of the block.",
+    "test": "Replay the 35-shot burst on a dry launch with timestampMax set; count rejections vs reverts and confirm no shot lands in E2+. Then run a 50-launch A/B of the 'first-or-nothing' knownAccounts variant against the current second-place-accepting rule using the existing decision-chain backtest.",
+    "confidence": "medium"
+   },
+   {
+    "title": "The public feed's delivery order is randomized per message and a second connection arrives first about half the time; third-party feeds measured 16 ms ahead at p50 from us-east-2",
+    "urls": [
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/wsbroadcastserver/clientmanager.go",
+     "https://github.com/groovg/ultrafast-robinhood-sequencer-feed",
+     "https://github.com/qskateboard/robinhood-feed-bench",
+     "https://eiranodes.dev/docs/benchmarks",
+     "https://blockrazor.io/products/robinhood/"
+    ],
+    "source_type": "measured writeup",
+    "claim": "nitro's ClientManager.doBroadcast serializes each message once, then iterates the client map (Go map iteration, random order) pushing into each client's channel; per-client writer goroutines then send. The groovg Rust client README reports the public RH feed allows 2 connections per IP (429 on the third), each of two connections is first ~50% of the time, and the duplicate lags ~30 ms on average; permessage-deflate is required. Eira's benchmark (client in AWS us-east-2, 26 Sep 2026): Eira Pulse gRPC first-seen 80.9-88.1%, p50 0.00 ms / p99 0.47 ms lag to first arrival, 16.2 ms median lead over the public feed across 25,597 txs; BlockRazor 'Ultra' p50 0.77 ms and Daris p50 0.52 ms behind Eira. Pricing: Eira day pass $200, Pro $2,000/month; BlockRazor per-day pricing behind login. qskateboard/robinhood-feed-bench is an independent tool that stamps every source on one monotonic clock.",
+    "relevance": "The two-fleet gate, the 'crowd appears only in the tick's own block' exclusion and the 'created in the last block of its second' exclusion are all bounded by how early the pre-tick blocks are seen; 16 ms is 16% of a block. Using both allowed connections per IP and taking the earliest arrival is free.",
+    "test": "Run robinhood-feed-bench on the c7a.large for a day with a $200 Eira pass alongside both public-feed connections; then replay the 696 launches with each source's arrival timestamps to count how many additional launches clear the gate one block earlier and what the modelled fills become.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Robinhood Chain is pure FCFS today (verified from block data), but Arbitrum One replaced Timeboost with Priority Gas Auctions on 24 Sep 2026 and PGA is a sequencer flag any Arbitrum chain can enable",
+    "urls": [
+     "https://docs.arbitrum.io/how-arbitrum-works/priority-gas-auction/pga",
+     "https://blog.arbitrum.io/competing-for-transaction-priority-on-arbitrum/",
+     "https://forum.arbitrum.foundation/t/constitutional-aip-transition-arbitrum-one-ordering-policy-to-priority-gas-auctions-pga/30942",
+     "https://docs.arbitrum.io/how-arbitrum-works/deep-dives/sequencer"
+    ],
+    "source_type": "official docs",
+    "claim": "PGA orders by min(maxPriorityFeePerGas, maxFeePerGas - baseFee) within rounds of B/K (Arbitrum One: 250 ms / 2 = 125 ms rounds; K adjustable 1-10 for two years), ties broken by the sequencer's recorded arrival timestamp, with an anti-starvation boost of p/(2K) per round so zero-fee txs still land within a few blocks; docs state PGA 'is now available for activation across all Arbitrum chains' as a sequencer flag plus a round-count parameter. On Robinhood Chain right now: within the 61 blocks sampled, maxPriorityFeePerGas values are unordered inside blocks (e.g. 757460, 0, 1000000, 1, 0, 21102900) and the RPC reports timeboost_sendExpressLaneTransaction and auctioneer_submitBid as non-existent, so neither Timeboost nor PGA is active.",
+    "relevance": "Every measured edge (46 ms aim, 2 ms spacing, first-vs-second seat) assumes arrival ordering. If Robinhood flips PGA on, position becomes a priority-fee bid decided per 125 ms-class round and the engine would need a fee-bid mode; conversely, the retirement of Timeboost on Arbitrum One removes the express-lane option as a lever here.",
+    "test": "Add a daily monitor that checks, per block, whether type-2 txs are sorted by priority fee (PGA signature) and whether new RPC namespaces appear; keep a pre-built fee-bid variant of the shot builder so the switch is a config change.",
+    "confidence": "high"
+   },
+   {
+    "title": "Paid relays claim small but measured wins over the official sequencer host even from Ohio; the same-nonce pair race is the cheap way to verify any path",
+    "urls": [
+     "https://blockrazor.io/products/robinhood/",
+     "https://blockrazor.io/blog/RobinhoodChainRPC/",
+     "https://eiranodes.dev/"
+    ],
+    "source_type": "measured writeup",
+    "claim": "BlockRazor reports, for its Robinhood 'transaction sending' endpoints (Frankfurt, Ohio, Singapore, Tokyo), a 60.46% win rate over the official sequencer in 703 same-nonce rounds and 54.20% ahead in distinct-nonce runs, measured from three AWS us-east-2 AZs; from Frankfurt/Singapore/Tokyo their relay won 65-70% of 50-pair races. Eira Send (free tier over HTTPS JSON-RPC at send.eiranodes.dev) reports 179/200 = 89.5% success in its own race. Both are vendor benchmarks; the method (two txs, same nonce, different recipient, whichever lands is the winner) is reproducible in minutes.",
+    "relevance": "Directly targets the 9-point cost of landing second. A 55-60% path advantage from inside Ohio implies the vendors hold better AZ placement or warmer connections than a single c7a.large; the engine can either buy the path or copy the setup (pre-warmed h2 streams from the best AZ).",
+    "test": "Run 200 same-nonce pairs at random times of day: direct host vs BlockRazor Ohio, direct vs Eira Send, and direct-from-AZ-a vs direct-from-AZ-b/c. Adopt any path that wins >55% with p<0.05, and re-run the live first-place rate (currently ~60%) for a week.",
+    "confidence": "low"
+   },
+   {
+    "title": "Pons v2 snipe tax is a factory-level, owner-mutable formula; the only fee-free E0 path is creator-named exemption",
+    "urls": [
+     "https://casatrick.substack.com/p/pons-sniper-bot-robinhood-chain",
+     "https://docs.ponsfamily.com/v2"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "snipeTaxBps(elapsed) = snipeTaxStartBps >> ((elapsed * 14) / snipeTaxSeconds) with factory settings 9900 bps and 3 s gives 99.00% in the launch second, 6.18% at +1 s, 0.19% at +2 s, 0 at +3 s (exactly the E1/E2 numbers measured), applies to buys only, and both parameters are owner-mutable ('read live off the factory'). Exemptions are set at creation by the launching address (launcher, creator-fee recipient, and extra named addresses); currentSnipeTaxBps(recipient) is per-recipient. The open-source bots found (0xhamssog/pons-sniper-bot, Trustdev-eth/pons-sniper-bot-v1-v2) default to waiting until the tax is zero and use a single wallet; neither documents a first-block technique or any measured latency.",
+    "relevance": "Fees take 36% of gross; this confirms there is no engineering route under 6.18% at E1 other than being named in the creation, and that a silent factory parameter change (e.g. snipeTaxSeconds 3 -> 5, as the docs' '5 seconds' wording hints) would move E1 to ~25% and must be detected before firing.",
+    "test": "Read snipeTaxStartBps/snipeTaxSeconds from the factory every block in the engine's gate and abort firing on any change; log the value beside each fill.",
+    "confidence": "high"
+   },
+   {
+    "title": "Express-lane research shows auction lanes get captured by three players and 30% of their txs revert; not a path for this venue",
+    "urls": [
+     "https://arxiv.org/abs/2509.22143",
+     "https://arxiv.org/abs/2306.02179",
+     "https://docs.arbitrum.io/launch-arbitrum-chain/configure-your-chain/common/mev/timeboost-for-arbitrum-chains"
+    ],
+    "source_type": "paper",
+    "claim": "The empirical Timeboost study (48.5M express-lane txs, 494k auctions, Jan-Apr 2026) found three entities won 99.74% of rounds, ~30% of express-lane txs reverted, auction revenue declined over time and secondary express-lane markets failed. Timeboost for Arbitrum chains requires the chain owner to deploy ExpressLaneAuction plus an autonomous auctioneer (60 s rounds, 15 s close, 200 ms delay for non-express txs, min reserve 0.001 WETH) and is marked alpha; Robinhood has not deployed it and Arbitrum One has since abandoned it.",
+    "relevance": "Closes the 'Timeboost express lane' angle: even where it exists the lane is won by capitalized latency shops, and on Robinhood Chain it does not exist. Time is better spent on the FCFS path and on a PGA contingency.",
+    "test": "None needed beyond the RPC-namespace monitor in the PGA finding.",
+    "confidence": "high"
+   }
+  ],
+  "dead_ends": [
+   "Timeboost express lane on Robinhood Chain: timeboost_* and auctioneer_* RPC methods absent on both official hosts; Arbitrum One itself retired Timeboost for PGA on 24 Sep 2026.",
+   "Arbitrum One's paid Fast Feed (per-tx streaming during block construction, feed-ticket contract): Arbitrum One only, no Robinhood equivalent found.",
+   "Nonce-gap pre-positioning (submit nonce N+1 early, trigger with N): nitro's precheckNonces inserts the held tx directly after its predecessor in the same block, so it confers no position; not worth testing.",
+   "Oversized gas limit to force retry-queue placement: the gasLimit-based ErrGasLimitReached check only exists for ArbOS < 50; Robinhood runs ArbOS 61 where only gas actually used counts.",
+   "timestampMin pre-positioning via conditional transactions: rejected at submission because options are checked against the latest header.",
+   "WebSocket submission to the official rpc/sequencer hosts: both return HTTP 400 on upgrade.",
+   "YouTube: Ed Felten talks (qxml80TparY, y2jVhQU3cRk) blocked by Google's bot check via fetch; the 'Robinhood Chain sniper bot' videos are marketing with no measurements.",
+   "Open-source Pons sniper repos (0xhamssog, Trustdev-eth): single-wallet, wait-until-tax-zero designs, no latency numbers, no first-block method.",
+   "0xZetty/arrowhead-protocol: alpha, no data. Glassnode status page: 0 probes online today, only the location statement is usable. cryptotimes 'front-run by two blocks' article: bot wall, unreadable.",
+   "Arbitrum research thread 'eth_sendRawTransaction to sequencer?': unanswered.",
+   "Chainstack 'What is Robinhood Chain' and Robinhood run-a-full-node page: nitro v3.11.2 and ArbOS 61 only; no sequencer config (max-block-speed, queue sizes) published anywhere; the 100 ms cadence was verified from block timestamps instead.",
+   "'Buying Time' (AFT 2023) and 'Shared sequencing as a noisy contest': theory only, no engineering parameters."
+  ]
+ },
+ "research:strategy": {
+  "findings": [
+   {
+    "title": "Pons 'waiver-and-bundle' ring launches have an on-chain signature: 15-25+ SnipeTaxExempted wallets, curve swept 1-3 blocks after creation, insiders hold 82-86% of supply; 467 other clusters run the same play",
+    "urls": [
+     "https://www.theblock.co/news/defi/2026-09-27-onchain-analyst-links-18-4-million-in-robinhood-chain-memecoin-extractions-to-single-rug-pull-operation-416960",
+     "https://www.cryptopolitan.com/bitquery-pegs-robinhood-chain-rug-pull-crew-at-56-launches-15-5m-take/",
+     "https://finance.yahoo.com/markets/crypto/articles/pons-v2-exemptions-put-robinhood-103042949.html",
+     "https://docs.bitquery.io/docs/blockchain/robinhood/pons-api/"
+    ],
+    "source_type": "measured writeup",
+    "claim": "Wazz (53 launches, $18.43M, Jul 10-Sep 21) and Bitquery (56 launches, $15.5M net; $13.3M buyer losses) reconstructed one crew on Pons V2. Pattern per launch: creator declares 15-25 exempt wallets (up to 31; DEED had 50 wallets funded 16 s before launch, 92 fresh addresses funded ~40 min before), then ONE transaction 1-3 blocks after creation buys for all of them and empties the bonding curve straight into the v4 pool; creator+exempt wallets end with 82-86% of supply (EQUITY: 21 of 31 exempt wallets bought within ~1 s, 65.7%). Only 1.9 ETH of snipe tax was collected across 35 of these launches. Bitquery found 467 further clusters using the same waiver-and-bundle tactic (~$11.6M). 25 of 53 launches used one unverified helper contract deployed Aug 28. Event topics to key on: SnipeTaxExempted 0xe4b7e48f..., SnipeTaxCharged 0x3bc39a55..., CurveBuy 0xec36bf57....",
+    "relevance": "Bottleneck: fee drag / win rate / 'launches whose crowd appears only in the tick block cannot be taken'. A launch with many exempt wallets is by construction swept before or at E1: our E1 shot either reverts (curve gone), fills on the v4 pool at the insiders' price, or buys into a wall that holds 70-86% of supply and exits in 1-2 swaps. These launches also attract rival fleets, so they may be over-represented in our '2 fleets' gate. Conversely, a cheap pre-tick signal exists: the exempt list is emitted in the creation tx itself.",
+    "test": "On the 696 qualifying launches join the creation tx's SnipeTaxExempted count (and exempt wallets' share of E0 CurveBuy tokensOut) to the modelled fills; split mean net return and miss rate by exempt-count buckets (0, 1-2, 3-14, 15+). Check how many fills were swept (LaunchSwept/PoolGraduated within 3 blocks of creation). If 15+ exempt launches are net losers or unfillable, add 'exempt_count >= N' as a veto and re-run the backtest.",
+    "confidence": "high"
+   },
+   {
+    "title": "The Pons snipe-tax schedule is owner-mutable and already disagrees across docs (5 s), source (15 s) and chain (3 s): the E1 seat can silently move from 6.18% to 24.75% or 99%",
+    "urls": [
+     "https://casatrick.substack.com/p/pons-sniper-bot-robinhood-chain",
+     "https://github.com/ponsdotdev/pons-labs/issues/10",
+     "https://docs.ponsfamily.com/v2"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "Formula: snipeTaxBps(elapsed) = snipeTaxStartBps >> ((elapsed*14)/snipeTaxSeconds), integer seconds since the launch tx, zero once elapsed >= snipeTaxSeconds. On-chain today: 9900 bps / 3 s => 99% (s0), 6.18% (s1), 0.19% (s2), 0 (s3+). The public docs describe a 5 s decay ('about 25% after one second and 3% after two' = 9900>>2 = 2475 bps, 9900>>5 = 309 bps), and the checked-in factory source defaults to 15 s (which would give 99% at s1, 49.5% at s2, 24.75% at s3). Both constants have setters and events on the factory; creators may exempt up to 32 addresses, fixed at creation. Pons has not (as of Sep 29) announced any change after the Sep 27 exposure, but the parameters are the obvious lever.",
+    "relevance": "Fee drag (36% of gross) and the whole seat economics: at 5 s the E1 seat costs 24.75%+tier, which turns our +25.4% first-seat gross into a loss; at 15 s no seat before s4 is viable. A silent param change would look exactly like 'P&L hasn't moved' while fills keep landing.",
+    "test": "Add a watcher on the factory's snipeTax setter events / read snipeTaxStartBps and snipeTaxSeconds (or currentSnipeTaxBps for a shooter address) at every launch, log them with each fill, and compute break-even seat per setting from the backtest's gross-move distribution. Alert and halt firing if the schedule differs from 9900/3.",
+    "confidence": "high"
+   },
+   {
+    "title": "Same-block insider sniping on pump.fun: 87% of snipes profitable, 55% exit within 1 minute, 11% within 15 s, 90% exit in 1-2 swaps, activity 14:00-23:00 UTC (Pine Analytics, 15,000+ launches/month)",
+    "urls": [
+     "https://pineanalytics.substack.com/p/exit-liquidity-machines",
+     "https://beincrypto.com/pump-fun-meme-coin-snipers-systematic-problem/"
+    ],
+    "source_type": "measured writeup",
+    "claim": "Over one month: 15,000+ tokens sniped in the creation block by 4,600+ wallets funded by 10,400+ deployers (~1.75% of launches), 15,000+ SOL realized profit, 87% of snipes profitable, typical 1-100 SOL per wallet. Exit timing: 11%+ fully out within 15 s, 55%+ within 1 min, 85%+ within 5 min; 90%+ of exits use only 1-2 swap events. Activity clusters 14:00-23:00 UTC, near zero 00:00-08:00 UTC ('US-aligned cron jobs').",
+    "relevance": "(a) Confirms the time-of-day concentration is structural to launchpad sniping, not a quirk of our week (our 75% of money 16-24 UTC). (b) On Pons the analogous insiders are the creator (auto-exempt) and named exempt wallets; their first CurveSell is the insider exit, and it comes in 1-2 swaps inside the first minute, i.e. inside our 11-block hold on many launches.",
+    "test": "For every fill, record the block of the first CurveSell by the creator/fee-recipient/any exempt wallet relative to our entry block, and the size (share of their holdings). Measure how often it precedes block 11 among losers vs winners. If it separates them, backtest an 'insider-sold' early exit trigger against the fixed 11-block sell (new evidence, distinct from the price/time exit rules already rejected).",
+    "confidence": "high"
+   },
+   {
+    "title": "Independent Pons v2 sniper (bodkin) publishes its full filter set and timing: buys at 0.19% (E2) 1.2-1.6 s after detection, vetoes exempt-wallet bundles, big dev buys, serial deployers with poor graduation history, 'launch-farm fingerprints', missing socials and non-ETH pairs",
+    "urls": [
+     "https://github.com/Phosphenq/bodkin",
+     "https://dev.to/hamssog/building-a-pons-v2-sniper-bot-on-robinhood-chain-with-typescript-2md1"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "bodkin subscribes to TokenLaunched, enriches each launch with one aggregate3 multicall + 3 tx reads in ~280 ms, polls currentSnipeTaxBps every 150 ms and buys under a ceiling (measured entries at 0.19% tax, 1.6-2.1 s post-detection; polling entries lagged websocket by 188-203 ms). Vetoes: declared exempt wallets > maxExemptWallets; dev buy > threshold; serial deployers with poor graduation history (in-memory deployer index over 400,000 blocks); launch-farm fingerprint = identical buy amounts + tax from fresh wallets created within 30 min; missing social links; non-ETH pair assets. Exits: TP +80%, SL -35%, trailing 25% off peak, max hold 45 min, marks are live sell quotes net of 1% fee + creator tax + impact. Sep 4 sample: 24,462 launches in 24 h, 559 graduated (2.3%).",
+    "relevance": "Gate quality and supply. Two signals here were not in the brief's rejected list and are pre-tick computable from the creation tx and the feed: (1) 'fresh-wallet fingerprint' (E0/E1 buyers whose wallets are < 30 min old and share a funder, which matches the Wazz/Bitquery ring pattern of wallets funded 16 s-40 min pre-launch); (2) quote asset (ETH vs USDG/tokenized stock; 33% of Pons launches are stock-quoted per Bitquery).",
+    "test": "For each qualifying launch compute: share of E0/E1 rival buyers with wallet age < 30 min and a common funding source; quote asset; social links present in metadata. Split modelled fills by each and check whether any explains the 59% win rate or the first-vs-second gap. Also compare bodkin's E2 entry vs our E1 on the same launches using the tax formula (0.19% vs 6.18% seat, one second later).",
+    "confidence": "medium"
+   },
+   {
+    "title": "Largest pump.fun predictive study (655,770 tokens): liquidity velocity is the strongest predictor; bot-dominated launches (non-bot share < 30%) have systematically lower sustained inflow; and 92% of tokens with >= 30 swaps get dumped",
+    "urls": [
+     "https://arxiv.org/abs/2602.14860",
+     "https://arxiv.org/html/2602.14860v1"
+    ],
+    "source_type": "paper",
+    "claim": "Sep 1-Oct 1 2025, 655,770 tokens, 0.63% graduated. Conditional on curve level, the number of trades needed to get there dominates every other variable (tokens reaching a level in <= 10 trades vs 50/100/500/1000). Tokens with >= 70% non-bot trades (bot = direct program call, not UI) have higher graduation odds; 'markets dominated by bot-like activity exhibit systematically lower graduation probabilities beyond intermediate stages'. Presence of historically profitable traders: 'at most a modest and non-monotonic effect'. Top-10 serial creators (>= 50 tokens, >= 10 trades/token) beat the economic breakeven only at advanced curve stages, with small n. 92.22% of 184,282 tokens with >= 30 swaps had at least one dump; pre-graduation dumps pay strictly more than post-graduation exits.",
+    "relevance": "Our gate ('>= 2 rival fleets visible') deliberately selects bot-dominated launches. This paper says such launches have the weakest follow-through beyond the first seconds, which is consistent with our money coming only from the first 11 blocks and with fees eating 36% of gross. Liquidity velocity (few large buys) rather than fleet count may be the better pre-tick proxy for the next-minute move.",
+    "test": "Recompute the gate using (a) quote inflow per rival shot in the pre-tick blocks and (b) the human (UI / non-relay) share of pre-tick buyers, and compare modelled fills' mean return against the fleet-count gate on the same 696 launches, with the Sep 26-27 low-supply days as a holdout.",
+    "confidence": "high"
+   },
+   {
+    "title": "Rival sniper cohorts raise first-30-minute buyer COUNT by +16.1% but SOL INFLOW by only +6.3% (CI includes zero): crowds bring bodies, not money (1,012 cohorts, 166,098 launches)",
+    "urls": [
+     "https://arxiv.org/abs/2607.02795",
+     "https://zenodo.org/records/21765387"
+    ],
+    "source_type": "paper",
+    "claim": "Kamat, 1,578,333 buyer events over 166,098 pump.fun launches (Jun 11-25 2026): 1,012 persistent cohorts of 2-12 wallets (2,965 addresses) that co-fire among the first 10 buyers; top cohort (9 wallets) hit 42 launches in 11 days at mean first-buyer rank 2.29; 22 cohorts hit >= 20 launches, median cohort 5. Propensity-matched (5,419 pairs, 10 covariates) effect of cohort presence: first-30-min buyer count +16.1% [+13.0, +19.4]; SOL inflow +6.3% [-0.5, +15.1], not distinguishable from zero; 7.0% of cohort-touched launches had zero non-cohort buyers in 30 min. The paper does not report cohort PnL.",
+    "relevance": "Direct external evidence on the gate itself: visible fleets predict more transactions but not more quote inflow. Our win (59%) depends on someone paying up after us within 11 blocks; fleet count is a weak proxy for that.",
+    "test": "Replicate on Pons: cluster rival shooter wallets into persistent cohorts across the 696 launches (co-occurrence >= 3), then regress the 11-block quote inflow (sum of CurveBuy quoteIn from non-cohort wallets) on cohort count vs on pre-tick quote inflow; use whichever predicts inflow to re-rank fireable launches.",
+    "confidence": "high"
+   },
+   {
+    "title": "Sniper landing position elsewhere: 'slot 0 vs slot 2 is a 20-60% upside difference' on pump.fun; co-located sub-35 ms nodes land slot zero 89% vs < 20% at 220 ms; only ~10% of Solana sniper bots are consistently profitable; Robinhood Chain has no Timeboost so ordering is pure arrival time",
+    "urls": [
+     "https://rpcfast.com/blog/how-to-launches-snipe-pump",
+     "https://rpcfast.com/blog/top-solana-sniper-bot",
+     "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed",
+     "https://docs.arbitrum.io/how-arbitrum-works/timeboost/timeboost-faq"
+    ],
+    "source_type": "anecdote",
+    "claim": "RPC Fast (240+ events): sub-35 ms detection-to-submission landed slot zero ~89% of events; same logic at 220 ms average latency landed slot zero < 20%; AllenHark: slot 0 vs slot 2 is typically a 20-60% upside gap; Dysnix (Jan 2026): >70% of bots target sub-50 ms but only ~10% deliver consistent profit, attributed to infrastructure not strategy. Chainstack's decoder of the Robinhood feed confirms blockMetadata is always 0 (no express lane): 'ordering is whatever reaches the sequencer first'. Arbitrum FCFS docs: the sequencer appends on arrival; Nitro's bounded queue defaults to 1024 entries and 12 s timeout, after which eth_sendRawTransaction returns 'context deadline exceeded'.",
+    "relevance": "Our 9-point first-vs-second gap (25.4% vs 16.1%) and 60% first-landing rate are the same shape other venues report, and there is no auction to buy the front seat. The only lever is arrival order at the sequencer ingress under load.",
+    "test": "From the feed, record for each fill the tx index of our first landed shot vs the first rival shot in the E1 block and the wall-clock send time of both (rival send time inferred from index). Regress win on index gap. Then A/B two ingress paths (direct sequencer endpoint vs RPC gateway, and/or a second AWS AZ) for a week of shadow sends and compare the index distribution; keep whichever lands earlier.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Why 400+ rival shots hold the burst for seconds: Nitro seals blocks at a gas target (32 Mgas on Arbitrum One; Orbit default speed limit 7 Mgas/s) and queues the rest FCFS with an exponential basefee ramp; the ArbGasInfo precompile exposes the live gas backlog",
+    "urls": [
+     "https://docs.arbitrum.io/how-arbitrum-works/deep-dives/gas-and-fees",
+     "https://docs.arbitrum.io/launch-arbitrum-chain/configure-your-chain/common-configurations/gas-optimization-tools",
+     "https://docs.arbitrum.io/launch-orbit-chain/maintain-your-chain/guidance/state-size-limit",
+     "https://docs.arbitrum.io/how-arbitrum-works/deep-dives/sequencer"
+    ],
+    "source_type": "official docs",
+    "claim": "Arbitrum One seals a block at the earliest of 32 Mgas target / 95,000 bytes calldata / end of ordering round (64 Mgas effective cap post-Fusaka, 32 Mgas per single tx). Orbit chains default to a 7,000,000 gas/s speed limit (Offchain Labs advises not raising it); when demand exceeds the target the pricer tracks a gas backlog and raises basefee exponentially (~10% fee for 1% over target), and transactions that do not fit simply wait in the FCFS queue. 400 buys at roughly 150-250k gas each is 60-100 Mgas, i.e. 2-3 full blocks at a 32 Mgas cap or ~10 s at 7 Mgas/s. ArbGasInfo.getGasBacklog() and getPricingInertia() are readable precompile views.",
+    "relevance": "Bottleneck 'under crowds of 400+ rival shots the sequencer holds our burst for seconds and we miss'. If the E1 block is gas-full, no timing trick lands us; but the block-level fullness is observable one block earlier from the feed and the backlog is readable from the precompile, so a crowd-size veto could save the 35-shot gas and the 20% minOut failures.",
+    "test": "Pull gasUsed/gasLimit for the creation block, E0 blocks and the E1 block of every crowded launch (RPC eth_getBlockByNumber) plus ArbGasInfo.getGasBacklog() at the tick; check whether misses coincide with E1 gasUsed at the cap and a rising backlog. If so, gate on 'projected rival gas in E1 < cap minus our burst' and re-run the miss rate; also confirm Robinhood Chain's actual speed limit and block gas cap (values are chain-owner set).",
+    "confidence": "medium"
+   },
+   {
+    "title": "Social-link presence is the strongest cheap pre-launch predictor on pump.fun: Telegram advertised -> 1.485% vs 0.166% graduation (8.94x; Cox HR 5.40), all three socials 1.919% vs 0.110%, on 832,941 launches",
+    "urls": [
+     "https://arxiv.org/abs/2607.02823",
+     "https://zenodo.org/records/21383616",
+     "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6915560"
+    ],
+    "source_type": "paper",
+    "claim": "Kamat, May 8-Jun 10 2026, 832,941 launches with 24 h outcomes: pooled graduation 0.198% (down 3.18x from 0.63% in Sep-Oct 2025). Telegram link: 1.485% vs 0.166% (log-rank p < 1e-300; multivariate Cox HR 5.40 [4.73, 6.17]); all three channels 1.919% vs none 0.110%; Cox concordance 0.858 with only creation-time fields (socials, initial mcap, description length). Dataset (860,213 rows) is public on Zenodo.",
+    "relevance": "Supply and win rate: a creation-time field that separates launches by ~9x in follow-through elsewhere and that bodkin also uses as a veto on Pons. It is available before the tick from the launch metadata and costs nothing in latency.",
+    "test": "Parse socials/description length from Pons launch metadata (URI or creation calldata) for the 696 launches; split modelled fills and misses by 'any social' / 'Telegram' / 'none'; if the lift transfers, use it as a tie-breaker to fire on more single-fleet launches on low-supply days rather than as a veto.",
+    "confidence": "high"
+   },
+   {
+    "title": "Copycat launches graduate 0.86% vs 9.20% for originals; top 1% of creator clusters make 58.57% of all coins; wash-traded coins graduate 2.0% vs 0.90% (15.2M pump.fun coins)",
+    "urls": [
+     "https://arxiv.org/html/2609.10246v1"
+    ],
+    "source_type": "paper",
+    "claim": "Two years of pump.fun (Jan 2024-Jan 2026, 15.2M coins, 5.8M creator addresses). After 3-hop address clustering, the top 1% of clusters created 58.57% of coins (largest cluster 10,531 addresses; top 100 clusters active 434 days on average). 1.49M copycat coins (10%): copycats graduate 0.86% vs 9.20% for the originals they copy; 26.5% of copycats are created outside the UI. Coins with detectable wash trading graduate 2.0% vs 0.90%; with 500+ wash trades 9.64%. 4,402 atomic multi-sender dumps found (median 7 senders, max 312).",
+    "relevance": "Selection: name/symbol duplication of a recently trending launch is a pre-tick, zero-latency feature not in the brief's list (creator serial count was). Wash/atomic-bundle activity being positively associated with graduation is also consistent with our crowd gate working at all.",
+    "test": "Flag each qualifying launch whose name or symbol matches a launch created in the prior 24 h that reached >= X quote inflow (or any hood.fun/Pons trending list); compare modelled net return and miss rate for copycats vs originals; test whether firing only on the 'original' of a copy wave changes the Sep 26-27 supply.",
+    "confidence": "high"
+   },
+   {
+    "title": "Pons-wide numbers (Bitquery, Aug 3-Sep 3 2026): 1.55% graduate, median 4 min to graduation, 83.6% of graduations within 1 h, 66.8% of 314,736 wallets lost, and the ~1,000 high-frequency wallets (>25% of volume) are 'deep in the red'",
+    "urls": [
+     "https://bitquery.io/investigations/pons-launchpad",
+     "https://medium.com/coinmonks/pons-api-on-robinhood-chain-how-to-track-the-pons-launchpad-on-chain-91b91e6b6a4b"
+    ],
+    "source_type": "measured writeup",
+    "claim": "207,893 coins in the window, 3,228 graduated (1.55%); median graduation 4 min, 83.6% inside one hour, fastest in the creation block (PDEX, 10 s). Daily launches went from ~2,000 (early Aug) to ~20,000 (late Aug), curve trading rose ~55x in 11 days. $736M traded on curves vs $2.14B on v4 pools. 314,736 wallets: 66.8% lost (median loss ~$5); winners took $33.9M, losers gave up $77.3M. About 1,000 wallets with 1,000+ trades each were over 25% of volume and net negative; nine wallets showed near-identical patterns across thousands of coins. Quote assets: ETH $406M (113,181 coins), stables $98.5M (20,440), tokenized stocks $232M (73,896 coins, NVDA first). Fees ~1% per side, ~80% to creators; only 16 creators cleared $10k.",
+    "relevance": "Regime and supply: the rival fleets we gate on are, in aggregate, losing money on Pons, and launch count is the dominant driver of fireable supply (our 20-33 -> 6-11 fills/day). Tokenized-stock-quoted launches are a third of supply and were never split out in our backtest.",
+    "test": "Split the 696 launches and modelled fills by quote asset (ETH / USDG / stock) and by day-level launch count; check whether stock-quoted launches carry the same fee structure and crowd and whether they are a separate, less-contested pool of fireable launches on low-supply days.",
+    "confidence": "high"
+   },
+   {
+    "title": "Other launchpads' anti-snipe economics, and a zero-snipe-tax venue on the same chain: four.meme X Mode 100% -> 1% by block 6, Zora 99% -> 1% over 10 s, Clanker ~80% -> 5% over ~30 s plus a gas-bid sniper auction every 2 blocks; hood.fun on Robinhood Chain charges a flat 1% with no snipe tax but a 5%-of-curve per-wallet cap",
+    "urls": [
+     "https://medium.com/@four.meme/introducing-x-mode-a-fairer-smarter-launch-experience-34c58502525a",
+     "https://www.binance.com/en/square/post/10-24-2025-four-meme-to-adjust-fair-mode-fee-structure-on-october-30-31447564734633",
+     "https://clanker.gitbook.io/clanker-documentation/references/core-contracts/v4/mev-modules/clankersniperauctionv0",
+     "https://hood.fun/whitepaper",
+     "https://memecentral.fun/guides/robinhood-chain-launchpads-compared"
+    ],
+    "source_type": "official docs",
+    "claim": "four.meme X Mode (Oct 30 2025): fee 100% at block 0 decreasing block by block to the 1% normal rate at block 6. Zora: 99% in the first second decaying to 1% over ten seconds. Clanker v4: launch fee ~80% decaying to ~5% over ~30 s, and ClankerSniperAuctionV0: up to 5 auctions, one every 2 blocks, snipers bid by gas price above a peg and pay (gasPrice - peg) x paymentPerGasUnit in WETH, 80/20 to token rewards/factory. hood.fun (Robinhood Chain): 1% flat curve fee (80% to creator), no snipe tax; optional launch-window per-wallet cap and a 5%-of-curve per-wallet cap on by default; 80% of supply on curve, ~6.5 ETH to graduate; migration fee 0.05 ETH + 3% of raise + 0.5 ETH. Pools.trade uses a 4-hour TWAP auction. Pons: 1% curve fee, creator tax fixed at creation, 4.2 ETH graduation (ETH pairs).",
+    "relevance": "Fee drag: our 8.9% average seat cost is 36% of gross. On hood.fun the same sequencer-feed engine could fire in the creation block (E0) for 1% + impact, with the 5% per-wallet cap bounding stake per shooter (35 shooters already exist). Unknowns are hood.fun's launch count and crowd size.",
+    "test": "Count hood.fun factory launches/day from the feed for the same Sep 21-29 week, measure E0/E1 rival shots per launch and the 11-block price path, then re-run the identical rule with a 1% fee and E0 entry; compare fills/day and mean net to Pons. Verify the per-wallet cap and whether creation-block buys are permitted by reading the curve contract.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Only public sniper backtest with fee-aware numbers: 270 exit setups on 2,551,714 pump.fun events found dev-buy >= 1 SOL, +30% TP / -30% SL / 120 s max hold: 1,034 trades, 52.7% win, +40.26 SOL in one hour; round-trip break-even 2.55%; 20% slippage needed live",
+    "urls": [
+     "https://dev.to/gengengen/my-pumpfun-bot-makes-4000-a-day-here-are-the-4-numbers-51oa"
+    ],
+    "source_type": "anecdote",
+    "claim": "Author replayed one hour (2,042 new tokens, 1,036 with dev buys >= 1 SOL) through the real curve math and swept dev-buy thresholds {1,3,5,10,20 SOL} x targets 5-200% x stops {15,30,50%} x max holds {120,300,900 s}. Best: entry on dev buy >= 1 SOL, TP +30%, SL -30%, 120 s => 1,034 trades, 52.7% win, +40.26 SOL. Break-even move 2.55% (1.25% fee each side). Live needs ~20% slippage because the pool moves between decision and confirmation. Claims ~$4,000/day on good days, far less on quiet days.",
+    "relevance": "Selection: the creator's own opening buy size (creator is auto-exempt on Pons, so its buy lands in the creation block and is visible before the tick) as a continuous gate feature; also independent confirmation that ~20% slippage and a 2-minute horizon are where fee-aware snipes cluster.",
+    "test": "For each of the 696 launches compute the creator/fee-recipient CurveBuy quoteIn in the creation second (USD), bucket into quartiles, and compare modelled net return and win rate per bucket; if monotonic, add it to the gate as a tie-breaker on single-fleet launches to recover supply on low days.",
+    "confidence": "medium"
+   }
+  ],
+  "dead_ends": [
+   "No published study quantifies return by buyer rank (1st vs 2nd vs 3rd) on any bonding-curve venue; the only numbers are vendor claims (AllenHark '20-60% slot 0 vs slot 2'). The Kamat cohort paper records buyer rank but reports no PnL.",
+   "YouTube: every hit for pump.fun / Robinhood Chain sniper bots is a tutorial or bot advertisement ('10000% ROI'); Google blocked fetching video pages, and no video with measured data was found.",
+   "Dune 'Pumpfun Snipers' (caiiiyua): user-level queries return zero rows and two widgets fail with division by zero; no sniper PnL-by-position. Robinhood Chain Dune dashboards (dch, adam_tehc, nvthao) are network-level only, no launch/sniper stats.",
+   "SSRN 6915560 (403), Pine Analytics X post, ChainCatcher mirror (410), beincrypto (403), cryptotimes (bot wall) unreachable; the arXiv/Zenodo/Substack primaries covered the same content.",
+   "No source found for any Pons response or parameter change after the Sep 27 Wazz report; the risk in finding 2 is a live unknown.",
+   "No published hour-of-day RETURN table for launchpad snipes; only activity windows (Pine 14-23 UTC; solbundler 14-22 UTC with no data source).",
+   "No study splits Pons launches by quote asset (ETH vs USDG vs tokenized stock); only volume shares exist.",
+   "arXiv 2512.11850 (The Memecoin Phenomenon) contains no time-of-day, holding-period or early-buyer return figures.",
+   "four.meme's exact per-block X Mode percentages between block 0 (100%) and block 6 (1%) are not published in any reachable source.",
+   "The 'There Will Be Spam' (arXiv 2607.24172) and Timeboost (arXiv 2509.22143) papers give spam shares (24-37% state-invariant txs on OP/Base; ~30% express-lane reverts) but nothing on how many duplicate shots per opportunity is optimal.",
+   "Searching 'first block vs second block' returned the user's own fomo-memebot repository; excluded as non-external evidence."
+  ]
+ },
+ "research:video": {
+  "findings": [
+   {
+    "title": "Sequencer endpoint accepts eth_sendRawTransactionConditional with an L2 timestampMin/timestampMax window: let the sequencer reject any shot that would land in the creation second, instead of aiming 46 ms early",
+    "urls": [
+     "https://docs.arbitrum.io/build-decentralized-apps/arbitrum-vs-ethereum/rpc-methods",
+     "https://research.arbitrum.io/t/eth-sendrawtransaction-to-sequencer/9539",
+     "https://eips.ethereum.org/EIPS/eip-7796"
+    ],
+    "source_type": "official docs",
+    "claim": "Arbitrum Nitro sequencer endpoints accept only eth_sendRawTransaction and eth_sendRawTransactionConditional. The conditional form carries knownAccounts (address -> storage root or slot=value), blockNumberMin/Max (L1 block numbers) and timestampMin/timestampMax (L2 timestamp). The sequencer verifies the conditions before accepting; if any fails the tx is rejected with JSON-RPC error -32003 and is never included (no gas burned, nonce not consumed). Robinhood Chain runs stock Nitro (chain 4663, no Timeboost), so the same method should be exposed at sequencer.mainnet.chain.robinhood.com.",
+    "relevance": "Bottlenecks: E1 aim (46 ms before the boundary), 'launches created in the last block of their second cannot be aimed at', wasted shots when the sequencer holds the burst. Since the Pons tax is keyed on block.timestamp second, a shot sent with timestampMin = creationTs+1 and timestampMax = creationTs+1 can only ever execute at E1; anything the sequencer would place in the creation second (97% tax) or in E2+ is rejected for free. If Nitro evaluates the condition against the block being built (preTxFilter at sequencing time), a spray of conditional shots starting ~100 ms before the boundary gets the first accepted shot into the first block of the new second with the sequencer's own clock, which also makes last-block-of-second creations aimable. If instead it evaluates on arrival, it still converts 97%-tax fills and minOut reverts into zero-cost rejections and gives an exact 'too early' signal per shot for calibrating the 46 ms lead.",
+    "test": "1) From the c7a.large, send a dust self-transfer via eth_sendRawTransactionConditional to sequencer.mainnet.chain.robinhood.com with timestampMin = now+1 s: record whether the reply is an immediate -32003, a hold until the timestamp, or a method-not-found. 2) If accepted, replay 20 live launches with half the 35 shooters conditional (min=max=creationTs+1) and half unconditional; compare landed-second distribution, gas burned, and first-vs-second place. 3) Check whether repeated rejections trigger sequencer rate limiting (count 429s).",
+    "confidence": "medium"
+   },
+   {
+    "title": "BlockRazor's Ohio A/B: private ingress beat the official sequencer endpoint 60.46% of same-nonce races from us-east-2; the public feed trails their feed by 28-953 ms depending on Ohio AZ",
+    "urls": [
+     "https://blockrazor.io/products/robinhood/",
+     "https://blockrazor.io/blog/RobinhoodChainRPC/",
+     "https://docs.blockrazor.io/streams/node-stream/robinhood-chain/sequencer-feed-ultra",
+     "https://latency.glassnode.com/robinhood/status"
+    ],
+    "source_type": "measured writeup",
+    "claim": "BlockRazor (vendor, self-interested) reports: from Ohio, their submission path won 60.46% of same-nonce races and was ahead in 54.62% of distinct-nonce tests against https://sequencer.mainnet.chain.robinhood.com; from Frankfurt/Singapore/Tokyo 70%/65%/65% over 50 nonce-identical pairs per region. Feed lag measured over 13,251 blocks on 10 Sep 2026: official wss://feed.mainnet.chain.robinhood.com arrived 28-85 ms (use2-az1), 97-953 ms (use2-az2) and 27-111 ms (use2-az3) after BlockRazor's feed, which reported 0 ms P50-P99. Their node-required 'Ultra' feed costs $200/day or $2,000/month; endpoints wss://us.robinhood-feeder.blockrazor.io/ws/ultra/{token} (Ohio) and jp.* (Tokyo). Glassnode's latency page confirms the sequencer is on AWS us-east-2 and that ordering is strictly first-come-first-served with no fee priority (the page currently shows 0/0 probes online).",
+    "relevance": "Bottlenecks: landing second instead of first (9 points), and the E1 boundary estimate. If our engine derives the boundary from the public feed's arrival time, a 28-111 ms (one block) feed lag in az1/az3, or up to 953 ms in az2, biases the aim by up to a full block; and a 60/40 same-nonce edge from the same region would directly move the 60% first-place rate.",
+    "test": "Replicate their protocol from our box: 100 pairs of identical-nonce dust txs, one to sequencer.mainnet, one to a BlockRazor or bloXroute Ohio endpoint, count which lands; separately, log feed message arrival time vs the block's own timestamp across 1,000 blocks and check which Ohio AZ the instance is in (use2-az2 is the bad one). Adopt only if the same-nonce win rate exceeds 55% and the feed lag reduction is at least one block.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Identical-nonce multi-path spraying: send each shooter's signed tx through two ingress paths at once; the first to reach the sequencer wins, the duplicate is a free nonce rejection",
+    "urls": [
+     "https://blockrazor.io/blog/RobinhoodChainRPC/",
+     "https://blog.bananagun.io/blog/solana-sniper-bots-how-first-block-token-sniping-actually-works",
+     "https://www.comparenodes.com/library/public-endpoints/robinhood/"
+    ],
+    "source_type": "measured writeup",
+    "claim": "BlockRazor's own benchmark is built on this: 'pairs of transactions with identical nonces' sent to two endpoints, only one can be sequenced, the loser is rejected as a nonce conflict at no cost. Under FCFS with no fee priority, path diversity is the only cheap way to buy arrival-time variance. Twelve public HTTPS ingress points exist for chain 4663 (Robinhood, bloXroute robinhood.rpc.blxrbdn.com, dRPC, Tenderly, Allnodes, etc.) plus the sequencer endpoint; Banana Gun cites an 88% first-block rate on Ethereum from bundle infrastructure with multi-wallet distribution but gives no Robinhood numbers.",
+    "relevance": "Bottlenecks: first vs second place, and the multi-second holds under 400+ rival shots (a second path may not be queued behind the same backlog). Cost is only bandwidth: rejected duplicates burn no gas.",
+    "test": "For 30 launches, send each of the 35 shots simultaneously to sequencer.mainnet and to one alternate ingress (bloXroute public or BlockRazor Ohio); tag each copy and read back which copy's hash landed; measure change in landed-first share and in reply latency under crowds; verify the sequencer does not penalise the duplicate stream (429 count).",
+    "confidence": "medium"
+   },
+   {
+    "title": "Pons V2 tax internals confirmed on-chain and now productised: 9900 >> ((elapsed*14)/3) bps, keyed on recipient, exemptions max 32 fixed at creation; PumpDev's public API ships 'maxSnipeTaxBps: 700' as the E1 setting",
+    "urls": [
+     "https://casatrick.substack.com/p/pons-sniper-bot-robinhood-chain",
+     "https://docs.ponsfamily.com/v2",
+     "https://pumpdev.io/pons-trade-api",
+     "https://github.com/1xmint/realorrug/pull/5",
+     "https://docs.bitquery.io/docs/blockchain/robinhood/pons-api/",
+     "https://dev.to/hamssog/building-a-pons-v2-sniper-bot-on-robinhood-chain-with-typescript-2md1"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "Casatrick (18 Sep 2026) gives the deployed formula snipeTaxBps(elapsed) = snipeTaxStartBps >> ((elapsed*14)/snipeTaxSeconds) with factory values 9900/3, i.e. 99.00%, 6.18%, 0.19%, 0 \u2014 matching the brief's E1/E2. Official docs say the tax lasts 5 s and the published source says 15 s; the realorrug capture (launch block 62357124) confirms the chain runs 3 s, so 'Pons's published source does not match what is deployed'. Tax is keyed on the token recipient, readable per-address via curve.currentSnipeTaxBps(recipient); the launch call carries snipeTaxExemptions[] (selector 0xa72101af), max 32 entries or revert ExemptionListTooLong, creator and fee recipient auto-exempt, immutable after creation, and a launch tx may carry an exempt buy. PumpDev's hosted API documents maxSnipeTaxBps: 700 as 'takes the second second (6.18%)', 20 for the third, HTTP 425 with retry timing otherwise, default priority fee 0.05 gwei, base fee ~0.2 gwei, tips seen 0.02-1.5 gwei, recommended slippage 15-25%.",
+    "relevance": "Bottlenecks: supply of fireable launches falling (20-33/day to 6-11/day) and crowding at E1. E1 is now a one-parameter setting in a commercial API, so the rival population at E1 can grow without any engineering; and the factory parameters demonstrably differ from documentation and can change, which would silently move the seat the engine aims at.",
+    "test": "(a) For each of the 696 launches, count distinct E1 buyers and classify by tx shape (PumpDev-routed calldata vs direct curve calls) week over week to see if E1 crowd growth explains the supply drop. (b) Read snipeTaxStartBps and snipeTaxSeconds from factory 0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e on every launch and alarm on change. (c) Verify the relay's fill check uses the CurveBuy(buyer, recipient, quoteIn, tokensOut, fee, tax) event's tax field, not tx status.",
+    "confidence": "high"
+   },
+   {
+    "title": "Exempt-wallet bundle ring: 53-56 launches, $15.5-18.4M, 15-25 exempt wallets buying 70-86% of supply in one tx 1-3 blocks after creation via one bundler contract deployed 28 Aug; 467 other clusters use the same tactic",
+    "urls": [
+     "https://www.theblock.co/news/defi/2026-09-27-onchain-analyst-links-18-4-million-in-robinhood-chain-memecoin-extractions-to-single-rug-pull-operation-416960",
+     "https://www.cryptopolitan.com/bitquery-pegs-robinhood-chain-rug-pull-crew-at-56-launches-15-5m-take/",
+     "https://finance.yahoo.com/markets/crypto/articles/pons-v2-exemptions-put-robinhood-103042949.html",
+     "https://x.com/WazzCrypto/status/2104194307628621976"
+    ],
+    "source_type": "measured writeup",
+    "claim": "Wazz (pseudonymous analyst, thread paywalled) and Bitquery independently trace a crew: 53 launches 10 Jul-21 Sep ($18.43M) / 56 launches to 23 Sep ($15.5M, $12.4M strict). Pattern: creator names 15-25 snipeTaxExemptions; one transaction 1-3 blocks after creation buys for all of them, empties the curve and pushes straight to the v4 pool, leaving creator+exempt wallets 82-86% of supply 'in under a second'; 25 of the 53 launches used one unverified bundling contract created 28 Aug ('a commercial bundling tool with many unrelated users'); for DEED, one wallet funded 92 fresh addresses ~40 min before launch and 25 exempt wallets took ~two-thirds of supply. Snipe tax collected by Pons across 35 of these launches: 1.9 ETH. Bitquery counts 467 other clusters using the same tactic for a potential $11.6M. Top extractions CRUMBS $3.12M, LEGS $2.9M, PINK $1.44M.",
+    "relevance": "Bottlenecks: 'launches whose crowd appears only in the tick's own block cannot be taken' and the supply drop. Exempt-bundle launches graduate inside the creation second, so they are structurally unfireable, and a growing share of the hottest-looking launches (many named buyers, big creation-block volume) are of this type; the engine already reads the exemption list, so exempt-list length and the bundler contract address are free pre-tick features.",
+    "test": "Join the 696-launch backtest with exemption-list length, whether the creation tx routed through the 28-Aug bundler contract, and whether the curve graduated before E1; measure what share of the 'crowd present' launches this removes and whether any of the 130 modelled fills sit on such launches. If the two-fleet gate is counting exempt wallets' buys as rival fleets, add 'exemptions >= 10 -> skip' and re-run.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Pools.trade (Uniswap Labs' launchpad on Robinhood Chain, live 5 Aug 2026): Instant Launch is a bonding curve with no snipe tax and a 0.25% LP fee, 'thousands of launches per day at peak'",
+    "urls": [
+     "https://blog.uniswap.org/pools-trade-a-new-way-to-launch-on-robinhood-chain",
+     "https://docs.bitquery.io/docs/blockchain/robinhood/pools-trade-api/",
+     "https://www.kucoin.com/blog/robinhood-chain-uniswap-v4-pools-trade-launch"
+    ],
+    "source_type": "official docs",
+    "claim": "Instant Launch: classic bonding curve, no FDV requirement, liquidity permanently locked in a v4 pool, 1B fixed supply, native ETH quote, pool fee 2500 (0.25%), no hook (0x000...000), tick spacing 25, creator may take 0.05% of the 25 bps; no launchpad fee; the only anti-snipe measure is that the creator buys in the same block as creation. Crowd Launch is a 4-hour TWAP auction with a $10K FDV threshold. Contracts: launch entry 0x0000ffffbe8efe702c8703ae3477ff5de3d319c0 (current), token factory 0x000000e200088d55c39a11f609e5f667729ad49b, v4 PoolManager 0x8366a39cc670b4001a1121b8f6a443a643e40951; launches emit TokenCreated(token). Casatrick describes it as 'a pure speed game rather than a tax-timing game'.",
+    "relevance": "Bottleneck: fees take 36% of gross (8.9% avg on Pons) \u2014 the same relay, fleet and feed could fire on a venue where the round trip costs ~0.5% plus curve impact. The trade-off is that with no tax the entire crowd targets the creation block, so the 'two fleets before the tick' gate has no tick to observe; the gate would have to be rebuilt on creation-tx features.",
+    "test": "Replay Pools.trade TokenCreated events for 21-29 Sep from the feed: count creation-block and block+1 buyers per launch, price path over the next 11 blocks, and simulate the $13 stake with 0.25% fee and curve impact at first/second/third position. Compare fills per day and net per fill against the 130 Pons fills.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Ingress and queue facts behind the multi-second holds: public RPC 429s after ~6 quick calls, sequencer endpoint is sendRaw-only, Nitro queue 1024/12 s, blocks slow under load (2% fewer blocks on the 3 Sep congestion day), feed rate-limited per client",
+    "urls": [
+     "https://www.dwellir.com/blog/robinhood-chain-defi-data",
+     "https://docs.arbitrum.io/run-arbitrum-node/sequencer/run-sequencer-node",
+     "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed",
+     "https://bitquery.io/investigations/robinhood-chain-gas-price-25x",
+     "https://chainstack.com/how-to-track-memecoin-trades-on-robinhood-chain-and-solana/"
+    ],
+    "source_type": "measured writeup",
+    "claim": "Dwellir (23 Sep 2026): rpc.mainnet.chain.robinhood.com 'returned HTTP 429 after about six quick calls', keeps ~10 min of state, is documented as 'not for production'. Nitro sequencer defaults: queue-size 1024, queue-timeout 12 s, max-block-speed 250 ms (Robinhood runs 100 ms), max-tx-data-size 95000. Bitquery: on 3 Sep the chain produced 842,360 blocks vs 861,465 on a calm day (2% fewer) while gas used tripled; base fee went 0.02 -> 0.511 gwei in 11 days; eight addresses drove four-fifths of demand. Chainstack: feed rate limiting is per client not per connection; one message = one block, sequence number = L2 block number; a single block carried 85 txs; ArbOS 61 compliance filtering can void a tx after sequencing (status 0x0, no logs, gas burned; ~150 filtered txs/day, filterer 0xebDc18A1...24b7 with 6,092 txs by mid-Aug); a sequencer failover can reorder before the batch lands.",
+    "relevance": "Bottleneck: 'under crowds of 400+ rival shots the sequencer holds our burst for seconds'. If any shooter's tx goes to rpc.mainnet rather than sequencer.mainnet, the burst is serialised by a 6-call rate limit; and with block cadence stretching under load, the E1 block may arrive late relative to wall-clock, so a fixed 46 ms lead lands early. Also: BuyOnce's 'first shot that lands' must not treat a voided status-0 inclusion as a fill.",
+    "test": "From the engine's logs, per shot: endpoint used, HTTP status, reply latency, landed block number; correlate reply latency with rival-shot count and with inter-block spacing from feed sequence numbers over the same second; scan past shot receipts for status 0 with empty revert data. If holds coincide with stretched block spacing, the sequencer is the bottleneck; if they coincide with 429s, it is ingress.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Pine Analytics (Solana, Apr 2025): deployer-funded same-block snipers cluster 14:00-23:00 UTC, 87% of snipes profitable, 15,000 SOL/month, 55% fully out within 60 s and 11% within 15 s",
+    "urls": [
+     "https://pineanalytics.substack.com/p/exit-liquidity-machines",
+     "https://rpcfast.com/blog/how-to-launches-snipe-pump"
+    ],
+    "source_type": "measured writeup",
+    "claim": "Over one month on pump.fun: 15,000+ tokens sniped in the launch block by wallets funded directly by the deployer, 4,600+ sniper wallets, 10,400+ deployers, ~1.75% of launches, 15,000 SOL realised, 87% of snipes profitable, per-wallet profit typically 1-100 SOL. Exits: 11% within 15 s, 55% within 60 s, 85% within 5 min, >90% of exits in one or two swaps. Activity clustered 14:00-23:00 UTC with hub-and-spoke funding (one deployer funding dozens of wallets) and single-use burners.",
+    "relevance": "Bottleneck: 75% of our money sits in 16:00-24:00 UTC and daily supply fell. The same UTC window shows up for the professional insider cohort on Solana, which suggests the concentration is structural (US-hours operators and their audiences) rather than a one-week artifact, and that insider selling begins within 15 s for a meaningful minority \u2014 inside or just after our 11-block hold. The funding-pattern heuristic (fresh wallets funded minutes before the launch by the creator's funder) is a pre-tick feature we can compute from the feed.",
+    "test": "On the 696 launches, compute for each creation the number of buyer wallets funded within 60 min before launch by the creator's funding source (Bitquery-style), and test whether fills on such launches have worse 11-block outcomes; separately bucket the 130 fills by hour to confirm the 16-24 UTC concentration holds out of sample on Sep 2-3 data already on disk.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Bitquery's Pons cohort study: 1.55% of launches graduate, half of those within 4 minutes; ~1,000 wallets with >1,000 trades each make >25% of all trades and a nine-wallet identical-pattern bot cohort is 'deep in the red'; 66.8% of 314,736 wallets lost",
+    "urls": [
+     "https://bitquery.io/investigations/pons-launchpad",
+     "https://dune.com/adam_tehc/pons",
+     "https://www.coindesk.com/tech/2026/09/03/a-memecoin-making-app-becomes-crypto-s-top-fee-generators-as-robinhood-chain-activity-explodes"
+    ],
+    "source_type": "measured writeup",
+    "claim": "Bitquery over 32 days to early Sep: 207,893 coins; launches went from ~2,000/day (3-24 Aug) to ~20,000/day (25 Aug-3 Sep); 1.55% graduated, half within 4 min, 83.6% within an hour, curves older than 24 h 'almost never finish'; example PDEX: 68 wallets bought within 10 s and the curve finished. ~1,000 wallets each with >1,000 trades account for more than a quarter of all trades; nine wallets with 'almost identical' patterns are net losers as a group; 66.8% of 314,736 wallets lost; median creator earned $15.73, only 16 creators above $10,000. Dune (adam_tehc): 964,489 tokens, 412,011 deployers, $30.72M protocol revenue, peak volume day 5 Sep $931.7M. CoinDesk: 25,000 launches on 2 Sep, $5.95M Pons fees in 24 h, 646,000 tokens since July.",
+    "relevance": "Context for the gate and for stake scaling: high-frequency generic bots lose in aggregate on this venue, so edge is gate selectivity, not volume; and graduation-in-minutes rates give a base rate for how often the 11-block hold sits inside a curve that will finish (exit liquidity exists).",
+    "test": "Compute, for the 130 modelled fills, the share whose curve graduated within 4 min and within 1 h, versus the 1.55%/50% base rates, to see whether the two-fleet gate is selecting launches that later graduate (a durable signal) or only launches with momentary crowds.",
+    "confidence": "medium"
+   }
+  ],
+  "dead_ends": [
+   "YouTube 'Robinhood Chain sniper bot' videos: two of three (nOtOOGqhCtM '10000% ROI free download', Af_XSD-6V7o 'RHC Sniper Bot') are from a channel literally named 'We're looking for cool stuff on GitHub.' (auto-generated repo promos, drainer pattern); Moon Dev's short 'I built a Robinhood chain sniper bot' (oAproZA99Ww) is a real educator but the page/transcript could not be fetched (Google sorry-page); no technique content extractable.",
+   "YouTube pump.fun sniper videos (hC18kFBefg8, fajiKXzLoJo, 5u0QBzQDApk, E0QoMIjVI44, GhgDnRpv_XU 'Block-Proposal Instant-Zero Snipe Engine', 3BT239zYq_M, Yds3dyAdwb0) are product marketing with no measurable technique; AllenHark '0-slot' bot sells '40 SOL source'.",
+   "Wazz's X thread (x.com/WazzCrypto/status/2104194307628621976) returned HTTP 402; only press coverage of it was readable. No first-hand X posts from Pons sniper operators (P&L, crowd sizes, seat timing) surfaced in any query.",
+   "Reddit: no threads on Pons/Robinhood Chain sniping; pump.fun bot-results queries returned only MEXC aggregator stats (49-50.6% of ~1.4M pump.fun wallets lost in March 2026), not operator experience.",
+   "Telegram/Discord: nothing public with technique; the 'Pons Sniper Bot' launch (openpr.com, King Newswire) is a browser tool asking for a private key with 0.04/0.1/1 ETH passes, no latency or tax numbers \u2014 treat as marketing/possible scam.",
+   "four.meme: X Mode / Fair Mode 'fees decrease over the first seconds/blocks' is confirmed to exist but the exact schedule was not retrievable (Medium 403, GitBook page gives no numbers); four.meme GitHub 'sniper' repos are template resale listings, no measurements.",
+   "bloXroute 'Reach Robinhood Sequencer First: Speed Boost' page returned empty content twice and docs.bloxroute.com/robinhood/overview has no ms numbers or endpoints.",
+   "ArrowHead sequencer-profiling repo (0xZetty) is alpha with no published numbers; Glassnode Robinhood latency page shows 0/0 probes online.",
+   "Robinhood Chain per-block gas limit and whether the sequencer's eth_sendRawTransaction reply is post-sequencing were not found in any public doc; Nitro defaults (queue 1024, timeout 12 s) are the only hard numbers.",
+   "Timeboost: search summaries conflated Arbitrum One's April-2025 express lane with Robinhood Chain; chainstack's feed decoder confirms Robinhood has no Timeboost (blockMetadata empty), so no auction path to priority exists.",
+   "PumpDev's PONS WebSocket API Medium post (feed lead-time claims) returned 403; Maestro and Axiom Robinhood pages contain no latency or Pons-tax numbers.",
+   "No study was found quantifying the share of Pons or pump.fun launches sniped in the first block by independent (non-deployer) bots."
+  ]
+ },
+ "research:repos": {
+  "findings": [
+   {
+    "title": "Nitro block composition is a ~10 ms read window per 100 ms block: 'first in E1' is decided ~80-90 ms before E1 is built (verified in sequencer.go)",
+    "urls": [
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/sequencer.go",
+     "https://docs.arbitrum.io/launch-arbitrum-chain/operate/sequencer-troubleshooting",
+     "https://docs.robinhood.com/chain/connecting"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "In Nitro's createBlock (execution/gethexec/sequencer.go, master): each block's batch is built by (1) draining txRetryQueue first (leftovers from the previous block that did not fit, in FIFO order), then (2) blocking until the first txQueue item arrives, then pulling further items for only ReadFromTxQueueTimeout (default 10 ms) once >=2 items are in hand, then executing. The next createBlock starts MaxBlockSpeed after the previous one started (100 ms on Robinhood). The block timestamp is time.Now().Unix() taken after the read window. On chain 4663 ArbGasInfo.getGasAccountingParams() returns speedLimit 7,000,000 gas/s, perBlockGasLimit 32,000,000, maxTxGas 32,000,000 (header gasLimit is the dummy 2^50). Txs beyond 32M gas are pushed to txRetryQueue in order and lead the next block; the tx queue is a 1024-slot channel with a 12 s queue timeout. Consequence: the first position in block k+1 goes to the earliest arrival after block k's read window closed, i.e. a window of roughly 90 ms that opens about 10 ms after block k's first tx and closes when block k+1 is built; position inside it is pure arrival order.",
+    "relevance": "Landing second instead of first costs 9 points (+25.4% vs +16.1%) and live we land first only ~60%. The current burst (fire 46 ms before the E1 boundary, 2 ms spacing over 35 shots = 70 ms span) is calibrated empirically; this model says the front of E1 is decided by arrivals in the first 10-20 ms after block E1-1's window closes, so shots in the tail of the 70 ms span cannot be first, and the burst should be front-loaded earlier with the timestamp guard living in the BuyOnce contract (require block.timestamp >= E1 second) rather than in the send schedule.",
+    "test": "From the engine's fill log, regress our tx index-in-block on send offset relative to the E1 boundary and locate the offset at which index-in-block jumps from 0 to >0 (that is the previous block's window edge). Then A/B on live launches: burst centred at -46 ms vs -70 ms and -85 ms, with the on-chain guard; compare first-place rate. Also confirm Robinhood did not override read-from-tx-queue-timeout by sending two txs 15 ms apart from two wallets and checking whether they split across blocks.",
+    "confidence": "high on the mechanics (read from source), medium on the tuning gain (Robinhood's flag values are not public)"
+   },
+   {
+    "title": "Under a 400-shot crowd the L2 base fee ramps (speed limit 7M gas/s) and Nitro drops txs whose maxFeePerGas < baseFee instead of delaying them",
+    "urls": [
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/sequencer.go",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/tx_pre_checker.go",
+     "https://docs.arbitrum.io/how-arbitrum-works/deep-dives/gas-and-fees"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "Robinhood Chain's ArbOS speed limit is 7,000,000 gas/s with 32,000,000 gas per block (read from the ArbGasInfo precompile 0x6C on chain 4663); current base fee is 20,156,000 wei (0.02 gwei). A 400-shot crowd at ~250-400k gas per bonding-curve buy is 100-160M gas inside about one second, 15-20x the speed limit, which is exactly what ArbOS's backlog-based pricing responds to by raising the base fee over the next blocks. In createBlock, any queued tx with GasFeeCap < lastBlock.BaseFee is returned immediately with core.ErrFeeCapTooLow ('max fee per gas less than block base fee') and never retried. Separately, MaxRevertGasReject defaults to 0, so every reverted shot (minOut guard, BuyOnce losers if they revert) is included and pays gas. The pre-checker also rejects a tx when balance < value + gasLimit*maxFeePerGas, so a high fee cap must be covered by the shooter wallet's balance.",
+    "relevance": "Touches the 'under crowds of 400+ rival shots the sequencer holds our burst for seconds and we miss' bottleneck: part of those misses may be silent fee-cap rejections rather than queueing, and the fix is free on an FCFS chain (you pay only the base fee, the cap is not a bid).",
+    "test": "Pull the engine's RPC error strings for the crowd events (look for 'max fee per gas less than block base fee' and 'context deadline exceeded'); from the feed, reconstruct the per-block base fee path in the 2 s after each crowded launch; then set maxFeePerGas to >= 50x the quiet base fee (e.g. 1-2 gwei) and confirm each shooter wallet holds gasLimit*maxFee + stake. Re-measure miss rate under crowds.",
+    "confidence": "medium (fee dynamics are ArbOS-standard; whether the engine's current cap is too low is unknown)"
+   },
+   {
+    "title": "Duplicate the same signed shot over several ingress paths to the one sequencer; the loser copy is free. BlockRazor measured 60.46% same-nonce wins vs the official sequencer endpoint from Ohio",
+    "urls": [
+     "https://github.com/D3AD-E/Solana-sniper-bot",
+     "https://github.com/girasolbot/girasolbot",
+     "https://blockrazor.io/products/robinhood/",
+     "https://blockrazor.io/blog/RobinhoodChainRPC/",
+     "https://docs.robinhood.com/chain/connecting",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/sequencer.go"
+    ],
+    "source_type": "measured writeup",
+    "claim": "Solana snipers fan one signed tx out to every provider simultaneously: D3AD-E/Solana-sniper-bot (Rust, 4 stars, last commit 2026-09-14) writes the same durable-nonce tx to 11 provider sockets (Jito, Helius, bloXroute, Nozomi, Blockrazor, Falcon, Flashblock, Nextblock, Node1, Astralane, 0slot) with per-thread tip stamping in <1 ms; girasolbot (Rust, 0 stars) aborts the losing provider tasks after the first success. On Robinhood there is one sequencer but several ingress paths: the official sequencer endpoint https://sequencer.mainnet.chain.robinhood.com (documented by Robinhood; accepts eth_sendRawTransaction and eth_sendRawTransactionConditional), the public RPC, Alchemy/Chainstack/QuickNode forwarders, and BlockRazor's Robinhood send endpoints (Frankfurt, Ohio, Singapore, Tokyo). Duplicates cost nothing: Nitro's precheckNonces keeps the second same-nonce copy 'in case previous txs fail', it then fails its nonce check at execution and is not included. BlockRazor's own benchmark (703 rounds, Ohio, same nonce raced against the official sequencer endpoint): 60.46% wins for their route, 54.20% 'same block, earlier index', 0.43% earlier block; from Frankfurt/Singapore/Tokyo 65-70% vs 30-35%. Pricing for the send product is not published ('contact sales').",
+    "relevance": "Directly targets first-vs-second (9 points) and the 60% first-place rate: 'same block, earlier index' is exactly the quantity we lose on. Also insures against one path stalling during 400-shot crowds.",
+    "test": "Replicate BlockRazor's methodology from our c7a.large: for 500+ rounds send one signed tx (fresh nonce) simultaneously to the official sequencer endpoint, the public RPC and Alchemy WS, and record which path's copy is included and its index; then trial BlockRazor's send endpoint the same way for a day before paying. Adopt fan-out to the best two paths for every shot.",
+    "confidence": "high that duplicates are free (code), medium on the vendor's numbers"
+   },
+   {
+    "title": "Feed timing: open both allowed sockets per IP (second copy is ~30 ms late on average), pick the right us-east-2 AZ (native feed P99 up to 953 ms in use2-az2), or rent the $200/day ultra feed",
+    "urls": [
+     "https://github.com/groovg/ultrafast-robinhood-sequencer-feed",
+     "https://raw.githubusercontent.com/groovg/ultrafast-robinhood-sequencer-feed/main/README.md",
+     "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed",
+     "https://docs.blockrazor.io/streams/node-stream/robinhood-chain/sequencer-feed-ultra",
+     "https://docs.robinhood.com/chain/run-a-full-node/"
+    ],
+    "source_type": "measured writeup",
+    "claim": "groovg/ultrafast-robinhood-sequencer-feed (Rust, 5 stars, last commit 2026-09-28) measured against wss://feed.mainnet.chain.robinhood.com: 'The public feed allows two connections per IP, and a third gets HTTP 429'; with two sockets 'each got about half the messages first. The other copy showed up about 30 ms later on average, sometimes 100 ms later'; busy-polling cut socket-read-to-recv from 95 to 61 us; sender recovery costs 273 us/message; signature check 27 us. chainstacklabs/robinhood-chain-sequencer-feed (Python, 30 stars, last commit 2026-09-25, pins nitro v3.12.0-ebe9e83 'the build mainnet runs') decodes lazily (4 us basic fields, 10 us hash, 70 us sender) but warns the Nitro relay 'doesn't check signatures, and it hides reorgs because it drops any message whose sequence number it has already sent'. BlockRazor's benchmark of Robinhood's native feed vs their node-required Ultra feed across the three Ohio AZs: native feed P50 27-97 ms behind, use2-az2 P99 953 ms; Tokyo native P50 71 ms; Ultra feed is WebSocket into a local node, $200/unit/day or $2,000/month, Ohio and Tokyo endpoints. Robinhood also documents a delayed backup feed wss://delayed-feed.mainnet.chain.robinhood.com running ~500 ms behind.",
+    "relevance": "The E1 tick estimate and the creation detection both come from the feed; tens of ms of feed jitter is the same order as the 46 ms pre-aim, so it feeds straight into first-vs-second and into 'launches created in the last block of their second cannot be aimed at'. AZ placement is a one-time fix on the existing AWS setup.",
+    "test": "Run two feed sockets plus the delayed feed for 24 h and log per-block arrival deltas (median and P99 of second-minus-first). Launch a t3.micro in each other us-east-2 AZ running the same logger for a day and compare per-AZ arrival times against the sequencer endpoint's RTT; move the engine if an AZ is consistently earlier. Only then trial the Ultra feed for one day against the two-socket baseline.",
+    "confidence": "medium-high (independent measurements by two parties, but AZ numbers are vendor-published)"
+   },
+   {
+    "title": "eth_sendRawTransactionConditional on the sequencer endpoint gives 'first-or-nothing' shots and wrong-second rejections at zero gas (verified in Nitro pre-checker and preTxFilter)",
+    "urls": [
+     "https://docs.arbitrum.io/build-decentralized-apps/arbitrum-vs-ethereum/rpc-methods",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/tx_pre_checker.go",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/sequencer.go",
+     "https://pkg.go.dev/github.com/tenderly/nitro/go-ethereum/arbitrum_types",
+     "https://eips.ethereum.org/EIPS/eip-7796"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "Nitro sequencer endpoints accept eth_sendRawTransactionConditional with options knownAccounts (address -> storage root or slot->value map), timestampMin/Max (L2 block time, seconds) and blockNumberMin/Max (note: L1 block number, not L2). The tx pre-checker (defaults: strictness 20 'LikelyCompatible', required-state-age 2 s, required-state-max-blocks 4) checks the options against the head state and against the state up to 4 blocks back (400 ms at 100 ms blocks, the block cap binds before the 2 s age); the sequencer re-checks in preTxFilter against the in-block state at the tx's position; any failure returns JSON-RPC -32003 and the tx is never included, so no gas is paid (unlike today's reverted shots, which are included because max-revert-gas-reject defaults to 0). A shot with knownAccounts = {curve: {tokensSold slot: initial value}} therefore executes only if no buy precedes it in the block and the chain, i.e. a 'first-or-nothing' shot; timestampMin = E1 second turns a shot that arrives in the creation second into a free rejection instead of a 20%-slippage revert.",
+    "relevance": "Two bottlenecks: (a) capacity/stake ($13 because untested above): put larger stake only on shots that can only fill first (+25.4% mean) and keep normal small shots behind them, BuyOnce still buys once; (b) shots that land in the wrong second cost gas today. Caveat: the 4-blocks-back check means the expected slot value must also hold 400 ms earlier, so either pick a slot whose pre-creation value (0) equals its no-buys value, or only use it when the creation sits in the first half of its second.",
+    "test": "Send a conditional tx to https://sequencer.mainnet.chain.robinhood.com with a deliberately false knownAccounts value and confirm -32003 with no on-chain trace, then with a true value and confirm inclusion; check Robinhood has not set required-state-age higher by testing a slot that changed 600 ms ago. Then shadow-run a two-tier burst (5 first-only shots at $40 ahead of 30 normal $13 shots) on the 130-fill backtest using the recorded index-in-block to score which tier would have filled.",
+    "confidence": "medium (code verified on master; Robinhood's pre-checker flags and Pons curve slot layout unverified)"
+   },
+   {
+    "title": "Regime risk: Arbitrum One moved from FCFS to Priority Gas Auctions on 2026-09-24 and Robinhood already runs a nitro v3.12.0 build; a daily canary should detect the switch",
+    "urls": [
+     "https://ethdaily.io/arbitrum-launches-priority-gas-auctions",
+     "https://docs.arbitrum.io/how-arbitrum-works/priority-gas-auction/pga",
+     "https://blog.arbitrum.io/competing-for-transaction-priority-on-arbitrum/",
+     "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed/pull/11",
+     "https://github.com/OffchainLabs/nitro/releases",
+     "https://docs.robinhood.com/chain/"
+    ],
+    "source_type": "official docs",
+    "claim": "Arbitrum One launched PGA on 2026-09-24: intake goes to an unordered waiting list, and at the start of every round (block time B / K rounds; 125 ms on Arbitrum One) the list is moved into a priority queue keyed on priority_fee_per_gas = min(maxPriorityFee, maxFee - baseFee), ties broken by sequencer arrival timestamp; Arbitrum docs say PGA is 'now available for activation across all Arbitrum chains'. The companion paid Fast Feed streams ordering during block construction. Robinhood's docs pin nitro v3.11.2 for full nodes, but Chainstack's relay PR #11 (2026-09-25) pins 'nitro v3.12.0-ebe9e83, the build mainnet runs', newer than the latest public nitro release v3.11.4 (2026-09-16), i.e. a PGA-era build. Robinhood docs and Chainstack (2026-09-25) still describe strict FCFS with no Timeboost, and Timeboost's own record (arXiv 2509.22143: 30.49% of express-lane txs reverted, three entities won 99.74% of auctions) shows how fast an auction regime concentrates the seat.",
+    "relevance": "Every measured edge (46 ms aim, first-vs-second split, burst spacing) is an FCFS artifact. If Robinhood enables PGA, first-in-block becomes a fee bid decided every 125 ms and the Solana-style dynamic tip logic (RPC Fast: tip floor multiplied 10-50x within seconds around hot launches) becomes the transferable technique instead.",
+    "test": "Daily canary: from two wallets in the same block window send tx A (priority fee 0) and 30 ms later tx B (priority fee 1 gwei); under FCFS A always precedes B, under PGA B precedes A whenever both fall in one round. Also diff the block ordering in the feed against tx maxPriorityFeePerGas for a few busy blocks each day and alert on any monotone fee ordering.",
+    "confidence": "high on the facts, low-medium on the probability that Robinhood flips it"
+   },
+   {
+    "title": "Copy the Solana bots' measurement discipline: multi-lane detection races run in separate processes, and per-fill 'blocks after creation + index in block' percentiles",
+    "urls": [
+     "https://github.com/chainstacklabs/pumpfun-bonkfun-bot",
+     "https://github.com/chainstacklabs/pumpfun-bonkfun-bot/pull/229",
+     "https://github.com/chainstacklabs/pumpfun-bonkfun-bot/pull/230",
+     "https://github.com/chainstacklabs/pumpfun-bonkfun-bot/issues/213",
+     "https://github.com/Tinuz/solsniperbot",
+     "https://github.com/D3AD-E/Solana-sniper-bot"
+    ],
+    "source_type": "measured writeup",
+    "claim": "chainstacklabs/pumpfun-bonkfun-bot (Python, ~1.0k stars, last commit 2026-09-28) ships compare_listeners.py racing five lanes (geyser, logs, blocks, shreds, pumpportal); a published run: shreds first on 16/19 coins (84.2%), geyser +29.1 ms, logs +104.7 ms, blocks +291.7 ms behind shreds. Issue #213/PR #230 found that running the gRPC and websocket lanes in one asyncio event loop starved the websocket lane (16,577 of 71,568 frames received, 27 of 117 coins reported) and fixed it by giving each lane its own process. Its buy path also has a 'zero-RPC' mode (trust the CreateEvent, no curve read) and a 2.0 s curve_refresh_budget. Tinuz/solsniperbot (TypeScript, 0 stars, last commit 2026-09-27) dashboards 'landed slots after launch' percentiles, detect->send latency, and reads its own fill from the same stream at 'processed'. D3AD-E reconciles orphan positions every 60 s with a force-sell.",
+    "relevance": "A Python 3.11 engine that decodes the feed, signs 35 shots and issues 35 sends on one asyncio loop is exposed to the same starvation during bursts, which would show up as late tick detection exactly when it matters; and the engine's key numbers (first-place rate, blocks-after-creation, index-in-block per fill) are the analog of the slot-delta dashboards. Orphan reconciliation matters with 35 shooter wallets and 4 s sequencer replies.",
+    "test": "Instrument feed-message handling latency (recv timestamp minus message timestamp) during bursts with the feed reader in-process vs in a separate process via multiprocessing/shared memory; move it out if P99 grows during bursts. Add a lane race (feed socket 1, feed socket 2, delayed feed, Alchemy newHeads) logging first-detection per launch. Add a 60 s reconciler that scans the 35 wallets for unexpected token balances.",
+    "confidence": "medium-high"
+   },
+   {
+    "title": "Public Pons tooling is far behind the brief's engine: the only Pons sniper on GitHub polls per-address tax over eth_call every 100 ms and broadcasts via plain RPC",
+    "urls": [
+     "https://github.com/Trustdev-eth/pons-sniper-bot-v1-v2",
+     "https://github.com/Trustdev-eth/pons-sniper-bot-v1-v2/commits/main",
+     "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed",
+     "https://github.com/groovg/ultrafast-robinhood-sequencer-feed"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "Trustdev-eth/pons-sniper-bot-v1-v2 (TypeScript, 1 star, 0 forks, two commits both on 2026-09-08) subscribes to Pons factory logs over websocket, then for V2 polls 'effective buy tax for the trading address', expected output and price impact via eth_call every V2_TAX_POLL_INTERVAL_MS (default 100 ms) and fires only when the address-specific opening tax is under a limit; it does a preflight eth_call, signs locally, supports multi-wallet with isolated nonce queues, TP/SL/trailing/timed exits, daily spend and loss caps, and its README admits no 'guaranteed block position or universal latency advantage' and ships an empty benchmark table. It does not read the sequencer feed, has no relay contract and no burst logic. The only Robinhood feed readers on GitHub are the two decoders above (Python 30 stars, Rust 5 stars), both read-only.",
+    "relevance": "Answers the survey question for this venue: the rival 'fleets' (400+ shots) are private code; nothing public explains their timing. The one reusable piece is the per-address effective-tax eth_call as a cheap sanity check that a shooter wallet is not accidentally 'named' or blacklisted before a burst.",
+    "test": "Clone and run in paper mode against the feed for an hour to confirm the feature list; add its per-address tax view call to the engine's pre-burst checks and compare with the surcharge actually paid on fills.",
+    "confidence": "high"
+   },
+   {
+    "title": "Creator-side 'sell into the snipers' bots exist as open source; Pons V2's named-buyer exemption is the protocol version of the Solana create+buy bundle, so test whether named wallets dump inside the 11-block hold",
+    "urls": [
+     "https://github.com/jcoulaud/pumpfun-sniping-bot",
+     "https://github.com/cutupdev/Solana-Raydium-Sniper-Bot",
+     "https://github.com/0xalberto/solana-raydium-pumpfun-sniper-Rust"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "jcoulaud/pumpfun-sniping-bot (TypeScript, 14 stars) is a creator-side bot: it creates a token, buys 70-80% of the wallet (cap 2 SOL, 5% slippage) in the same flow, watches over websocket and 'sells all tokens when someone else buys, or after timeout' (SELL_TIMEOUT_SECONDS default 20). Solana 'bundler' repos advertise create+buy with up to 20 wallets in one Jito bundle so the creator's wallets are the first holders. On Pons V2 the 97% creation-second tax exempts buyers named in the creation, which gives creators the same first-holder privilege without bundles; a visible E1 crowd of two or more fleets is their natural exit.",
+    "relevance": "Touches the exit and the crowd gate: if named/creator wallets sell within our 11-block hold on launches with a crowd, the fixed hold is selling into their dump rather than ahead of it, and 'creation names buyers' is a pre-tick signal (available before E1, unlike tick-block crowds).",
+    "test": "On the 696 qualifying launches, flag creations with a non-empty named-buyer list; measure fill P&L with vs without, and the block offset from E1 to the first sell by a named or creator wallet; if a large share sell inside 11 blocks, test a 'no named buyers' gate or a shorter hold on flagged launches. Check first that this was not one of the nine rejected gate signals.",
+    "confidence": "low-medium"
+   },
+   {
+    "title": "Nitro's nonce-gap hold is not a queue jump: a nonce-too-high tx is kept up to 1 s and spliced immediately behind its predecessor in the predecessor's block (verified), so it cannot pre-position a shot",
+    "urls": [
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/sequencer.go",
+     "https://raw.githubusercontent.com/OffchainLabs/nitro/master/execution/gethexec/tx_pre_checker.go"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "Sequencer defaults: nonce-cache-size 1024, nonce-failure-cache-size 1024, nonce-failure-cache-expiry 1 s ('maximum amount of time to wait for a predecessor before rejecting a tx with nonce too high'); the pre-checker at strictness 20 does not reject nonce gaps (only strictness 30 does). In precheckNonces, when the predecessor tx is in the current batch the held successor is inserted as the very next item (nextQueueItem), i.e. same block, index = predecessor + 1; the postTxFilter path pushes it to txRetryQueue for the front of the next block only if it was cached by the post-execution path. Either way the predecessor still has to win the arrival race, so the successor gains no position. On expiry the sender gets the original nonce-too-high error.",
+    "relevance": "Rules out a tempting trick before engineering time is spent on it, and explains an operational hazard: a shooter wallet whose previous tx (e.g. its sell) has not been sequenced will have its next shot silently held up to 1 s and then rejected, which looks like a sequencer stall.",
+    "test": "Send nonce N+1 then, 300 ms later, nonce N from one wallet to the sequencer endpoint; confirm both land with N+1 at index N+1 in the same block. In the engine, assert per-wallet 'no pending tx' before assigning a shooter to a burst.",
+    "confidence": "high"
+   },
+   {
+    "title": "What does not transfer from the Solana and EVM-mempool bots, and why",
+    "urls": [
+     "https://github.com/D3AD-E/Solana-sniper-bot",
+     "https://github.com/vvizardev/solana-relayer-adapter-rust",
+     "https://rpcfast.com/blog/how-to-launches-snipe-pump",
+     "https://github.com/sszczep/UniswapSniperBot",
+     "https://github.com/saantiaguilera/liquidity-sniper",
+     "https://github.com/Humancyyborg/uniswap-v2-sniper",
+     "https://docs.arbitrum.io/launch-arbitrum-chain/chain-config/sequencer/timeboost",
+     "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "(1) Shred/pre-execution detection (D3AD-E reports creates at shred 0 of a 79-shred segment; RPC Fast: gRPC 5-20 ms plus 50-200 ms ShredStream lookahead) has no analog: Robinhood's feed is emitted after the sequencer has ordered and executed the block and there is no mempool, and Arbitrum's paid Fast Feed is Arbitrum One only. (2) Tips, Jito bundles, SWQoS provider tips and jitodontfront accounts (vvizardev adapter, 7 relayers; RPC Fast tip floors 10-50x around hot launches) do nothing under FCFS, where gas price only has to clear the base fee (see PGA finding for when this flips). (3) Mempool liquidity-add sniping and same-gas front-running (saantiaguilera/liquidity-sniper Go, 173 stars, last commit 2021-11-23; sszczep C++, 193 stars, unmaintained; Humancyyborg revm honeypot simulation) rely on a public mempool. (4) Pre-signing and gas-variant pregeneration (sszczep: 2.5x faster than signing) and sub-ms Rust paths (D3AD-E 5-7 us detect thread) attack a cost the engine already has at 3.8 ms for 35 shots, off the critical path. (5) Honeypot/rug scanners (GoPlus, honeypot.is, RugCheck; the AllenHark and RPC Fast guides) are irrelevant for a factory-deployed bonding-curve token held for 11 blocks. (6) Timeboost express lane (200 ms advantage) is not enabled on Robinhood. The multi-wallet 'swarm + trigger contract' in liquidity-sniper is the same design as the 35-wallet BuyOnce relay, so nothing new there either.",
+    "relevance": "Prevents re-spending effort on the rejected Rust/C++ rewrite and on Solana-specific plumbing; the only Solana ideas that survive are fan-out submission, lane-race measurement and process isolation (separate findings).",
+    "test": "None needed; each item is excluded by a venue property documented above (no mempool, FCFS, feed after execution, no Timeboost).",
+    "confidence": "high"
+   }
+  ],
+  "dead_ends": [
+   "ACM 'Ready, Aim, Snipe!' (WWW'23) sniper-bot survey: dl.acm.org returned 403, the author-hosted PDF could not be parsed in this environment (no working pdftotext/pypdf), the Medium summary returned 403; only the abstract numbers (27 GitHub bots surveyed, 14,029 ETH and 1,395,042 BSC snipes) were recoverable and they add nothing actionable for an FCFS L2.",
+   "GitHub API (api.github.com) and the GitHub MCP are restricted to the session's own repo, so stars/dates came from repo pages and commit-history pages; for girasolbot, keidev-sol, vvizardev, jcoulaud and Humancyyborg the exact last-commit date could not be read.",
+   "Search for bots that measure 'position in block' / 'transaction index' on FCFS L2s: nothing public; the only such measurement found is BlockRazor's vendor benchmark (finding 3).",
+   "Solana 'sniper' repos that are marketing shells: 0xalberto/solana-raydium-pumpfun-sniper-Rust now hosts an unrelated paper-trading bot (18 stars, ORDER_POST_LATENCY_MS=300 simulated fills); cutupdev and keidev-sol (5 stars, one commit) repeat the same 'up to 20 wallets in a Jito bundle' README without measurable code; not cited for numbers.",
+   "No public discussion or repo exploits Nitro's nonce-failure cache as an ordering trick; reading the code shows why (finding 10).",
+   "nitro v3.12.0 release notes: the tag page is 404 and the public releases list stops at v3.11.4 (2026-09-16); whether the v3.12.0-ebe9e83 build Robinhood runs contains PGA support could not be confirmed from release notes, only inferred from the Arbitrum One PGA launch date.",
+   "Arbitrum research forum thread 'eth_sendRawTransaction to sequencer?' and the degencode Arbitrum posts contain no latency numbers for direct sequencer submission; BowTiedDevil/degenbot has no sniper or feed code.",
+   "Robinhood docs (chain overview, gas-and-fees, run-a-full-node) do not publish block gas limit, sequencer flags or sequencer location; the gas parameters had to be read from the ArbGasInfo precompile and the AZ hint comes only from BlockRazor's Ohio benchmark.",
+   "Akshat-cs/Arbitrum-sniper-bot (Bitquery-polling TypeScript) and Imtiaz9400/eth-base-sniper-bot (Base) are RPC-polling toys with nothing on submission or timing."
+  ]
+ },
+ "research:econ": {
+  "findings": [
+   {
+    "title": "Supply is tracking Pons V2 curve volume with elasticity ~1.5, and chain congestion has collapsed (DefiLlama daily series, pulled raw)",
+    "urls": [
+     "https://api.llama.fi/summary/dexs/pons",
+     "https://api.llama.fi/summary/fees/pons?dataType=dailyFees",
+     "https://api.llama.fi/summary/fees/robinhood-chain?dataType=dailyFees",
+     "https://cryptobriefing.com/robinhood-chain-launchpad-volume-drops/",
+     "https://www.kucoin.com/news/flash/robinhood-chain-ends-free-gas-subsidy-in-late-september-memecoins-face-stress-test"
+    ],
+    "source_type": "measured writeup",
+    "claim": "DefiLlama 'Pons V2' daily volume (USD): Sep 5 161.4M, Sep 6 173.1M (peak), Sep 15 77.9M, Sep 16 35.1M, Sep 21 56.0M, Sep 22 42.0M, Sep 23 38.3M, Sep 24 26.1M, Sep 25 25.4M, Sep 26 22.4M, Sep 27 20.8M, Sep 28 27.6M. Pons daily fees: Sep 5 $11.42M peak, Sep 21 $3.39M, Sep 27 $1.31M, Sep 28 $1.46M (7-day total $12.9M vs 30-day $144M). Robinhood Chain gas fees: Sep 4 $6.04M, Sep 21 $312K, Sep 26 $91K, Sep 27 $68K, i.e. gas per dollar of Pons volume fell from 3.9% (Sep 4) to 0.33% (Sep 27), a 12x drop in congestion. Your fills fell from 20-33/day (Sep 21-23, avg volume $45.4M) to 6-11/day (Sep 26-27, avg $21.6M): volume fell 2.1x, fills 3.1x, so fills scale like volume^1.5. Launchpad-wide volume was $399M on Sep 16, lowest since Aug 29, vs $600M+ days in early September. The Sep 29 gas-subsidy expiry only covered Robinhood Wallet transactions, which are 1-2% of chain volume, so it does not touch bot gas directly.",
+    "relevance": "Bottleneck: supply of fireable launches fell from 20-33 to 6-11 a day. Hypothesis: fireable count is a convex function of Pons curve volume (crowded launches are the tail), so a daily volume series is a usable supply forecast and a regime kill-switch; and the 12x drop in gas-per-volume implies the 400+-shot congestion misses should now be rare, so the 4 s sequencer-hold regime may already be gone.",
+    "test": "Regress daily fireable-launch count (from the 696-launch backtest plus live days) on DefiLlama daily Pons V2 volume in log-log form; check the exponent (~1.5) and use the fitted curve to set expected fills/day. Separately count launches with 400+ rival shots per day for Sep 4-8 vs Sep 21-28 from the feed archive to confirm the congestion regime has thinned; the raw JSON is saved at /tmp/claude-0/-home-user-fomo-memebot/a7a59693-7c2d-5b6c-b7df-e43fdbe7d612/scratchpad/pdfwork/pons.json and ../pons_fees.json, ../rh_fees.json.",
+    "confidence": "high"
+   },
+   {
+    "title": "Capacity can be computed exactly: the Pons V2 phantom quote reserve is 1.68 ETH, so a $200 stake pays ~4.5% buy premium plus ~5% exit discount from its own impact",
+    "urls": [
+     "https://docs.ponsfamily.com/v2",
+     "https://docs.bitquery.io/docs/blockchain/robinhood/pons-api/",
+     "https://casatrick.substack.com/p/pons-sniper-bot-robinhood-chain",
+     "https://fortune.com/article/price-of-ethereum-09-28-2026/"
+    ],
+    "source_type": "official docs",
+    "claim": "Pons V2 docs: constant-product curve amountOut = in*reserveOut/(reserveIn+in); reserved tokens = supply * phantomQuote/(phantomQuote+threshold). Bitquery: 5/7 of supply sells on the curve, 2/7 is reserved; casatrick: graduation threshold 4.2 ETH for native-quoted launches. Solving 2/7 = p/(p+4.2) gives phantomQuote = 1.68 ETH (starting FDV 1.68 ETH, graduation FDV 20.58 ETH, 12.25x). For a buy of x ETH into a fresh curve the average fill premium over spot is x/1.68 and the post-buy spot moves (1+x/1.68)^2-1. At ETH $2,653 (Sep 28): $13 = 0.0049 ETH -> 0.29% premium (0.58% spot move); $50 -> 1.1%; $100 -> 2.2%; $200 = 0.0754 ETH -> 4.5% premium (9.2% spot move). On exit the average sell discount is roughly position/(reserve+position); with 0.2 ETH of crowd inflow and a $200 position grown 25% that is ~5%. Own impact therefore rises from ~0.6 points at $13 to ~9.5 points at $200 against a 16-25 point gross edge; break-even stake is roughly $300-350 if nothing else changes.",
+    "relevance": "Bottleneck: stake is $13 because capacity is untested and the model says linear to $200. Hypothesis: the model is missing the constant-product own-impact term (or the phantom reserve is different from 1.68 ETH); the true capacity curve is concave and flattens well before $200.",
+    "test": "Read the active launch config from the factory (fields: supply, curveFeeBps, phantomQuote, graduationThreshold) to confirm phantomQuote = 1.68e18 wei for the ETH-quoted config; then replay the 130 modelled fills using getReserves()-exact math for stakes $13/$25/$50/$100/$200, inserting your buy and 11-block sell into the recorded flow, and plot net per fill versus stake. If the concavity holds, stake at the argmax of expected dollars per day rather than at $200.",
+    "confidence": "medium"
+   },
+   {
+    "title": "The 3-second tax window is a mutable owner setting; docs describe 5 s (E1 tax 24.75%) and the contract source defaults to 15 s (E1 99%), so the seat economics can change without notice",
+    "urls": [
+     "https://casatrick.substack.com/p/pons-sniper-bot-robinhood-chain",
+     "https://docs.ponsfamily.com/v2",
+     "https://github.com/ponsdotdev/pons-labs/issues/10",
+     "https://pumpdev.io/pons-trade-api",
+     "https://github.com/Phosphenq/bodkin"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "Formula: snipeTaxBps(elapsed) = snipeTaxStartBps >> ((elapsed*14)/snipeTaxSeconds). Live factory: snipeTaxStartBps = 9900, snipeTaxSeconds = 3 -> 99.00% / 6.18% / 0.19% / 0 (confirmed by casatrick, PumpDev's API doc and bodkin/dzo dry runs on Sep 3-4). Both values are owner-mutable via setters; getters snipeTaxStartBps() selector 0x50e25ac2 and snipeTaxSeconds() selector 0x6783774b. The public docs describe a 5 s window (~25% at 1 s, ~3% at 2 s), which under the formula is 24.75% / 3.09% / 0.38% / 0.04% / 0. pons-labs issue #10 (Sep 14) reports the checked-in factory source defaults to 15 seconds (99% / 49.5% / 24.75% / 12.4% / 6.19% / 3.09% ... 0 at 15 s) and that the published curve source lacks the anti-snipe view functions, i.e. the deployed bytecode is not the published source. Fee policy is snapshotted per launch, so a change applies to new launches only.",
+    "relevance": "Bottleneck: fees take 36% of the gross move and the whole edge lives in the 6.18% E1 seat. Hypothesis: a parameter change to 5 s would raise the E1 surcharge to 24.75% and move the only viable seat to E2/E3 (3.09%/0.38%), killing the current rule; the risk is unpriced today.",
+    "test": "Poll both getters every minute and on every TokenLaunched, store the values with each launch, and hard-stop the engine when either changes; also verify per-launch by calling the curve's snipe-tax view (or reading SnipeTaxCharged on rival E1 buys) so the engine uses the snapshot, not the factory default. Backtest the 696 launches under the 5 s schedule to know in advance whether any seat survives.",
+    "confidence": "high"
+   },
+   {
+    "title": "Robinhood Chain runs plain FCFS sequencing (no Timeboost), so second-place fills are pure latency and there is no priority to buy; enabling Timeboost would end that",
+    "urls": [
+     "https://github.com/chainstacklabs/robinhood-chain-sequencer-feed",
+     "https://arxiv.org/abs/2509.22143",
+     "https://docs.arbitrum.io/launch-arbitrum-chain/chain-config/sequencer/timeboost"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "Chainstack's feed decoder: the Robinhood Chain feed message carries no express-lane bitmap, 'no Timeboost: no express lane, no bidding your way to the front of a block'; one message = one 100 ms block; the chain averages ~71 tx/s. Timeboost is an opt-in setting for Orbit chains that imposes a 200 ms delay on non-express-lane transactions per 1-minute round; on Arbitrum One three entities win 99.74% of express-lane auctions (arXiv 2509.22143).",
+    "relevance": "Bottleneck: landing second costs 9 points and happens on ~40% of fills. Hypothesis: with FCFS the only lever is wire path and timing (already sub-ms in the engine), so the 40% is set by rivals' physical proximity to the sequencer, not by anything purchasable; conversely, if Robinhood turns on Timeboost, a non-controller cannot win E1 at all.",
+    "test": "Add a watcher on the feed message header for the express-lane field (the chainstack decoder exposes it) and on the ArbOwner/Timeboost config, and alert on change. Separately, measure the arrival-time distribution of the rivals that beat you (feed timestamp minus your send timestamp) to bound how much of the 40% is reachable by a shorter wire path versus not.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Exemption-bundle launches ($15.5-18.4M extracted, 53-56 launches) put a curve-emptying buy 1-3 blocks after creation, inside your E1 window",
+    "urls": [
+     "https://www.theblock.co/news/defi/2026-09-27-onchain-analyst-links-18-4-million-in-robinhood-chain-memecoin-extractions-to-single-rug-pull-operation-416960",
+     "https://finance.yahoo.com/markets/crypto/articles/pons-v2-exemptions-put-robinhood-103042949.html",
+     "https://cryptonews.net/news/security/33511324/",
+     "https://github.com/Phosphenq/bodkin"
+    ],
+    "source_type": "measured writeup",
+    "claim": "Wazz (Sep 27): 53 Pons V2 launches Jul 10-Sep 21, $18.43M extracted (Bitquery's own count: 56 launches, $15.5M); The Block confirmed 10. Pattern: the creation transaction exempts 15-25 wallets (31 in EQUITY; the cap is 32), and 'one to three blocks later, a single transaction bought tokens for each one of them at once. In each launch, that single transaction emptied the bonding curve'; creator plus exempt wallets held 82-86% of supply; 25 of 53 launches used one bundling contract created Aug 28; DEED was funded 40 minutes before launch from DRAFT's 179.88 ETH sweep. Open-source Pons snipers (bodkin) refuse 'declared bundles (exempt wallets)' by default via a --max-exempt-wallets flag.",
+    "relevance": "Bottleneck: launches that cannot be taken, second-place fills, and the minOut guard. Hypothesis: a launch whose creation names 15+ exempt wallets has a deterministic 4.2 ETH curve-emptying buy landing at block 1-3, which is before E1 for creations early in their second (your burst then reverts or buys the graduated pool at 12x) and after E1 for creations late in their second (you front-run the bundle and it graduates around you). Exemption-list length is readable in the creation itself, before the tick.",
+    "test": "Tag the 696 qualifying launches with the length of the creation's exempt address[] and with whether a buy >= 4.2 ETH landed within 3 blocks; split the 130 modelled fills and the 14 live fills by that tag and compare fill rate, revert rate, first-vs-second placement and net return. If this overlaps one of the nine rejected gate signals, at least report the split so the overlap is explicit.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Every public Pons sniper tool targets the 0.19% window (E2), 1.2-1.7 s after detection, with $27-53 stakes; E1 rivals are closed fleets and your 11-block sell lands at the E2 boundary",
+    "urls": [
+     "https://github.com/maaks9n/dzo",
+     "https://github.com/Phosphenq/bodkin",
+     "https://github.com/Trustdev-eth/pons-sniper-bot-v1-v2",
+     "https://pumpdev.io/pons-trade-api",
+     "https://casatrick.substack.com/p/pons-sniper-bot-robinhood-chain"
+    ],
+    "source_type": "verified contract/code",
+    "claim": "dzo ('wait for zero'): polls tax every 150 ms and enters when it falls below an adaptive ceiling of 0.18-0.31%, observed 1.1-1.7 s after websocket detection; example buys 0.01-0.02 ETH, session budget 0.05 ETH, exits +80% / -35% / 25% trailing / 45 min max. bodkin: all dry-run and two live entries at exactly 0.19% tax, 1.2-1.6 s after detection; single wallet; launch-card reads take 279-284 ms. Trustdev bot: V2_MAX_EFFECTIVE_TAX_BPS=100 (1%), BUY_AMOUNT_ETH=0.01, MAX_DAILY_SPEND_ETH=0.10. PumpDev API: maxSnipeTaxBps ceiling, HTTP 425 if the tax is above tolerance. casatrick tells readers the optimal entry is 'the second window ... where the tax has decayed to near-zero'. Both terminals logged 24,462 launches and 559 graduations (2.3%) on Sep 3 and 56-152 launches per 5 minutes.",
+    "relevance": "Bottleneck: the fixed 11-block hold and exit liquidity. Hypothesis (explanatory, not a new exit rule): your sell at E1+1.1 s falls 1.2-2.1 s after creation, i.e. just before or at the start of the 0.19% second, so the buyers you sell into are the tail of the 6.18% payers plus the first 'wait for zero' bots; if that public-tool population thins with volume, realized exit slippage rises even when the gross move is unchanged (live +7.6% vs modelled +16.1%).",
+    "test": "From the feed archive, count per launch the buys whose SnipeTaxCharged is ~19 bps (E2 entrants) and ~618 bps (E1 rivals) for Sep 4-8 vs Sep 21-28; regress your realized sell slippage on the E2 count in the sell block +/-2; track the daily E2-entrant count as an exit-liquidity gauge alongside the two-fleet gate.",
+    "confidence": "medium"
+   },
+   {
+    "title": "When a launchpad's volume halves, its professional sniper population does not halve, it fires less: pump.fun evidence and a 13-day census of 1,012 persistent sniper cohorts",
+    "urls": [
+     "https://www.tradingview.com/news/cointelegraph:d2f2c96e8094b:0-pump-fun-volume-drops-by-63-in-february/",
+     "https://coinmarketcap.com/academy/article/pumpfun-sees-80percent-decline-in-token-launches-as-meme-coin-market-loses-momentum",
+     "https://arxiv.org/pdf/2607.02795",
+     "https://github.com/jmenzler/pumpfun-retrospective"
+    ],
+    "source_type": "paper",
+    "claim": "pump.fun Jan->Feb 2025: volume -63%, graduations -80% (about 1,200/day on Jan 23-24 to about 200 by Feb 26). Kamat (arXiv 2607.02795, Jun 11-25 2026, 166,098 launches = 12,400/day, 1,578,333 buyer events): 1,012 persistent cohorts from 2,965 addresses; median cohort 2 wallets (56.4% pairs); only 22 cohorts hit >= 20 launches in 13.4 days; the top cohort (9 wallets) hit 42 launches in 11 days (3.8/day) at mean first-buyer rank 2.29 committing 68.12 SOL (1.6 SOL per launch); 5,419 launches (3.3%) had a persistent cohort among the first 10 buyers; cohort presence lifts 30-minute buyer count by +16.1% but SOL inflow only +6.3% (not significant). jmenzler's bot-anticipation strategy: per-attempt losses of 0.01-0.3 SOL replaced a high-win-rate distribution within ~3 months as the sniper cohort's filters evolved through ~8 stages and the author fell off the speed frontier.",
+    "relevance": "Bottleneck: the two-fleet gate fires on fewer launches as volume falls. Hypothesis: professional fleets are few (tens of cohorts) and selective (a few launches per day each), so their co-occurrence on the same launch drops faster than volume, which is exactly the volume^1.5 relation in finding 1; the fleets are still present and will re-crowd launches when volume returns, so this is a dormancy problem, not an exit problem.",
+    "test": "Fingerprint rival fleets on the feed (shared funding, shot spacing, wallet counts) and count distinct fleets per day and shots per fleet per day for Sep 4-8 vs Sep 21-28; if fleet count is flat and shots-per-fleet fell, supply will recover with volume and the engine should idle rather than loosen the gate.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Public operators size $50-300 per shot and scale P&L by trade count, not stake: pump.fun retrospective (7 -> ~1,000 SOL), Clanker v4.0 auction data, RPC Fast slot economics",
+    "urls": [
+     "https://github.com/jmenzler/pumpfun-retrospective",
+     "https://paragraph.com/@clankerworld/clanker-v4_1-sniper-tech",
+     "https://rpcfast.com/blog/how-to-launches-snipe-pump",
+     "https://rpcfast.com/blog/top-solana-sniper-bot"
+    ],
+    "source_type": "measured writeup",
+    "claim": "jmenzler (Feb-Apr 2024): starting capital 7 SOL to ~1,000 SOL (~143x) over ~3 months; per-trade notional 0.6-2 SOL; ~50 trades/day, ~5,000 trades, ~2,500 round trips; peak working capital on the hot wallet ~100 SOL; effectively no losing days until the terminal decay window. Clanker v4.0 (30 days, 52,612 coins): 245 sniper auctions (0.47% of coins), 14 unique auction participants, average winning bid 0.025 ETH (~$100), highest ~0.07 ETH (~$300); block 2-3 swaps averaged 7% of supply, block 10 swaps 1%. RPC Fast (vendor): slot 0 vs slot 2 is 20-60% of upside on pump.fun; co-located sub-35 ms lands slot 0 in ~89% of events vs <20% at 220 ms; a client at median entry slot 3.2 with 31% bundle acceptance had profit per attempt near zero after fees; roughly 90% of DIY sniper bots fail.",
+    "relevance": "Bottleneck: stake untested above $13 and the 9-point first-vs-second gap. Hypothesis: the best-documented operator ran ~50 trades/day at ~$100-300 each, consistent with the concave capacity in finding 2; growth came from breadth (more launches, more venues) rather than depth, and the second-place cost you measured (9 points) sits inside the 20-60%-of-upside range others report.",
+    "test": "Compare dollars/day at stake S from the finding-2 replay against the alternative of widening breadth (more hours online, the E1-plus-crowd launches you currently skip at small size, LONG/pools.trade per finding 10); also compute your per-shot gas at today's gas (chain fees fell 99%) to see whether the 35-shot burst is now cheap enough to fire on marginal launches.",
+    "confidence": "medium"
+   },
+   {
+    "title": "No other live venue reproduces the 3-second exponential tax; on Robinhood Chain the only other launchpad with real volume is LONG (Doppler Multicurve, ~25% of launchpad volume, no time tax)",
+    "urls": [
+     "https://web3.bitget.com/en/academy/top-robinhood-chain-launchpads",
+     "https://blog.uniswap.org/pools-trade-a-new-way-to-launch-on-robinhood-chain",
+     "https://docs.bitquery.io/docs/blockchain/robinhood/pools-trade-api/",
+     "https://www.globenewswire.com/news-release/2026/08/31/3353221/0/en/pair-launches-the-first-multipool-rwa-launchpad-on-robinhood-chain-pairing-new-tokens-with-baskets-of-tokenized-stocks-partners-with-aws-to-scale-its-infrastructure.html",
+     "https://docs.bitquery.io/docs/blockchain/robinhood/robinhood-meme-coin-launches/",
+     "https://airdropalert.com/blogs/what-is-long-xyz/",
+     "https://api.llama.fi/summary/fees/clanker?dataType=dailyFees",
+     "https://api.llama.fi/summary/fees/zora-protocol?dataType=dailyFees",
+     "https://docs.zora.co/coins/contracts/architecture",
+     "https://docs.meteora.ag/anti-sniper-suite/fee-scheduler/what-is-fee-scheduler"
+    ],
+    "source_type": "official docs",
+    "claim": "Same chain: LONG (long.xyz) launches through Doppler Airlock 0xeb7c034704ef8dcd2d32324c1545f62fb4ad0862 with Doppler Multicurve v4 pools paired to stock tokens (NVDA, AAPL, MSFT, GOOGL, TSLA, MU, SPCX); ~25% of the $600M launchpad volume on Sep 1 and ~$100M in its first month; anti-snipe is a 24-hour ticker reservation, no time tax. pools.trade: v4 pool from block one, creator buys in the launch block, 0.25% LP fee, no launchpad fee, no tax, 'thousands per day at peak' but ~$38K/day fees in late August vs Pons $4.9M. PAIR: caps of 5.5% per buy and 5.0% per wallet for the launch block plus 5 blocks, 1% swap fee, $26M cumulative volume over 1,200 tokens. Pons V1: only the creator's buy executes in the launch block, 5% wallet cap for 2 blocks. Clanker on Robinhood Chain: $457/day fees (Base $30.7K/day) with 80%->5% parabolic fee decay over 30 s. Other chains: Zora TrendCoins on Base 99% -> 0.01% linear over 10 s, but DefiLlama Zora fees are $138-1,126/day in September (dead); Meteora DBC on Solana has a fee scheduler (e.g. 50% -> 1% over 120 s in 40 steps) on a different stack. Bitquery also lists Virtuals, Flap.sh, Klik, Ape.store, Bags.fm as active Robinhood Chain launch factories, all without time-based taxes.",
+    "relevance": "Bottleneck: supply. Hypothesis: the engine's edge (fleet detection on the feed plus timed burst) is portable only to a venue with a crowd that fires at a predictable block; LONG and pools.trade launches have no tax, so the seat is block N+1 after creation with 0.25-1% fees instead of 8.9%, but only if rival fleets crowd them. Nothing off-chain is worth the port at current volumes.",
+    "test": "Point the existing feed listener at the Doppler Airlock and the pools.trade entry contract (0x0000ffffbe8efe702c8703ae3477ff5de3d319c0) for one week; for each launch count buyers in blocks +1..+10, repeated fleet signatures, and the price move from block +1 to +12; if a two-fleet crowd appears on >= 10 launches/day with a positive post-fee move at 0.25-1% fees, run the same burst there in shadow mode.",
+    "confidence": "medium"
+   },
+   {
+    "title": "Base rates for Pons V2 launches (Bitquery, Aug 3-Sep 3): 79.6% trade at all, 38.6% reach 5 buyers, 1.55% graduate, half of graduations within 4 minutes, and half of active wallets on the peak day were first-timers",
+    "urls": [
+     "https://bitquery.io/investigations/pons-launchpad",
+     "https://www.datawallet.com/crypto/robinhood-chain-statistics",
+     "https://docs.bitquery.io/docs/blockchain/robinhood/pons-api/"
+    ],
+    "source_type": "measured writeup",
+    "claim": "207,893 coins in 32 days; 165,446 (79.6%) traded at least once; 80,317 (38.6%) found 5+ buyers; 3,228 (1.55%) graduated, half within 4 minutes; $736M traded on curves vs $2.14B after graduation; busiest day Sep 3 $517M; on Sep 3, 35,008 of 69,598 wallets that traded a Pons coin had never traded one before (50.3%). Datawallet: 19,541 launches on Sep 2, 53,555 over Sep 1-3, gas ~$0.40/tx at peak congestion. Bitquery exposes SnipeTaxCharged per buy and per-launch buyer counts via its API.",
+    "relevance": "Bottleneck: supply concentration by hour and the fall in fireable launches. Hypothesis: the crowd's fuel is new-wallet inflow (half the active wallets were new on the peak day); daily new-wallet count is a leading indicator of fireable launches that is available from Bitquery without touching the feed.",
+    "test": "Pull daily distinct first-time Pons traders from Bitquery for Sep 1-28 and correlate with daily fireable launches and with the 16:00-24:00 UTC share; if the correlation beats DefiLlama volume alone, use it as the supply forecast.",
+    "confidence": "high"
+   },
+   {
+    "title": "The Robinhood Chain gas subsidy that ended Sep 29 covered only Robinhood Wallet transactions (1-2% of chain volume); flow is routed by terminals (GMGN 4.86M swaps / $947.5M over Sep 1-3) charging 0.5-1%",
+    "urls": [
+     "https://www.kucoin.com/news/flash/robinhood-chain-ends-free-gas-subsidy-in-late-september-memecoins-face-stress-test",
+     "https://www.kucoin.com/news/flash/robinhood-lowers-gas-fee-subsidy-threshold-to-0-5-on-robinhood-chain",
+     "https://medium.com/coinmonks/best-robinhood-chain-meme-coin-trading-platforms-in-2026-gmgn-vs-axiom-vs-fomo-vs-terminal-43e130d87181",
+     "https://github.com/Ricosworks1/blockchain-payment-flow-analysis/releases/tag/market-update-robinhood-chain-47b-subsidy-test-sept-2026"
+    ],
+    "source_type": "measured writeup",
+    "claim": "90-day rebate from Jul 1 for transactions sent from the Robinhood Wallet, threshold cut from $5.00 to $0.50 in mid-August, expired Sep 29; the Robinhood app accounts for 'one to two percent' of chain trading volume; 'most of the fee-generating activity ... runs through the memecoin launchpad Pons and through trading bots'. GMGN handled 4.86M swaps and $947.5M routed volume on Sep 1-3, more than Axiom, OKX, Maestro and the gasless account-abstraction stack combined; terminals charge 0.5-1% per trade. Datawallet's own threshold: DEX volume under $200M/day after the subsidy would indicate subsidy dependence.",
+    "relevance": "Bottleneck: supply and the crowd's composition. Hypothesis: the subsidy end is not a mechanical hit to the crowd (the crowd pays its own gas through GMGN/Axiom) but the terminals' 0.5-1% fee plus 6.18% E1 tax means the E1 crowd is paying ~7-9% to be in your seat, so their presence is a strong commitment signal; watch terminal volume, not Robinhood app volume, for supply.",
+    "test": "Track Pons V2 daily volume (finding 1) and terminal-routed volume for Sep 29-Oct 6 against the prior week; if volume does not break lower after the subsidy end, the late-September decline is memecoin-cycle driven and mean-reverts with attention rather than with gas policy.",
+    "confidence": "medium"
+   }
+  ],
+  "dead_ends": [
+   "Pons daily launch counts after Sep 3 are not published anywhere reachable: ponsfamily.com/analytics shows 0 launches with 'Dune history is unavailable', the Dune dashboards (adam_tehc/pons, caiiiyua/pumpfun-snipers) are JS-only, and Bitquery's investigation stops at Sep 3; DefiLlama volume/fees is the only daily series available.",
+   "Cryptobriefing's 'lowest volume day since late August' article body is unreachable (redirects to an archive page); only the $399M Sep 16 figure surfaced via search snippets.",
+   "No Pons team response or rule change after the Sep 27 exemption expose was found as of Sep 29; searches for a Pons V3 / exemption cap returned nothing.",
+   "casatrick's 'most Robinhood Chain sniper bots are losing 99% on every buy' headline has no data behind it (no wallet counts, no SnipeTaxCharged totals).",
+   "Zora Coins sniper-tax economics: no data on how much snipers pay; DefiLlama shows Zora protocol fees of $138-1,126/day in September, so it is not a venue.",
+   "Coinmonks articles (GMGN/Axiom/FOMO comparison, Pons API guide) return 403; numbers came only from search snippets.",
+   "The ASE'26 'Demystifying Solana Bots' paper (200 addresses, 44M txs) has no per-snipe hit rate or P&L; only cluster-level success rates (72.73% of venue-specialized MEV addresses under 20% tx success).",
+   "pools.trade has no DefiLlama adapter and no public daily volume series; only 'thousands of launches per day at peak' and ~$38K/day fees in late August.",
+   "Doppler Multicurve parameters as deployed for LONG/Bankr on Robinhood Chain are not published; the only worked numbers are the Base/Zora model in holosko's write-up.",
+   "Pons V2 phantomQuote is never stated directly in any source; the 1.68 ETH figure is derived from the 2/7 reserved split, the 4.2 ETH threshold and the docs' formula.",
+   "Nothing public quantifies Arbitrum/Orbit sequencer queueing under burst load at 100 ms blocks; Timeboost literature is about Arbitrum One only.",
+   "MegaETH, Monad (nad.fun), HyperEVM launchpads: no time-based sniper tax with published parameters or volume data was found.",
+   "Solana pump.fun hour-of-day data is only vendor blog guidance (14:00-22:00 UTC peak), nothing measured."
+  ]
+ }
+}
