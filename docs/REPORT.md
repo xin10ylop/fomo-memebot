@@ -4394,3 +4394,13 @@ holes, 0 engine-only, 3 tier-refused outside the population; no nonce skips, no 
 no $25 fill yet. One detail: the first burst after the restart signed in 22.4 ms (the direct signer proves each key on its
 first use), the earlier ones in 3.8; the shots still left within 0.13 ms of schedule because signing happens at the build,
 but the send step now proves every key at load so the first burst after a restart signs in 4 ms like the rest.
+
+*Capacity per trade, measured (Sep 29, answering the owner).* The hold grids price every fill through the curve's own math
+at three stakes. On the week's 72 usual-view fills with grid data: at first place +25.4% mean at $13 and +25.7% at $100; at
+second place +15.7% and +15.9%; the own-impact cost of going from $13 to $100 is 0.2 points at the median (the curves are deep
+enough at these bundle sizes, which is also what the K round's "linear to $200" meant). Dollars a fill at second place, model:
+$1.71 at $13, $3.60 at $25, $7.57 at $50, $15.61 at $100, $32 at $200. The economics researcher's 1.68 ETH phantom-reserve
+estimate (2% each way at $50) is the more pessimistic bound and is not what the curve math on the real tapes shows; the live
+split at each step decides. The binding limits are not the curve: capital on the box ($54: the relay must hold the stake and
+the wallet its reserve, so about $40 today without a deposit; $100 needs about $200 on the box), the untested-live risk
+above $13 (the twenty-fill windows), and the swing of a losing window (a −58% fill is −$58 at $100).
