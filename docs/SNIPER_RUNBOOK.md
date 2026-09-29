@@ -1133,3 +1133,41 @@ no view ever fires on; check the skip's `boundary` field (confidence above 0.5 m
 second had simply opened). Watch items carried into the brief: the creator-supply gate (opposite signs in the two halves,
 priced Sep 29), the engine-only class (bundles the engine counts over nine blocks that the tables' creation-second rule does
 not: two so far, one refused at the gate, one flat fill), the gate view (k−1 on most bursts on the two-core box).
+
+## 5ab. The box's availability zone and the feed's lag (Sep 29, report 24.44)
+
+Measured Sep 29: the box sits in **use2-az2** (AWS zone id; the name us-east-2b maps to it in this account). An independent
+measurement of the public feed from the three Ohio zones (BlockRazor, 13,251 blocks, Sep 10) puts use2-az2's delivery lag at
+97 ms median and 953 ms p99 against 27-28 ms median and 86-112 ms p99 in use2-az1 and use2-az3, which matches our own probe
+(`FEED_LAG_MS` 85 from `feed_lag_probe.py`). Also measured: a second feed socket from the same box delivers 3.8 ms earlier
+than the first on 98% of messages (`feed_dual_probe.py`, 1,186 messages), so the earlier-of-two is a 6.9 engine item.
+
+**The test, before moving anything** (a t3.micro in use2-az1 for ten minutes, cents). CloudShell, never `exit`:
+
+    R=us-east-2; I=i-001ea415c64ab3f58
+    read SG KEY AMI < <(aws ec2 describe-instances --region $R --instance-ids $I --query 'Reservations[0].Instances[0].[SecurityGroups[0].GroupId,KeyName,ImageId]' --output text)
+    SUB=$(aws ec2 describe-subnets --region $R --filters Name=availability-zone-id,Values=use2-az1 --query 'Subnets[0].SubnetId' --output text)
+    echo "sg $SG key $KEY ami $AMI subnet $SUB"
+    NEW=$(aws ec2 run-instances --region $R --image-id $AMI --instance-type t3.micro --key-name $KEY --security-group-ids $SG --subnet-id $SUB --associate-public-ip-address --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=feed-probe-az1}]' --query 'Instances[0].InstanceId' --output text)
+    aws ec2 wait instance-running --region $R --instance-ids $NEW; sleep 20
+    aws ec2 describe-instances --region $R --instance-ids $NEW --query 'Reservations[0].Instances[0].[InstanceId,Placement.AvailabilityZone,PublicIpAddress]' --output text
+
+Then from the laptop, with the printed IP (the probes are fetched from the public branch; the first run installs the
+websockets package):
+
+    ssh -o StrictHostKeyChecking=no -i ~/.ssh/sniper-ohio.pem ubuntu@IP 'sudo apt-get update -qq >/dev/null 2>&1; sudo apt-get install -y -qq python3-websockets >/dev/null 2>&1; B=https://raw.githubusercontent.com/xin10ylop/fomo-memebot/claude/memecoin-strategy-research-vcdy6c/deploy; curl -sO $B/feed_lag_probe.py; curl -sO $B/feed_dual_probe.py; python3 feed_lag_probe.py 120; python3 feed_dual_probe.py 60'
+
+and at the same time on the engine box, for a same-minute comparison:
+
+    sudo /opt/sniper-venv/bin/python3 deploy/feed_lag_probe.py 120
+
+Decision: the p5-p10 lag is the feed's delivery lag. If use2-az1 reads 30 ms or more below use2-az2, move the engine: a
+c7a.large in use2-az1 (same key and security group, `deploy/ohio_setup.sh` as in 5t, `/etc/sniper/engine.env` copied by hand
+from the old box with `sudo cat`, `FEED_LAG_MS` set to the new probe's p5-p10), start it with no fill open, then stop the old
+instance. If the difference is under 30 ms, stay. Either way terminate the probe instance:
+`aws ec2 terminate-instances --region us-east-2 --instance-ids $NEW`.
+
+What it is for: the gate reads the blocks before the tick from the feed, and the burst is aimed from the feed's flips. 60 ms
+less lag means the last pre-tick block is seen 60 ms earlier (a fuller gate view, reliably the usual view) and the boundary
+estimate has a fifth of the jitter, which is what sets the 46 ms lead; a shorter lead lands first more often (first beats
+second by 9 points on the week).
