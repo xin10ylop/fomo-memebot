@@ -4433,3 +4433,20 @@ since this one was not a last-block creation). Both ways 0 holes, 0 engine-only,
 The two bursts after the send-step redeploy signed in 3.9 ms (the first burst after a restart used to take 22). One
 `feed2_error` since the 13:55 restart (the second socket reconnecting; to be read). No alarms. P&L +$12.03 (the ETH price;
 capital unchanged at 0.019906 ETH). No $25 fill yet.
+
+*Reading, Sep 29 16:35 - 18:33 UTC: the crowds came in the tick's block, reconciled.* Eight qualifying launches, no fire at
+the floor or usual view (five had a crowd only in the tick's own block; the ceiling view would have fired five times for
+−3.3% mean). The engine: four unopened bursts (16:51, 17:06, 18:21, 18:27: one fleet at most by the tick's shot) as
+predicted; the creator-repeat skip at 17:50 and the last-block creation at 17:41 as predicted; and two skips with a new
+reason, "bundle not visible on the feed within 900 ms and 9 blocks": 17:04 `0x51842ef7` (the chain shows a 0.357 ETH exempt
+bundle from six named wallets; on the feed the named wallets deployed fresh contracts in block 2 and bought through them,
+so the buyer of record is unnamed and the calldata names nobody) and 18:31 `0xf0368793` (0.356 ETH from three named; one
+bought through helper `0x14b9a544`, selector `6f49227e`, unknown to the engine, so it counted two). Both were refused at the
+crowd gate anyway (one fleet, none), so nothing was lost tonight, but the engine's bundle count and the tables' count now
+disagree on two mechanisms, and the replay does not see it because its bundle gate reads the tables' bundle. Tonight's
+review question: how many population launches since Sep 21 carry a deploy-and-buy or unknown-helper bundle, what they
+pay, and whether the engine should learn the two patterns (the refuters' fold on real values, `V_0_mechanism_q.py`, is the
+tool; the crowd files alone cannot answer it). Both ways 0 holes, 0 engine-only, 22 tier-refused outside the population;
+all six bursts signed in 3.9 ms; one `feed2_error` with an empty message at 13:59 (a reconnect after the restart); the
+two boundary skips carried confident estimates (0.85 and 0.87) with the seat's second already open, as before. P&L +$12.11,
+no $25 fill yet.
