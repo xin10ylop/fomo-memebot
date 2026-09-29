@@ -4282,3 +4282,24 @@ costs or withholds per week at the $13 stake.
 The order of the levers is therefore: the stake (Part C), then ordering and the sequencer path (Part B, the research),
 then nothing until the supply comes back. The tail matters: the top five fills of the week are 25% of the gains, and the
 worst two (−58%, −53%) are last-place landings the guard now refuses.
+
+*Part C: the stake, a decision rule the data can meet.* The sequential test stays as the record of whether the edge is
+the tables' +19% or nothing, but it cannot be the stake's gate. Two separate questions:
+
+- **Does the stake scale (a mechanism question)?** The curve math says linearly to $200; the live check is the per-fill
+  split `live_vs_table` already prints (seat, hold, execution/fees/model): if twenty fills at $25 land and exit within
+  the same few tenths of a point of their model as the $13 fills do, the curve took the size. That test costs nothing
+  extra if the edge is there and is the natural next step.
+- **Is the edge real (a statistics question)?** The week's fills have a standard deviation of 35 points, so the live
+  mean's one-sided 90% lower bound clears +2% (fees and gas covered) only when the mean is above +13.8% at 14 fills,
+  +11.9% at 20, +10.1% at 30, +8.2% at 50. Today: 14 fills, mean +7.6%, lower bound about −4%. At the current supply of
+  three to five fills a day that is two to three weeks of data for a decision at 50 fills.
+
+What a step to $25 would do over its first twenty fills, simulated on the week's fill distribution recentred on each
+assumed true mean (gas included): if the true mean is +7.6% (today's live), expected +$31, one time in five it ends below
+zero, the tenth percentile is −$17; at +16% (the model), +$74, and below zero one time in fifty; at zero, −$7 expected with
+the tenth percentile at −$54. At $13 the same twenty fills are +$13, −$12 at the tenth percentile. The stake decision is
+therefore a risk decision, not a data one: the data says the edge is probably positive and cannot yet say it is not
+zero. The recommendation is to keep $13 until the 30-fill bound clears (mean above +10.1%), then step to $25 for a
+20-fill mechanism check, then $50; a losing 20-fill window at any step goes back one step. If the owner accepts a one
+in five chance of a −$17 to −$30 window now, the step to $25 can start today with the same rollback.
