@@ -1240,3 +1240,6 @@ If `pinned` is not 3.141.111.43, with no fill open:
     set_kv SEQ_PIN_IP 3.141.111.43; cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 8 && sudo grep -h '"ev": "sender_addresses"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"pinned": "[^"]*"\|"pin_by": "[^"]*"'
 
 Re-run the race monthly (addresses and routing change); a pin that stops answering falls back to the ping automatically.
+
+**Checked Sep 29 15:40 UTC:** the engine already pins 3.141.111.43 (pings 0.87 / 0.83 / 2.08 ms; the ping order matched the
+race order this time), so `SEQ_PIN_IP` stays unset; the setting is there for the day the two disagree.
