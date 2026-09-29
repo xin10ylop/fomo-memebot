@@ -1210,3 +1210,18 @@ refused the second socket; the engine runs on one as before.
 **Deployed Sep 29 ~14:40 UTC:** `relay_ops.py deposit` refuses while the engine runs (same wallet, same nonce), so the order is
 stop, deposit, start. After it: version 6.9, venue 3 / 9900, stake 25 / 25, both feed sockets connected, relay 0.010270 ETH
 ($27.90), capital 0.019923 ETH, P&L +$12.26 (a fill landed during the day, +$0.80). The $25 window starts here: twenty fills.
+
+## 5ad. The ingress race (Sep 29, report 24.44 part B)
+
+`deploy/ingress_race.py`: the sequencer's name resolves to one address per zone; each round signs one 0 ETH self-transfer from
+the wallet and posts the identical bytes to every address at the same instant from warm sockets; only one copy is sequenced
+(its reply carries the hash, the others a nonce error at no cost). Thirty rounds cost a few cents and one to two minutes of
+the engine stopped (same wallet, same nonce), so run it in the quiet hours (00-12 UTC) or accept the minute:
+
+    sudo systemctl stop sniper-engine && sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/ingress_race.py 30 2>&1 | tail -6; sudo systemctl start sniper-engine && sleep 6 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*'
+
+Reading it: the engine pins the address with the lowest ping (`sender_addresses` in the log). If the race-winner is the same
+address at 65% or more, nothing changes. If another address wins the race although it pings slower, the pin should follow the
+race, not the ping (an engine change: `SEQ_PIN_IP`). If it is near 50/50 with a reply-time gap, a two-path fan-out of every shot
+(the loser rejected free) would cut arrival variance, at the cost of 70 warm sockets; that is a separate decision after the
+number exists. Nothing is deployed from this probe by itself.
