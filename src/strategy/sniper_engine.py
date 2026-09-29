@@ -45,6 +45,7 @@ for _k, _v in list(os.environ.items()):                 # systemd's EnvironmentF
 RPC_URL = os.environ.get("RPC_URL", "https://rpc.mainnet.chain.robinhood.com")
 LOGS_RPC_URL = os.environ.get("LOGS_RPC_URL", "https://rpc.mainnet.chain.robinhood.com")   # log queries span hundreds of blocks; Alchemy's free tier allows 10, the public node allows any
 SEQ_URL = os.environ.get("SEQ_URL", "https://sequencer.mainnet.chain.robinhood.com")
+SEQ_PIN_IP = os.environ.get("SEQ_PIN_IP", "")                             # 6.9: pin this sequencer address by the arrival race (deploy/ingress_race.py) instead of the ping; empty = the fastest ping
 FEED_URL = os.environ.get("FEED_URL", "wss://feed.mainnet.chain.robinhood.com")
 FEED_SOCKETS = int(os.environ.get("FEED_SOCKETS", "2"))                  # 6.9: sockets to the feed; the second delivers 4-6 ms earlier on 98% of messages (measured Sep 29), the copy is dropped by sequence number
 FEED_COMPRESSION = os.environ.get("FEED_COMPRESSION", "deflate") or None   # 5.48: since Sep 17 ~19:30 UTC the feed refuses a connection that does not offer permessage-deflate ("Compression is required")
@@ -376,11 +377,14 @@ class Sender:
                 res[ip] = None
         e["ips"] = res; good = {ip: v for ip, v in res.items() if v is not None}
         if good:
-            best = min(good, key=good.get)
+            by = "rtt"; best = min(good, key=good.get)
+            if SEQ_PIN_IP and e is self.eps[0] and good.get(SEQ_PIN_IP) is not None:   # 6.9: the race winner, when it answers; the fastest ping otherwise
+                best = SEQ_PIN_IP; by = "race"
             if best != e["ip"]:
                 with e["lock"]:
                     e["ip"] = best; e["c"] = None
-        log({"ev": "sender_addresses", "host": e["host"], "rtt_ms_by_address": res, "pinned": e["ip"]})
+            e["pin_by"] = by
+        log({"ev": "sender_addresses", "host": e["host"], "rtt_ms_by_address": res, "pinned": e["ip"], "pin_by": e.get("pin_by")})
 
     def _ping(self, e):
         with e["lock"]:

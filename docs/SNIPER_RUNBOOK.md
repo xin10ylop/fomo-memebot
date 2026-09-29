@@ -1225,3 +1225,18 @@ address at 65% or more, nothing changes. If another address wins the race althou
 race, not the ping (an engine change: `SEQ_PIN_IP`). If it is near 50/50 with a reply-time gap, a two-path fan-out of every shot
 (the loser rejected free) would cut arrival variance, at the cost of 70 warm sockets; that is a separate decision after the
 number exists. Nothing is deployed from this probe by itself.
+
+**Result (Sep 29 ~15:30 UTC, 30 rounds, engine stopped for it):** the name resolves to 3.136.74.196, 3.141.111.43 and
+3.142.9.34; reply medians 60.3 / 60.3 / 60.0 ms (inclusion latency, identical), local send spread 0.16 ms. Race wins:
+**3.141.111.43 25 of 30 (83%)**, 3.136.74.196 5 (17%), 3.142.9.34 0. Ping cannot tell the three apart; the race can. Engine
+6.9 now takes `SEQ_PIN_IP` (the race winner is pinned when it answers, the fastest ping otherwise; the `sender_addresses` log
+line shows `pin_by`). Check what the engine pins today:
+
+    sudo grep -h '"ev": "sender_addresses"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"rtt_ms_by_address": {[^}]*}\|"pinned": "[^"]*"\|"pin_by": "[^"]*"'
+
+If `pinned` is not 3.141.111.43, with no fill open:
+
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }
+    set_kv SEQ_PIN_IP 3.141.111.43; cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 8 && sudo grep -h '"ev": "sender_addresses"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"pinned": "[^"]*"\|"pin_by": "[^"]*"'
+
+Re-run the race monthly (addresses and routing change); a pin that stops answering falls back to the ping automatically.

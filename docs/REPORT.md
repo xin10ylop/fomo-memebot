@@ -4367,3 +4367,10 @@ venue-parameter guard, the gas cap on the base fee with the shooters' float foll
 passing. The owner accepted the $25 step with the twenty-fill window and the rollback to $13 on a losing window; the
 relay is topped up to hold the stake at the deploy. The stake step is the one change whose effect is expected to show in
 the P&L; the engine items are hygiene and insurance.
+
+*The ingress race (Sep 29, runbook 5ad).* The sequencer's name resolves to three addresses with identical reply times
+(60 ms, the inclusion latency). Thirty same-nonce rounds from warm sockets at the same instant: one address won 25, one 5,
+one none. The engine had pinned by ping, which cannot see this; 6.9 pins the race winner (`SEQ_PIN_IP`) with the ping as
+the fallback. What it is worth is not measurable from the race alone: an 83% arrival advantage over the other paths means a
+consistent few milliseconds, the same order as the burst's 2 ms spacing, so it goes straight into landing order and is
+read on the next fills' landing index.
