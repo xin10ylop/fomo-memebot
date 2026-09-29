@@ -1128,3 +1128,8 @@ registration block), so predictions quote it as the centre with the floor and ce
 "nonce/gas not fresh" skip is the release path (a gate refusal 8 s earlier set the nonce to None; the live poll is
 every 10 s), worth $0 on the week; count it each morning with `sudo grep -c 'not fresh' /var/log/sniper/engine.jsonl`.
 The step's second rollback tail: three or more of the next ten bursts with no shot before the tick means a longer lead.
+"No confident boundary estimate" skips are, so far, always launches created in the last block of their second (k = 1), which
+no view ever fires on; check the skip's `boundary` field (confidence above 0.5 means the estimate was fine and the seat's
+second had simply opened). Watch items carried into the brief: the creator-supply gate (opposite signs in the two halves,
+priced Sep 29), the engine-only class (bundles the engine counts over nine blocks that the tables' creation-second rule does
+not: two so far, one refused at the gate, one flat fill), the gate view (k−1 on most bursts on the two-core box).

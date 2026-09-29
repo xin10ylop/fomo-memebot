@@ -4229,3 +4229,16 @@ The creator-supply gate, priced on the week because it refused the night's two b
 usual view, guard 0.20, the gate off; scratch rows): it refuses 153 launches, 23 of which would fire. Sep 21–23: 10 fires,
 −$10.88, win 11%. Sep 24–29: 13 fires, +$6.63, win 50%, of which last night's two +$3.04. Opposite signs in the two halves,
 so nothing changes; it goes into tonight's brief as a watch item with these numbers.
+
+*The "no confident boundary estimate" skips, resolved (Sep 29 morning).* The three overnight skips (00:08:52, 01:39:30,
+03:58:57, all on engine-only launches) and the 21:27 one on `0x6d11e170` all carried a confident boundary estimate
+(confidence 0.90 to 0.96 on 300 brackets) and a creation seen 96 to 119 ms after its block. The skip's real cause is the
+other branch of the same test: the seat's second had already opened when the build ran, which is what happens when the
+creation sits in the last block of its second (k = 1: the engine sees it about 900 ms into the second and the E1 second
+opens before the burst can be aimed). 21:27 was k = 1. On the week 54 of 696 launches are k = 1 and none fires at the
+floor or usual view (their gate view is the creation block itself, never two fleets), so the tables never counted them
+and nothing was lost; the wording is wrong, not the decision. The 03:58 estimate's theta of −953 ms is the estimator
+restarted after the 03:01 feed reconnect on a late reference flip; the aim is the sum of the two and stays right. 6.9
+list (hygiene, no money): split that skip message into "seat's second already open" and "no confident estimate"; make
+the shooter and relay top-ups advance the local nonce; wake the bookkeeping poll at a reservation release; make the
+replay refuse k = 1 launches explicitly rather than by the gates' accident.
