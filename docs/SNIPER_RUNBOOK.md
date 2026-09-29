@@ -1244,3 +1244,5 @@ Re-run the race monthly (addresses and routing change); a pin that stops answeri
 **Checked Sep 29 15:40 UTC:** the engine pinned 3.141.111.43 at that moment (pings 0.87 / 0.83 / 2.08 ms), but it re-measures
 every 20 minutes and the two front addresses are 0.04 ms apart, so the ping pin can flip to the 17% address at any
 re-measurement. Set `SEQ_PIN_IP 3.141.111.43` (the paste above) so the choice is the race's, not the ping's.
+**Set Sep 29 ~15:50 UTC:** `SEQ_PIN_IP 3.141.111.43`, the log reads `pinned 3.141.111.43, pin_by race`. Everything of the day is
+now live: 6.9, the $25 stake, both feed sockets, the venue guard, the gas cap, the race pin.
