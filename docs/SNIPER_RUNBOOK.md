@@ -1206,3 +1206,7 @@ next step is $50 after a positive window. Deploy, no fill open (5z's check), one
 Expected: `"version": 6.9`, `stake_min 25 / stake_max 25`, a `venue` line with 3 / 9900, `feed_connected` and `feed2_connected`,
 the relay above 0.0095 ETH in the status. If `feed2_connected` is missing after a minute (`sudo grep -c feed2 ...`), the feed
 refused the second socket; the engine runs on one as before.
+
+**Deployed Sep 29 ~14:40 UTC:** `relay_ops.py deposit` refuses while the engine runs (same wallet, same nonce), so the order is
+stop, deposit, start. After it: version 6.9, venue 3 / 9900, stake 25 / 25, both feed sockets connected, relay 0.010270 ETH
+($27.90), capital 0.019923 ETH, P&L +$12.26 (a fill landed during the day, +$0.80). The $25 window starts here: twenty fills.
