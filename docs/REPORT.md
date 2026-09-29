@@ -4450,3 +4450,49 @@ tool; the crowd files alone cannot answer it). Both ways 0 holes, 0 engine-only,
 all six bursts signed in 3.9 ms; one `feed2_error` with an empty message at 13:59 (a reconnect after the restart); the
 two boundary skips carried confident estimates (0.85 and 0.87) with the seat's second already open, as before. P&L +$12.11,
 no $25 fill yet.
+
+### 24.45 The other launchpads on Robinhood Chain, measured from the chain (Sep 29-30)
+
+*Why.* Pons' fireable supply fell to about five launches a day (24.44 part A). The owner asked to explore the no-tax venues
+on the same chain, where the engine's timing work could matter more. Everything below is measured on two full days of chain
+data (Sep 27 21:00 to Sep 29 21:00 UTC): every Uniswap v4 pool initialized (8,804 and 8,329 a day), every swap on each in its
+first 20 minutes (560,601 and about 470,000), every liquidity removal, and the wallet behind a sample of about 7,000 trades
+(`src/analysis/v4_launch_pull.py`, `v4_seat.py`, `v4_family_trap.py`, `v4_family_seat.py`, `v4_gap_seat.py`; data in
+`data/derived/edge_check/O/`). The seat model prices our buy and sell against each pool's real state with exact v4 math,
+validated to the wei against 3,885 real buys and 2,903 real sells; a liquidity pull before our sell is a total loss.
+
+*The venues.* Launches reach v4 in families (hook, fee, tick spacing). Flap.sh (about 780 a day) and the other curve
+launchpads found in the docs carry almost no outside buying (878 buys on 783 launches in 4 hours, 58 buyers). LONG (Doppler)
+launches about 1,750 a day paired with stock tokens and 140 paired with ETH, with first trades about 10 seconds in. The
+ETH-paired families that matter:
+
+| family | launches a day | crowd arrives | crowd in 30 s | liquidity pulled in 20 min | what an early buyer meets |
+|---|---|---|---|---|---|
+| 1% fee, tick 200 | 1,175-1,436 | 0.9 s | 12 buys, 1.4-1.5 ETH | 68-72% | pulled 1 s later, 28 of 28 |
+| 0.25% fee, tick 50 | 287-292 | 0.8 s | 11 buys, 1.3 ETH | 100% | pulled 1 s later, 13 of 13 |
+| pools.trade 0.25% | 110-116 | 2-3 s | 10-20 buys, 0.15 ETH | 2-4% | the crowd still comes, never pulled (66 cases) |
+| Pons graduations | 44-55 | block 1 | 38-50 buys, 0.9-1.2 ETH | 0-2% | the crowd still comes (27 cases) |
+| 2-2.45% fee, tick 200 | 100-120 | 6 s | 27 buys, 1.1-1.3 ETH | 81-100%, after 4-5 min | mixed, see below |
+
+*The trap.* The two big families look like the best opportunity on paper: a first-block buy sold one block after the first
+crowd buy modelled +4.6% a launch (trimmed mean), 68% wins, about 1,200 launches a day. It is a trap built for snipers. On
+80% of launches a single wallet (`0xe71a69f4…`) buys dust at block 3 or 4 through the Universal Router, and the crowd's
+orders follow half a second later. On every launch where an outsider bought before that test (28 on Sep 29, and 13 more in
+the 0.25% family), the crowd did not come (a median of one buy against twelve) and the liquidity was pulled 10 to 20 blocks
+after the outsider's buy, before any sell: 41 total losses out of 41. Normally these pools are pulled after about 3 minutes.
+The +4.6% assumed the crowd comes regardless of us; the chain says it does not.
+
+*The rest, priced (first-block buy, $25, both days).* pools.trade: -1% to +2% by hold, 4-52% wins: no edge (the crowd is
+small and the curve is deep). Pons graduations: -10% to +4.5% by exit rule, the sign changing between the two days: no edge.
+The 2-2.45% families: holding 10 to 30 seconds modelled +14% to +92% median with 85-90% wins on both days, before a pull at 4
+to 5 minutes; outsiders can sell (37 and 36 of 40 launches had buyers who sold), but the pump is scripted (exactly 11 fresh
+wallets per launch buy then all sell; three operator wallets dump across many launches), and the only two buyers who truly
+came first (block 0 or 1) are the two that lost, with little or no pump after them. The other "early" buyers at blocks 8-9 are
+probably the operator's own first wallets. So the same trap cannot be ruled out, and only a live test can rule it in or out.
+
+*Verdict.* No venue on the chain shows an edge that survives the natural experiments in the data. The only open candidate is
+the 2-2.45% families (about 100-120 launches a day), and its one decisive question, whether the operator withholds the pump
+and pulls the liquidity when an outsider buys first, can only be answered by buying first. A test needs a v4 buy-and-sell path
+(a small contract that buys with ETH and sells from its own balance, so no approvals slow the exit), detection of the launch
+from the feed (the launch is a PositionManager multicall whose calldata carries the pool key), and a sell at a fixed hold.
+Five to ten trades at $3 each answer it: a trap shows as pulls within a second or two on most of them.
