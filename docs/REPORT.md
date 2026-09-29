@@ -4425,3 +4425,11 @@ and the crowd whose inflow the return depends on runs the same minOut guards we 
 behind us start reverting and the modelled inflow is not there. No model holds that; only live windows do. And capital: a
 $200 stake needs about $400 on the box. The path stays $25, $50, $100 by windows; $200 is the measured ceiling of the model,
 and anything above it is a live experiment with the crowd's behaviour, not a calculation.
+
+*Reading, Sep 29 13:52 - 16:35 UTC: dead stretch, reconciled.* Three qualifying launches, no fire at any view; the engine: two
+unopened bursts (15:51, 16:22: no fleet by the tick's shot) as predicted, and one "no confident boundary estimate" skip at
+14:15 on a k = 3 launch (one fleet only, refused at every view anyway; its `boundary` field is the morning's next question,
+since this one was not a last-block creation). Both ways 0 holes, 0 engine-only, 21 tier-refused outside the population.
+The two bursts after the send-step redeploy signed in 3.9 ms (the first burst after a restart used to take 22). One
+`feed2_error` since the 13:55 restart (the second socket reconnecting; to be read). No alarms. P&L +$12.03 (the ETH price;
+capital unchanged at 0.019906 ETH). No $25 fill yet.
