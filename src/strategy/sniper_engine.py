@@ -46,6 +46,7 @@ RPC_URL = os.environ.get("RPC_URL", "https://rpc.mainnet.chain.robinhood.com")
 LOGS_RPC_URL = os.environ.get("LOGS_RPC_URL", "https://rpc.mainnet.chain.robinhood.com")   # log queries span hundreds of blocks; Alchemy's free tier allows 10, the public node allows any
 SEQ_URL = os.environ.get("SEQ_URL", "https://sequencer.mainnet.chain.robinhood.com")
 FEED_URL = os.environ.get("FEED_URL", "wss://feed.mainnet.chain.robinhood.com")
+FEED_SOCKETS = int(os.environ.get("FEED_SOCKETS", "2"))                  # 6.9: sockets to the feed; the second delivers 4-6 ms earlier on 98% of messages (measured Sep 29), the copy is dropped by sequence number
 FEED_COMPRESSION = os.environ.get("FEED_COMPRESSION", "deflate") or None   # 5.48: since Sep 17 ~19:30 UTC the feed refuses a connection that does not offer permessage-deflate ("Compression is required")
 FEED_SOURCE = os.environ.get("FEED_SOURCE", "sequencer")                  # "sequencer": Robinhood's feed; "provider": a third-party node's WebSocket (PROVIDER_WS), no Robinhood endpoint at all
 PROVIDER_WS = os.environ.get("PROVIDER_WS", "")                            # e.g. wss://robinhood-mainnet.g.alchemy.com/v2/KEY (section 23.10)
@@ -115,7 +116,7 @@ MAX_CREATOR_BUY_ETH = float(os.environ.get("MAX_CREATOR_BUY_ETH", "2"))
 SWITCH_N = int(os.environ.get("SWITCH_N", "15")); SWITCH = float(os.environ.get("SWITCH", "-0.10")); DAILY_STOP = float(os.environ.get("DAILY_STOP", "0.50"))
 MAX_RESOLVE_MS = int(os.environ.get("MAX_RESOLVE_MS", "1500"))
 GAS_MAX_SHARE = float(os.environ.get("GAS_MAX_SHARE", "0.05"))
-GAS_HEADROOM = float(os.environ.get("GAS_HEADROOM", "2.0"))
+GAS_HEADROOM = float(os.environ.get("GAS_HEADROOM", "6.0"))            # 6.9: the shots' price cap over the base fee (was 2): only the base fee is charged, and the sequencer drops a transaction whose cap is under a ramped base fee instead of delaying it; a one-second ramp is at most ~2.6x
 SELL_GAS_HEADROOM = float(os.environ.get("SELL_GAS_HEADROOM", "8.0"))   # cap on the approve and the sell: receipts show only the base fee is charged, so a high cap is free and a fee spike cannot refuse the exit
 SELL_CONFIRM_S = float(os.environ.get("SELL_CONFIRM_S", "1.5")); SELL_MAX_S = float(os.environ.get("SELL_MAX_S", "20"))
 SELL_FEE_MAX_USD = float(os.environ.get("SELL_FEE_MAX_USD", "2.00"))  # the exit's fee ceiling: the doubling cap stops here. Receipts pay about $0.02; an unbounded cap could spend multiples of the position (audit, Sep 16)                # gasPrice sent = this x eth_gasPrice: the quote equals the base fee, a tick up refuses the tx (23.7)
@@ -123,6 +124,8 @@ GAS_EST_BUY, GAS_EST_APPROVE, GAS_EST_SELL = 100_000, 50_000, 80_000        # me
 REQUIRE_COINCURVE = os.environ.get("REQUIRE_COINCURVE", "0") == "1"
 PIN_CPU = os.environ.get("PIN_CPU", "")                                   # e.g. "1": keep the process off core 0 (interrupts) on a 2-vCPU box
 GAS_BUY, GAS_APPROVE, GAS_SELL = 500_000, 80_000, 200_000
+PONS_FACTORY_V2 = os.environ.get("PONS_FACTORY_V2", "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e")   # 6.9: holds snipeTaxSeconds / snipeTaxStartBps (owner-settable; docs say 5 s, the source 15 s, the chain 3 s)
+EXPECT_TAX_SECONDS = int(os.environ.get("EXPECT_TAX_SECONDS", "3")); EXPECT_TAX_START_BPS = int(os.environ.get("EXPECT_TAX_START_BPS", "9900"))   # the schedule the seat model (E1 = 6.18%) was built on
 FACTORY = bytes.fromhex("e33e9e479df8802cb0866d5d05258bec4cf62948"); CREATE_SELS = {bytes.fromhex("f85f8e41"), bytes.fromhex("3f707e6b")}
 FACTORY_HEX = "0x" + FACTORY.hex()
 BUY_EV = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"; SELL_EV = "0x8113d738abdcb6b38357e9d53a54a7157861a09031b453651f0fe7fe151f59df"
@@ -567,7 +570,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
          "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "feed_seq": 0, "connected_at": 0.0,
          "arrivals": collections.deque(maxlen=900), "flip_wall": {}, "slot_pred": {}, "slot_err": collections.deque(maxlen=120), "vote_err": collections.deque(maxlen=120), "slot_hits": collections.deque(maxlen=120),   # 5.9 ramp model
-         "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "decisions": {}, "shooter_nonce": {}, "shooter_eth": {}, "shooter_at": 0.0, "relay_eth": None, "relay_at": 0.0,
+         "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "ingested_seq": 0, "venue_ok": True, "venue": None, "decisions": {}, "shooter_nonce": {}, "shooter_eth": {}, "shooter_at": 0.0, "relay_eth": None, "relay_at": 0.0,
          "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "day_start_real": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "scores_e1": collections.deque(maxlen=60), "race_lags": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
 lock = threading.Lock()
 cond = threading.Condition()                           # notified by the feed loop after every message is fully indexed
@@ -702,6 +705,8 @@ def chain_loop():
             except Exception as e:
                 if n % 20 == 0:                                              # the readout block used to sit outside every try: one raise stopped the nonce refresh for good and every launch was gated "nonce/gas not fresh" (audit, Sep 16)
                     log({"ev": "error", "stage": "chain_loop_readouts", "err": str(e)[:200]})
+        if n % max(1, int(3600 / CHAIN_POLL_S)) == 0 and n > 0:
+            venue_check()                                                   # 6.9: hourly
         n += 1; time.sleep(2.0 if failed else CHAIN_POLL_S)                  # 6.8: a failed read is retried in 2 s, not after the whole interval
 
 
@@ -920,7 +925,7 @@ def hold_cap():
 
 def gas_cost_usd():
     """the round trip's cost at the price we send with (measured gas used, not the limits)"""
-    gp = state["gas_price"]
+    gp = state.get("base_fee") or state["gas_price"]                        # 6.9: what is charged is the base fee; the cap (GAS_HEADROOM) is free
     return burst_gas_units() * gp / 1e18 * state["eth_usd"] if gp else None
 
 
@@ -1601,6 +1606,16 @@ def bankroll_usd(wallet_eth):
     return (wallet_eth + ((state.get("relay_eth") or 0.0) if SHOOTERS else 0.0)) * state["eth_usd"]
 
 
+def shooter_need_eth():
+    """6.9: what a shooter must hold for one shot to be accepted: gas limit times the price cap (a legacy transaction is
+    admitted only when the balance covers gasLimit x gasPrice), never below SHOOTER_MIN_ETH"""
+    return max(SHOOTER_MIN_ETH, RELAY_SHOOT_GAS * (state.get("gas_price") or 0) / 1e18 * 1.1)
+
+
+def shooter_target_eth():
+    return max(SHOOTER_TARGET_ETH, 3 * shooter_need_eth())
+
+
 def refresh_shooters(nonces=True, gas=True):
     """live, shooters: every shooter's nonce and gas from the chain (2 calls each; a shot that was refused did not spend a nonce)"""
     for a in SHOOTERS:
@@ -1612,7 +1627,7 @@ def refresh_shooters(nonces=True, gas=True):
         except Exception as e:
             log({"ev": "error", "stage": "refresh_shooters", "err": str(e)[:120]}); return
     state["shooter_at"] = mono()
-    low = [a for a in SHOOTERS if state["shooter_eth"].get(a, 0) < SHOOTER_MIN_ETH]
+    low = [a for a in SHOOTERS if state["shooter_eth"].get(a, 0) < shooter_need_eth()]
     if gas and low and state["open"] is None:
         shooter_topup(low)
 
@@ -1621,7 +1636,7 @@ def shooter_topup(low):
     """gas for the shooters that ran low, from the wallet, one plain transfer each at the wallet's next nonce"""
     if SEND is None:
         return
-    need = sum(SHOOTER_TARGET_ETH - state["shooter_eth"].get(a, 0) for a in low); gp = state.get("gas_price") or 2e8
+    need = sum(shooter_target_eth() - state["shooter_eth"].get(a, 0) for a in low); gp = state.get("gas_price") or 2e8
     if state.get("wallet_eth") is None:
         try:
             state["wallet_eth"] = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18; state["wallet_at"] = mono()
@@ -1631,7 +1646,7 @@ def shooter_topup(low):
         log({"ev": "alarm", "what": f"{len(low)} shooters are out of gas and the wallet ({state.get('wallet_eth')} ETH) cannot refill them ({need:.5f} ETH): top up the wallet"}); return
     sent = 0
     for a in low:
-        amt = int((SHOOTER_TARGET_ETH - state["shooter_eth"].get(a, 0)) * 1e18)
+        amt = int((shooter_target_eth() - state["shooter_eth"].get(a, 0)) * 1e18)
         h = submit({"to": to_checksum_address(a), "value": hex(amt), "data": "0x", "gas": hex(30_000), "gasPrice": hex(int(gp)), "nonce": hex(next_nonce()), "chainId": 4663}, "shooter_gas")
         if h:
             sent += 1; wait_receipt(h, 5.0)
@@ -1659,6 +1674,25 @@ def relay_topup(why=""):
         state["relay_eth"] = int(rpc.call("eth_getBalance", [RELAY, "latest"]), 16) / 1e18; state["relay_at"] = mono()
     except Exception as e:
         log({"ev": "error", "stage": "relay_topup", "err": str(e)[:160]})
+
+
+_VENUE_SELS = ("0x" + keccak(text="snipeTaxSeconds()").hex()[:8], "0x" + keccak(text="snipeTaxStartBps()").hex()[:8])
+
+
+def venue_check(first=False):
+    """6.9: the launchpad's snipe-tax schedule is owner-settable and the docs (5 s), the source (15 s) and the chain (3 s) already
+    disagree. Read it from the V2 factory; when it is not the schedule the seat model was built on (E1 = 6.18%), no launch is
+    taken and one alarm is logged. A failed read keeps the last answer."""
+    try:
+        secs = int(rpc.call("eth_call", [{"to": PONS_FACTORY_V2, "data": _VENUE_SELS[0]}, "latest"]), 16)
+        bps = int(rpc.call("eth_call", [{"to": PONS_FACTORY_V2, "data": _VENUE_SELS[1]}, "latest"]), 16)
+    except Exception as e:
+        log({"ev": "error", "stage": "venue_check", "err": str(e)[:120]}); return
+    ok = secs == EXPECT_TAX_SECONDS and bps == EXPECT_TAX_START_BPS; prev = state.get("venue")
+    state["venue"] = [secs, bps]; state["venue_ok"] = ok
+    if first or prev != [secs, bps] or not ok:
+        log({"ev": "alarm" if not ok else "venue", "what": ("the launchpad's snipe-tax schedule is not the one the seat model was built on: no launch is taken until it is" if not ok else "snipe-tax schedule read from the factory"),
+             "snipe_tax_seconds": secs, "snipe_tax_start_bps": bps, "expected": [EXPECT_TAX_SECONDS, EXPECT_TAX_START_BPS]})
 
 
 def release_reservation():
@@ -1945,13 +1979,15 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             gates.append("detection on the provider path (the sequencer feed is down): a send this late is second one, not the seat (E0_ALLOW_PROVIDER=1 after measuring the lag)")
         if state["nonce"] is None or mono() - state["chain_at"] > 30:                 # 30 s: the wallet's top-up sends (shooter_topup, relay_topup) do not advance the local nonce, so a wider window could admit a stale one (6.8 review); the poll retries 2 s after a failure
             gates.append("nonce/gas not fresh (RPC)")
+        if not state.get("venue_ok", True):
+            gates.append(f"the launchpad's tax schedule changed (snipeTaxSeconds {state['venue'][0]}, start {state['venue'][1]} bps; the seat model needs {EXPECT_TAX_SECONDS} / {EXPECT_TAX_START_BPS}): not firing")
         ready = SHOOTERS
         if SHOOTERS and SEND is not None:
             if state["relay_eth"] is None or mono() - state["relay_at"] > 60:
                 gates.append("the relay's balance was not read in the last minute (RPC)")
             elif state["relay_eth"] < stake_usd / state["eth_usd"] * 0.999:
                 gates.append(f"the relay holds {state['relay_eth']:.5f} ETH (${state['relay_eth'] * state['eth_usd']:.2f}) < the stake ${stake_usd:.0f}: deposit (deploy/relay_ops.py deposit)")
-            ready = [a for a in SHOOTERS if a in state["shooter_nonce"] and state["shooter_eth"].get(a, 0) >= SHOOTER_MIN_ETH]
+            ready = [a for a in SHOOTERS if a in state["shooter_nonce"] and state["shooter_eth"].get(a, 0) >= shooter_need_eth()]
             if len(ready) < min(BURST_N, max(3, BURST_N // 2)):
                 gates.append(f"only {len(ready)} of {len(SHOOTERS)} shooters have a nonce and gas (need {min(BURST_N, max(3, BURST_N // 2))}): deploy/relay_ops.py shooters-fund")
         if SEND is not None and MAX_LIVE_TRADES > 0 and state.get("live_trades", 0) >= MAX_LIVE_TRADES:
@@ -2469,6 +2505,64 @@ def _frame_stat(seen):
         f["ms"] = []; f["busy"] = 0.0; f["since"] = seen; f["n"] = 0
 
 
+_last_prune = [0.0]
+
+
+def _ingest_frame(raw, seen, wall, sock=1):
+    """one feed frame from either socket (6.9): every L2 message is indexed once, by sequence number, at its earliest arrival"""
+    d = json.loads(raw)
+    if seen - _last_prune[0] > 30:
+        prune(seen); _last_prune[0] = seen
+    for m in d.get("messages", []):                    # 6.7: the time this frame takes to index is measured below (feed_stats, once a minute)
+        inner = m["message"]["message"]; hdr = inner.get("header", {})
+        ts = int(hdr.get("timestamp", 0) or 0) if int(hdr.get("kind", 0) or 0) == 3 else 0   # L2 messages only: batch reports carry L1 time
+        if not ts:
+            continue
+        seq = int(m.get("sequenceNumber") or 0)
+        if seq and seq <= state["ingested_seq"]:          # 6.9: the other socket's copy (or a reconnect's replay): already indexed
+            continue
+        if seq:
+            state["ingested_seq"] = seq
+        warm = wall - ts > 2.0                            # a backlog replay (the feed sends one on connect): index nothing, trade nothing
+        state["blocks"] += 1
+        if not warm:
+            state["arrivals"].append((wall, seq))         # 5.9: every block's arrival and number, for the ramp model
+            index_message(inner, ts, seen)
+        with cond:
+            if ts > state["last_seen_ts"] and state["last_seen_ts"] and not warm:
+                state["flip_at"].setdefault(ts, seen); state["flip_block"].setdefault(ts, m.get("sequenceNumber")); state["flip_wall"].setdefault(ts, wall)
+                score_flip(ts, wall, seen)               # 5.7: how well both models predicted this flip, and the prediction for the next one
+                if state["ref"] is None:
+                    state["ref"] = (seen, ts)
+                if state["prev_seen"] is not None and state["prev_ts"] == ts - 1 and seen - state["prev_seen"] < 0.5:
+                    r0, t0 = state["ref"]; state["brackets"].append(((state["prev_seen"] - r0) - (ts - t0), (seen - r0) - (ts - t0)))
+            state["last_seen_ts"] = max(state["last_seen_ts"], ts); state["feed_ts"] = max(state["feed_ts"], ts)
+            if not warm:
+                state["feed_seq"] = max(state["feed_seq"], seq)   # = the L2 block number
+            state["prev_seen"] = seen; state["prev_ts"] = ts
+            cond.notify_all()
+    _frame_stat(seen)
+
+
+async def _feed_second(websockets):
+    """6.9: a second socket to the same feed. The broadcaster favours one client consistently (measured Sep 29 on two boxes: the
+    second socket 3.8-5.5 ms earlier on 98-99% of messages), so both are read and the later copy is dropped in _ingest_frame.
+    It never drives the provider fallback and never hammers a refusing edge (an HTTP refusal waits ten minutes)."""
+    backoff = 0.2; last_err = 0.0
+    while True:
+        try:
+            async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=FEED_COMPRESSION) as ws:
+                log({"ev": "feed2_connected"}); backoff = 0.2
+                while True:
+                    raw = await asyncio.wait_for(ws.recv(), timeout=2.0)
+                    _ingest_frame(raw, mono(), time.time(), sock=2)
+        except Exception as e:
+            refused = "rejected WebSocket connection" in str(e) or "HTTP 4" in str(e)
+            if mono() - last_err > 60:
+                log({"ev": "feed2_error", "err": str(e)[:160], "retry_s": 600 if refused else backoff}); last_err = mono()
+            await asyncio.sleep(600 if refused else backoff); backoff = min(30.0, backoff * 2)
+
+
 async def main():
     import websockets
     if SEAT == "E0" and not EXEMPT:
@@ -2509,10 +2603,10 @@ async def main():
         except Exception as e:
             if RELAY_TOO_LATE not in str(e):
                 raise SystemExit(f"RELAY {RELAY} does not know the deadline (old relay, or the RPC failed: {str(e)[:100]}): redeploy with deploy/relay_deploy.py --write-env, engine stopped")
-    load_state(); new_day_check(); threading.Thread(target=chain_loop, daemon=True).start()
+    load_state(); new_day_check(); venue_check(first=True); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 6.8, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.9, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
@@ -2522,7 +2616,9 @@ async def main():
         last_prune_holder[0] = mono(); await provider_loop(websockets); return
     if PROVIDER_WS:
         asyncio.ensure_future(chain_rivals_loop(websockets))            # the chain's Buy events as a second rival source next to the feed
-    last_prune = mono(); backoff = 0.2; refused = 0
+    _last_prune[0] = mono(); backoff = 0.2; refused = 0
+    if FEED_SOCKETS >= 2:
+        asyncio.ensure_future(_feed_second(websockets))                 # 6.9: the second socket; whichever delivers a block first indexes it
     while True:
         try:
             async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=FEED_COMPRESSION) as ws:
@@ -2533,33 +2629,7 @@ async def main():
                         raw = await asyncio.wait_for(ws.recv(), timeout=2.0)
                     except asyncio.TimeoutError:
                         log({"ev": "feed_stall", "note": "no message for 2 s: reconnecting"}); break
-                    seen = mono(); wall = time.time(); d = json.loads(raw)
-                    if seen - last_prune > 30:
-                        prune(seen); last_prune = seen
-                    for m in d.get("messages", []):                    # 6.7: the time this frame takes to index is measured below (feed_stats, once a minute)
-                        inner = m["message"]["message"]; hdr = inner.get("header", {})
-                        ts = int(hdr.get("timestamp", 0) or 0) if int(hdr.get("kind", 0) or 0) == 3 else 0   # L2 messages only: batch reports carry L1 time
-                        if not ts:
-                            continue
-                        warm = wall - ts > 2.0                            # a backlog replay (the feed sends one on connect): index nothing, trade nothing
-                        state["blocks"] += 1
-                        if not warm:
-                            state["arrivals"].append((wall, int(m.get("sequenceNumber") or 0)))   # 5.9: every block's arrival and number, for the ramp model
-                            index_message(inner, ts, seen)
-                        with cond:
-                            if ts > state["last_seen_ts"] and state["last_seen_ts"] and not warm:
-                                state["flip_at"].setdefault(ts, seen); state["flip_block"].setdefault(ts, m.get("sequenceNumber")); state["flip_wall"].setdefault(ts, wall)
-                                score_flip(ts, wall, seen)               # 5.7: how well both models predicted this flip, and the prediction for the next one
-                                if state["ref"] is None:
-                                    state["ref"] = (seen, ts)
-                                if state["prev_seen"] is not None and state["prev_ts"] == ts - 1 and seen - state["prev_seen"] < 0.5:
-                                    r0, t0 = state["ref"]; state["brackets"].append(((state["prev_seen"] - r0) - (ts - t0), (seen - r0) - (ts - t0)))
-                            state["last_seen_ts"] = max(state["last_seen_ts"], ts); state["feed_ts"] = max(state["feed_ts"], ts)
-                            if not warm:
-                                state["feed_seq"] = max(state["feed_seq"], int(m.get("sequenceNumber") or 0))   # = the L2 block number
-                            state["prev_seen"] = seen; state["prev_ts"] = ts
-                            cond.notify_all()
-                    _frame_stat(seen)
+                    _ingest_frame(raw, mono(), time.time())
         except Exception as e:
             refused = refused + 1 if ("rejected WebSocket connection" in str(e) or "HTTP 4" in str(e)) else 0        # an HTTP refusal, not a network drop
             blocked = "HTTP 403" in str(e)                                # their edge blocks an address for an hour after sustained rejections: do not feed the block

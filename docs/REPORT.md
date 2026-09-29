@@ -4361,3 +4361,9 @@ shot burns its full gas limit; a revert does not), and the venue's daily volume 
 Later, needing data we do not hold yet: creation-time features the papers rate highly elsewhere (social links present,
 copycat names, fresh-wallet funder clusters), and the two no-tax venues on the same chain (pools.trade, hood.fun) where
 the crowd fires in the creation block and the seat model does not apply.
+
+*Done on Sep 29 (runbook 5ac).* Engine 6.9 carries the three adopted items (two feed sockets with sequence-number dedupe, the
+venue-parameter guard, the gas cap on the base fee with the shooters' float following it), 17 new checks and the older tests
+passing. The owner accepted the $25 step with the twenty-fill window and the rollback to $13 on a losing window; the
+relay is topped up to hold the stake at the deploy. The stake step is the one change whose effect is expected to show in
+the P&L; the engine items are hygiene and insurance.

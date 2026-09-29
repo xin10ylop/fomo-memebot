@@ -1177,3 +1177,32 @@ use2-az2 p5 45 / p10 52 / median 102 / p90 138 ms. No difference: the vendor's z
 as we see it, so the box stays where it is. The second-socket result repeated on the probe box (B earlier on 99% of
 messages, 5.5 ms median), so the earlier-of-two feed is a real, small gain (4-6 ms) and stays on the 6.9 list. The probe
 instance was terminated after the test.
+
+## 5ac. Engine 6.9 and the step to $25 (Sep 29, report 24.44)
+
+Engine 6.9 (`tests/test_feed_dual.py`, 17 checks): (1) two sockets to the feed (`FEED_SOCKETS`, default 2); every block is
+indexed once, by sequence number, at whichever socket delivers it first (measured 4-6 ms earlier on 98% of messages); the
+second socket logs `feed2_connected`, never drives the provider fallback, and waits ten minutes after an HTTP refusal; (2) a
+venue guard: `snipeTaxSeconds` and `snipeTaxStartBps` are read from the V2 factory at start and hourly (`PONS_FACTORY_V2`,
+`EXPECT_TAX_SECONDS` 3, `EXPECT_TAX_START_BPS` 9900); the start log carries a `venue` line; a different schedule logs an
+alarm and closes the gate ("the launchpad's tax schedule changed"), a failed read keeps the last answer; (3) the shots'
+gas-price cap `GAS_HEADROOM` 6 (was 2): only the base fee is charged and the sequencer drops a shot whose cap is under a ramped
+base fee; the gas gate prices the round trip at the base fee, and a shooter's required float follows the cap
+(`shooter_need_eth`, top-up target three times that).
+
+The $25 step (report 24.44 part C, accepted by the owner Sep 29): `STAKE_MIN` and `STAKE_MAX` 25. The relay must hold the
+stake before the first launch (about 0.0095 ETH at $2,650; it held 0.0058), so deposit 0.004 ETH from the wallet first; the
+wallet keeps its 0.0015 ETH reserve and the shooters' floats. `KILL_USD` stays 24 (a capital floor, not a stake multiple).
+The rule: twenty fills at $25 are one window; if the window's realized sum is negative, back to $13 for twenty fills; if the
+per-fill split (`live_vs_table`: seat, hold, execution/fees/model) stays within a few tenths of a point of the $13 fills, the
+next step is $50 after a positive window. Deploy, no fill open (5z's check), one paste:
+
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }
+    set_kv STAKE_MIN 25; set_kv STAKE_MAX 25; set_kv FEED_SOCKETS 2; set_kv GAS_HEADROOM 6
+    cd ~/fomo-memebot && git pull -q && sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py deposit 0.004 | tail -2
+    sudo systemctl restart sniper-engine && sleep 8 && sudo grep -h '"ev": "start"\|"ev": "venue"\|"ev": "feed2_connected"\|"ev": "feed_connected"' /var/log/sniper/engine.jsonl | tail -4 | grep -o '"ev": "[a-z_0-9]*"\|"version": [0-9.]*\|"stake_min": [0-9.]*\|"stake_max": [0-9.]*\|"snipe_tax_seconds": [0-9]*\|"snipe_tax_start_bps": [0-9]*\|"burst": \[[^]]*\]' | paste -sd' '
+    sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py status 0.015412 | tail -2
+
+Expected: `"version": 6.9`, `stake_min 25 / stake_max 25`, a `venue` line with 3 / 9900, `feed_connected` and `feed2_connected`,
+the relay above 0.0095 ETH in the status. If `feed2_connected` is missing after a minute (`sudo grep -c feed2 ...`), the feed
+refused the second socket; the engine runs on one as before.
