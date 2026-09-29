@@ -4404,3 +4404,24 @@ estimate (2% each way at $50) is the more pessimistic bound and is not what the 
 split at each step decides. The binding limits are not the curve: capital on the box ($54: the relay must hold the stake and
 the wallet its reserve, so about $40 today without a deposit; $100 needs about $200 on the box), the untested-live risk
 above $13 (the twenty-fill windows), and the swing of a losing window (a −58% fill is −$58 at $100).
+
+*Capacity beyond $100, computed properly (Sep 29).* The hold grid replays the crowd's buys as fixed token amounts, which is
+right at $13 (our buy barely moves the price) and wrong at size: after a large buy of ours the same tokens cost the crowd
+more ETH, so the grid's returns rose with the stake (+28.8% at $1,000 at first place), a flattery. Re-run with the crowd
+spending the ETH it actually spent (scratch `hold_grid_ethfixed.py`, cap off, the week's 130 usual-view fills, 11-block exit):
+
+| stake | first place | second place | $ a fill at second place |
+|---|---|---|---|
+| $13 | +28.0% | +18.6% | $2.09 |
+| $200 | +26.0% | +17.1% | $33.97 |
+| $500 | +23.2% | +15.0% | $74.91 |
+| $1,000 | +19.2% | +12.1% | $120.73 |
+
+So the edge in the curve's math holds to about $200 (1.5 points of cost), thins to $500 and is still positive at $1,000.
+Three things cap it before that. The engine's own supply cap (3% of a token's supply, `SUPPLY_FRAC`) sizes a buy down to a
+median $317 on these fills (p10 $237, p90 $524), so a $1,000 setting would not buy $1,000. The rivals' guards: our $13 to $50
+buys move the price 0.5 to 2%, invisible to their slippage limits; $200 moves it about 6%, $500 about 17%, $1,000 about 33%,
+and the crowd whose inflow the return depends on runs the same minOut guards we do, so above roughly $200 their shots
+behind us start reverting and the modelled inflow is not there. No model holds that; only live windows do. And capital: a
+$200 stake needs about $400 on the box. The path stays $25, $50, $100 by windows; $200 is the measured ceiling of the model,
+and anything above it is a live experiment with the crowd's behaviour, not a calculation.
