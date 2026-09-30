@@ -1355,22 +1355,26 @@ and net, its own tally for the first 20 fills (5ag). The $25 window rule (5ac) c
 the new band is carrying or dragging it.
 
 
-## 5ai. Telegram notifications (Sep 30)
+## 5ai. Telegram P&L notifications (Sep 30)
 
-`deploy/tg_notify.py` is a separate process (service `sniper-notify`) that follows the engine's log and sends a Telegram
-message on every engine start, every fill, every closed trade (with the capital and P&L lines of `relay_ops.py status`, read
-25 s after the sell so the refill is in) and every alarm. It never touches the engine; if it dies, nothing else notices.
-Secrets in `/etc/sniper/telegram.env` (root, 0600): `TG_TOKEN`, `TG_CHAT`, `TG_PNL_BASE` (the P&L baseline, 0.015412).
+`deploy/tg_notify.py`, service `sniper-notify`: one message, the same line as the box's `pnl`, only when the P&L changes:
+
+    balance 0.018972 ETH ($50.70) | P&L +0.003560 ETH ($9.51) (+23.1%)
+
+A separate process that never touches the engine: it reads the engine's log to learn that a trade closed or a burst landed
+(then reads the balances 25 s later, once the refill is in) and reads them every 10 minutes regardless; it sends when the
+P&L in ETH moved by 0.00005 ETH or more since the last message (a trade or a burst's gas; the ETH price moving does not
+count). It runs 24/7 as a systemd service, restarts on a crash or a reboot, and does not depend on any terminal being open.
+Secrets in `/etc/sniper/telegram.env` (root, 0600): `TG_TOKEN`, `TG_CHAT`, `TG_PNL_BASE` (the baseline, 0.015412).
 
 Setup, once:
 1. In Telegram, open @BotFather, send `/newbot`, give it a name and a username; it answers with the bot token. Then open the
-   new bot's chat and send it any message (that is how the installer learns your chat id).
+   new bot's chat and send it any message (that is how the installer learns the chat id).
 2. On the box (the token is typed at the prompt, never pasted into the chat with the assistant):
 
        sudo sh -c 'read -p "bot token: " T; printf "TG_TOKEN=%s\n" "$T" > /etc/sniper/telegram.env; chmod 600 /etc/sniper/telegram.env' && cd ~/fomo-memebot && git pull -q && sudo bash deploy/tg_install.sh
 
-   It fills in the chat id from your message, installs and starts the service, and a "sniper notifier started" message with
-   the current capital and P&L arrives on the phone.
+   The first line arrives on the phone right away; the next ones only when the P&L moves.
 
-Check: `sudo systemctl status sniper-notify | head -3`; `sudo python3 deploy/tg_notify.py --test` sends one more. Stop:
-`sudo systemctl disable --now sniper-notify`. Tested dry on a fake log (`--replay`), including the daily log rotation.
+Check: `sudo systemctl status sniper-notify | head -3`; `sudo python3 deploy/tg_notify.py --test` sends the line once. Off:
+`sudo systemctl disable --now sniper-notify`.
