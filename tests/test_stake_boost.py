@@ -62,4 +62,32 @@ sent.clear(); logged.clear(); g = {"n": 0}
 def gate(): g["n"] += 1; return g["n"] >= 2
 calls["n"] = 10; out = submit_burst(base, [time.monotonic() + 0.05 + i * 0.002 for i in range(4)], "buy", gate=gate, open_by=None, alt=alt, pick=pick)
 ok(out[0] == (None, None) and [amount_of(r) for _, r in sent] == [50, 50, 50] and eng.state["last_boosted"] == [False, True, True, True], "a gated first shot is skipped and marked unboosted; the rest go boosted")
+
+
+# ---- 6.14: two shots per shooter -------------------------------------------------------------------------------------------
+# the receipts: the second wave's pollers wait 0.3 s and poll at half the cadence; a fill in the first wave stops everything after the settle
+calls = []
+class R:
+    def __init__(self, have): self.have = have
+    def call(self, method, params, tries=3):
+        calls.append((time.monotonic(), params[0])); return {"status": "0x1", "blockNumber": "0x10", "transactionIndex": "0x2"} if params[0] in self.have else None
+E.rpc = R({"0xw1b"}); E.rpc_logs = R(set()); E.SENDER = type("S", (), {"rejected": lambda self, a: False})()
+t0 = time.monotonic(); recs = E.burst_receipts([("0xw1a", None), ("0xw1b", None), ("0xw2a", None), ("0xw2b", None)], timeout=3.0, settle_s=0.2, first_wave=2)
+ok(recs[1][1] and recs[1][1]["status"] == "0x1" and time.monotonic() - t0 < 1.0, "the first wave's fill is found and the read ends after the settle")
+w2_first = min((t for t, h in calls if h in ("0xw2a", "0xw2b")), default=None)
+ok(w2_first is None or w2_first - t0 >= 0.29, "the second wave's pollers did not start before 0.3 s")
+n1 = sum(1 for _, h in calls if h == "0xw1a"); n2 = sum(1 for _, h in calls if h == "0xw2a")
+ok(n2 <= max(1, n1 // 2) + 1, f"the second wave polled at most half as often ({n2} against {n1})")
+# the nonce bookkeeping: two shots per shooter, the refused ones give the nonce back once each
+E.state["shooter_nonce"] = {"a": 10, "b": 20}
+seq = ["a", "b", "a", "b"]; recs2 = [("0x1", {"status": "0x0"}, None), ("0x2", None, None), ("0x3", {"status": "0x0"}, None), ("0x4", None, None)]
+for a, (hh, _, _) in zip(seq, recs2): E.state["shooter_nonce"][a] += 1                                 # the provisional +1 per sent shot
+E.restore_shooter_nonces(seq, recs2)
+ok(E.state["shooter_nonce"] == {"a": 12, "b": 20}, "a's two shots landed (+2), b's two were refused (given back): the chain's count")
+# the hardened pick: a set that raises during the copy never breaks the burst
+class Bad:
+    def __iter__(self): raise RuntimeError("Set changed size during iteration")
+E.state["smart_helpers"] = {"0xaaaa"}
+ok(E.smart_present({"attack_targets": Bad()}) is False, "a container that raises while copied answers False, not an exception")
+ok(E.smart_present({"attack_targets": {"0xaaaa", "0x1"}}) is True, "and a normal set still answers")
 print(f"\n{checks} checks passed")

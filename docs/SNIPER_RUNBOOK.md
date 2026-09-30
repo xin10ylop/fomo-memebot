@@ -1486,3 +1486,43 @@ Check: `"release": "6.13"`, `"stake_boost_usd": 50.0`, `"smart_helpers": 14`. In
 the $50 fills in their own tally (the stake shows in `live_vs_table`'s stake column).
 
 **Deposit Sep 30 23:55 UTC:** +0.005778 ETH ($17) to the wallet; the engine moved it to the relay (0.0210 ETH, $56): the boost is live. The P&L baseline moves from 0.015412 to **0.021190 ETH** (the deposit added); `pnl`, the notifier (`TG_PNL_BASE`) and the readings use it.
+
+
+## 5an. Engine 6.14: the two-shot burst, built and off; the audit of 6.13 and 6.14 (Oct 1 00:40 UTC)
+
+**The two-shot burst.** `SHOTS_PER_SHOOTER` (default 1): with 2, every shooter sends a second shot at its next nonce after the
+first wave, 70 shots at the same 2 ms spacing, 140 ms of coverage; with `BURST_LEAD_MS 90` and `GATE_CLOSE_MS 80` the burst
+spans -90..+48 ms around the aim (today -46..+22, gate closing 10 ms before the aim in both). The second wave's receipts are
+polled 0.3 s later at half the cadence, so the provider's load stays that of one wave when the first fills. Nonces: one
+provisional +1 per sent shot, one give-back per refused shot; a second-wave shot whose first-wave shot was dropped is refused
+by the sequencer and given back the same way; the chain read after the burst corrects any drift.
+
+**Why it stays off at this size (the honest arithmetic, report 24.50 addendum).** 7 of 28 live bursts began after the seal
+and paid +0.9% at 43% first place; the 21 straddled ones +5.0% at 52%. Covering those seven is worth about +4 points on a
+quarter of the fills, +1 point a fill: at $25 that is +$0.25 a fill, at the boosted $50 +$0.50, about +$1.2 a day at three
+fills. The certain cost: about 35 more reverted shots a burst, $0.33, about +$1.7 a day at five bursts. Break-even to
+slightly negative at $25-50; positive from $100 a fill, where the same point is worth $1 a fill. Switch on at the $100 step:
+
+    set_kv SHOTS_PER_SHOOTER 2; set_kv BURST_LEAD_MS 90; set_kv GATE_CLOSE_MS 80   (then restart)
+
+**Audit of 6.13, the boosted stake.** Evidence: five walk-forward days, every day's list fitted on the days before; +$470
+against +$257 on the same 52 fills; unchanged under a positive-share floor (0.4, 0.5) or a higher minimum count (6): the
+boosted fills are the same; on our own live fills +7.0% with a smart helper attacking against -2.9% without. Code, read
+adversarially: the two variants share a nonce, so one of them goes per shooter; each variant carries its own minOut from the
+same sizing; the boosted set is signed only when it cannot delay the first shot, else the burst is the base one and the skip
+is logged; the boost is built only when the relay holds the boosted stake, and one position at a time keeps a stale relay
+read from building one the relay cannot pay; the pick is a set intersection under a try (the feed thread grows the set while
+the burst reads it - a copy can raise; 6.14 retries once and answers False, the send step never lets the pick break a shot);
+the landing log names the stake that filled; the float covers the boosted stake and the loop refills to the float, so a
+deposit reaches the relay within a minute. Known and accepted: `paper_day` simulates the guard with the base amount (its
+GUARD column is approximate on boosted fills; `live_vs_table` reads the chain's amounts and is exact); the smart list is a
+seven-day trailing fit of bot software contracts, refitted in every reading; a bot changing contracts drops out until it
+earns its way back. Risk stated plainly: the boosted dollars concentrate on the launches a handful of bots attack; the
+readings tally the $50 fills on their own line, and STAKE_BOOST_USD 0 turns it off in one line.
+
+**Audit of 6.14 as deployed with SHOTS_PER_SHOOTER 1:** the burst is byte-for-byte the 6.13 burst (one wave, all pollers
+immediate); the only live changes are the hardened pick and the receipt poll cadence parameter at its old value.
+Tests: `tests/test_stake_boost.py` 21 checks (the list, the pick, the fallbacks, the gate, the two-wave receipts, the nonce
+bookkeeping, the race). Deploy (the send step changed):
+
+    cd ~/fomo-memebot && git pull -q && sudo cp deploy/send_step.py /etc/sniper/send_step.py && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"\|"ev": "smart_helpers"' | tail -2 | grep -o '"release": "[0-9.]*"\|"stake_boost_usd": [0-9.]*\|"shots_per_shooter": [0-9]*\|"n": [0-9]*\|"dry_run": [a-z]*'

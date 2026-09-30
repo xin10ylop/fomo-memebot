@@ -4684,3 +4684,9 @@ the same 52 fills, 31 boosted; as a filter (fire only with a smart helper) it dr
 the boost trigger is the same idea weaker (+$379). Built as engine 6.13 (runbook 5am). Not found: an exit better than hold 11
 in any class; a paying sub-slice of the 2-fleet class; a gate the 3+ class is missing (creator supply, the cap and the
 repeat gate all refuse losers there); a bad-bot exclusion that keeps the dollars.
+
+**Addendum, Oct 1 00:40 UTC: the two-shot burst built, priced, left off (runbook 5an).** The gain is +1 point a fill on the
+landing sample, worth $0.25-0.50 a fill at today's stakes; the cost is 35 more reverted shots a burst, $0.33. Break-even to
+slightly negative until the fill is $100, positive after. The audit of the boosted stake (6.13) is in 5an: the evidence holds
+under other thresholds, the code's failure modes each fall back to the base burst, and the one real risk - the boosted
+dollars follow a handful of bots - is watched by the $50 fills' own tally.
