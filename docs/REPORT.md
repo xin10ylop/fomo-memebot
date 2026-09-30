@@ -4589,3 +4589,27 @@ Sep 28 (164 qualifying launches, 51 would-fires in the usual view): 2 would-fire
 Sep 30 07:13 -13%). The class costs nothing; the usual view over-counts fires by it, and by no money. A side reading from the
 same table, not yet a rule: the would-fires' return by k (blocks left in the creation second) is +20% mean at k=6 (11), +10% at
 k=7 (11), and negative at k<=3 and k=8; small counts, kept for the next census.
+
+
+### 24.49 Are we refusing positive trades? Every refusal since Sep 24 against what the seat would have paid (Sep 30)
+
+`src/analysis/refused_positive.py` (runs on the box): every qualifying launch of every prediction piece, the engine's own
+decision for it from the log, the seat's behind-one return at hold 11 and $13 from the hold grid. 253 launches, 22 pieces,
+Sep 24 22:01 - Sep 30 07:13 UTC. Fired: 25, mean +10.7%, 52% positive, +$34.73. Refused: 228, mean -0.5%, 25% positive,
+-$14.98. By reason: the attackers gate 85 (-$13.21), creator supply < 1% 47 (-$32.75, 11% positive), the seat second already
+open 46 (+$13.58, but 3 would-fires: +154%, -18%, -9%), the relay fault 36 (+$18.82; fixed, 24.48), bundle under the minimum
+3 (+$3.75), the creator's Nth launch 4 (-$1.88), the cap 1, nonce not fresh 1 (+$2.29), the curve unresolved 1.
+
+**No filter to remove, edit or add.** Removing the creator-supply filter costs $33 per six days at $13; the attackers gate as
+a class refuses a losing population (its 24 positives are led by zero-fleet launches that pump on late organic buyers, a slice
+with a -9.5% median and nothing visible before the tick). The fired side splits by fleets: 2 -> -1.6% (n 20), 3 -> +2.5%,
+4 -> +1.1%, 5+ -> +44% mean and 75% positive (n 8); too few to raise ATTACK_MIN, tracked as a slice.
+
+**The one apparent gain was an illusion of position.** 16 launches were refused by the gate while the chain shows 2+ fleets
+before the tick, +$13.20 at behind one. On the engine's view 10 of them reached 2 fleets just after the burst window and 6
+never did. A wider gate window would have sent on the 10, but those shots land last in the seat block or one block late, and
+at those positions the same 10 launches pay +$2.65 (one launch, +99%, carries it; the other nine lose) and -$3.04. The 6 the
+engine never counted pay -$7.73 last in block. The gate window stays at 36 ms.
+
+What the six days say about the P&L: the engine's expectancy is in the fired class and in it in the 5+-fleet launches; the
+refusals are right; the losses of the period came from the relay fault (24.48), not from the filters.
