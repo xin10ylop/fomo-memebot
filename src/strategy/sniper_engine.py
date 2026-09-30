@@ -577,7 +577,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
          "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "feed_seq": 0, "connected_at": 0.0,
          "arrivals": collections.deque(maxlen=900), "flip_wall": {}, "slot_pred": {}, "slot_err": collections.deque(maxlen=120), "vote_err": collections.deque(maxlen=120), "slot_hits": collections.deque(maxlen=120),   # 5.9 ramp model
-         "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "ingested_seq": 0, "venue_ok": True, "venue": None, "decisions": {}, "shooter_nonce": {}, "shooter_eth": {}, "shooter_at": 0.0, "relay_eth": None, "relay_at": 0.0, "base_fee_hist": collections.deque(maxlen=600), "relay_try_at": 0.0, "relay_alarm_at": 0.0, "shooter_alarm_at": 0.0,
+         "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "ingested_seq": 0, "venue_ok": True, "venue": None, "decisions": {}, "shooter_nonce": {}, "shooter_eth": {}, "shooter_at": 0.0, "relay_eth": None, "relay_at": 0.0, "base_fee_hist": collections.deque(maxlen=600), "relay_try_at": -1e9, "relay_alarm_at": -1e9, "shooter_alarm_at": -1e9,
          "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "day_start_real": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "scores_e1": collections.deque(maxlen=60), "race_lags": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
 lock = threading.Lock()
 cond = threading.Condition()                           # notified by the feed loop after every message is fully indexed
@@ -1636,8 +1636,8 @@ def shooter_target_eth():
 
 def shot_gas_price(gas_price, shooter_eth):
     """6.10: the price cap a shooter's shot carries: the engine's cap (base fee x GAS_HEADROOM), trimmed to what the shooter's balance
-    covers at the shot's gas limit with 3% to spare; a shot whose cap is under the base fee is not sent (shooter_ready)"""
-    afford = int(shooter_eth * 1e18 / RELAY_SHOOT_GAS * 0.97)
+    covers at the shot's gas limit with 10% to spare; a shot whose cap is under the base fee is not sent (shooter_ready)"""
+    afford = int(shooter_eth * 1e18 / RELAY_SHOOT_GAS * 0.90)                  # 10% to spare: the balance is read every five minutes and a burst spends about 4% of a shooter's float
     return max(1, min(int(gas_price or 0), afford))
 
 
@@ -1677,7 +1677,7 @@ def shooter_topup(low):
     for a in sorted(low, key=lambda a: state["shooter_eth"].get(a, 0)):
         amt = shooter_target_eth() - state["shooter_eth"].get(a, 0)
         if amt > avail:
-            break
+            continue                                                         # the emptiest needs the most; a fuller one may still fit
         plan.append((a, amt)); avail -= amt
     if not plan:
         if mono() - state["shooter_alarm_at"] > 1800:

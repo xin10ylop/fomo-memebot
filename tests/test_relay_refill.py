@@ -31,7 +31,7 @@ ok(abs(E.shooter_target_eth() - 3 * E.SHOOTER_MIN_ETH) < 1e-15, "and the top-up 
 # ---- each shot's cap trimmed to its shooter's balance ----------------------------------------------------------------
 cap = E.shot_gas_price(S["gas_price"], 0.00008)                                       # a shooter holding 0.00008 ETH (the fleet's level Sep 30)
 ok(cap < S["gas_price"] and cap * E.RELAY_SHOOT_GAS <= 0.00008 * 1e18, "a shooter that cannot afford the 6x cap gets the cap its balance covers")
-ok(cap >= S["base_fee"], "and that cap still clears a 10x ramped base fee (0.00008 ETH covers 0.31 gwei at 250k gas)")
+ok(cap >= S["base_fee"], "and that cap still clears a 10x ramped base fee (0.00008 ETH covers 0.29 gwei at 250k gas with 10% spare)")
 ok(E.shot_gas_price(S["gas_price"], 0.001) == S["gas_price"], "a shooter with the balance keeps the full cap")
 S["shooter_nonce"] = {"a": 1, "b": 2, "c": 3}; S["shooter_eth"] = {"a": 0.00008, "b": 0.00001, "c": 0.00008}
 ok(E.shooter_ready("a") and not E.shooter_ready("b") and not E.shooter_ready("d"), "ready: a nonce, the float and a cap over the base fee; an empty or unknown shooter is not")
@@ -82,12 +82,12 @@ bal[E.RELAY.lower()] = 0.0007; bal[E.WALLET.lower()] = 0.0016; sent.clear(); log
 E.relay_topup("under the stake"); E.relay_topup("under the stake")
 ok(not sent and sum(1 for d in logged if d["ev"] == "alarm") == 1, "a wallet that cannot cover 10% of the need: no send, one alarm (not one a minute)")
 # ---- shooter_topup funds what the wallet covers, the emptiest first ------------------------------------------------------
-S["wallet_eth"] = 0.00062; S["shooter_eth"] = {"a": 0.00001, "b": 0.00003, "c": 0.00002}; S["shooter_nonce"] = {"a": 1, "b": 1, "c": 1}; sent.clear(); logged.clear()
+S["wallet_eth"] = 0.00061; S["shooter_eth"] = {"a": 0.00001, "b": 0.00003, "c": 0.00002}; S["shooter_nonce"] = {"a": 1, "b": 1, "c": 1}; sent.clear(); logged.clear()
 E.refresh_shooters = lambda **kw: None; E.next_nonce = lambda: 9
 E.shooter_topup(["a", "b", "c"])
-ok([lab for lab, _, _ in sent] == ["shooter_gas"] and abs(sent[0][1] - (3 * E.SHOOTER_MIN_ETH - 0.00001)) < 1e-12, "wallet 0.00062 (0.00012 spare): the emptiest shooter is funded to 0.00012, the others wait")
+ok([lab for lab, _, _ in sent] == ["shooter_gas"] and abs(sent[0][1] - (3 * E.SHOOTER_MIN_ETH - 0.00002)) < 1e-12, "wallet 0.00061 (0.00011 spare): the emptiest (needs 0.00011) fits exactly; funded, the others wait")
 ok(logged[-1]["ev"] == "shooter_topup" and logged[-1]["funded"] == 1 and logged[-1]["shooters"] == 3, "and the log says 1 of 3 funded")
-S["wallet_eth"] = 0.00051; sent.clear(); logged.clear(); S["shooter_alarm_at"] = 0.0
+S["wallet_eth"] = 0.00051; sent.clear(); logged.clear(); S["shooter_alarm_at"] = -1e9
 E.shooter_topup(["a", "b", "c"]); E.shooter_topup(["a", "b", "c"])
 ok(not sent and sum(1 for d in logged if d["ev"] == "alarm") == 1, "nothing affordable: one alarm, then silence")
 print(f"\n{checks} checks passed")
