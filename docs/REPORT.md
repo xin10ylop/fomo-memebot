@@ -4662,3 +4662,15 @@ and crowd files; the class the engine fires on since 5ak (3+ fleets before the t
   of +8.7 points at 3 fleets, +12.6 at 4, +20.5 at 5+; live we land first on 13 of 28 fills. What decides first against
   second is the timing of the shots against the fleets' shots around the boundary (lead 46 ms, step 2 ms). The live landing
   data (which shot filled, its offset from the flip) is the input for that study; requested from the box.
+
+**Addendum, Sep 30 22:15 UTC: the landing data (28 live fills, Sep 26-30).** Position decides the live return: first in the
+seat block +10.7% (n 14, 50% positive), one buy ahead -4.5% (9, 11%), two or more ahead +0.2% (5). Which of our 35 shots
+filled tells where the block's seal fell relative to the aim (-46 ms + 2 ms per shot): median -18 ms on the 21 straddled
+bursts (the aim runs about 18 ms late), and 7 bursts of 28 began after the seal (the seal more than 46 ms before the aim).
+Those seven landed first 43% of the time with 1.29 buys ahead on average and paid +0.9%; the straddled 21 landed first 52% of
+the time, 0.62 ahead, +5.0%. The seat block itself seals 70-250 ms (median 143) after the filling shot leaves, so the block
+collects everything that arrives in that window and orders it by intake; our 2 ms spacing is the width in which a fleet's
+shot can slip ahead, and half the straddled fills still had someone ahead. The lever that follows: a longer lead (about
++20 ms) with a longer burst to keep the tail (two shots per shooter at consecutive nonces, 70 shots, 140 ms), or a 1 ms
+spacing at the same coverage; either is about +1 point a fill on this sample against +$0.35 of reverted-shot gas a burst,
+a wash at $25 and positive from $50. Queued with the stake-by-signal design for the $50 step; nothing changed tonight.
