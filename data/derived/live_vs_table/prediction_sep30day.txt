@@ -1,0 +1,13 @@
+5 qualifying launches scored, Sep 30 06:14 - Sep 30 07:13 UTC
+when          launch       k fleets by block           k-1 tick  k-2  eng  behind1 h300
+Sep 30 06:14  0x54128b9a   7 [0, 0, 0, 0, 0, 0, 0, 0]    0    0    0    0        +77.7%
+Sep 30 06:46  0xe73999f0   1 [0, 2]                      0    0    0    0         +4.5%
+Sep 30 06:57  0x6e44566a   6 [0, 0, 0, 0, 0, 0, 1]       0    0    0    0        -34.5%
+Sep 30 07:03  0x95c280ad   9 [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]    0    0    0    0         -1.1%
+Sep 30 07:13  0xee634386   2 [0, 3, 3]                   3    3    0    0        -13.3%
+
+k-1                    1 fires  mean -13.3%  median -13.3%  win  0%  dead  0%  $-2.06 total at $13 after gas
+tick's shot (0.76)     1 fires  mean -13.3%  median -13.3%  win  0%  dead  0%  $-2.06 total at $13 after gas
+k-2                  0 fires
+ENGINE (k-2 after registration) 0 fires
+refused (k-1 < 2)      4        mean +11.7%  median  +1.7%  win 50%
