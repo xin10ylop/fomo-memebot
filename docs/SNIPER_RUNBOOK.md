@@ -1380,3 +1380,5 @@ Check: `sudo systemctl status sniper-notify | head -3`; `sudo python3 deploy/tg_
 `sudo systemctl disable --now sniper-notify`.
 
 **Installed Sep 30 11:35 UTC** on the box (chat id detected from the START press; service active).
+
+**Sep 30 11:55 reading (piece sep30pm, 08:19-11:49).** Usual view 2 fills (-9.7%, -11.9%); the engine fired nothing: 08:28 counted 1 fleet of 71 wallets where the chain view counts 2 (gate closed), 09:59 the bundle was not visible on the feed within 900 ms / 9 blocks (skip). Both saved money this time; both are measurement gaps that would skip winners at the same rate, tallied as classes (24.49). No 3-4% tier launch yet. P&L unchanged, relay 0.01227, no alarm, late_max 0.12 ms.
