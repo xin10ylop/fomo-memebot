@@ -1301,3 +1301,17 @@ and nothing retried. The 23:27:59 alarm asked the wallet for 0.0472 ETH (35 shoo
 
 **Sep 30 08:45 reading check.** `no confident boundary estimate` skips are creations in the last 1-2 blocks of their second (the
 seat second opens before the build; report 24.48 addendum): 2 of 51 would-fires since Sep 28, both losers. Not a fault; no change.
+
+
+## 5ag. Proposed: the tier gate widened to 300 bps (creator tax up to 3%, tier 4%) (Sep 30)
+
+Report 24.49 addendum: over Sep 27-30 the launches with a 201-300 bps creator tax paid +26.7% a fire under the live rule (11
+would-fires, +$38 at $13, +$73 at $25), against +7.2% in our 100-200 bps band; the 0-99 bps band stays dead. One setting
+changes; the engine reads the tax from the creation calldata and models the seat with the live tax, so nothing else moves
+(sizing assumes TIER_ASSUMED for the stake's gross, a 1-point difference inside the 20% burst guard). Deploy with no fill open:
+
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }
+    set_kv TIER_MAX_BPS 300; cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"tier_max_bps": [0-9]*\|"dry_run": [a-z]*'
+
+Check: `"tier_max_bps": 300`. From then on the readings' scan runs `e1_multi ... 0.02 0.04` and the reconciliation tags each
+fill with its tier band; the $25 window and the sequential test count the new band separately for its first 20 fills.

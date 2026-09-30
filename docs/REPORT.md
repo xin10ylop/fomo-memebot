@@ -4613,3 +4613,19 @@ engine never counted pay -$7.73 last in block. The gate window stays at 36 ms.
 
 What the six days say about the P&L: the engine's expectancy is in the fired class and in it in the 5+-fleet launches; the
 refusals are right; the losses of the period came from the relay fault (24.48), not from the filters.
+
+**Addendum, Sep 30 10:00 UTC: the tier gate's refusals, three days, the exact live rule.** `e1_multi` re-run with the tier band
+open (0-20%) over Sep 27 09:15 - Sep 30 08:26: 459 qualifying launches at any tier, 279 outside the 2-3% band the engine trades
+(`data/derived/e1_wide`, `launches_wideout_*`, crowd, hold grids, `prediction_wideout_*`). Scored as the live rule scores: 2+
+fleets before the tick (k-1), the seat behind one, hold 11, $13.
+- Creator tax 0-99 bps (tier 1-1.9%), 233 launches: the bots leave them alone; 16 would-fires, +1.7% mean, +$3.57 over three
+  days; one at the floor view. The Sep 16-18 verdict stands; the gate stays for this band.
+- **Creator tax 201-300 bps (tier 3.1-4%), 42 launches: 11 would-fires, +26.7% mean, median +19.8%, 73% positive, +$38.15
+  at $13 (+$73 at $25); floor view 6 fires +46% mean, +$35.92; the 31 refused by the fleets gate -$31.62 (the gate works in
+  this band too).** Without the one +135% launch: 10 at +15.8% mean, +$24. Hold 15 pays less (+$24.85), as in our band. By
+  day: +$1.37 (2), +$6.91 (2), +$29.86 (7). This band was never priced when the gate was set (24.14 priced 100-200 bps).
+- Creator tax 301-500 bps (tier 4.1-6%): 4 launches, one would-fire (-15.6%, a 4.37 ETH bundle, over the cap anyway). No
+  evidence to include it.
+Our own band over the same three days: 51 would-fires, +7.2% mean, +$48. The 3.1-4% band adds a fifth as many fires at
+three and a half times the return per fire. Proposed: `TIER_MAX_BPS` 200 -> 300 (runbook 5ag), the readings' scan widened to
+tiers 2-4%, the new band tracked as its own slice of the sequential test.
