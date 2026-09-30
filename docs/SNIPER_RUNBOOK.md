@@ -1442,3 +1442,5 @@ chain-side pieces keep scoring the 2-fleet launches, so the readings will show i
     set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv ATTACK_MIN 3; cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"attack_min": [0-9]*\|"tier_max_bps": [0-9]*\|"dry_run": [a-z]*'
 
 Check: `"attack_min": 3`.
+
+**Deployed Sep 30 20:40 UTC:** `"attack_min": 3`, release 6.11, tier max 300, live.
