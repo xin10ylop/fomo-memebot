@@ -1369,22 +1369,56 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
 
 
 # ------------------------------------------------------------------------------------------------------------- trading
-def wait_receipt(h, timeout=10.0, ans=None, stop=None):
-    """the receipt of h within timeout; None sooner when ans (the fire() answers) shows every endpoint refused the transaction, or stop is set"""
-    t0 = mono()
+def wait_receipt(h, timeout=10.0, ans=None, stop=None, alt_every=2):
+    """the receipt of h within timeout; None sooner when ans (the fire() answers) shows every endpoint refused the transaction, or stop is set.
+    6.11: every alt_every-th poll also asks the sequencer's own RPC (rpc_logs): the provider's receipts ran 20 s behind the chain on
+    Sep 30 16:53 and the engine re-sent a landed sell thirteen times (burst_receipts polls 35 hashes at once, so it asks it rarely)"""
+    t0 = mono(); n = 0
     while mono() - t0 < timeout:
         if ans is not None and SENDER.rejected(ans):
             return None
         if stop is not None and stop.is_set():
             return None
-        try:
-            r = rpc.call("eth_getTransactionReceipt", [h])
-            if r:
-                return r
-        except Exception:
-            pass
-        time.sleep(0.05)
+        for node in ((rpc, rpc_logs) if alt_every and n % alt_every == alt_every - 1 else (rpc,)):
+            try:
+                r = node.call("eth_getTransactionReceipt", [h], tries=1)
+                if r:
+                    return r
+            except Exception:
+                pass
+        n += 1; time.sleep(0.05)
     return None
+
+
+def nonce_latest(node):
+    """the wallet's confirmed nonce on one node (None when it does not answer)"""
+    try:
+        return int(node.call("eth_getTransactionCount", [WALLET, "latest"], tries=1), 16)
+    except Exception:
+        return None
+
+
+def landed_on_chain(nonce, effect):
+    """6.11: whether the wallet's transaction at nonce has landed and done its job, read from a node that has seen it land: a node counts
+    only when its confirmed nonce is past `nonce` (a node behind the buy would show a zero token balance for the wrong reason), and then
+    effect(node) says whether the job is done (the tokens gone for a sell, the allowance in place for an approve)"""
+    for node in (rpc_logs, rpc):
+        n = nonce_latest(node)
+        if n is not None and n > nonce:
+            try:
+                if effect(node):
+                    return True
+            except Exception:
+                pass
+    return False
+
+
+def sold_on(token):
+    return lambda node: int(node.call("eth_call", [{"to": to_checksum_address(token), "data": "0x70a08231" + abi_word(WALLET)}, "latest"], tries=1), 16) == 0
+
+
+def approved_on(token, spender, amount_wei):
+    return lambda node: int(node.call("eth_call", [{"to": to_checksum_address(token), "data": "0xdd62ed3e" + abi_word(WALLET) + abi_word(spender)}, "latest"], tries=1), 16) >= amount_wei
 
 
 def burst_receipts(shots, timeout=10.0, settle_s=0.6):
@@ -1393,7 +1427,7 @@ def burst_receipts(shots, timeout=10.0, settle_s=0.6):
     res = [[hh, None, a] for hh, a in shots]; done = [False] * len(shots); stop = threading.Event(); fill_at = [None]
     def one(i):
         if res[i][0]:
-            res[i][1] = wait_receipt(res[i][0], timeout=timeout, ans=res[i][2], stop=stop)
+            res[i][1] = wait_receipt(res[i][0], timeout=timeout, ans=res[i][2], stop=stop, alt_every=10)
             if res[i][1] and res[i][1].get("status") == "0x1" and fill_at[0] is None:
                 fill_at[0] = mono()                                        # the fill's time, stamped by the poller that saw it (the loop below is 20 ms coarse and may exit first)
         done[i] = True
@@ -1420,10 +1454,14 @@ def restore_shooter_nonces(shooters_now, recs):
 
 
 def next_nonce():
-    try:
-        return int(rpc.call("eth_getTransactionCount", [WALLET, "pending"]), 16)
-    except Exception:
-        return state["nonce"]
+    """the wallet's pending nonce, the higher of two nodes' answers (6.11: a node 20 s behind hands out a nonce the chain has used)"""
+    best = None
+    for node in (rpc, rpc_logs):
+        try:
+            v = int(node.call("eth_getTransactionCount", [WALLET, "pending"], tries=1), 16); best = v if best is None else max(best, v)
+        except Exception:
+            pass
+    return best if best is not None else state["nonce"]
 
 
 def token_balance(token):
@@ -1448,13 +1486,20 @@ def tx_sell(pos, amount_wei, nonce, cap):
     return {"to": to_checksum_address(pos["curve"]), "value": "0x0", "data": "0x" + SELL_SEL.hex() + abi_word(amount_wei) + abi_word(0) + abi_word(WALLET), "gas": hex(GAS_SELL), "gasPrice": hex(int(cap)), "nonce": hex(nonce), "chainId": 4663}
 
 
-def send_confirmed(build, label, max_s):
+def send_confirmed(build, label, max_s, effect=None):
     """live only: send build(cap, nonce) and wait for its receipt; no receipt within SELL_CONFIRM_S, or a refusal, means send again
     with a doubled cap at the next free nonce. 'nonce too low' from the sequencer means an earlier attempt landed: its receipt is
-    fetched. Returns (receipt, hash), (None, last hash) after max_s."""
+    fetched. 6.11: when no node shows a receipt but a node past this nonce shows the job done (effect: the tokens gone, the
+    allowance in place), the transaction is taken as landed (an inferred receipt, status 0x1) instead of re-sent for 20 s.
+    Returns (receipt, hash), (None, last hash) after max_s."""
     t0 = mono(); cap = (state.get("base_fee") or state["gas_price"] or 10 ** 8) * SELL_GAS_HEADROOM; hashes = []; attempt = 0
     nonce = next_nonce()                                                 # the SAME nonce every attempt: a fee bump replaces the stuck transaction; a new nonce would queue behind it and both would land (audit, Sep 16)
     cap_max = max(cap, int(SELL_FEE_MAX_USD / max(state["eth_usd"], 1.0) * 1e18 / max(GAS_SELL, 1)))
+    def inferred():
+        if effect is not None and landed_on_chain(nonce, effect):
+            log({"ev": "landed_inferred", "label": label, "nonce": nonce, "hashes": hashes, "note": "no node shows the receipt yet; a node past this nonce shows the job done"})
+            return {"status": "0x1", "inferred": True, "nonce": nonce}
+        return None
     while mono() - t0 < max_s:
         attempt += 1; h = submit(build(min(cap, cap_max), nonce), label); ans = SENDER.mine() or []
         if h:
@@ -1467,9 +1512,14 @@ def send_confirmed(build, label, max_s):
                 rec = wait_receipt(hh, 1.0)
                 if rec:
                     return rec, hh
+            rec = inferred()
+            if rec:
+                return rec, (hashes[0] if hashes else None)
             nonce = next_nonce()
-        elif "already known" in txt:                                     # the same transaction is still in the pool: raise the fee and re-send at the same nonce
-            pass
+        else:                                                            # 'already known': the same transaction is still in the pool, the fee is raised and it is re-sent at the same nonce
+            rec = inferred()                                             # the receipt of the attempt just sent may be invisible on a lagging node while the chain has it
+            if rec:
+                return rec, (hashes[-1] if hashes else None)
         if not h:
             time.sleep(0.2)
         cap = min(cap * 2, cap_max)
@@ -1487,7 +1537,7 @@ def ensure_approved(pos, amount_wei, max_s):
     if al is not None and al >= amount_wei:
         return True
     log({"ev": "approve_missing", "curve": pos["curve"], "approve_hash": h, "allowance": al, "note": "sending the approve again with a high cap"})
-    rec, h2 = send_confirmed(lambda cap, nonce: tx_approve(pos, nonce, cap), "approve", max_s)
+    rec, h2 = send_confirmed(lambda cap, nonce: tx_approve(pos, nonce, cap), "approve", max_s, effect=approved_on(pos["token"], pos["curve"], amount_wei))
     if h2:
         pos["approve_hash"] = h2
     if rec and rec.get("status") == "0x1":
@@ -1537,7 +1587,7 @@ def close_position(pos, why):
             log({"ev": "alarm", "what": "approve not confirmed: the sell would revert; retrying in the background", "curve": pos["curve"]})
             threading.Timer(5.0, close_position, args=(pos, "retry after approve")).start(); return
         for _ in range(3):
-            rec, hs = send_confirmed(lambda cap, nonce: tx_sell(pos, amount, nonce, cap), "sell", max(2.0, SELL_MAX_S - (mono() - t0)))
+            rec, hs = send_confirmed(lambda cap, nonce: tx_sell(pos, amount, nonce, cap), "sell", max(2.0, SELL_MAX_S - (mono() - t0)), effect=sold_on(pos["token"]))
             if hs:
                 pos["sell_hash"] = hs; save_state()
             if rec and rec.get("status") == "0x1":
@@ -2671,7 +2721,7 @@ async def main():
     load_state(); new_day_check(); venue_check(first=True); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 6.10, "release": "6.10", "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.11, "release": "6.11", "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

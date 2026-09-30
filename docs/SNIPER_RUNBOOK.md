@@ -1382,3 +1382,31 @@ Check: `sudo systemctl status sniper-notify | head -3`; `sudo python3 deploy/tg_
 **Installed Sep 30 11:35 UTC** on the box (chat id detected from the START press; service active).
 
 **Sep 30 11:55 reading (piece sep30pm, 08:19-11:49).** Usual view 2 fills (-9.7%, -11.9%); the engine fired nothing: 08:28 counted 1 fleet of 71 wallets where the chain view counts 2 (gate closed), 09:59 the bundle was not visible on the feed within 900 ms / 9 blocks (skip). Both saved money this time; both are measurement gaps that would skip winners at the same rate, tallied as classes (24.49). No 3-4% tier launch yet. P&L unchanged, relay 0.01227, no alarm, late_max 0.12 ms.
+
+
+## 5aj. Engine 6.11: the exit reads the chain from two nodes (Sep 30)
+
+**What happened (16:53 UTC, curve 0xc2f323a4).** The buy filled; the approve and the sell went out 3 s later than usual and
+landed at +22 and +40 blocks; then the provider's node, which the engine reads receipts and nonces from, ran about 20 s behind
+the chain: no receipt for the sell, the same pending nonce, so `send_confirmed` re-sent the sell thirteen times (the sequencer
+answered "nonce too low" each time, meaning the first one had landed), raised `sell not confirmed after 21.3 s`, kept the
+position open (a launch at 16:53:19 was refused for it) and closed it 27 s after the buy when the retry saw the token balance
+at zero. The 15:30 trade had the same shape with a 4.7 s confirmation. On the chain: no fee ramp, the first attempt landed,
+the extra sends cost nothing. The three earlier trades of the day confirmed in 0.13 s. Cost this time: nothing (both tokens
+flat); on a winner a sell landing at +40 blocks instead of +11, or a refused launch, would have.
+
+**6.11.**
+- `wait_receipt` asks the sequencer's own RPC (`rpc_logs`, rpc.mainnet.chain.robinhood.com) on every second poll (every tenth
+  for the burst's 35 hashes); `next_nonce` takes the higher of the two nodes' pending counts.
+- `landed_on_chain(nonce, effect)`: a node whose confirmed nonce is past the transaction's, and on which the job is done (the
+  tokens gone for a sell, the allowance in place for an approve), proves the landing; a node behind the buy can never count
+  (its zero balance predates the buy). `send_confirmed(..., effect=)` uses it after a missed receipt and on "nonce too low",
+  returning an inferred receipt (status 0x1, `landed_inferred` in the log) instead of re-sending for 20 s.
+- Nothing on the fire path changes. Tests: `tests/test_sell_landing.py` (12 checks).
+
+Deploy (the engine keeps an open position across a restart and resumes its sell):
+
+    cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"tier_max_bps": [0-9]*\|"dry_run": [a-z]*'
+
+Check: `"release": "6.11"`. In the readings: `sell_confirm_s` back under a second, no `resend` chains, no `landed_inferred`
+unless the provider lags again (then one per trade, and the trade closes within a second anyway).
