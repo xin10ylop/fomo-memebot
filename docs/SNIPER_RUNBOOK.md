@@ -1410,3 +1410,7 @@ Deploy (the engine keeps an open position across a restart and resumes its sell)
 
 Check: `"release": "6.11"`. In the readings: `sell_confirm_s` back under a second, no `resend` chains, no `landed_inferred`
 unless the provider lags again (then one per trade, and the trade closes within a second anyway).
+
+**Deployed Sep 30 17:35 UTC:** release 6.11, tier max 300, live. The two trades before it (17:09 +44.8%, first in the block, +$10.68; 17:12 -0.8%) confirmed in 0.22 s and 0.21 s at +12 blocks: the exit path is fine when the provider keeps up.
+
+**Sep 30 17:40 reading (pieces sep30eve, sep30night).** 11:49-17:22: five fires as the chain view named them (13:56 guard revert, the first 3-4% band fire; 15:13 +1.6%; 15:30 -11.9%; 16:53 -11.9%; 17:09 +44.8% landed first; 17:12 -0.8%), the 14:57 launch skipped for an invisible bundle (-8.8% avoided). P&L +$4.34 -> +$14.99, capital $56.34, the $25 window at 8 fills of 20.
