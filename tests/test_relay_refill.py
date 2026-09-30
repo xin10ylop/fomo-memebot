@@ -90,4 +90,11 @@ ok(logged[-1]["ev"] == "shooter_topup" and logged[-1]["funded"] == 1 and logged[
 S["wallet_eth"] = 0.00051; sent.clear(); logged.clear(); S["shooter_alarm_at"] = -1e9
 E.shooter_topup(["a", "b", "c"]); E.shooter_topup(["a", "b", "c"])
 ok(not sent and sum(1 for d in logged if d["ev"] == "alarm") == 1, "nothing affordable: one alarm, then silence")
+
+
+# ---- 6.12: the team-bundle gate (off by default) --------------------------------------------------------------------------
+E.NAMED_MAX = 0
+ok(E.team_bundle(["a"] * 30) is False, "NAMED_MAX 0: the gate is off, thirty named wallets pass")
+E.NAMED_MAX = 12
+ok(E.team_bundle(["a"] * 12) is False and E.team_bundle(["a"] * 13) is True, "NAMED_MAX 12: twelve pass, thirteen are a team bundle")
 print(f"\n{checks} checks passed")

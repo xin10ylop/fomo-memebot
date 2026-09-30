@@ -21,7 +21,7 @@ def flag(k):
 T0 = calendar.timegm(time.strptime(arg("--from", "2026-09-21 09:40"), "%Y-%m-%d %H:%M")); T1 = calendar.timegm(time.strptime(arg("--to", "2026-09-28 09:40"), "%Y-%m-%d %H:%M"))
 HOLD = int(arg("--hold", "11")); NO_CAP = flag("--no-cap"); NO_REPEAT = flag("--no-repeat"); VIEW = arg("--view", "k-2"); REG = flag("--reg"); DUMP = arg("--dump"); SLIP = float(arg("--slip", "0.07"))   # --slip: the minOut guard's tolerance to test (the live BURST_SLIP is 0.07)   # --dump file.json: every launch's row (disposition, fleets at k-2/k-1/k, guard ratio, returns by position and hold)   # --reg: count the registration block's shots (the engine does when its launch thread wins the race: 3 of 4 live cases)
 LIVE = {"SEND_MODULE": "", "PRIVATE_KEY": "", "LOG_PATH": "/tmp/engine_replay.jsonl", "SEAT": "E1", "ATTACK_MIN": os.environ.get("REPLAY_ATTACK_MIN", "2"), "GATE_CLOSE_MS": "36", "TRADE_HOURS": "",
-        "MIN_FOLLOW_ETH_60": "0", "TIER_MIN_BPS": "100", "TIER_MAX_BPS": os.environ.get("REPLAY_TIER_MAX", "300"), "BUNDLE_MIN": "3", "BUNDLE_MIN_ETH": "0.3", "BUNDLE_MAX_ETH": "0" if NO_CAP else "3.0",
+        "MIN_FOLLOW_ETH_60": "0", "TIER_MIN_BPS": "100", "TIER_MAX_BPS": os.environ.get("REPLAY_TIER_MAX", "300"), "BUNDLE_MIN": "3", "NAMED_MAX": os.environ.get("REPLAY_NAMED_MAX", "12"), "BUNDLE_MIN_ETH": "0.3", "BUNDLE_MAX_ETH": "0" if NO_CAP else "3.0",
         "MIN_CREATOR_SUPPLY": "0.01", "MAX_CREATOR_BUY_ETH": "2", "HOLD_BLOCKS": "9", "BURST_SLIP": "0.07", "BURST_N": "35", "STAKE_MIN": "13", "STAKE_MAX": "13",
         "WALLET": "0xe0686dc72b04c12ceefeea75e286e4ef7c056f01", "RELAY": "0xe8e98c3514d5bd83fdd01360896f2382b861a720"}
 for k, v in LIVE.items(): os.environ[k] = v
@@ -110,6 +110,7 @@ for r, l, h in launches:
     elif tk0 <= 0 or tk0 >= Y0: reasons.append("no launch-block buy")
     elif tk0 < E.MIN_CREATOR_SUPPLY * Y0: reasons.append("creator supply < 1%")
     if (h.get("init_buy_eth") or 0.0) > E.MAX_CREATOR_BUY_ETH: reasons.append("creator buy > 2 ETH")
+    if E.team_bundle(named): reasons.append(f"team bundle ({len(named)} named > {E.NAMED_MAX})")
     if reasons: rec["why"] = "PRE " + reasons[0]; out.append(rec); continue
     gates = []
     nb = bundle_buyers(r, named)

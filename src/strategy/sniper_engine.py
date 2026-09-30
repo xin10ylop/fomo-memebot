@@ -84,6 +84,14 @@ HOLD = float(os.environ.get("HOLD_S", "5")); SUPPLY_FRAC = float(os.environ.get(
 TAKE_PROFIT = float(os.environ.get("TAKE_PROFIT", "0.5"))                # sell when the curve price is up this fraction over our entry (0 = off)
 SEAT = os.environ.get("SEAT", "E2").upper(); EXEMPT = os.environ.get("EXEMPT", "0") == "1"
 BUNDLE_MIN = int(os.environ.get("BUNDLE_MIN", "3" if SEAT in ("E1", "E2") else "0"))
+NAMED_MAX = int(os.environ.get("NAMED_MAX", "0"))                        # 6.12 (5al): a creation naming more than this many exempt wallets is a team bundle: the crowd is partly the team, and it dumps. Sep 24-30, 3+ fleets:
+                                                                          # named 9+ paid -4.3% (n 18, positive on 1 day of 7), named <= 8 +26.4% (n 39, positive every day). 0 = off.
+
+
+def team_bundle(named):
+    """6.12: True when the creation names more exempt wallets than NAMED_MAX (13-27 named wallets on the week's losers, 3-8 on the winners)"""
+    return NAMED_MAX > 0 and len(named) > NAMED_MAX
+
 BUNDLE_MIN_ETH = float(os.environ.get("BUNDLE_MIN_ETH", "0.3"))
 BUNDLE_MAX_ETH = float(os.environ.get("BUNDLE_MAX_ETH", "0"))
 TAXED_HELPER_SELS = {x.strip().lower().replace("0x", "") for x in os.environ.get("TAXED_HELPER_SELS", "4d819a2a").split(",") if x.strip()}   # 6.6: helper selectors that buy in the helper's own name, taxed 97% in the creation second (report 24.40)     # 0 = no cap. A team that puts in more than this has already taken the move: Sep 12-16 those launches paid -0.7%, the rest +8.5% (audit_combo)
@@ -1825,6 +1833,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         prior = state["launched_today"][creator]; state["launched_today"][creator] += 1
     if SEAT in ("E0", "E1", "E2") and BUNDLE_MIN > 0 and (quote != ZERO or len(named) < BUNDLE_MIN):
         log({"ev": "skip", "why": ["cannot pass the rule from the calldata (quote or named wallets): not resolved"], "creator": creator, "named_wallets": len(named), "quote": quote}); return
+    if team_bundle(named):                                               # 6.12: the team's own wallet farm is not a crowd
+        log({"ev": "skip", "why": [f"creation names {len(named)} wallets > {NAMED_MAX} (team bundle)"], "creator": creator, "named_wallets": len(named), "quote": quote}); return
 
     def count_cands():
         cands = collections.Counter()
@@ -2721,7 +2731,7 @@ async def main():
     load_state(); new_day_check(); venue_check(first=True); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 6.11, "release": "6.11", "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.12, "release": "6.12", "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

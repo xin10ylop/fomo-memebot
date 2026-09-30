@@ -1444,3 +1444,10 @@ chain-side pieces keep scoring the 2-fleet launches, so the readings will show i
 Check: `"attack_min": 3`.
 
 **Deployed Sep 30 20:40 UTC:** `"attack_min": 3`, release 6.11, tier max 300, live.
+
+
+## 5al. Engine 6.12: the team-bundle gate, built and off (Sep 30 21:30 UTC)
+
+`NAMED_MAX` (default 0 = off): a creation naming more exempt wallets than this is skipped as a team bundle (report 24.50).
+On the week it is a wash in dollars on top of the other gates (10 fewer fires, +$0.6), so it stays off; `REPLAY_NAMED_MAX=12`
+replays it. The engine's release string moves to 6.12 with the next restart; no restart is needed for this.

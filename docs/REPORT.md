@@ -4635,3 +4635,30 @@ splits the fills by the fleets counted before the tick: 2 fleets, 38 fills, +1.7
 whole sum on Sep 25 and losses on each of the five days since; 3+ fleets, 40 fills, +22.2%, 72% positive, +$115 and positive
 every day. The gate at 3 keeps the dollars (+$99.92 against +$94.45), halves the fires and the gas, and turns 56% positive into
 72%. Deployed; the 2-fleet launches stay scored on the chain side so the gate can come back down if they pay again.
+
+
+### 24.50 Making the model more profitable: what the week's data supports and what it does not (Sep 30 21:30 UTC)
+
+Asked to find more P&L with everything measured so far. Population: the 366 qualifying launches of Sep 24-30 with hold grids
+and crowd files; the class the engine fires on since 5ak (3+ fleets before the tick, 57 launches); the seat behind one, hold 11.
+- **Exit: nothing to gain.** By hold on the 3+ class: 9 blocks +15.1%, 11 +16.7%, 13 +12.4%, 15 +10.3%, 30 +11.0%, 60 +6.1%,
+  300 +10.3%. A +50% take-profit raises the positive share to 60% and lowers the mean to +8.1%; a -20% stop lowers both. The
+  live hold (9 blocks, sells landing at 11-13) is the top of the grid.
+- **Fleets count is the signal, and it is steep:** 3 fleets +13.0% (n 33), 4 +3.3% (12), 5+ +40.2% (12, 83% positive).
+  Stake by signal - $25 at 3-4 fleets, $50 at 5+ - pays +$359 against +$238 flat on the week's model. The stake is fixed when
+  the shots are signed and the count is known only when the gate opens, so this needs two pre-signed amounts per shooter and
+  the gate choosing at fire time, plus a relay float for $50. Designed as the shape of the $50 step (5ac), not deployed.
+- **Team bundles lose.** Creations naming 9+ exempt wallets (13-27 on the week; the 3-8 of the winners): -4.3% at 3+ fleets
+  (n 18, positive on one day of seven) against +26.4% for the rest (39, positive every day); across all 366 launches -3.1%
+  against +1.5%. Visible in the calldata before the tick. But in the full replay most of them are already refused by the
+  creator-supply and creator-repeat gates: the cap on top of every gate removes 10 fires (9 fills at +2.3%, +$5 at $25, one
+  guard revert) and leaves +$100.55 against +$99.92, 77% positive against 72%. A wash in dollars, cleaner fires. Built as
+  `NAMED_MAX` (engine 6.12, default off, `team_bundle()`), replayable with `REPLAY_NAMED_MAX`; not switched on.
+- **Tier 3% (200 bps) against 2-2.9%** at 3+ fleets: +28.0% (31) against +3.8% (24). Mostly the same launches as the team
+  bundles (the 2%-tier factory template names 11-30 wallets); on its own not a rule, and the 2-2.9% fills are positive.
+- **The 2-fleet class does not come back** under any split tried (bundle size, early crowd, creator buy, tier, named): Sep
+  26-30 -0.6% (36), with named <= 8 -0.7% (24). The 3-fleet gate stands.
+- **First place is the largest lever left:** on the 3+ class first in the block pays +28.7% against +16.7% behind one, a gap
+  of +8.7 points at 3 fleets, +12.6 at 4, +20.5 at 5+; live we land first on 13 of 28 fills. What decides first against
+  second is the timing of the shots against the fleets' shots around the boundary (lead 46 ms, step 2 ms). The live landing
+  data (which shot filled, its offset from the flip) is the input for that study; requested from the box.
