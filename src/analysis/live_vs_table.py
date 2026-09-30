@@ -12,7 +12,7 @@ each launch rebuilds exactly what src/analysis/e1_multi.py's score() would have 
 so the gap between the tables and the wallet splits into: the seat we got (first - landed), the hold we held
 (landed - landed@exit) and everything else (landed@exit - actual: fees, curve model, sell slippage). Our own events are
 removed from the launch's tape before modelling, so the model does not count our own buy as somebody else's."""
-import json, time, urllib.request, time, sys, os, collections, statistics as st
+import json, time, urllib.request, sys, os, collections, statistics as st
 RPC = os.environ.get("RPC_URL", "https://rpc.mainnet.chain.robinhood.com"); H = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 curl/8"}
 BUY = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"; SELL = "0x8113d738abdcb6b38357e9d53a54a7157861a09031b453651f0fe7fe151f59df"
 V2F = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"; WALLET = "0xe0686dc72b04c12ceefeea75e286e4ef7c056f01"; RELAY = "0xe8e98c3514d5bd83fdd01360896f2382b861a720"
