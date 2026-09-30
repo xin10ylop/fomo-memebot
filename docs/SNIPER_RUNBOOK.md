@@ -1255,3 +1255,37 @@ The direct signer proves each key against eth_account on its first use, so the f
     cd ~/fomo-memebot && git pull -q && sudo cp deploy/send_step.py /etc/sniper/send_step.py && sudo systemctl restart sniper-engine && sleep 6 && sudo grep -h '"ev": "start"' /var/log/sniper/engine.jsonl | tail -1 | grep -o '"version": [0-9.]*'
 
 Check: the next burst's `sign_ms` in the reading's sent_burst line is about 4, not 22.
+
+
+## 5af. Engine 6.10: the relay refilled from the loop; the shooters' gas float on the typical base fee (Sep 30)
+
+**What happened.** The night of Sep 29-30 was the busiest window in days (51 launches; the usual-view prediction +$21 at $13,
+two big fills: 20:49 +61%, 21:34 +118%). The engine fired four times (19:01 guard revert, 19:11 -0.9%, 19:30 -6.3%, 20:08 -0.8%,
+every one as predicted) and then refused **32 launches over 7 hours** with `the relay holds 0.00557 ETH ($14.95) < the stake $25`,
+the two big ones among them (about $45 not taken at $25). The refill after the 20:08 exit left the relay short of the float and
+nothing retried it: `relay_topup` ran only after an exit, and there was no exit because nothing fired. At 23:27:59 a second alarm:
+`35 shooters are out of gas and the wallet cannot refill them` — 6.9 sized a shooter's gas float on the 6x price cap at the instant
+base fee, so one launch's fee ramp marked all 35 low at once and asked the wallet for 3x the ramped cap.
+
+**6.10.**
+- `relay_short()`: the relay under the next stake; the background loop calls `relay_topup("under the stake")` every `RELAY_RETRY_S`
+  (60 s) while it is, outside a trade (`busy_until`), in the loop's own thread so the nonce is re-read on the next poll. One refill at
+  a time (`_relay_lock`). After a wallet send (relay or shooter top-up) the local nonce follows at once (the 6.8 review's stale window).
+- `relay_topup` re-reads the wallet two seconds later when the first read cannot cover the need (the sell's proceeds may not be on
+  the endpoint yet). The "wallet cannot refill" alarm at most every 30 minutes.
+- Shooters: the float is sized on `SHOOTER_HEADROOM` (2) x the ten-minute median base fee (`base_fee_typical`), never below
+  `SHOOTER_MIN_ETH`; each shot's price cap is trimmed to what its shooter's balance covers (`shot_gas_price`); `shooter_ready` needs a
+  nonce, the float and a cap over the current base fee. The top-up funds as many shooters as the wallet covers, the emptiest first.
+  At today's fees nothing changes (need 0.00004, target 0.00012); a ramp no longer empties the fleet.
+- `deploy/englog.py HOURS`: the log in time order across rotations, for the readings' greps.
+
+Tests: `tests/test_relay_refill.py` (21 checks), `tests/test_feed_dual.py` (18). Deploy (the engine deposits the relay itself
+within a minute of the start; no manual deposit):
+
+    cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 30 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"\|relay_topup\|"ev": "alarm"' | tail -3 | cut -c1-170 && sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py status 0.015412 | tail -2
+
+Check: `"version": 6.10`, a `relay_topup` line with `"why": "under the stake"` and `"landed": true`, the relay at about 0.0111 ETH in
+the status. The reading's log block from now on:
+
+    sudo python3 deploy/englog.py 12 > /tmp/eng.jsonl; grep -c 'not fresh' /tmp/eng.jsonl; grep -c 'bundle not visible' /tmp/eng.jsonl; grep -c 'feed2_error' /tmp/eng.jsonl; grep -h '"ev": "alarm"\|"ev": "relay_topup"\|"ev": "shooter_topup"' /tmp/eng.jsonl | tail -4 | cut -c1-200
+    python3 -c "import json,datetime as d;[print(d.datetime.fromtimestamp(e['t'],d.timezone.utc).strftime('%H:%M:%S'),'gated',e.get('gated'),'late_max_ms',max(e.get('late_ms') or [0])) for e in map(json.loads,open('/tmp/eng.jsonl')) if e.get('ev')=='sent_burst']" | tail -8

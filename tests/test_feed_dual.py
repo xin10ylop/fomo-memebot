@@ -83,7 +83,14 @@ ok(S["venue_ok"] is True, "back to 3 s: the guard opens")
 # ---- gas: the cost estimate on the base fee, the shooters' need on the cap -----------------------------------------
 S["base_fee"] = 20_000_000; S["gas_price"] = int(S["base_fee"] * 6.0); S["eth_usd"] = 2700.0
 ok(abs(E.gas_cost_usd() - E.burst_gas_units() * 20_000_000 / 1e18 * 2700.0) < 1e-9, "the gas gate prices the round trip at the base fee, not the cap")
-ok(abs(E.shooter_need_eth() - max(E.SHOOTER_MIN_ETH, E.RELAY_SHOOT_GAS * S["gas_price"] / 1e18 * 1.1)) < 1e-15 and E.shooter_need_eth() <= 0.0001, "a shooter's need follows the cap and stays under its target float at today's base fee")
-S["gas_price"] = int(0.5e9 * 6.0)
-ok(E.shooter_need_eth() > E.SHOOTER_MIN_ETH and E.shooter_target_eth() == 3 * E.shooter_need_eth(), "under a fee ramp the need and the top-up target rise together")
+S["base_fee_hist"].clear()
+ok(abs(E.shooter_need_eth() - max(E.SHOOTER_MIN_ETH, E.RELAY_SHOOT_GAS * S["base_fee"] * E.SHOOTER_HEADROOM / 1e18 * 1.1)) < 1e-15 and E.shooter_need_eth() <= 0.0001, "6.10: a shooter's need follows the typical base fee (x2), not the 6x cap, and stays under its target float today")
+for _ in range(20):
+    S["base_fee_hist"].append(S["base_fee"])
+S["base_fee"] = int(0.5e9); S["gas_price"] = int(S["base_fee"] * 6.0)
+ok(E.shooter_need_eth() == E.SHOOTER_MIN_ETH, "one ramped poll does not raise the need (the ten-minute median holds)")
+S["base_fee_hist"].clear()
+for _ in range(20):
+    S["base_fee_hist"].append(S["base_fee"])
+ok(E.shooter_need_eth() > E.SHOOTER_MIN_ETH and E.shooter_target_eth() == 3 * E.shooter_need_eth(), "a ramp that lasts ten minutes raises the need and the top-up target together")
 print(f"\n{checks} checks passed")

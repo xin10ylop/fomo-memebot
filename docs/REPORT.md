@@ -4559,3 +4559,23 @@ and +41% from a few hits), median -17% and -12% without one (8-10% in profit). T
 come and go within the six hours; the creator who waits holds tokens worth less than the entry. An honest launch is a lottery
 ticket whose price is the launch fee plus the creator's buy, with a negative median and a positive mean only when a creator tax
 lets the rare hit pay for the misses; that is the same answer section 13.2 gave for Sep 3.
+
+
+### 24.48 The night of Sep 29-30: four fires as predicted, then 32 launches refused by an empty relay
+
+The prediction for Sep 29 18:33 - Sep 30 05:07 (usual view, k-1 with registration): 20 fires, 15 fills, mean +8.2%, median
+-2.8%, +$21 at $13, carried by two launches (20:49 0x1327efca +61%, 21:34 0x3f6c380c +118%). The chain and the log agree on
+every decision up to 20:08: 19:01 guard revert (predicted), 19:11 -0.9% (model at our exit -0.9%), 19:30 -6.3% (-6.3%),
+20:08 -0.8% (model +5.9%: two buys ahead of us, the seat cost 9%). Then nothing fired for seven hours: the refill after the
+20:08 exit left the relay at 0.00557 ETH ($14.95), under the $25 stake, and the engine refused 32 launches for it, both big
+ones included. At $25 the two would have paid about $45; the night closed at -$2.25 on three fills and one revert.
+
+The cause is a design hole, not the model: the relay was refilled only after an exit, so a short refill had no second chance
+until the next fill, which the shortfall itself prevented. Engine 6.10 refills from the background loop whenever the relay is
+under the stake (runbook 5af). The same night showed the second hole of 6.9: the shooters' gas float was sized on the 6x price
+cap at the instant base fee, so one launch's fee ramp marked all 35 shooters out of gas at once (23:27:59) and asked the wallet
+for more than it held. 6.10 sizes the float on the ten-minute median base fee and trims each shot's cap to what its shooter can
+pay; at today's fees the shooters hold what they held.
+
+What the night says about the edge: the four decisions the engine did take were the four the prediction named, at the predicted
+outcomes; the $25 window is at 3 fills of 20 and continues.
