@@ -1329,3 +1329,27 @@ band against it. Bound: the band's own tally for its first 20 fills in the readi
 `e1_multi ... 0.02 0.04`.
 
 **Deployed Sep 30 10:40 UTC:** `"tier_max_bps": 300`, release 6.10, live. The readings tally the 201-300 bps band separately from here.
+
+
+## 5ah. The reading, current version (Sep 30): one place for both sides
+
+Both sides of a reading use the newest code: the chain side through `src/analysis/score_window.sh` (the live settings baked
+in: tiers 2-4%, hold 11, guard 0.20, the three engine views), the box side through the block below, which pulls first. When a
+live setting changes, this section and the script change with it; older reading blocks in this runbook are history.
+
+Chain side, before the box is read (the prediction is committed before the paste):
+
+    bash src/analysis/score_window.sh NAME "YYYY-MM-DD HH:MM"
+
+Box side (the owner pastes the output):
+
+    cd ~/fomo-memebot && git pull -q && sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py status 0.015412 | tail -2
+    sudo python3 src/analysis/paper_day.py --from "YYYY-MM-DD HH:MM" --stake 25 --hold 11 2>&1 | tail -8
+    python3 src/analysis/live_vs_table.py 2>&1 | tail -8
+    sudo python3 src/analysis/engine_vs_chain.py data/derived/live_vs_table/launches_NAME.json --crowd data/derived/live_vs_table/crowd_raw_NAME.json.gz --from "YYYY-MM-DD HH:MM" --to "$(date -u +'%Y-%m-%d %H:%M')" | tail -12
+    sudo python3 deploy/englog.py 12 > /tmp/eng.jsonl; grep -c 'not fresh' /tmp/eng.jsonl; grep -c 'feed2_error' /tmp/eng.jsonl; grep -h '"ev": "alarm"\|"ev": "relay_topup"\|"ev": "shooter_topup"' /tmp/eng.jsonl | tail -4 | cut -c1-200
+    python3 -c "import json,datetime as d;[print(d.datetime.fromtimestamp(e['t'],d.timezone.utc).strftime('%H:%M:%S'),'gated',e.get('gated'),'late_max_ms',max(e.get('late_ms') or [0])) for e in map(json.loads,open('/tmp/eng.jsonl')) if e.get('ev')=='sent_burst']" | tail -8
+
+`live_vs_table.py` closes with one line per creator-tax band (100-200 and 201-300 bps): the new band's fills, mean, positives
+and net, its own tally for the first 20 fills (5ag). The $25 window rule (5ac) counts every fill; the band line says whether
+the new band is carrying or dragging it.

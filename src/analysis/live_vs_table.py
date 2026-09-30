@@ -148,13 +148,16 @@ def main():
         print(f"   model at our stake: first {m_first:+.1%}  last {m_last:+.1%}  landed(h15) {m_landed:+.1%}" + (f"  landed@our exit(+{sell_blk-blk} blocks) {m_landed_x:+.1%}" if m_landed_x is not None else "") + (f"   ACTUAL {actual:+.1%}  ({eth_out-eth_in:+.5f} ETH, ${(eth_out-eth_in)*ETH_USD:+.2f})" if actual is not None else "   ACTUAL: no sell found (open or dust)"))
         if actual is not None and m_landed_x is not None:
             print(f"   split: seat {m_landed-m_first:+.1%}  hold {m_landed_x-m_landed:+.1%}  execution/fees/model {actual-m_landed_x:+.1%}")
-        rowsout.append({"cv": cv, "T0": T0, "first": m_first, "last": m_last, "landed": m_landed, "landed_x": m_landed_x, "actual": actual, "ahead": len(ahead), "fills": len(buys), "sec": sec, "stake": eth_in, "net": (eth_out - eth_in) if sells else None, "via": via, "fee_paid": fee_paid, "hold": (sell_blk - blk) if sell_blk else None})
+        rowsout.append({"cv": cv, "T0": T0, "first": m_first, "last": m_last, "landed": m_landed, "landed_x": m_landed_x, "actual": actual, "tb": L.get("tb"), "ahead": len(ahead), "fills": len(buys), "sec": sec, "stake": eth_in, "net": (eth_out - eth_in) if sells else None, "via": via, "fee_paid": fee_paid, "hold": (sell_blk - blk) if sell_blk else None})
         print()
     clean = [r for r in rowsout if r["actual"] is not None and r["fills"] == 1]
     if clean:
         print(f"=== {len(clean)} single-fill trades with a sell: mean actual {st.mean(r['actual'] for r in clean):+.1%} | model first {st.mean(r['first'] for r in clean if r['first'] is not None):+.1%} | landed(h15) {st.mean(r['landed'] for r in clean):+.1%} | landed@exit {st.mean(r['landed_x'] for r in clean):+.1%}")
         print(f"    buys ahead of us: {[r['ahead'] for r in clean]}; seconds landed: {[r['sec'] for r in clean]}; holds (blocks): {[r['hold'] for r in clean]}; fee paid: {[round(r['fee_paid'],4) for r in clean]}")
         print(f"    net ETH {sum(r['net'] for r in clean):+.5f} (${sum(r['net'] for r in clean)*ETH_USD:+.2f}) on stakes {sum(r['stake'] for r in clean):.5f} ETH; multi-fill launches: {[(r['fills'], round(r['net'],5)) for r in rowsout if r['fills'] > 1]}")
+        for lo, hi, name in ((100, 200, "creator tax 100-200 bps (the original band)"), (201, 300, "creator tax 201-300 bps (opened Sep 30 10:40 UTC, runbook 5ag)")):   # 5ah: each band on its own line
+            b = [r for r in clean if r.get("tb") is not None and lo <= r["tb"] <= hi]
+            print(f"    {name}: {len(b)} fills" + (f", mean actual {st.mean(r['actual'] for r in b):+.1%}, {sum(1 for r in b if r['actual'] > 0)} positive, net ${sum(r['net'] for r in b)*ETH_USD:+.2f}" if b else ""))
     json.dump(rowsout, open("live_vs_table.json", "w"), indent=1)
 if __name__ == "__main__":
     main()
