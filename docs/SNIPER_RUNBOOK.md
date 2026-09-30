@@ -1289,3 +1289,12 @@ the status. The reading's log block from now on:
 
     sudo python3 deploy/englog.py 12 > /tmp/eng.jsonl; grep -c 'not fresh' /tmp/eng.jsonl; grep -c 'bundle not visible' /tmp/eng.jsonl; grep -c 'feed2_error' /tmp/eng.jsonl; grep -h '"ev": "alarm"\|"ev": "relay_topup"\|"ev": "shooter_topup"' /tmp/eng.jsonl | tail -4 | cut -c1-200
     python3 -c "import json,datetime as d;[print(d.datetime.fromtimestamp(e['t'],d.timezone.utc).strftime('%H:%M:%S'),'gated',e.get('gated'),'late_max_ms',max(e.get('late_ms') or [0])) for e in map(json.loads,open('/tmp/eng.jsonl')) if e.get('ev')=='sent_burst']" | tail -8
+
+**Deployed Sep 30 05:40 UTC.** The start line shows `"version": 6.1` (the number is a float; `"release": "6.10"` is added for the
+next restart). The loop's refill sent 0.006705 ETH within 30 s of the start (`"why": "under the stake"`, landed): relay 0.01227 ETH
+($32.8, sized on the env's default ETH price before the first price poll; harmless), wallet 0.00393. The night's refill history
+(englog.py 14) settled the cause: after 19:11 and 19:30 the refill was whole (0.01015 and 0.00927 ETH, short 0); after 20:08 it
+sent 0.003731 with `short_of_float 0.00559` — the wallet read at that moment was 0.0054 ETH under what it held minutes later —
+and nothing retried. The 23:27:59 alarm asked the wallet for 0.0472 ETH (35 shooters at 3x a 12x-ramped cap); at 23:44 for
+0.0251. Under 6.10 neither would fire: the float follows the ten-minute median and a shooter at 0.00008 ETH still carries a
+0.31 gwei cap.
