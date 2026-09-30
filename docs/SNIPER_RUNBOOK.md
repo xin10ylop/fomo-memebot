@@ -1298,3 +1298,6 @@ sent 0.003731 with `short_of_float 0.00559` — the wallet read at that moment w
 and nothing retried. The 23:27:59 alarm asked the wallet for 0.0472 ETH (35 shooters at 3x a 12x-ramped cap); at 23:44 for
 0.0251. Under 6.10 neither would fire: the float follows the ten-minute median and a shooter at 0.00008 ETH still carries a
 0.31 gwei cap.
+
+**Sep 30 08:45 reading check.** `no confident boundary estimate` skips are creations in the last 1-2 blocks of their second (the
+seat second opens before the build; report 24.48 addendum): 2 of 51 would-fires since Sep 28, both losers. Not a fault; no change.

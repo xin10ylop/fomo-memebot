@@ -4579,3 +4579,13 @@ pay; at today's fees the shooters hold what they held.
 
 What the night says about the edge: the four decisions the engine did take were the four the prediction named, at the predicted
 outcomes; the $25 window is at 3 fills of 20 and continues.
+
+**Addendum, Sep 30 08:45 UTC: the "no confident boundary estimate" refusals are creations that land in the last block or two of
+their second.** 93 such skips in 72 hours; the boundary itself was confident in every one (0.82-0.96 on 300 brackets). The skip
+fires because the seat's second has already opened when the engine reaches the aim: `since_creation_ms` 69-218 for creations
+with 1-2 blocks left in their second (`same_second_blocks` 1-2: the seat second opens 100-200 ms after the creation is seen, under
+the resolve-and-build time), 850-920 for creations whose bundle took the whole wait. Sized on the 14 prediction pieces since
+Sep 28 (164 qualifying launches, 51 would-fires in the usual view): 2 would-fires had k <= 2, both losers (Sep 28 19:44 -18%,
+Sep 30 07:13 -13%). The class costs nothing; the usual view over-counts fires by it, and by no money. A side reading from the
+same table, not yet a rule: the would-fires' return by k (blocks left in the creation second) is +20% mean at k=6 (11), +10% at
+k=7 (11), and negative at k<=3 and k=8; small counts, kept for the next census.
