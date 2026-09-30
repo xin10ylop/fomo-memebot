@@ -12,4 +12,5 @@ python3 src/analysis/crowd_raw.py $D/launches_$N.json $D/crowd_raw_$N.json 2>&1 
 HOLD_OUT=$D/hold_grid_week_$N.json python3 src/analysis/hold_grid.py $D/launches_$N.json 2>&1 | tail -1
 HOLD=11 python3 src/analysis/predict_window.py $D/crowd_raw_$N.json.gz $D/hold_grid_week_$N.json $D/launches_$N.json > $D/prediction_$N.txt; cat $D/prediction_$N.txt
 for v in "--view k-2" "--view k-1 --reg" "--view k --reg"; do echo "-- $v"; python3 src/analysis/engine_replay.py $v --slip 0.20 --from "$FROM" --to "$TO" --hold 11 --list 2>&1 | grep "^week\|^dispositions\|FILL\|GUARD" | grep -v "^dispositions.*FILL [0-9]* *$" ; done
+python3 src/analysis/smart_helpers.py | head -1
 echo "== the box's reading is in runbook 5ah (git pull first)"

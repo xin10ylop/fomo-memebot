@@ -73,6 +73,9 @@ SHOOTER_TARGET_ETH = float(os.environ.get("SHOOTER_TARGET_ETH", "0.0001"))
 SHOOTER_HEADROOM = float(os.environ.get("SHOOTER_HEADROOM", "2.0"))          # 6.10: a shooter's gas float is sized on this multiple of the TYPICAL base fee (ten-minute median), not on the shots' cap: the
                                                                             # cap of each shot is trimmed to its shooter's balance instead (Sep 29 23:27: a one-launch fee ramp marked all 35 shooters low at the 6x cap and the wallet could not cover 3x that)
 RELAY_RETRY_S = float(os.environ.get("RELAY_RETRY_S", "60"))                # 6.10: the relay under the stake is refilled from the background loop this often, not only after an exit (Sep 29 20:08: one short refill, 32 launches refused over 7 h)
+STAKE_BOOST_USD = float(os.environ.get("STAKE_BOOST_USD", "0") or 0)        # 6.13 (5am): the stake when a smart helper is attacking at fire time (0 = off). Walk-forward Sep 26-30, 3+ fleets: $50 on
+                                                                          # those fills against $25 flat, +$470 against +$257; the same 52 fills, 31 of them boosted (report 24.50)
+SMART_HELPERS_PATH = os.environ.get("SMART_HELPERS_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "data", "derived", "smart_helpers.json"))
 RELAY_FLOAT_USD = float(os.environ.get("RELAY_FLOAT_USD", "0") or 0)      # the relay is refilled from the wallet to this after every exit (0 = 1.2 x STAKE_MAX), as far as the wallet reaches
 ETH_USD = float(os.environ.get("ETH_USD", "2445")); ETH_USD_URL = os.environ.get("ETH_USD_URL", "https://api.coinbase.com/v2/prices/ETH-USD/spot")
 BANKROLL = float(os.environ.get("BANKROLL_USD", "300"))
@@ -725,6 +728,7 @@ def chain_loop():
                     log({"ev": "error", "stage": "chain_loop_readouts", "err": str(e)[:200]})
         if n % max(1, int(3600 / CHAIN_POLL_S)) == 0 and n > 0:
             venue_check()                                                   # 6.9: hourly
+            smart_helpers_load()                                            # 6.13: the list, when the file changed
         n += 1; time.sleep(2.0 if failed else CHAIN_POLL_S)                  # 6.8: a failed read is retried in 2 s, not after the whole interval
 
 
@@ -1756,14 +1760,36 @@ _relay_lock = threading.Lock()
 
 
 def relay_float_eth():
-    return (RELAY_FLOAT_USD or 1.2 * STAKE_MAX) / max(state["eth_usd"], 1.0)
+    return (RELAY_FLOAT_USD or 1.2 * max(STAKE_MAX, STAKE_BOOST_USD)) / max(state["eth_usd"], 1.0)   # 6.13: the float covers the boosted stake
+
+
+def smart_helpers_load(force=False):
+    """6.13: the smart helpers' file (src/analysis/smart_helpers.py refits it from the chain in every reading; the box pulls it):
+    bot software contracts whose attacked launches paid. Reloaded when the file changes; a missing or bad file leaves the set as it was."""
+    try:
+        mt = os.path.getmtime(SMART_HELPERS_PATH)
+        if not force and state.get("smart_mtime") == mt:
+            return
+        d = json.load(open(SMART_HELPERS_PATH)); hs = {a.lower() for a in (d.get("helpers") or {})}
+        state["smart_helpers"] = hs; state["smart_mtime"] = mt
+        log({"ev": "smart_helpers", "n": len(hs), "fitted": d.get("fitted"), "window_days": d.get("window_days")})
+    except Exception as e:
+        if force:
+            log({"ev": "error", "stage": "smart_helpers_load", "err": str(e)[:120]})
+
+
+def smart_present(w):
+    """6.13: a smart helper is among the relays attacking this curve so far (attack_targets fills as the feed's blocks arrive)"""
+    hs = state.get("smart_helpers")
+    return bool(hs) and bool(set(w.get("attack_targets", ())) & hs)
 
 
 def relay_short():
-    """6.10: the ETH the relay is short of the stake the next launch needs (0 when it can fund one)"""
+    """6.10: the ETH the relay is short of its float (0 when it holds it); 6.13: the float, not the base stake, so a deposit to the
+    wallet reaches the relay within a minute and the boosted stake can be built before the next exit"""
     if state.get("relay_eth") is None:
         return 0.0
-    return max(0.0, STAKE_MAX / max(state["eth_usd"], 1.0) - state["relay_eth"])
+    return max(0.0, relay_float_eth() * 0.98 - state["relay_eth"])
 
 
 def relay_topup(why=""):
@@ -2162,11 +2188,17 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             release_reservation(); gates = [f"supply cap sizes the buy at {gross:.5f} ETH and leaves {left:.5f} ETH: a second shot could fill; not taking this launch"]
             threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
             log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
+    buy_alt = None                                                       # 6.13: the boosted variant, built below when a smart helper could be in
     if RELAY:                                                            # 5.94: the shot goes to the relay, which buys once per curve and sends the tokens to the wallet
         deadline = (feed_ts + SEAT_SECONDS.get(SEAT, 0)) if RELAY_DEADLINE else 0   # the seat's clock second: a block stamped later reverts in the relay (TooLate) instead of buying a dead seat
         buy = {"to": to_checksum_address(RELAY), "value": hex(0 if SHOOTERS else amount_in), "data": "0x" + RELAY_BUY_SEL + abi_word(curve) + abi_word(amount_in) + abi_word(min_out) + abi_word(deadline),
                "gas": hex(RELAY_SHOOT_GAS if SHOOTERS else GAS_BUY + RELAY_GAS_EXTRA), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
         decision["relay_deadline"] = deadline
+        if STAKE_BOOST_USD > stake_usd and SHOOTERS and state.get("smart_helpers") and (state.get("relay_eth") or 0) >= STAKE_BOOST_USD / state["eth_usd"] * 0.999:
+            tk_b, net_b, gross_b, _ = size_buy(X, Y, STAKE_BOOST_USD / state["eth_usd"], SEAT)                  # 6.13: the boosted stake, sized the same way (the supply cap applies)
+            amount_b = int(gross_b * 1e18); min_out_b = int(tk_b * (1 - BURST_SLIP) * 1e18)
+            buy_alt = dict(buy, data="0x" + RELAY_BUY_SEL + abi_word(curve) + abi_word(amount_b) + abi_word(min_out_b) + abi_word(deadline))
+            decision["boost_amount_in_eth"] = amount_b / 1e18; decision["boost_min_out_tokens"] = min_out_b / 1e18; decision["boost_usd"] = STAKE_BOOST_USD
     else:
         buy = {"to": curve_cs, "value": hex(amount_in), "data": "0x" + BUY_SEL.hex() + abi_word(amount_in) + abi_word(min_out) + abi_word(WALLET), "gas": hex(GAS_BUY), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
     shots = None
@@ -2181,14 +2213,17 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             if SLOT_SEND:
                 sp_ = slot_predict(feed_ts + SEAT_SECONDS[SEAT]); decision["slot_block"] = sp_[1] if sp_ else None; decision["slot_t_wall"] = sp_[0] if sp_ else None
         if SHOOTERS:                                                     # 6.0: one shooter per shot, each at its own nonce; the relay pays the stake
-            txs = [dict(buy, nonce=hex(state["shooter_nonce"].get(a, 0)), gasPrice=hex(shot_gas_price(gas_price, state["shooter_eth"].get(a, 0)))) for a in shooters_now]; keys = [SHOOTER_KEYS[SHOOTERS.index(a)] for a in shooters_now]   # 6.2: the dry run never reads the shooters' nonces (only the live path does), so a missing one is 0 in the unsigned log, not a crash
+            txs = [dict(buy, nonce=hex(state["shooter_nonce"].get(a, 0)), gasPrice=hex(shot_gas_price(gas_price, state["shooter_eth"].get(a, 0)))) for a in shooters_now]; keys = [SHOOTER_KEYS[SHOOTERS.index(a)] for a in shooters_now]
+            txs_alt = [dict(t, data=buy_alt["data"]) for t in txs] if buy_alt else None                              # 6.13: the same nonces and caps, the boosted amount   # 6.2: the dry run never reads the shooters' nonces (only the live path does), so a missing one is 0 in the unsigned log, not a crash
             decision["shooters"] = len(shooters_now)
         else:
-            txs = [dict(buy, nonce=hex(nonce + i)) for i in range(BURST_N)]; keys = None
+            txs = [dict(buy, nonce=hex(nonce + i)) for i in range(BURST_N)]; keys = None; txs_alt = None
         at = [t_first + i * BURST_STEP_MS / 1000.0 for i in range(len(txs))]
         open_by = (t_first + (GATE_CLOSE_MS if GATE_CLOSE_MS >= 0 else BURST_LEAD_MS + GATE_LATE_MS) / 1000.0) if gate is not None else None   # the gate may open up to the shot scheduled at the predicted tick (+GATE_LATE_MS)
         if SEND_BURST is not None:
             gk = {"gate": gate, "open_by": open_by} if gate is not None else {}   # an older send step (no gate=) still works when the gate is off
+            if txs_alt is not None and getattr(SEND_BURST, "alt", False):
+                gk["alt"] = txs_alt; gk["pick"] = lambda: smart_present(w)                                      # 6.13: the send step picks the boosted shot when a smart helper is in
             shots = SEND_BURST(txs, at, "buy", keys=keys, **gk) if keys else SEND_BURST(txs, at, "buy", **gk)
         else:
             shots = []; opened = gate is None; shut = False
@@ -2250,7 +2285,10 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         while state["flip_wall"].get(feed_ts + SEAT_SECONDS.get(SEAT, 0)) is None and mono() - t_w < 0.5:   # the receipts can beat the flip message by a few hundred ms
             time.sleep(0.01)
         fw = state["flip_wall"].get(feed_ts + SEAT_SECONDS.get(SEAT, 0)); baw = decision.get("burst_at_wall")
-        log({"ev": "burst_landing", "curve": curve, "filled": len(filled), "flip_minus_first_shot_ms": round(1000 * (fw - baw), 1) if (fw and baw) else None,
+        fi = next((i for i, (hh, r, _) in enumerate(recs) if r and r.get("status") == "0x1"), None); boosted = state.get("last_boosted") or []
+        decision["filled_boost"] = bool(fi is not None and fi < len(boosted) and boosted[fi])
+        log({"ev": "burst_landing", "curve": curve, "filled": len(filled), "boost": decision["filled_boost"], "stake_usd": (STAKE_BOOST_USD if decision["filled_boost"] else stake_usd) if filled else None,
+             "flip_minus_first_shot_ms": round(1000 * (fw - baw), 1) if (fw and baw) else None,
              "flip_minus_first_fill_ms": round(1000 * (fw - baw) - BURST_STEP_MS * next((i for i, (hh, r, _) in enumerate(recs) if r and r.get("status") == "0x1"), 0), 1) if (fw and baw and filled) else None,
              "target_model": decision.get("target_model"), "shots": [{"hash": hh, "status": (r or {}).get("status"), "block": int(r["blockNumber"], 16) if r else None,
              "tx_index": int(r["transactionIndex"], 16) if r else None, "rejected": bool(a is not None and SENDER.rejected(a)) if r is None else False} for hh, r, a in recs]})
@@ -2731,9 +2769,10 @@ async def main():
     load_state(); new_day_check(); venue_check(first=True); threading.Thread(target=chain_loop, daemon=True).start()
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    log({"ev": "start", "version": 6.12, "release": "6.12", "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    smart_helpers_load(force=True)
+    log({"ev": "start", "version": 6.13, "release": "6.13", "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
-         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
+         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
         if not PROVIDER_WS:

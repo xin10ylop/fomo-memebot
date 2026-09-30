@@ -4674,3 +4674,13 @@ shot can slip ahead, and half the straddled fills still had someone ahead. The l
 +20 ms) with a longer burst to keep the tail (two shots per shooter at consecutive nonces, 70 shots, 140 ms), or a 1 ms
 spacing at the same coverage; either is about +1 point a fill on this sample against +$0.35 of reverted-shot gas a burst,
 a wash at $25 and positive from $50. Queued with the stake-by-signal design for the $50 step; nothing changed tonight.
+
+**Addendum, Sep 30 23:30 UTC: the search taken to the end, and what it found.** Every pre-tick feature on 594 launches
+(the 2-3% pieces and the wide sets, Sep 24-30): fleets, wallets, bundle, tier, creator buy, named wallets, the crowd's timing,
+hour, the attackers' identities and their software (helper contracts), the other gates inside the 3+ class, the hold by
+class. Two things survived a walk-forward test (lists fitted on the days before, scored on the day): (1) the identity of the
+attacking bots is a stake signal - $50 when a helper with a paying record is attacking, $25 otherwise: +$470 against +$257 on
+the same 52 fills, 31 boosted; as a filter (fire only with a smart helper) it drops fires and money alike; (2) 5+ fleets as
+the boost trigger is the same idea weaker (+$379). Built as engine 6.13 (runbook 5am). Not found: an exit better than hold 11
+in any class; a paying sub-slice of the 2-fleet class; a gate the 3+ class is missing (creator supply, the cap and the
+repeat gate all refuse losers there); a bad-bot exclusion that keeps the dollars.

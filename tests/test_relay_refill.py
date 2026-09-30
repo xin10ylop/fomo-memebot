@@ -42,9 +42,9 @@ S["base_fee"] = 23_000_000; S["gas_price"] = int(S["base_fee"] * 6)
 S["relay_eth"] = None
 ok(E.relay_short() == 0.0, "no relay read yet: nothing to refill")
 S["relay_eth"] = 0.005565
-ok(abs(E.relay_short() - (25 / 2700.0 - 0.005565)) < 1e-12, "the relay at 0.00557 ETH is short of the $25 stake by the difference")
-S["relay_eth"] = 0.0103
-ok(E.relay_short() == 0.0, "at 0.0103 ETH it can fund one stake: not short")
+ok(abs(E.relay_short() - (0.98 * 30 / 2700.0 - 0.005565)) < 1e-12, "the relay at 0.00557 ETH is short of its float ($30 x 0.98) by the difference")
+S["relay_eth"] = 0.0112
+ok(E.relay_short() == 0.0, "at the float (0.0112 ETH) it is not short")
 ok(abs(E.relay_float_eth() - 30 / 2700.0) < 1e-12, "the float is 1.2 stakes ($30) by default")
 # relay_topup with a fake chain: the relay short, the wallet able; the send is recorded, the nonce re-read, the relay read back
 E.SEND = lambda tx, label: "0xhash"; E.SHOOTERS = ["a", "b", "c"]; E.RELAY = "0x" + "1" * 40; E.WALLET = "0x" + "2" * 40

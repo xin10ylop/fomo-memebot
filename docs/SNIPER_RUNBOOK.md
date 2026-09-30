@@ -1451,3 +1451,36 @@ Check: `"attack_min": 3`.
 `NAMED_MAX` (default 0 = off): a creation naming more exempt wallets than this is skipped as a team bundle (report 24.50).
 On the week it is a wash in dollars on top of the other gates (10 fewer fires, +$0.6), so it stays off; `REPLAY_NAMED_MAX=12`
 replays it. The engine's release string moves to 6.12 with the next restart; no restart is needed for this.
+
+
+## 5am. Engine 6.13: the boosted stake on the smart helpers (Sep 30 23:30 UTC)
+
+**The finding (report 24.50).** Each bot attacks through its own helper contract, visible in the creation second before our
+shots leave. Helpers whose attacked launches paid (4+ launches, mean over +5% behind one at hold 11, trailing 7 days) are
+'smart'. Fitted on each day's history and applied to the next day, Sep 26-30, on the 3+ fleet class: $50 when a smart helper
+is attacking, $25 otherwise, pays +$470 against +$257 flat on the same 52 fills (31 boosted). As a filter it adds nothing;
+as a stake signal it nearly doubles the dollars. On our own 28 live fills: smart helper present +7.0% (18), absent -2.9% (6).
+
+**How it works.** `STAKE_BOOST_USD` (0 = off). At the build, when a smart list is loaded and the relay holds the boosted
+stake, the engine sizes a second buy (the same guard rule) and the send step signs both sets - the boosted one only when the
+signing cannot delay the first shot. At each shot's time the send step asks `smart_present(w)` (a smart helper among the
+curve's `attack_targets`) and sends the boosted shot when it is true. The landing log says which stake filled (`boost`,
+`stake_usd`); `sent_burst` counts the boosted shots. The relay float is 1.2 x the boosted stake ($60); the loop refills the
+relay to the float (not only to the base stake), so a deposit to the wallet reaches the relay within a minute.
+
+**The list.** `data/derived/smart_helpers.json`, written by `src/analysis/smart_helpers.py` at the end of every
+`score_window.sh` run and committed; the box pulls it in the reading and the engine reloads it hourly when the file changed.
+Fitted Sep 30 23:20: 14 helpers of 65 seen over 594 launches.
+
+Tests: `tests/test_stake_boost.py` (15 checks: the list, the pick at fire time, the no-time-to-sign fallback, the gate).
+
+**Capital.** The boosted shots need the relay at $60: about $75 on the box. Send about 0.013 ETH to the wallet
+(0xe0686dc72b04c12ceefeea75e286e4ef7c056f01); the engine moves it to the relay. Until then the boost is not built and every
+fill is $25.
+
+Deploy (the send step changed, so it is copied):
+
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv STAKE_BOOST_USD 50; cd ~/fomo-memebot && git pull -q && sudo cp deploy/send_step.py /etc/sniper/send_step.py && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"\|"ev": "smart_helpers"' | tail -2 | grep -o '"release": "[0-9.]*"\|"stake_boost_usd": [0-9.]*\|"smart_helpers": [0-9]*\|"n": [0-9]*\|"dry_run": [a-z]*'
+
+Check: `"release": "6.13"`, `"stake_boost_usd": 50.0`, `"smart_helpers": 14`. In the readings: `boost` on the landing line,
+the $50 fills in their own tally (the stake shows in `live_vs_table`'s stake column).
