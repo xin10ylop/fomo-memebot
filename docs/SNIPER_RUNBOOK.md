@@ -1315,3 +1315,15 @@ changes; the engine reads the tax from the creation calldata and models the seat
 
 Check: `"tier_max_bps": 300`. From then on the readings' scan runs `e1_multi ... 0.02 0.04` and the reconciliation tags each
 fill with its tier band; the $25 window and the sequential test count the new band separately for its first 20 fills.
+
+**Audit (Sep 30 10:30 UTC), passed; decision: deploy.** (1) The creator tax charged on the chain in the E1 block matches the
+model's tier on all 11 would-fires (2.2-3.0%; platform fee 7.18% = 1% + the 6.18% surcharge). (2) The hold-grid model charges
+the tier on the buy and on the sell. (3) The engine: the gate is `tax > TIER_MAX_BPS`, so 300 admits up to 300 bps; sizing
+assumes TIER_ASSUMED 5% (conservative for a 4% tier); the sell carries no fee-based minimum; the fold uses the live tax.
+(4) The full engine replay (every gate: creator supply, cap, repeat, bundle, registration, the guard at slip 0.20) over
+Sep 27 09:15 - Sep 30 08:26 with the gate at 200 and at 300: 35 -> 45 fills, 8 -> 9 guard reverts, +$33.82 -> +$71.60 at $13;
+the ten added fills +$38.15 ($73 at $25), 8 of 10 positive, the one -25% launch reverts at the guard; no fill of the current
+band lost. (5) Positive on each of the three days; +$20.6 without the +135% launch. (6) Nothing in the earlier work prices the
+band against it. Bound: the band's own tally for its first 20 fills in the readings; back to 200 if it is negative then.
+`engine_replay.py` now replays the 300 gate by default (`REPLAY_TIER_MAX=200` for the old one); the readings' scan runs
+`e1_multi ... 0.02 0.04`.
