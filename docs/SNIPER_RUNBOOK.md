@@ -1378,3 +1378,5 @@ Setup, once:
 
 Check: `sudo systemctl status sniper-notify | head -3`; `sudo python3 deploy/tg_notify.py --test` sends the line once. Off:
 `sudo systemctl disable --now sniper-notify`.
+
+**Installed Sep 30 11:35 UTC** on the box (chat id detected from the START press; service active).

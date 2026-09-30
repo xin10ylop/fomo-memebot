@@ -22,4 +22,4 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 UNIT
-systemctl daemon-reload && systemctl enable --now sniper-notify >/dev/null && systemctl restart sniper-notify && sleep 3 && systemctl is-active sniper-notify && echo "notifier running; a 'sniper notifier started' message should be on your phone"
+systemctl daemon-reload && systemctl enable --now sniper-notify >/dev/null && systemctl restart sniper-notify && sleep 3 && systemctl is-active sniper-notify && echo "notifier running; the balance | P&L line should be on your phone"
