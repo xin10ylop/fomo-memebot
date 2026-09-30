@@ -26,6 +26,22 @@ def reason_key(cls, text):
 def span_of(n):
     for f in glob.glob(f"data/derived/*/e1m_{n}.json"):
         d = json.load(open(f)); return d["t_lo"], d["t_hi"]
+import gzip
+def engine_views():
+    """curve -> the engine's own count at the gate's close and after the burst (the log's eligible_not_traded / trade_decision events, every rotation)"""
+    out = {}
+    for f in sorted(glob.glob("/var/log/sniper/engine.jsonl*"), key=os.path.getmtime):
+        if f.endswith(".state.json"): continue
+        try:
+            with (gzip.open if f.endswith(".gz") else open)(f, "rt") as fh:
+                for line in fh:
+                    if '"eligible_not_traded"' not in line and '"trade_decision"' not in line: continue
+                    try: e = json.loads(line)
+                    except Exception: continue
+                    if e.get("curve"): out[e["curve"][:10]] = e
+        except Exception: pass
+    return out
+EV = engine_views()
 now = time.time(); rows = []; pieces = 0
 for pf in sorted(glob.glob(f"{D}/prediction_*.txt")):
     n = os.path.basename(pf)[11:-4]; sp = span_of(n); cf = f"{D}/crowd_raw_{n}.json.gz"; hg = f"{D}/hold_grid_week_{n}.json"; lf = f"{D}/launches_{n}.json"
@@ -59,6 +75,14 @@ print("refused by the attackers gate, by fleets at k-1 (the chain's count):")
 for n_ in (0, 1, 2, 3):
     v = [r["r"] for r in ref if r["reason"].startswith("gate") and r["k1"] == n_]
     if v: print(f"  fleets {n_} on the chain, engine saw < 2      {summ(v)}")
+late = []
+print("\nrefused by the attackers gate while the chain shows 2+ fleets before the tick: what the engine saw (fleets at the gate's close / after the burst):")
+for r in sorted([r for r in ref if r["reason"].startswith("gate") and (r["k1"] or 0) >= 2], key=lambda r: -r["r"]):
+    e = EV.get(r["cv"], {}); fo, fa = e.get("fleets_at_open"), e.get("fleets_after_burst"); r["fo"], r["fa"] = fo, fa
+    if fa is not None and fa >= 2: late.append(r)
+    print(f"  {r['when']} {r['cv']} chain k-1 {r['k1']}  engine at close {fo} after burst {fa}  wallets {e.get('wallets_at_open')}/{e.get('wallets_after_burst')}  build {e.get('attackers_at_build')}  {r['r']:+6.1f}%")
+print(f"  of these, the count reached 2 just after the burst (a wider gate would have sent, at a later position): {summ([r['r'] for r in late])}")
+print(f"  never reached 2 on the engine's view (registration/visibility, not timing):                    {summ([r['r'] for r in ref if r['reason'].startswith('gate') and (r['k1'] or 0) >= 2 and r not in late])}")
 print(f"\nrefused launches that would have paid over +{MIN:.0f}%:")
 for r in sorted(ref, key=lambda r: -r["r"]):
     if r["r"] > MIN: print(f"  {r['when']} {r['cv']} k {r['k']} fleets(k-1) {r['k1']} bundle {r['bundle']:.2f} tier {r['tier']}  {r['r']:+6.1f}%  {r['reason']}")
