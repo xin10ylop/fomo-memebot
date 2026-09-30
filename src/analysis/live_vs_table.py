@@ -12,7 +12,7 @@ each launch rebuilds exactly what src/analysis/e1_multi.py's score() would have 
 so the gap between the tables and the wallet splits into: the seat we got (first - landed), the hold we held
 (landed - landed@exit) and everything else (landed@exit - actual: fees, curve model, sell slippage). Our own events are
 removed from the launch's tape before modelling, so the model does not count our own buy as somebody else's."""
-import json, urllib.request, time, sys, os, collections, statistics as st
+import json, time, urllib.request, time, sys, os, collections, statistics as st
 RPC = os.environ.get("RPC_URL", "https://rpc.mainnet.chain.robinhood.com"); H = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 curl/8"}
 BUY = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"; SELL = "0x8113d738abdcb6b38357e9d53a54a7157861a09031b453651f0fe7fe151f59df"
 V2F = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"; WALLET = "0xe0686dc72b04c12ceefeea75e286e4ef7c056f01"; RELAY = "0xe8e98c3514d5bd83fdd01360896f2382b861a720"
@@ -158,6 +158,10 @@ def main():
         for lo, hi, name in ((100, 200, "creator tax 100-200 bps (the original band)"), (201, 300, "creator tax 201-300 bps (opened Sep 30 10:40 UTC, runbook 5ag)")):   # 5ah: each band on its own line
             b = [r for r in clean if r.get("tb") is not None and lo <= r["tb"] <= hi]
             print(f"    {name}: {len(b)} fills" + (f", mean actual {st.mean(r['actual'] for r in b):+.1%}, {sum(1 for r in b if r['actual'] > 0)} positive, net ${sum(r['net'] for r in b)*ETH_USD:+.2f}" if b else ""))
+        days = {}
+        for r in clean:
+            days.setdefault(time.strftime("%b %d", time.gmtime(r["T0"])), []).append(r)
+        print("    by UTC day: " + " | ".join(f"{d}: {len(v)} fills, {sum(1 for r in v if r['actual'] > 0)} up, net ${sum(r['net'] for r in v)*ETH_USD:+.2f}" for d, v in days.items()))   # 5ah: the day line
     json.dump(rowsout, open("live_vs_table.json", "w"), indent=1)
 if __name__ == "__main__":
     main()
