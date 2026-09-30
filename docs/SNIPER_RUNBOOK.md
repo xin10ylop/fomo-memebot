@@ -1414,3 +1414,31 @@ unless the provider lags again (then one per trade, and the trade closes within 
 **Deployed Sep 30 17:35 UTC:** release 6.11, tier max 300, live. The two trades before it (17:09 +44.8%, first in the block, +$10.68; 17:12 -0.8%) confirmed in 0.22 s and 0.21 s at +12 blocks: the exit path is fine when the provider keeps up.
 
 **Sep 30 17:40 reading (pieces sep30eve, sep30night).** 11:49-17:22: five fires as the chain view named them (13:56 guard revert, the first 3-4% band fire; 15:13 +1.6%; 15:30 -11.9%; 16:53 -11.9%; 17:09 +44.8% landed first; 17:12 -0.8%), the 14:57 launch skipped for an invisible bundle (-8.8% avoided). P&L +$4.34 -> +$14.99, capital $56.34, the $25 window at 8 fills of 20.
+
+
+## 5ak. The attackers gate raised to 3 fleets (Sep 30 20:30 UTC)
+
+**Why.** The owner's reading of the ledger was right: more losers than winners and a P&L that drifts. The full engine replay
+(every gate, hold 11, guard 0.20, the 300 bps tier gate) over Sep 24 22:00 - Sep 30 20:05, 632 launches, split by the fleets
+the usual view counts before the tick:
+
+| gate | fills | positive | mean | $ at $13 / 5.9 days | bursts (gas) |
+|---|---|---|---|---|---|
+| 2 fleets (live until now) | 78 | 56% | +12.2% | +$94.45 | 89 ($29) |
+| 3 fleets | 40 | 72% | +22.2% | +$99.92 | 47 ($16) |
+| 4 fleets | 19 | 84% | +29.3% | +$64.38 | 24 |
+
+The 38 fills the 3-fleet gate drops (exactly 2 fleets) pay +1.7% mean, 39% positive, +$8.39 in total - and that total is
+Sep 25 alone (+$19.89, one +107% launch); Sep 26-30 they lose on five days of five (-$0.01, +$1.04, -$1.22, -$4.63, -$6.68 at
+$13). The fills it keeps (3+ fleets) are positive on every one of the six days. Sep 30 was the extreme: 73% of the fires
+were 2-fleet fires, 11 of them, -$12.85 at $25; the 3+ fires +$2.26. The mechanism reads as a regime: as the venue's bot count
+grew, two fleets attacking a launch became ordinary noise, three or more still means demand behind us.
+
+**The change.** `ATTACK_MIN` 2 -> 3. Half the fires, the same dollars in expectancy, three losers fewer in every four fires,
+half the gas. The stake window (5ac) keeps counting fills; it will take longer to reach 20. Reversible in one line; the
+chain-side pieces keep scoring the 2-fleet launches, so the readings will show if they start paying again (then 2 comes back).
+`engine_replay.py` replays either gate with `REPLAY_ATTACK_MIN`.
+
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv ATTACK_MIN 3; cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"attack_min": [0-9]*\|"tier_max_bps": [0-9]*\|"dry_run": [a-z]*'
+
+Check: `"attack_min": 3`.

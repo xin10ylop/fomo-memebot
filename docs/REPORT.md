@@ -4629,3 +4629,9 @@ fleets before the tick (k-1), the seat behind one, hold 11, $13.
 Our own band over the same three days: 51 would-fires, +7.2% mean, +$48. The 3.1-4% band adds a fifth as many fires at
 three and a half times the return per fire. Proposed: `TIER_MAX_BPS` 200 -> 300 (runbook 5ag), the readings' scan widened to
 tiers 2-4%, the new band tracked as its own slice of the sequential test.
+
+**Addendum, Sep 30 20:30 UTC: the attackers gate to 3 fleets (runbook 5ak).** The full replay over Sep 24-30 (632 launches)
+splits the fills by the fleets counted before the tick: 2 fleets, 38 fills, +1.7% mean, 39% positive, +$8.39 at $13 with the
+whole sum on Sep 25 and losses on each of the five days since; 3+ fleets, 40 fills, +22.2%, 72% positive, +$115 and positive
+every day. The gate at 3 keeps the dollars (+$99.92 against +$94.45), halves the fires and the gas, and turns 56% positive into
+72%. Deployed; the 2-fleet launches stay scored on the chain side so the gate can come back down if they pay again.
