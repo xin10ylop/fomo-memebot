@@ -858,7 +858,7 @@ reading shows 0 fires and 0 gate refusals. Check and fix:
     sudo grep -h '"ev": "eligible_not_traded"' /var/log/sniper/engine.jsonl | python3 -c "import sys,json; [print(json.loads(l)['gates'][0][:90]) for l in sys.stdin if json.loads(l)['t'] > 1790430420]" | sort | uniq -c | sort -rn | head
     # top up the wallet from Phantom (0.004 ETH), wait for it to land, then move the relay to its float
     sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py deposit 0.0015
-    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py status 0.015412
+    sudo /opt/sniper-venv/bin/python3 ~/fomo-memebot/deploy/relay_ops.py status 0.021190
 
 The engine reads the relay's balance every 6 s while no position is open: no restart. The status line's base moves
 by exactly the top-up: on Sep 26 the top-up was $17.90 = 0.006659 ETH, so the base is 0.008753 + 0.006659 = 0.015412 ETH
@@ -1201,7 +1201,7 @@ next step is $50 after a positive window. Deploy, no fill open (5z's check), one
     set_kv STAKE_MIN 25; set_kv STAKE_MAX 25; set_kv FEED_SOCKETS 2; set_kv GAS_HEADROOM 6
     cd ~/fomo-memebot && git pull -q && sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py deposit 0.0045 | tail -2
     sudo systemctl restart sniper-engine && sleep 8 && sudo grep -h '"ev": "start"\|"ev": "venue"\|"ev": "feed2_connected"\|"ev": "feed_connected"' /var/log/sniper/engine.jsonl | tail -4 | grep -o '"ev": "[a-z_0-9]*"\|"version": [0-9.]*\|"stake_min": [0-9.]*\|"stake_max": [0-9.]*\|"snipe_tax_seconds": [0-9]*\|"snipe_tax_start_bps": [0-9]*\|"burst": \[[^]]*\]' | paste -sd' '
-    sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py status 0.015412 | tail -2
+    sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py status 0.021190 | tail -2
 
 Expected: `"version": 6.9`, `stake_min 25 / stake_max 25`, a `venue` line with 3 / 9900, `feed_connected` and `feed2_connected`,
 the relay above 0.0095 ETH in the status. If `feed2_connected` is missing after a minute (`sudo grep -c feed2 ...`), the feed
@@ -1282,7 +1282,7 @@ base fee, so one launch's fee ramp marked all 35 low at once and asked the walle
 Tests: `tests/test_relay_refill.py` (21 checks), `tests/test_feed_dual.py` (18). Deploy (the engine deposits the relay itself
 within a minute of the start; no manual deposit):
 
-    cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 30 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"\|relay_topup\|"ev": "alarm"' | tail -3 | cut -c1-170 && sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py status 0.015412 | tail -2
+    cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 30 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"\|relay_topup\|"ev": "alarm"' | tail -3 | cut -c1-170 && sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py status 0.021190 | tail -2
 
 Check: `"version": 6.10`, a `relay_topup` line with `"why": "under the stake"` and `"landed": true`, the relay at about 0.0111 ETH in
 the status. The reading's log block from now on:
@@ -1343,7 +1343,7 @@ Chain side, before the box is read (the prediction is committed before the paste
 
 Box side (the owner pastes the output):
 
-    cd ~/fomo-memebot && git pull -q && sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py status 0.015412 | tail -2
+    cd ~/fomo-memebot && git pull -q && sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py status 0.021190 | tail -2
     sudo python3 src/analysis/paper_day.py --from "YYYY-MM-DD HH:MM" --stake 25 --hold 11 2>&1 | tail -8
     python3 src/analysis/live_vs_table.py 2>&1 | tail -8
     sudo python3 src/analysis/engine_vs_chain.py data/derived/live_vs_table/launches_NAME.json --crowd data/derived/live_vs_table/crowd_raw_NAME.json.gz --from "YYYY-MM-DD HH:MM" --to "$(date -u +'%Y-%m-%d %H:%M')" | tail -12
@@ -1484,3 +1484,5 @@ Deploy (the send step changed, so it is copied):
 
 Check: `"release": "6.13"`, `"stake_boost_usd": 50.0`, `"smart_helpers": 14`. In the readings: `boost` on the landing line,
 the $50 fills in their own tally (the stake shows in `live_vs_table`'s stake column).
+
+**Deposit Sep 30 23:55 UTC:** +0.005778 ETH ($17) to the wallet; the engine moved it to the relay (0.0210 ETH, $56): the boost is live. The P&L baseline moves from 0.015412 to **0.021190 ETH** (the deposit added); `pnl`, the notifier (`TG_PNL_BASE`) and the readings use it.
