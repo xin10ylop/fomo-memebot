@@ -1327,3 +1327,5 @@ band lost. (5) Positive on each of the three days; +$20.6 without the +135% laun
 band against it. Bound: the band's own tally for its first 20 fills in the readings; back to 200 if it is negative then.
 `engine_replay.py` now replays the 300 gate by default (`REPLAY_TIER_MAX=200` for the old one); the readings' scan runs
 `e1_multi ... 0.02 0.04`.
+
+**Deployed Sep 30 10:40 UTC:** `"tier_max_bps": 300`, release 6.10, live. The readings tally the 201-300 bps band separately from here.
