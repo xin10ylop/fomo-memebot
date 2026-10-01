@@ -4739,3 +4739,11 @@ creator team selling its whole 33% bundle in one block eight blocks after the se
 pre-tick mark, no exit that beats a one-block dump. The sequencer-door probe (6.16) read 2-8 ms on both slow-door misses
 of the day while the shots waited 1-3 s: the rejection happens before the queue, so the probe does not measure it and the
 skip rule stays off; the shots' reply times remain the only measure, and the slow door remains unplayable.
+
+**Addendum, Oct 1 23:30 UTC: the attackers' committed ETH before the tick.** The value on the bots' pre-tick shots (the ETH
+each wants to buy with), summed per launch, on 225 scored launches of Sep 29 - Oct 1: under 0.1 ETH committed the seat
+returns -6% (56 launches, 20% positive); 0.3-0.7 ETH +7.6%; 0.7-1.5 ETH +16%; the signal exists, but the 3-fleet gate already
+carries it (among the fired launches only one sat under 0.3 ETH, -8.8%), and the 20:45 rug sat at 1.04 ETH committed over
+33 shots, a strong crowd that then bought only 0.14 ETH behind us: the bots' own guards refused the launch after the team
+started selling, which no pre-tick reading shows. Not a gate; the rug class stays priced as the model's dead 2%, and the
+stake-to-capital rule stays the protection.
