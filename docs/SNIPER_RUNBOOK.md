@@ -1644,3 +1644,8 @@ the boost goes to $100 when the capital passes $200. After the next fill:
 Hygiene: the feed refused five connections at 15:33 (HTTP 429) and the engine ran on the provider path for 120 s, then came
 back (the 15:36 fire was on the feed again); one feed stall at 18:27; the relay alarm until the 05:25 float change; nothing
 since. Smart list refit: 16 helpers.
+
+**Deployed Oct 1 21:45 UTC:** base stake $50, boost $75, relay float $90, release 6.16, live; one fill before the $25 window's
+twentieth. The $50 window starts here: 20 fills, counted in the readings; the base goes to $100 when it closes positive and the
+capital allows a $100 fill at under half of it; the boost to $100 when the capital passes $200. The relay refills from the
+wallet to the $90 float within a minute of the restart (`relay_topup` in the log); the boost builds once it holds $75.
