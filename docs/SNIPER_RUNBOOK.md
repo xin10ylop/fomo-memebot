@@ -1591,7 +1591,7 @@ low", nothing on the chain, no gas), posted every `PROBE_EVERY_S` (10) from its 
 probe, its age and the median of the last six ride on every decision (`seq_rtt_ms`, `seq_rtt_age_s`, `seq_rtt_med_ms`) and
 on every `burst_landing`; the ten-minute `flow` line carries the median. `SEQ_RTT_SKIP_MS` (0 = off) skips the burst when the
 last probe is under thirty seconds old and slower than the limit: built, off until the probe is seen agreeing with the
-shots' reply times on a slow burst (a reading's job), then `set_kv SEQ_RTT_SKIP_MS 400`. `tests/test_seq_probe.py` (17 checks).
+shots' reply times on a slow burst (a reading's job), then `set_kv SEQ_RTT_SKIP_MS 400`. `tests/test_seq_probe.py` (16 checks).
 
 Deploy (the send step changed: `make_probe`):
 
