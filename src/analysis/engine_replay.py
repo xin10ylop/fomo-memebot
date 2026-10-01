@@ -157,6 +157,8 @@ big = sorted(fills, key=lambda x: -x["ret"])[:6]
 print("largest fills: " + ", ".join(f"{time.strftime('%b %d %H:%M', time.gmtime(x['T0']))} {x['cv'][:10]} {x['ret']:+.0%}" for x in big))
 if len(fills) > 1:
     rest = [x["ret"] for x in fills if x is not big[0]]; print(f"without the largest: mean {st.mean(rest):+.1%} on {len(rest)} fills, ${sum(x * STAKE - GAS for x in rest):+.2f}")
+sm = [x for x in fills if x.get("smart")]
+if SMART: print(f"boosted (a smart helper attacking, $50 live since Oct 1, 5am): {len(sm)} of {len(fills)} fills" + (f", mean {st.mean(x['ret'] for x in sm):+.1%}, {sum(x['ret'] > 0 for x in sm)} positive; at $25/$50 the fills net ${sum(x['ret'] * (50 if x.get('smart') else 25) - GAS for x in fills):+.2f} against ${sum(x['ret'] * 25 - GAS for x in fills):+.2f} flat" if sm else ""))
 if DUMP:
     for x in out:
         r, l, h = rows[x["cv"]]; cw, cf = cums(r); k = r["k"]
@@ -165,7 +167,5 @@ if DUMP:
                   "ret": {hh: h.get(f"behind1_13_h{hh}") for hh in (9, 11, 13, 15, 30, 60)}, "ret_first": {hh: h.get(f"first_13_h{hh}") for hh in (9, 11, 13, 15)},
                   "tp50_h600": h.get("behind1_13_tp50_h600"), "stop20_h600": h.get("behind1_13_stop20_h600"), "src": h.get("src")})
     json.dump(out, open(DUMP, "w")); print(f"dumped {len(out)} rows to {DUMP}", file=sys.stderr)
-sm = [x for x in fills if x.get("smart")]
-if SMART: print(f"boosted (a smart helper attacking, $50 live since Oct 1, 5am): {len(sm)} of {len(fills)} fills" + (f", mean {st.mean(x['ret'] for x in sm):+.1%}, {sum(x['ret'] > 0 for x in sm)} positive; at $25/$50 the fills net ${sum(x['ret'] * (50 if x.get('smart') else 25) - GAS for x in fills):+.2f} against ${sum(x['ret'] * 25 - GAS for x in fills):+.2f} flat" if sm else ""))
 if flag("--list"):
     for x in out: print(f"  {time.strftime('%b %d %H:%M', time.gmtime(x['T0']))} {x['cv'][:10]} bundle {x['bundle']:.3f} fleets {x.get('fleets', '-')}{' BOOST' if x.get('smart') else ''} | {x['why']}" + (f" {x['ret']:+.1%}" if "ret" in x else ""))

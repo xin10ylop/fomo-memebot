@@ -4720,3 +4720,14 @@ always rejects and logs the reading with every burst; the skip rule is built and
 the shots' replies agreeing. The value at stake is small either way: the regime's fills lost and its misses cost gas, about
 $7 over the week; the point of the probe is to stop paying for a seat that is out of reach, and, if the door's delay proves
 steady inside an episode, to lead by it later.
+
+### 24.52 Do the fills catch a 50x? The week's 40 fills followed for 24 hours (Oct 1)
+The engine sells 11 blocks after the seat block, about a second in; the return is the bot crowd's first-second rush. Every
+fill of the replay at the live settings (Sep 24 - Oct 1, usual view, 40 with a seat-block number) followed on its bonding
+curve for 24 hours, priced against our entry: after 1 minute the mean token stood at 1.33x (median 1.21x), after 1 hour 1.14x
+(median 0.58x), after 24 hours 1.08x (median 0.55x). The highest any curve reached was 5.8x; none reached 10x. Six of the 40
+filled their curve and moved to a Uniswap v4 pool (graduation) at 2.0-5.8x our entry, four of them within the first hour;
+what they did on v4 is not in this sample, and the earlier study of graduated Pons tokens bought after the move (section
+11) found -11% to -20% on average. Keeping a slice of each fill for 24 hours would have returned +8% a fill against +30% for
+the one-second exit; with a take-profit at 2x, +28%, no better than the exit and with a day of exposure. The one-second exit
+stays; a 50x runner is out of reach by design and not worth chasing with the median token at half our entry a day later.
