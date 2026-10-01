@@ -27,6 +27,19 @@ def make(engine):
     return submit
 
 
+def make_probe(engine):
+    """engine 6.16: the raw bytes of one signed transaction the sequencer always rejects (the wallet's nonce 0, long used: "nonce too
+    low"), signed once; the engine posts it every PROBE_EVERY_S and times the reply (its door's delay, report 24.51). It can
+    never land: the nonce is spent, so no gas, no balance, no state is touched."""
+    key = Account.from_key(os.environ["PRIVATE_KEY"])
+    signed = key.sign_transaction({"to": key.address, "value": 0, "data": b"", "gas": 21000, "gasPrice": 10 ** 9, "nonce": 0, "chainId": 4663})
+    raw = bytes(signed.raw_transaction)
+
+    def probe():
+        return raw
+    return probe
+
+
 def make_burst(engine):
     """engine 5.6, BURST_N > 1: the buy as BURST_N shots at consecutive nonces. All are signed first; then each is written to
     its own warm socket to the sequencer at its scheduled time (engine.SENDER.fire_slot). Shots that reach the sequencer

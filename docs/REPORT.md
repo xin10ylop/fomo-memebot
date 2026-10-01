@@ -4710,3 +4710,13 @@ as `land_off` from 6.15): 28 fills, 13 misses (no shot filled).
   nothing: Sep 28 19:44 (+17.6% on the chain) and Sep 30 21:26 (+78.8%, 4-7 fleets, a boosted helper attacking, $50 live).
   The release of the reserved wallet nonce invalidated it and the background poll had not re-read it in time. Fixed in 6.15
   (runbook 5ap): the release reads the nonce itself. At the stakes of the day the two were worth about $43.
+
+**Addendum, Oct 1 07:30 UTC: the delay is at the sequencer's door.** The send step times every shot's reply. The seven
+slow-regime bursts: medians 616, 1160, 620, 634, 649, 1458 and 3909 ms (Sep 30 20:08, 21:04, 15:30, 16:53; Sep 27 22:09; Sep
+26 09:24; Sep 28 14:55). The other 44 bursts of the week: 36-230 ms. So the shots sat in the sequencer's intake behind a
+steady stream (27-35 transactions in every block for seconds on end) and no lead of ours covers a delay that varies by
+seconds between episodes. Engine 6.16 (runbook 5aq) probes the door every ten seconds with a transaction the sequencer
+always rejects and logs the reading with every burst; the skip rule is built and off until a slow burst shows the probe and
+the shots' replies agreeing. The value at stake is small either way: the regime's fills lost and its misses cost gas, about
+$7 over the week; the point of the probe is to stop paying for a seat that is out of reach, and, if the door's delay proves
+steady inside an episode, to lead by it later.

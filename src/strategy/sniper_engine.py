@@ -117,6 +117,8 @@ def hours_ok(now=None):
 SEND_MODE = os.environ.get("SEND_MODE", "react"); MARGIN_MS = float(os.environ.get("MARGIN_MS", "15"))
 MARGIN_MIN_MS = float(os.environ.get("MARGIN_MIN_MS", "5")); MARGIN_MAX_MS = float(os.environ.get("MARGIN_MAX_MS", "60"))
 MAX_LATE_S = float(os.environ.get("MAX_LATE_S", "0.5"))
+PROBE_EVERY_S = float(os.environ.get("PROBE_EVERY_S", "10") or 0)      # 6.16 (5aq): the sequencer-door probe's cadence (0 = off): a signed, always-rejected transaction, timed
+SEQ_RTT_SKIP_MS = float(os.environ.get("SEQ_RTT_SKIP_MS", "0") or 0)    # 6.16: skip the burst when the last probe took longer than this (0 = off; report 24.51: 600-4000 ms in the slow regime, 60-230 at rest)
 SHOTS_PER_SHOOTER = max(1, int(os.environ.get("SHOTS_PER_SHOOTER", "1")))   # 6.14 (5an): shots per shooter in a burst, consecutive nonces, the second wave after the first: a longer burst at the same
                                                                           # 2 ms density, so a longer lead covers the seals that fell before the burst began (7 of 28 live fills, report 24.50)
 BURST_N = max(1, int(os.environ.get("BURST_N", "1")))                    # 5.6: shots per buy, consecutive nonces, BURST_STEP_MS apart, the first one BURST_LEAD_MS before the predicted
@@ -551,7 +553,8 @@ class Sender:
         return True
 
 
-rpc = Rpc(RPC_URL); rpc_logs = Rpc(LOGS_RPC_URL); rpc_seat = Rpc(RPC_URL, timeout=2.0, keepalive_s=30.0)   # rpc_seat: the resolver's node on the seat path, nothing may hang there
+rpc = Rpc(RPC_URL); rpc_logs = Rpc(LOGS_RPC_URL); rpc_seat = Rpc(RPC_URL, timeout=2.0, keepalive_s=30.0)
+rpc_seq = Rpc(SEQ_URL, timeout=3.0)                                                              # 6.16: the probe goes where the shots go   # rpc_seat: the resolver's node on the seat path, nothing may hang there
 
 
 def get_logs(filt, tries=3, seat=False):
@@ -590,7 +593,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
          "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "feed_seq": 0, "connected_at": 0.0,
          "arrivals": collections.deque(maxlen=900), "flip_wall": {}, "slot_pred": {}, "slot_err": collections.deque(maxlen=120), "vote_err": collections.deque(maxlen=120), "slot_hits": collections.deque(maxlen=120),   # 5.9 ramp model
-         "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "ingested_seq": 0, "venue_ok": True, "venue": None, "decisions": {}, "shooter_nonce": {}, "shooter_eth": {}, "shooter_at": 0.0, "relay_eth": None, "relay_at": 0.0, "base_fee_hist": collections.deque(maxlen=600), "relay_try_at": -1e9, "relay_alarm_at": -1e9, "shooter_alarm_at": -1e9, "block_ntx": collections.deque(maxlen=40),
+         "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "ingested_seq": 0, "venue_ok": True, "venue": None, "decisions": {}, "shooter_nonce": {}, "shooter_eth": {}, "shooter_at": 0.0, "relay_eth": None, "relay_at": 0.0, "base_fee_hist": collections.deque(maxlen=600), "relay_try_at": -1e9, "relay_alarm_at": -1e9, "shooter_alarm_at": -1e9, "block_ntx": collections.deque(maxlen=40), "seq_rtt": collections.deque(maxlen=60),
          "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "day_start_real": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "scores_e1": collections.deque(maxlen=60), "race_lags": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
 lock = threading.Lock()
 cond = threading.Condition()                           # notified by the feed loop after every message is fully indexed
@@ -635,13 +638,14 @@ def abi_word(x):
 
 SEND = None                                                # the operator's send step, loaded from SEND_MODULE (deploy/send_step.py); None = dry run
 SEND_BURST = None                                          # its burst variant, make_burst(engine) -> submit_burst(txs, at, label) -> [(hash, answers)]
+SEND_PROBE = None                                          # 6.16: make_probe(engine) -> the raw bytes of a signed transaction the sequencer always rejects (nonce 0), for timing its door
 
 
 def load_send_step():
     """SEND_MODULE=/etc/sniper/send_step.py: a file the operator writes (the reference is deploy/send_step.py) whose make(engine)
     returns a function submit(tx, label) -> hash. Nothing in the repository signs or sends; without the file the engine
     stays in dry run. The file is read once at start; an error in it stops the engine before the feed is opened."""
-    global SEND, SEND_BURST
+    global SEND, SEND_BURST, SEND_PROBE
     path = os.environ.get("SEND_MODULE", "")
     if not path:
         return
@@ -649,6 +653,7 @@ def load_send_step():
     spec = importlib.util.spec_from_file_location("sniper_send_step", path); mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
     SEND = mod.make(sys.modules[__name__])
     SEND_BURST = mod.make_burst(sys.modules[__name__]) if hasattr(mod, "make_burst") else None
+    SEND_PROBE = mod.make_probe(sys.modules[__name__]) if hasattr(mod, "make_probe") else None       # 6.16
     if ATTACK_MIN > 0 and BURST_N > 1 and SEND_BURST is not None:
         import inspect
         if "gate" not in inspect.signature(SEND_BURST).parameters:
@@ -719,7 +724,8 @@ def chain_loop():
                      "follow_eth_last_20": round(st.mean([c for a, b, c in tm][-20:]), 3) if tm else None, "follow_eth_last_60": round(st.mean(c for a, b, c in tm), 3) if tm else None, "follow_eth_all_60": round(st.mean(ta), 3) if ta else None,
                      "out1_share_last_60": round(st.mean(o1), 2) if o1 else None, "mean_score_e1_last_60": round(st.mean(se1), 4) if se1 else None, "race_first_rival_ms_median": round(st.median(rl), 1) if rl else None, "race_first_block_share": round(sum(1 for x in rl if x < 15) / len(rl), 2) if rl else None,
                      "bankroll_usd": round(state["bankroll"], 2), "wallet_eth": round(state["wallet_eth"], 5) if state.get("wallet_eth") is not None else None,
-                     "silent_min": round((mono() - state["last_creation_at"]) / 60, 1) if state["last_creation_at"] else None})
+                     "silent_min": round((mono() - state["last_creation_at"]) / 60, 1) if state["last_creation_at"] else None,
+                     "seq_rtt_med_ms": seq_rtt()[2]})
                 if state["last_creation_at"] and mono() - state["last_creation_at"] > 1800 and mono() - state["connected_at"] > 1800:
                     log({"ev": "alarm", "what": "no creation seen from the factory for 30 minutes while the feed is connected: the launchpad moved, stopped or changed its factory"})
                 b = boundary()
@@ -2087,8 +2093,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at, watch=w)
     elif SEAT == "E0":
         send_mode = "e0"                                                  # the creation second: no wait, every 100 ms costs 3-5 points
-    t_wake = mono()
-    decision = {"bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "race_ms": w.get("race_ms"), "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"]),
+    t_wake = mono(); p_ms, p_age, p_med = seq_rtt(); decision_probe = {"seq_rtt_ms": p_ms, "seq_rtt_age_s": p_age, "seq_rtt_med_ms": p_med}   # 6.16: the sequencer door as last probed
+    decision = {**decision_probe, "bundle": w["bundle"], "bundle_wallets": len(w["wallets"]), "bundle_eth": round(w["bundle_eth"], 4), "out1": w["out1"], "out2": w["out2"], "out1_chain": w["out1_chain"], "out2_chain": w["out2_chain"], "race_ms": w.get("race_ms"), "blocks_to_seat": state["blocks"] - blk0, "rivals": list(w["rivals"]),
                 "tax_bps": w.get("tax_bps"), "team_share": round((Y0 - w["Y"]) / Y0, 4), "bundle_wait_ms": bundle_wait_ms, "bundle_helper": helper_folded, "detect": state.get("detect", "sequencer")}
     with lock:
         sc = list(state["scores"])[-SWITCH_N:]; on = len(sc) < SWITCH_N or st.mean(sc) >= SWITCH
@@ -2156,6 +2162,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             gates.append("detection on the provider path (the sequencer feed is down): a send this late is second one, not the seat (E0_ALLOW_PROVIDER=1 after measuring the lag)")
         if state["nonce"] is None or mono() - state["chain_at"] > 30:                 # 30 s: the wallet's top-up sends (shooter_topup, relay_topup) do not advance the local nonce, so a wider window could admit a stale one (6.8 review); the poll retries 2 s after a failure
             gates.append("nonce/gas not fresh (RPC)")
+        if door_slow(p_ms, p_age):
+            gates.append(f"sequencer door slow: the probe took {p_ms:.0f} ms > {SEQ_RTT_SKIP_MS:.0f} ({p_age:.0f} s ago): the seat is out of reach (report 24.51)")
         if not state.get("venue_ok", True):
             gates.append(f"the launchpad's tax schedule changed (snipeTaxSeconds {state['venue'][0]}, start {state['venue'][1]} bps; the seat model needs {EXPECT_TAX_SECONDS} / {EXPECT_TAX_START_BPS}): not firing")
         ready = SHOOTERS
@@ -2317,7 +2325,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         fi = next((i for i, (hh, r, _) in enumerate(recs) if r and r.get("status") == "0x1"), None); boosted = state.get("last_boosted") or []
         decision["filled_boost"] = bool(fi is not None and fi < len(boosted) and boosted[fi])
         log({"ev": "burst_landing", "curve": curve, "filled": len(filled), "boost": decision["filled_boost"], "stake_usd": (STAKE_BOOST_USD if decision["filled_boost"] else stake_usd) if filled else None,
-             "land_off": landing_offset(recs, feed_ts + SEAT_SECONDS.get(SEAT, 0)), "load_txpb": decision.get("load_txpb"),   # 6.15: report 24.51
+             "land_off": landing_offset(recs, feed_ts + SEAT_SECONDS.get(SEAT, 0)), "load_txpb": decision.get("load_txpb"), "seq_rtt_ms": decision.get("seq_rtt_ms"),   # 6.15/6.16: report 24.51
              "flip_minus_first_shot_ms": round(1000 * (fw - baw), 1) if (fw and baw) else None,
              "flip_minus_first_fill_ms": round(1000 * (fw - baw) - BURST_STEP_MS * next((i for i, (hh, r, _) in enumerate(recs) if r and r.get("status") == "0x1"), 0), 1) if (fw and baw and filled) else None,
              "target_model": decision.get("target_model"), "shots": [{"hash": hh, "status": (r or {}).get("status"), "block": int(r["blockNumber"], 16) if r else None,
@@ -2521,6 +2529,46 @@ def landing_offset(recs, seat_ts):
     -1 = the creation second's last block, +5 = five blocks late); None when either side is unknown"""
     fb = state["flip_block"].get(seat_ts); blocks = [int(r["blockNumber"], 16) for hh, r, a in recs if r and r.get("blockNumber")]
     return (min(blocks) - fb) if (fb and blocks) else None
+
+
+def seq_probe(raw=None):
+    """6.16: one timed post to the sequencer's endpoint of a signed transaction it always rejects (the wallet's nonce 0: "nonce too
+    low", no gas, nothing on the chain). The reply's round trip is the door's delay; a timeout counts as the timeout. Report 24.51:
+    in the slow regime every shot's reply took 0.6-4 s against 60-230 ms at rest, and the shots landed 5-33 blocks late."""
+    raw = raw if raw is not None else (SEND_PROBE() if SEND_PROBE else None)
+    if raw is None:
+        return None
+    t0 = mono()
+    try:
+        rpc_seq.call("eth_sendRawTransaction", ["0x" + bytes(raw).hex()], tries=1)
+    except Exception:
+        pass                                                              # the rejection is the answer; a timeout is the timeout
+    ms = round(1000 * (mono() - t0), 1); state["seq_rtt"].append((mono(), ms)); return ms
+
+
+def seq_rtt():
+    """6.16: (the latest probe's ms, its age in s, the median of the last six) or (None, None, None)"""
+    v = list(state["seq_rtt"])
+    if not v:
+        return None, None, None
+    t, ms = v[-1]; last6 = [m for _, m in v[-6:]]
+    return ms, round(mono() - t, 1), round(st.median(last6), 1)
+
+
+def door_slow(p_ms, p_age):
+    """6.16: the skip rule (SEQ_RTT_SKIP_MS, 0 = off): the last probe is recent (under three cadences) and slower than the limit"""
+    return bool(SEQ_RTT_SKIP_MS and p_ms is not None and p_age is not None and p_age < 3 * max(PROBE_EVERY_S, 1) and p_ms > SEQ_RTT_SKIP_MS)
+
+
+def probe_loop():
+    """6.16: its own thread, never the chain loop's (a 3 s timeout there would stale the nonce poll and refuse launches)"""
+    while True:
+        try:
+            if state["open"] is None:
+                seq_probe()
+        except Exception as e:
+            log({"ev": "error", "stage": "probe", "err": str(e)[:120]})
+        time.sleep(PROBE_EVERY_S)
 
 
 def second_of_block(bn):
@@ -2812,10 +2860,12 @@ async def main():
             if RELAY_TOO_LATE not in str(e):
                 raise SystemExit(f"RELAY {RELAY} does not know the deadline (old relay, or the RPC failed: {str(e)[:100]}): redeploy with deploy/relay_deploy.py --write-env, engine stopped")
     load_state(); new_day_check(); venue_check(first=True); threading.Thread(target=chain_loop, daemon=True).start()
+    if SEND_PROBE is not None and PROBE_EVERY_S > 0:
+        threading.Thread(target=probe_loop, daemon=True).start()        # 6.16
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
     smart_helpers_load(force=True)
-    log({"ev": "start", "version": 6.15, "release": "6.15", "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.16, "release": "6.16", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

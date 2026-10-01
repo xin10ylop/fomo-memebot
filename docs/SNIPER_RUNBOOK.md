@@ -1580,3 +1580,22 @@ Deploy (the send step is unchanged):
     cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"stake_boost_usd": [0-9.]*\|"dry_run": [a-z]*'
 
 Check: `"release": "6.15"`. In the readings: `land_off` on every landing line; no "not fresh" refusal within 30 s of a burst.
+
+
+## 5aq. Engine 6.16: the sequencer-door probe (Oct 1 07:30 UTC)
+
+The week's reply times (24.51): every shot of the seven bursts in the slow regime was acknowledged by the sequencer 0.6-4 s
+after it was posted, every other burst in 60-230 ms, and the slow ones landed 5-33 blocks after the seat block. The door is
+measurable without a burst: a signed transaction the sequencer always rejects (the wallet's nonce 0, long spent: "nonce too
+low", nothing on the chain, no gas), posted every `PROBE_EVERY_S` (10) from its own thread, its reply timed. The latest
+probe, its age and the median of the last six ride on every decision (`seq_rtt_ms`, `seq_rtt_age_s`, `seq_rtt_med_ms`) and
+on every `burst_landing`; the ten-minute `flow` line carries the median. `SEQ_RTT_SKIP_MS` (0 = off) skips the burst when the
+last probe is under thirty seconds old and slower than the limit: built, off until the probe is seen agreeing with the
+shots' reply times on a slow burst (a reading's job), then `set_kv SEQ_RTT_SKIP_MS 400`. `tests/test_seq_probe.py` (17 checks).
+
+Deploy (the send step changed: `make_probe`):
+
+    cd ~/fomo-memebot && git pull -q && sudo cp deploy/send_step.py /etc/sniper/send_step.py && sudo systemctl restart sniper-engine && sleep 25 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"probe": \[[^]]*\]\|"dry_run": [a-z]*'; sudo python3 deploy/englog.py 1 | grep -c '"stage": "probe"'
+
+Check: `"release": "6.16"`, `"probe": [true, 10.0, 0.0]`, and a zero count of probe errors. The first `flow` line (ten
+minutes in) shows `seq_rtt_med_ms` around 60-100 at rest.
