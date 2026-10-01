@@ -590,7 +590,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
          "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "feed_seq": 0, "connected_at": 0.0,
          "arrivals": collections.deque(maxlen=900), "flip_wall": {}, "slot_pred": {}, "slot_err": collections.deque(maxlen=120), "vote_err": collections.deque(maxlen=120), "slot_hits": collections.deque(maxlen=120),   # 5.9 ramp model
-         "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "ingested_seq": 0, "venue_ok": True, "venue": None, "decisions": {}, "shooter_nonce": {}, "shooter_eth": {}, "shooter_at": 0.0, "relay_eth": None, "relay_at": 0.0, "base_fee_hist": collections.deque(maxlen=600), "relay_try_at": -1e9, "relay_alarm_at": -1e9, "shooter_alarm_at": -1e9,
+         "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "ingested_seq": 0, "venue_ok": True, "venue": None, "decisions": {}, "shooter_nonce": {}, "shooter_eth": {}, "shooter_at": 0.0, "relay_eth": None, "relay_at": 0.0, "base_fee_hist": collections.deque(maxlen=600), "relay_try_at": -1e9, "relay_alarm_at": -1e9, "shooter_alarm_at": -1e9, "block_ntx": collections.deque(maxlen=40),
          "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "day_start_real": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "scores_e1": collections.deque(maxlen=60), "race_lags": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
 lock = threading.Lock()
 cond = threading.Condition()                           # notified by the feed loop after every message is fully indexed
@@ -1861,9 +1861,20 @@ def venue_check(first=False):
 
 def release_reservation():
     """give the nonce back and make the next launch wait for a fresh one from the chain, so a reserved-but-unused nonce
-    cannot leave a gap that strands every later transaction in the pool (audit, Sep 16)."""
+    cannot leave a gap that strands every later transaction in the pool (audit, Sep 16). 6.15: the fresh one is read here,
+    now, from the two nodes (the shooters fired the shots, the wallet's count is whatever the chain says): the launch 3 s
+    after a gated burst was refused "nonce/gas not fresh" on Sep 30 21:26 (+79% on the chain) while the background poll
+    was still on its way. If both nodes fail the old rule stands (None: the next launch waits for the poll)."""
     with lock:
         state["nonce"] = None; state["chain_at"] = 0.0; state["busy_until"] = 0.0
+    try:
+        v = next_nonce()                                                  # None when both nodes fail (state["nonce"] is None here)
+    except Exception:
+        v = None
+    if v is not None:
+        with lock:
+            if state["nonce"] is None:                                    # the poll did not beat us to it
+                state["nonce"] = v; state["chain_at"] = mono()
 
 
 def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0, tax_bps=None, txh=None, known=None):
@@ -2209,6 +2220,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         buy = {"to": to_checksum_address(RELAY), "value": hex(0 if SHOOTERS else amount_in), "data": "0x" + RELAY_BUY_SEL + abi_word(curve) + abi_word(amount_in) + abi_word(min_out) + abi_word(deadline),
                "gas": hex(RELAY_SHOOT_GAS if SHOOTERS else GAS_BUY + RELAY_GAS_EXTRA), "gasPrice": hex(gas_price), "nonce": hex(nonce), "chainId": 4663}
         decision["relay_deadline"] = deadline
+        decision["load_txpb"] = feed_load()                                                                     # 6.15: the feed's load going into the burst
         if STAKE_BOOST_USD > stake_usd and SHOOTERS and state.get("smart_helpers") and (state.get("relay_eth") or 0) >= STAKE_BOOST_USD / state["eth_usd"] * 0.999:
             tk_b, net_b, gross_b, _ = size_buy(X, Y, STAKE_BOOST_USD / state["eth_usd"], SEAT)                  # 6.13: the boosted stake, sized the same way (the supply cap applies)
             amount_b = int(gross_b * 1e18); min_out_b = int(tk_b * (1 - BURST_SLIP) * 1e18)
@@ -2305,6 +2317,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         fi = next((i for i, (hh, r, _) in enumerate(recs) if r and r.get("status") == "0x1"), None); boosted = state.get("last_boosted") or []
         decision["filled_boost"] = bool(fi is not None and fi < len(boosted) and boosted[fi])
         log({"ev": "burst_landing", "curve": curve, "filled": len(filled), "boost": decision["filled_boost"], "stake_usd": (STAKE_BOOST_USD if decision["filled_boost"] else stake_usd) if filled else None,
+             "land_off": landing_offset(recs, feed_ts + SEAT_SECONDS.get(SEAT, 0)), "load_txpb": decision.get("load_txpb"),   # 6.15: report 24.51
              "flip_minus_first_shot_ms": round(1000 * (fw - baw), 1) if (fw and baw) else None,
              "flip_minus_first_fill_ms": round(1000 * (fw - baw) - BURST_STEP_MS * next((i for i, (hh, r, _) in enumerate(recs) if r and r.get("status") == "0x1"), 0), 1) if (fw and baw and filled) else None,
              "target_model": decision.get("target_model"), "shots": [{"hash": hh, "status": (r or {}).get("status"), "block": int(r["blockNumber"], 16) if r else None,
@@ -2438,9 +2451,9 @@ def prune(now):
 def index_message(inner, ts, seen):
     """index one L2 message's transactions: direct buys and sells, creations, router buys (sender lazily), and the fold of
     everything that touches a watched curve"""
-    watched = state["watch"]
+    watched = state["watch"]; n_tx = 0
     for t in decode_batch(inner.get("l2Msg", "")):
-        p = parse_tx(t)
+        n_tx += 1; p = parse_tx(t)
         if p is None:
             continue
         ty, to, value, data = p
@@ -2493,6 +2506,21 @@ def index_message(inner, ts, seen):
                             fold_sell(w, float("inf") if STOP_SELL_FRAC > 0 else 0.0)
         except Exception as e:
             log({"ev": "error", "stage": "decode", "err": str(e)[:200]})
+    state["block_ntx"].append(n_tx)                       # 6.15: the feed's transactions per block, for the landing log's load reading
+
+
+def feed_load(n=10):
+    """6.15: mean transactions per feed block over the last n blocks (the creation second, at a burst). The slow-sequencer regime
+    of Sep 26-30 (report 24.51) showed as a steady 27-35 transactions in every block for seconds on end, against 5-15 at rest."""
+    v = list(state["block_ntx"])[-n:]
+    return round(st.mean(v), 1) if v else None
+
+
+def landing_offset(recs, seat_ts):
+    """6.15: the first block one of the burst's shots landed in, counted from the seat second's first block (0 = the seat block,
+    -1 = the creation second's last block, +5 = five blocks late); None when either side is unknown"""
+    fb = state["flip_block"].get(seat_ts); blocks = [int(r["blockNumber"], 16) for hh, r, a in recs if r and r.get("blockNumber")]
+    return (min(blocks) - fb) if (fb and blocks) else None
 
 
 def second_of_block(bn):
@@ -2787,7 +2815,7 @@ async def main():
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
     smart_helpers_load(force=True)
-    log({"ev": "start", "version": 6.14, "release": "6.14", "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.15, "release": "6.15", "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

@@ -4690,3 +4690,23 @@ landing sample, worth $0.25-0.50 a fill at today's stakes; the cost is 35 more r
 slightly negative until the fill is $100, positive after. The audit of the boosted stake (6.13) is in 5an: the evidence holds
 under other thresholds, the code's failure modes each fall back to the base burst, and the one real risk - the boosted
 dollars follow a handful of bots - is watched by the $50 fills' own tally.
+
+### 24.51 Where the shots land: the week's 41 bursts placed on the chain (Oct 1 06:00 UTC)
+Every burst with a shot sent, Sep 26 - Oct 1, placed by hand against the first block of its seat second (the engine logs this
+as `land_off` from 6.15): 28 fills, 13 misses (no shot filled).
+- **The straddle works.** 29 of 34 bursts outside the slow regime had their first shot in the creation second's last block or
+  the seat block and their last shot in the seat block, with no buy ahead of us at block level; 24 of those 34 filled. The
+  misses in that class were the guard (the seat block's buys ahead of ours pushed the price past minOut) or, on Sep 27, the
+  tighter slip of the time. Nothing to retune there.
+- **The slow-sequencer regime.** In 7 bursts the creation second ran at a steady 27-35 transactions in every block (5-15 at
+  rest) and the sequencer drained slowly: our shots landed 5, 7, 13 and 33 blocks after the seat block (Sep 26 09:24, Sep 28
+  14:55, Sep 30 20:08 and 21:04), behind 4-8 buys, and reverted on the guard; the three fills in the regime landed at +0, +2
+  and +4 and two of them lost 12%. The seat model scores those four misses +18%, +31%, +40% and +43%; priced where the shots
+  actually landed, with the hold from there, they are -29%, -100%, -29% and -10%: the guard refused four losers. The regime
+  is not playable from where we stand in the queue; the four bursts cost $1.30 of gas. Whether the delay sits in our posts
+  (the send step logs each shot's reply time) or inside the sequencer's intake decides what, if anything, can be done; the
+  reply times of the week's bursts are the next pull.
+- **A refusal with no cause.** Two launches in seven days were refused "nonce/gas not fresh" within 3 s of a burst that sent
+  nothing: Sep 28 19:44 (+17.6% on the chain) and Sep 30 21:26 (+78.8%, 4-7 fleets, a boosted helper attacking, $50 live).
+  The release of the reserved wallet nonce invalidated it and the background poll had not re-read it in time. Fixed in 6.15
+  (runbook 5ap): the release reads the nonce itself. At the stakes of the day the two were worth about $43.

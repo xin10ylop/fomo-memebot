@@ -1543,3 +1543,40 @@ Chain side first, with the live settings (tiers 2-4%, 3 fleets, hold 11, guard 0
   expectation for them). The 20:08 launch (2 fleets, +39.8%) sits before the 3-fleet gate's deploy at 20:30: a fill if the
   engine fired it, refused by the gate after. 13 launches refused for fewer fleets: mean -7.0%, 15% positive. The smart
   list refit on the window: 15 helpers (was 14); the box pulls it with the reading and the engine reloads it within the hour.
+
+**Box side (05:20 UTC).** Capital $67.16, P&L since the reset +0.003575 ETH (+$9.69, +16.9%): the +$9.9 expected less one burst's gas.
+No fill in the window; the $25 window stays at 13 of 20 fills. Engine against the chain, launch by launch:
+- 20:08 0x04e4af02 (2 fleets, before the 3-fleet gate's deploy): fired, the 35 shots landed in the seat second's 6th block
+  behind 4 buys, all reverted on the guard. Gas only. The chain's +39.8% assumed the seat block; priced where the shots
+  landed it was -29% (report 24.51), so the guard was right.
+- 21:04 0x1daf553a (4 fleets): fired, the shots landed in the 8th-15th blocks of the seat second behind 8 buys, all reverted.
+  Gas only. Chain +42.7% from the seat; -10% where we landed. Same class: the slow-sequencer regime (24.51).
+- 21:24 0x5c9177c6 (boosted, 35 shots at $50): 18 shots in the creation second's last block, 17 in the seat block, all
+  reverted on the guard, as the chain predicted. Gas only.
+- 21:26:18 0xf78e378c (+78.8% on the chain, 4-7 fleets, a boosted helper attacking): refused "nonce/gas not fresh" 3 s after
+  the gated burst at 21:26:15 released its reserved wallet nonce by invalidating it. Nothing had left the wallet. A bug: fixed
+  in 6.15 (5ap). The same refusal took a +17.6% launch on Sep 28 19:44. Two in seven days, both winners.
+- 22:07-03:52: seven launches at 0-2 fleets, the gate never opened, no shot sent; the chain scored the refused set -7% mean.
+- 04:14 0x14479a88: the first boosted fire of 6.14 (28 shots at $50, 7 gated): 25 shots in the creation second's last block,
+  3 in the seat block, reverted on the guard as the chain predicted. Gas only, the P&L's -$0.33.
+Hygiene: 2 "not fresh" and 3 feed2 errors in 12 h; the relay alarm every 30 min was the $60 float against a $56 relay and a
+$3.8 wallet (harmless: the boost built and fired at 04:14); `RELAY_FLOAT_USD=55` set and the engine restarted at 05:25.
+
+
+## 5ap. Engine 6.15: the released nonce is re-read; the landing log shows where the shots landed (Oct 1 06:30 UTC)
+
+- `release_reservation()` (every gated burst, no-fill burst and pre-burst refusal) now reads the wallet's pending nonce from the
+  two nodes at once and marks it fresh; both nodes failing leaves the old rule (the next launch waits for the poll). The
+  shooters fire the shots, so the wallet's count is whatever the chain says; nothing can be stranded by reading it.
+- `burst_landing` carries `land_off` (the first landed shot's block counted from the seat second's first block: -1 the
+  creation second's last block, 0 the seat block, +5 five blocks late) and `load_txpb` (the feed's transactions per block over
+  the ten blocks before the burst). Report 24.51: the week's 41 bursts placed on the chain by hand; from now on every reading
+  has both numbers in the log.
+- Tests: `tests/test_release_nonce.py` (15 checks: the two nodes, one down, both down, the poll winning the race, a raising
+  read, the offset, the load).
+
+Deploy (the send step is unchanged):
+
+    cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"stake_boost_usd": [0-9.]*\|"dry_run": [a-z]*'
+
+Check: `"release": "6.15"`. In the readings: `land_off` on every landing line; no "not fresh" refusal within 30 s of a burst.
