@@ -158,6 +158,8 @@ def main():
         for lo, hi, name in ((100, 200, "creator tax 100-200 bps (the original band)"), (201, 300, "creator tax 201-300 bps (opened Sep 30 10:40 UTC, runbook 5ag)")):   # 5ah: each band on its own line
             b = [r for r in clean if r.get("tb") is not None and lo <= r["tb"] <= hi]
             print(f"    {name}: {len(b)} fills" + (f", mean actual {st.mean(r['actual'] for r in b):+.1%}, {sum(1 for r in b if r['actual'] > 0)} positive, net ${sum(r['net'] for r in b)*ETH_USD:+.2f}" if b else ""))
+        b = [r for r in clean if r["stake"] * ETH_USD > 37.5]   # 6.13: the boosted fills ($50 when a smart helper attacks, live since Oct 1)
+        print(f"    boosted $50 (6.13, a smart helper attacking): {len(b)} fills" + (f", mean actual {st.mean(r['actual'] for r in b):+.1%}, {sum(1 for r in b if r['actual'] > 0)} positive, net ${sum(r['net'] for r in b)*ETH_USD:+.2f}; the $25 fills: {len(clean) - len(b)}, net ${sum(r['net'] for r in clean if r not in b)*ETH_USD:+.2f}" if b else ""))
         days = {}
         for r in clean:
             days.setdefault(time.strftime("%b %d", time.gmtime(r["T0"])), []).append(r)

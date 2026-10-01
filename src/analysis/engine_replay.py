@@ -20,7 +20,7 @@ def flag(k):
     return False
 T0 = calendar.timegm(time.strptime(arg("--from", "2026-09-21 09:40"), "%Y-%m-%d %H:%M")); T1 = calendar.timegm(time.strptime(arg("--to", "2026-09-28 09:40"), "%Y-%m-%d %H:%M"))
 HOLD = int(arg("--hold", "11")); NO_CAP = flag("--no-cap"); NO_REPEAT = flag("--no-repeat"); VIEW = arg("--view", "k-2"); REG = flag("--reg"); DUMP = arg("--dump"); SLIP = float(arg("--slip", "0.07"))   # --slip: the minOut guard's tolerance to test (the live BURST_SLIP is 0.07)   # --dump file.json: every launch's row (disposition, fleets at k-2/k-1/k, guard ratio, returns by position and hold)   # --reg: count the registration block's shots (the engine does when its launch thread wins the race: 3 of 4 live cases)
-LIVE = {"SEND_MODULE": "", "PRIVATE_KEY": "", "LOG_PATH": "/tmp/engine_replay.jsonl", "SEAT": "E1", "ATTACK_MIN": os.environ.get("REPLAY_ATTACK_MIN", "2"), "GATE_CLOSE_MS": "36", "TRADE_HOURS": "",
+LIVE = {"SEND_MODULE": "", "PRIVATE_KEY": "", "LOG_PATH": "/tmp/engine_replay.jsonl", "SEAT": "E1", "ATTACK_MIN": os.environ.get("REPLAY_ATTACK_MIN", "3"), "GATE_CLOSE_MS": "36", "TRADE_HOURS": "",
         "MIN_FOLLOW_ETH_60": "0", "TIER_MIN_BPS": "100", "TIER_MAX_BPS": os.environ.get("REPLAY_TIER_MAX", "300"), "BUNDLE_MIN": "3", "NAMED_MAX": os.environ.get("REPLAY_NAMED_MAX", "12"), "BUNDLE_MIN_ETH": "0.3", "BUNDLE_MAX_ETH": "0" if NO_CAP else "3.0",
         "MIN_CREATOR_SUPPLY": "0.01", "MAX_CREATOR_BUY_ETH": "2", "HOLD_BLOCKS": "9", "BURST_SLIP": "0.07", "BURST_N": "35", "STAKE_MIN": "13", "STAKE_MAX": "13",
         "WALLET": "0xe0686dc72b04c12ceefeea75e286e4ef7c056f01", "RELAY": "0xe8e98c3514d5bd83fdd01360896f2382b861a720"}
@@ -28,6 +28,8 @@ for k, v in LIVE.items(): os.environ[k] = v
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."); os.chdir(ROOT); sys.path.insert(0, "src/strategy"); import sniper_engine as E
 _argv = sys.argv; sys.argv = ["x", "0.76", "0.71"]; exec(open("src/analysis/crowd_rules.py").read().split("rules = [")[0]); sys.argv = _argv   # cums, at (the tables' count per block, for the dump)
 STAKE, GAS = 13.0, 0.33; BUSY_S = 6.0
+try: SMART = {a.lower() for a in (json.load(open(arg("--smart", "data/derived/smart_helpers.json"))).get("helpers") or {})}   # 6.13: the helpers the engine boosts to $50 on
+except Exception: SMART = set()
 D = "data/derived/live_vs_table"
 KNOWN = {"sep2021": ("2026-09-20 13:26", "2026-09-22 01:02"), "sep2223": ("2026-09-22 01:02", "2026-09-23 06:35"), "sep23day": ("2026-09-23 10:22", "2026-09-23 20:20"), "sep24_paper": ("2026-09-24 12:38", "2026-09-24 21:36")}
 CROWD_ALIAS = {"sep24_paper": "sep24paper"}
@@ -64,7 +66,7 @@ def fleets(r, cv, named, creator, token, upto):
             E.sender_of = (lambda fr: (lambda tx: fr))(t["fr"])
             data = bytes.fromhex(t["sel"][2:]) if t["direct"] else (bytes.fromhex(t["sel"][2:]) + b"\0" * 12 + bytes.fromhex(cv[2:]) + b"".join(b"\0" * 12 + bytes.fromhex(a[2:]) for a in named if t["named_data"]))
             E.note_attack(w, t["to"], b"", data, cv)
-    return E.attack_fleets(w)
+    return E.attack_fleets(w), {a.lower() for a in w.get("attack_targets", ())}
 def bundle_buyers(r, named):
     nm = set(a.lower() for a in named); s = set(); helper = False
     for rows in r["blocks"][: min(len(r["blocks"]), 10)]:
@@ -120,7 +122,7 @@ for r, l, h in launches:
     if tb < E.TIER_MIN_BPS or tb > E.TIER_MAX_BPS: gates.append("tier")
     if t < busy_until: gates.append("position open")
     k = r["k"]; upto = {"k-2": k - 2, "k-1": k - 1, "k": k}[VIEW]
-    fl = fleets(r, cv, named, creator, r.get("token"), upto); rec["fleets"] = fl
+    fl, tg = fleets(r, cv, named, creator, r.get("token"), upto); rec["fleets"] = fl; rec["smart"] = bool(tg & SMART)   # 6.13: a boosted helper is attacking
     if fl < E.ATTACK_MIN: gates.append(f"attackers {fl} < {E.ATTACK_MIN}")
     if gates: rec["why"] = "GATE " + gates[0]; out.append(rec); continue
     rec["fired"] = True
@@ -163,5 +165,7 @@ if DUMP:
                   "ret": {hh: h.get(f"behind1_13_h{hh}") for hh in (9, 11, 13, 15, 30, 60)}, "ret_first": {hh: h.get(f"first_13_h{hh}") for hh in (9, 11, 13, 15)},
                   "tp50_h600": h.get("behind1_13_tp50_h600"), "stop20_h600": h.get("behind1_13_stop20_h600"), "src": h.get("src")})
     json.dump(out, open(DUMP, "w")); print(f"dumped {len(out)} rows to {DUMP}", file=sys.stderr)
+sm = [x for x in fills if x.get("smart")]
+if SMART: print(f"boosted (a smart helper attacking, $50 live since Oct 1, 5am): {len(sm)} of {len(fills)} fills" + (f", mean {st.mean(x['ret'] for x in sm):+.1%}, {sum(x['ret'] > 0 for x in sm)} positive; at $25/$50 the fills net ${sum(x['ret'] * (50 if x.get('smart') else 25) - GAS for x in fills):+.2f} against ${sum(x['ret'] * 25 - GAS for x in fills):+.2f} flat" if sm else ""))
 if flag("--list"):
-    for x in out: print(f"  {time.strftime('%b %d %H:%M', time.gmtime(x['T0']))} {x['cv'][:10]} bundle {x['bundle']:.3f} fleets {x.get('fleets', '-')} | {x['why']}" + (f" {x['ret']:+.1%}" if "ret" in x else ""))
+    for x in out: print(f"  {time.strftime('%b %d %H:%M', time.gmtime(x['T0']))} {x['cv'][:10]} bundle {x['bundle']:.3f} fleets {x.get('fleets', '-')}{' BOOST' if x.get('smart') else ''} | {x['why']}" + (f" {x['ret']:+.1%}" if "ret" in x else ""))

@@ -1334,8 +1334,11 @@ band against it. Bound: the band's own tally for its first 20 fills in the readi
 ## 5ah. The reading, current version (Sep 30): one place for both sides
 
 Both sides of a reading use the newest code: the chain side through `src/analysis/score_window.sh` (the live settings baked
-in: tiers 2-4%, hold 11, guard 0.20, the three engine views), the box side through the block below, which pulls first. When a
-live setting changes, this section and the script change with it; older reading blocks in this runbook are history.
+in: tiers 2-4%, the attackers gate at 3 fleets, hold 11, guard 0.20, the three engine views; since Oct 1 the replay marks the
+fills a boosted helper attacked as `BOOST`, the fills the engine stakes $50 on, and tallies them on a `boosted` line), the box
+side through the block below, which pulls first (`live_vs_table.py` closes with a `boosted $50` line next to the band lines,
+the fills at their real stake). When a live setting changes, this section and the script change with it; older reading
+blocks in this runbook are history.
 
 Chain side, before the box is read (the prediction is committed before the paste):
 
@@ -1526,3 +1529,17 @@ Tests: `tests/test_stake_boost.py` 21 checks (the list, the pick, the fallbacks,
 bookkeeping, the race). Deploy (the send step changed):
 
     cd ~/fomo-memebot && git pull -q && sudo cp deploy/send_step.py /etc/sniper/send_step.py && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"\|"ev": "smart_helpers"' | tail -2 | grep -o '"release": "[0-9.]*"\|"stake_boost_usd": [0-9.]*\|"shots_per_shooter": [0-9]*\|"n": [0-9]*\|"dry_run": [a-z]*'
+
+**Deployed Oct 1 04:50 UTC:** release 6.14, boost $50 (14 helpers loaded), one shot per shooter, live.
+
+
+## 5ao. Oct 1 05:15 reading (piece oct01night, Sep 30 20:05 - Oct 1 05:09 UTC)
+
+Chain side first, with the live settings (tiers 2-4%, 3 fleets, hold 11, guard 0.20): 1,584 creations, 22 qualifying.
+- Usual view (k-1 with the registration block, the live centre): 2 fills, 21:04 0x1daf553a +42.7% (4 fleets) and 21:26
+  0xf78e378c +78.8% (7 fleets); 2 guard reverts, 21:24 0x5c9177c6 and 04:14 0x14479a88 (gas only). Floor (k-2): the same
+  two fills, one guard. Ceiling (k): a third fill, 22:38 0x14e238da +6.8%. All four fired launches had a boosted helper
+  attacking; at $25/$50 the two fills net +$60 against +$30 flat (they came before the boost went live, so $25 is the
+  expectation for them). The 20:08 launch (2 fleets, +39.8%) sits before the 3-fleet gate's deploy at 20:30: a fill if the
+  engine fired it, refused by the gate after. 13 launches refused for fewer fleets: mean -7.0%, 15% positive. The smart
+  list refit on the window: 15 helpers (was 14); the box pulls it with the reading and the engine reloads it within the hour.
