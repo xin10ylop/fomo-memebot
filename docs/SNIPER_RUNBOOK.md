@@ -1344,6 +1344,10 @@ Chain side, before the box is read (the prediction is committed before the paste
 
     bash src/analysis/score_window.sh NAME "YYYY-MM-DD HH:MM"
 
+Health, any time (services, the last start line, the flow line, the last 3 hours' events and alarms, an open position, the P&L):
+
+    cd ~/fomo-memebot && git pull -q && sudo bash deploy/health.sh
+
 Box side (the owner pastes the output):
 
     cd ~/fomo-memebot && git pull -q && sudo /opt/sniper-venv/bin/python3 deploy/relay_ops.py status 0.021190 | tail -2
