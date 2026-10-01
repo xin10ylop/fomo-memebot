@@ -4731,3 +4731,11 @@ what they did on v4 is not in this sample, and the earlier study of graduated Po
 11) found -11% to -20% on average. Keeping a slice of each fill for 24 hours would have returned +8% a fill against +30% for
 the one-second exit; with a take-profit at 2x, +28%, no better than the exit and with a day of exposure. The one-second exit
 stays; a 50x runner is out of reach by design and not worth chasing with the median token at half our entry a day later.
+
+**Addendum, Oct 1 21:30 UTC: the day the model paid, and the two things it cannot see.** Oct 1 05:09-20:49: 95 qualifying
+launches, the engine fired 7 times and filled 5, every fill within a point of the chain's seat model (runbook 5ar); with the
+20:52 fill, +$69 on the day, +$81 since the reset, the five boosted fills +$71. The one loss, -58% on a $50 fill, was a
+creator team selling its whole 33% bundle in one block eight blocks after the seat: first seen in 47 fired launches, no
+pre-tick mark, no exit that beats a one-block dump. The sequencer-door probe (6.16) read 2-8 ms on both slow-door misses
+of the day while the shots waited 1-3 s: the rejection happens before the queue, so the probe does not measure it and the
+skip rule stays off; the shots' reply times remain the only measure, and the slow door remains unplayable.

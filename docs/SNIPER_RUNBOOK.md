@@ -1603,3 +1603,44 @@ Deploy (the send step changed: `make_probe`):
 
 Check: `"release": "6.16"`, `"probe": [true, 10.0, 0.0]`, and a zero count of probe errors. The first `flow` line (ten
 minutes in) shows `seq_rtt_med_ms` around 60-100 at rest.
+
+
+## 5ar. Oct 1 21:30 reading (piece oct01day, Oct 1 05:09 - 20:49 UTC): the best day, launch by launch
+
+Chain side (tiers 2-4%, 3 fleets, hold 11, guard 0.20): 3,322 creations, 95 qualifying. Usual view: 6 fills, 1 guard, +7.0%
+mean, 5 of 6 with a listed helper attacking. Box side: P&L +$81.21 since the reset (+142%), capital $138.37, no deposit; Oct 1:
+6 fills, 3 up, net +$68.98; the five boosted $50 fills net +$70.76. Engine against the chain:
+
+| time | chain, behind one | engine | note |
+|---|---|---|---|
+| 07:39 | +78.4% | +80.3%, $50, first in the block | matched |
+| 07:46 | -1.1% | no fill: the shots landed 9 blocks late, replies 7.6 ms on the probe, 22 txs a block on the feed | the slow door; nothing lost |
+| 09:26 | guard revert | not fired (the engine's view had fewer fleets) | nothing lost |
+| 15:36 | -9.8% (22 named wallets: the replay's team-bundle gate refuses it, live NAMED_MAX is off) | -7.4%, $25 | the one the named gate would have saved, $1.86 |
+| 17:52 | -2.0% | -2.6%, $50 | matched |
+| 18:28 | +17.3% | +30.9%, $50, first in the block | better than the model |
+| 18:43 | +8.0% (no listed helper) | no fill: the shots landed 33 blocks late, the probe read 2.0 ms | the slow door, unseen by the probe; $2 lost |
+| 20:45 | -58.5% | -58.1%, $50, first in the block | the team dump (below) |
+| 20:52 | outside the window | +97.6%, $50 | |
+
+**The -$29 trade (20:45, 0x0e354e61).** Execution was perfect: first in the seat block, sold 11 blocks later in 1.09 s. The
+creator's five bundle wallets had bought 0.82 ETH (33% of the supply) in the creation second and sold all of it in one
+block, +8, into a crowd of six small buys (0.14 ETH); the curve fell from 2.51 to 1.74 ETH before our sell. The creator and
+the five wallets had never launched before. Across the week's 47 fired launches this is the only one where the team sold
+inside the hold (the other 46: 0-1% of their tokens); nothing before the tick marks it (an ordinary bundle, 3 fleets, a
+listed helper attacking). A stop cannot beat it: the six sells sat in one block, and a sell of ours at +9 would have got the
+same price as at +11. It is the "dead" column of the model, 2% of fills, priced in. No change.
+
+**The probe is not a detector.** Both slow-door misses today (07:46, 18:43) read 7.6 and 2.0 ms on the probe while the shots
+waited 1-3 s: the sequencer rejects the nonce-0 transaction before the queue the shots stand in. `SEQ_RTT_SKIP_MS` stays off
+for good; the probe stays as a cheap record of the RPC front's latency. The shots' own reply times remain the measure.
+
+**The $25 window** stands at 19 fills of 20, net far positive. The next fill closes it, and the step is the base stake to $50 and
+the boost to $75 (not $100: a boosted fill would be 72% of today's capital, and the 20:45 dump shows what one fill can cost);
+the boost goes to $100 when the capital passes $200. After the next fill:
+
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv STAKE_MIN 50; set_kv STAKE_MAX 50; set_kv STAKE_BOOST_USD 75; set_kv RELAY_FLOAT_USD 90; sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"stake": \[[^]]*\]\|"stake_boost_usd": [0-9.]*\|"dry_run": [a-z]*'
+
+Hygiene: the feed refused five connections at 15:33 (HTTP 429) and the engine ran on the provider path for 120 s, then came
+back (the 15:36 fire was on the feed again); one feed stall at 18:27; the relay alarm until the 05:25 float change; nothing
+since. Smart list refit: 16 helpers.
