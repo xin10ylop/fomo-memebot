@@ -1700,3 +1700,5 @@ Deploy (no send-step change):
     cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"stake": \[[^]]*\]\|"stake_boost_usd": [0-9.]*\|"dry_run": [a-z]*'
 
 Check: `"release": "6.17"`. In the readings: `hold_blocks` 11-13 on every trade_done; `exit_prep_s` near zero.
+
+**Deployed Oct 3 00:45 UTC:** release 6.17, base $50, boost $75, live.
