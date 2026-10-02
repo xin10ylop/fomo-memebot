@@ -4756,3 +4756,12 @@ two seconds on a day the public node answered in a second instead of 50 ms, and 
 dump. Engine 6.17 (runbook 5at) sends the first sell with no query in front of it (the exact amount from the buy's event,
 the approve confirmed by the watcher during the hold), bounds the receipt poll's alternate node at 0.7 s, and logs where
 every sell lands. On a normal day it moves the sell a block earlier, which the hold study prices at +1 to +3 points a fill.
+
+**Addendum, Oct 3 01:00 UTC: the 17 live trades of Oct 1-2 re-priced at an on-time exit.** Each trade's curve folded from the
+chain's own tape with our sell removed, our exact tokens sold at the end of the buy block + 11, 12 and 13; the method
+reproduces every actual sell to the tenth of a point at its actual position. Oct 1 (6 trades, the sells mostly on time):
+actual +$71.67, at +11 +$77.46, at +12 +$70.16, at +13 +$70.16. Oct 2 (11 trades, 8 sells late): actual -$22.51, at +11
++$11.55, at +12 -$4.13, at +13 -$15.16. Four of Oct 2's losses were dumps that came before block +11 and no exit changes them
+(12:03, 14:47, 16:45, 16:53); 22:37 turns from -3.9% to +11.4% and 19:55 from -12.1% to -1.6%; 19:09 would have been worse
+on time (-7.8% against -4.9%). Single trades swing by up to 24 points on one block (16:06: +31% at +11, +8% at +12), in
+both directions; summed over the days the earlier block is the better one, which is what 6.17 moves the sell toward.
