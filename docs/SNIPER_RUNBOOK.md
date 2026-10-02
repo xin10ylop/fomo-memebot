@@ -1661,3 +1661,14 @@ Chain side first (tiers 2-4%, 3 fleets, hold 11, guard 0.20): 1,689 creations, 4
 - 39 launches refused for fewer than 3 fleets: -9.9% mean, 5% positive. 10 refused by the replay's team-bundle gate
   (14-22 named wallets; live NAMED_MAX is off, so the engine may have fired some of them: the box side says).
 - Smart list refit: 16 helpers.
+
+**Box side (09:40 UTC).** Capital $137.99, P&L +$79.75 since the reset (+137%); overnight -$2.9. One fire, one fill: 23:14
+0x74c0183c, the first $75 fill (a listed helper attacking), landed in the straddle, sold in 1.18 s, -3.7% as the chain
+priced it. The 00:24 launch (chain -4.0%) the engine did not fire: its own fleet count stayed under 3 (a measurement-gap
+refusal that saved $3 this time). The 20:52 fill (+97.6%, counted on Oct 1) was the night's other fire. Nine launches with
+14-22 named wallets, two serial creators' templates (a 2.9% tier with 14-19 wallets, a 4% tier with 15 wallets and 1.1 ETH
+bundles), were all refused by the creator-repeat gate or for fewer than 3 fleets: the team-bundle class needs no gate of
+its own while those hold. The stake step restarted the engine at 21:25 and the relay refilled to the $90 float at once
+(relay 0.0333 ETH). No alarm, no "not fresh", no open position. The public RPC answered a block-number query in 1.1 s from
+the box (normally 50 ms) and the trade-reconciliation script timed out at 240 s on its 36 trades: the node was sluggish
+this morning, the engine's exits read two nodes and were not affected. The $50 window: 1 fill of 20 (-3.7%).
