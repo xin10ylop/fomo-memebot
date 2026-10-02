@@ -1672,3 +1672,31 @@ its own while those hold. The stake step restarted the engine at 21:25 and the r
 (relay 0.0333 ETH). No alarm, no "not fresh", no open position. The public RPC answered a block-number query in 1.1 s from
 the box (normally 50 ms) and the trade-reconciliation script timed out at 240 s on its 36 trades: the node was sluggish
 this morning, the engine's exits read two nodes and were not affected. The $50 window: 1 fill of 20 (-3.7%).
+
+
+## 5at. Engine 6.17: the sell goes out with nothing in front of it (Oct 3 00:30 UTC)
+
+**What happened on Oct 2.** Eleven trades, every entry in the right spot (first shot in the straddle or the seat block), and
+the day -$22.51. Priced from the chain: the three sells that landed 12-13 blocks after the buy returned +21%, +8%, -7%; the
+eight that landed 18-24 blocks after it returned -13%, +20%, -8%, -12%, -18%, -5%, -12%, -4%. The exit sells 11 feed blocks
+after the buy; before sending it read the wallet's token balance and the approve's receipt, two or three queries that take
+150 ms on a normal day and took one to two seconds on Oct 2, when the public node answered a block-number query in 1.1 s.
+A sell at +20 lands in the bots' dump; at +12 it lands before it (the week's holds: +28.5% at 11 blocks, +21.6% at 13).
+
+**6.17.**
+- The buy's receipt event gives the exact token amount (`tokens_wei`) and the buy's block (`buy_block`); the first sell uses
+  that amount with no balance read. A retry (a sell hash already exists) or a position from before 6.17 reads the balance as
+  before; a reverted sell is still diagnosed from the chain.
+- The approve is sent at the buy and confirmed by the watcher thread during the hold (`approve_ok`); when it is, the exit
+  skips the receipt query. When it is not, `ensure_approved` runs first, as before.
+- The receipt poll's alternate node (the public RPC) is a 0.7 s-bounded client, so a slow public node cannot stall the poll
+  a second per turn.
+- `trade_done` carries `hold_blocks` (the sell's block minus the buy's) and `exit_prep_s` (the time from the hold's end to
+  the sell's send). Healthy: 11-13 and under 0.02 s.
+- Tests: `tests/test_exit_prep.py` (8 checks), `tests/test_sell_landing.py` updated for the bounded node.
+
+Deploy (no send-step change):
+
+    cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"stake": \[[^]]*\]\|"stake_boost_usd": [0-9.]*\|"dry_run": [a-z]*'
+
+Check: `"release": "6.17"`. In the readings: `hold_blocks` 11-13 on every trade_done; `exit_prep_s` near zero.

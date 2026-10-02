@@ -4747,3 +4747,12 @@ carries it (among the fired launches only one sat under 0.3 ETH, -8.8%), and the
 33 shots, a strong crowd that then bought only 0.14 ETH behind us: the bots' own guards refused the launch after the team
 started selling, which no pre-tick reading shows. Not a gate; the rug class stays priced as the model's dead 2%, and the
 stake-to-capital rule stays the protection.
+
+### 24.53 Oct 2: the exits, not the launches (Oct 3 00:30 UTC)
+Eleven live trades on Oct 2, all entered in the right spot, -$22.51 on the day. From the chain: the sells that landed 12-13
+blocks after the buy returned +21%, +8% and -7%; the eight that landed 18-24 blocks after it returned -13%, +20%, -8%, -12%,
+-18%, -5%, -12% and -4%. The exit's two or three pre-send queries (the token balance, the approve's receipt) took one to
+two seconds on a day the public node answered in a second instead of 50 ms, and the sell went out that much later, into the
+dump. Engine 6.17 (runbook 5at) sends the first sell with no query in front of it (the exact amount from the buy's event,
+the approve confirmed by the watcher during the hold), bounds the receipt poll's alternate node at 0.7 s, and logs where
+every sell lands. On a normal day it moves the sell a block earlier, which the hold study prices at +1 to +3 points a fill.

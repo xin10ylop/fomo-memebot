@@ -29,16 +29,16 @@ E.WALLET = W; E.state["eth_usd"] = 2700.0; E.state["base_fee"] = 22_000_000; E.s
 logged = []; E.log = lambda d: logged.append(d)
 # ---- wait_receipt: the second node is asked on the alternate polls ---------------------------------------------------------
 lag = Node(1215, 1216, 10 ** 24); cur = Node(1217, 1217, 0, {"0xsell1": {"status": "0x1", "blockNumber": "0x10"}})
-E.rpc, E.rpc_logs = lag, cur
+E.rpc, E.rpc_logs, E.rpc_logs_quick = lag, cur, cur
 t0 = time.time(); r = E.wait_receipt("0xsell1", 1.0)
 ok(r and r["status"] == "0x1" and time.time() - t0 < 0.5, "a receipt the lagging node does not show is found on the sequencer's node within 100 ms")
 ok(E.wait_receipt("0xnone", 0.2) is None, "no receipt anywhere: None after the timeout")
 # ---- next_nonce: the higher of the two nodes ---------------------------------------------------------------------------------
 ok(E.next_nonce() == 1217, "the pending nonce is the higher of the two nodes' answers (the lagging node hands out a used one)")
 # ---- landed_on_chain: a node behind the transaction never counts, even with a zero balance ---------------------------------
-behind = Node(1215, 1216, 0); E.rpc, E.rpc_logs = behind, behind
+behind = Node(1215, 1216, 0); E.rpc, E.rpc_logs, E.rpc_logs_quick = behind, behind, behind
 ok(E.landed_on_chain(1216, E.sold_on(TOKEN)) is False, "a node whose confirmed nonce is not past the sell's does not count (its zero balance predates the buy)")
-E.rpc, E.rpc_logs = lag, cur
+E.rpc, E.rpc_logs, E.rpc_logs_quick = lag, cur, cur
 ok(E.landed_on_chain(1216, E.sold_on(TOKEN)) is True, "a node past the sell's nonce with the tokens gone: landed")
 cur.balance = 5
 ok(E.landed_on_chain(1216, E.sold_on(TOKEN)) is False, "past the nonce but the tokens still there (the sell reverted): not landed")
