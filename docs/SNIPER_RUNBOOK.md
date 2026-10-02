@@ -1649,3 +1649,15 @@ since. Smart list refit: 16 helpers.
 twentieth. The $50 window starts here: 20 fills, counted in the readings; the base goes to $100 when it closes positive and the
 capital allows a $100 fill at under half of it; the boost to $100 when the capital passes $200. The relay refills from the
 wallet to the $90 float within a minute of the restart (`relay_topup` in the log); the boost builds once it holds $75.
+
+
+## 5as. Oct 2 09:30 reading (piece oct02night, Oct 1 20:49 - Oct 2 08:58 UTC)
+
+Chain side first (tiers 2-4%, 3 fleets, hold 11, guard 0.20): 1,689 creations, 46 qualifying, quiet and slightly negative.
+- Usual view (the live centre): 2 fills, 23:14 0x74c0183c -3.7% and 00:24 0xfeefb6d7 -4.0%, both with a listed helper
+  attacking (so $75 live); 1 guard revert, 20:52 0xdc93b9c0, which the engine in fact filled at +97.6% first in the block
+  (the replay's guard prices the seat behind one; first place clears it). Floor: the 00:24 fill only. Ceiling: the same as
+  the usual view. Expected on the box for the window after 20:52: two small losers, about -$6 at $75, plus gas.
+- 39 launches refused for fewer than 3 fleets: -9.9% mean, 5% positive. 10 refused by the replay's team-bundle gate
+  (14-22 named wallets; live NAMED_MAX is off, so the engine may have fired some of them: the box side says).
+- Smart list refit: 16 helpers.
