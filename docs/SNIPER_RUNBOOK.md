@@ -1701,7 +1701,7 @@ Deploy (no send-step change):
 
 Check: `"release": "6.17"`. In the readings: `hold_blocks` 11-13 on every trade_done; `exit_prep_s` near zero.
 
-**Deployed Oct 3 00:45 UTC:** release 6.17, base $50, boost $75, live.
+**Deployed Oct 2 23:38 UTC:** release 6.17, base $50, boost $75, live.
 
 
 ## 5au. Oct 3 09:40 reading (piece oct03, Oct 2 23:19 - Oct 3 09:10 UTC)
@@ -1751,3 +1751,23 @@ with the command above is the fix.
 **Oct 3 10:15 UTC:** made public again by the owner (the box pulls anonymously). Nothing secret is in the current tree (checked:
 no wallet key, no shooter key, no bot token, no RPC key); the Alchemy key stays in the history of `router_blindspot.py`, so
 the rotation above remains the fix if the engine's reads are ever refused.
+
+**Box side (09:40 UTC).** No fill overnight, no burst sent, no alarm; 6.17 running since 23:38; P&L +$53.36, capital $110.19.
+The 05:56 launch the chain scored +264% from the seat: the engine did not fire (its own count stayed under 3 fleets); the
+replay with the live team-bundle setting calls it a guard revert at the seat behind one, so nothing was lost either way.
+
+**Oct 2 daytime, the model against the engine (piece oct02day, 08:58-23:19, scanned on the Alchemy key).** 3,074 creations,
+74 qualifying. Usual view: 13 fires, 9 fills, 4 guard reverts; the fills +4.3% mean, 3 of 9 positive, +$16 at $25/$50. The
+engine fired 11 and filled 11: nine are the model's nine fills, launch for launch and sign for sign (12:03, 14:14, 14:55,
+16:06, 16:45, 16:53, 17:58, 19:09, 19:55); the other two (14:47 -7.8%, 22:37 -3.9%) the model prices as guard reverts at the
+seat behind one and the engine filled by landing first. The 49 launches refused for fewer than 3 fleets ran -9.1%, 4%
+positive: the gate was right all day. So the day's launches were the market's (3 winners in 11 on the model too), and the
+difference between the model's +$16 and the engine's -$22.51 is the exits: 16:06 sold one block late (+7.7% against +31% a
+block earlier), 19:55 (-12.1% against -1.7%), 22:37 (-3.9% against +11.4%), fixed by 6.17. The model's own daily mean on
+the fired set fell from +21-62% (Sep 24-30) to +5.5% (Oct 1) and +4.3% (Oct 2): two thin days, watched from here on as the
+first line of every reading. The $50 window: 12 fills of 20, net about -$25; a window that closes negative steps the base
+back to $25.
+
+**The readings' scan, the honest timing.** At 8 requests a second the Alchemy route is no faster than the public node for a
+14-hour window (16,000 requests); raised to 18 a second from the next reading (the engine's steady use of the key is under
+2 a second, and since 6.17 the sell does not wait on the key): about 12 minutes for 14 hours.
