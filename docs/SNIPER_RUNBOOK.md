@@ -1748,3 +1748,6 @@ typed at the prompt, never pasted in the chat:
 **Oct 3 11:00 UTC:** the repository made private by the owner; pull and push from the session checked after. The key itself
 was not rotated (the owner's choice): if the engine's reads start failing with an authorization or quota error, rotating it
 with the command above is the fix.
+**Oct 3 10:15 UTC:** made public again by the owner (the box pulls anonymously). Nothing secret is in the current tree (checked:
+no wallet key, no shooter key, no bot token, no RPC key); the Alchemy key stays in the history of `router_blindspot.py`, so
+the rotation above remains the fix if the engine's reads are ever refused.
