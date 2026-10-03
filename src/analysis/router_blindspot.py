@@ -3,7 +3,8 @@ that buy's transaction and classify it: direct call to the curve, router call na
 the feed decoder), or a router call that names neither (invisible: the engine would trade the launch as clean)"""
 import os, sys, json, glob, collections, urllib.request, time
 sys.path.insert(0, '/home/user/fomo-memebot/src/analysis'); import risk_harness as RH
-ALCH = os.environ.get("ALCHEMY_READ_URL") or os.environ.get("RPC_URL") or "https://rpc.mainnet.chain.robinhood.com"   # never a key in the repository (Oct 3); H = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
+ALCH = os.environ.get("ALCHEMY_READ_URL") or os.environ.get("RPC_URL") or "https://rpc.mainnet.chain.robinhood.com"   # never a key in the repository (Oct 3)
+H = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
 def call(m, p, tries=4):
     for i in range(tries):
         try: return json.load(urllib.request.urlopen(urllib.request.Request(ALCH, data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": m, "params": p}).encode(), headers=H), timeout=60))["result"]
