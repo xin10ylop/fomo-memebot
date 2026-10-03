@@ -1702,3 +1702,14 @@ Deploy (no send-step change):
 Check: `"release": "6.17"`. In the readings: `hold_blocks` 11-13 on every trade_done; `exit_prep_s` near zero.
 
 **Deployed Oct 3 00:45 UTC:** release 6.17, base $50, boost $75, live.
+
+
+## 5au. Oct 3 09:40 reading (piece oct03, Oct 2 23:19 - Oct 3 09:10 UTC)
+
+Chain side first: 859 creations, 7 qualifying, the quietest night yet (46 the night before). The replay in `score_window.sh`
+was still refusing team bundles (more than 12 named wallets), a gate that is off live (NAMED_MAX, 5al); fixed in the script
+(`REPLAY_NAMED_MAX=0`), and the window re-run with it. Usual view: no fill. One fire, 05:56 0x8cae613b (3-4 fleets, a listed
+helper attacking, so $75): the seat behind one buy is past the minOut guard, so a guard revert and gas only, unless the burst
+landed first in the block, where the chain scores it far up (behind one +264%). 01:30 0x4a81ceda (4 fleets, -13.8%) refused
+by the bundle cap (more than 3 ETH). Five launches refused for fewer than 3 fleets, all -11% to -14%. Expected on the box: P&L
+flat to -$0.5 of gas, one burst at 05:56; the open question is whether it landed first.
