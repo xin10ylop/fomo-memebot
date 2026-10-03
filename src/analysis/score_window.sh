@@ -10,6 +10,7 @@ H=$(python3 -c "import time,calendar; t0=calendar.timegm(time.strptime('$FROM','
 TO=$(date -u +'%Y-%m-%d %H:%M'); echo "== $N: $FROM -> $TO UTC ($H h), tiers 2-4%, block reads on $([ -n "$ALCHEMY_READ_URL" ] && echo "the second endpoint (5av)" || echo "the public node")"
 python3 src/analysis/e1_multi.py $H 0 $E/e1m_$N.json 0.02 0.04 2>&1 | tail -1
 python3 src/analysis/add_creators.py $E/e1m_$N.json $D/launches_$N.json
+[ "$(python3 -c "import json;print(len(json.load(open('$D/launches_$N.json'))))")" = "0" ] && { echo "== no qualifying launch in the window: nothing to score"; exit 0; }
 python3 src/analysis/crowd_raw.py $D/launches_$N.json $D/crowd_raw_$N.json 2>&1 | tail -1 && gzip -kf $D/crowd_raw_$N.json
 HOLD_OUT=$D/hold_grid_week_$N.json python3 src/analysis/hold_grid.py $D/launches_$N.json 2>&1 | tail -1
 HOLD=11 python3 src/analysis/predict_window.py $D/crowd_raw_$N.json.gz $D/hold_grid_week_$N.json $D/launches_$N.json > $D/prediction_$N.txt; cat $D/prediction_$N.txt
