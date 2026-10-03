@@ -4765,3 +4765,11 @@ actual +$71.67, at +11 +$77.46, at +12 +$70.16, at +13 +$70.16. Oct 2 (11 trades
 (12:03, 14:47, 16:45, 16:53); 22:37 turns from -3.9% to +11.4% and 19:55 from -12.1% to -1.6%; 19:09 would have been worse
 on time (-7.8% against -4.9%). Single trades swing by up to 24 points on one block (16:06: +31% at +11, +8% at +12), in
 both directions; summed over the days the earlier block is the better one, which is what 6.17 moves the sell toward.
+
+**Addendum, Oct 3 09:45 UTC: Oct 2's losers on the tape.** Each of the 11 trades taken apart on the chain (the crowd's buys
+behind ours up to block +11, who sold during our hold, the price peak, the bots' pre-tick commitment). No team sold during any
+hold (0% of their tokens, 3% once). The three winners had 0.43-0.88 ETH of buys behind us and peaked +39% to +67% by blocks
+10-13. Six of the eight losers had 0.04-0.21 ETH behind us and never rose more than 7%: the bots lined up (3-6 fleets, 1-2
+listed helpers, 1.0-3.8 ETH committed before the tick, the same as on the winners) and did not follow through after it, and
+the seat lost its fees, -5% to -18%. The other two were followed: 19:55 peaked +12% at block 3 and 22:37 +28% at block 5 with
+1.12 ETH behind us, and the late exits sold them at -12% and -4%. Nothing before the tick separates the six; a thin day.
