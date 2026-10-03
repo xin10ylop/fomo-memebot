@@ -1745,3 +1745,6 @@ deleted), the box's settings updated with it, and the repository made private (G
 typed at the prompt, never pasted in the chat:
 
     sudo sh -c 'read -p "new alchemy key: " K; sed -i -E "s#(alchemy\.com/v2/)[A-Za-z0-9_-]+#\1$K#g" /etc/sniper/engine.env' && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"\|feed_connected\|"ev": "error"' | tail -3 | cut -c1-160
+**Oct 3 11:00 UTC:** the repository made private by the owner; pull and push from the session checked after. The key itself
+was not rotated (the owner's choice): if the engine's reads start failing with an authorization or quota error, rotating it
+with the command above is the fix.
