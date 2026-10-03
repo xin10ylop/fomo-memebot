@@ -9,10 +9,11 @@ RPC = "https://rpc.mainnet.chain.robinhood.com"; H = {"Content-Type": "applicati
 V2F = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"                    # the Pons V2 factory (its creation log: topics[1] token, [2] curve, [3] creator)
 def call(m, p):
     for i in range(6):
-        u = RR.url(m, RPC)
+        u = RR.url(m, RPC, p)
         try:
             if u != RPC: RR.throttle()
-            r = json.load(urllib.request.urlopen(urllib.request.Request(u, data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": m, "params": p}).encode(), headers=H), timeout=60))
+            with (RR.public_gate if u == RPC else RR.nogate):
+                r = json.load(urllib.request.urlopen(urllib.request.Request(u, data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": m, "params": p}).encode(), headers=H), timeout=60))
             if u == RPC: time.sleep(0.22)
             if "error" in r: raise RuntimeError(r["error"])
             if u != RPC: RR.worked()

@@ -10,13 +10,14 @@ HOURS = float(sys.argv[1]); BACK_H = float(sys.argv[2]); OUT = sys.argv[3]; TIER
 if os.path.exists(OUT): print("exists, skipping", OUT); sys.exit(0)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import rpc_route as RR   # 5av: the second endpoint for the block and transaction reads
 def post(payload, tries=6):
-    m = RR.method_of(payload)
+    m = RR.method_of(payload); pr = RR.params_of(payload)
     for i in range(tries):
-        u = RR.url(m, RPC)
+        u = RR.url(m, RPC, pr)
         try:
             if u != RPC: RR.throttle(len(payload) if isinstance(payload, list) else 1)
             req = urllib.request.Request(u, data=json.dumps(payload).encode(), headers=H)
-            r = json.load(urllib.request.urlopen(req, timeout=90))
+            with (RR.public_gate if u == RPC else RR.nogate):
+                r = json.load(urllib.request.urlopen(req, timeout=90))
             if u != RPC: RR.worked()
             return r
         except Exception:
