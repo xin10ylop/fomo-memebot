@@ -7,7 +7,7 @@ set -e; export REPLAY_ATTACK_MIN=3 REPLAY_NAMED_MAX=0;   # NAMED_MAX is off live
  N=$1; FROM=$2; D=data/derived/live_vs_table; E=data/derived/e1_sep24
 [ -n "$N" ] && [ -n "$FROM" ] || { echo "usage: score_window.sh NAME \"YYYY-MM-DD HH:MM\""; exit 1; }
 H=$(python3 -c "import time,calendar; t0=calendar.timegm(time.strptime('$FROM','%Y-%m-%d %H:%M')); print(round((time.time()-t0)/3600+0.02,2))")
-TO=$(date -u +'%Y-%m-%d %H:%M'); echo "== $N: $FROM -> $TO UTC ($H h), tiers 2-4%, block reads on ${ALCHEMY_READ_URL:+the second endpoint (5av)}${ALCHEMY_READ_URL:-the public node}"
+TO=$(date -u +'%Y-%m-%d %H:%M'); echo "== $N: $FROM -> $TO UTC ($H h), tiers 2-4%, block reads on $([ -n "$ALCHEMY_READ_URL" ] && echo "the second endpoint (5av)" || echo "the public node")"
 python3 src/analysis/e1_multi.py $H 0 $E/e1m_$N.json 0.02 0.04 2>&1 | tail -1
 python3 src/analysis/add_creators.py $E/e1m_$N.json $D/launches_$N.json
 python3 src/analysis/crowd_raw.py $D/launches_$N.json $D/crowd_raw_$N.json 2>&1 | tail -1 && gzip -kf $D/crowd_raw_$N.json
