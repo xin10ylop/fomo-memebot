@@ -9,9 +9,26 @@ RPS = float(os.environ.get("ALCHEMY_RPS", "20") or 20)
 _lock = threading.Lock(); _next = [0.0]
 
 
+_bad = [0]
+
+
 def routed(method):
     """True when this method goes to the second endpoint"""
-    return bool(READ) and method != "eth_getLogs"
+    return bool(READ) and _bad[0] < 3 and method != "eth_getLogs"
+
+
+def failed():
+    """a request to the second endpoint failed; after three in a row the rest of the run uses the public node (a rotated key,
+    a quota spent: the reading still completes)"""
+    _bad[0] += 1
+    if _bad[0] == 3:
+        import sys
+        print("rpc_route: the second endpoint failed three times in a row; the public node for the rest of this run", file=sys.stderr, flush=True)
+
+
+def worked():
+    if _bad[0] < 3:
+        _bad[0] = 0
 
 
 def url(method, default):

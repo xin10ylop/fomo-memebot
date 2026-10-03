@@ -20,12 +20,16 @@ OURS = {WALLET, RELAY}; X0, Y0 = 1.68, 1e9; SUR = {0: 0.98, 1: 0.0618, 2: 0.0019
 ETH_USD = float(sys.argv[sys.argv.index("--eth-usd") + 1]) if "--eth-usd" in sys.argv else 2570.0
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import rpc_route as RR   # 5av: the second endpoint for block and transaction reads (unset on the box)
 def post(p, tries=6):
-    u = RR.url(RR.method_of(p), RPC)
+    m = RR.method_of(p)
     for i in range(tries):
+        u = RR.url(m, RPC)
         try:
             if u != RPC: RR.throttle(len(p) if isinstance(p, list) else 1)
-            r = urllib.request.Request(u, data=json.dumps(p).encode(), headers=H); return json.load(urllib.request.urlopen(r, timeout=90))
+            r = urllib.request.Request(u, data=json.dumps(p).encode(), headers=H); d = json.load(urllib.request.urlopen(r, timeout=90))
+            if u != RPC: RR.worked()
+            return d
         except Exception:
+            if u != RPC: RR.failed()
             if i == tries - 1: raise
             time.sleep(2 * (i + 1))
 def call(m, p):

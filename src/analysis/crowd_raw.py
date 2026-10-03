@@ -8,15 +8,17 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import rpc_route
 RPC = "https://rpc.mainnet.chain.robinhood.com"; H = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 curl/8"}
 V2F = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"                    # the Pons V2 factory (its creation log: topics[1] token, [2] curve, [3] creator)
 def call(m, p):
-    u = RR.url(m, RPC)
     for i in range(6):
+        u = RR.url(m, RPC)
         try:
             if u != RPC: RR.throttle()
             r = json.load(urllib.request.urlopen(urllib.request.Request(u, data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": m, "params": p}).encode(), headers=H), timeout=60))
             if u == RPC: time.sleep(0.22)
             if "error" in r: raise RuntimeError(r["error"])
+            if u != RPC: RR.worked()
             return r["result"]
         except Exception as e:
+            if u != RPC: RR.failed()
             if i == 5: raise
             time.sleep(2 * (i + 1))
 L = json.load(open(sys.argv[1])); out = sys.argv[2]

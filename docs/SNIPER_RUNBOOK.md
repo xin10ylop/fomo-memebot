@@ -1732,3 +1732,16 @@ Setup, once (the owner):
 2. This cloud environment's settings (the environment menu in the session's title bar, then Edit): an environment variable
    `ALCHEMY_READ_URL` with that URL. Never in the chat, never in the repository.
 3. A new session picks it up. The scan prints which endpoint it uses on its first line.
+
+**Oct 3 10:30 UTC, in use.** The engine's own Alchemy key serves the readings' block reads from this session (held in a private
+local file outside the repository, never printed, never committed), at `ALCHEMY_RPS=8` so a reading cannot crowd the engine's
+receipt polls on the same key. Three failures in a row on the second endpoint (a rotated key, a spent quota) switch the rest
+of the run to the public node: tested with a dead key, the piece's files come out identical.
+
+**Security finding, Oct 3.** The same key was committed on Sep 11 in `src/analysis/router_blindspot.py`, and the repository is
+public. Removed from the code today; it stays in the git history. An RPC key moves no funds, but anyone can spend its quota,
+and then the engine's reads are refused mid-trade. The fix is the owner's: a new key in the Alchemy dashboard (and the old one
+deleted), the box's settings updated with it, and the repository made private (GitHub, Settings, Danger Zone). On the box,
+typed at the prompt, never pasted in the chat:
+
+    sudo sh -c 'read -p "new alchemy key: " K; sed -i -E "s#(alchemy\.com/v2/)[A-Za-z0-9_-]+#\1$K#g" /etc/sniper/engine.env' && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"\|feed_connected\|"ev": "error"' | tail -3 | cut -c1-160
