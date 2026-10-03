@@ -18,17 +18,21 @@ BUY = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"; SELL
 V2F = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"; WALLET = "0xe0686dc72b04c12ceefeea75e286e4ef7c056f01"; RELAY = "0xe8e98c3514d5bd83fdd01360896f2382b861a720"
 OURS = {WALLET, RELAY}; X0, Y0 = 1.68, 1e9; SUR = {0: 0.98, 1: 0.0618, 2: 0.0019}; CAP = 0.03
 ETH_USD = float(sys.argv[sys.argv.index("--eth-usd") + 1]) if "--eth-usd" in sys.argv else 2570.0
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import rpc_route as RR   # 5av: the second endpoint for block and transaction reads (unset on the box)
 def post(p, tries=6):
+    u = RR.url(RR.method_of(p), RPC)
     for i in range(tries):
         try:
-            r = urllib.request.Request(RPC, data=json.dumps(p).encode(), headers=H); return json.load(urllib.request.urlopen(r, timeout=90))
+            if u != RPC: RR.throttle(len(p) if isinstance(p, list) else 1)
+            r = urllib.request.Request(u, data=json.dumps(p).encode(), headers=H); return json.load(urllib.request.urlopen(r, timeout=90))
         except Exception:
             if i == tries - 1: raise
             time.sleep(2 * (i + 1))
 def call(m, p):
     r = post({"jsonrpc": "2.0", "id": 1, "method": m, "params": p})
     if "error" in r: raise RuntimeError(r["error"])
-    time.sleep(0.25); return r["result"]
+    if not RR.routed(m): time.sleep(0.25)
+    return r["result"]
 def stamps(lo, hi):
     out = {}
     for attempt in range(5):

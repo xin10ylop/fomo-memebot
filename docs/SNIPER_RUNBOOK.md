@@ -1713,3 +1713,22 @@ helper attacking, so $75): the seat behind one buy is past the minOut guard, so 
 landed first in the block, where the chain scores it far up (behind one +264%). 01:30 0x4a81ceda (4 fleets, -13.8%) refused
 by the bundle cap (more than 3 ETH). Five launches refused for fewer than 3 fleets, all -11% to -14%. Expected on the box: P&L
 flat to -$0.5 of gas, one burst at 05:56; the open question is whether it landed first.
+
+
+## 5av. The readings' scan on a second endpoint (Oct 3 10:00 UTC)
+
+The chain side of a reading spends most of its 20-30 minutes waiting on the public node, which throttles past three requests
+at once. `src/analysis/rpc_route.py` sends the per-block and per-transaction reads (`eth_getBlockByNumber`,
+`eth_getTransactionByHash`, receipts) to `ALCHEMY_READ_URL` when that variable is set, under a shared limit of `ALCHEMY_RPS`
+(20 a second; the free plan allows 25), and runs the launches in parallel (8 threads in `e1_multi.py`, 6 in `crowd_raw.py`);
+the log searches (`eth_getLogs`) stay on the public node, whose block ranges Alchemy's free plan limits. Unset, every script
+behaves exactly as before (tested: the crowd file of piece oct03 reproduced byte for byte; the routed path gives the same
+output, 40 s down to 12 s on that piece). Cost: about 60,000 compute units a reading against 30 million free a month.
+
+Setup, once (the owner):
+1. Alchemy dashboard: create a new app (free plan) on the same network the engine uses, and copy its HTTPS URL. A separate
+   app from the engine's, so the readings never draw on the engine's limits. The engine's network, without its key:
+   `sudo grep -o '^RPC_URL=https://[^/]*' /etc/sniper/engine.env`
+2. This cloud environment's settings (the environment menu in the session's title bar, then Edit): an environment variable
+   `ALCHEMY_READ_URL` with that URL. Never in the chat, never in the repository.
+3. A new session picks it up. The scan prints which endpoint it uses on its first line.

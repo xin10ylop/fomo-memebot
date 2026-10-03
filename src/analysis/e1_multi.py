@@ -8,10 +8,13 @@ BUY = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455"; SELL
 X0, Y0 = 1.68, 1e9; ETH_USD = 2500.0; SUR = {1: 0.0618, 2: 0.0019}; CAP = 0.03
 HOURS = float(sys.argv[1]); BACK_H = float(sys.argv[2]); OUT = sys.argv[3]; TIER_LO = float(sys.argv[4]) if len(sys.argv) > 4 else 0.02; TIER_HI = float(sys.argv[5]) if len(sys.argv) > 5 else 0.03
 if os.path.exists(OUT): print("exists, skipping", OUT); sys.exit(0)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import rpc_route as RR   # 5av: the second endpoint for the block and transaction reads
 def post(payload, tries=6):
+    m = RR.method_of(payload); u = RR.url(m, RPC)
     for i in range(tries):
         try:
-            req = urllib.request.Request(RPC, data=json.dumps(payload).encode(), headers=H)
+            if u != RPC: RR.throttle(len(payload) if isinstance(payload, list) else 1)
+            req = urllib.request.Request(u, data=json.dumps(payload).encode(), headers=H)
             return json.load(urllib.request.urlopen(req, timeout=90))
         except Exception:
             if i == tries - 1: raise
@@ -118,7 +121,7 @@ def safe(item):
             err = e; time.sleep(3 * (attempt + 1))
     errors.append(f"{item[1][1]}: {str(err)[:80]}"); return None
 errors = []; burned = []
-with cf.ThreadPoolExecutor(3) as ex: res = [r for r in ex.map(safe, list(cre.items())) if r]
+with cf.ThreadPoolExecutor(8 if RR.READ else 3) as ex: res = [r for r in ex.map(safe, list(cre.items())) if r]
 print("launch errors:", len(errors), errors[:5], file=sys.stderr); print("launch errors:", len(errors), errors[:5])
 if errors: print(f"WARNING: {len(errors)} launches could not be read and are NOT in this window; rerun before trusting it", file=sys.stderr)
 json.dump({"t_lo": t_lo, "t_hi": t_hi, "creations": len(cre), "launches": res, "errors": errors, "burned": burned}, open(OUT, "w"))
