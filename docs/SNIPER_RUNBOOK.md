@@ -1845,3 +1845,6 @@ above. Deploy and switch on:
 
 Check: `"release": "6.19"`, `"shots_per_shooter": 2`, `"burst": [35, 1.0, 46.0, 0.2]`. Back off: `set_kv SHOTS_PER_SHOOTER 1;
 set_kv BURST_STEP_MS 2` and a restart.
+
+**Deployed Oct 4 15:10 UTC:** release 6.19, two shots per shooter at a 1 ms step (`burst [35, 1.0, 46.0, 0.2]`), base $50,
+boost $75, live. The trial's first measure is the next fill's position in the seat block.
