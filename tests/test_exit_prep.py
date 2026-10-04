@@ -49,3 +49,15 @@ import inspect
 src = inspect.getsource(E.wait_receipt)
 ok("rpc_logs_quick" in src and E.rpc_logs_quick.timeout == 0.7, "wait_receipt alternates onto the 0.7 s-bounded public node")
 print(f"\n{checks} checks passed")
+# ---- 6.18: the burst path (the live path) sets the exact amount and the fill block too ------------------------------------
+import re
+src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "strategy", "sniper_engine.py")).read()
+import textwrap
+i0 = src.rfind("\n", 0, src.find("tokens = 0.0; tokens_wei = 0")) + 1; i1 = src.rfind("\n", 0, src.find("t_buy = state.get(\"t_fill\") or mono()")) + 1
+blk = src[i0:i1]
+ok("tokens_wei += int(" in blk and 'buy_block = int(r["blockNumber"], 16)' in blk and "tokens_wei = tokens_wei or None" in blk, "the burst fill path sums the exact token amount and records the fill block (Oct 3: hold_blocks None on every live trade)")
+recs = [("h", {"blockNumber": hex(500), "logs": [{"topics": [E.BUY_EV], "address": CURVE, "data": "0x" + "00" * 32 + hex(4534579780362193500000000)[2:].rjust(64, "0")}]}, None)]
+ns = {"filled": [(h, r) for h, r, _ in recs], "BUY_EV": E.BUY_EV, "curve": CURVE, "buy_block": None}
+exec(compile(textwrap.dedent(blk), "burst_block", "exec"), ns)
+ok(ns["tokens_wei"] == 4534579780362193500000000 and ns["buy_block"] == 500 and abs(ns["tokens"] - 4534579.7803621935) < 1e-6, "executed on a burst receipt: the exact wei amount, the fill block, the float amount")
+print(f"\n{checks} checks passed (with 6.18)")

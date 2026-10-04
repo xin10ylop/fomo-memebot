@@ -1786,3 +1786,30 @@ Usual view (k-1 with the registration block), all with a listed helper attacking
   16:35 -4.9%, guards 22:55 and 05:02. Floor: 16:04 and 20:46 only.
 - Expected at $75 for the five usual fills: about +$110 before gas, nearly all of it 13:50 and 16:04.
 - Refused for fewer than 3 fleets: 56 launches, -7% to -11% mean, 0-9% positive.
+
+**Box side (14:05 UTC).** P&L +$63.11 (+$9.75 since the last reading), capital $120.21, no alarm, no open position. Engine
+against the chain, the chain pricing each trade from its receipts:
+
+| launch | model (behind one) | engine | position in the seat block | sold at | actual |
+|---|---|---|---|---|---|
+| Oct 3 13:50 0xcbc4d69d | +66.0% | $75 fill | behind 4 buys | +11 | +40.0%, +$30.07 |
+| Oct 3 16:04 0x437717d4 | +93.9% | burst, no fill | 4 buys ahead, 0.47 ETH (one of 0.4) | | guard revert, gas |
+| Oct 3 16:35 0x02c64fbd | -4.9% (ceiling) | $75 fill | behind 3 | +26 | -20.0%, -$15.09 (-10.6% at +11) |
+| Oct 3 20:18 0x3f681cbb | guard revert | guard revert | | | gas |
+| Oct 3 20:46 0xc03a0c3a | -11.9% | not fired (fewer fleets on its own count) | | | saved $9 |
+| Oct 3 21:28 0x5565b2ce | +5.4% | $75 fill | behind 2 | +11 | +4.1%, +$3.06 |
+| Oct 4 04:58 0x908186e3 | guard revert | 24 blocks late (slow door) | | | gas |
+| Oct 4 09:04 0x0e0db022 | -6.1% | $75 fill | behind 3 | +12 | -10.2%, -$7.63 |
+
+Three of four sells landed at +11/+12 (6.17's exit, with the sell sent 19-21 ms after the hold). 16:35's sell landed at +26
+with the same 21 ms preparation: the sequencer, not the engine. `hold_blocks` read None on all four: the burst path (the live
+one) never set `tokens_wei` or `buy_block`, only the single-shot path did, so the exit still read the balance first (fast on
+Alchemy today, 20 ms). Fixed in 6.18, tested by executing the burst block on a receipt (`tests/test_exit_prep.py`, 10 checks).
+
+**The finding: first place is gone.** Every live fill of Oct 1 (6 of 6) was the seat block's first buy. Every live fill since
+(15 of 15, Oct 2-4) had 1-5 buys ahead. Three helper contracts, new on the chain, take the seat block's first transaction:
+0x23e4ddf1 (first seen Sep 28), 0x6cd02597 (Oct 1) and 0x828f3766 (Oct 2); across all scanned launches they own the seat
+block's first transaction on 12 to 18 a day since Oct 1, and on 12 of our 15 fills since Oct 2. The cost on this window:
+13:50 sold +40% where the model's behind-one seat gives +66%; 16:04 (+94% from behind one) reverted on the guard behind four
+buys. Next: measure the competitors' burst shape and the spread of our seal position, then decide on a denser burst
+(6.14's two shots per shooter, built and off, with a shorter step).
