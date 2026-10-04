@@ -366,7 +366,7 @@ class Sender:
                 continue
             p = urllib.parse.urlparse(u); self.eps.append({"url": u, "host": p.netloc, "path": p.path or "/", "c": None, "lock": threading.Lock(), "rtt_ms": None, "ok": False, "ip": None, "ips": {}})
         self._local = threading.local(); self.last = []
-        self.pool = [{"c": None, "lock": threading.Lock(), "e": self.eps[0]} for _ in range(BURST_N)] if self.eps and BURST_N > 1 else []   # one warm socket per burst shot, to the sequencer
+        self.pool = [{"c": None, "lock": threading.Lock(), "e": self.eps[0]} for _ in range(BURST_N * SHOTS_PER_SHOOTER)] if self.eps and BURST_N > 1 else []   # 6.19: one socket per shot, the second wave included (6.14 sized it per shooter: shot 36 would have raised)   # one warm socket per burst shot, to the sequencer
         threading.Thread(target=self._keepalive, daemon=True).start()
 
     def _connect(self, e):
@@ -1710,7 +1710,7 @@ def shooter_need_eth():
     """what a shooter must hold to be sent a shot: gas limit x SHOOTER_HEADROOM x the typical base fee (a legacy transaction is
     admitted only when the balance covers gasLimit x gasPrice, and the shot's cap is trimmed to the balance by shot_gas_price),
     never below SHOOTER_MIN_ETH. 6.9 sized it on the 6x cap at the instant base fee: one ramp marked all 35 shooters low."""
-    return max(SHOOTER_MIN_ETH, RELAY_SHOOT_GAS * base_fee_typical() * SHOOTER_HEADROOM / 1e18 * 1.1)
+    return max(SHOOTER_MIN_ETH, RELAY_SHOOT_GAS * SHOTS_PER_SHOOTER * base_fee_typical() * SHOOTER_HEADROOM / 1e18 * 1.1)   # 6.19: a shot per wave
 
 
 def shooter_target_eth():
@@ -1720,7 +1720,7 @@ def shooter_target_eth():
 def shot_gas_price(gas_price, shooter_eth):
     """6.10: the price cap a shooter's shot carries: the engine's cap (base fee x GAS_HEADROOM), trimmed to what the shooter's balance
     covers at the shot's gas limit with 10% to spare; a shot whose cap is under the base fee is not sent (shooter_ready)"""
-    afford = int(shooter_eth * 1e18 / RELAY_SHOOT_GAS * 0.90)                  # 10% to spare: the balance is read every five minutes and a burst spends about 4% of a shooter's float
+    afford = int(shooter_eth * 1e18 / (RELAY_SHOOT_GAS * SHOTS_PER_SHOOTER) * 0.90)   # 10% to spare; 6.19: the balance covers every wave's shot (the pool admits a sender's pending transactions on their summed cost)
     return max(1, min(int(gas_price or 0), afford))
 
 
@@ -2876,7 +2876,7 @@ async def main():
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
     smart_helpers_load(force=True)
-    log({"ev": "start", "version": 6.18, "release": "6.18", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.19, "release": "6.19", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight

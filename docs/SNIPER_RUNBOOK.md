@@ -1813,3 +1813,35 @@ block's first transaction on 12 to 18 a day since Oct 1, and on 12 of our 15 fil
 13:50 sold +40% where the model's behind-one seat gives +66%; 16:04 (+94% from behind one) reverted on the guard behind four
 buys. Next: measure the competitors' burst shape and the spread of our seal position, then decide on a denser burst
 (6.14's two shots per shooter, built and off, with a shorter step).
+
+
+## 5ax. Engine 6.19: the two-shot burst audited again, two faults fixed; the density trial (Oct 4 15:00 UTC)
+
+**The double check asked for.** 6.18 verified: on every live trade the log read `hold_blocks: None`, which only the burst path
+produces, and the single-shot path alone set the exact amount; the 6.18 block executed on a burst receipt in the test gives
+the exact wei, the fill block and the float. Approved and deployed at 14:40. The 14:08 trade, the last on 6.17: +92.7%,
++$69.26, $75, behind three buys (other helpers; the bot 0x23e4ddf1 fired 55 shots on that launch and landed its first
+seat-block shot one place behind ours), sold at +26 blocks with the sell sent 18 ms after the hold: the sequencer's door,
+twice now in two days on hot launches (16:35 Oct 3 the same), and at +11 it would have been +81.8%, so no harm this time.
+
+**The finding re-checked.** 16 live fills since Oct 2, 16 with buys ahead (1-5); 6 of 6 on Oct 1 first in the block. The
+three new helpers hold the seat block's first transaction on 12 of the 16. Our burst shape is unchanged (the first shot 118-300
+ms before the flip message, the straddle on every landing), so the field moved, not us.
+
+**The audit of 6.14's two-shot mode, before switching it on: two faults, both fatal to it, both fixed.**
+1. The sender's warm-socket pool held BURST_N sockets and the send step addresses socket i for shot i: shot 36 would have raised
+   IndexError and aborted the burst mid-way. The pool now holds BURST_N x SHOTS_PER_SHOOTER.
+2. The per-shot gas cap was trimmed to the shooter's whole balance, and the shooter's float was sized for one shot; the pool
+   admits a sender's pending transactions on their summed cost, so the second wave's shot would have been refused. The cap now
+   leaves the balance enough for every wave, and the float is sized per wave (the engine tops the shooters up itself).
+   Tests: `tests/test_two_wave_sockets.py` (6 checks); the 6.14 tests mocked the sender and could not see either.
+
+**The trial.** Two shots per shooter at a 1 ms step: 70 shots over the same 70 ms, twice the density around the boundary, so the
+first shot after the seal is on average half a millisecond behind it instead of one. Cost about $0.33 a burst more in reverted
+shots. Measured in the readings as our transaction index in the seat block and the buys ahead of us, against the 16 fills
+above. Deploy and switch on:
+
+    set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; cd ~/fomo-memebot && git pull -q && set_kv SHOTS_PER_SHOOTER 2; set_kv BURST_STEP_MS 1; sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"shots_per_shooter": [0-9]*\|"burst": \[[^]]*\]\|"dry_run": [a-z]*'
+
+Check: `"release": "6.19"`, `"shots_per_shooter": 2`, `"burst": [35, 1.0, 46.0, 0.2]`. Back off: `set_kv SHOTS_PER_SHOOTER 1;
+set_kv BURST_STEP_MS 2` and a restart.
