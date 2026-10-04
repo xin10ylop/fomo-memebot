@@ -1771,3 +1771,18 @@ back to $25.
 **The readings' scan, the honest timing.** At 8 requests a second the Alchemy route is no faster than the public node for a
 14-hour window (16,000 requests); raised to 18 a second from the next reading (the engine's steady use of the key is under
 2 a second, and since 6.17 the sell does not wait on the key): about 12 minutes for 14 hours.
+
+
+## 5aw. Oct 4 14:20 reading (pieces oct03day, oct03eve, oct04am: Oct 3 09:28 - Oct 4 13:50 UTC)
+
+The cloud machine restarted at 13:04 and killed the 27-hour scan; it was rerun as three pieces with `score_span.sh`, each
+committed as it finished (the machine had also lost the engine's Python packages: reinstalled). Chain side, before the box:
+3,216 creations, 74 qualifying. The model's own mean on its fills, the first line from now on: Oct 3 day +79.9% (2 fills),
+Oct 3 evening -3.2% (2), Oct 4 morning -6.1% (1).
+
+Usual view (k-1 with the registration block), all with a listed helper attacking, so $75 live:
+- Oct 3 13:50 0xcbc4d69d +66.0%; 16:04 0x437717d4 +93.9%; 20:46 0xc03a0c3a -11.9%; 21:28 0x5565b2ce +5.4%; Oct 4 09:04
+  0x0e0db022 -6.1%. Guard reverts: 20:18, Oct 4 04:58. Ceiling adds Oct 3 10:05 -9.6% (no listed helper), 16:32 -10.0%,
+  16:35 -4.9%, guards 22:55 and 05:02. Floor: 16:04 and 20:46 only.
+- Expected at $75 for the five usual fills: about +$110 before gas, nearly all of it 13:50 and 16:04.
+- Refused for fewer than 3 fleets: 56 launches, -7% to -11% mean, 0-9% positive.
