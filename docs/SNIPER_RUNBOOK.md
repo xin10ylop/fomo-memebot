@@ -1846,7 +1846,7 @@ above. Deploy and switch on:
 Check: `"release": "6.19"`, `"shots_per_shooter": 2`, `"burst": [35, 1.0, 46.0, 0.2]`. Back off: `set_kv SHOTS_PER_SHOOTER 1;
 set_kv BURST_STEP_MS 2` and a restart.
 
-**Deployed Oct 4 15:10 UTC:** release 6.19, two shots per shooter at a 1 ms step (`burst [35, 1.0, 46.0, 0.2]`), base $50,
+**Deployed Oct 4 14:21 UTC (the engine's start time):** release 6.19, two shots per shooter at a 1 ms step (`burst [35, 1.0, 46.0, 0.2]`), base $50,
 boost $75, live. The trial's first measure is the next fill's position in the seat block.
 
 
@@ -1862,3 +1862,22 @@ Usual view, the fires after the trial went live at 15:10 (two shots per shooter,
 - Expected at $75 on the five usual fires after 15:10: about +$45 before gas, from the seat behind one buy. The trial's
   question is the position: first in the block lifts all of these (the model's first-place column runs 8-15 points higher).
 - Refused for fewer than 3 fleets: 18 launches, -10% to -13% mean.
+
+**Box side (08:35 UTC).** P&L +$126.55 (-$5.91 since 14:08 yesterday), capital $184.31 (the wallet holds $85: the relay float
+and the shooters' second-wave gas came out of it), no alarm, no open position, the shooters topped up four times. The trial
+was live from 14:21, not 15:10. Its six bursts, placed on the chain:
+
+| launch | model | shots | where they landed | buys ahead of our first seat shot | result |
+|---|---|---|---|---|---|
+| 14:40 0xfc8dc6f0 | -7.0% | 70 | seat +3 to +5 (the slow door) | none | -9.4%, -$7.09, sold +16 |
+| 17:08 0x4c9b092e | -11.2% | 70 | straddled, first seat shot index 3 | 2 (bot B first) | -11.9%, -$8.91, sold +28 |
+| 18:00 0x39aefb20 | +21.3% | 70 | straddled, first seat shot index 5 | 2, one of 0.40 ETH | guard revert, gas |
+| 18:26 0xab380d87 | +36.2% | 70 | all after the boundary, first seat shot index 53 | 5, one of 0.54 ETH | guard revert, gas |
+| 18:39 0x13773127 | +34.4% | 70 | straddled, first seat shot index 4 | 3 | +22.9%, +$17.13, sold +12 |
+| 20:27 0xd4d86aee | -14.3% | 70 | straddled, first in the block (no bot there) | 0 | -14.3%, -$7.15, sold +12 |
+
+The seat block's first transaction on the contested launches belongs to bots that spray 50 to 180 transactions across the
+boundary (B 0x6cd02597, the listed helper 0x19078e5c, C 0x828f3766, 0x610de2b5): denser than our 70. With the trial our first
+seat-block shot sits at index 3-5 where it sat at 2-45 before, still behind them; the two guard reverts (18:00, 18:26) were
+the cost, about $43 at $75 from the seat behind one. Two of four sells landed at +16 and +28 with the sell sent 18-20 ms
+after the hold: on the hot launches the bots' spray fills the sequencer's intake for seconds and our sell waits in it.
