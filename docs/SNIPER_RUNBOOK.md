@@ -1881,3 +1881,33 @@ boundary (B 0x6cd02597, the listed helper 0x19078e5c, C 0x828f3766, 0x610de2b5):
 seat-block shot sits at index 3-5 where it sat at 2-45 before, still behind them; the two guard reverts (18:00, 18:26) were
 the cost, about $43 at $75 from the seat behind one. Two of four sells landed at +16 and +28 with the sell sent 18-20 ms
 after the hold: on the hot launches the bots' spray fills the sequencer's intake for seconds and our sell waits in it.
+
+## 5az. The guard at 0.30: rejected; where the edge goes when we sit behind the sprayers (Oct 5)
+
+**The replay said loosen.** `engine_replay.py` on Sep 20 - Oct 5 (guards 0.15 to 0.50, the three views) puts 0.30 above
+0.20 by $22-50 over the 15 days, the extra fills (guard ratio 0.70-0.80) winning 14 of 16 on the usual view, in both halves.
+Below a ratio of 0.65 the extras lose. But the replay prices every fill behind one buy, and since Oct 2 we are behind 2-3.
+
+**Priced where we land.** `src/analysis/seat_positions.py` re-prices the 232 fired launches (any view) at the seat behind 1, 3
+and 5 buys, last in the seat block, and landed 2-33 blocks late, behind the block (`seat_positions_report.py` for the grid).
+Usual view (140 fires), the guard at 0.20 and what 0.30 adds:
+
+| position | 0.20 | 0.30 adds |
+|---|---|---|
+| behind 1 | +$270 | 11 fills, 9 won, +$25 |
+| behind 3 | +$58 | 16 fills, 6 won, median -3%, +$10 |
+| behind 5 | -$53 | 28 fills, 11 won, +$17 |
+| last in the seat block | -$70 | -$5 |
+| 5 / 9 / 13 blocks late | -$134 / -$130 / -$75 | -$30 / -$36 / -$37 |
+
+Weighted by the live mix since Oct 2 (about one burst in five first or second, half behind 2-3, one in seven late) 0.30 is
+worth about +$2 a week against the late-landing tail: **the guard stays at 0.20.** The two trial reverts (18:00, 18:26) are
+the price of that tail.
+
+**The position finding.** Behind 3 the edge is a fifth of what it is behind 1, and behind 5 it is gone. Behind 3, by the
+fleets on the usual view: 3 fleets -$13 (58 fills), 4 fleets +$5 (21), 5 or more +$65 (17); launches with no listed helper
+-$14 (21). This prices us behind the block's first buys whoever they are; on a thin launch the sprayers may be absent and we
+sit first. Next: where the sprayers actually sit by fleet count since Oct 2. If they are on the 3-fleet launches too,
+`ATTACK_MIN=4` is the candidate change.
+
+**6.20 (the hold clock counted from the buy block) shelved:** correct, worth $0-5 a week, not a release on its own.
