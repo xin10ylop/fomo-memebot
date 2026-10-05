@@ -1848,3 +1848,17 @@ set_kv BURST_STEP_MS 2` and a restart.
 
 **Deployed Oct 4 15:10 UTC:** release 6.19, two shots per shooter at a 1 ms step (`burst [35, 1.0, 46.0, 0.2]`), base $50,
 boost $75, live. The trial's first measure is the next fill's position in the seat block.
+
+
+## 5ay. Oct 5 08:45 reading (pieces oct04pm, oct05am: Oct 4 13:50 - Oct 5 08:20 UTC): the density trial's first day
+
+Chain side first (scored in two pieces while the session stayed on them): 1,893 creations, 38 qualifying. The model's mean
+on its fills: Oct 4 afternoon +21.7% (7 fills, usual view), the night none (8 launches, all refused, -13% to -18%).
+Usual view, the fires after the trial went live at 15:10 (two shots per shooter, 1 ms step), all $75 but 20:27 ($50):
+- 17:08 0x4c9b092e -11.2%; 18:00 0x39aefb20 +21.3%; 18:26 0xab380d87 +36.2%; 18:39 0x13773127 +34.4% (8 fleets);
+  20:27 0xd4d86aee -14.3% (no listed helper, $50). Before the trial: 14:08 (live +92.7%, priced last reading), 14:40
+  0xfc8dc6f0 -7.0% (a 2.76 ETH bundle). Ceiling adds 15:37 0xbf840cc4 +62.6%, 16:49 +1.6%, 18:53 -9.8%. Floor: 14:40, 18:00,
+  20:27.
+- Expected at $75 on the five usual fires after 15:10: about +$45 before gas, from the seat behind one buy. The trial's
+  question is the position: first in the block lifts all of these (the model's first-place column runs 8-15 points higher).
+- Refused for fewer than 3 fleets: 18 launches, -10% to -13% mean.

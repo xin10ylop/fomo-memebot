@@ -1,65 +1,60 @@
 {
- "fitted": "2026-10-04 14:04 UTC",
+ "fitted": "2026-10-05 08:31 UTC",
  "window_days": 7.0,
  "min_n": 4,
  "min_mean": 0.05,
- "launches": 807,
- "helpers_seen": 89,
+ "launches": 764,
+ "helpers_seen": 93,
  "helpers": {
   "0x19078e5c68760e500eeeb3f515f0c5a14c12669b": {
-   "n": 57,
-   "mean": 0.0956,
+   "n": 56,
+   "mean": 0.1089,
    "pos": 0.39
   },
   "0x96d7b1eec86e8ca83b9cbf8d742867eb706a1c73": {
-   "n": 53,
-   "mean": 0.0767,
+   "n": 52,
+   "mean": 0.0906,
    "pos": 0.4
   },
   "0xf2c69db0311b3ded8ec7f39e80f555a200cc2839": {
-   "n": 45,
-   "mean": 0.3303,
-   "pos": 0.91
+   "n": 43,
+   "mean": 0.3728,
+   "pos": 0.93
   },
   "0x460b1f818ce34db07458c6347896069ebef19bf2": {
-   "n": 42,
-   "mean": 0.1957,
-   "pos": 0.6
+   "n": 41,
+   "mean": 0.1997,
+   "pos": 0.61
   },
   "0xadf2dfe02965151ee5e62a03ac7efaea2ac18907": {
    "n": 38,
-   "mean": 0.1577,
-   "pos": 0.42
+   "mean": 0.1713,
+   "pos": 0.45
+  },
+  "0xa29d8198b39050024c638ff4d8cb5021cac46598": {
+   "n": 25,
+   "mean": 0.1081,
+   "pos": 0.36
   },
   "0x6320b456f2f5da787edf8734e41a4a9ca3c144f3": {
    "n": 24,
-   "mean": 0.1272,
+   "mean": 0.1579,
    "pos": 0.42
-  },
-  "0xa29d8198b39050024c638ff4d8cb5021cac46598": {
-   "n": 20,
-   "mean": 0.1625,
-   "pos": 0.45
   },
   "0x0b30b193349f452a4eb3a94ab4efa67343ba16a3": {
-   "n": 12,
-   "mean": 0.1159,
-   "pos": 0.42
-  },
-  "0x6c56103c6af4891be46cb3666c1fa354cc79eaca": {
-   "n": 12,
-   "mean": 0.1818,
-   "pos": 0.67
-  },
-  "0xfa348a805e5665a279fdc0f826f9b034211cfcbe": {
-   "n": 6,
-   "mean": 0.304,
-   "pos": 0.67
+   "n": 14,
+   "mean": 0.1215,
+   "pos": 0.43
   },
   "0xe492912f37c2a4eca45d42dc67548f4c6cd7ce2b": {
-   "n": 5,
-   "mean": 0.1226,
-   "pos": 0.6
+   "n": 6,
+   "mean": 0.0858,
+   "pos": 0.5
+  },
+  "0x6c56103c6af4891be46cb3666c1fa354cc79eaca": {
+   "n": 6,
+   "mean": 0.2608,
+   "pos": 0.67
   },
   "0xa05af438b8cafe2f94d4e0c424b78f4372bd5e87": {
    "n": 5,
@@ -78,7 +73,7 @@
   },
   "0x2ddcda583ca0a6b2eb0ad35236703a6dcfe2eb2a": {
    "n": 4,
-   "mean": 0.1627,
+   "mean": 0.3372,
    "pos": 0.75
   },
   "0xfbc14e8f3270cd621e9439d93aa4e1980d70fb91": {
