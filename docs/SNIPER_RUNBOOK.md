@@ -1925,3 +1925,21 @@ seat behind one buy; behind 2-3 (where we sit since Oct 2, 5az) take about 8-10 
 - The night (19:20-06:20): 21 launches, nothing the usual view fills. Refused for fewer than 3 fleets: mean -4% to -10%.
 - Extension (piece oct06eve, Oct 6 17:05 - 17:26, scored before the box paste for the owner's new trade): 3 launches, no fire on
   the usual view or the floor; the ceiling fires 17:24 0xda48f334 (4 fleets on k) and the guard refuses it (-10.8% behind one).
+
+**Box side (Oct 6 17:30 UTC), recorded only; pricing on the chain and the analysis at the next reading (Oct 7 morning).**
+Engine active since Oct 4 14:21 (6.19), notifier since Oct 1 06:02; flow line 17:30: 5,115 creations seen, probe median 4.0 ms,
+bankroll $156.06; last 3 h: 502 creations, 1 trade_decision, 12 eligible_not_traded, 13 sent_burst, 1 burst_landing, 1
+trade_done, 2 feed_connected; 0 "not fresh" refusals; no open position. Capital 0.060703 ETH ($163.72) = wallet 0.024506 +
+relay 0.033386 + shooters' gas 0.002812. P&L since 0.021190 ETH: +0.039513 ETH ($106.57, +186.5%), all gas and fees included.
+The engine's bursts since the last reading:
+
+| launch | filled | stake | land_off | load_txpb | exit | hold_blocks | held_s |
+|---|---|---|---|---|---|---|---|
+| Oct 5 15:23 0x4835464b | 0 (buy_reverted) | | -1 | 4.9 | | | |
+| Oct 5 16:10 0x9e8d4fbf | 0 (buy_reverted) | | -1 | 11.9 | | | |
+| Oct 5 16:55 0xdc093b2b | 1 | $75 | -1 | 9.6 | hold | 28 | 3.44 |
+| Oct 5 17:49 0x7258454c | 0 (buy_reverted) | | +1 | 8.9 | | | |
+| Oct 5 17:58 0x0bb5ee0f | 1 | $75 | 0 | 6.8 | hold | 17 | 1.59 |
+| Oct 5 20:21 0x91bbe43f | 1 | $75 | +4 | 12.4 | hold | 27 | 3.40 |
+| Oct 6 12:23 0x9d48eeff | 1 | $75 | -1 | 5.3 | hold | 25 | 3.19 |
+| Oct 6 17:24 0xda48f334 | 1 | $50 | 0 | 8.3 | hold | 14 | 1.43 |
