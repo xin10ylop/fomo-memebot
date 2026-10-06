@@ -1911,3 +1911,15 @@ sit first. Next: where the sprayers actually sit by fleet count since Oct 2. If 
 `ATTACK_MIN=4` is the candidate change.
 
 **6.20 (the hold clock counted from the buy block) shelved:** correct, worth $0-5 a week, not a release on its own.
+
+## 5ba. Oct 6 17:10 reading (pieces oct05day, oct05night, oct06day: Oct 5 08:20 - Oct 6 17:05 UTC)
+
+Chain side first (three pieces scored in parallel, the session on them): 3,657 creations, 78 qualifying (35 / 21 / 22), a quiet
+span: 64-70 refused for fewer than 3 fleets on every view. All fires carry a listed helper ($75 live). The model prices the
+seat behind one buy; behind 2-3 (where we sit since Oct 2, 5az) take about 8-10 points off each fill.
+- Usual view (k-1 with the registration block), 8 fires: 15:23 0x4835464b -3.0%; 16:10 0x9e8d4fbf guard (+66.9% behind one);
+  16:55 0xdc093b2b +1.4%; 17:49 0x7258454c +23.3%; 20:46 0x1a4d9acb guard (+29.8%); 23:13 0xdd898120 guard (-4.1%);
+  Oct 6 12:23 0x9d48eeff -3.5%; 15:39 0x42dfb38f +37.4%. Five fills, mean +11.1%, median +1.4%: about +$42 at $75 before gas.
+- Ceiling (k) adds 09:58 -13.8%, 17:58 -9.9%, 19:42 -10.5%, 20:21 -5.1%, Oct 6 15:05 +14.1% and three guards (14:09, 17:01,
+  20:15): 10 fills, mean +3.0%. Floor (k-2): 17:49 +23.3% and the 23:13 guard.
+- The night (19:20-06:20): 21 launches, nothing the usual view fills. Refused for fewer than 3 fleets: mean -4% to -10%.
