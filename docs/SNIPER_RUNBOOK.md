@@ -1923,3 +1923,5 @@ seat behind one buy; behind 2-3 (where we sit since Oct 2, 5az) take about 8-10 
 - Ceiling (k) adds 09:58 -13.8%, 17:58 -9.9%, 19:42 -10.5%, 20:21 -5.1%, Oct 6 15:05 +14.1% and three guards (14:09, 17:01,
   20:15): 10 fills, mean +3.0%. Floor (k-2): 17:49 +23.3% and the 23:13 guard.
 - The night (19:20-06:20): 21 launches, nothing the usual view fills. Refused for fewer than 3 fleets: mean -4% to -10%.
+- Extension (piece oct06eve, Oct 6 17:05 - 17:26, scored before the box paste for the owner's new trade): 3 launches, no fire on
+  the usual view or the floor; the ceiling fires 17:24 0xda48f334 (4 fleets on k) and the guard refuses it (-10.8% behind one).
