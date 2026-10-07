@@ -2,7 +2,7 @@
 feed block the engine happened to be at when the receipt arrived; the wall-clock cap and the old clock remain as fallbacks."""
 import os, sys, tempfile
 LOG = tempfile.mkdtemp() + "/t.jsonl"; os.environ["LOG_PATH"] = LOG
-for k, v in (("SEAT", "E1"), ("SEND_MODULE", ""), ("PRIVATE_KEY", ""), ("TRADE_HOURS", ""), ("SHOOTER_KEYS", ""), ("HOLD_BLOCKS", "9")):
+for k, v in (("SEAT", "E1"), ("SEND_MODULE", ""), ("PRIVATE_KEY", ""), ("TRADE_HOURS", ""), ("SHOOTER_KEYS", ""), ("HOLD_BLOCKS", "9"), ("HOLD_FROM_FILL", "1")):
     os.environ[k] = v
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "strategy"))
 import sniper_engine as E
@@ -35,4 +35,9 @@ ok(E.still_holding(pos3, now), "feed_seq unknown: the feed-counter clock")
 E.state["feed_seq"] = 1002
 ok(not E.still_holding(pos3, now - E.HOLD_EFF - 3.1), "the wall-clock cap (HOLD_EFF + 3 s) still ends a hold the feed never finishes counting")
 pos4 = {}; ok(E.still_holding(pos4, now) == (now - now < E.HOLD), "no block fields at all: the seconds hold")
+# the switch off (the live default, 5bc rec 3): the feed-counter clock decides even when buy_block and feed_seq are known
+E.HOLD_FROM_FILL = False; E.state["feed_seq"] = 1030; E.state["blocks"] = 2005
+ok(E.still_holding(pos, now), "HOLD_FROM_FILL off: the chain clock is ignored, the feed counter (at +2) still holds")
+E.state["blocks"] = 2012
+ok(not E.still_holding(pos, now), "HOLD_FROM_FILL off: sell at blocks_at_fill + 9 as before")
 print(f"all {checks} checks passed")

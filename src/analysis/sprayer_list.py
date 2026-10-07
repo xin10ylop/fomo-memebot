@@ -9,7 +9,7 @@ the sprayers of Oct 2+ send 50-180. Prints the list and the per-contract statist
 import json, gzip, glob, sys, time, collections, os
 def arg(k, d):
     return sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
-DAYS = float(arg("--days", "7")); MIN_TX = int(arg("--min-tx", "50")); MIN_L = int(arg("--min-launches", "5")); OUT = arg("--out", "data/derived/sprayers.json")
+DAYS = float(arg("--days", "7")); MIN_TX = int(arg("--min-tx", "50")); MIN_L = int(arg("--min-launches", "5")); OUT = arg("--out", "data/derived/sprayers_refit.json")   # the candidates; data/derived/sprayers.json (the engine's list) is updated by hand after review (5bc)
 OURS = {"0xe0686dc72b04c12ceefeea75e286e4ef7c056f01", "0xe8e98c3514d5bd83fdd01360896f2382b861a720"}   # our wallet and relay: a 70-shot burst of ours looks like a spray
 now = time.time(); lo = now - DAYS * 86400
 per = collections.defaultdict(lambda: collections.defaultdict(int)); days = collections.defaultdict(set); seen = set(); n_l = 0

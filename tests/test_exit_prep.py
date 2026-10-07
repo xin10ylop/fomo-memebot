@@ -33,7 +33,7 @@ d = next(e for e in logged if e["ev"] == "trade_done")
 ok(d["hold_blocks"] == 22 and d["exit_prep_s"] < 0.05 and E.state["open"] is None, f"trade_done logs the landing (hold {d['hold_blocks']} blocks) and the prep time ({d['exit_prep_s']} s); the position is closed")
 # ---- the approve not seen by the watcher: the check runs first ------------------------------------------------------------
 pos = fresh(approve_ok=False); E.close_position(pos, "hold")
-ok(calls["approved"] == 0 and calls["balance"] == 0 and amt() == 4534579780362193500000000, "approve unconfirmed but sent: the first sell follows it at the reserved nonce (6.21), no ensure_approved; the amount still comes from the event")
+ok(calls["approved"] == 1 and calls["balance"] == 0 and amt() == 4534579780362193500000000, "approve unconfirmed: ensure_approved runs (SELL_RESERVED_NONCE off, the live default), the amount still comes from the event")
 # ---- a retry after a sell hash exists: the real balance is read -----------------------------------------------------------
 pos = fresh(sell_hash="0xold"); E.close_position(pos, "retry")
 ok(calls["balance"] == 1, "a retry reads the wallet's balance from the chain")

@@ -2026,19 +2026,24 @@ late sells thin (2-18 transactions), so the 1.2-1.5 s went in the engine, not th
 
 **Engine 6.21** (tests: `test_attack_group.py` 13, `test_hold_clock.py` 11, `test_sell_nonce.py` 9; the older suites pass):
 1. `ATTACK_GROUP`: relay targets that together count as ONE fleet in `attack_fleets()`. Unset, the engine loads
-   `data/derived/sprayers.json` (ATTACK_GROUP_PATH), refit each reading by `src/analysis/sprayer_list.py` (a contract with >= 50
-   transactions on one launch's blocks on >= 5 launches in 7 days; our relay excluded): 12 contracts on Oct 7 (the seven above,
-   0x32651dff and 0x7316855a (gone since Oct 1-3), 0xe665841e (all week), 0xd0fa5138 and 0x982403 (Oct 6)). With ATTACK_MIN 3 the
-   gate needs two real snipers when a sprayer is attacking. The replay follows the engine (`REPLAY_ATTACK_GROUP`,
+   `data/derived/sprayers.json` (ATTACK_GROUP_PATH): the seven contracts the review tested. `src/analysis/sprayer_list.py` refits
+   the candidates each reading into `sprayers_refit.json` (a contract with >= 50 transactions on one launch's blocks on >= 5
+   launches in 7 days; our relay excluded: 12 on Oct 7, the seven plus 0x32651dff and 0x7316855a (gone since Oct 1-3),
+   0xe665841e (all week, its launches -4.7% behind one), 0xd0fa5138 and 0x982403 (Oct 6)); a candidate enters `sprayers.json`
+   only after review, since a listed good sniper would be demoted and the backtest is on the seven. With ATTACK_MIN 3 the gate
+   needs two real snipers when a sprayer is attacking. The replay follows the engine (`REPLAY_ATTACK_GROUP`,
    `REPLAY_ATTACK_GROUP_PATH`; score_window/score_span pass the file and `REPLAY_BUILD_MIN=1`).
 2. `ATTACK_BUILD_MIN=1` (6.3's setting, now used): no burst when nobody was attacking at the build (the k-2 view): the gate that
    opens only at the seat block fired 6 live bursts since Oct 2, -8.1% behind one, 0 of 6 positive; 8 launches in the replay,
    -$23.7 behind three, 0 wins of 3 fills.
-3. The hold counted from the fill's own block (`feed_seq < buy_block + HOLD_BLOCKS + 1`): the receipt pollers' timing no longer
-   moves the clock. The `+1` keeps the old clock's count (it started at the block after the fill).
-4. The first sell at the reserved nonce (`pos.nonce + 2`, the approve's + 1) with no node asked and no approve-receipt wait: the
-   sequencer orders the approve before it; a reverted first sell takes the old path (allowance read, re-approve, nonce read).
-   `send_timing` logs the query and the time to submit on every send.
+3. `HOLD_FROM_FILL=1` (off by default): the hold counted from the fill's own block (`feed_seq < buy_block + HOLD_BLOCKS + 1`),
+   so the receipt pollers' timing no longer moves the clock; the `+1` keeps the old clock's count (it started at the block after
+   the fill).
+4. `SELL_RESERVED_NONCE=1` (off by default): the first sell at the reserved nonce (`pos.nonce + 2`, the approve's + 1) with no
+   node asked and no approve-receipt wait; the sequencer orders the approve before it; a reverted first sell takes the old path
+   (allowance read, re-approve, nonce read). Always on: `send_timing` logs the nonce query's time and the time to submit on
+   every send, so the next reading measures what these two switches would remove (the judge, below: not supported by the live
+   data yet; the 6.19 clock shift is real in blocks, +3.3 (se 0.7), and worth $0 by the actual fills to $13 by the model).
 
 **The backtest (engine_replay, Sep 20 - Oct 7 04:09, $13 behind one; and the fires re-priced at the live stake behind three
 buys, gas $0.6 a burst).** Usual view: the current gate 169 fires, 140 fills, mean +19.6%, median +8.4%, win 64%, +$301; the
@@ -2062,7 +2067,28 @@ Deploy (no fill open):
 
     cd ~/fomo-memebot && git pull -q && set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv ATTACK_BUILD_MIN 1; set_kv SHOTS_PER_SHOOTER 1; set_kv BURST_STEP_MS 2; sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"attack_group": [0-9]*\|"attack_build_min": [0-9]*\|"shots_per_shooter": [0-9]*\|"burst": \[[^]]*\]\|"dry_run": [a-z]*'
 
-Expected: `"release": "6.21"`, `"attack_group": 12`, `"attack_build_min": 1`, `"shots_per_shooter": 1`, `"burst": [35, 2.0, 46.0, 0.2]`,
-`"dry_run": false`. What to watch at the readings: fires about 5 a day (4.8 in the replay) instead of 6-8; `fleets_at_build` >= 1
+Expected: `"release": "6.21"`, `"attack_group": 7`, `"attack_build_min": 1`, `"hold_from_fill": false`, `"sell_reserved_nonce": false`,
+`"shots_per_shooter": 1`, `"burst": [35, 2.0, 46.0, 0.2]`, `"dry_run": false`. What to watch at the readings: fires about 5 a day (4.8 in the replay) instead of 6-8; `fleets_at_build` >= 1
 on every decision; `land_off` back to -1/0; `hold_blocks` 11-12; `send_timing` query_ms ~0 on the first sell; the `sprayers.json`
-refit each reading (`python3 src/analysis/sprayer_list.py`), committed with the reading so the box picks it up at the next deploy.
+refit each reading (`python3 src/analysis/sprayer_list.py` -> `sprayers_refit.json`, diffed against `sprayers.json`; a new contract enters the engine's list only after review).
+
+**The judge's verdict (every analyst's number re-derived from the data; the two skeptics' pass is recorded below when done).**
+Diagnosis, in dollars, on the 27 fills since Oct 2 (+$24 actual): the diluted fired set -$89 on 13 fills (1 win; the other 14
+fills +$113, 8 wins; 11 of the 13 lose even first in the block; one-real-fleet fires 0 wins of 10 fills behind three over 17
+days, P 0.012 at the current win rate); the seat behind the sprayers -$143 of the launches' first-place value (structural, no
+setting moves it); late landings under 6.19 -$38 (the post-trial loss); late sells -$39 (Oct 2's node -$33, fixed; -$6 since);
+gas -$4.5. Not causes: sprayer dumping, the crowd signal at >= 2 real fleets, the boost, the hold length. Fewer trades: the
+market, ~100% (half the launches; the real-sniper supply 8.0 -> 2.8 fires a day with >= 3 real fleets; the engine's own refusals
+4 in 7 days). Recommendations: (1) ATTACK_GROUP (the tested seven) + ATTACK_BUILD_MIN 1, ATTACK_MIN 3 unchanged: post-Oct 2
+25 fires (4.8 a day), behind three +$114 ($4.55 a fire, se 3.37, win 53%) against +$46 ($1.12, se 2.20, win 36%); pre-Oct 2
++$569 against +$530; the dropped set 0 wins of 8 fills; bootstrap P(post total <= 0) 0.08 against 0.33; live Oct 2-6 +$85 to
++$113 instead of +$24 (the build floor's price in the old regime: Oct 1 20:52, +$48.78, a build-0 fire). (2) One wave again
+(SHOTS_PER_SHOOTER 1, BURST_STEP_MS 2): late landings 4 of 19 against 1 of 40 (p 0.033), 60 of 150 sent shots dead on the three
+gated two-wave bursts, no position bought. (3) Do NOT deploy the hold clock and the reserved nonce as P&L changes (insufficient
+evidence; the mechanism is 6.19's, which (2) removes); keep the `send_timing` log: done as the two switches above, off. (4)
+ATTACK_MIN 4 only as a fallback (gives up $440 of pre-Oct 2 first-place edge). (5) Leave the hold, the guard, the exit path, the
+smart list; no launch-feature filter (every one that helps post-Oct 2 flips sign before). Caveats the judge keeps: n = 25 post
+fires, se of the order of the mean; the kept set's mean is not itself significant, the case rests on the dropped set; the k-2
+floor view is negative for every rule post-Oct 2 (n <= 14); Oct 6-type days (no follow-through on 13 of 41 fires) stay negative
+under every rule. Watch: 4-5 fires a day, win rate above 50%, no fill with a build-0 gate, the approve back at +2/+3 and healthy
+sells at +11/+12, `send_timing` query_ms on the first sell, the refit candidates (0xe665841e, 0x982403) reviewed before listing.

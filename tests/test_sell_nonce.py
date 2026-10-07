@@ -2,7 +2,7 @@
 and no approve-receipt wait in front of it; a retry, or a sell without a reserved approve, reads the chain as before."""
 import os, sys, tempfile
 LOG = tempfile.mkdtemp() + "/t.jsonl"; os.environ["LOG_PATH"] = LOG
-for k, v in (("SEAT", "E1"), ("SEND_MODULE", ""), ("PRIVATE_KEY", ""), ("TRADE_HOURS", ""), ("BANKROLL_USD", "50"), ("STAKE_MIN", "25"), ("STAKE_MAX", "25"), ("SHOOTER_KEYS", "")):
+for k, v in (("SEAT", "E1"), ("SEND_MODULE", ""), ("PRIVATE_KEY", ""), ("TRADE_HOURS", ""), ("BANKROLL_USD", "50"), ("STAKE_MIN", "25"), ("STAKE_MAX", "25"), ("SHOOTER_KEYS", ""), ("SELL_RESERVED_NONCE", "1")):
     os.environ[k] = v
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "strategy"))
 import sniper_engine as E
@@ -53,4 +53,8 @@ def fake_send2(build, label, max_s, effect=None, nonce=None):
 E.send_confirmed = fake_send2; E.token_allowance = lambda token, curve: 10 ** 30
 pos = fresh(); E.close_position(pos, "hold")
 ok([s[1] for s in calls["sent"]] == [1218, None], "first attempt at 1218 reverted; the second attempt reads the nonce")
+# the switch off (the live default, 5bc rec 3): the 6.17 path, ensure_approved and a read nonce on the first sell
+E.SELL_RESERVED_NONCE = False; E.send_confirmed = fake_send
+pos = fresh(); E.close_position(pos, "hold")
+ok(calls["approved"] == 1 and calls["sent"][0][1] is None, "SELL_RESERVED_NONCE off: ensure_approved runs and the nonce is read, as in 6.17")
 print(f"all {checks} checks passed")
