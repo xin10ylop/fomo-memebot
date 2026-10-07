@@ -17,8 +17,8 @@ logged = []; E.log = lambda d: logged.append(d); E.save_state = lambda: None; E.
 calls = {"balance": 0, "approved": 0, "sent": []}
 def fake_balance(token): calls["balance"] += 1; return 4_534_579_780_362_193_500_000_000
 def fake_ensure(pos, amount, max_s): calls["approved"] += 1; return True
-def fake_send(build, label, max_s, effect=None):
-    tx = build(100, 1217); calls["sent"].append((label, tx)); return {"status": "0x1", "blockNumber": hex(78_594_216)}, "0xsellhash"
+def fake_send(build, label, max_s, effect=None, nonce=None):
+    tx = build(100, nonce if nonce is not None else 1217); calls["sent"].append((label, tx)); return {"status": "0x1", "blockNumber": hex(78_594_216)}, "0xsellhash"
 E.token_balance = fake_balance; E.ensure_approved = fake_ensure; E.send_confirmed = fake_send
 def fresh(**kw):
     pos = {"curve": CURVE, "token": TOKEN, "creator": "0x" + "11" * 20, "tokens": 4534579.7803621935, "tokens_wei": "4534579780362193500000000", "buy_block": 78_594_194,
@@ -33,7 +33,7 @@ d = next(e for e in logged if e["ev"] == "trade_done")
 ok(d["hold_blocks"] == 22 and d["exit_prep_s"] < 0.05 and E.state["open"] is None, f"trade_done logs the landing (hold {d['hold_blocks']} blocks) and the prep time ({d['exit_prep_s']} s); the position is closed")
 # ---- the approve not seen by the watcher: the check runs first ------------------------------------------------------------
 pos = fresh(approve_ok=False); E.close_position(pos, "hold")
-ok(calls["approved"] == 1 and calls["balance"] == 0 and amt() == 4534579780362193500000000, "approve unconfirmed: ensure_approved runs, the amount still comes from the event")
+ok(calls["approved"] == 0 and calls["balance"] == 0 and amt() == 4534579780362193500000000, "approve unconfirmed but sent: the first sell follows it at the reserved nonce (6.21), no ensure_approved; the amount still comes from the event")
 # ---- a retry after a sell hash exists: the real balance is read -----------------------------------------------------------
 pos = fresh(sell_hash="0xold"); E.close_position(pos, "retry")
 ok(calls["balance"] == 1, "a retry reads the wallet's balance from the chain")
@@ -41,7 +41,7 @@ ok(calls["balance"] == 1, "a retry reads the wallet's balance from the chain")
 pos = fresh(); del pos["tokens_wei"]; E.close_position(pos, "hold")
 ok(calls["balance"] == 1 and amt() == 4534579780362193500000000, "no exact amount in the state: the balance read, as before")
 # ---- the receipt without a block number, or no buy block: hold_blocks is None, nothing raises ----------------------------------
-E.send_confirmed = lambda build, label, max_s, effect=None: (build(100, 1217) and ({"status": "0x1"}, "0xh"))
+E.send_confirmed = lambda build, label, max_s, effect=None, nonce=None: (build(100, 1217) and ({"status": "0x1"}, "0xh"))
 pos = fresh(); E.close_position(pos, "hold"); d = next(e for e in logged if e["ev"] == "trade_done")
 ok(d["hold_blocks"] is None and E.state["open"] is None, "a receipt without a block number: hold_blocks None, the trade still closes")
 # ---- the alternate node in the receipt poll is the bounded one -------------------------------------------------------------

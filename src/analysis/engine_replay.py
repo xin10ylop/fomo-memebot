@@ -21,6 +21,7 @@ def flag(k):
 T0 = calendar.timegm(time.strptime(arg("--from", "2026-09-21 09:40"), "%Y-%m-%d %H:%M")); T1 = calendar.timegm(time.strptime(arg("--to", "2026-09-28 09:40"), "%Y-%m-%d %H:%M"))
 HOLD = int(arg("--hold", "11")); NO_CAP = flag("--no-cap"); NO_REPEAT = flag("--no-repeat"); VIEW = arg("--view", "k-2"); REG = flag("--reg"); DUMP = arg("--dump"); SLIP = float(arg("--slip", "0.07"))   # --slip: the minOut guard's tolerance to test (the live BURST_SLIP is 0.07)   # --dump file.json: every launch's row (disposition, fleets at k-2/k-1/k, guard ratio, returns by position and hold)   # --reg: count the registration block's shots (the engine does when its launch thread wins the race: 3 of 4 live cases)
 LIVE = {"SEND_MODULE": "", "PRIVATE_KEY": "", "LOG_PATH": "/tmp/engine_replay.jsonl", "SEAT": "E1", "ATTACK_MIN": os.environ.get("REPLAY_ATTACK_MIN", "3"), "GATE_CLOSE_MS": "36", "TRADE_HOURS": "",
+        "ATTACK_GROUP": os.environ.get("REPLAY_ATTACK_GROUP", ""), "ATTACK_GROUP_PATH": os.environ.get("REPLAY_ATTACK_GROUP_PATH", ""), "ATTACK_BUILD_MIN": os.environ.get("REPLAY_BUILD_MIN", "0"),   # 6.21 (5bc): the sprayer contracts as one fleet (a list, or the refit file data/derived/sprayers.json); the count required at the build (k-2). Unset = the pre-6.21 gate
         "MIN_FOLLOW_ETH_60": "0", "TIER_MIN_BPS": "100", "TIER_MAX_BPS": os.environ.get("REPLAY_TIER_MAX", "300"), "BUNDLE_MIN": "3", "NAMED_MAX": os.environ.get("REPLAY_NAMED_MAX", "12"), "BUNDLE_MIN_ETH": "0.3", "BUNDLE_MAX_ETH": "0" if NO_CAP else "3.0",
         "MIN_CREATOR_SUPPLY": "0.01", "MAX_CREATOR_BUY_ETH": "2", "HOLD_BLOCKS": "9", "BURST_SLIP": "0.07", "BURST_N": "35", "STAKE_MIN": "13", "STAKE_MAX": "13",
         "WALLET": "0xe0686dc72b04c12ceefeea75e286e4ef7c056f01", "RELAY": "0xe8e98c3514d5bd83fdd01360896f2382b861a720"}
@@ -124,6 +125,9 @@ for r, l, h in launches:
     k = r["k"]; upto = {"k-2": k - 2, "k-1": k - 1, "k": k}[VIEW]
     fl, tg = fleets(r, cv, named, creator, r.get("token"), upto); rec["fleets"] = fl; rec["smart"] = bool(tg & SMART)   # 6.13: a boosted helper is attacking
     if fl < E.ATTACK_MIN: gates.append(f"attackers {fl} < {E.ATTACK_MIN}")
+    if E.ATTACK_BUILD_MIN > 0 and upto > k - 2:                             # 6.21: the engine's count at the build is the k-2 view (51 of 62 live decisions, 5bc)
+        fb, _ = fleets(r, cv, named, creator, r.get("token"), k - 2); rec["fleets_build"] = fb
+        if fb < E.ATTACK_BUILD_MIN: gates.append(f"attackers {fb} < {E.ATTACK_BUILD_MIN} at the build")
     if gates: rec["why"] = "GATE " + gates[0]; out.append(rec); continue
     rec["fired"] = True
     tb_, ts1 = h.get("tk_build_13"), h.get("tk_seat1_13")

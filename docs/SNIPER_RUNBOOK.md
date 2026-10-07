@@ -1976,3 +1976,93 @@ The live fills priced on the chain (`live_vs_table.py`, saved as `data/derived/l
 
 All 43 single fills since Sep 30: actual mean +3.6%, model first +10.4%, landed +3.2%; net +$94.20. By day: Sep 30 +$0.43,
 Oct 1 +$69.67, Oct 2 -$22.74, Oct 3 +$18.08, Oct 4 +$55.79, Oct 5 -$5.82, Oct 6 -$21.22.
+
+## 5bc. The Oct 7 review: why the engine fires less and loses since Oct 5; engine 6.21 (the sprayers as one fleet, the hold from the fill block, the first sell with nothing in front of it); one wave again
+
+The owner asked for a deep review of every live trade against the readings and of 6.19/6.20 (6.20 was never deployed: it was
+built, tested and shelved in 5az; the box ran 6.19). Five analysts worked independently from the chain, the crowd tables since
+Sep 20 (1,618 qualifying launches), the engine log summary (`data/derived/live_vs_table/box_decisions_oct07.txt`: 63 decisions)
+and the 43 live fills priced on the chain (`live_vs_table_oct07.txt`); a judge and two skeptics then attacked the findings.
+Reports in the session's scratchpad (review/*/report.md); the numbers below are theirs, each re-checked by at least one other.
+
+**Why fewer trades (Q1): the market, not the engine.** Qualifying launches a day: 171 (Sep 28-29), 111 (Oct 1-2), 55 (Oct 3-6).
+The share that reaches 3 fleets did not fall (12.8-13.7% of eligible launches on Oct 1-6 against 17% in September), so the fire
+count halved with the launches. The attacking field is a third of what it was (129 distinct attackers a day on Sep 21-23, 31-42
+on Oct 3-6; the Sep 27-30 whale 0x2124f1fa left after Oct 1). Engine-side refusals in 7 days: 1 relay float, 2 nonce, 1 position
+open; feed coverage improved from 71-78% of the chain's eligible launches (Sep 30 - Oct 2) to 82-85% (Oct 4-6). The Oct 3 flood
+of 110 "token tax 0 bps" refusals was many small teams choosing the 1% tier for a day; never fireable, never a factor.
+
+**Why losing (Q2): the gate let the sprayers vote.** Since Oct 2 the seven sprayer contracts (0x23e4ddf1, 0x6cd02597, 0xa29d8198,
+0x460b1f81, 0x19078e5c, 0x828f3766, 0x610de2b5; 50-180 transactions each across the boundary, at 42% of eligible launches on
+Oct 3-6 against 19% before) are counted as fleets like any relay. 63% of the fires since Oct 1 passed the 3-fleet gate only
+because sprayers were counted (25% before). On the launches with ONE real sniper and two sprayers: 15 fires over the period, 11
+fills, 1 win, mean -5.1% (0 wins of 7 fills Oct 2-6, -$62 behind three buys); with two or more real fleets the launches still earn
+(+15-24% behind one, every period). The sprayers do not dump on us: on 26 of 30 post-Oct 2 sprayer launches no sprayer sold
+inside the 11-block hold (the big ones, 0x460b1f81 at 0.45 ETH and 0x23e4ddf1, sell at +12..+18; the small ones never within
+100 blocks). What separates winners from losers is the follow-through: net ETH into the curve in blocks +1..+11 (corr 0.92 with
+the return post-Oct 2); the one-real-sniper launches have none, and a launch with no follow-through returns -(tier + 6.18% +
+round trip) = -7..-12%, the mode of the losers. Decomposition of the 27 fills since Oct 2 (+$24 actual): launches worth +$230
+first in the seat block; the seat behind the sprayers -$143; late landings -$38 (two fills, both under 6.19); late sells -$39
+(Oct 2's public node, fixed by 6.17; ~$0 since); gas -$4.5 (receipts: $0.02-0.15 a burst, the capital line $0.17: the box's
+gas estimate assumes every shot lands). The live fills by the model's first-place return since Oct 2: first > +5%: 12 fills,
++$138, 9 wins; first < -5%: 14 fills, -$109, 0 wins. Hold 11 remains the best hold at our real position (h9 +$36, h11 +$49,
+h13 +$32 on the 27).
+
+**6.19 (Q4): nothing improved, three faults.** 70 shots at 1 ms (Oct 4 14:21+): our first seat-block shot sat at index 5 (median)
+against 4.5 before; only 52% of a two-wave burst's shots reached the straddle blocks (84% of the 35-shot bursts; 10 of 18 bursts
+under half); late landings +1..+4 rose from 1 of 38 bursts to 4 of 19 (p 0.04); the fill rate fell from 80% to 58%; two late fills
+cost $36. The code faults (none in the 6.19 lines themselves): (F1) a gated first-wave shot leaves its second-wave partner at
+nonce+1 behind a nonce the chain never sees, so a gate opening at shot g kills 2g shots and leaves a hole across the tick (Oct 5
+20:21: 32 gated, 6 of 38 sent shots alive, landed +4, -$9.51; 16:10: 24 gated, guard revert on a +67% launch); (F2) with LEAD 46
+and a 1 ms step the fill IS a second-wave shot, polled by 6.14's late pollers, so the position was built 2-3 blocks later (the
+approve landed at +4..+10 against +2/+3 before) and the 9-block hold ran from there (sells at +12..+17 against +11/+12);
+(F4) under a sprayer's flood the chained second shot is refused or dropped at the sequencer (36 of 39 pairs on the two flood
+bursts). Back to one wave: `SHOTS_PER_SHOOTER 1`, `BURST_STEP_MS 2` (the documented back-off, the 6.18 burst byte for byte).
+
+**The exit (F3).** `exit_prep_s` is measured before `next_nonce()` (two nodes, the public one unbounded) and before
+`ensure_approved`'s receipt wait when the watcher has not confirmed: the chain shows the blocks between the approve and the
+late sells thin (2-18 transactions), so the 1.2-1.5 s went in the engine, not the sequencer. The +25..+28 sells' `held_s` of
+3.2-3.4 s sits at the hold's wall-clock cap (HOLD_EFF + 3 s): the feed had stalled (feed_stall 3 / 2 / 5 on Oct 5-7).
+
+**Engine 6.21** (tests: `test_attack_group.py` 13, `test_hold_clock.py` 11, `test_sell_nonce.py` 9; the older suites pass):
+1. `ATTACK_GROUP`: relay targets that together count as ONE fleet in `attack_fleets()`. Unset, the engine loads
+   `data/derived/sprayers.json` (ATTACK_GROUP_PATH), refit each reading by `src/analysis/sprayer_list.py` (a contract with >= 50
+   transactions on one launch's blocks on >= 5 launches in 7 days; our relay excluded): 12 contracts on Oct 7 (the seven above,
+   0x32651dff and 0x7316855a (gone since Oct 1-3), 0xe665841e (all week), 0xd0fa5138 and 0x982403 (Oct 6)). With ATTACK_MIN 3 the
+   gate needs two real snipers when a sprayer is attacking. The replay follows the engine (`REPLAY_ATTACK_GROUP`,
+   `REPLAY_ATTACK_GROUP_PATH`; score_window/score_span pass the file and `REPLAY_BUILD_MIN=1`).
+2. `ATTACK_BUILD_MIN=1` (6.3's setting, now used): no burst when nobody was attacking at the build (the k-2 view): the gate that
+   opens only at the seat block fired 6 live bursts since Oct 2, -8.1% behind one, 0 of 6 positive; 8 launches in the replay,
+   -$23.7 behind three, 0 wins of 3 fills.
+3. The hold counted from the fill's own block (`feed_seq < buy_block + HOLD_BLOCKS + 1`): the receipt pollers' timing no longer
+   moves the clock. The `+1` keeps the old clock's count (it started at the block after the fill).
+4. The first sell at the reserved nonce (`pos.nonce + 2`, the approve's + 1) with no node asked and no approve-receipt wait: the
+   sequencer orders the approve before it; a reverted first sell takes the old path (allowance read, re-approve, nonce read).
+   `send_timing` logs the query and the time to submit on every send.
+
+**The backtest (engine_replay, Sep 20 - Oct 7 04:09, $13 behind one; and the fires re-priced at the live stake behind three
+buys, gas $0.6 a burst).** Usual view: the current gate 169 fires, 140 fills, mean +19.6%, median +8.4%, win 64%, +$301; the
+new gate (sprayers as one fleet, build minimum 1) 133 fires, 115 fills, +23.9%, +11.6%, 71%, +$313. Per day since Oct 2: Oct 2
+-$0.16 -> +$6.79, Oct 3 +$17.96 -> +$18.62, Oct 4 +$16.02 -> +$17.73, Oct 5 +$0.83 -> +$1.89, Oct 6 -$0.43 -> -$0.10 (the
+pre-Oct 2 days unchanged or better). Ceiling view: 294 -> 184 fires, +$363 -> +$342 (Oct 2-6: -$2.73/+13.46/+21.78/-6.58/-3.35
+-> +9.15/+17.04/+25.21/-0.23/-0.31). The gate researcher's table (the seven contracts, behind three, live stake): post-Oct 2
+the current gate 41 fires +$46 ($1.12 a fire, se 2.20), the new gate 25 fires +$114 ($4.55, se 3.37); pre-Oct 2 +$530 -> +$569
+on 128 -> 108 fires; bootstrap P(post total <= 0) 0.32 -> 0.08. On the live Oct 2-6 fills it keeps 14 (+$113, 8 up) and drops 13
+(-$89, 1 up); Oct 2-6 would have been +$113 instead of +$24. The refit 12-contract list gives the same week (+$313, +$344) and
+differs on Oct 6 only (3 fewer fires, one the +37% winner of 15:39, net -$1).
+
+**Rejected by the review:** ATTACK_MIN 4 (gives up $440 of the pre-Oct 2 first-place edge, drops the Oct 3-4 winners, post +$60);
+ATTACK_MIN 5 (1.7 fires a day); the guard at 0.30 (5az); a shorter or longer hold (h9 does not help with sprayers present, h13
+hurts); skipping on `load_txpb` (the slow door is not in the load: costs $14); skipping any burst with gated shots (the gate that
+opens DURING the burst marks the best launches: +$98 over the period); firing only without sprayers (they are at 39 of 41
+fires); removing the sprayer contracts from the smart list (the boost still pays, +$15 on the Oct 2-6 fills; the fix belongs in
+the fleet count). ATTACK_BUILD_MIN 2 saves more since Oct 2 (+$53) but cost $104 on Sep 30 - Oct 1: not taken.
+
+Deploy (no fill open):
+
+    cd ~/fomo-memebot && git pull -q && set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv ATTACK_BUILD_MIN 1; set_kv SHOTS_PER_SHOOTER 1; set_kv BURST_STEP_MS 2; sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"attack_group": [0-9]*\|"attack_build_min": [0-9]*\|"shots_per_shooter": [0-9]*\|"burst": \[[^]]*\]\|"dry_run": [a-z]*'
+
+Expected: `"release": "6.21"`, `"attack_group": 12`, `"attack_build_min": 1`, `"shots_per_shooter": 1`, `"burst": [35, 2.0, 46.0, 0.2]`,
+`"dry_run": false`. What to watch at the readings: fires about 5 a day (4.8 in the replay) instead of 6-8; `fleets_at_build` >= 1
+on every decision; `land_off` back to -1/0; `hold_blocks` 11-12; `send_timing` query_ms ~0 on the first sell; the `sprayers.json`
+refit each reading (`python3 src/analysis/sprayer_list.py`), committed with the reading so the box picks it up at the next deploy.

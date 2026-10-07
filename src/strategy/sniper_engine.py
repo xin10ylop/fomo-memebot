@@ -168,6 +168,14 @@ except ValueError:
     PROVIDER_LAG_MS = 0.0; E0_ALLOW_PROVIDER = False                   # a placeholder left in the env file: the seat stays off the provider path until a number is set   # after the sequencer feed refuses us, run on the provider this long, then try the feed again (24.17: the fallback was a one-way door)   # the creation-second seat counts the bundle inside this many blocks of the creation; 3 = the honest table's "complete by 0.3 s" (24.15), the 5.41 paper run lost on later ones   # the creation-second seat waits this long after the creation for the bundle to be visible on the feed (24.15: the tables' edge past the bundle was look-ahead)   # skip a 1%-tier token whose team holds at least this share of supply (0 = off): the worst class in 24.14
 
 
+ATTACK_GROUP = {x.strip().lower() for x in os.environ.get("ATTACK_GROUP", "").split(",") if x.strip()}   # 6.21 (runbook 5bc): relay targets that together count as ONE fleet, however many of them attack. The
+                                                                          # sprayer bots of Oct 2+ (seven contracts that spray 50-180 shots at almost every launch) made the 3-fleet gate pass on launches
+                                                                          # with a single real sniper: 11 of 41 fires Oct 2-6, 0 wins of 7 fills. Collapsing them to one fleet means "a sprayer is here" is
+                                                                          # worth one vote, and two real fleets are still needed. The list is refit each reading (src/analysis/sprayer_list.py).
+ATTACK_GROUP_PATH = os.environ.get("ATTACK_GROUP_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "data", "derived", "sprayers.json"))
+if not ATTACK_GROUP and ATTACK_GROUP_PATH and os.path.exists(ATTACK_GROUP_PATH):   # no explicit list: the refit file (the box pulls it with the repo; a restart loads it)
+    try: ATTACK_GROUP = {str(a).lower() for a in json.load(open(ATTACK_GROUP_PATH)).get("sprayers") or ()} - OUR_ADDRS
+    except Exception: ATTACK_GROUP = set()
 ATTACK_MIN = int(os.environ.get("ATTACK_MIN", "0"))                       # 6.1: fire only when at least this many other snipers (distinct relay targets plus direct senders) are already firing at the
 HOLD_BLOCKS = int(os.environ.get("HOLD_BLOCKS", "0"))                     # curve when the burst is built (0 = off). Report 24.30: the seat block's crowd shows in the creation second's blocks; launches with 0-1
 KILL_USD = float(os.environ.get("KILL_USD", "0"))                         # attackers lost at every hold, 2+ paid +25% at second place over 300 blocks (Sep 22-23). HOLD_BLOCKS: hold this many feed blocks after the
@@ -945,8 +953,10 @@ def burst_gas_units(n=None):
 def still_holding(pos, t_buy):
     """6.1: the hold is HOLD_BLOCKS feed blocks after the fill when set (capped at the equivalent seconds plus three, in case the feed
     stalls), else HOLD_S seconds"""
-    if HOLD_BLOCKS and pos.get("blocks_at_fill") is not None:
-        return state["blocks"] < pos["blocks_at_fill"] + HOLD_BLOCKS and mono() - t_buy < HOLD_EFF + 3.0
+    if HOLD_BLOCKS and pos.get("buy_block") and state.get("feed_seq"):    # 6.21: counted from the fill's own block as the feed numbers it (feed_seq = the L2 block number): the receipt
+        return state["feed_seq"] < pos["buy_block"] + HOLD_BLOCKS + 1 and mono() - t_buy < HOLD_EFF + 3.0   # pollers' timing no longer moves the clock (6.19's late pollers put the position 2-3 blocks after the fill;
+    if HOLD_BLOCKS and pos.get("blocks_at_fill") is not None:             # the approve landed at +4..+10 against +2/+3 before, the sell at +12..+17 against +11/+12: review 5bc). The +1 keeps
+        return state["blocks"] < pos["blocks_at_fill"] + HOLD_BLOCKS and mono() - t_buy < HOLD_EFF + 3.0   # the old clock's count: it started at the block AFTER the fill's (blocks_at_fill was read once the receipt was in)
     return mono() - t_buy < HOLD
 
 
@@ -1072,6 +1082,9 @@ def attack_fleets(w):
     t = set(w.get("attack_targets", ())); tb = w.get("tb")
     if tb is not None:
         t.discard("0x" + tb.hex())
+    if ATTACK_GROUP:                                                      # 6.21: the grouped relays (the sprayers) are one fleet between them
+        g = len(t & ATTACK_GROUP); t -= ATTACK_GROUP
+        return len(t) + len(w.get("attack_senders", ())) + (1 if g else 0)
     return len(t) + len(w.get("attack_senders", ()))
 
 
@@ -1512,14 +1525,15 @@ def tx_sell(pos, amount_wei, nonce, cap):
     return {"to": to_checksum_address(pos["curve"]), "value": "0x0", "data": "0x" + SELL_SEL.hex() + abi_word(amount_wei) + abi_word(0) + abi_word(WALLET), "gas": hex(GAS_SELL), "gasPrice": hex(int(cap)), "nonce": hex(nonce), "chainId": 4663}
 
 
-def send_confirmed(build, label, max_s, effect=None):
+def send_confirmed(build, label, max_s, effect=None, nonce=None):
     """live only: send build(cap, nonce) and wait for its receipt; no receipt within SELL_CONFIRM_S, or a refusal, means send again
     with a doubled cap at the next free nonce. 'nonce too low' from the sequencer means an earlier attempt landed: its receipt is
     fetched. 6.11: when no node shows a receipt but a node past this nonce shows the job done (effect: the tokens gone, the
     allowance in place), the transaction is taken as landed (an inferred receipt, status 0x1) instead of re-sent for 20 s.
     Returns (receipt, hash), (None, last hash) after max_s."""
     t0 = mono(); cap = (state.get("base_fee") or state["gas_price"] or 10 ** 8) * SELL_GAS_HEADROOM; hashes = []; attempt = 0
-    nonce = next_nonce()                                                 # the SAME nonce every attempt: a fee bump replaces the stuck transaction; a new nonce would queue behind it and both would land (audit, Sep 16)
+    nonce = next_nonce() if nonce is None else nonce                     # the SAME nonce every attempt: a fee bump replaces the stuck transaction; a new nonce would queue behind it and both would land (audit, Sep 16)
+    t_q = mono()                                                         # 6.21: the exit passes the nonce it reserved for the first sell, so no node is asked before the send (next_nonce asks two, the public one unbounded)
     cap_max = max(cap, int(SELL_FEE_MAX_USD / max(state["eth_usd"], 1.0) * 1e18 / max(GAS_SELL, 1)))
     def inferred():
         if effect is not None and landed_on_chain(nonce, effect):
@@ -1528,6 +1542,7 @@ def send_confirmed(build, label, max_s, effect=None):
         return None
     while mono() - t0 < max_s:
         attempt += 1; h = submit(build(min(cap, cap_max), nonce), label); ans = SENDER.mine() or []
+        if attempt == 1: log({"ev": "send_timing", "label": label, "nonce": nonce, "query_ms": round(1000 * (t_q - t0), 1), "to_submit_ms": round(1000 * (mono() - t0), 1)})   # 6.21: what sat in front of the send
         if h:
             hashes.append(h); rec = wait_receipt(h, SELL_CONFIRM_S, ans)
             if rec:
@@ -1613,12 +1628,14 @@ def close_position(pos, why):
             log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": pos["tokens"], "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": False, "note": "balance already zero: an earlier sell landed",
                  "buy_hash": pos.get("buy_hash"), "approve_hash": pos.get("approve_hash"), "sell_hash": pos.get("sell_hash"), "seat_ts": pos.get("seat_ts")})
             state["open"] = None; save_state(); return
-        if not pos.get("approve_ok") and not ensure_approved(pos, amount, SELL_MAX_S / 2):   # 6.17: the watcher's confirmation during the hold spares the receipt query
+        first = not pos.get("sell_hash") and bool(pos.get("approve_hash")) and pos.get("nonce") is not None   # 6.21: the first sell follows its approve at the next reserved nonce
+        if not first and not pos.get("approve_ok") and not ensure_approved(pos, amount, SELL_MAX_S / 2):   # 6.17: the watcher's confirmation during the hold spares the receipt query
             log({"ev": "alarm", "what": "approve not confirmed: the sell would revert; retrying in the background", "curve": pos["curve"]})
             threading.Timer(5.0, close_position, args=(pos, "retry after approve")).start(); return
         t_send = mono()
-        for _ in range(3):
-            rec, hs = send_confirmed(lambda cap, nonce: tx_sell(pos, amount, nonce, cap), "sell", max(2.0, SELL_MAX_S - (mono() - t0)), effect=sold_on(pos["token"]))
+        for attempt in range(3):
+            known = (pos["nonce"] + 2) if (first and attempt == 0) else None   # 6.21: the build reserved two wallet nonces after the shots' (the approve went at nonce + 1); the sequencer orders the
+            rec, hs = send_confirmed(lambda cap, nonce: tx_sell(pos, amount, nonce, cap), "sell", max(2.0, SELL_MAX_S - (mono() - t0)), effect=sold_on(pos["token"]), nonce=known)   # sell after it, so no receipt wait and no node query sit in front of the send (review 5bc, F3); a retry re-reads as before
             if hs:
                 pos["sell_hash"] = hs; save_state()
             if rec and rec.get("status") == "0x1":
@@ -2876,9 +2893,9 @@ async def main():
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
     smart_helpers_load(force=True)
-    log({"ev": "start", "version": 6.19, "release": "6.19", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.21, "release": "6.21", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
-         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
+         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "attack_group": len(ATTACK_GROUP), "attack_build_min": ATTACK_BUILD_MIN, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
         if not PROVIDER_WS:

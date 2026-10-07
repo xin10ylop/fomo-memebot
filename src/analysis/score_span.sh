@@ -2,7 +2,7 @@
 # The chain-side scoring of a fixed span, FROM to TO (score_window.sh scores FROM to now). Used to split a long reading into
 # pieces that each finish in minutes (runbook 5av): a restarted cloud machine then loses one piece, not the whole scan.
 #     bash src/analysis/score_span.sh NAME "YYYY-MM-DD HH:MM" "YYYY-MM-DD HH:MM"
-set -e; export REPLAY_ATTACK_MIN=3 REPLAY_NAMED_MAX=0
+set -e; export REPLAY_ATTACK_MIN=3 REPLAY_NAMED_MAX=0 REPLAY_ATTACK_GROUP_PATH=data/derived/sprayers.json REPLAY_BUILD_MIN=1   # 6.21 (5bc): the live gate since Oct 7
 N=$1; FROM=$2; TO=$3; D=data/derived/live_vs_table; E=data/derived/e1_sep24
 [ -n "$N" ] && [ -n "$FROM" ] && [ -n "$TO" ] || { echo "usage: score_span.sh NAME FROM TO"; exit 1; }
 set -- $(python3 -c "import time,calendar; f=calendar.timegm(time.strptime('$FROM','%Y-%m-%d %H:%M')); t=calendar.timegm(time.strptime('$TO','%Y-%m-%d %H:%M')); print(round((t-f)/3600+0.02,2), max(0.0, round((time.time()-t)/3600,2)))")

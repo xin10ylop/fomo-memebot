@@ -1,0 +1,86 @@
+# The box's engine log, Sep 30 - Oct 7 04:23 UTC (englog.py 168), summarised on the box: event counts per UTC day, the gates
+# that stopped eligible launches, the landing offsets, and every trade decision. Columns of the decisions:
+# time curve fleets_at_build fleets_at_open stake_usd(base; the listed-helper boost makes it 75) shooters gated_shots sent_ms seat_flip_to_send_ms prebuilt_ms load_txpb
+09-30 alarm 8 | burst_landing 14 | buy_reverted 4 | eligible_not_traded 91 | trade_decision 14 | trade_done 10
+10-01 alarm 16 | burst_landing 10 | buy_reverted 3 | eligible_not_traded 128 | feed_stall 4 | trade_decision 10 | trade_done 7
+10-02 burst_landing 12 | buy_reverted 1 | eligible_not_traded 98 | feed_stall 2 | trade_decision 12 | trade_done 11
+10-03 burst_landing 5 | buy_reverted 2 | eligible_not_traded 140 | trade_decision 5 | trade_done 3
+10-04 burst_landing 9 | buy_reverted 3 | eligible_not_traded 53 | trade_decision 9 | trade_done 6
+10-05 burst_landing 6 | buy_reverted 3 | eligible_not_traded 78 | feed_stall 3 | trade_decision 6 | trade_done 3
+10-06 burst_landing 6 | buy_reverted 2 | eligible_not_traded 52 | feed_stall 2 | trade_decision 6 | trade_done 4
+10-07 burst_landing 1 | buy_reverted 1 | eligible_not_traded 1 | feed_stall 5 | trade_decision 1
+--gates (day count gate)
+09-30 13 attackers 0 < 2 by the tick's shot; 7 attackers 0 < 3; 7 attackers 1 < 2; 1 attackers 1 < 3; 3 attackers 2 < 3; 2 nonce/gas not fresh (RPC); 1 position open; 51 token tax 0 bps < 100; 7 token tax 1 bps < 100
+10-01 61 attackers 0 < 3; 14 attackers 1 < 3; 8 attackers 2 < 3; 1 bundle 3.271 ETH > 3.0; 1 bundle 3.431 ETH > 3.0; 39 token tax 0 bps < 100; 4 token tax 1 bps < 100
+10-02 26 attackers 0 < 3; 13 attackers 1 < 3; 7 attackers 2 < 3; 1 bundle 3.305 > 3.0; 1 bundle 4.939 > 3.0; 2 bundle 7.192 > 3.0; 48 token tax 0 bps < 100; 1 token tax 1 bps < 100; 1 token tax 500 bps > 300
+10-03 9 attackers 0 < 3; 15 attackers 1 < 3; 5 attackers 2 < 3; 1 bundle 4.992 > 3.0; 110 token tax 0 bps < 100
+10-04 9 attackers 0 < 3; 14 attackers 1 < 3; 10 attackers 2 < 3; 20 token tax 0 bps < 100
+10-05 13 attackers 0 < 3; 13 attackers 1 < 3; 10 attackers 2 < 3; 1 the relay holds 0.00551 ETH ($14.84) < the stake $50; 41 token tax 0 bps < 100; 1 token tax 25 bps < 100
+10-06 8 attackers 0 < 3; 15 attackers 1 < 3; 12 attackers 2 < 3; 1 bundle 3.446 > 3.0; 1 bundle 4.312 > 3.0; 15 token tax 0 bps < 100; 1 token tax 400 bps > 300
+10-07 1 token tax 0 bps < 100
+--land_off (day offset count)
+09-30 None 14 | 10-01 -1 6, 0 1, 33 1, 9 1, None 1 | 10-02 -1 10, 0 2 | 10-03 -1 4, 0 1 | 10-04 -1 6, 0 1, 24 1, 3 1 | 10-05 -1 3, 0 1, 1 1, 4 1 | 10-06 -1 1, 0 3, 1 1, 23 1 | 10-07 -1 1
+--decisions time curve fleets_build fleets_open stake shooters gated sent_ms flip_to_send prebuilt load
+09-30 13:56 0x2c4cb8cf 1 5 25.0 35 0 376 None 82.2 None
+09-30 15:13 0x3bdb86cf 1 2 25.0 35 4 668 None 81.7 None
+09-30 15:30 0x3dd3592d 2 2 25.0 35 0 491 None 81.5 None
+09-30 16:53 0xc2f323a4 2 2 25.0 35 0 610 None 81.7 None
+09-30 17:09 0xd6fbcc54 1 2 25.0 35 0 371 None 81.1 None
+09-30 17:12 0x7d4ed49f 3 3 25.0 35 0 794 None 80.8 None
+09-30 18:17 0xcfbd1940 1 2 25.0 35 13 597 None 81.8 None
+09-30 19:04 0x47724544 0 2 25.0 35 0 327 None 82.1 None
+09-30 19:38 0x67950435 1 2 25.0 35 0 700 None 81.7 None
+09-30 19:41 0xa3520819 4 4 25.0 35 0 570 None 82.4 None
+09-30 19:51 0xa817a848 0 3 25.0 35 0 875 None 81.9 None
+09-30 20:08 0x04e4af02 2 2 25.0 35 0 891 None 80.6 None
+09-30 21:04 0x1daf553a 4 4 25.0 35 0 670 None 82.1 None
+09-30 21:24 0x5c9177c6 3 4 25.0 35 0 574 None 82.2 None
+10-01 04:14 0x14479a88 2 4 25.0 35 7 871 None 81.2 None
+10-01 07:39 0x3bfcd4ef 1 3 25.0 35 10 582 None 81.9 8.8
+10-01 07:46 0x680c95a2 2 3 25.0 35 0 402 None 80.6 22.5
+10-01 15:36 0x8c42643b 3 3 25.0 35 0 545 None 80.7 11.3
+10-01 17:52 0xdc9cefd0 2 3 25.0 35 0 598 None 81.6 16.7
+10-01 18:28 0xa57ea4c6 1 3 25.0 35 0 794 None 81.3 9.4
+10-01 18:43 0xc82e81ca 3 3 25.0 35 0 490 None 81.5 13.2
+10-01 20:45 0x0e354e61 3 3 25.0 35 0 454 None 80.7 8.7
+10-01 20:52 0xdc93b9c0 0 3 25.0 35 0 295 None 81.0 5.4
+10-01 23:14 0x74c0183c 0 3 50.0 35 0 590 None 81.8 3.3
+10-02 12:03 0x7c1d9373 2 3 50.0 35 2 798 None 82.1 11.2
+10-02 14:14 0x1e152e9e 2 3 50.0 35 7 590 None 80.3 12.5
+10-02 14:47 0x1d111fbf 0 3 50.0 35 7 281 None 81.5 6.5
+10-02 14:55 0x415e8fb3 3 6 50.0 35 0 498 None 82.0 15.6
+10-02 16:06 0x7a92cf24 3 3 50.0 35 0 555 None 82.2 26.7
+10-02 16:45 0xeb997cba 2 3 50.0 35 0 380 None 81.2 10.8
+10-02 16:53 0x26c1c059 1 4 50.0 35 0 890 None 80.5 4.9
+10-02 17:58 0x98e91e46 2 3 50.0 35 0 587 None 82.2 8
+10-02 18:37 0x0c75a15c 3 3 50.0 35 0 455 None 80.8 7.7
+10-02 19:09 0xed9d1d03 0 3 50.0 35 0 507 None 81.0 6.1
+10-02 19:55 0x4195dabb 1 4 50.0 35 0 703 None 80.6 13.1
+10-02 22:37 0x77036c08 2 4 50.0 35 6 789 None 82.0 9.7
+10-03 13:50 0xcbc4d69d 1 3 50.0 35 0 496 None 81.5 3.3
+10-03 16:04 0x437717d4 4 4 50.0 35 0 687 None 80.2 7.1
+10-03 16:35 0x02c64fbd 1 3 50.0 35 0 491 None 82.0 10.9
+10-03 20:18 0x3f681cbb 1 3 50.0 35 0 585 None 82.0 4.7
+10-03 21:28 0x5565b2ce 0 4 50.0 35 0 281 None 81.7 4.1
+10-04 04:58 0x908186e3 4 4 50.0 35 0 691 None 80.7 15.6
+10-04 09:04 0x0e0db022 0 3 50.0 35 0 283 None 81.2 5.4
+10-04 14:08 0x17d132a9 2 3 50.0 35 6 686 None 80.4 10.4
+10-04 14:40 0xfc8dc6f0 3 3 50.0 35 0 624 18.7 81.1 15.6
+10-04 17:08 0x4c9b092e 0 3 50.0 35 4 293 None 81.3 6.3
+10-04 18:00 0x39aefb20 3 4 50.0 35 0 492 None 82.2 8.7
+10-04 18:26 0xab380d87 4 4 50.0 35 0 574 None 80.4 10.8
+10-04 18:39 0x13773127 2 5 50.0 35 0 792 None 80.3 6.5
+10-04 20:27 0xd4d86aee 4 5 50.0 35 0 783 None 81.9 9.7
+10-05 15:23 0x4835464b 0 3 50.0 35 0 407 None 82.0 4.9
+10-05 16:10 0x9e8d4fbf 2 3 50.0 35 24 796 None 81.7 11.9
+10-05 16:55 0xdc093b2b 2 5 50.0 35 0 505 None 81.1 9.6
+10-05 17:49 0x7258454c 4 6 50.0 35 0 933 None 81.0 8.9
+10-05 17:58 0x0bb5ee0f 2 3 50.0 35 1 489 None 81.0 6.8
+10-05 20:21 0x91bbe43f 0 3 50.0 35 32 548 None 80.9 12.4
+10-06 12:23 0x9d48eeff 1 5 50.0 35 0 699 None 81.1 5.3
+10-06 17:24 0xda48f334 0 3 50.0 35 0 304 None 82.2 8.3
+10-06 17:45 0x49630455 3 3 50.0 35 0 836 6.1 81.9 18.4
+10-06 19:21 0x4416a5ae 6 6 50.0 35 0 367 None 81.1 8.7
+10-06 21:19 0x14331814 3 3 50.0 35 0 594 None 81.3 11.1
+10-06 22:23 0xd7657dce 3 3 50.0 35 0 919 None 81.4 5.9
+10-07 04:14 0x47313c63 3 3 50.0 35 0 885 None 80.5 3.4
