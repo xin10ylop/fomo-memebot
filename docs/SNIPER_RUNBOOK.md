@@ -2001,9 +2001,10 @@ fills, 1 win, mean -5.1% (0 wins of 7 fills Oct 2-6, -$62 behind three buys); wi
 inside the 11-block hold (the big ones, 0x460b1f81 at 0.45 ETH and 0x23e4ddf1, sell at +12..+18; the small ones never within
 100 blocks). What separates winners from losers is the follow-through: net ETH into the curve in blocks +1..+11 (corr 0.92 with
 the return post-Oct 2); the one-real-sniper launches have none, and a launch with no follow-through returns -(tier + 6.18% +
-round trip) = -7..-12%, the mode of the losers. Decomposition of the 27 fills since Oct 2 (+$24 actual): launches worth +$230
-first in the seat block; the seat behind the sprayers -$143; late landings -$38 (two fills, both under 6.19); late sells -$39
-(Oct 2's public node, fixed by 6.17; ~$0 since); gas -$4.5 (receipts: $0.02-0.15 a burst, the capital line $0.17: the box's
+round trip) = -7..-12%, the mode of the losers. Decomposition of the 27 fills since Oct 2
+(+$24 actual): launches worth +$230 first in the seat block; the seat behind the sprayers about -$175; late landings $5-8 (the
+skeptics: re-priced at the seat block the four late fills would have made +$5 to +$8 more; the judge's -$38 charged the buys
+ahead to the trial); late sells -$39 (Oct 2's public node, fixed by 6.17; ~$0 since); gas -$4.5 (receipts: $0.02-0.15 a burst, the capital line $0.17: the box's
 gas estimate assumes every shot lands). The live fills by the model's first-place return since Oct 2: first > +5%: 12 fills,
 +$138, 9 wins; first < -5%: 14 fills, -$109, 0 wins. Hold 11 remains the best hold at our real position (h9 +$36, h11 +$49,
 h13 +$32 on the 27).
@@ -2022,7 +2023,10 @@ bursts). Back to one wave: `SHOTS_PER_SHOOTER 1`, `BURST_STEP_MS 2` (the documen
 **The exit (F3).** `exit_prep_s` is measured before `next_nonce()` (two nodes, the public one unbounded) and before
 `ensure_approved`'s receipt wait when the watcher has not confirmed: the chain shows the blocks between the approve and the
 late sells thin (2-18 transactions), so the 1.2-1.5 s went in the engine, not the sequencer. The +25..+28 sells' `held_s` of
-3.2-3.4 s sits at the hold's wall-clock cap (HOLD_EFF + 3 s): the feed had stalled (feed_stall 3 / 2 / 5 on Oct 5-7).
+3.2-3.4 s is NOT the wall-clock cap (skeptic B: the cap is 3.9 s and held_s is stamped after the sell's receipt, so a cap hit reads
+4.2 s or more): those holds ended on the block count, 11 blocks later than the healthy ones, i.e. the feed was behind the chain at the
+hold's end, or the nonce query sat in front of the send. `trade_done` now logs `feed_seq_at_send` (the sell's block minus it is the
+feed's lag) and `send_timing` the query: the next reading separates the two.
 
 **Engine 6.21** (tests: `test_attack_group.py` 13, `test_hold_clock.py` 11, `test_sell_nonce.py` 9; the older suites pass):
 1. `ATTACK_GROUP`: relay targets that together count as ONE fleet in `attack_fleets()`. Unset, the engine loads
@@ -2065,11 +2069,11 @@ the fleet count). ATTACK_BUILD_MIN 2 saves more since Oct 2 (+$53) but cost $104
 
 Deploy (no fill open):
 
-    cd ~/fomo-memebot && git pull -q && set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv ATTACK_BUILD_MIN 1; set_kv SHOTS_PER_SHOOTER 1; set_kv BURST_STEP_MS 2; sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"attack_group": [0-9]*\|"attack_build_min": [0-9]*\|"shots_per_shooter": [0-9]*\|"burst": \[[^]]*\]\|"dry_run": [a-z]*'
+    cd ~/fomo-memebot && git pull -q && set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv ATTACK_BUILD_MIN 0; set_kv SHOTS_PER_SHOOTER 1; set_kv BURST_STEP_MS 2; sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"attack_group": [0-9]*\|"attack_build_min": [0-9]*\|"shots_per_shooter": [0-9]*\|"burst": \[[^]]*\]\|"dry_run": [a-z]*'
 
-Expected: `"release": "6.21"`, `"attack_group": 7`, `"attack_build_min": 1`, `"hold_from_fill": false`, `"sell_reserved_nonce": false`,
-`"shots_per_shooter": 1`, `"burst": [35, 2.0, 46.0, 0.2]`, `"dry_run": false`. What to watch at the readings: fires about 5 a day (4.8 in the replay) instead of 6-8; `fleets_at_build` >= 1
-on every decision; `land_off` back to -1/0; `hold_blocks` 11-12; `send_timing` query_ms ~0 on the first sell; the `sprayers.json`
+Expected: `"release": "6.21"`, `"attack_group": 7`, `"attack_build_min": 0`, `"hold_from_fill": false`, `"sell_reserved_nonce": false`,
+`"shots_per_shooter": 1`, `"burst": [35, 2.0, 46.0, 0.2]`, `"dry_run": false`. What to watch at the readings: fires about 5-6 a day (5.8 in the replay) instead of 6-8;
+`fleets_at_build` on every decision (the build floor is priced on the grouped count at the next readings, not deployed); `land_off` back to -1/0; `hold_blocks` 11-12; `send_timing` query_ms ~0 on the first sell; the `sprayers.json`
 refit each reading (`python3 src/analysis/sprayer_list.py` -> `sprayers_refit.json`, diffed against `sprayers.json`; a new contract enters the engine's list only after review).
 
 **The judge's verdict (every analyst's number re-derived from the data; the two skeptics' pass is recorded below when done).**
@@ -2092,3 +2096,25 @@ fires, se of the order of the mean; the kept set's mean is not itself significan
 floor view is negative for every rule post-Oct 2 (n <= 14); Oct 6-type days (no follow-through on 13 of 41 fires) stay negative
 under every rule. Watch: 4-5 fires a day, win rate above 50%, no fill with a build-0 gate, the approve back at +2/+3 and healthy
 sells at +11/+12, `send_timing` query_ms on the first sell, the refit candidates (0xe665841e, 0x982403) reviewed before listing.
+
+**The skeptics and the final arbiter (Oct 7 09:50 UTC).** Skeptic A (statistics) refuted the build floor and the +$114
+headline, not the group: given the group, `ATTACK_BUILD_MIN=1` drops 5 launches post-Oct 2 (1 fill, -$5) and at the ceiling view
+costs $186 behind three / $372 behind one of the pre-Oct 2 edge (n = 67); live Oct 1-6 it drops 9 fills worth +$7.68 net (Oct 1
+20:52, +$48.78, was a build-0 fire the box saw at 0 because the feed was behind). The kept set's total is top-heavy (G post +$108
+behind three, +$10 without its two best launches; the current gate +$46, -$52 without the same two) so the expectation is "the
+one-real-fleet leak closed", not a profit figure; the dropped set is uniform (8 fills, all -3% to -13%, 0 wins, in both periods and
+at every position). The P = 0.012 used the wrong null (against the one-real-fleet base rate it is 0.14-0.29) but the paired
+difference G - A behind three is +$62 [+29, +97] because every dropped fill lost. The list is robust to its own refit
+(walk-forward on trailing 7 days: post +$124 vs +$114; fitted on Sep 20 - Oct 1 only: +$124). The density trial's -$36 was
+misattributed (above); the revert stands on mechanism and costs nothing. ATTACK_MIN 4 refuted (one launch: +$0 without 0x17d132a9).
+Skeptic B (mechanism) did not refute the group: the sprayers are visible by k-1 on 39 of 41 post fires, the grouped count opens the
+gate at the same block as the raw count, `attack_fleets()` is pure and the boost, guard and hold are untouched. Corrections: the
+list decays within days (by Oct 6 four of the seven were still active while five unlisted contracts sprayed; 2 of Oct 6's 5 grouped
+fires passed only through unlisted ones, both losers), so the refit must be reviewed at every reading; the engine's view is k-1..k,
+so expect the engine bound (live Oct 2-6 +$74 instead of +$24) rather than the k-1 table's +$113; only Oct 5 20:21 of the four
+late fills was the two-wave code's doing; `exit_prep_s` is blind to `next_nonce` only, so the approve wait is excluded on the +26
+sells and the candidates are the nonce query and the feed's lag (hence `feed_seq_at_send`). The arbiter's verdict: deploy the
+group (the tested seven, loaded from `sprayers.json`), ATTACK_MIN 3, NO build floor; one wave; the two exit switches off; leave the
+hold, the guard, the exit path and the smart list; expect 5-6 fires a day and days like Oct 6 to stay negative under any rule;
+re-price the build floor on the grouped count once build-0 fires reach n >= 15; review the refit candidates (0xe665841e, 0x98240307,
+0xd0fa5138) at the next reading; watch 0x19078e5c (half of the group's effect, last seen Oct 5).
