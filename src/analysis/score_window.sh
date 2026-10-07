@@ -3,7 +3,7 @@
 #     bash src/analysis/score_window.sh NAME "YYYY-MM-DD HH:MM"        # from that UTC time to now
 # Tiers 2-4% (creator tax 100-300 bps, the gate since Sep 30 10:40), the attackers gate at 3 fleets (since Sep 30 20:30, 5ak), hold 11,
 # the burst guard at 0.20, the three engine views; fills attacked by a boosted helper (6.13, $50) are marked BOOST and tallied.
-set -e; export REPLAY_ATTACK_MIN=3 REPLAY_NAMED_MAX=0 REPLAY_ATTACK_GROUP_PATH=data/derived/sprayers.json REPLAY_BUILD_MIN=1   # 6.21 (5bc): the live gate since Oct 7;   # NAMED_MAX is off live (5al): the replay must not refuse team bundles the engine fires on
+set -e; export REPLAY_ATTACK_MIN=3 REPLAY_NAMED_MAX=0 REPLAY_ATTACK_GROUP_PATH=data/derived/sprayers.json REPLAY_BUILD_MIN=0   # 6.21 (5bc): the live gate since Oct 7 (no build floor: the skeptics);   # NAMED_MAX is off live (5al): the replay must not refuse team bundles the engine fires on
  N=$1; FROM=$2; D=data/derived/live_vs_table; E=data/derived/e1_sep24
 [ -n "$N" ] && [ -n "$FROM" ] || { echo "usage: score_window.sh NAME \"YYYY-MM-DD HH:MM\""; exit 1; }
 H=$(python3 -c "import time,calendar; t0=calendar.timegm(time.strptime('$FROM','%Y-%m-%d %H:%M')); print(round((time.time()-t0)/3600+0.02,2))")

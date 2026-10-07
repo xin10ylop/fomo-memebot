@@ -1635,7 +1635,7 @@ def close_position(pos, why):
         if not first and not pos.get("approve_ok") and not ensure_approved(pos, amount, SELL_MAX_S / 2):   # 6.17: the watcher's confirmation during the hold spares the receipt query
             log({"ev": "alarm", "what": "approve not confirmed: the sell would revert; retrying in the background", "curve": pos["curve"]})
             threading.Timer(5.0, close_position, args=(pos, "retry after approve")).start(); return
-        t_send = mono()
+        t_send = mono(); seq_send = state.get("feed_seq")                    # 6.21: the feed's block at the send (the sell's block minus it = the feed's lag at the hold's end: review 5bc)
         for attempt in range(3):
             known = (pos["nonce"] + 2) if (first and attempt == 0) else None   # 6.21: the build reserved two wallet nonces after the shots' (the approve went at nonce + 1); the sequencer orders the
             rec, hs = send_confirmed(lambda cap, nonce: tx_sell(pos, amount, nonce, cap), "sell", max(2.0, SELL_MAX_S - (mono() - t0)), effect=sold_on(pos["token"]), nonce=known)   # sell after it, so no receipt wait and no node query sit in front of the send (review 5bc, F3); a retry re-reads as before
@@ -1644,7 +1644,7 @@ def close_position(pos, why):
             if rec and rec.get("status") == "0x1":
                 sb = int(rec.get("blockNumber", "0x0"), 16) if rec.get("blockNumber") else None
                 log({"ev": "trade_done", "curve": pos["curve"], "tokens_sold": amount / 1e18, "held_s": round(mono() - pos["t_buy"], 2), "exit": why, "dry_run": False, "sell_confirm_s": round(mono() - t0, 2),
-                     "hold_blocks": (sb - pos["buy_block"]) if (sb and pos.get("buy_block")) else None, "exit_prep_s": round(t_send - t0, 3),   # 6.17: where the sell landed, and the time spent before sending it
+                     "hold_blocks": (sb - pos["buy_block"]) if (sb and pos.get("buy_block")) else None, "exit_prep_s": round(t_send - t0, 3), "feed_seq_at_send": seq_send,   # 6.17: where the sell landed, and the time spent before sending it; 6.21: the feed's block then
                      "buy_hash": pos.get("buy_hash"), "approve_hash": pos.get("approve_hash"), "sell_hash": hs, "seat_ts": pos.get("seat_ts")})
                 state["open"] = None; save_state(); refresh_wallet("exit"); return
             if rec:                                                  # landed and reverted: find out why and fix it
