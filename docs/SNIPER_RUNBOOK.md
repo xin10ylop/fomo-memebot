@@ -2118,3 +2118,8 @@ group (the tested seven, loaded from `sprayers.json`), ATTACK_MIN 3, NO build fl
 hold, the guard, the exit path and the smart list; expect 5-6 fires a day and days like Oct 6 to stay negative under any rule;
 re-price the build floor on the grouped count once build-0 fires reach n >= 15; review the refit candidates (0xe665841e, 0x98240307,
 0xd0fa5138) at the next reading; watch 0x19078e5c (half of the group's effect, last seen Oct 5).
+
+Deployed Oct 7 about 10:05 UTC: the start line read `release 6.21, shots_per_shooter 1, burst [35, 2.0, 46.0, 0.2], attack_build_min 0,
+attack_group 7, hold_from_fill false, sell_reserved_nonce false, dry_run false`. (The first attempt failed on the box's pull: an analysis
+output `live_vs_table.json` had been committed by mistake and collided with an untracked copy there; removed from the repo, the pull
+then went through. During that attempt the engine was restarted once on 6.19 with its old settings; no fill was open.)
