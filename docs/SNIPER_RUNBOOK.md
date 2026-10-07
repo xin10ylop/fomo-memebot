@@ -1943,3 +1943,12 @@ The engine's bursts since the last reading:
 | Oct 5 20:21 0x91bbe43f | 1 | $75 | +4 | 12.4 | hold | 27 | 3.40 |
 | Oct 6 12:23 0x9d48eeff | 1 | $75 | -1 | 5.3 | hold | 25 | 3.19 |
 | Oct 6 17:24 0xda48f334 | 1 | $50 | 0 | 8.3 | hold | 14 | 1.43 |
+
+## 5bb. Oct 7 04:30 reading (pieces oct06pm, oct07am: Oct 6 17:26 - Oct 7 04:09 UTC), recorded only (the owner: no analysis)
+
+Chain side first: 1,053 creations, 26 qualifying (25 / 1). The model prices the seat behind one buy.
+- Usual view (k-1 with the registration block), 4 fires: 17:45 0x49630455 -11.9% ($75, listed helper); 19:21 0x4416a5ae
+  guard; 21:04 0x0af2d4e6 guard; 22:23 0xd7657dce -10.1% (no listed helper, $50). Two fills, mean -11.0%.
+- Ceiling (k) adds 18:24 0xe565a53a -10.6%, 21:19 0x14331814 -10.7% and two guards (19:04 0x9b414128, 19:07 0x62084e9d): 4
+  fills, mean -10.8%. Floor (k-2): 17:45 -11.9% and 22:23 -10.1%.
+- The night after 23:00: one qualifying launch, no fire.
