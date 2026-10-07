@@ -2123,3 +2123,43 @@ Deployed Oct 7 about 10:05 UTC: the start line read `release 6.21, shots_per_sho
 attack_group 7, hold_from_fill false, sell_reserved_nonce false, dry_run false`. (The first attempt failed on the box's pull: an analysis
 output `live_vs_table.json` had been committed by mistake and collided with an untracked copy there; removed from the repo, the pull
 then went through. During that attempt the engine was restarted once on 6.19 with its old settings; no fill was open.)
+
+## 5bd. The growth review (Oct 7, afternoon): the exit, first place, selection; the burst's partner-shot fix (6.22, send step)
+
+The owner asked for growth, not patches. Three researchers (Opus 5.5), each reviewed here.
+
+**1. The exit: hold 11 stays.** Premise: on the live gate's fills the price touched +50% within a minute on most launches, so a
+trailing exit could multiply the per-fill return. Tested on the full price paths of all 133 fired launches (115 fills; a simulator
+that reproduces hold_grid's pricing exactly, sells executed two blocks after the decision), 194 rules at $75 and $250, behind 1 and
+3 buys, ranked on the pre-Oct 2 fills and held out on Oct 2-7: **no take-profit, trailing stop, early stop or scale-out beats the
+fixed 11-block hold** (the best loses 0.5 points, trailing stops lose 6-13). The premise was wrong: the mean mark peaks at block
+11 in both periods and every winning group gives back after it, the biggest the most. The one addition with a positive sign is
+the reverse: sell the winners at 11, let the LOSERS ride to 300 blocks with a -25% floor (rule G): +3 points pre (se 2.3), +6-8
+on the holdout (se 7), +$105 on the live Oct 2-6 fills of which all is Oct 6. Not significant; scored at the readings from now on
+(growth/exit/live_check.py prices it at our real landing); on only if the running lift stays positive over ~30 riders.
+
+**2. First place: the mechanism is known, the prize measured, the engine cannot do it yet.** On 25 launches Oct 2-6 where a sprayer's
+buy is the seat block's first transaction, dissected from receipts: each sprayer runs N wallets x M consecutive-nonce copies of one
+buy (the leader 0x460b1f81: 20 x 15 = 300 copies; 0x6cd02597 10 x 16; 0x19078e5c one wallet x 86), streamed continuously from
+about two blocks before the second boundary through the seat block; every copy carries deadline = T0+1, 99-100% revert cheaply
+(22-50k gas) in the creation second, the first copy past the boundary succeeds and sits at the top of the block. Ordering is pure
+arrival order: effectiveGasPrice == base fee on 21,587 of 21,587 transactions (no priority tip exists), a 137x-base sprayer does not
+beat a 4x one, reverting copies occupy slots like successes. Why they beat our timed burst: they start 2-6x earlier (our 46 ms lead
+is ~31 ms before the real boundary, which lands 15 ms before our predicted tick), their nonce chains never gap (every copy
+included), and they spread 70-300 copies over 200-300 ms (admitted in full) where we force 35-70 into 69 ms on parallel sockets
+(dropped ~48% under floods). Prize, measured on the same launches: first place is worth **+$7.43 a fill (se 1.61), +0.094 return
+points (median +0.052), +$134 over Oct 2-6**, but 85% of it on the 10 of 18 launches that were already positive; 2 of 18 flip
+from loss to win. Cost to replicate with our 35 wallets: $0.2-0.6 a launch in gas (ours is $0.15 today). The current burst cannot
+replicate it: it fires one timed cluster, and a gated first-wave shot strands its chained partner (F1).
+
+**6.22 (deploy/send_step.py; `tests/test_partner_shot.py`, 14 checks): in a multi-wave burst a shot sends its key's lowest UNSENT
+body, so a shooter whose earlier shot the gate skipped sends that body (its current nonce) instead of a nonce + 1 body the
+sequencer refuses; the chain never gaps; `sent_burst` logs `partner_substituted`.** With SHOTS_PER_SHOOTER 1 (live) it changes
+nothing; it is the prerequisite for any multi-copy pattern. Next: a one-day config trial after a day of 6.21 baseline, the stream
+bent toward the sprayers' pattern with the existing settings (BURST_LEAD_MS ~150-200, SHOTS_PER_SHOOTER 3, BURST_STEP_MS 2: ~105
+copies over ~210 ms from about block k-2), measured on our first included seat-block index and the included-shot share on contested
+launches, with a stop rule (median first index not below 3 after 10 contested launches, inclusion under 60%, gas over $1 a burst,
+or the day's chain-priced P&L at -$15: back to 35 x 1 at 2 ms). If the index moves, build the continuous-stream sender (independent
+per-wallet nonce chains topped up from k-2) and spend the copies only on launches worth winning.
+
+**3. Selection:** running (a reputation-weighted crowd score, walk-forward); recorded when done.

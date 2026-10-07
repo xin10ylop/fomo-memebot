@@ -117,7 +117,10 @@ def make_burst(engine):
             else:
                 alt_skipped = f"no time to sign the boosted set ({1000 * per * len(alt):.0f} ms needed)"
         t_signed = mono(); out = []; fired_at = []; opened = gate is None; opened_at = None; shut = False; boosted = []
-        for i, body in enumerate(bodies):
+        order = {}; ptr = {}; subst = 0                                      # 6.22 (review 5bc F1 / growth review): each key's bodies in nonce order. The later waves repeat the shooters at
+        if keys:                                                            # nonce + 1, + 2; when the gate skipped a shooter's earlier shot, that nonce was never used, so a later shot sent at
+            for j, k in enumerate(keys): order.setdefault(k, []).append(j); ptr[k] = 0   # its own nonce is refused ("nonce too high": Oct 5 20:21, 32 of 38 sent shots dead). A shot therefore
+        for i, body in enumerate(bodies):                                   # sends its key's lowest UNSENT body (the chain never gaps); the skipped slot stays (None, None), one hash per shot sent.
             while mono() < at[i] - 0.0015:                              # a prebuilt burst waits for the boundary here: sleep to 1.5 ms before the shot,
                 time.sleep(0.0002)                                       # then spin yielding the interpreter lock each turn (engine 6.7, review J: the old
             while mono() < at[i]:                                        # 4 ms spin held the lock for the whole burst and starved the feed loop at the gate)
@@ -130,13 +133,16 @@ def make_burst(engine):
                     shut = True                                          # too late for a shot to straddle the tick: the burst is abandoned
             if not opened:
                 fired_at.append(mono()); out.append((None, None)); boosted.append(False); continue
+            src = i
+            if keys:                                                     # 6.22: this key's lowest unsent body (its own when nothing of its was skipped)
+                src = order[keys[i]][ptr[keys[i]]]; ptr[keys[i]] += 1; subst += src != i
             try:
                 use_alt = bool(alt_bodies is not None and pick())        # 6.13: the boosted shot when a smart helper is in at this moment
             except Exception:
                 use_alt = False                                          # never let the pick break the burst
-            boosted.append(use_alt); fired_at.append(mono()); out.append(engine.SENDER.fire_slot(alt_bodies[i] if use_alt else body, i))
+            boosted.append(use_alt); fired_at.append(mono()); out.append(engine.SENDER.fire_slot(alt_bodies[src] if use_alt else bodies[src], i))
         engine.state["last_boosted"] = boosted
-        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "shooters": bool(keys), "gated": sum(1 for h, _ in out if h is None), "boosted": sum(boosted), "alt_skipped": alt_skipped, "gate_opened_at_shot": opened_at, "sign_ms": round(1000 * (t_signed - t_sign0), 1), "signed_direct": n_fast,
+        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "shooters": bool(keys), "gated": sum(1 for h, _ in out if h is None), "boosted": sum(boosted), "alt_skipped": alt_skipped, "partner_substituted": subst, "gate_opened_at_shot": opened_at, "sign_ms": round(1000 * (t_signed - t_sign0), 1), "signed_direct": n_fast,
                     "shot_ms": [round(1000 * (t - at[0]), 1) for t in fired_at], "late_ms": [round(1000 * (t - a), 2) for t, a in zip(fired_at, at)]})
         return out
     submit_burst.alt = True                                               # 6.13: the engine passes alt= and pick= only to a send step that has this
