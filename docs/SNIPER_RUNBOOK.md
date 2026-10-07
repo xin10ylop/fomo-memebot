@@ -2163,3 +2163,36 @@ or the day's chain-priced P&L at -$15: back to 35 x 1 at 2 ms). If the index mov
 per-wallet nonce chains topped up from k-2) and spend the copies only on launches worth winning.
 
 **3. Selection:** running (a reputation-weighted crowd score, walk-forward); recorded when done.
+
+**3. Selection: a reputation floor doubles the $ per fire; one bot carries it (engine 6.23, shadow).** Walk-forward Sep 27 - Oct 7
+(every parameter and table from days strictly before each test day; all 590 eligible launches with a fleet re-priced behind three
+buys), 26 rule families against the live gate on the same days. Best: keep the 6.21 gate AND require rep_sum >= the median rep_sum
+of the last 7 days' gate passes, where rep_sum sums the attacking relays' weights and a relay's weight is sum(min(return, 1)) /
+(n + 4) over the launches it attacked in the trailing 7 days (n >= 4; the return the seat's behind-one hold-11, the quantity the
+smart list fits). Live gate: 79 fires (7.8 a day), 48 fills, +9.5% mean / +0.4% median, win 50%, $3.96 a fire behind three (se
+2.11). With the floor: 48 fires (4.7 a day, 61% kept), 27 fills, +20.3% / +5.7%, win 70%, **$7.98 a fire (se 3.27)**; total +$383
+vs +$313 (+$234 vs +$164 without the two best fires); the dropped 31 fires -$70 (21 fills, 5 wins; -$45 without their two worst).
+Day-resampled gain +$70 [+22, +127], P(<= 0) 0.004; per day it never loses more than $5 and gains on Oct 2 (+22 -> +51), Oct 6
+(-23 -> -7). Robust across 11 reputation settings ($7.6-9.5 a fire) and the quantile choice ($7.5-8.0); a table a day stale keeps
+$7.46, two or three days stale $5.8 / $5.1. Live Oct 2-6: keeps 9 fills (+$151, 8 up), drops 18 (-$127, 1 up). Caveat that governs
+everything: **since Sep 27 the live gate's whole behind-three profit came from launches 0xf2c69db0 attacked** (with it 35 fires
++$477, 83% of fills won; without it 44 fires -$164; after Oct 2 without it 8 fills, 0 wins). The table found it walk-forward (#1
+every day since Sep 30) and would find its successor; before Sep 27 other bots carried the gate. Pre-Oct 2 the floor costs $24 a day
+behind one (it cuts first-place winners), is even behind three; since Oct 2 it gains at both positions. Planning number: +$5-10 a
+day at the live stake, +$20-40 at $250 a fill, with a real chance of ~$0 if that bot leaves. Rejected: 0x460b1f81's presence as
+the rule (its own 0.45 ETH buy trips our guard: 4 fills of 25), shots as a proxy for commitment (correlation -0.07), reputation
+instead of the count ($1.9-4.0 a fire), a logistic model (no gain), boosted stumps (best total but unstable across its own choices).
+
+Engine 6.23 (`tests/test_rep_floor.py`, 12 checks): `src/analysis/helper_weights.py` refits `data/derived/helper_weights.json`
+each reading (Oct 7: 24 weighted helpers, 0xf2c69db0 +0.263, 0x2ddcda58 +0.169, 0x0b30b193 +0.167, 0xadf2dfe0 +0.166, 0x460b1f81
++0.163; rep_min 0.253 over 56 gate passes: the researcher's table within 0.01). The engine loads it like the smart list (reloaded
+when the file changes), logs `rep_sum_at_build`, `rep_sum_at_open`, `rep_min` and `rep_gate` on every decision and gate line
+(`rep_weights` on load; the start line carries the count, rep_min and the switch). `REP_GATE=1` makes the burst gate also require
+rep_sum >= rep_min; **off by default (shadow)**: the next readings compare the fires it would have refused with their outcomes
+before it gates real shots. Deploy (shadow; no fill open):
+
+    cd ~/fomo-memebot && git pull -q && sudo cp deploy/send_step.py /etc/sniper/send_step.py && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"attack_group": [0-9]*\|"rep_weights": [0-9]*\|"rep_min": [0-9.]*\|"rep_gate": [a-z]*\|"shots_per_shooter": [0-9]*\|"burst": \[[^]]*\]\|"dry_run": [a-z]*'
+
+Expected: `release 6.23, attack_group 7, rep_weights 24, rep_min 0.253, rep_gate false, shots_per_shooter 1, burst [35, 2.0, 46.0, 0.2], dry_run false`.
+The send step copied is 6.22 (inert at one shot per shooter). Switch the floor on (`set_kv REP_GATE 1`, restart) once two readings
+show the shadow refusals losing and the kept fires paying; refit the table every reading and commit it so the box pulls it.

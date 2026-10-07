@@ -76,6 +76,9 @@ RELAY_RETRY_S = float(os.environ.get("RELAY_RETRY_S", "60"))                # 6.
 STAKE_BOOST_USD = float(os.environ.get("STAKE_BOOST_USD", "0") or 0)        # 6.13 (5am): the stake when a smart helper is attacking at fire time (0 = off). Walk-forward Sep 26-30, 3+ fleets: $50 on
                                                                           # those fills against $25 flat, +$470 against +$257; the same 52 fills, 31 of them boosted (report 24.50)
 SMART_HELPERS_PATH = os.environ.get("SMART_HELPERS_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "data", "derived", "smart_helpers.json"))
+REP_WEIGHTS_PATH = os.environ.get("REP_WEIGHTS_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "data", "derived", "helper_weights.json"))   # 6.23 (runbook 5bd): each
+REP_GATE = os.environ.get("REP_GATE", "0") == "1"                         # helper's trailing-7-day weight and the floor rep_min (src/analysis/helper_weights.py). rep_sum = the attacking relays'
+                                                                          # weights summed; logged on every decision. REP_GATE=1 also refuses a fire whose rep_sum is under the floor (shadow first).
 RELAY_FLOAT_USD = float(os.environ.get("RELAY_FLOAT_USD", "0") or 0)      # the relay is refilled from the wallet to this after every exit (0 = 1.2 x STAKE_MAX), as far as the wallet reaches
 ETH_USD = float(os.environ.get("ETH_USD", "2445")); ETH_USD_URL = os.environ.get("ETH_USD_URL", "https://api.coinbase.com/v2/prices/ETH-USD/spot")
 BANKROLL = float(os.environ.get("BANKROLL_USD", "300"))
@@ -748,7 +751,7 @@ def chain_loop():
                     log({"ev": "error", "stage": "chain_loop_readouts", "err": str(e)[:200]})
         if n % max(1, int(3600 / CHAIN_POLL_S)) == 0 and n > 0:
             venue_check()                                                   # 6.9: hourly
-            smart_helpers_load()                                            # 6.13: the list, when the file changed
+            smart_helpers_load(); rep_weights_load()                        # 6.13: the list, when the file changed; 6.23: the weight table likewise
         n += 1; time.sleep(2.0 if failed else CHAIN_POLL_S)                  # 6.8: a failed read is retried in 2 s, not after the whole interval
 
 
@@ -1819,6 +1822,43 @@ def smart_helpers_load(force=False):
             log({"ev": "error", "stage": "smart_helpers_load", "err": str(e)[:120]})
 
 
+def rep_weights_load(force=False):
+    """6.23: the helpers' weight table (src/analysis/helper_weights.py refits it each reading; the box pulls it): weight = the sum of the
+    capped behind-one returns of the launches the helper attacked over the trailing window / (n + 4), and rep_min, the median rep_sum
+    of the window's gate passes. Reloaded when the file changes; a missing or bad file leaves the table as it was (empty = no floor)."""
+    try:
+        mt = os.path.getmtime(REP_WEIGHTS_PATH)
+        if not force and state.get("rep_mtime") == mt:
+            return
+        d = json.load(open(REP_WEIGHTS_PATH)); ws = {str(a).lower(): float(v) for a, v in (d.get("weights") or {}).items()}
+        state["rep_weights"] = ws; state["rep_min"] = float(d.get("rep_min") or 0.0); state["rep_mtime"] = mt
+        log({"ev": "rep_weights", "n": len(ws), "rep_min": state["rep_min"], "fitted": d.get("fitted"), "window_days": d.get("window_days")})
+    except Exception as e:
+        if force:
+            log({"ev": "error", "stage": "rep_weights_load", "err": str(e)[:120]})
+
+
+def rep_sum(w):
+    """6.23: the attacking relays' weights summed (a relay not in the table counts 0); None when no table is loaded"""
+    ws = state.get("rep_weights")
+    if not ws:
+        return None
+    for _ in range(2):
+        try:
+            return round(sum(ws.get(t, 0.0) for t in set(w.get("attack_targets", ()))), 4)
+        except RuntimeError:
+            pass
+    return None
+
+
+def rep_ok(w):
+    """6.23: the reputation floor, only when REP_GATE=1 and a table with a floor is loaded; otherwise always true (shadow: logged only)"""
+    if not REP_GATE or not state.get("rep_weights") or not state.get("rep_min"):
+        return True
+    s = rep_sum(w)
+    return s is None or s >= state["rep_min"]
+
+
 def smart_present(w):
     """6.13: a smart helper is among the relays attacking this curve so far (attack_targets fills as the feed's blocks arrive; the
     copy can race that growth, so it is retried once and answers False rather than raise inside the burst loop)"""
@@ -2225,11 +2265,12 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     decision["b_create"] = b_create; decision["seq_at_build"] = state["feed_seq"]                               # 6.4: chain-numbered blocks (feed_seq = the L2 block number)
     decision["blk_watch"] = w.get("blk_watch"); decision["seq_watch"] = w.get("seq_watch")                       # where the feed stood when the curve was registered (blind before)
     snap = lambda: (state["blocks"], state["feed_seq"], attack_fleets(w), attack_wallets(w))
-    opened_at, last_ask = [None], [None]
+    opened_at, last_ask, rep_open = [None], [None], [None]
+    decision["rep_sum_at_build"] = rep_sum(w); decision["rep_min"] = state.get("rep_min"); decision["rep_gate"] = REP_GATE   # 6.23: logged on every decision (shadow)
     def gate():
-        last_ask[0] = snap(); ok = attackers(w) >= ATTACK_MIN                                                    # the view at this ask: block, chain block, fleets, wallets
+        last_ask[0] = snap(); ok = attackers(w) >= ATTACK_MIN and rep_ok(w)                                      # the view at this ask: block, chain block, fleets, wallets; 6.23: the reputation floor when REP_GATE
         if ok and opened_at[0] is None:
-            opened_at[0] = last_ask[0]                                                                          # the view that decided the fire
+            opened_at[0] = last_ask[0]; rep_open[0] = rep_sum(w)                                                # the view that decided the fire, and the attackers' reputation then
         return ok
     gate = gate if ATTACK_MIN > 0 else None                                                                     # 6.2: decided shot by shot while the burst runs (see GATE_LATE_MS)
     if gate is not None and ATTACK_BUILD_MIN > 0 and n_att < ATTACK_BUILD_MIN:                                 # 6.3: the count required already at the build
@@ -2311,7 +2352,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             decision["attack_list"] = sorted(w["attack_targets"])[:6] + sorted(w["attack_senders"])[:4]
             dec = opened_at[0] or last_ask[0] or snap()                                                         # 6.4: the view that decided (the opening, or the last ask of a refusal)
             decision["feed_block_at_open"], decision["seq_at_open"], decision["fleets_at_open"], decision["wallets_at_open"] = dec
-            decision["attackers_at_open"] = dec[2] if ATTACK_UNIT == "fleets" else dec[3]; decision["gate_opened"] = opened_at[0] is not None
+            decision["attackers_at_open"] = dec[2] if ATTACK_UNIT == "fleets" else dec[3]; decision["gate_opened"] = opened_at[0] is not None; decision["rep_sum_at_open"] = rep_open[0]   # 6.23
             decision["feed_block_after_burst"] = state["blocks"]; decision["seq_after_burst"] = state["feed_seq"]
             decision["fleets_after_burst"] = attack_fleets(w); decision["wallets_after_burst"] = attack_wallets(w)
             if decision["gated_shots"] == len(shots):                   # the gate never opened: nothing left the box, nothing to pay
@@ -2895,10 +2936,10 @@ async def main():
         threading.Thread(target=probe_loop, daemon=True).start()        # 6.16
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
-    smart_helpers_load(force=True)
-    log({"ev": "start", "version": 6.21, "release": "6.21", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    smart_helpers_load(force=True); rep_weights_load(force=True)
+    log({"ev": "start", "version": 6.23, "release": "6.23", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
-         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "attack_group": len(ATTACK_GROUP), "attack_build_min": ATTACK_BUILD_MIN, "hold_from_fill": HOLD_FROM_FILL, "sell_reserved_nonce": SELL_RESERVED_NONCE, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
+         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "attack_group": len(ATTACK_GROUP), "attack_build_min": ATTACK_BUILD_MIN, "hold_from_fill": HOLD_FROM_FILL, "sell_reserved_nonce": SELL_RESERVED_NONCE, "rep_weights": len(state.get("rep_weights") or ()), "rep_min": state.get("rep_min"), "rep_gate": REP_GATE, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
         if not PROVIDER_WS:
