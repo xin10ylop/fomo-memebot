@@ -2306,3 +2306,7 @@ Deployed Oct 8 18:40 UTC: `hold_from_fill true, rep_min 0.1851, rep_gate true, s
 engine did not fire: 17:10 0x9af0b56b, the engine's gate saw 2 fleets by the tick (fleets_at_build 0, at_open 2) against the tables'
 3 at k-1 / 4 at k, so the floor never came into it (the engine's view behind the tables', the known 71-85% coverage); 12:45
 0x26731e6e has no decision row at all in the box's log (not seen, or refused before the eligible stage): its events are requested.
+12:45 0x26731e6e (+22.3%): the engine skipped it at 12:45:12 with "burst mode: no confident boundary estimate to aim at (react would
+send late): not sending", then restarted at 12:45:57 (feed_connected 12:46:00) without the owner's hand: an unexplained restart
+right after the skip, to be read from the log (errors around 12:45:12-12:46:05). The seat block of that launch carried 383
+transactions (the sprayers 0x2670a033, 0xc54d3914, 0xd0fa5138, 0x98240307 streaming), the kind of flood the trial is meant to beat.
