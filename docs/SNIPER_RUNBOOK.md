@@ -2270,3 +2270,17 @@ top-ups and the shooters' gas; the relay keeps its $90 float and the stake).
 Done Oct 8: 0.007800 ETH to 0xAB5A34c3F41E57fDEe1a1D6f19D3E21f46dF3eA8 (tx 0x3ff46ae8d882ecab2b970d4dd85408b69f90bc641a14240e6eed7d5fd89682f8,
 block 83324480). The box had not pulled the new scripts, so the withdrawal was recorded by hand (`TG_PNL_WITHDRAWN=0.007800`). Health
 after: capital 0.053753 ETH ($135.89) = wallet 0.014308 + relay 0.036810 + shooters 0.002635; P&L +0.040363 ETH (+190.5%), unchanged.
+
+## 5bg. Oct 8 18:20 reading (pieces oct08day, oct08pm: Oct 8 07:28 - 18:13 UTC)
+
+Chain side first: 883 creations, 13 qualifying (3 / 10), thin. The usual view fires three, all winners: 12:45 0x26731e6e +22.3%
+(4 fleets, $75), 14:34 0xa94292c3 +39.3% (5, $75), 17:10 0x9af0b56b +12.2% (3, $75); the ceiling adds a guard at 15:59 0x52f11a9e.
+The reputation floor (shadow on the chain, the deployed Oct 8 morning table, floor 0.185): passes all three (rep_sum 0.26 / 0.40 /
+0.23), refuses the guard (0.00). The floor's record on the model's sign since it went live: 7 of 7 over Oct 7-8 (four passes +72.6%,
++22.3%, +39.3%, +12.2%; three refusals +0.7%, -13.7%, -8.9%).
+
+**Tables refit.** Sprayers: the refit lists 11 (0x7316855a has left the window); the reviewed list stays at 12 (a gone contract costs
+nothing). Weights: 20 helpers over 419 launches, 0xf2c69db0 +0.262 (n 29), 0x460b1f81 +0.186, 0x0b30b193 +0.164, 0x0b112df2 and
+0x98240307 +0.117, 0xadf2dfe0 +0.115; rep_min 0.296 over 43 gate passes (up from 0.185: the window's passes are fewer and
+better). With the new table the last two days' seven fires still split 7 of 7 (passes 0.61 / 0.33 / 0.51 / 0.30, refusals 0.24 /
+0.18 / 0.21). The box pulls the table with the reading command.

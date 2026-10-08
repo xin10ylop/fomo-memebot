@@ -1,53 +1,52 @@
 {
- "fitted": "2026-10-08 07:53 UTC",
+ "fitted": "2026-10-08 18:23 UTC",
  "window_days": 7.0,
  "min_tx": 50,
  "min_launches": 5,
- "launches": 468,
+ "launches": 419,
  "sprayers": [
   "0x23e4ddf11bf280d08a506e60c5b7bd50ec781b22",
   "0x6cd02597aed4877c8cd1d8ea10523fb0b6cd7d0b",
   "0xa29d8198b39050024c638ff4d8cb5021cac46598",
   "0x19078e5c68760e500eeeb3f515f0c5a14c12669b",
-  "0x460b1f818ce34db07458c6347896069ebef19bf2",
   "0xe665841ec9c5aa1c057b2a2bbc3b513111be7e15",
+  "0x460b1f818ce34db07458c6347896069ebef19bf2",
   "0x828f376682d5e4786824fffc1fc729c05286403a",
   "0xd0fa513823279199eb15843934a9f9176dfa90f9",
   "0x610de2b5fe686748ceaa6c5f1cb45f3aa9672208",
   "0xaae6dafbe6d8b962b19e32220414d4b539c6d19e",
-  "0x7316855af247c0bdaf80db7b84cef3899bbf86be",
   "0x982403071488a9f04920589709824db5c1446d80"
  ],
  "stats": {
   "0x23e4ddf11bf280d08a506e60c5b7bd50ec781b22": {
-   "launches": 81,
-   "median_tx": 67,
+   "launches": 79,
+   "median_tx": 68,
    "max_tx": 72
   },
   "0x6cd02597aed4877c8cd1d8ea10523fb0b6cd7d0b": {
-   "launches": 36,
+   "launches": 33,
    "median_tx": 161,
    "max_tx": 161
   },
   "0xa29d8198b39050024c638ff4d8cb5021cac46598": {
-   "launches": 34,
-   "median_tx": 131,
+   "launches": 32,
+   "median_tx": 129,
    "max_tx": 228
   },
   "0x19078e5c68760e500eeeb3f515f0c5a14c12669b": {
-   "launches": 34,
+   "launches": 30,
    "median_tx": 85,
    "max_tx": 86
-  },
-  "0x460b1f818ce34db07458c6347896069ebef19bf2": {
-   "launches": 25,
-   "median_tx": 220,
-   "max_tx": 255
   },
   "0xe665841ec9c5aa1c057b2a2bbc3b513111be7e15": {
    "launches": 22,
    "median_tx": 81,
    "max_tx": 300
+  },
+  "0x460b1f818ce34db07458c6347896069ebef19bf2": {
+   "launches": 21,
+   "median_tx": 220,
+   "max_tx": 255
   },
   "0x828f376682d5e4786824fffc1fc729c05286403a": {
    "launches": 15,
@@ -55,7 +54,7 @@
    "max_tx": 100
   },
   "0xd0fa513823279199eb15843934a9f9176dfa90f9": {
-   "launches": 9,
+   "launches": 10,
    "median_tx": 138,
    "max_tx": 161
   },
@@ -68,11 +67,6 @@
    "launches": 6,
    "median_tx": 192,
    "max_tx": 212
-  },
-  "0x7316855af247c0bdaf80db7b84cef3899bbf86be": {
-   "launches": 6,
-   "median_tx": 321,
-   "max_tx": 385
   },
   "0x982403071488a9f04920589709824db5c1446d80": {
    "launches": 6,
