@@ -2215,3 +2215,30 @@ on 0x0b30b193, 0x460b1f81 and 0x23e4ddf1 together, which is what the table is fo
 counted as real fleets: the five enter `sprayers.json` (reviewed, 12 contracts). Weights: 22 helpers, 0xf2c69db0 +0.250 (n 31),
 0x0b30b193 +0.186, 0x460b1f81 +0.161, 0xadf2dfe0 +0.101; rep_min 0.185 over 50 gate passes (the window moved past the Sep 30 -
 Oct 1 days). The box pulls both with the next deploy.
+
+**Box side (Oct 8 07:58 UTC).** 6.23 ran from Oct 7 11:03 (the owner deployed it the same day; 6.21 from 09:56). P&L +0.040363
+ETH ($103.69, +190.5%; +$12.55 on the day), capital $158.12, no alarm, no position open; probe 2.8 ms; flow quiet (0 rule-passing
+launches in the last hour, 100 creations in 3 h). Two fills since the last reading, priced on the chain:
+
+| fill | landed | model behind one (seat) | actual | floor (shadow) |
+|---|---|---|---|---|
+| Oct 7 18:45 0xf03c1f5c $75 | E1+1, index 24, 1 ahead | -13.7% | **-13.8%, -$10.39**, sold +11 | rep_sum 0.1515: refused |
+| Oct 7 21:44 0x9f69fc9e $75 | **E1+5** (slow door, load 28), index 30, 0 ahead | -8.9% | **+30.6%, +$22.94**, sold +13 | rep_sum 0.1502: refused |
+
+The engine's live rep_sum equals the offline one on both (0.1515 / 0.1502 against 0.151 / 0.150): the shadow numbers are right. On
+these two the floor would have been -$12.55 net: the 21:44 fill is a slow-door landing five blocks late that bought after the seat's
+dip and sold into a rise the seat model does not see (the seat itself was -8.9%); not a reason against the floor, which is judged
+on the 43 priced fills (14 kept at +58%, 29 dropped at +6%) and the walk-forward, but recorded. The 04:14 miss (+72.6%, every
+shot in the creation second) was 6.19's last burst. 13:38 (model +0.7%, 4 fleets on the tables): the engine counted 0 fleets at the
+build and the open (a registration behind the crowd); the floor refuses it too. The sells: `send_timing` query 18-38 ms, submit 1 ms
+after; hold_blocks 11 and 13; held_s 1.07 / 1.27 s: the exit path is clean on one wave. `feed_seq_at_send` logged.
+
+**Decision: the reputation floor goes live (REP_GATE=1), with the reviewed 12-contract sprayer list and the Oct 8 weight table.**
+Deploy (no fill open):
+
+    cd ~/fomo-memebot && set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; git pull -q && set_kv REP_GATE 1 && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"attack_group": [0-9]*\|"rep_weights": [0-9]*\|"rep_min": [0-9.]*\|"rep_gate": [a-z]*\|"shots_per_shooter": [0-9]*\|"burst": \[[^]]*\]\|"dry_run": [a-z]*'
+
+Expected: `release 6.23, attack_group 12, rep_weights 22, rep_min 0.185, rep_gate true, shots_per_shooter 1, burst [35, 2.0, 46.0, 0.2],
+dry_run false`. Watch: fires 2-4 a day; every `trade_decision` with rep_sum_at_open >= rep_min; the refusals' outcomes at each reading
+(the shadow continues on the eligible_not_traded lines); back to REP_GATE 0 if the kept fills lose over 15 fills while the refused
+set would have paid.
