@@ -2307,6 +2307,12 @@ engine did not fire: 17:10 0x9af0b56b, the engine's gate saw 2 fleets by the tic
 3 at k-1 / 4 at k, so the floor never came into it (the engine's view behind the tables', the known 71-85% coverage); 12:45
 0x26731e6e has no decision row at all in the box's log (not seen, or refused before the eligible stage): its events are requested.
 12:45 0x26731e6e (+22.3%): the engine skipped it at 12:45:12 with "burst mode: no confident boundary estimate to aim at (react would
-send late): not sending", then restarted at 12:45:57 (feed_connected 12:46:00) without the owner's hand: an unexplained restart
-right after the skip, to be read from the log (errors around 12:45:12-12:46:05). The seat block of that launch carried 383
-transactions (the sprayers 0x2670a033, 0xc54d3914, 0xd0fa5138, 0x98240307 streaming), the kind of flood the trial is meant to beat.
+send late): not sending". That skip is neither the fleet gate nor the floor: in predict mode the burst is aimed at the second
+boundary from the flip-vote estimator (boundary(): 30 brackets narrower than 350 ms, confidence >= 0.5, a reference flip), and
+when the feed delivers late or bunched the brackets widen past the filter or the votes split and seat_target returns None; the
+engine then refuses rather than send 300 ms into the second behind the crowd (5.62). The feed reconnected at 12:46:00, 48 s after
+the skip, with no feed_stall logged (a dropped socket, feed_error): the socket was failing around the launch. The skip line's
+boundary field [theta_ms, confidence, brackets] and the feed_error lines 12:40-12:50 are requested from the box (the paste cut the
+line at 160 characters). The seat block of that launch carried 383 transactions (the sprayers 0x2670a033, 0xc54d3914, 0xd0fa5138,
+0x98240307 streaming), the kind of flood the trial is meant to beat. Boundary-estimate skips are a miss category of their own,
+to be counted at every reading next to the gate's and the floor's refusals.
