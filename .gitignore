@@ -12,3 +12,6 @@ risk_harness_cache*.pkl
 sniper_engine.jsonl
 sniper_engine.jsonl.state.json
 live_vs_table.json
+
+# per-launch rows written by v4_slowrug_test.py (regenerable)
+data/derived/edge_check/Q/*_rows.json
