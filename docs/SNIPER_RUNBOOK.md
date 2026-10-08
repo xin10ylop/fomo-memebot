@@ -2196,3 +2196,9 @@ before it gates real shots. Deploy (shadow; no fill open):
 Expected: `release 6.23, attack_group 7, rep_weights 24, rep_min 0.253, rep_gate false, shots_per_shooter 1, burst [35, 2.0, 46.0, 0.2], dry_run false`.
 The send step copied is 6.22 (inert at one shot per shooter). Switch the floor on (`set_kv REP_GATE 1`, restart) once two readings
 show the shadow refusals losing and the kept fires paying; refit the table every reading and commit it so the box pulls it.
+
+## 5be. Oct 8 07:30 reading (pieces oct07day, oct08am: Oct 7 04:09 - Oct 8 07:28 UTC)
+
+Chain side first. Piece oct07day (Oct 7 04:09 - 16:00): 775 creations, 17 qualifying, a quiet day. Every view fires the same two:
+04:14 0x47313c63 +72.6% behind one ($75, listed helper; the box's 6.19 burst at 04:14 put every shot in the creation second and
+missed it) and 13:38 0x4fa46ef4 +0.7% ($50). 11 refused for fewer than 3 grouped fleets, 4 for creator supply.
