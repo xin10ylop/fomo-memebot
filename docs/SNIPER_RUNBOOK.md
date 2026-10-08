@@ -2306,13 +2306,33 @@ Deployed Oct 8 18:40 UTC: `hold_from_fill true, rep_min 0.1851, rep_gate true, s
 engine did not fire: 17:10 0x9af0b56b, the engine's gate saw 2 fleets by the tick (fleets_at_build 0, at_open 2) against the tables'
 3 at k-1 / 4 at k, so the floor never came into it (the engine's view behind the tables', the known 71-85% coverage); 12:45
 0x26731e6e has no decision row at all in the box's log (not seen, or refused before the eligible stage): its events are requested.
-12:45 0x26731e6e (+22.3%): the engine skipped it at 12:45:12 with "burst mode: no confident boundary estimate to aim at (react would
-send late): not sending". That skip is neither the fleet gate nor the floor: in predict mode the burst is aimed at the second
-boundary from the flip-vote estimator (boundary(): 30 brackets narrower than 350 ms, confidence >= 0.5, a reference flip), and
-when the feed delivers late or bunched the brackets widen past the filter or the votes split and seat_target returns None; the
-engine then refuses rather than send 300 ms into the second behind the crowd (5.62). The feed reconnected at 12:46:00, 48 s after
-the skip, with no feed_stall logged (a dropped socket, feed_error): the socket was failing around the launch. The skip line's
-boundary field [theta_ms, confidence, brackets] and the feed_error lines 12:40-12:50 are requested from the box (the paste cut the
-line at 160 characters). The seat block of that launch carried 383 transactions (the sprayers 0x2670a033, 0xc54d3914, 0xd0fa5138,
-0x98240307 streaming), the kind of flood the trial is meant to beat. Boundary-estimate skips are a miss category of their own,
-to be counted at every reading next to the gate's and the floor's refusals.
+12:45 0x26731e6e (+22.3%): the engine skipped it at 12:45:12 with the 5.62 message "no confident boundary estimate to aim at", but
+the estimator WAS confident: the skip line read `boundary [-383.5, 0.92, 300], since_creation_ms 103`. The refusal was the other
+branch of the same rule, the aim already passed. The chain: the creation block 83324041 was the 7th of its second's ten (83324035-44
+stamped T0, the seat block 83324045 with 2 transactions, the 334-transaction flood in 83324046 = E1+1), so the tick was about 300 ms
+behind the creation on the feed; the aim is the tick less the 180 ms lead plus the 15 ms margin = tick - 165 ms, about 135 ms after
+the creation; the engine reached the burst branch 103 ms after the creation and the feed's delivery jitter (slot_shadow ramp_err
+p10 -99 ms at 12:44:59) put the aim a few ms behind it. Under the pre-trial lead of 46 ms the aim would have sat ~270 ms after the
+creation and the launch would have fired. The 12:46:00 start was the owner's midday list deploy, not a crash.
+
+**The rule's cost.** The aim passes whenever the tick is less than lead - margin + resolve (~268 ms at lead 180, ~134 ms at lead 46)
+from the creation's arrival, i.e. whenever the creation block is one of the last ~2.7 (lead 180) or ~1.3 (lead 46) of its second's
+ten: roughly 27% of launches under the trial, 13% before it, refused before the fleet gate is even read. The box's counts: 5, 13, 6, 7
+such skips on Oct 5-8 against 78+6, 52+6 launches reaching the gate on Oct 5-6 (eligible_not_traded + trade_decision). At the gate's
+fire rate (6 of 84, 6 of 58) that is about one fire a day refused, more under the trial. The refusals were never priced because they
+were logged under the estimator's message.
+
+**6.24: the late start (`LATE_SEND_MIN_MS`, default 100).** `burst_start(burst_at)`: the aim ahead -> the stream starts on it as
+before; the aim passed but the estimated tick at least 100 ms ahead -> the stream starts now, shortened on the early side (those
+copies land in the creation second and revert anyway: the post-tick position depends only on copies in flight at the tick, and the
+stream still covers it: 105 copies over 210 ms); the tick nearer than 100 ms (the vote's p90 error is ~95 ms: a start that could
+already be past the true tick lands behind the flood in E1+1, the behind-5 position worth nothing) or no estimate -> refused. The
+gate's deadline is measured from the aim, so a late start moves it nowhere; with `GATE_CLOSE_MS` set it is held open to the tick
+itself. The skip now logs `aim_ms`, `tick_ms`, `seat_on_feed` under three distinct reasons (no estimate / the seat's second already
+on the feed / the aim passed with the tick N ms away); the decision logs `late_start_ms` and `tick_ms_at_start`; the start line
+`late_send_min_ms`. `LATE_SEND_MIN_MS=0` restores 6.23. tests/test_late_start.py (16 checks).
+
+    cd ~/fomo-memebot && git pull -q && sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"late_send_min_ms": [0-9.]*\|"burst": \[[^]]*\]\|"gate_close_ms": [0-9.-]*\|"gate_late_ms": [0-9.-]*\|"rep_gate": [a-z]*\|"dry_run": [a-z]*'
+
+Expected: release 6.24, late_send_min_ms 100.0, burst [35, 2.0, 180.0, 0.2], rep_gate true, dry_run false. Readings count the three
+skip reasons next to the gate's and the floor's refusals, and the late starts by `late_start_ms` and their landings.

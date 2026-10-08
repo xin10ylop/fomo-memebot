@@ -128,6 +128,7 @@ BURST_N = max(1, int(os.environ.get("BURST_N", "1")))                    # 5.6: 
 BURST_STEP_MS = float(os.environ.get("BURST_STEP_MS", "4")); BURST_LEAD_MS = float(os.environ.get("BURST_LEAD_MS", "8"))   # boundary: shots that land in the creation second revert for the gas,
 BURST_SLIP = float(os.environ.get("BURST_SLIP", "0.07"))
 RAMP_BLOCKS = int(os.environ.get("RAMP_BLOCKS", "30")); RAMP_MAX_RES_MS = float(os.environ.get("RAMP_MAX_RES_MS", "60"))   # 5.9 ramp model: fit window and confidence
+LATE_SEND_MIN_MS = float(os.environ.get("LATE_SEND_MIN_MS", "100"))     # 6.24: the aim passed but the estimated tick still this far ahead: the stream starts now (0 = never)
 SLOT_SEND = os.environ.get("SLOT_SEND", "0") == "1"                     # 5.7: aim the burst with the slot model (every block's arrival folded on the 101.6 ms slot grid) instead of the flip vote
 SLOT_LEAD_MS = float(os.environ.get("SLOT_LEAD_MS", "100"))             # send this long before the predicted CREATION of the seat second's first block: its window opened one block (~101.6 ms) earlier (calibrated from fills)
 FEED_LAG_MS = float(os.environ.get("FEED_LAG_MS", "85"))                # the feed's delivery lag on this box (deploy/feed_lag_probe.py p5-p10): predicted arrival minus this is the creation                 # the first one past the boundary fills; the minOut must reject a SECOND fill of our own (about 8% fewer tokens at 3% of supply) and no more: a fill behind a big crowd still pays (24.20)
@@ -866,6 +867,22 @@ def seat_target(feed_ts, seconds):
     if b is None or b[1] < 0.5 or ref is None:
         return None
     return ref[0] + (target_ts - ref[1]) + b[0] + MARGIN_MS / 1000.0 - (BURST_LEAD_MS / 1000.0 if BURST_N > 1 else 0.0)
+
+
+def burst_start(burst_at, now=None):
+    """6.24: when the burst's stream starts. burst_at (seat_target: the estimated tick + MARGIN_MS - BURST_LEAD_MS) still ahead: on it.
+    Passed, but the estimated tick at least LATE_SEND_MIN_MS ahead: now, the stream shortened on the early side, whose copies land
+    in the creation second and revert anyway (Oct 8 12:45: the creation block the 7th of its second's ten, the 180 ms lead and 103 ms
+    of resolve past the aim by a few ms, a +22% seat refused under the 5.62 rule). Nearer than that, or no estimate: None (the start
+    would land behind the flood in E1+1). Returns (t_first, late_ms), late_ms how long after the aim the stream starts."""
+    if burst_at is None:
+        return None
+    now = mono() if now is None else now
+    if now < burst_at:
+        return burst_at, 0.0
+    if LATE_SEND_MIN_MS > 0 and (burst_at + (BURST_LEAD_MS - MARGIN_MS) / 1000.0 - now) * 1000.0 >= LATE_SEND_MIN_MS:
+        return now, round((now - burst_at) * 1000.0, 1)
+    return None
 
 
 def wait_for_second(feed_ts, seconds, seen_at, deadline=3.5, watch=None):
@@ -2147,15 +2164,21 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         threading.Thread(target=learn_token, daemon=True).start()
     curve_cs = to_checksum_address(curve)
     # the seat's wait: the bundle and second one must be fully visible before the gates are read
-    send_mode = None; burst_at = None
+    send_mode = None; burst_at = None; late_start_ms = 0.0
     if SEAT in ("E1", "E2") and BURST_N > 1:
         burst_at = seat_target(feed_ts, SEAT_SECONDS[SEAT])            # 5.61: gates, sizing, build and signing happen BEFORE the boundary; the shots leave on the estimate
-        if burst_at is not None and mono() < burst_at:
-            send_mode = "predict-prebuilt"
-        else:                                                          # 5.62: no confident estimate (or the estimate already passed): a burst has nothing to aim at.
-            b = boundary()                                             # React mode would send 300 ms into the second, twelve shots wide, all behind the crowd (Sep 18 14:31).
-            log({"ev": "skip", "why": ["burst mode: no confident boundary estimate to aim at (react would send late): not sending"], "creator": creator, "curve": curve,
-                 "boundary": None if b is None else [round(1000 * b[0], 1), round(b[1], 2), len(state["brackets"])], "since_creation_ms": round((mono() - seen_at) * 1000)})
+        bs = burst_start(burst_at)                                     # 6.24: on the aim, or now when the aim passed with the tick still LATE_SEND_MIN_MS ahead
+        if bs is not None:
+            late_start_ms = bs[1]; send_mode = "predict-prebuilt" if late_start_ms == 0 else "predict-late-start"
+        else:                                                          # 5.62: no confident estimate, or the tick too near: a burst has nothing to aim at.
+            b = boundary(); now = mono()                               # React mode would send 300 ms into the second, twelve shots wide, all behind the crowd (Sep 18 14:31).
+            seat_on_feed = state["feed_ts"] >= feed_ts + SEAT_SECONDS[SEAT]
+            tick_ms = None if burst_at is None else round((burst_at + (BURST_LEAD_MS - MARGIN_MS) / 1000.0 - now) * 1000, 1)
+            why = ("burst mode: the seat's second is already on the feed: not sending" if seat_on_feed else
+                   "burst mode: no confident boundary estimate to aim at (react would send late): not sending" if burst_at is None else
+                   f"burst mode: the aim passed {round((now - burst_at) * 1000, 1)} ms ago and the estimated tick is {tick_ms} ms away (< LATE_SEND_MIN_MS {LATE_SEND_MIN_MS:.0f}): not sending")
+            log({"ev": "skip", "why": [why], "creator": creator, "curve": curve, "boundary": None if b is None else [round(1000 * b[0], 1), round(b[1], 2), len(state["brackets"])],
+                 "since_creation_ms": round((now - seen_at) * 1000), "aim_ms": None if burst_at is None else round((burst_at - now) * 1000, 1), "tick_ms": tick_ms, "seat_on_feed": seat_on_feed})
             release_reservation(); return
     if send_mode is None and SEAT in ("E1", "E2"):
         send_mode = wait_for_second(feed_ts, SEAT_SECONDS[SEAT], seen_at, watch=w)
@@ -2310,9 +2333,10 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         own = 1 - ((Y - tk) * net / (X + 2 * net)) / tk if tk > 0 else 0.0   # tokens a second identical shot would get after our own fill, as a shortfall
         if own < BURST_SLIP + 0.005:
             decision["burst_note"] = f"stake too small for the burst's guard: a second shot would fill ({100*own:.1f}% shortfall < BURST_SLIP {100*BURST_SLIP:.0f}%)"
-        t_first = burst_at if burst_at is not None else mono() + 0.0015 * BURST_N   # prebuilt: the send step signs now and fires on the estimate; else signs first (about 1.5 ms each)
+        t_first = max(burst_at, mono()) if burst_at is not None else mono() + 0.0015 * BURST_N   # prebuilt: the send step signs now and fires on the estimate (6.24: now, when the aim passed); else signs first
         if burst_at is not None:
             decision["burst_at_ms"] = round((burst_at - seen_at) * 1000, 1); decision["prebuilt_ms"] = round((burst_at - mono()) * 1000, 1)   # how early the shots were ready
+            decision["late_start_ms"] = late_start_ms; decision["tick_ms_at_start"] = round((burst_at + (BURST_LEAD_MS - MARGIN_MS) / 1000.0 - t_first) * 1000, 1)   # 6.24: how far the estimated tick is from the first shot
             decision["target_model"] = "slot" if SLOT_SEND else "vote"; decision["burst_at_wall"] = time.time() + (burst_at - mono())
             if SLOT_SEND:
                 sp_ = slot_predict(feed_ts + SEAT_SECONDS[SEAT]); decision["slot_block"] = sp_[1] if sp_ else None; decision["slot_t_wall"] = sp_[0] if sp_ else None
@@ -2325,7 +2349,9 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         else:
             txs = [dict(buy, nonce=hex(nonce + i)) for i in range(BURST_N)]; keys = None; txs_alt = None; shooters_seq = []
         at = [t_first + i * BURST_STEP_MS / 1000.0 for i in range(len(txs))]
-        open_by = (t_first + (GATE_CLOSE_MS if GATE_CLOSE_MS >= 0 else BURST_LEAD_MS + GATE_LATE_MS) / 1000.0) if gate is not None else None   # the gate may open up to the shot scheduled at the predicted tick (+GATE_LATE_MS)
+        open_by = ((burst_at if burst_at is not None else t_first) + (GATE_CLOSE_MS if GATE_CLOSE_MS >= 0 else BURST_LEAD_MS + GATE_LATE_MS) / 1000.0) if gate is not None else None   # the gate may open up to the shot scheduled at the predicted tick (+GATE_LATE_MS); 6.24: measured from the aim, so a late start moves no deadline
+        if gate is not None and late_start_ms > 0 and GATE_CLOSE_MS >= 0:
+            open_by = max(open_by, burst_at + (BURST_LEAD_MS + GATE_LATE_MS) / 1000.0)                        # 6.24: a late start keeps the gate open to the tick itself (GATE_CLOSE_MS measured from an aim already passed would shut it before the first shot)
         if SEND_BURST is not None:
             gk = {"gate": gate, "open_by": open_by} if gate is not None else {}   # an older send step (no gate=) still works when the gate is off
             if txs_alt is not None and getattr(SEND_BURST, "alt", False):
@@ -2937,9 +2963,9 @@ async def main():
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
     smart_helpers_load(force=True); rep_weights_load(force=True)
-    log({"ev": "start", "version": 6.23, "release": "6.23", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.24, "release": "6.24", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
-         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "attack_group": len(ATTACK_GROUP), "attack_build_min": ATTACK_BUILD_MIN, "hold_from_fill": HOLD_FROM_FILL, "sell_reserved_nonce": SELL_RESERVED_NONCE, "rep_weights": len(state.get("rep_weights") or ()), "rep_min": state.get("rep_min"), "rep_gate": REP_GATE, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
+         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "attack_group": len(ATTACK_GROUP), "attack_build_min": ATTACK_BUILD_MIN, "hold_from_fill": HOLD_FROM_FILL, "sell_reserved_nonce": SELL_RESERVED_NONCE, "late_send_min_ms": LATE_SEND_MIN_MS, "rep_weights": len(state.get("rep_weights") or ()), "rep_min": state.get("rep_min"), "rep_gate": REP_GATE, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
         if not PROVIDER_WS:
