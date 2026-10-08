@@ -2302,3 +2302,7 @@ tick: fewer than 3 fleets in the engine's view, or the floor); their rows are re
 3. **The late sell is back (+17 blocks).** With three copies per shooter the filling shot is a later-wave one, polled late (review
    F2), so the position and the hold clock start 2-3 blocks after the fill. `HOLD_FROM_FILL=1` (built and tested in 6.21, off until now)
    counts the hold from the fill's own chain block and removes exactly this; it goes on for the trial's duration.
+Deployed Oct 8 18:40 UTC: `hold_from_fill true, rep_min 0.1851, rep_gate true, shots_per_shooter 3` on 6.23. The two model winners the
+engine did not fire: 17:10 0x9af0b56b, the engine's gate saw 2 fleets by the tick (fleets_at_build 0, at_open 2) against the tables'
+3 at k-1 / 4 at k, so the floor never came into it (the engine's view behind the tables', the known 71-85% coverage); 12:45
+0x26731e6e has no decision row at all in the box's log (not seen, or refused before the eligible stage): its events are requested.
