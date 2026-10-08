@@ -2284,3 +2284,21 @@ nothing). Weights: 20 helpers over 419 launches, 0xf2c69db0 +0.262 (n 29), 0x460
 0x98240307 +0.117, 0xadf2dfe0 +0.115; rep_min 0.296 over 43 gate passes (up from 0.185: the window's passes are fewer and
 better). With the new table the last two days' seven fires still split 7 of 7 (passes 0.61 / 0.33 / 0.51 / 0.30, refusals 0.24 /
 0.18 / 0.21). The box pulls the table with the reading command.
+
+**Box side (Oct 8 18:33 UTC).** P&L +0.046355 ETH ($113.19, +218.8%; +$15 on the day), capital $145.89, no alarm, no position.
+One fill since the morning, priced on the chain: 14:34 0xa94292c3 $72, landed **E1+1, index 16, 4 buys ahead**, model first +41.9%,
+landed +27.3%, sold at **+17 blocks** for **+20.6%, +$14.96** (seat -14.6 points, the late sell -6.7). The model's other two
+winners (12:45 +22.3%, 17:10 +12.2%) the engine did not fire: six bursts today sent 0 of 105 shots (the gate never opened by the
+tick: fewer than 3 fleets in the engine's view, or the floor); their rows are requested from the box.
+
+**Three findings, acted on:**
+1. **The floor's live scale.** The engine compares rep_sum at the moment the gate opens, counting only the attackers seen by then:
+   0.2204 on the 14:34 fire against 0.396 on the full k-1 tables. A floor fitted on the tables' sums (0.296 this evening) would have
+   refused today's only fill, a +$15 winner. `rep_min` is pinned at 0.1851 in the table (the tables' value kept as `rep_min_offline`)
+   until 15+ live decisions carry `rep_sum_at_open` and the floor can be set from them, as the selection study advised.
+2. **The trial's first burst.** The partner fix worked (9 gated first shots, 18 partners substituted, no dead shots); the first
+   landed shot sat two blocks before the seat block (the 180 ms lead reaches the chain), but the fill still landed at E1+1 behind 4
+   buys: the seat block itself took none of our shots. One burst; the trial needs ten contested launches.
+3. **The late sell is back (+17 blocks).** With three copies per shooter the filling shot is a later-wave one, polled late (review
+   F2), so the position and the hold clock start 2-3 blocks after the fill. `HOLD_FROM_FILL=1` (built and tested in 6.21, off until now)
+   counts the hold from the fill's own chain block and removes exactly this; it goes on for the trial's duration.

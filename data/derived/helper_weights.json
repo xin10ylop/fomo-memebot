@@ -128,6 +128,8 @@
    "w": 0.1174
   }
  },
- "rep_min": 0.2964,
- "passes": 43
+ "rep_min": 0.1851,
+ "passes": 43,
+ "rep_min_offline": 0.2964,
+ "note": "rep_min pinned at 0.1851 (Oct 8 evening): the engine compares its rep_sum AT THE GATE'S OPENING, which counts only the attackers seen by then (0.2204 on the Oct 8 14:34 fire against 0.396 on the full k-1 tables), so a floor fitted on the tables' sums runs too high live; rep_min_offline is the tables' value. Recalibrate from the engine's logged rep_sum_at_open once 15+ decisions carry it."
 }
