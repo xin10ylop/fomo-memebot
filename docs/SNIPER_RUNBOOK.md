@@ -2267,3 +2267,6 @@ notifier parses the same line, unchanged). `withdraw.py` also refuses a mixed-ca
 (a wrong character), and sends to the checksummed form. First use: the owner's $20 (0.0078 ETH at $2,569) to
 0xAB5A34c3F41E57fDEe1a1D6f19D3E21f46dF3eA8 for another project, from the wallet (which then holds about $41: enough for the relay's
 top-ups and the shooters' gas; the relay keeps its $90 float and the stake).
+Done Oct 8: 0.007800 ETH to 0xAB5A34c3F41E57fDEe1a1D6f19D3E21f46dF3eA8 (tx 0x3ff46ae8d882ecab2b970d4dd85408b69f90bc641a14240e6eed7d5fd89682f8,
+block 83324480). The box had not pulled the new scripts, so the withdrawal was recorded by hand (`TG_PNL_WITHDRAWN=0.007800`). Health
+after: capital 0.053753 ETH ($135.89) = wallet 0.014308 + relay 0.036810 + shooters 0.002635; P&L +0.040363 ETH (+190.5%), unchanged.
