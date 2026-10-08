@@ -2202,3 +2202,16 @@ show the shadow refusals losing and the kept fires paying; refit the table every
 Chain side first. Piece oct07day (Oct 7 04:09 - 16:00): 775 creations, 17 qualifying, a quiet day. Every view fires the same two:
 04:14 0x47313c63 +72.6% behind one ($75, listed helper; the box's 6.19 burst at 04:14 put every shot in the creation second and
 missed it) and 13:38 0x4fa46ef4 +0.7% ($50). 11 refused for fewer than 3 grouped fleets, 4 for creator supply.
+Piece oct08am (Oct 7 16:00 - Oct 8 07:28): 1,362 creations, 18 qualifying, nothing good. Usual view: 18:45 0xf03c1f5c -13.7% ($75),
+21:44 0x9f69fc9e -8.9% ($75); ceiling adds 21:06 0x1f5632c7 -8.6% ($50) and a guard at 21:09 0xde176599. Floor (k-2): the same two.
+
+**The reputation floor's shadow on the chain side (the Oct 7 table, rep_min 0.253):** of the six launches fired since the deploy it
+passes ONE, 04:14 0x47313c63 (rep_sum +0.43, +72.6%), and refuses the five others (rep_sum 0.00-0.15: 13:38 +0.7%, 18:45 -13.7%,
+21:06 -8.6%, 21:09 guard, 21:44 -8.9%). Six for six on the sign. None of the six had 0xf2c69db0 attacking: the +72.6% launch passed
+on 0x0b30b193, 0x460b1f81 and 0x23e4ddf1 together, which is what the table is for.
+
+**The tables refit (Oct 8 07:50).** Sprayers: the refit lists 12 (the seven plus 0xd0fa5138, 0x98240307, 0xe665841e, 0x7316855a,
+0xaae6dafb); 0xd0fa5138 and 0x98240307 (86-138 transactions a launch) were among the attackers on four of the six fires above,
+counted as real fleets: the five enter `sprayers.json` (reviewed, 12 contracts). Weights: 22 helpers, 0xf2c69db0 +0.250 (n 31),
+0x0b30b193 +0.186, 0x460b1f81 +0.161, 0xadf2dfe0 +0.101; rep_min 0.185 over 50 gate passes (the window moved past the Sep 30 -
+Oct 1 days). The box pulls both with the next deploy.

@@ -1,0 +1,26 @@
+18 qualifying launches scored, Oct 07 15:42 - Oct 08 00:44 UTC
+when          launch       k fleets by block           k-1 tick  k-2  eng   behind1 h11
+Oct 07 15:42  0x39e2a1c1   8 [0, 0, 0, 0, 0, 0, 0, 1, 1]    1    0    0    0        -11.8%
+Oct 07 15:46  0x5f405df3   2 [0, 1, 2]                   1    1    0    0        -11.8%
+Oct 07 16:47  0x80562982   8 [0, 0, 0, 0, 0, 1, 1, 1, 1]    1    1    1    1         -6.9%
+Oct 07 17:11  0x13ce2805   9 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    0    0    0    0        -11.8%
+Oct 07 17:57  0x71b5f54d   6 [0, 0, 0, 0, 0, 0, 0]       0    0    0    0        -11.8%
+Oct 07 18:20  0x8ab891f5   3 [0, 0, 0, 2]                0    0    0    0        +24.7%
+Oct 07 18:35  0xc607f671   5 [0, 0, 0, 0, 0, 0]          0    0    0    0        -11.8%
+Oct 07 18:45  0xf03c1f5c   6 [1, 1, 2, 2, 2, 3, 3]       3    2    2    2        -13.7%
+Oct 07 19:07  0xb0ddc8df   1 [0, 0]                      0    0    0    0         -2.5%
+Oct 07 20:20  0x0a61dd02   6 [0, 1, 2, 2, 2, 2, 3]       2    2    2    2         -9.2%
+Oct 07 20:25  0xd6f3068f   7 [0, 0, 0, 0, 0, 0, 0, 0]    0    0    0    0        -11.9%
+Oct 07 21:06  0x1f5632c7   9 [0, 0, 0, 0, 0, 0, 0, 0, 2, 3]    2    0    0    0         -8.6%
+Oct 07 21:09  0xde176599   1 [0, 4]                      0    0    0    0         +4.3%
+Oct 07 21:16  0x0b253157   9 [0, 1, 1, 1, 1, 1, 1, 1, 2, 2]    2    1    1    1        +19.9%
+Oct 07 21:44  0x9f69fc9e   6 [0, 1, 1, 1, 3, 3, 3]       3    3    3    3         -8.9%
+Oct 07 22:18  0x947b96c4   2 [1, 2, 2]                   2    2    1    0        -13.8%
+Oct 08 00:31  0xc6a1181e   8 [1, 2, 2, 2, 2, 2, 2, 2, 2]    2    2    2    2        -13.8%
+Oct 08 00:44  0xdd79c798   4 [0, 1, 1, 1, 1]             1    1    1    1         +7.1%
+
+k-1                    7 fires  mean  -6.9%  median  -9.2%  win 14%  dead  0%  $-8.55 total at $13 after gas
+tick's shot (0.76)     5 fires  mean -11.9%  median -13.7%  win  0%  dead  0%  $-9.37 total at $13 after gas
+k-2                    4 fires  mean -11.4%  median -11.5%  win  0%  dead  0%  $-7.25 total at $13 after gas
+ENGINE (k-2 after registration)   4 fires  mean -11.4%  median -11.5%  win  0%  dead  0%  $-7.25 total at $13 after gas
+refused (k-1 < 2)     11        mean  -4.0%  median -11.8%  win 27%
