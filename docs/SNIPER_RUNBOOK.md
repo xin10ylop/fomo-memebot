@@ -2336,3 +2336,29 @@ on the feed / the aim passed with the tick N ms away); the decision logs `late_s
 
 Expected: release 6.24, late_send_min_ms 100.0, burst [35, 2.0, 180.0, 0.2], rep_gate true, dry_run false. Readings count the three
 skip reasons next to the gate's and the floor's refusals, and the late starts by `late_start_ms` and their landings.
+
+**Deployed Oct 8 ~19:20 UTC:** `release 6.24, late_send_min_ms 100.0, burst [35, 2.0, 180.0, 0.2], gate_close_ms 36.0, gate_late_ms 0.0,
+rep_gate true, dry_run false`. The one trial burst so far (14:34 0xa94292c3, the +$15 fill) logged `target_model slot`: the box aims
+with the slot model (SLOT_SEND=1), whose aim sits SLOT_LEAD_MS + BURST_LEAD_MS before the seat block's predicted production, not
+BURST_LEAD_MS - MARGIN_MS as the vote's does; 6.24.1 computes the late-start margin and the logged tick_ms from the live model
+(`tick_after_aim_s()`), test_late_start 20 checks.
+
+**The refusals priced (src/analysis/aim_skips.py, data/derived/aim_skips/aim_skips_oct04_08.txt).** The box's 44 aim-rule skips Oct 4-8
+(every one with a confident estimator: confidence 0.71-0.99, 300 brackets; resolve at the gate median 100 ms, p90 150): 21 are in the
+readings' tables, and the gate (fleets >= 3 by k-1, rep_sum >= 0.1851) would have fired ONE of them, 12:45 0x26731e6e (+22.3% behind
+one, +$17 at $75). The other twenty had 0-1 fleets by k-1: a creation block late in its second leaves k = 1-2 same-second blocks, too
+few for the crowd to register before the tick, so the launches the aim rule refuses are mostly launches the gate refuses anyway. The
+rule's cost is about one fire in five days, not the one a day estimated above from the counts alone; 6.24 recovers it at no risk,
+and that is its size. Per day at the gate: Oct 5 78+6 launches, 14 aim skips; Oct 6 52+6, 13; Oct 7 34+3, 6; Oct 8 29+1, 7.
+
+**The trial moved the gate's deadline 134 ms earlier (found in the same paste).** `GATE_CLOSE_MS 36` is measured from the burst's
+first shot: with the lead at 46 the gate could open until the aim + 36 ms = about 10 ms before the tick; with the lead at 180 and the
+same 36 it shuts 144 ms before the tick, about a block and a half earlier, so since Oct 8 08:15 the fleet gate has read the crowd at
+roughly the k-2 view instead of k-1 (Oct 8: 1 fire from 30 launches at the gate, against 6 of 84 and 6 of 58 on Oct 5-6). The 6.19
+trial set `GATE_CLOSE_MS 80` with its lead of 90 for this reason; the first-place trial did not. `GATE_CLOSE_MS 170` (36 + 180 - 46)
+restores the deadline at the tick under the 180 ms lead; 6.24's late start keeps the gate open to the tick in any case.
+
+    cd ~/fomo-memebot && git pull -q && set_kv() { sudo grep -q "^$1=" /etc/sniper/engine.env && sudo sed -i "s|^$1=.*|$1=$2|" /etc/sniper/engine.env || echo "$1=$2" | sudo tee -a /etc/sniper/engine.env >/dev/null; }; set_kv GATE_CLOSE_MS 170; sudo systemctl restart sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"gate_close_ms": [0-9.-]*\|"late_send_min_ms": [0-9.]*\|"slot_send": [a-z]*\|"slot_lead_ms": [0-9.]*\|"feed_lag_ms": [0-9.]*\|"margin_ms": [0-9.]*\|"burst": \[[^]]*\]\|"rep_gate": [a-z]*\|"dry_run": [a-z]*'
+
+Expected: release 6.24, gate_close_ms 170.0, late_send_min_ms 100.0, slot_send true. The next reading compares the Oct 8 gate
+refusals (attackers at the build and at the last ask) with the tables' k-1 fleets to size what the early deadline cost.

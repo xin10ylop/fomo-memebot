@@ -869,6 +869,13 @@ def seat_target(feed_ts, seconds):
     return ref[0] + (target_ts - ref[1]) + b[0] + MARGIN_MS / 1000.0 - (BURST_LEAD_MS / 1000.0 if BURST_N > 1 else 0.0)
 
 
+def tick_after_aim_s():
+    """6.24: the estimated tick (the seat block's production at the sequencer), seconds after the burst's aim (seat_target). The slot
+    model aims SLOT_LEAD_MS + BURST_LEAD_MS before the seat block's predicted production (its feed arrival less FEED_LAG_MS); the
+    vote aims MARGIN_MS after the boundary less BURST_LEAD_MS."""
+    return (SLOT_LEAD_MS + BURST_LEAD_MS) / 1000.0 if SLOT_SEND else (BURST_LEAD_MS - MARGIN_MS) / 1000.0
+
+
 def burst_start(burst_at, now=None):
     """6.24: when the burst's stream starts. burst_at (seat_target: the estimated tick + MARGIN_MS - BURST_LEAD_MS) still ahead: on it.
     Passed, but the estimated tick at least LATE_SEND_MIN_MS ahead: now, the stream shortened on the early side, whose copies land
@@ -880,7 +887,7 @@ def burst_start(burst_at, now=None):
     now = mono() if now is None else now
     if now < burst_at:
         return burst_at, 0.0
-    if LATE_SEND_MIN_MS > 0 and (burst_at + (BURST_LEAD_MS - MARGIN_MS) / 1000.0 - now) * 1000.0 >= LATE_SEND_MIN_MS:
+    if LATE_SEND_MIN_MS > 0 and (burst_at + tick_after_aim_s() - now) * 1000.0 >= LATE_SEND_MIN_MS:
         return now, round((now - burst_at) * 1000.0, 1)
     return None
 
@@ -2173,7 +2180,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         else:                                                          # 5.62: no confident estimate, or the tick too near: a burst has nothing to aim at.
             b = boundary(); now = mono()                               # React mode would send 300 ms into the second, twelve shots wide, all behind the crowd (Sep 18 14:31).
             seat_on_feed = state["feed_ts"] >= feed_ts + SEAT_SECONDS[SEAT]
-            tick_ms = None if burst_at is None else round((burst_at + (BURST_LEAD_MS - MARGIN_MS) / 1000.0 - now) * 1000, 1)
+            tick_ms = None if burst_at is None else round((burst_at + tick_after_aim_s() - now) * 1000, 1)
             why = ("burst mode: the seat's second is already on the feed: not sending" if seat_on_feed else
                    "burst mode: no confident boundary estimate to aim at (react would send late): not sending" if burst_at is None else
                    f"burst mode: the aim passed {round((now - burst_at) * 1000, 1)} ms ago and the estimated tick is {tick_ms} ms away (< LATE_SEND_MIN_MS {LATE_SEND_MIN_MS:.0f}): not sending")
@@ -2336,7 +2343,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         t_first = max(burst_at, mono()) if burst_at is not None else mono() + 0.0015 * BURST_N   # prebuilt: the send step signs now and fires on the estimate (6.24: now, when the aim passed); else signs first
         if burst_at is not None:
             decision["burst_at_ms"] = round((burst_at - seen_at) * 1000, 1); decision["prebuilt_ms"] = round((burst_at - mono()) * 1000, 1)   # how early the shots were ready
-            decision["late_start_ms"] = late_start_ms; decision["tick_ms_at_start"] = round((burst_at + (BURST_LEAD_MS - MARGIN_MS) / 1000.0 - t_first) * 1000, 1)   # 6.24: how far the estimated tick is from the first shot
+            decision["late_start_ms"] = late_start_ms; decision["tick_ms_at_start"] = round((burst_at + tick_after_aim_s() - t_first) * 1000, 1)   # 6.24: how far the estimated tick is from the first shot
             decision["target_model"] = "slot" if SLOT_SEND else "vote"; decision["burst_at_wall"] = time.time() + (burst_at - mono())
             if SLOT_SEND:
                 sp_ = slot_predict(feed_ts + SEAT_SECONDS[SEAT]); decision["slot_block"] = sp_[1] if sp_ else None; decision["slot_t_wall"] = sp_[0] if sp_ else None
