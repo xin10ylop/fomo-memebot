@@ -2242,3 +2242,12 @@ Expected: `release 6.23, attack_group 12, rep_weights 22, rep_min 0.185, rep_gat
 dry_run false`. Watch: fires 2-4 a day; every `trade_decision` with rep_sum_at_open >= rep_min; the refusals' outcomes at each reading
 (the shadow continues on the eligible_not_traded lines); back to REP_GATE 0 if the kept fills lose over 15 fills while the refused
 set would have paid.
+
+**Deployed Oct 8 ~08:15 UTC:** the reputation floor live (`rep_gate true`, the 12-contract list, the Oct 8 table) and, on the owner's
+call the same morning, the first-place trial with the existing settings: `SHOTS_PER_SHOOTER 3`, `BURST_STEP_MS 2`, `BURST_LEAD_MS 180`
+(105 copies streamed from 180 ms before the predicted tick; the 6.22 send step keeps a shooter's chain unbroken when the gate skips
+its first copies). Start line: `release 6.23, shots_per_shooter 3, burst [35, 2.0, 180.0, 0.2], rep_gate true, dry_run false`.
+Measured at each reading on contested launches: our first included seat-block index (baseline median 4.5-5; 29-62 on floods) and the
+share of our shots admitted (baseline ~50% on floods). Stop rule: back to `SHOTS_PER_SHOOTER 1`, `BURST_LEAD_MS 46` if the median
+index has not dropped below 3 after 10 contested launches, if fewer than 60% of shots are admitted, if gas exceeds $1 a burst, or if a
+day's fills lose $15 to late landings.
