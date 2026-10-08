@@ -2251,3 +2251,8 @@ Measured at each reading on contested launches: our first included seat-block in
 share of our shots admitted (baseline ~50% on floods). Stop rule: back to `SHOTS_PER_SHOOTER 1`, `BURST_LEAD_MS 46` if the median
 index has not dropped below 3 after 10 contested launches, if fewer than 60% of shots are admitted, if gas exceeds $1 a burst, or if a
 day's fills lose $15 to late landings.
+
+**The decision date (agreed with the owner, Oct 8).** The floor and the trial went live Oct 8 ~08:15 UTC. By **Oct 21** the live
+fills, priced on the chain, must show the kept fills winning at least 60% of the time and at least +$5 a fire at the live stake. Every
+reading reports the running numbers against those two thresholds. If they hold: the stake steps to $150, then $250. If they do not:
+the owner is told plainly that the edge does not pay in this market, and the work stops there (no third week of fixes).
