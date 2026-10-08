@@ -74,6 +74,17 @@ def send(rpc, acct, tx, label, wait=True):
     return h, rec
 
 
+def withdrawn_eth():
+    """the ETH withdrawn from the bot so far (TG_PNL_WITHDRAWN in /etc/sniper/telegram.env, kept by withdraw.py); 0 when unset or unreadable"""
+    try:
+        for line in open("/etc/sniper/telegram.env"):
+            if line.startswith("TG_PNL_WITHDRAWN="):
+                return float(line.split("=", 1)[1].strip() or 0)
+    except Exception:
+        pass
+    return 0.0
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("cmd", choices=["status", "shooters-create", "shooters-register", "shooters-fund", "shooters-sweep", "deposit", "withdraw"])
     ap.add_argument("arg", nargs="?"); ap.add_argument("--replace", action="store_true"); ap.add_argument("--yes", action="store_true"); a = ap.parse_args()
@@ -104,7 +115,8 @@ def main():
         total = wb + (rb if relay else 0.0) + gas_total
         print(f"TOTAL capital: {total:.6f} ETH{usd(total)} = wallet {wb:.6f} + relay {rb if relay else 0.0:.6f} + shooters' gas {gas_total:.6f}")
         if a.arg:
-            base = float(a.arg); print(f"P&L since {base:.6f} ETH: {total - base:+.6f} ETH{usd(total - base)} ({100 * (total - base) / base:+.1f}%), every gas and fee included")
+            base = float(a.arg); wd = withdrawn_eth(); pnl = total + wd - base   # Oct 8: ETH sent out of the bot (withdraw.py records it) still counts as earned
+            print(f"P&L since {base:.6f} ETH: {pnl:+.6f} ETH{usd(pnl)} ({100 * pnl / base:+.1f}%), every gas and fee included" + (f"; {wd:.6f} ETH withdrawn counted as kept" if wd else ""))
         return
 
     if engine_running():

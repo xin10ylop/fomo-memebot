@@ -29,6 +29,23 @@ def rpc(url, method, params):
     return d["result"]
 
 
+def record_withdrawal(eth, path="/etc/sniper/telegram.env"):
+    """Oct 8: adds a landed withdrawal to TG_PNL_WITHDRAWN, so the P&L line (relay_ops.py status) counts it as kept, not lost"""
+    try:
+        lines = open(path).read().splitlines() if os.path.exists(path) else []
+        prev = 0.0; out = []
+        for line in lines:
+            if line.startswith("TG_PNL_WITHDRAWN="):
+                prev = float(line.split("=", 1)[1].strip() or 0)
+            else:
+                out.append(line)
+        out.append(f"TG_PNL_WITHDRAWN={prev + eth:.6f}")
+        open(path, "w").write("\n".join(out) + "\n"); os.chmod(path, 0o600)
+        print(f"recorded: {prev + eth:.6f} ETH withdrawn in all (the P&L line counts it as kept)")
+    except Exception as e:
+        print(f"could not record the withdrawal in {path} ({e}): add TG_PNL_WITHDRAWN by hand")
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--to", required=True); ap.add_argument("--amount", required=True, help="ETH, or 'all'"); ap.add_argument("--yes", action="store_true")
     a = ap.parse_args(); e = env(); url = e.get("RPC_URL") or "https://rpc.mainnet.chain.robinhood.com"
@@ -38,6 +55,10 @@ def main():
     to = a.to
     if not (to.startswith("0x") and len(to) == 42):
         sys.exit("the destination must be a 0x address of 42 characters")
+    from eth_utils import is_checksum_address, to_checksum_address
+    if to != to.lower() and not is_checksum_address(to):
+        sys.exit("the destination's capital letters do not match its checksum: a character is probably wrong; check the address")
+    to = to_checksum_address(to.lower())
     bal = int(rpc(url, "eth_getBalance", [wallet, "latest"]), 16); gp = int(int(rpc(url, "eth_gasPrice", []), 16) * 2); gas = 21000; reserve = gp * gas * 3
     amount = bal - reserve if a.amount == "all" else int(float(a.amount) * 1e18)
     if amount <= 0 or amount + gp * gas > bal:
@@ -52,7 +73,10 @@ def main():
     for _ in range(60):
         time.sleep(0.5); r = rpc(url, "eth_getTransactionReceipt", [h])
         if r:
-            print("landed in block", int(r["blockNumber"], 16), "status", "ok" if r.get("status") == "0x1" else "FAILED"); return
+            ok = r.get("status") == "0x1"; print("landed in block", int(r["blockNumber"], 16), "status", "ok" if ok else "FAILED")
+            if ok:
+                record_withdrawal(amount / 1e18)
+            return
     print("no receipt after 30 s: check the hash on the explorer before sending again")
 
 

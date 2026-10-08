@@ -2257,3 +2257,13 @@ fills, priced on the chain, must show the kept fills winning at least 60% of the
 reading reports the running numbers against those two thresholds. If they hold: the stake steps to $150, then $250. If they do not:
 the stake is not raised, the owner is told plainly that this edge does not pay in this market, and the research moves to the next
 candidate edge instead of a third week of fixes on this one (the owner, Oct 8: "there is no stopping").
+
+## 5bf. Withdrawals without breaking the P&L line (Oct 8)
+
+The P&L line was `total - base`, so ETH sent out of the bot read as a loss. `deploy/withdraw.py` now records every landed
+withdrawal in `TG_PNL_WITHDRAWN` (in /etc/sniper/telegram.env, added to what is there) and `relay_ops.py status` reports
+`P&L = total + withdrawn - base` and the % on the same base, with "X ETH withdrawn counted as kept" appended (the Telegram
+notifier parses the same line, unchanged). `withdraw.py` also refuses a mixed-case destination whose checksum does not match
+(a wrong character), and sends to the checksummed form. First use: the owner's $20 (0.0078 ETH at $2,569) to
+0xAB5A34c3F41E57fDEe1a1D6f19D3E21f46dF3eA8 for another project, from the wallet (which then holds about $41: enough for the relay's
+top-ups and the shooters' gas; the relay keeps its $90 float and the stake).
