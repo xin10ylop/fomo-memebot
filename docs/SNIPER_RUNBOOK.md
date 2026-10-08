@@ -2362,3 +2362,9 @@ restores the deadline at the tick under the 180 ms lead; 6.24's late start keeps
 
 Expected: release 6.24, gate_close_ms 170.0, late_send_min_ms 100.0, slot_send true. The next reading compares the Oct 8 gate
 refusals (attackers at the build and at the last ask) with the tables' k-1 fleets to size what the early deadline cost.
+
+**Deployed Oct 8 ~19:40 UTC:** `release 6.24, gate_close_ms 170.0, late_send_min_ms 100.0, slot_send true, slot_lead_ms 50.0,
+feed_lag_ms 85.0, margin_ms 0.0, burst [35, 2.0, 180.0, 0.2], rep_gate true, dry_run false`. With the box's values the seat block's
+predicted production sits SLOT_LEAD + BURST_LEAD = 230 ms after the aim: the gate's deadline is now aim + 170 = 60 ms before it, where
+it sat before the trial (lead 46: aim + 96 and the deadline at aim + 36); under the trial's first eleven hours it was 194 ms before.
+The late start fires when the aim has passed by up to 130 ms (the tick still 100 ms ahead); the 12:45 case passed it by ~13 ms.
