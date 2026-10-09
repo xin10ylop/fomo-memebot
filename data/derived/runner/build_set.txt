@@ -1,0 +1,26 @@
+untaxed tapes 633; the 5bi set 285 (all in the tapes: True)
+fleets_of reproduced on the tapes' stored count: 633 of 633
+j is None (no named transaction in the crowd rows): 67 of 633 tapes, 59 of the 285
+  of the 59: fixed count ('first curve-naming tx') > 0 on 26; from block 1 > 0 on 26
+  where the first curve-naming tx sits (block offset) on those 59: Counter({1: 18, None: 12, 3: 9, 6: 6, 8: 4, 4: 3, 2: 3, 7: 2, 9: 1, 10: 1})
+
+filter cascade on the 285:
+  tax_ok             drops   0 -> 285
+  bE1                drops   0 -> 285
+  creator_supply_ok  drops  10 -> 275
+  creator_buy_ok     drops   0 -> 275
+  bundle_ok          drops   0 -> 275
+  fleet_ok           drops  26 -> 249
+  creator_day_ok     drops  20 -> 229
+
+each filter alone on the 285: tax_ok 0, bE1 0, creator_supply_ok 10, creator_buy_ok 0, bundle_ok 0, fleet_ok 26, creator_day_ok 34
+
+ENGINE SET: 229  (stay from the 285: 229, new: 0)
+why the new ones were out of the 285: Counter()
+per day (engine set / of which in the 285 / the 285): 09-27:18/18/27 09-28:29/29/38 09-29:66/66/89 09-30:27/27/27 10-01:16/16/27 10-02:6/6/7 10-03:11/11/12 10-04:11/11/12 10-05:19/19/19 10-06:2/2/2 10-07:5/5/6 10-08:19/19/19
+variant engine_b1: 229 (stay 229, new 0)
+variant engine_all0: 227 (stay 227, new 0)
+variant engine_no_day: 249 (stay 249, new 0)
+
+fleets in block k (seen only after the build) among the engine set: 132; in block k or E1: 166
+row 0 is the creation's own transaction: 633 of 633; creator from the launch list == the log's topic[3]: 633

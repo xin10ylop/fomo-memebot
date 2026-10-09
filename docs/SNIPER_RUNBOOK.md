@@ -2628,3 +2628,69 @@ per address. The runner must not open a feed socket from the sniper's address (5
 Eight untaxed launches reached the sniper's gate between 14:50 and 21:06 (refused by the tier): the runner's flow. Priced the runner's
 way (behind one, tp30/stop30/300, $10; data/derived/allday/oct09_1430_2120.json): +27.9, -37.6, +35.4, -5.0, +18.5, -55.5, -1.4, +5.3%:
 mean -1.5%, four won, -$1.23, before the fleet gate.
+
+## 5bk. The pre-live review of the runner, the rebuild (engine 6.26), the re-pricing, the deploy sequence (Oct 9)
+
+**The review** (workflow runner-prelive-review: five reviewers, one area each; most skeptic checks hit the agents' limit and were
+verified by hand against the code and the chain). Confirmed and fixed:
+
+- *The exit.* The chain poll asked for logs from the feed's message counter instead of a chain block on the runner's usual path
+  (curve found on the feed: b_create None, w["blk0"] a counter of about 400,000 against blocks of 84M; the node refuses a range over
+  10M blocks), so the chain mark never worked (blocker). An empty or lagging answer was taken as an untouched curve: the mark read
+  -55% and the stop fired at once on nearly every trade (high). The feed's fold froze 25 s into the 30 s hold (score_launch dropped
+  the held curve). The dry run marked without our buy and without the poll. The busy timer held the runner 33 s after an early exit.
+- *The entry.* One shot from the wallet aimed with the vote (MARGIN_MS 60) reaches the sequencer about 190-240 ms after the tick on
+  this box: E1+1 or E1+2, not the seat block the research priced; and the fleet count was read at the send, through block k and E1,
+  not the research's k-1 (blockers: together they took the priced +7.8% to about -2..+2%).
+- *The sniper's exposure.* The runner copied the sniper's provider key and polled it every 3 s (the Sep 26 quota failure, at three
+  times its rate); it repeated the sniper's resolve and seat polls on every taxed launch (the tier was checked after them); its feed
+  socket was the box's third (the feed allows two per address: the sniper's second socket was refused 429 at 15:xx while the runner
+  ran); with no provider it would retry a refusing feed every 5 s into the edge's one-hour block; it shared the sniper's core.
+- *Money.* withdraw.py could fail after a send without recording it (and a re-run send again); record_withdrawal rewrote the env file
+  in place (an interrupted write could erase the runner's only key copy); base overwrote the books on a re-run; withdrawals did not
+  check the engine that owns the wallet; dry and live shared a state file (a paper daily stop blocked live; a dry restart forgot a
+  live position); the sequencer probe signed the fresh wallet's nonce 0; the gas cap 2.0 dropped buys on a fee ramp.
+
+**The rebuild (engine 6.26; every change behind a switch the sniper leaves off, every live suite green).**
+- Exit: `mark_from_block` (the creation block, else the creation second's first block as the feed numbers it, else 40 before the
+  fill; within 2,000 blocks of the fill), `mark_reading` refuses an empty answer or one without our buy, one try per poll and a
+  backoff, the chain decides once it has a reading (the feed's fold only before it or after 3 s of silence), the dry run polls and
+  marks with our virtual buy, the held curve keeps its feed fold, the busy timer clears after a mark exit. test_exit_mark (28).
+- Entry: the runner rides the sniper's proven E1 path: its own buy-once relay and 24 shooters, one shot each 3 ms apart from 46 ms
+  before the slot model's predicted seat block (the box's calibration copied from the sniper's env), built before the tick (the k-1
+  view), BURST_SLIP 0.30; fleets that fired before the curve was watched are back-filled (runner only).
+- The sniper's protection: TIER_EARLY (refused from the calldata before any lookup), FEED_LOCAL_ADDR + REQUIRE_FEED_LOCAL_ADDR (the
+  runner's feed socket leaves from a second public address; the engine refuses to start without one it owns), refused or blocked
+  with no provider: one alarm and a wait, the runner's own provider key (set-rpc refuses the sniper's), CHAIN_POLL_S 10, the units
+  on core 0 at Nice 10, the runner from its own checkout (~/fomo-runner, a git worktree: a pull in ~/fomo-memebot is a sniper deploy
+  only). test_runner_guards (17).
+- Money: withdraw.py prints the hash before sending, polls a send that may have gone through, survives receipt errors, records once
+  per hash (a ledger), --record HASH for after the fact, atomic rewrites, refuses while the owning engine runs; base refuses to
+  overwrite (--add, --reset); the state file records dry or live; PROBE_EVERY_S 0; the default gas cap. test_withdraw_gas (22),
+  test_runner_setup (12).
+
+**The re-pricing at the entry the rebuild gets** (workflow runner-reprice-landing; data/derived/runner/): the eligible set rebuilt
+with the engine's own filters (the research's fleet-count bug fixed, one launch per creator per day against all 41,012 creations):
+229 of the 285 stay, none enter. Priced with asim, tp30/stop30/cap300, delay 4, at the sniper's measured landing mix (seat block in
+79% of 63 live bursts at its live tx indexes, median 4, p75 9; late in 21%, E1+1..E1+33): **+7.6% a launch at $10 after the burst's
+gas**, whole-day 95% [+3.0%, +14.3%], 10 of 12 days positive, Sep 27-Oct 2 +7.0% (162), Oct 3-8 +9.1% (67); first in the seat +11.0%,
+E1+1 +5.7% (the downside: every sniper fill since Oct 7 landed late). About 7 launches a day now (Oct 6-8: 8.7, Oct 9: about 3 by
+the gates), $2-8 a day at $10. The tail is unchanged: about 20% end at -40% or worse (the creator's dump).
+
+**Deploy sequence** (the sniper is not touched: it stays on its checkout and release).
+Prepare, outside the box: (a) a separate app at the provider for the runner (its HTTPS URL is typed on the box only); (b) a second
+address: EC2 > the instance > Networking > its network interface > Actions > Manage IP addresses > assign a new private IPv4;
+then Elastic IPs > Allocate > Associate with that network interface and that private IP (about $3.60 a month).
+On the box:
+
+    cd ~ && git -C ~/fomo-memebot fetch -q origin claude/memecoin-strategy-research-vcdy6c && git -C ~/fomo-memebot worktree add --detach ~/fomo-runner FETCH_HEAD && git -C ~/fomo-runner log --oneline -1
+    cd ~/fomo-runner && sudo systemctl stop runner-engine runner-notify; sudo bash deploy/runner_setup.sh upgrade && sudo bash deploy/runner_setup.sh units
+    sudo bash deploy/runner_setup.sh set-rpc
+    sudo bash deploy/runner_setup.sh add-ip <the new private IP>
+    sudo bash deploy/runner_setup.sh relay
+    sudo bash deploy/runner_setup.sh shooters 24
+    sudo bash deploy/runner_setup.sh check && sudo bash deploy/runner_setup.sh dry
+
+Then read the dry run against the chain at the next reading, and `sudo bash deploy/runner_setup.sh live`. Updating the runner later:
+`git -C ~/fomo-runner fetch -q origin claude/memecoin-strategy-research-vcdy6c && git -C ~/fomo-runner checkout -q --detach FETCH_HEAD`
+and `sudo bash deploy/runner_setup.sh dry|live` (each restart prints the start line).

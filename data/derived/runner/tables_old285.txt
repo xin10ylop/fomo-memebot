@@ -1,0 +1,47 @@
+set 'old285': 285 launches (215 Sep 27 - Oct 2, 70 Oct 3 - Oct 8); tp +30 / stop -30 / cap 300, delay 4, ethfold, $2,700
+per day: 09-27:27 09-28:38 09-29:89 09-30:27 10-01:27 10-02:7 10-03:12 10-04:12 10-05:19 10-06:2 10-07:6 10-08:19
+live E1 tx index (38 fills): median 4, p75 9; land_off (63 known of 67 bursts): {'-2': 1, '-1': 45, '0': 4, '1': 3, '3': 1, '4': 2, '5': 1, '9': 1, '13': 1, '23': 1, '24': 1, '33': 2, 'null': 4}
+
+| entry | n | mean | median | won | <= -40% | $ at $10 | $ at $75 | Sep 27-Oct 2 | Oct 3-8 | burst gas $0.075 at $10 | 20% guard: refused / mean |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| first in the seat block (E1, index 0) | 285 | +10.4% (+9.4%) | +30.0% | 68% | 47.0 | +297 | +2019 | +9.2% / +8.0% | +14.1% / +13.9% | +9.7% | 38.0 / +9.7% |
+| behind one (the 5bi convention) | 285 | +8.5% (+7.8%) | +29.8% | 66% | 53.0 | +243 | +1670 | +7.4% / +6.5% | +11.9% / +11.8% | +7.8% | 39.0 / +7.9% |
+| at the live E1 median tx index (4) | 285 | +8.5% (+7.8%) | +29.8% | 66% | 53.0 | +242 | +1660 | +7.3% / +6.4% | +12.2% / +12.0% | +7.7% | 39.0 / +7.9% |
+| at the live E1 p75 tx index (9) | 285 | +6.2% (+5.5%) | +27.6% | 65% | 57.0 | +178 | +1172 | +5.4% / +4.4% | +8.9% / +8.7% | +5.5% | 51.0 / +6.6% |
+| behind every seat-block buy and sell | 285 | +5.3% (+4.4%) | +27.2% | 64% | 60.0 | +151 | +933 | +4.8% / +3.9% | +6.8% / +5.9% | +4.6% | 63.0 / +5.9% |
+| E1+1, first | 285 | +5.2% (+4.3%) | +27.2% | 64% | 60.0 | +148 | +912 | +4.7% / +3.7% | +6.8% / +6.0% | +4.4% | 63.0 / +5.8% |
+| seat block at the live E1 index distribution (38 fills) | 285 | +7.9% (+7.1%) | +29.8% | 66% | 53.6 | +224 | +1510 | +6.9% / +6.0% | +10.8% / +10.5% | +7.1% | 45.0 / +7.7% |
+| MIX land_off, all bursts (n 63: 50 seat, late {1: 3, 3: 1, 4: 2, 5: 1, 9: 1, 13: 1, 23: 1, 24: 1, 33: 2}) | 285 | +7.3% (+6.5%) | +29.2% | 65% | 54.2 | +209 | +1394 | +6.5% / +5.6% | +9.9% / +9.4% | +6.6% | 50.5 / +7.2% |
+| MIX land_off, one-wave bursts only (n 42: 34 seat, late {1: 1, 4: 1, 5: 1, 9: 1, 13: 1, 24: 1, 33: 2}) | 285 | +7.4% (+6.6%) | +29.2% | 65% | 53.9 | +211 | +1413 | +6.6% / +5.6% | +10.0% / +9.6% | +6.7% | 50.1 / +7.3% |
+| MIX the live fills' own block and index (n 47, late {1: 5, 3: 1, 4: 2, 5: 1}) | 285 | +7.1% (+6.3%) | +29.2% | 65% | 55.1 | +203 | +1344 | +6.3% / +5.4% | +9.6% / +9.1% | +6.4% | 51.3 / +7.1% |
+(mean at $10, in brackets at $75; median, won, <= -40% (expected count for the mixes) at $10; the period columns $10 / $75; burst gas = the mean at $10 less $0.075 a burst, every eligible launch bursts)
+
+== the burst's gas (35 shots, the early ones revert; $0.05-0.10 a burst), on every eligible launch
+  first in the seat block (E1, index 0)                        $10: +10.42% -> +9.92% / +9.67% / +9.42% ($+276 at $0.075)  $75: +9.44% -> +9.38% / +9.34% / +9.31% ($+1997 at $0.075)
+  behind one (the 5bi convention)                              $10: +8.52% -> +8.02% / +7.77% / +7.52% ($+221 at $0.075)  $75: +7.81% -> +7.74% / +7.71% / +7.68% ($+1648 at $0.075)
+  seat block at the live E1 index distribution (38 fills)      $10: +7.86% -> +7.36% / +7.11% / +6.86% ($+203 at $0.075)  $75: +7.06% -> +7.00% / +6.96% / +6.93% ($+1489 at $0.075)
+  MIX land_off, all bursts (n 63: 50 seat, late {1: 3, 3: 1, 4 $10: +7.34% -> +6.84% / +6.59% / +6.34% ($+188 at $0.075)  $75: +6.52% -> +6.46% / +6.42% / +6.39% ($+1373 at $0.075)
+
+== the realistic scenario: MIX land_off, all bursts (n 63: 50 seat, late {1: 3, 3: 1, 4: 2, 5: 1, 9: 1, 13: 1, 23: 1, 24: 1, 33: 2})
+  $10, burst gas $0.075 included: mean +6.59%, $+188 on 285 ($+15.6 a day over 12 days); Sep 27 - Oct 2 +5.76% (n 215, $+124) | Oct 3 - Oct 8 +9.13% (n 70, $+64); whole-day bootstrap 95% [+2.73, +12.39], P(mean <= 0) 0.000
+     with the 20% guard (refused = a miss): mean +6.47%, 95% [+2.59, +11.22], P(mean <= 0) 0.001
+  $75, burst gas $0.075 included: mean +6.42%, $+1373 on 285 ($+114.4 a day over 12 days); Sep 27 - Oct 2 +5.47% (n 215, $+882) | Oct 3 - Oct 8 +9.35% (n 70, $+491); whole-day bootstrap 95% [+2.74, +11.83], P(mean <= 0) 0.000
+     with the 20% guard (refused = a miss): mean +6.39%, 95% [+2.68, +10.78], P(mean <= 0) 0.001
+  (for comparison, $10 with burst gas) behind one (the 5bi convention): mean +7.77%, 95% [+3.71, +13.25], P(mean <= 0) 0.000
+  (for comparison, $10 with burst gas) at the live E1 p75 tx index (9): mean +5.49%, 95% [+1.57, +11.76], P(mean <= 0) 0.001
+  (for comparison, $10 with burst gas) MIX land_off, one-wave bursts only (n 42: 34 seat, late {1: 1, 4: 1, 5: mean +6.66%, 95% [+2.82, +12.48], P(mean <= 0) 0.000
+  (for comparison, $10 with burst gas) MIX the live fills' own block and index (n 47, late {1: 5, 3: 1, 4: 2,: mean +6.38%, 95% [+2.41, +12.30], P(mean <= 0) 0.000
+
+== per day, the realistic scenario at $10 (burst gas included) and behind one
+  09-27 n  27  mix  +10.2% $ +27.5   behind one   +9.9% $ +26.8
+  09-28 n  38  mix   -0.5% $  -2.0   behind one   -0.9% $  -3.4
+  09-29 n  89  mix   +3.7% $ +33.1   behind one   +6.2% $ +55.0
+  09-30 n  27  mix  +22.1% $ +59.6   behind one  +22.6% $ +61.1
+  10-01 n  27  mix   +4.2% $ +11.3   behind one   +3.8% $ +10.4
+  10-02 n   7  mix   -8.1% $  -5.7   behind one   -9.7% $  -6.8
+  10-03 n  12  mix  +18.8% $ +22.6   behind one  +19.5% $ +23.4
+  10-04 n  12  mix   -2.6% $  -3.1   behind one   +1.8% $  +2.1
+  10-05 n  19  mix  +17.2% $ +32.7   behind one  +18.6% $ +35.3
+  10-06 n   2  mix  +10.2% $  +2.0   behind one   +9.8% $  +2.0
+  10-07 n   6  mix  +13.8% $  +8.3   behind one  +14.7% $  +8.8
+  10-08 n  19  mix   +0.8% $  +1.5   behind one   +3.6% $  +6.8
