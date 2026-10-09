@@ -2617,3 +2617,14 @@ wallet list; the fleet count and the reputation floor come after it. Every launc
 The 567 launches with no team at all and the 159 with a team under 0.3 ETH lose under either exit; even the 451 with any buyer
 besides the creator in 12 s lose (-3.0% under the runner's exit). The profile throws away losers. What fell is the number of launches
 that fit it: 6 in 15.5 h today (5 taxed, 1 untaxed), against 210 taxed a day on Sep 29.
+
+**Reading Oct 9 evening, box side (21:40 UTC).** The sniper live on 6.25 since 15:14 (restarts 14:59 and 15:14 for the funding), P&L
++0.045044 ETH (+212.6%), the runner stopped since 15:31. Every decision matches the chain: 13 qualifying launches all refused by the
+gate (attackers 0-2 < 3), the bundle cap (14:06 and 18:21, 4.4 and 4.7 ETH > 3.0) or the tier; 19:25 0x5284f737 refused by 6.24's
+late-start rule (aim passed 228 ms, tick 2 ms away: correctly, and it lost 11.9%); nine "the seat's second is already on the feed"
+skips, none of them a qualifying launch. **The feed refused the sniper's second socket once with HTTP 429 since 14:50**, inside the
+window the runner held a third connection from the box (14:58-15:31); REPORT 24 recorded that the public feed allows two connections
+per address. The runner must not open a feed socket from the sniper's address (5bk).
+Eight untaxed launches reached the sniper's gate between 14:50 and 21:06 (refused by the tier): the runner's flow. Priced the runner's
+way (behind one, tp30/stop30/300, $10; data/derived/allday/oct09_1430_2120.json): +27.9, -37.6, +35.4, -5.0, +18.5, -55.5, -1.4, +5.3%:
+mean -1.5%, four won, -$1.23, before the fleet gate.
