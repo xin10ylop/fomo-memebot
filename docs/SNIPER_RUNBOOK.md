@@ -2599,3 +2599,21 @@ failure fallback, the balance check, the bookkeeping for the sniper (TG_PNL_WITH
 root cause confirmed on the receipt); paid 0.00000045 ETH. The sniper's TG_PNL_WITHDRAWN 0.018900 (0.0078 Oct 8 + 0.0111), its
 wallet 0.008024 ETH, its relay at the $90 float; restarted live on 6.25. The runner's PNL_BASE 0.011100; it stays in dry run until
 the pre-live review (workflow runner-prelive-review) and a reading of its dry-run decisions.
+
+**Oct 9 ~16:00 UTC: is the launch profile hiding good launches? (the owner's question).** "Qualifying" is a launch-level profile
+(the Pons V2 creation call, quote ETH, a team bundle of 3+ named wallets with 0.3+ ETH in the creation second, the tax tier), no
+wallet list; the fleet count and the reputation floor come after it. Every launch the factory created Oct 9 00:00-15:30 was priced
+(src/analysis/allday_scan.py, data/derived/allday/oct09_0000_1530.json): 796 creations, 101 non-standard (64 another creation call,
+37 quote not ETH), 732 priced at $75, first in the seat block, hold 11 (the sniper's way), and behind one under the runner's exit:
+
+| set | n | the sniper's way | won | the runner's way | won |
+|---|---|---|---|---|---|
+| sniper tiers, fits the profile | 5 | +1.5% | 20% | -2.4% | 20% |
+| sniper tiers, outside the profile | 570 | -8.7%, -$3,702 | 8% | -5.4%, -$2,292 | 20% |
+| untaxed, fits the profile | 1 | -7.9% | 0% | +27.9% | 100% |
+| untaxed, outside the profile | 102 | -6.1% | 13% | -2.6% | 25% |
+| over 3% tax | 54 | -22.2% | 0% | -22.0% | 0% |
+
+The 567 launches with no team at all and the 159 with a team under 0.3 ETH lose under either exit; even the 451 with any buyer
+besides the creator in 12 s lose (-3.0% under the runner's exit). The profile throws away losers. What fell is the number of launches
+that fit it: 6 in 15.5 h today (5 taxed, 1 untaxed), against 210 taxed a day on Sep 29.
