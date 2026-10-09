@@ -109,7 +109,9 @@ TIER_ASSUMED = float(os.environ.get("TIER_ASSUMED", "0.05"))
 STOP_SELL_FRAC = float(os.environ.get("STOP_SELL_FRAC", "0"))
 EXIT_MARK = os.environ.get("EXIT_MARK", "0") == "1"                      # 6.25 (runbook 5bj, the runner): TAKE_PROFIT and STOP_LOSS read on the position's MARK, what selling everything now
 STOP_LOSS = float(os.environ.get("STOP_LOSS", "0"))                       # returns net of the sell fee over the ETH paid (the tables' and the simulator's number), the chain polled for the
-MARK_POLL_MS = float(os.environ.get("MARK_POLL_MS", "300"))               # curve's reserves every MARK_POLL_MS so the mark does not hang on the feed's coverage; STOP_LOSS: sell at or below -it
+MARK_POLL_MS = float(os.environ.get("MARK_POLL_MS", "300"))
+MARK_FRESH_S = float(os.environ.get("MARK_FRESH_S", "1.5")); MARK_FEED_AFTER_S = float(os.environ.get("MARK_FEED_AFTER_S", "1.0"))   # 6.26 (5bk): when the
+MARK_FEED_STALE_S = float(os.environ.get("MARK_FEED_STALE_S", "3.0")); MARK_BACKOFF_S = float(os.environ.get("MARK_BACKOFF_S", "2.0"))  # chain or the feed decides               # curve's reserves every MARK_POLL_MS so the mark does not hang on the feed's coverage; STOP_LOSS: sell at or below -it
 TRADE_HOURS = os.environ.get("TRADE_HOURS", "12-05")                 # UTC hours the tables cover and that pay (start-end, wraps midnight); "" = always. 06-12 never measured, 05-06 +0.4% on 33 launches
 MIN_RULE_PASSING_1H = int(os.environ.get("MIN_RULE_PASSING_1H", "0"))
 MIN_FOLLOW_ETH_60 = float(os.environ.get("MIN_FOLLOW_ETH_60", "0.10")); DEMAND_ARM_N = int(os.environ.get("DEMAND_ARM_N", "10"))  # the floor arms after this many scored clean launches (tables: arming at 10 removes 28 trades worth -$5)  # demand floor: no new trade while the mean follow-on ETH of the last 60 scored launches is below this. The tables never read below 0.15 except Sep 10 12-18 (0.06, those trades lost); costs nothing there, and Sep 11 read 0.01-0.03 all morning  # optional dead-stretch guard; off: the tables' n=7 at -7.8% and yesterday's n=3 at +19.9% pool to nothing
@@ -998,42 +1000,81 @@ def hold_cap():
     return HOLD_EFF + 3.0 if HOLD_BLOCKS else HOLD
 
 
-def position_mark(w, pos, gross):
-    """6.25: the position's mark: selling every token now on the curve as last seen (the chain poll's reserves when under a second
-    old, else the feed's fold), net of the sell fee (the 1% protocol fee plus the token's own tax), over the ETH paid: the number the
-    tables' hold grid and the exit simulator call the mark. None before the fill's amount is known."""
+def position_mark(w, pos, gross, now=None):
+    """6.25: the position's mark: selling every token now on the curve, net of the sell fee (the 1% protocol fee plus the token's own
+    tax), over the ETH paid: the number the tables' hold grid and the exit simulator call the mark. None when no reading may decide.
+    6.26 (review 5bk): the chain poll's reserves decide once a reading exists and while it is under MARK_FRESH_S old; the feed's fold
+    (which misses router sells, folds reverted buys and has no surcharge) decides only before the first chain reading once
+    MARK_FEED_AFTER_S have passed since the fill, or after the poll has given nothing fresh for MARK_FEED_STALE_S. In dry run our buy
+    is not on the curve: it is added to the reserves before marking (net of the tier, the token's tax and the seat's surcharge)."""
     tk = pos.get("tokens") or 0.0
     if tk <= 0 or not gross or gross <= 0:
         return None
-    c = w.get("chain_xy")
-    X, Y = (c[0], c[1]) if (c and mono() - c[2] < 1.0) else (w["X"], w["Y"])
-    if Y + tk <= 0 or X <= 0:
+    now = mono() if now is None else now
+    c = w.get("chain_xy"); t0 = pos.get("t_mark0"); t0 = now if t0 is None else t0
+    if c and now - c[2] < MARK_FRESH_S:
+        X, Y = c[0], c[1]
+    elif (c is None and now - t0 >= MARK_FEED_AFTER_S) or (c is not None and now - c[2] >= MARK_FEED_STALE_S):
+        X, Y = w["X"], w["Y"]
+    else:
+        return None
+    if pos.get("dry"):
+        net = gross * (1 - w.get("tax", 0.01) - SURCHARGE.get(SEAT, 0.0)); X, Y = X + net, Y - tk
+    if Y + tk <= 0 or X <= 0 or Y <= 0:
         return None
     return X * tk / (Y + tk) * (1 - w.get("tax", 0.01)) / gross - 1
 
 
+def mark_reading(ev, pos):
+    """6.26: the curve's reserves from its Buy and Sell events (every one since the creation second, from the curve's constants: the
+    tables' fold, live_vs_table.fold_buy/fold_sell), or None when the answer cannot be trusted: empty (the creator's buy is always
+    there), or, live, missing our own buy (a node behind our fill would price our tokens on a curve without them: -55% at once)."""
+    if not ev:
+        return None
+    ev = sorted(ev, key=lambda e: (int(e["blockNumber"], 16), int(e["logIndex"], 16)))
+    bh = (pos.get("buy_hash") or "").lower()
+    if bh and not any((e.get("transactionHash") or "").lower() == bh for e in ev):
+        return None
+    if not bh and pos.get("buy_block") and int(ev[-1]["blockNumber"], 16) < pos["buy_block"]:
+        return None
+    X, Y = X0, Y0
+    for e in ev:
+        d = e["data"][2:]; a = int(d[:64], 16) / 1e18; b = int(d[64:128], 16) / 1e18
+        if e["topics"][0] == BUY_EV:
+            if 0 < b < Y:
+                X, Y = X + X * b / (Y - b), Y - b
+        else:
+            X, Y = X - X * a / (Y + a), Y + a
+    return X, Y, int(ev[-1]["blockNumber"], 16)
+
+
 def mark_poll(w, pos, curve, b0):
-    """6.25: while the position is open, the curve's reserves from the chain every MARK_POLL_MS: every Buy and Sell since the creation
-    block folded from the curve's constants (the tables' fold, live_vs_table.fold_buy/fold_sell), on the logs node; a failed poll
-    leaves the last reading, which position_mark ignores once it is a second old (the feed's fold stands in)."""
+    """6.25: while the position is open, the curve's reserves from the chain every MARK_POLL_MS on the logs node. 6.26: one try per
+    poll, MARK_BACKOFF_S after an error or an untrusted answer (the node is shared with the sniper's exits), the last block seen logged."""
     while state.get("open") is pos and not pos.get("closing"):
+        pause = MARK_POLL_MS / 1000.0
         try:
-            ev = rpc_logs.call("eth_getLogs", [{"fromBlock": hex(b0), "toBlock": "latest", "address": curve, "topics": [[BUY_EV, SELL_EV]]}]) or []
-            ev.sort(key=lambda e: (int(e["blockNumber"], 16), int(e["logIndex"], 16)))
-            X, Y = X0, Y0
-            for e in ev:
-                d = e["data"][2:]; a = int(d[:64], 16) / 1e18; b = int(d[64:128], 16) / 1e18
-                if e["topics"][0] == BUY_EV:
-                    if 0 < b < Y:
-                        X, Y = X + X * b / (Y - b), Y - b
-                else:
-                    X, Y = X - X * a / (Y + a), Y + a
-            w["chain_xy"] = (X, Y, mono()); w["chain_polls"] = w.get("chain_polls", 0) + 1
-            with cond:
-                cond.notify_all()
+            r = mark_reading(rpc_logs.call("eth_getLogs", [{"fromBlock": hex(b0), "toBlock": "latest", "address": curve, "topics": [[BUY_EV, SELL_EV]]}], tries=1), pos)
+            if r is None:
+                w["chain_poll_untrusted"] = w.get("chain_poll_untrusted", 0) + 1; pause = max(pause, MARK_BACKOFF_S)
+            else:
+                w["chain_xy"] = (r[0], r[1], mono()); w["chain_last_block"] = r[2]; w["chain_polls"] = w.get("chain_polls", 0) + 1
+                with cond:
+                    cond.notify_all()
         except Exception as e:
-            w["chain_poll_err"] = str(e)[:80]; w["chain_poll_errs"] = w.get("chain_poll_errs", 0) + 1
-        time.sleep(MARK_POLL_MS / 1000.0)
+            w["chain_poll_err"] = str(e)[:80]; w["chain_poll_errs"] = w.get("chain_poll_errs", 0) + 1; pause = max(pause, MARK_BACKOFF_S)
+        time.sleep(pause)
+
+
+def mark_from_block(b_create, feed_ts, buy_block):
+    """6.26 (review 5bk, the blocker): the chain block the poll reads from: the creation block when the resolver found it, else the
+    first block of the creation second as the feed numbered it (flip_block: the feed's sequence number is the chain's block number),
+    else 40 blocks before the fill; never w["blk0"], which counts feed messages since the process started. Kept within 2,000 blocks
+    before the fill (a node refuses a wider range and the poll would never read)."""
+    b = b_create or state["flip_block"].get(feed_ts) or (buy_block - 40 if buy_block else None)
+    if b and buy_block and not (buy_block - 2000 <= b <= buy_block):
+        b = buy_block - 40
+    return b
 
 
 def gas_cost_usd():
@@ -1471,7 +1512,8 @@ def score_launch(curve, tk0, b_create, stake_usd, creator, src, decision):
     except Exception as e:
         log({"ev": "error", "stage": "score", "err": str(e)[:200]})
     finally:
-        state["watch"].pop(curve, None)
+        if not (EXIT_MARK and (state.get("open") or {}).get("curve") == curve):                                 # 6.26 (5bk): a held curve keeps its feed fold
+            state["watch"].pop(curve, None)
 
 
 # ------------------------------------------------------------------------------------------------------------- trading
@@ -2543,9 +2585,10 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     if pos["approve_hash"]:
         threading.Thread(target=watch_approve, args=(pos,), daemon=True).start()
     why = "hold"; mk = {"last": None, "hi": -9.0, "lo": 9.0, "n": 0}
-    b_from = b_create or w.get("blk0") or (buy_block - 30 if buy_block else None)                                # the creation block (the feed's or the resolver's), else 30 blocks before the fill
-    if EXIT_MARK and h and b_from:
-        threading.Thread(target=mark_poll, args=(w, pos, curve, b_from), daemon=True).start()                        # 6.25: the chain's reserves behind the mark
+    pos["t_mark0"] = mono(); pos["dry"] = h is None                                                              # 6.26: the mark's clock; a dry position's buy is not on the curve
+    b_from = mark_from_block(b_create, feed_ts, buy_block) if EXIT_MARK else None
+    if EXIT_MARK and b_from:
+        threading.Thread(target=mark_poll, args=(w, pos, curve, b_from), daemon=True).start()                        # 6.25: the chain's reserves behind the mark (6.26: in dry run too)
     with cond:
         while still_holding(pos, t_buy):
             if STOP_SELL_FRAC > 0 and w["dump"] is not None:
@@ -2564,8 +2607,11 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     if EXIT_MARK:
         log({"ev": "mark_exit", "curve": curve, "why": why, "mark": None if mk["last"] is None else round(mk["last"], 4), "mark_hi": round(mk["hi"], 4) if mk["n"] else None,
              "mark_lo": round(mk["lo"], 4) if mk["n"] else None, "reads": mk["n"], "chain_polls": w.get("chain_polls", 0), "chain_poll_errs": w.get("chain_poll_errs", 0),
-             "blocks_held": (state["feed_seq"] - pos["buy_block"]) if (pos.get("buy_block") and state.get("feed_seq")) else None, "held_s": round(mono() - t_buy, 2), "dry_run": h is None})
+             "blocks_held": (state["feed_seq"] - pos["buy_block"]) if (pos.get("buy_block") and state.get("feed_seq")) else None, "held_s": round(mono() - t_buy, 2), "dry_run": h is None,
+             "b_from": b_from, "chain_last_block": w.get("chain_last_block"), "chain_poll_untrusted": w.get("chain_poll_untrusted", 0), "chain_poll_err": w.get("chain_poll_err")})
     close_position(pos, why)
+    if EXIT_MARK:                                                                                               # 6.26 (5bk): the next launch is not held back by the
+        state["busy_until"] = 0.0; state["watch"].pop(curve, None)                                              # 33 s timer after an early exit (the open position gate stays)
     if SHOOTERS:
         threading.Thread(target=relay_topup, args=("after exit",), daemon=True).start()
 
