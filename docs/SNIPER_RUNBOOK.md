@@ -2593,3 +2593,9 @@ relay_ops.py had the same 21,000 cap: now 51,000 with the fee it keeps back matc
 headroom already (shooter funding 30,000, relay top-up 50,000, approve 80,000, sell 200,000, buy 500,000).
 tests/test_withdraw_gas.py (13): the signed transaction decoded (destination, amount, limit, nonce, chain id, signer), the estimate's
 failure fallback, the balance check, the bookkeeping for the sniper (TG_PNL_WITHDRAWN) and for the runner (PNL_WITHDRAWN).
+
+**Funded Oct 9 15:11 UTC.** 0.0111 ETH from the sniper's wallet to the runner's 0x4c662C38729dB298730c80fae8736621bc536B9a, tx
+0xbdb264e6...e2f71d, block 84254200: gas used 21,991, of which 991 posting gas, so a 21,000 cap would have been refused again (the
+root cause confirmed on the receipt); paid 0.00000045 ETH. The sniper's TG_PNL_WITHDRAWN 0.018900 (0.0078 Oct 8 + 0.0111), its
+wallet 0.008024 ETH, its relay at the $90 float; restarted live on 6.25. The runner's PNL_BASE 0.011100; it stays in dry run until
+the pre-live review (workflow runner-prelive-review) and a reading of its dry-run decisions.
