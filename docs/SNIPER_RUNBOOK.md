@@ -2474,3 +2474,55 @@ exit: 15 of 25 launches reached +50% within 60 s from the seat, 8 stopped, +$367
 untaxed tier back to Sep 27 (three pieces) is being scored to tape and simulate the same way (~300 launches expected). If it holds,
 it is a second strategy with its own entry (no crowd needed, first in the seat is free) and exit (the engine has TAKE_PROFIT; a
 mark-based stop and a 600-block hold would be new), on its own wallet, not a change to the sniper.
+
+## 5bi. The untaxed no-crowd tier, finished (Oct 9): a second strategy's edge, on paper, with its winners and losers taken apart
+
+Set: every launch of the 1% tier (token tax under 100 bps) from Sep 27 to Oct 8 that would qualify for the engine (bundle of 3+
+named wallets, the taxed bundle >= 0.3 ETH by k-1, creator buy rules) with NO fleet attacking by k-1: 285 launches over 12 days
+(27, 38, 89, 27, 27, 7, 12, 12, 19, 2, 6, 19 a day). Priced with the exit study's path simulator (two-block marks, our own impact,
+later buyers spending their ETH), the audit's corrections applied: behind one in the seat block, execution four blocks after the
+signal (the engine's real sell latency), gas $0.15, $75. Chain-side pieces t1_0927 .. t1_1006 and t1_oct0709; scratchpad growth/untaxed/.
+
+| exit | mean | median | won | ends <= -40% | P&L | whole-day 95% | P(mean <= 0) |
+|---|---|---|---|---|---|---|---|
+| hold 11 (the sniper's) | +0.6% | -3.9% | 41% | 4 | +$124 | [-2.1, +3.9] | 0.34 |
+| take-profit +50% / stop -20% / cap 600 | +6.6% | +17.7% | 52% | 87 | +$1,414 | [-0.7, +18.5] | 0.04 |
+| take-profit +30% / stop -30% / cap 300 (chosen below) | +7.8% | +29.9% | 65% | 54 | +$1,670 | | |
+
+Out of sample: the exit grid (tp 30/50/100, stop 15/20/30, cap 120/300/600, hold 11) chosen on Sep 27 - Oct 2 (215 launches; the
+grid's in-sample means -0.8% .. +6.5%) picks tp30/stop30/300; on Oct 3 - 8 untouched (70) it earns +11.8%, 73% won, +$618. The
+strategy class itself was found on Oct 7-8, so the only window touched by neither choice is Oct 3 - 6: 45 launches, +14.8%, 76% won,
++$501 (tp50/20/600 +$607, hold 11 +$272). Execution delay 1, 2, 4, 6 blocks: +8.0, +7.6, +7.8, +8.3%: the result does not depend on
+it. First in the seat instead of behind one: about +2 points (the audit). Per day under tp50/20/600: 8 of 12 days positive; the worst
+Oct 4 -$202 (12 launches, 7 in the tail), Sep 29 -$181 (89 launches), Sep 28 -$190; the best Sep 27 +$478, Oct 5 +$430, Sep 30 +$417.
+
+**How the winners come (tp30/30/300: 152 of 285, +$4,069).** The +30% mark is reached at block ~102 (10 s) median, 78 of 152
+between blocks 31 and 120, 59 later; on the way ~16 buys from ~14 distinct wallets, 0.7 ETH, with ZERO buys from any sprayer or
+listed helper contract and ~1.7 from the bundle's own wallets. The pump is ordinary wallets, not bots, and our take-profit sells into
+it. The mark at block 11 already reads +15% for the winners against +6% for the tail, but the two overlap too much to act on.
+
+**How the losers come (the tail, 54 of 285, -$2,299).** All 54 are one-block drops of 30 points or more, median -70%, at block ~56
+(5.6 s) median, 27 of them between blocks 12 and 60, 23 between 61 and 300; the seller in that block is the CREATOR in 49 of 54
+(the bundle's wallets in 2, outsiders in 3). It is the creator dumping the launch-block allocation into the pump; no stop catches
+it, because the mark goes from about +6% to -70% inside the block. The stop exits proper are few under this rule (4) and under
+tp50/20/600 they are late fades by outsiders (29, median block 390, -$527). So the strategy is a race on every launch: the crowd's
+pump reaching the take-profit before the creator's dump; it wins the race 53% of the time, the dump wins 19%, the rest fade to the
+cap near zero.
+
+**What separates them before entry (what an entry rule could use).** Little. The in-sample halves (Sep 27 - Oct 2): the taxed bundle
+<= 0.8 ETH +11.9% against -0.4% above it, and k <= 7 +9.0% against -3.4%; out of sample the bundle split cannot be read (5 launches
+in the high half) and the k split keeps its direction (+17.1% at k <= 7 on 32, +7.3% above on 38). The creator's share, the named
+count and the hour do not separate the groups. The rug's timing is not visible at the tick. The entry rule is therefore the whole
+class, with k <= 7 and the bundle <= 0.8 ETH as filters to measure in shadow, not to rely on.
+
+**Verdict.** On paper the class earns +$1,400-1,700 in 12 days at $75 (about +$120-140 a day on ~24 launches, one position at a
+time, each under 30 s), the sniper's own set earning +$1,468 behind one in the same simulator over the same days on different
+launches. Whole-day P(mean <= 0) 0.04, the untouched window positive at +15%, delay-insensitive, the mechanics audited (fees to 1e-13,
+fills, tapes complete). It is an edge worth building as a SECOND strategy, with these caveats on the record: 12 days; a 19% tail of
+-70% launches that no exit avoids, so a bad day is -$200 on 12 launches; the pumps are a crowd we cannot name, and a crowd that stops
+chasing untaxed launches, or creators that dump earlier, ends it; it was never traded live, so the first live week runs at $25.
+What the engine lacks for it: a mark-based take-profit and stop read every block to a 300-block cap (TAKE_PROFIT is price-based
+and the hold is a block count; STOP_SELL_FRAC is a dump trigger, useless here since the dump IS the loss), a second instance with
+its own wallet and relay float on the same box (TIER_MIN_BPS 0, TIER_MAX_BPS 99, ATTACK_MIN 0, REP_GATE 0, BUNDLE_MIN 3,
+BUNDLE_MIN_ETH 0.3, HOLD_BLOCKS 300), and the P&L kept apart from the sniper's. The September verdict that the 1% tier is dead
+stands for hold rules (hold 11 +0.6% here too); it never tested a take-profit.
