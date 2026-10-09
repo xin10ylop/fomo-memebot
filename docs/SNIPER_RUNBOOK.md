@@ -2368,3 +2368,49 @@ feed_lag_ms 85.0, margin_ms 0.0, burst [35, 2.0, 180.0, 0.2], rep_gate true, dry
 predicted production sits SLOT_LEAD + BURST_LEAD = 230 ms after the aim: the gate's deadline is now aim + 170 = 60 ms before it, where
 it sat before the trial (lead 46: aim + 96 and the deadline at aim + 36); under the trial's first eleven hours it was 194 ms before.
 The late start fires when the aim has passed by up to 130 ms (the tick still 100 ms ahead); the 12:45 case passed it by ~13 ms.
+
+## 5bh. Oct 9 reading and the step back: every live fill against every change (Sep 30 - Oct 8)
+
+The owner asked for a step back: the good days with the big trades against every change pushed, no fixing, no "market" verdict.
+The 43 fills priced on the chain (live_vs_table_oct07.txt) plus Oct 8's, each with the release in force:
+
+| period | running | fills | wins | P&L | landing |
+|---|---|---|---|---|---|
+| Sep 30 | 6.10-6.11, $25, tier 300, attack_min 3 from 20:40 | 9 | 2 | +$0 | E1, index 2-57 |
+| Oct 1 | 6.14 one shot per shooter + boost (04:50); $50 base (21:45) | 7 | 3 | +$70 | six of seven at index 1-3, nobody ahead |
+| Oct 2 | 6.16, $75; the sprayers appear | 11 | 3 | -$23 | index 5-29 behind 2-5, or late blocks |
+| Oct 3 - Oct 4 14:21 | 6.17, 6.18 | 5 | 3 | +$80 | index 4-45 behind 2-4 (+$69 at index 9 behind 3) |
+| Oct 4 14:21 - Oct 7 | 6.19 two shots per shooter, 1 ms step | 11 | 3 | -$33 | the losers E1+1..E1+4, index 24-49 |
+| Oct 7 | 6.21 + 6.23 shadow (sprayers one fleet, one wave) | 3 decisions | - | - | (box) |
+| Oct 8 | floor on + first-place trial, gate deadline 134 ms early | 1 | 1 | +$15 | E1+1 behind 4 |
+
+Findings. (1) The money came from landing first: Oct 1's six fills at index 1-3 with nobody ahead returned the model's first-place
+number (+80%, +31%, +98%; the -58% rug was first too). From Oct 2 the sprayers hold the top and the fills sit behind 2-5 buys;
+the winners still pay (+$69, +$30, +$17) at a fraction of first. (2) 6.19 lost outright: 11 fills, three wins under $4, -$33, the
+losers one to four blocks late; three days live, reverted Oct 7. (3) The $75 stake landed on Oct 2, the sprayers' first day,
+tripling the size of the losses exactly as the position worsened. (4) Since Oct 7 the gate drops launches on purpose (the set that
+lost 0 of 8 after Oct 2); the trial added two unpriced costs (the gate deadline, the aim rule), both found Oct 8 evening and fixed.
+
+What was there, from every table on disk with the current gate (3+ fleets by k-1 grouped, the floor), at $75:
+
+| day | qualifying | gate passes | won | behind one | first |
+|---|---|---|---|---|---|
+| Sep 29 | 210 | 8 | 8 | +$363 | +$513 |
+| Oct 1 | 135 | 6 | 5 | +$122 | +$234 |
+| Oct 2 | 87 | 7 | 4 | +$61 | +$115 |
+| Oct 3 | 55 | 3 | 3 | +$124 | +$132 |
+| Oct 4 | 59 | 3 | 3 | +$123 | +$132 |
+| Oct 5 | 55 | 5 | 4 | +$88 | +$239 |
+| Oct 6 | 52 | 3 | 2 | +$91 | +$158 |
+| Oct 7 | 32 | 2 | 2 | +$55 | +$62 |
+| Oct 8 | 15 | 3 | 3 | +$55 | +$59 |
+
+(The weights are the Oct 8 table, so the days before Oct 2 are read with hindsight.) Qualifying launches fell from 210 a day to 15
+in ten days; the gate still finds 2-5 passes a day worth $55-125 behind one; the engine took 0 of 2 on Oct 7 and 1 of 3 on Oct 8
+(12:45 the aim rule, fixed; 17:10 the engine's 3 fleets against the table's 4, the coverage gap). The number to watch from here is
+the capture rate, the table's gate passes against the engine's fires, read daily; P&L at one to three fires a day is noise. Nothing
+new goes in until the trial has its ten contested launches.
+
+**Chain side, piece oct09night (Oct 8 18:11 - Oct 9 02:00):** 6 qualifying launches; with the floor the engine should have fired
+20:11 0x4f834844 (fleets 3, rep 0.300; behind one -0.2%, first +22.7%) and refused 22:16 0x38e639e3 (fleets 3, rep 0.072); the other
+four under two fleets, all losers (-6% to -12%).
