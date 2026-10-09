@@ -2457,3 +2457,20 @@ first in the seat, hold 11 -8.5% (8% won, -$559 on 88); tp50/stop20 to 600 -9.1%
 fills through one-block dumps, -$603); every other exit worse. Fleets 3+ on the same tapes: hold 11 +28.5% first (+14.9% behind one).
 The lead is dead on the first hundred; the rest (657 tapes, the untaxed included) and the untaxed tier back to Sep 27 (pieces
 t1_sep2730, t1_sep30oct3, t1_oct0306) are running.
+
+**The path simulator on all 657 tapes ($75, +2 block execution, our impact; scratchpad growth/exit/nocrowd_sim.json).**
+
+| set | n | hold 11, first | tp +50% / stop -20% to 600, first | ends at or below -40% (tp/stop) |
+|---|---|---|---|---|
+| taxed, 0 fleets | 522 | -3.2%, 19% won, -$1,258 | -0.1%, 48% won, -$28 | 115 |
+| taxed, 3+ fleets (the sniper's set) | 99 | +33.5%, 71% won, +$2,486 | +32.5%, 69% won, +$2,415 | 8 |
+| untaxed, 0 fleets (Oct 7-8) | 25 | +2.4%, 64% won, +$46 | **+19.6%, median +51.5%, 64% won, +$367** | 6 |
+| untaxed, 1-2 fleets | 11 | +1.6% | +1.3% | 4 |
+
+Behind one instead of first: taxed 3+ hold 11 +19.8% (+$1,468); untaxed 0 fleets tp/stop +10.4% (+$195). The taxed no-crowd set loses
+under every exit (the stop fills through one-block dumps: 115 of 522 end at or below -40%), so the gate drops nothing worth having
+in the taxed tiers, and hold 11 stays the sniper's exit. The one survivor is the untaxed no-crowd tier under the take-profit/stop
+exit: 15 of 25 launches reached +50% within 60 s from the seat, 8 stopped, +$367 in two days on 25 launches. Too few to act on; the
+untaxed tier back to Sep 27 (three pieces) is being scored to tape and simulate the same way (~300 launches expected). If it holds,
+it is a second strategy with its own entry (no crowd needed, first in the seat is free) and exit (the engine has TAKE_PROFIT; a
+mark-based stop and a 600-block hold would be new), on its own wallet, not a change to the sniper.
