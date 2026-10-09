@@ -2444,3 +2444,16 @@ lands behind the streams (the -5.1 points a trade) and that the launch flow is a
 a day). The first-place trial is the one lever on the landing: two contested launches so far, both E1+1 (behind 4; index 12). The
 rule stands: nothing new until it has its ten; if it does not land first by then, the first-place game at equal technology is lost
 to the streams and the next edge is not another gate.
+
+**Oct 9 ~11:00 UTC: are the readings ignoring positive launches? (the owner's question).** Two checks. (1) The taxed tables since Sep 27,
+$75 behind one, hold 11: the gate drops 0-fleet launches (522, 16% won, -$1,904) and 1-2-fleet launches (410, 25%, -$1,214); under the
+floor 42 (26%, +$114); the passes 57 (79%, +$1,339). The gate drops losers. (2) The untaxed tier (tax under 100 bps, refused by
+TIER_MIN_BPS and never scored since Sep 16-18) scored for Oct 7-8 (piece t1_oct0709, 36 qualifying launches against 47 taxed: nearly
+half the flow now, 3,908 creations in 57 h): at the seat, hold 11, dead even (-0.7% a launch, 56% won), as in September. On the
+hold_grid's exit columns the no-crowd sets looked positive under a +50% take-profit with a -20% stop over 600 blocks (fleets 0
+taxed +$996 on 522; untaxed +$393 on 36), but that table fills the stop at -20% exactly. The path simulator of the exit study
+(scratchpad growth/exit: nocrowd_tapes.py, nocrowd_sim.py; +2 block execution delay, our impact), first 100 tapes: taxed fleets 0
+first in the seat, hold 11 -8.5% (8% won, -$559 on 88); tp50/stop20 to 600 -9.1% (47% won, 26 of 88 end at or below -40%: the stop
+fills through one-block dumps, -$603); every other exit worse. Fleets 3+ on the same tapes: hold 11 +28.5% first (+14.9% behind one).
+The lead is dead on the first hundred; the rest (657 tapes, the untaxed included) and the untaxed tier back to Sep 27 (pieces
+t1_sep2730, t1_sep30oct3, t1_oct0306) are running.
