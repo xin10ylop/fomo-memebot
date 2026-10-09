@@ -2694,3 +2694,16 @@ On the box:
 Then read the dry run against the chain at the next reading, and `sudo bash deploy/runner_setup.sh live`. Updating the runner later:
 `git -C ~/fomo-runner fetch -q origin claude/memecoin-strategy-research-vcdy6c && git -C ~/fomo-runner checkout -q --detach FETCH_HEAD`
 and `sudo bash deploy/runner_setup.sh dry|live` (each restart prints the start line).
+
+**The box's third program (Oct 9 ~22:00 UTC).** The owner's other project runs on the same box: flip-engine.service
+(/home/ubuntu/v2pons, /opt/flip-venv, log /var/log/flip/engine.jsonl), since Oct 9 12:04 UTC, as root, Nice -5, 0.6% CPU, with its
+own connection to the feed (FEED_URL wss://feed.mainnet...). So the box holds three feed connections without the runner (the sniper's
+two, the flip engine's one; all three established at 21:55), and the HTTP 429 on the sniper's second socket came at a reconnect while
+the runner made four. The feed and the public node share the Cloudflare addresses 104.20.46.209 / 172.66.147.70 (a connection count
+by address mixes the two). The flip engine could run on both cores (affinity 0,1) beside the sniper pinned to core 1: pinned to
+core 0 with a drop-in, without a restart (taskset applied to its threads):
+
+    /etc/systemd/system/flip-engine.service.d/affinity.conf:  [Service] CPUAffinity=0      (undo: delete it, daemon-reload, restart)
+
+Planned with the runner's second address: the flip engine's outbound traffic can be moved to the same second address without
+touching its code (an SNAT rule matched on its systemd cgroup), leaving the sniper alone on the main address.
