@@ -2414,3 +2414,33 @@ new goes in until the trial has its ten contested launches.
 **Chain side, piece oct09night (Oct 8 18:11 - Oct 9 02:00):** 6 qualifying launches; with the floor the engine should have fired
 20:11 0x4f834844 (fleets 3, rep 0.300; behind one -0.2%, first +22.7%) and refused 22:16 0x38e639e3 (fleets 3, rep 0.072); the other
 four under two fleets, all losers (-6% to -12%).
+
+**Box side (Oct 9 ~09:30 UTC).** P&L +0.045045 ETH ($112.73, +212.6%), capital $146.24 (withdrawal counted); overnight one fire, 20:11
+0x4f834844: gate 3 fleets, rep_sum_at_open 0.3277, a normal start (tick_ms_at_start 230), the first landed shot one block before the
+seat (land_off -1), the fill in the block after the seat at index 12, -4.1% (-$3); the table: -0.2% behind one, +22.7% first. The
+other five decisions matched the prediction: 18:11, 19:30, 20:22 refused with 0 attackers at the open (one fleet in the tables, all
+losers); 22:16 refused by the floor (3 fleets, rep 0.072; -13.8% in the table). Two late starts ran (19:30 +37.9 ms, 20:22 +36.4 ms)
+on launches whose gate never opened: the 6.24 path works. The gate's refusal message reads "attackers 3 < 3" when the floor refused
+(22:16): the count passed and rep_ok failed; the text is wrong, the decision right. To fix with the next engine change, not before.
+
+**The capture, Oct 7 10:00 - Oct 9 09:00 (the tables' gate passes against the engine).** Passes in the window: Oct 7 13:38 (+0.7%
+behind one), Oct 8 12:45 (+22.3%), 14:34 (+39.3%), 17:10 (+12.2%), 20:11 (-0.2%). The engine fired 14:34 (+20% live, +$15) and
+20:11 (-4.1%); it missed 12:45 (the aim rule, fixed), 17:10 (2 attackers at the open against the table's 3) and 13:38 (0 against
+3): two coverage misses, one of them worth +$9. Off the table it fired Oct 7 18:45 (-$10.39; the floor, then in shadow, would have
+refused it) and 21:44 (+$22.94 on a two-fleet launch by the table, 3 at the engine's open: a slow-door landing five blocks late that
+bought the dip). The floor's three refusals in the window (Oct 7 13:53, 18:45, Oct 8 22:16) were all losers in the tables.
+
+Before the window, **Oct 7 04:14 0x47313c63** (+72.6% behind one, 4 fleets, rep 0.61) was fired by 6.19 and got no fill: every shot
+landed in the creation second. 6.19's bill is therefore -$33 on eleven fills plus a +$54 fill it reached and lost to its timing.
+
+**The execution gap, all 64 trades on the box's log (live_check.py, Sep 19 - Oct 8):** live mean +4.79% a trade, the engine's own
+score of the same launches +9.89%, gap -5.10% [-7.56%, -2.63%] (95% bootstrap); live median -3.98%, worst -58.1%; one missing
+receipt. Half of the edge the engine scores is lost between the score and the landing, which is the position behind the crowd since
+Oct 2 (index 12 last night, 4-49 since Oct 2, 1-3 on Oct 1).
+
+**The step back, concluded.** The decisions match the tables (the floor's refusals all losers, the fleet refusals one-fleet
+launches); the misses since Oct 7 are two coverage misses and the aim rule. What is wrong is not a decision: it is that the engine
+lands behind the streams (the -5.1 points a trade) and that the launch flow is a tenth of Sep 29's (210 -> 15 a day; 2-3 gate passes
+a day). The first-place trial is the one lever on the landing: two contested launches so far, both E1+1 (behind 4; index 12). The
+rule stands: nothing new until it has its ten; if it does not land first by then, the first-place game at equal technology is lost
+to the streams and the next edge is not another gate.
