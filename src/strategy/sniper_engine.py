@@ -107,6 +107,9 @@ OUT2_MAX = int(os.environ.get("OUT2_MAX", "0"))                          # non-n
 SEAT_WAIT_MS = float(os.environ.get("SEAT_WAIT_MS", "300"))              # react mode: watch the seat's second this long for an outsider before sending (section 23)
 TIER_ASSUMED = float(os.environ.get("TIER_ASSUMED", "0.05"))
 STOP_SELL_FRAC = float(os.environ.get("STOP_SELL_FRAC", "0"))
+EXIT_MARK = os.environ.get("EXIT_MARK", "0") == "1"                      # 6.25 (runbook 5bj, the runner): TAKE_PROFIT and STOP_LOSS read on the position's MARK, what selling everything now
+STOP_LOSS = float(os.environ.get("STOP_LOSS", "0"))                       # returns net of the sell fee over the ETH paid (the tables' and the simulator's number), the chain polled for the
+MARK_POLL_MS = float(os.environ.get("MARK_POLL_MS", "300"))               # curve's reserves every MARK_POLL_MS so the mark does not hang on the feed's coverage; STOP_LOSS: sell at or below -it
 TRADE_HOURS = os.environ.get("TRADE_HOURS", "12-05")                 # UTC hours the tables cover and that pay (start-end, wraps midnight); "" = always. 06-12 never measured, 05-06 +0.4% on 33 launches
 MIN_RULE_PASSING_1H = int(os.environ.get("MIN_RULE_PASSING_1H", "0"))
 MIN_FOLLOW_ETH_60 = float(os.environ.get("MIN_FOLLOW_ETH_60", "0.10")); DEMAND_ARM_N = int(os.environ.get("DEMAND_ARM_N", "10"))  # the floor arms after this many scored clean launches (tables: arming at 10 removes 28 trades worth -$5)  # demand floor: no new trade while the mean follow-on ETH of the last 60 scored launches is below this. The tables never read below 0.15 except Sep 10 12-18 (0.06, those trades lost); costs nothing there, and Sep 11 read 0.01-0.03 all morning  # optional dead-stretch guard; off: the tables' n=7 at -7.8% and yesterday's n=3 at +19.9% pool to nothing
@@ -180,6 +183,7 @@ ATTACK_GROUP_PATH = os.environ.get("ATTACK_GROUP_PATH", os.path.join(os.path.dir
 if not ATTACK_GROUP and ATTACK_GROUP_PATH and os.path.exists(ATTACK_GROUP_PATH):   # no explicit list: the refit file (the box pulls it with the repo; a restart loads it)
     try: ATTACK_GROUP = {str(a).lower() for a in json.load(open(ATTACK_GROUP_PATH)).get("sprayers") or ()} - OUR_ADDRS
     except Exception: ATTACK_GROUP = set()
+ATTACK_MAX = int(os.environ.get("ATTACK_MAX", "-1"))                      # 6.25: refuse at the build when MORE than this many fleets attack (-1 = off): the runner's launches have no crowd
 ATTACK_MIN = int(os.environ.get("ATTACK_MIN", "0"))                       # 6.1: fire only when at least this many other snipers (distinct relay targets plus direct senders) are already firing at the
 HOLD_BLOCKS = int(os.environ.get("HOLD_BLOCKS", "0"))                     # curve when the burst is built (0 = off). Report 24.30: the seat block's crowd shows in the creation second's blocks; launches with 0-1
 KILL_USD = float(os.environ.get("KILL_USD", "0"))                         # attackers lost at every hold, 2+ paid +25% at second place over 300 blocks (Sep 22-23). HOLD_BLOCKS: hold this many feed blocks after the
@@ -992,6 +996,44 @@ def still_holding(pos, t_buy):
 
 def hold_cap():
     return HOLD_EFF + 3.0 if HOLD_BLOCKS else HOLD
+
+
+def position_mark(w, pos, gross):
+    """6.25: the position's mark: selling every token now on the curve as last seen (the chain poll's reserves when under a second
+    old, else the feed's fold), net of the sell fee (the 1% protocol fee plus the token's own tax), over the ETH paid: the number the
+    tables' hold grid and the exit simulator call the mark. None before the fill's amount is known."""
+    tk = pos.get("tokens") or 0.0
+    if tk <= 0 or not gross or gross <= 0:
+        return None
+    c = w.get("chain_xy")
+    X, Y = (c[0], c[1]) if (c and mono() - c[2] < 1.0) else (w["X"], w["Y"])
+    if Y + tk <= 0 or X <= 0:
+        return None
+    return X * tk / (Y + tk) * (1 - w.get("tax", 0.01)) / gross - 1
+
+
+def mark_poll(w, pos, curve, b0):
+    """6.25: while the position is open, the curve's reserves from the chain every MARK_POLL_MS: every Buy and Sell since the creation
+    block folded from the curve's constants (the tables' fold, live_vs_table.fold_buy/fold_sell), on the logs node; a failed poll
+    leaves the last reading, which position_mark ignores once it is a second old (the feed's fold stands in)."""
+    while state.get("open") is pos and not pos.get("closing"):
+        try:
+            ev = rpc_logs.call("eth_getLogs", [{"fromBlock": hex(b0), "toBlock": "latest", "address": curve, "topics": [[BUY_EV, SELL_EV]]}]) or []
+            ev.sort(key=lambda e: (int(e["blockNumber"], 16), int(e["logIndex"], 16)))
+            X, Y = X0, Y0
+            for e in ev:
+                d = e["data"][2:]; a = int(d[:64], 16) / 1e18; b = int(d[64:128], 16) / 1e18
+                if e["topics"][0] == BUY_EV:
+                    if 0 < b < Y:
+                        X, Y = X + X * b / (Y - b), Y - b
+                else:
+                    X, Y = X - X * a / (Y + a), Y + a
+            w["chain_xy"] = (X, Y, mono()); w["chain_polls"] = w.get("chain_polls", 0) + 1
+            with cond:
+                cond.notify_all()
+        except Exception as e:
+            w["chain_poll_err"] = str(e)[:80]; w["chain_poll_errs"] = w.get("chain_poll_errs", 0) + 1
+        time.sleep(MARK_POLL_MS / 1000.0)
 
 
 def gas_cost_usd():
@@ -2303,6 +2345,10 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             opened_at[0] = last_ask[0]; rep_open[0] = rep_sum(w)                                                # the view that decided the fire, and the attackers' reputation then
         return ok
     gate = gate if ATTACK_MIN > 0 else None                                                                     # 6.2: decided shot by shot while the burst runs (see GATE_LATE_MS)
+    if ATTACK_MAX >= 0 and n_att > ATTACK_MAX:                                                                  # 6.25: the runner's launches have no crowd; one that has is the sniper's kind
+        release_reservation(); gates = [f"attackers {n_att} > ATTACK_MAX {ATTACK_MAX} at the build (a crowd: not this strategy's launch)"]
+        threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
+        log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
     if gate is not None and ATTACK_BUILD_MIN > 0 and n_att < ATTACK_BUILD_MIN:                                 # 6.3: the count required already at the build
         release_reservation(); gates = [f"attackers {n_att} < ATTACK_BUILD_MIN {ATTACK_BUILD_MIN} at the build"]
         threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
@@ -2496,14 +2542,29 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
     pos["approve_hash"] = submit(tx_approve(pos, pos["nonce"] + 1, cap), "approve"); pos["approved"] = True; save_state()   # 5.95: after the LAST shot's nonce (nonce + 1 was the second shot's, already used: the sequencer refused every approve since the burst, and the exit re-sent it a second later, Sep 19)
     if pos["approve_hash"]:
         threading.Thread(target=watch_approve, args=(pos,), daemon=True).start()
-    why = "hold"
+    why = "hold"; mk = {"last": None, "hi": -9.0, "lo": 9.0, "n": 0}
+    b_from = b_create or w.get("blk0") or (buy_block - 30 if buy_block else None)                                # the creation block (the feed's or the resolver's), else 30 blocks before the fill
+    if EXIT_MARK and h and b_from:
+        threading.Thread(target=mark_poll, args=(w, pos, curve, b_from), daemon=True).start()                        # 6.25: the chain's reserves behind the mark
     with cond:
         while still_holding(pos, t_buy):
             if STOP_SELL_FRAC > 0 and w["dump"] is not None:
                 why = f"dump {100 * w['dump'] / Y0:.1f}% of supply"; break
-            if TAKE_PROFIT > 0 and w["X"] / w["Y"] >= p_in * (1 + TAKE_PROFIT):
+            if EXIT_MARK:
+                m = position_mark(w, pos, gross)
+                if m is not None:
+                    mk["last"] = m; mk["hi"] = max(mk["hi"], m); mk["lo"] = min(mk["lo"], m); mk["n"] += 1
+                    if STOP_LOSS > 0 and m <= -STOP_LOSS:
+                        why = f"stop: mark {100 * m:+.1f}%"; break
+                    if TAKE_PROFIT > 0 and m >= TAKE_PROFIT:
+                        why = f"take-profit: mark {100 * m:+.1f}%"; break
+            elif TAKE_PROFIT > 0 and w["X"] / w["Y"] >= p_in * (1 + TAKE_PROFIT):
                 why = f"take-profit: curve price {w['X'] / w['Y'] / p_in:.2f}x our entry"; break
             cond.wait(min(0.25, max(0.0, hold_cap() - (mono() - t_buy))))
+    if EXIT_MARK:
+        log({"ev": "mark_exit", "curve": curve, "why": why, "mark": None if mk["last"] is None else round(mk["last"], 4), "mark_hi": round(mk["hi"], 4) if mk["n"] else None,
+             "mark_lo": round(mk["lo"], 4) if mk["n"] else None, "reads": mk["n"], "chain_polls": w.get("chain_polls", 0), "chain_poll_errs": w.get("chain_poll_errs", 0),
+             "blocks_held": (state["feed_seq"] - pos["buy_block"]) if (pos.get("buy_block") and state.get("feed_seq")) else None, "held_s": round(mono() - t_buy, 2), "dry_run": h is None})
     close_position(pos, why)
     if SHOOTERS:
         threading.Thread(target=relay_topup, args=("after exit",), daemon=True).start()
@@ -2970,9 +3031,9 @@ async def main():
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
     smart_helpers_load(force=True); rep_weights_load(force=True)
-    log({"ev": "start", "version": 6.24, "release": "6.24", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.25, "release": "6.25", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
-         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "attack_group": len(ATTACK_GROUP), "attack_build_min": ATTACK_BUILD_MIN, "hold_from_fill": HOLD_FROM_FILL, "sell_reserved_nonce": SELL_RESERVED_NONCE, "late_send_min_ms": LATE_SEND_MIN_MS, "rep_weights": len(state.get("rep_weights") or ()), "rep_min": state.get("rep_min"), "rep_gate": REP_GATE, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
+         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "attack_group": len(ATTACK_GROUP), "attack_build_min": ATTACK_BUILD_MIN, "hold_from_fill": HOLD_FROM_FILL, "sell_reserved_nonce": SELL_RESERVED_NONCE, "late_send_min_ms": LATE_SEND_MIN_MS, "exit_mark": EXIT_MARK, "stop_loss": STOP_LOSS, "mark_poll_ms": MARK_POLL_MS, "attack_max": ATTACK_MAX, "rep_weights": len(state.get("rep_weights") or ()), "rep_min": state.get("rep_min"), "rep_gate": REP_GATE, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
         if not PROVIDER_WS:

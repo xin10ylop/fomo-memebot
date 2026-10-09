@@ -2526,3 +2526,58 @@ and the hold is a block count; STOP_SELL_FRAC is a dump trigger, useless here si
 its own wallet and relay float on the same box (TIER_MIN_BPS 0, TIER_MAX_BPS 99, ATTACK_MIN 0, REP_GATE 0, BUNDLE_MIN 3,
 BUNDLE_MIN_ETH 0.3, HOLD_BLOCKS 300), and the P&L kept apart from the sniper's. The September verdict that the 1% tier is dead
 stands for hold rules (hold 11 +0.6% here too); it never tested a take-profit.
+
+## 5bj. The runner (engine 6.25): the untaxed no-crowd tier as a second instance on its own wallet (Oct 9)
+
+The owner's call after 5bi: build it, start at $10 stakes, move $30 from the sniper, raise the stake as it earns. Built as the same
+engine under a second systemd unit and env file, nothing shared but the code, the feed and the send step:
+
+- **Entry** (deploy/runner.env.template): the tables' filter: a bundle of 3+ named wallets with 0.3+ ETH, the creator holding 1%+,
+  quote ETH, the untaxed tier (`TIER_MIN_BPS 0, TIER_MAX_BPS 99`), and `ATTACK_MAX 0` (6.25): refused at the build when any fleet
+  attacks, with its own reason in eligible_not_traded. No fleet floor, no reputation floor, no team-share rule, all hours, the
+  safety switch off (`SWITCH -9`: the seat model's score means nothing on this tier). The engine's one-launch-per-creator-per-day
+  rule stays: the repeat launches earned the same (+7.2% on 30) and are few.
+- **Seat**: E1, one shot from the wallet at the vote's tick plus `MARGIN_MS 60` (`BURST_N 1, SEND_MODE predict`, no relay, no
+  shooters, `SLIP 0.25`), the 5.x path the engine still runs (`submit(buy)`, the receipt's Buy event for the exact amount, the
+  approve at the next nonce). A burst was rejected on purpose: on a no-crowd curve a $10 fill moves the price 0.4%, so a second
+  shot behind it would fill too, and a slip tight enough to stop that would refuse the fill behind the bundle's own seat-block buy.
+  An early shot reverts for the gas and the launch is missed; tune_margin adds 5 ms per early landing. The fill lands in the seat
+  block or the one after, which the simulator priced as behind one (delay-insensitive, 5bi).
+- **Exit** (6.25, `EXIT_MARK 1`): `position_mark` = selling every token now on the curve as last seen, net of the sell fee (the 1%
+  protocol fee plus the token's tax), over the ETH paid: the tables' and the simulator's number. Read on every wake of the hold loop
+  (every feed block, at most 250 ms apart); `STOP_LOSS 0.30` sells at or below -30%, `TAKE_PROFIT 0.30` at or above +30%, else the
+  cap `HOLD_BLOCKS 300` from the fill block (`HOLD_FROM_FILL 1`, `HOLD_S 30`). Behind the mark, `mark_poll` reads the curve's
+  reserves from the chain every `MARK_POLL_MS 300` (every Buy and Sell since the creation, folded from the constants on the logs
+  node); a reading under a second old is the mark's source, else the feed's fold, so the exit does not hang on the feed's coverage;
+  a failing node leaves the feed's fold in charge. The exit logs `mark_exit` (last, high, low, reads, chain polls, blocks held).
+  The sniper runs with EXIT_MARK off: its loop is unchanged (test_exit_mark checks both branches).
+- **Money**: `STAKE_MIN = STAKE_MAX = 10`, `WALLET_STAKE 0` (the wallet is not sized into the stake: $30 in the wallet, $10 a trade;
+  raise STAKE_MIN/STAKE_MAX by hand), `DAILY_STOP 0.5` on the wallet (read every tenth tick live), `GAS_RESERVE_USD 1`, one position
+  at a time. Its P&L: `PNL_BASE` (the wallet's ETH when funded, `runner_setup.sh base`) and `PNL_WITHDRAWN` in runner.env;
+  `relay_ops.py status` and `withdraw.py` take `SNIPER_ENV=/etc/sniper/runner.env`; the notifier unit runner-notify posts the same
+  line with a `[runner]` label. The sniper's own P&L line is untouched: the $30 leaves it through withdraw.py, which records it as kept.
+- **Tests**: tests/test_exit_mark.py (16: the mark against the simulator's formula, the chain reading's freshness, the poll's fold
+  on sorted events, a failing node, the source of the loop, the gate, the start line); every live suite green; a local dry run on
+  the template's settings printed the start line below and read a creation from the feed.
+
+Deploy, in order (each step pastes its output back before the next):
+
+1. The code and the runner in DRY RUN (it prints the new wallet's address; the key is written to /etc/sniper/runner.env, root-only,
+   and never printed):
+
+       cd ~/fomo-memebot && git pull -q && sudo bash deploy/runner_setup.sh install
+
+   Expected start line: release 6.25, seat E1, burst [1, 4.0, 8.0, 0.07], send_mode predict, margin_ms 60, exit_mark true,
+   stop_loss 0.3, take_profit 0.3, hold_blocks 300, attack_max 0, tier_min_bps 0, tier_max_bps 99, stake [10.0, 10.0], dry_run true.
+
+2. $30 from the sniper's wallet to the runner's address (0.0111 ETH at $2,700; the sniper stops for the send so the two never
+   share a nonce, and restarts after; the withdrawal is recorded, so the sniper's P&L line does not move):
+
+       cd ~/fomo-memebot && sudo systemctl stop sniper-engine && sudo /opt/sniper-venv/bin/python3 deploy/withdraw.py --to RUNNER_ADDRESS --amount 0.0111 --yes; sudo systemctl start sniper-engine && sleep 12 && sudo python3 deploy/englog.py 1 | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"dry_run": [a-z]*' && sudo bash deploy/runner_setup.sh base
+
+3. Read the dry run against the day's untaxed table at the next reading (its decisions carry the same gates and the mark_exit
+   rows in dry run show what the exit would have done); then live:
+
+       cd ~/fomo-memebot && sudo bash deploy/runner_setup.sh live
+
+   Expected: the same start line with dry_run false. `sudo bash deploy/runner_setup.sh status` any time; `dry` switches back.

@@ -22,12 +22,19 @@ def cfg():
             if "=" in line and not line.startswith("#"): k, v = line.strip().split("=", 1); c[k] = v.strip().strip('"')
     return c
 C = cfg(); TOKEN = C.get("TG_TOKEN", ""); CHAT = C.get("TG_CHAT", ""); BASE = C.get("TG_PNL_BASE", "0.015412")
+LABEL = os.environ.get("TG_LABEL", "")                                   # 6.25: a second instance's notifier names itself and reads its own base
+if os.environ.get("SNIPER_ENV"):
+    try:
+        for line in open(os.environ["SNIPER_ENV"]):
+            if line.startswith("PNL_BASE="): BASE = line.split("=", 1)[1].strip() or BASE
+    except Exception: pass
 def api(method, **params):
     data = urllib.parse.urlencode(params).encode() if params else None
     for i in range(3):
         try: return json.load(urllib.request.urlopen(urllib.request.Request(f"https://api.telegram.org/bot{TOKEN}/{method}", data), timeout=15))
         except Exception as e: err = e; time.sleep(2 * (i + 1))
     print(f"telegram {method} failed: {str(err)[:80]}", file=sys.stderr); return None
+def tag(text): return f"[{LABEL}] {text}" if LABEL else text
 def pnl_line():
     """(the line, pnl_eth) from relay_ops status, or (None, None)"""
     try:
@@ -59,9 +66,9 @@ if __name__ == "__main__":
     if not CHAT: sys.exit(f"no TG_CHAT in {ENV} (run --whoami after messaging the bot)")
     line, pnl = pnl_line()
     if "--test" in a:
-        api("sendMessage", chat_id=CHAT, text=line or "status unavailable"); print("sent:", line); sys.exit(0)
+        api("sendMessage", chat_id=CHAT, text=tag(line or "status unavailable")); print("sent:", line); sys.exit(0)
     last = pnl; due = time.time() + POLL_S; settle_at = None
-    if line: api("sendMessage", chat_id=CHAT, text=line)
+    if line: api("sendMessage", chat_id=CHAT, text=tag(line))
     for raw in follow(LOG):
         if raw:
             try: e = json.loads(raw)
@@ -71,4 +78,4 @@ if __name__ == "__main__":
         if (settle_at and now >= settle_at) or now >= due:
             settle_at = None; due = now + POLL_S; line, pnl = pnl_line()
             if line and pnl is not None and (last is None or abs(pnl - last) >= MIN_MOVE_ETH):
-                api("sendMessage", chat_id=CHAT, text=line); last = pnl
+                api("sendMessage", chat_id=CHAT, text=tag(line)); last = pnl

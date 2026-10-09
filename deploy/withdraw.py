@@ -9,7 +9,7 @@ Prints the balance, asks for a yes, sends, and waits for the receipt."""
 import argparse, json, os, sys, time, urllib.request
 from eth_account import Account
 
-ENV = "/etc/sniper/engine.env"
+ENV = os.environ.get("SNIPER_ENV", "/etc/sniper/engine.env")                # 6.25: a second instance (the runner) passes its own env file
 
 
 def env():
@@ -29,17 +29,20 @@ def rpc(url, method, params):
     return d["result"]
 
 
-def record_withdrawal(eth, path="/etc/sniper/telegram.env"):
-    """Oct 8: adds a landed withdrawal to TG_PNL_WITHDRAWN, so the P&L line (relay_ops.py status) counts it as kept, not lost"""
+def record_withdrawal(eth, path=None):
+    """Oct 8: adds a landed withdrawal to TG_PNL_WITHDRAWN, so the P&L line (relay_ops.py status) counts it as kept, not lost.
+    6.25: a second instance's withdrawals go to PNL_WITHDRAWN in its own env file (SNIPER_ENV)."""
+    key = "TG_PNL_WITHDRAWN=" if ENV == "/etc/sniper/engine.env" else "PNL_WITHDRAWN="
+    path = path or ("/etc/sniper/telegram.env" if key.startswith("TG_") else ENV)
     try:
         lines = open(path).read().splitlines() if os.path.exists(path) else []
         prev = 0.0; out = []
         for line in lines:
-            if line.startswith("TG_PNL_WITHDRAWN="):
+            if line.startswith(key):
                 prev = float(line.split("=", 1)[1].strip() or 0)
             else:
                 out.append(line)
-        out.append(f"TG_PNL_WITHDRAWN={prev + eth:.6f}")
+        out.append(f"{key}{prev + eth:.6f}")
         open(path, "w").write("\n".join(out) + "\n"); os.chmod(path, 0o600)
         print(f"recorded: {prev + eth:.6f} ETH withdrawn in all (the P&L line counts it as kept)")
     except Exception as e:

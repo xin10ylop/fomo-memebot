@@ -15,7 +15,7 @@ import argparse, json, os, subprocess, sys, time, urllib.request
 from eth_account import Account
 from eth_utils import to_checksum_address
 
-ENV = "/etc/sniper/engine.env"
+ENV = os.environ.get("SNIPER_ENV", "/etc/sniper/engine.env")                # 6.25: a second instance (the runner) passes its own env file
 SHOOTER_TARGET_ETH = 0.0001; SHOOTER_MIN_ETH = 0.00004
 
 
@@ -75,10 +75,12 @@ def send(rpc, acct, tx, label, wait=True):
 
 
 def withdrawn_eth():
-    """the ETH withdrawn from the bot so far (TG_PNL_WITHDRAWN in /etc/sniper/telegram.env, kept by withdraw.py); 0 when unset or unreadable"""
+    """the ETH withdrawn from the bot so far (TG_PNL_WITHDRAWN in /etc/sniper/telegram.env, kept by withdraw.py); 0 when unset or unreadable.
+    6.25: a second instance keeps its own count as PNL_WITHDRAWN in its env file (SNIPER_ENV)."""
+    path, key = ("/etc/sniper/telegram.env", "TG_PNL_WITHDRAWN=") if ENV == "/etc/sniper/engine.env" else (ENV, "PNL_WITHDRAWN=")
     try:
-        for line in open("/etc/sniper/telegram.env"):
-            if line.startswith("TG_PNL_WITHDRAWN="):
+        for line in open(path):
+            if line.startswith(key):
                 return float(line.split("=", 1)[1].strip() or 0)
     except Exception:
         pass
