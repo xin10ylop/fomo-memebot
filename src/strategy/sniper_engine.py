@@ -48,6 +48,8 @@ SEQ_URL = os.environ.get("SEQ_URL", "https://sequencer.mainnet.chain.robinhood.c
 SEQ_PIN_IP = os.environ.get("SEQ_PIN_IP", "")                             # 6.9: pin this sequencer address by the arrival race (deploy/ingress_race.py) instead of the ping; empty = the fastest ping
 FEED_URL = os.environ.get("FEED_URL", "wss://feed.mainnet.chain.robinhood.com")
 FEED_SOCKETS = int(os.environ.get("FEED_SOCKETS", "2"))                  # 6.9: sockets to the feed; the second delivers 4-6 ms earlier on 98% of messages (measured Sep 29), the copy is dropped by sequence number
+FEED_LOCAL_ADDR = os.environ.get("FEED_LOCAL_ADDR", "").strip()            # 6.26 (5bk): the local address the feed sockets leave from: a second instance on the box must
+REQUIRE_FEED_LOCAL_ADDR = os.environ.get("REQUIRE_FEED_LOCAL_ADDR", "0") == "1"   # use a second public address (the feed allows two connections per address; the sniper uses both)
 FEED_COMPRESSION = os.environ.get("FEED_COMPRESSION", "deflate") or None   # 5.48: since Sep 17 ~19:30 UTC the feed refuses a connection that does not offer permessage-deflate ("Compression is required")
 FEED_SOURCE = os.environ.get("FEED_SOURCE", "sequencer")                  # "sequencer": Robinhood's feed; "provider": a third-party node's WebSocket (PROVIDER_WS), no Robinhood endpoint at all
 PROVIDER_WS = os.environ.get("PROVIDER_WS", "")                            # e.g. wss://robinhood-mainnet.g.alchemy.com/v2/KEY (section 23.10)
@@ -161,6 +163,7 @@ BUY_SEL = bytes.fromhex("59a87bc1"); SELL_SEL = bytes.fromhex("d04c6983"); APPRO
 UA = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) fomo-memebot/engine"}
 X0, Y0 = 1.68, 1e9
 E0_OUTSIDER = os.environ.get("E0_OUTSIDER", "0") == "1"                # explicit opt-in: take the creation second as a wallet that is NOT exempt from the surcharge
+TIER_EARLY = os.environ.get("TIER_EARLY", "0") == "1"                     # 6.26 (5bk): refuse by the tier from the calldata before any lookup (the runner: no lookups on the sniper's launches)
 TIER_MIN_BPS = int(os.environ.get("TIER_MIN_BPS", "0")); TIER_MAX_BPS = int(os.environ.get("TIER_MAX_BPS", "0"))   # the token's own tax (creation calldata word 13, bps on top of the 1% protocol fee): 0 = no gate. 24.14: 100-200 bps tokens pay +34/+43/+36/+27%
 SKIP_TIER1_TEAM_SHARE = float(os.environ.get("SKIP_TIER1_TEAM_SHARE", "0"))
 E0_BUNDLE_WAIT_S = float(os.environ.get("E0_BUNDLE_WAIT_S", "0.45"))
@@ -625,16 +628,28 @@ def save_state():
     try:
         d = {"bankroll": state["bankroll"], "day": str(state["day"]), "day_start": state["day_start"], "stopped": state["stopped"], "scores": list(state["scores"]),
              "open": {k: v for k, v in state["open"].items() if k != "closing"} if isinstance(state["open"], dict) else state["open"],
-             "margin_ms": MARGIN_MS, "saved_at": time.time(), "timing": list(state["timing"])}
+             "margin_ms": MARGIN_MS, "saved_at": time.time(), "timing": list(state["timing"]), "mode": run_mode()}
         tmp = STATE_PATH + ".tmp"; json.dump(d, open(tmp, "w")); os.replace(tmp, STATE_PATH)
     except Exception as e:
         log({"ev": "error", "stage": "save_state", "err": str(e)[:200]})
+
+
+def run_mode():
+    """6.26: live when a send step is configured, else dry (read from the environment: load_state runs before load_send_step)"""
+    return "live" if os.environ.get("SEND_MODULE") else "dry"
 
 
 def load_state():
     global MARGIN_MS
     try:
         d = json.load(open(STATE_PATH))
+        saved = d.get("mode"); now_mode = run_mode()
+        if saved and saved != now_mode:                                    # 6.26 (5bk): a dry day's paper stop must not block live trading, nor a live position be
+            op = d.get("open")                                             # forgotten by a dry restart (close_position's dry branch would drop it unsold)
+            if now_mode == "dry" and isinstance(op, dict) and op.get("buy_hash"):
+                raise SystemExit("a LIVE position is open in the state file: start the engine live so it is sold (SEND_MODULE), not in dry run")
+            log({"ev": "state_mode_changed", "saved": saved, "now": now_mode, "dropped_open": op is not None, "note": "bankroll, day, stop and scores start fresh in the new mode"})
+            d = {"open": None, "scores": []}
         if str(datetime.datetime.utcnow().date()) == d.get("day"):
             state["bankroll"] = d["bankroll"]; state["day"] = datetime.datetime.utcnow().date(); state["day_start"] = d["day_start"]; state["stopped"] = d["stopped"]
         for x in d.get("scores", []):
@@ -661,6 +676,26 @@ def abi_word(x):
 SEND = None                                                # the operator's send step, loaded from SEND_MODULE (deploy/send_step.py); None = dry run
 SEND_BURST = None                                          # its burst variant, make_burst(engine) -> submit_burst(txs, at, label) -> [(hash, answers)]
 SEND_PROBE = None                                          # 6.16: make_probe(engine) -> the raw bytes of a signed transaction the sequencer always rejects (nonce 0), for timing its door
+
+
+def feed_local():
+    """6.26: the feed socket's local address (FEED_LOCAL_ADDR) as create_connection's local_addr; nothing when unset (the sniper)"""
+    return {"local_addr": (FEED_LOCAL_ADDR, 0)} if FEED_LOCAL_ADDR else {}
+
+
+def check_feed_local():
+    """6.26: with REQUIRE_FEED_LOCAL_ADDR (a second instance) refuse to start without FEED_LOCAL_ADDR, or with one this machine does not own"""
+    if REQUIRE_FEED_LOCAL_ADDR and not FEED_LOCAL_ADDR:
+        raise SystemExit("REQUIRE_FEED_LOCAL_ADDR: set FEED_LOCAL_ADDR to the second address (the feed allows two connections per address and the sniper uses both)")
+    if FEED_LOCAL_ADDR:
+        import socket
+        sk = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sk.bind((FEED_LOCAL_ADDR, 0))
+        except OSError as e:
+            raise SystemExit(f"FEED_LOCAL_ADDR {FEED_LOCAL_ADDR} is not an address of this machine ({e}): not starting")
+        finally:
+            sk.close()
 
 
 def load_send_step():
@@ -2067,6 +2102,8 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         prior = state["launched_today"][creator]; state["launched_today"][creator] += 1
     if SEAT in ("E0", "E1", "E2") and BUNDLE_MIN > 0 and (quote != ZERO or len(named) < BUNDLE_MIN):
         log({"ev": "skip", "why": ["cannot pass the rule from the calldata (quote or named wallets): not resolved"], "creator": creator, "named_wallets": len(named), "quote": quote}); return
+    if TIER_EARLY and ((TIER_MAX_BPS > 0 and (tax_bps is None or tax_bps > TIER_MAX_BPS)) or (TIER_MIN_BPS > 0 and (tax_bps is None or tax_bps < TIER_MIN_BPS))):
+        log({"ev": "skip", "why": [f"token tax {tax_bps} bps outside {TIER_MIN_BPS}-{TIER_MAX_BPS} (from the calldata, TIER_EARLY: not resolved)"], "creator": creator, "tax_bps": tax_bps}); return
     if team_bundle(named):                                               # 6.12: the team's own wallet farm is not a crowd
         log({"ev": "skip", "why": [f"creation names {len(named)} wallets > {NAMED_MAX} (team bundle)"], "creator": creator, "named_wallets": len(named), "quote": quote}); return
 
@@ -3019,7 +3056,7 @@ async def _feed_second(websockets):
     backoff = 0.2; last_err = 0.0
     while True:
         try:
-            async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=FEED_COMPRESSION) as ws:
+            async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=FEED_COMPRESSION, **feed_local()) as ws:
                 log({"ev": "feed2_connected"}); backoff = 0.2
                 while True:
                     raw = await asyncio.wait_for(ws.recv(), timeout=2.0)
@@ -3041,7 +3078,7 @@ async def main():
         except Exception as e:
             log({"ev": "error", "stage": "pin_cpu", "err": str(e)[:100]})
     sys.setswitchinterval(0.0005)
-    load_send_step()
+    check_feed_local(); load_send_step()
     if RELAY and SEND is not None:                                        # 5.94/6.03: after the send step is loaded (before it, SEND was None and none of this ran); a wrong relay address would burn every shot; the contract must be there and be ours
         try:
             code = rpc.call("eth_getCode", [RELAY, "latest"]); owner = rpc.call("eth_call", [{"to": RELAY, "data": "0x8da5cb5b"}, "latest"])
@@ -3092,7 +3129,7 @@ async def main():
         asyncio.ensure_future(_feed_second(websockets))                 # 6.9: the second socket; whichever delivers a block first indexes it
     while True:
         try:
-            async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=FEED_COMPRESSION) as ws:
+            async with websockets.connect(FEED_URL, open_timeout=10, max_size=None, ping_interval=10, ping_timeout=5, max_queue=4, compression=FEED_COMPRESSION, **feed_local()) as ws:
                 log({"ev": "feed_connected"}); state["connected_at"] = mono(); state["prev_seen"] = None; backoff = 0.2; state["detect"] = "sequencer"
                 state["brackets"].clear(); state["ref"] = None; _bcache["at"] = -1e9              # the route, hence theta, may have changed
                 while True:
@@ -3109,6 +3146,10 @@ async def main():
                 log({"ev": "alarm", "what": f"the sequencer feed {'blocked this address (HTTP 403)' if blocked else 'refused five connections in a row'}: detection on the provider WebSocket for {window:.0f} s, then the feed is tried again", "err": str(e)[:160]})
                 last_prune_holder[0] = mono(); await provider_loop(websockets, until=mono() + window)
                 log({"ev": "note", "what": "trying the sequencer feed again"}); refused = 0; backoff = 0.2; continue
+            if (refused >= 5 or blocked) and not PROVIDER_WS:             # 6.26 (5bk): no provider to fall back to: do not feed their block (the box's address is shared)
+                window = 3600.0 if blocked else 600.0
+                log({"ev": "alarm", "what": f"the sequencer feed {'blocked this address (HTTP 403)' if blocked else 'refused five connections in a row'} and there is no PROVIDER_WS: waiting {window:.0f} s before trying again", "err": str(e)[:160]})
+                await asyncio.sleep(window); refused = 0; backoff = 0.2; continue
             log({"ev": "feed_error", "err": str(e)[:200], "retry_s": backoff}); await asyncio.sleep(backoff); backoff = min(5.0, backoff * 2)   # 0.2 s after a drop, slower if the network is gone
 
 
