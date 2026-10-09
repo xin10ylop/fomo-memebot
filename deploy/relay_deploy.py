@@ -10,7 +10,7 @@ runs one simulated buy through the new relay on a live curve, and prints the REL
 import argparse, hashlib, json, os, subprocess, sys, time, urllib.request
 from eth_account import Account
 
-ENV = "/etc/sniper/engine.env"; ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENV = os.environ.get("SNIPER_ENV", "/etc/sniper/engine.env"); ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FACTORY = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"
 
 
@@ -52,9 +52,10 @@ def word(x):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--yes", action="store_true", help="do not ask")
-    ap.add_argument("--write-env", action="store_true", help="after a verified deployment, put RELAY=<address> into /etc/sniper/engine.env (replacing any RELAY line)"); a = ap.parse_args()
-    if subprocess.run(["systemctl", "is-active", "--quiet", "sniper-engine"]).returncode == 0:
-        sys.exit("the engine is running: sudo systemctl stop sniper-engine first (same wallet, same nonce)")
+    ap.add_argument("--write-env", action="store_true", help="after a verified deployment, put RELAY=<address> into the env file (SNIPER_ENV, default /etc/sniper/engine.env), replacing any RELAY line"); a = ap.parse_args()
+    unit = "runner-engine" if os.path.basename(ENV) == "runner.env" else "sniper-engine"   # 6.26: the engine that sends from this env's wallet
+    if subprocess.run(["systemctl", "is-active", "--quiet", unit]).returncode == 0:
+        sys.exit(f"the engine is running: sudo systemctl stop {unit} first (same wallet, same nonce)")
     e = env(); key = e.get("PRIVATE_KEY"); wallet = e.get("WALLET", "").lower(); url = e.get("RPC_URL") or "https://rpc.mainnet.chain.robinhood.com"
     if not key or not wallet:
         sys.exit(f"PRIVATE_KEY or WALLET missing in {ENV}")
@@ -115,7 +116,7 @@ def main():
         tmp = ENV + ".tmp"; open(tmp, "w").write("\n".join(lines) + "\n"); os.chmod(tmp, 0o600); os.replace(tmp, ENV)
         print(f"\nRELAY={relay} written to {ENV}. Next: deploy/relay_ops.py shooters-register (if shooters exist), deposit <eth> (the stake), then restart the engine")
     else:
-        print("\nadd this line to /etc/sniper/engine.env (and STAKE_MIN/STAKE_MAX to the bet you want), then restart the engine:")
+        print(f"\nadd this line to {ENV} (and STAKE_MIN/STAKE_MAX to the bet you want), then restart the engine:")
         print(f"RELAY={relay}")
 
 

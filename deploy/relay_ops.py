@@ -61,8 +61,13 @@ def word(x):
     return ("%064x" % x) if isinstance(x, int) else x[2:].lower().zfill(64)
 
 
+def engine_unit():
+    """6.26: the engine that sends from this env file's wallet: runner-engine for runner.env, sniper-engine otherwise"""
+    return "runner-engine" if os.path.basename(ENV) == "runner.env" else "sniper-engine"
+
+
 def engine_running():
-    return subprocess.run(["systemctl", "is-active", "--quiet", "sniper-engine"]).returncode == 0
+    return subprocess.run(["systemctl", "is-active", "--quiet", engine_unit()]).returncode == 0
 
 
 def send(rpc, acct, tx, label, wait=True):
@@ -117,13 +122,13 @@ def main():
         print(f"{low} low on gas, {unreg} not registered")
         total = wb + (rb if relay else 0.0) + gas_total
         print(f"TOTAL capital: {total:.6f} ETH{usd(total)} = wallet {wb:.6f} + relay {rb if relay else 0.0:.6f} + shooters' gas {gas_total:.6f}")
-        if a.arg:
+        if a.arg and float(a.arg) > 0:                                    # 6.26: no base recorded yet (0): no P&L line
             base = float(a.arg); wd = withdrawn_eth(); pnl = total + wd - base   # Oct 8: ETH sent out of the bot (withdraw.py records it) still counts as earned
             print(f"P&L since {base:.6f} ETH: {pnl:+.6f} ETH{usd(pnl)} ({100 * pnl / base:+.1f}%), every gas and fee included" + (f"; {wd:.6f} ETH withdrawn counted as kept" if wd else ""))
         return
 
     if engine_running():
-        sys.exit("the engine is running: sudo systemctl stop sniper-engine first (same wallet, same nonce)")
+        sys.exit(f"the engine is running: sudo systemctl stop {engine_unit()} first (same wallet, same nonce)")
 
     if a.cmd == "shooters-create":
         n = int(a.arg or 35)

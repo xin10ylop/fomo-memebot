@@ -3,7 +3,7 @@
 # Services, the last start line, the engine's ten-minute flow line (feed, probe, bankroll), the last 3 hours' event counts and
 # alarms, the "not fresh" refusals, the feed's last creation, an open position, and the capital/P&L line the phone gets.
 R=$(cd "$(dirname "$0")/.." && pwd)
-for s in sniper-engine sniper-notify; do printf "%-14s %s since %s\n" "$s:" "$(systemctl is-active $s)" "$(systemctl show -p ActiveEnterTimestamp --value $s | cut -d' ' -f2-3)"; done
+for s in sniper-engine sniper-notify $( [ -f /etc/sniper/runner.env ] && echo runner-engine runner-notify ); do printf "%-14s %s since %s\n" "$s:" "$(systemctl is-active $s)" "$(systemctl show -p ActiveEnterTimestamp --value $s | cut -d' ' -f2-3)"; done
 python3 "$R/deploy/englog.py" 3 > /tmp/health.jsonl 2>/dev/null
 python3 - <<'PY'
 import json,time,collections,datetime as d
@@ -21,3 +21,4 @@ fi=[e for e in ev if e.get('ev')=='burst_landing' and e.get('filled')]; dn=[e fo
 print('position:      ' + ('OPEN since '+f(fi[-1]['t'])+' (the sell should land within seconds)' if fi and (not dn or dn[-1]['t']<fi[-1]['t']) else 'none open'))
 PY
 B=$(grep -s '^TG_PNL_BASE=' /etc/sniper/telegram.env | cut -d= -f2); /opt/sniper-venv/bin/python3 "$R/deploy/relay_ops.py" status "${B:-0.021190}" 2>/dev/null | tail -2
+[ -f /etc/sniper/runner.env ] && { echo "runner:        $(python3 "$R/deploy/englog.py" 24 runner 2>/dev/null | grep -h '"ev": "start"' | tail -1 | grep -o '"release": "[0-9.]*"\|"dry_run": [a-z]*' | paste -sd' ')"; }

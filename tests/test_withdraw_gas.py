@@ -51,6 +51,70 @@ try:
     sys.argv = ["withdraw.py", "--to", TO, "--amount", "0.019124", "--yes"]; n = len(sent); W.main(); ok(False, "over the balance must refuse")
 except SystemExit as e:
     ok(len(sent) == n and "cannot cover" in str(e), "an amount the balance cannot cover with the gas is refused before signing")
+# 6.26 (5bk): the engine that sends from this wallet must be stopped
+W.engine_active = lambda: True
+try:
+    run("0.001"); ok(False, "must refuse")
+except SystemExit as e:
+    ok("runner-engine is running" in str(e), "runner.env: refused while runner-engine runs (the nonce race)")
+W.engine_active = lambda: False
+# a send that times out (the node may have taken it): the hash is polled, and recorded once it lands
+real_rpc = W.rpc; state = {"n": 0}
+def flaky(url, m, p):
+    if m == "eth_sendRawTransaction": sent.append(p[0]); raise TimeoutError("read timed out")
+    if m == "eth_getTransactionReceipt":
+        state["n"] += 1
+        if state["n"] <= 2: raise ConnectionError("reset")                 # two failed polls, then the receipt
+    return fake_rpc(url, m, p)
+W.rpc = flaky; before = open(RUNNER).read()
+sys.argv = ["withdraw.py", "--to", TO, "--amount", "0.0005", "--yes"]; W.main()
+ok("PNL_WITHDRAWN=0.013600" in open(RUNNER).read(), "a send that timed out but landed is polled through two failed polls and recorded")
+led = W.ledger_path(); lines = open(led).read().splitlines()
+ok(len(lines) == 4 and all(l.startswith("0x") and len(l.split()[0]) == 66 for l in lines), "every recorded withdrawal is in the ledger by its hash")
+# the same hash recorded twice is refused
+h0 = lines[0].split()[0]; v = open(RUNNER).read()
+ok(W.record_withdrawal(0.0111, tx_hash=h0) is True and open(RUNNER).read() == v, "a hash already in the ledger is not counted twice")
+# a node refusal: nothing sent, nothing recorded, non-zero exit
+def refuse(url, m, p):
+    if m == "eth_sendRawTransaction": raise RuntimeError({"code": -32000, "message": "intrinsic gas too low"})
+    return fake_rpc(url, m, p)
+W.rpc = refuse; v = open(RUNNER).read()
+try:
+    sys.argv = ["withdraw.py", "--to", TO, "--amount", "0.0004", "--yes"]; W.main(); ok(False, "must exit non-zero")
+except SystemExit as e:
+    ok("refused by the node, nothing sent" in str(e) and open(RUNNER).read() == v, "a refusal by the node: non-zero exit, nothing recorded")
+# no receipt within the wait: non-zero exit with the --record command
+W.RECEIPT_WAIT_S = 0.01
+def never(url, m, p):
+    if m == "eth_getTransactionReceipt": return None
+    return fake_rpc(url, m, p)
+W.rpc = never
+try:
+    sys.argv = ["withdraw.py", "--to", TO, "--amount", "0.0004", "--yes"]; W.main(); ok(False, "must exit non-zero")
+except SystemExit as e:
+    ok("--record 0x" in str(e) and "do NOT send again" in str(e), "no receipt: non-zero exit naming the hash and the --record command")
+W.RECEIPT_WAIT_S = 120.0
+# --record: from this wallet, landed, a plain transfer, recorded once
+HX = "0x" + "cd" * 32
+def chain(url, m, p):
+    if m == "eth_getTransactionByHash": return {"from": acct.address, "to": TO, "value": hex(int(0.002e18)), "input": "0x"}
+    if m == "eth_getTransactionReceipt": return {"status": "0x1", "blockNumber": "0x20"}
+    return fake_rpc(url, m, p)
+W.rpc = chain
+try:
+    sys.argv = ["withdraw.py", "--record", HX]; W.main()
+except SystemExit as e:
+    ok(e.code == 0 and "PNL_WITHDRAWN=0.015600" in open(RUNNER).read(), "--record: a landed transfer from this wallet is recorded")
+def other(url, m, p):
+    if m == "eth_getTransactionByHash": return {"from": "0x" + "99" * 20, "to": TO, "value": hex(10 ** 15), "input": "0x"}
+    return chain(url, m, p)
+W.rpc = other
+try:
+    sys.argv = ["withdraw.py", "--record", "0x" + "ef" * 32]; W.main(); ok(False, "must refuse")
+except SystemExit as e:
+    ok("not from this wallet" in str(e), "--record refuses a transaction from another wallet")
+W.rpc = real_rpc
+ok(oct(os.stat(RUNNER).st_mode & 0o777) == "0o600" and not os.path.exists(RUNNER + ".tmp"), "the env file is rewritten whole, mode 0600, no temporary left")
 # the sniper's instance: the record goes to telegram.env as TG_PNL_WITHDRAWN
 os.environ.pop("SNIPER_ENV"); importlib.reload(W)
 ok(W.ENV == "/etc/sniper/engine.env", "without SNIPER_ENV it is the sniper's env file")

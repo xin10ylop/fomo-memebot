@@ -616,7 +616,7 @@ state = {"bankroll": BANKROLL, "day": None, "day_start": BANKROLL, "stopped": Fa
          "sells": collections.defaultdict(list),       # curve -> [(seen, tokens)] direct sells
          "valtx": collections.deque(maxlen=4000),      # [seen, ts, sender_or_None, value_eth, data, raw] value-carrying non-direct txs: router buys, sender recovered lazily
          "watch": {},                                  # curve -> incremental reserves and counters, folded by the feed loop for the curves we are trading
-         "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "feed_seq": 0, "connected_at": 0.0,
+         "known_curves": {}, "brackets": collections.deque(maxlen=300), "ref": None, "flip_at": {}, "flip_block": {}, "recent_calls": collections.deque(maxlen=6000), "feed_seq": 0, "connected_at": 0.0,
          "arrivals": collections.deque(maxlen=900), "flip_wall": {}, "slot_pred": {}, "slot_err": collections.deque(maxlen=120), "vote_err": collections.deque(maxlen=120), "slot_hits": collections.deque(maxlen=120),   # 5.9 ramp model
          "blocks": 0, "prev_seen": None, "prev_ts": 0, "nonce": None, "gas_price": None, "chain_at": 0.0, "open": None, "ingested_seq": 0, "venue_ok": True, "venue": None, "decisions": {}, "shooter_nonce": {}, "shooter_eth": {}, "shooter_at": 0.0, "relay_eth": None, "relay_at": 0.0, "base_fee_hist": collections.deque(maxlen=600), "relay_try_at": -1e9, "relay_alarm_at": -1e9, "shooter_alarm_at": -1e9, "block_ntx": collections.deque(maxlen=40), "seq_rtt": collections.deque(maxlen=60),
          "landings": {"since_early": 0, "first": 0}, "schedule": collections.deque(maxlen=20), "rule_passing": collections.deque(maxlen=400), "rules_changed": False, "day_start_real": False, "creations": 0, "timing": collections.deque(maxlen=60), "timing_all": collections.deque(maxlen=60), "scores_e1": collections.deque(maxlen=60), "race_lags": collections.deque(maxlen=60), "out1_flags": collections.deque(maxlen=60), "last_creation_at": 0.0, "reverters": collections.Counter()}
@@ -1172,6 +1172,12 @@ def watch_curve(curve, tk0, feed_ts, named, creator, blk0=None, tax_bps=None):
     net0 = X0 * tk0 / (Y0 - tk0); w = {"X": X0 + net0, "Y": Y0 - tk0, "cb": bytes.fromhex(curve[2:]), "ts0": feed_ts, "blk0": blk0, "named": named, "creator": creator, "curve": curve,
                                        "tax_bps": tax_bps, "tax": 0.01 + (tax_bps or 0) / 10000.0,             # the buyers' tax on this token: the 1% protocol fee plus the token's own (calldata word 13)
                                        "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "out1_chain": 0, "out2_chain": 0, "tb": None, "buys": 0, "sells": 0, "since": mono(), "dump": None, "wallets": set(), "rivals": [], "attack_targets": set(), "attack_senders": set(), "attack_wallets": set(), "blk_watch": state["blocks"], "seq_watch": state["feed_seq"]}
+    if ATTACK_MAX >= 0:                                                    # 6.26 (5bk): the fleets that fired before the curve was watched (blind before otherwise)
+        n0 = attack_fleets(w)
+        for to_hex, t, data in list(state["recent_calls"]):
+            if to_hex == curve or w["cb"] in data:
+                note_attack(w, to_hex, t, data, curve)
+        w["backfilled_fleets"] = attack_fleets(w) - n0
     for b in curve_buys(curve, feed_ts):
         ts_, snd, val, seen = b[:4]; blk = b[4] if len(b) > 4 else None
         buyers = named_in(b[7], named) if len(b) > 7 else None                 # a helper call: its recipients are the bundle
@@ -2410,7 +2416,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
         while mono() < t_build:                                           # creation second and refused a fill at index 1 (0x46ce738f, Sep 18 17:2x).
             time.sleep(0.002)
         decision["build_lead_ms"] = round((burst_at - mono()) * 1000, 1)
-    n_att = attackers(w); decision["attackers_at_build"] = n_att                                              # 6.1/6.2: the crowd before the tick as the feed showed it at the build
+    n_att = attackers(w); decision["attackers_at_build"] = n_att; decision["backfilled_fleets"] = w.get("backfilled_fleets")                                              # 6.1/6.2: the crowd before the tick as the feed showed it at the build
     decision["blk0"] = blk0; decision["feed_block_at_build"] = state["blocks"]                                  # 6.3: the feed's view at the build, measured (24.33), and both units
     decision["fleets_at_build"] = attack_fleets(w); decision["wallets_at_build"] = attack_wallets(w); decision["attack_unit"] = ATTACK_UNIT
     decision["b_create"] = b_create; decision["seq_at_build"] = state["feed_seq"]                               # 6.4: chain-numbered blocks (feed_seq = the L2 block number)
@@ -2718,6 +2724,8 @@ def index_message(inner, ts, seen):
             continue
         val = int.from_bytes(value, "big") / 1e18 if value else 0.0; sel = data[:4]; to_hex = "0x" + to.hex()
         try:
+            if ATTACK_MAX >= 0 and len(data) >= 24:                                  # 6.26 (5bk): the runner remembers recent calls so a curve registered late still sees
+                state["recent_calls"].append((to_hex, t, data))                      # the fleets that fired before it was watched (ATTACK_MAX is a ceiling: missing them lets a crowd in)
             if watched:                                                              # 6.1: every call that touches a watched curve counts as a sniper's shot (see note_attack)
                 for cv_, w_ in list(watched.items()):
                     if to_hex == cv_ or w_["cb"] in data:
@@ -3114,9 +3122,9 @@ async def main():
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
     smart_helpers_load(force=True); rep_weights_load(force=True)
-    log({"ev": "start", "version": 6.25, "release": "6.25", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.26, "release": "6.26", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
-         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "attack_group": len(ATTACK_GROUP), "attack_build_min": ATTACK_BUILD_MIN, "hold_from_fill": HOLD_FROM_FILL, "sell_reserved_nonce": SELL_RESERVED_NONCE, "late_send_min_ms": LATE_SEND_MIN_MS, "exit_mark": EXIT_MARK, "stop_loss": STOP_LOSS, "mark_poll_ms": MARK_POLL_MS, "attack_max": ATTACK_MAX, "rep_weights": len(state.get("rep_weights") or ()), "rep_min": state.get("rep_min"), "rep_gate": REP_GATE, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
+         "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "attack_group": len(ATTACK_GROUP), "attack_build_min": ATTACK_BUILD_MIN, "hold_from_fill": HOLD_FROM_FILL, "sell_reserved_nonce": SELL_RESERVED_NONCE, "late_send_min_ms": LATE_SEND_MIN_MS, "exit_mark": EXIT_MARK, "stop_loss": STOP_LOSS, "mark_poll_ms": MARK_POLL_MS, "attack_max": ATTACK_MAX, "tier_early": TIER_EARLY, "feed_local_addr": bool(FEED_LOCAL_ADDR), "feed_sockets": FEED_SOCKETS, "chain_poll_s": CHAIN_POLL_S, "rep_weights": len(state.get("rep_weights") or ()), "rep_min": state.get("rep_min"), "rep_gate": REP_GATE, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
     if FEED_SOURCE == "provider":
         if not PROVIDER_WS:
