@@ -2707,3 +2707,21 @@ core 0 with a drop-in, without a restart (taskset applied to its threads):
 
 Planned with the runner's second address: the flip engine's outbound traffic can be moved to the same second address without
 touching its code (an SNAT rule matched on its systemd cgroup), leaving the sniper alone on the main address.
+
+**The re-pricing challenged (Oct 9 ~23:00 UTC).** Two challengers reproduced the analyst's arithmetic to the cent and corrected three
+inputs: (1) the relay's deadline makes every landing after the seat's second a miss, not a late fill; (2) each live burst priced by
+what really happened: 38 of 63 filled in E1, two were timing misses (every shot in the creation second: Oct 5 15:23, Oct 7 04:14),
+three filled at E1+1, not 79% in E1; (3) the build reads the crowd through the creation second's SECOND-TO-LAST block (the sniper's
+own log: fleets_at_build equals the tables' k-2 count on 51 of 62 live decisions), so a single check at the build lets in 178
+launches whose first fleet shows one block later (+3.8% alone). Corrected: on the research's 229, +5.8% a launch at $10 with the
+0.20 guard and about +6.7% with 0.30 (now in the template); for the runner as built (the 407 the build-only check would trade),
++4.9% at $10, 95% [+1.6, +9.0], about 8 launches a day. data/derived/runner/ holds both reports.
+
+**6.26 adds the veto.** The send step takes an optional veto (asked before every shot from the first; once true no later shot is
+sent; a veto that raises stops the burst; None, the sniper, exactly as before); the engine passes `attackers(w) > ATTACK_MAX` for an
+ATTACK_MAX burst, emulates it in dry run, treats a burst vetoed before its first shot as a refusal, and refuses to start an
+ATTACK_MAX burst with a send step that has no veto. The shots that would land in the seat block go last, so a fleet that shows by
+then stops them: the research's k-1 view at the shot, with the early shots (creation second, reverting for gas) already gone. The
+runner gets its own copy of the send step (/etc/sniper/runner_send_step.py, copied from its checkout at `live`); the sniper's
+/etc/sniper/send_step.py is never touched. tests/test_burst_veto.py (12). Expected with the veto and the 0.30 guard: the research's
+set at the real landing mix, about +6.5% a launch at $10 after burst gas, roughly 7 launches a day.

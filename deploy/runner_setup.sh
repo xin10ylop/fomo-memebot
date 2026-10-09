@@ -16,6 +16,7 @@
 #   status             services, the start line, the capital and the P&L against the base
 set -e; REPO=$(cd "$(dirname "$0")/.." && pwd); ENV=/etc/sniper/runner.env; SRC=/etc/sniper/engine.env; PY=/opt/sniper-venv/bin/python3
 TPL="$REPO/deploy/runner.env.template"; LOGF=/var/log/sniper/runner.jsonl; STATEF=/var/log/sniper/runner.jsonl.state.json
+RSEND=/etc/sniper/runner_send_step.py                     # the runner's own copy of the send step (the sniper's /etc/sniper/send_step.py is never touched)
 [ "$(id -u)" = 0 ] || { echo "run with sudo"; exit 1; }
 val() { grep "^$1=" "$2" 2>/dev/null | head -1 | cut -d= -f2-; }
 setkv() { KV_K="$1" KV_V="$2" python3 - "$ENV" <<'PYEOF'
@@ -184,14 +185,14 @@ check)
   [ -n "$(val RELAY "$ENV")" ] && echo "relay: ok ($(val RELAY "$ENV" | cut -c1-12)...)" || { echo "relay: not deployed (relay)"; rc=1; }
   n=$(val SHOOTER_KEYS "$ENV" | tr ',' '\n' | grep -c . || true); [ "$n" -ge "$(val BURST_N "$ENV")" ] && echo "shooters: ok ($n)" || { echo "shooters: $n, BURST_N $(val BURST_N "$ENV") (shooters)"; rc=1; }
   [ "$(val PNL_BASE "$ENV")" != "0" ] && echo "base: ok ($(val PNL_BASE "$ENV") ETH)" || { echo "base: not recorded (base)"; rc=1; }
-  [ -f /etc/sniper/send_step.py ] && echo "send step: ok" || { echo "send step: missing (/etc/sniper/send_step.py)"; rc=1; }
+  grep -q "veto=None" "$REPO/deploy/send_step.py" && echo "send step: ok (this checkout's, with the veto; copied to $RSEND at live)" || { echo "send step: $REPO/deploy/send_step.py has no veto (engine 6.26)"; rc=1; }
   grep -q "WorkingDirectory=$REPO$" /etc/systemd/system/runner-engine.service 2>/dev/null && grep -q "^CPUAffinity=0" /etc/systemd/system/runner-engine.service && echo "units: ok ($REPO)" || { echo "units: not for this checkout (units)"; rc=1; }
   no_open_position && echo "state: ok (no open position)" || rc=1
   exit $rc ;;
 dry|live)
   own_rpc_ok; feed_ip_ok; no_open_position
   grep -q "WorkingDirectory=$REPO$" /etc/systemd/system/runner-engine.service || { echo "the units are not for this checkout: units"; exit 1; }
-  if [ "$1" = live ]; then bash "$0" check >/dev/null || { bash "$0" check; exit 1; }; setkv SEND_MODULE /etc/sniper/send_step.py; else setkv SEND_MODULE ""; fi
+  if [ "$1" = live ]; then bash "$0" check >/dev/null || { bash "$0" check; exit 1; }; install -m 600 "$REPO/deploy/send_step.py" "$RSEND"; setkv SEND_MODULE "$RSEND"; else setkv SEND_MODULE ""; fi
   rm -f "$STATEF"                                         # a fresh state in the new mode (no position open: checked above)
   ( crontab -l 2>/dev/null | grep -v "sniper-check $LOGF" || true; echo "*/5 * * * * /usr/local/bin/sniper-check $LOGF" ) | crontab -
   systemctl restart runner-engine; systemctl enable runner-engine >/dev/null 2>&1

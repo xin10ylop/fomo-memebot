@@ -100,12 +100,14 @@ def make_burst(engine):
         def sign_raw(k, tx):
             return bytes(signer(k).sign_transaction(tx).raw_transaction), False
 
-    def submit_burst(txs, at, label, keys=None, gate=None, open_by=None, alt=None, pick=None):
+    def submit_burst(txs, at, label, keys=None, gate=None, open_by=None, alt=None, pick=None, veto=None):
         """engine 6.2: with gate (a callable), a shot is sent only once gate() is true; shots before that are skipped (they would have
         landed in the tax second and reverted anyway), and if the gate is still shut at the shot scheduled after open_by no later shot
         is sent at all. A skipped shot is (None, None) in the result. 6.13: with alt (a second transaction per shot, the boosted stake
         at the same nonce) and pick (a callable), each shot sends the alt when pick() is true at its time; the alt set is signed after
-        the base set and only when that signing cannot delay the first shot."""
+        the base set and only when that signing cannot delay the first shot. 6.26 (runbook 5bk): with veto (a callable), it is asked
+        before every shot from the first; once it answers true no later shot is sent (the runner's ceiling on the crowd: a fleet that
+        shows before the tick stops the shots that would land in the seat block). None: as before."""
         t_sign0 = mono(); raws = [sign_raw(keys[i] if keys else None, tx) for i, tx in enumerate(txs)]; n_fast = sum(1 for _, f in raws if f)
         bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + raw.hex()]}).encode() for raw, _ in raws]
         alt_bodies = None; alt_skipped = None
@@ -116,7 +118,7 @@ def make_burst(engine):
                 alt_bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_sendRawTransaction", "params": ["0x" + raw.hex()]}).encode() for raw, _ in alt_raws]
             else:
                 alt_skipped = f"no time to sign the boosted set ({1000 * per * len(alt):.0f} ms needed)"
-        t_signed = mono(); out = []; fired_at = []; opened = gate is None; opened_at = None; shut = False; boosted = []
+        t_signed = mono(); out = []; fired_at = []; opened = gate is None; opened_at = None; shut = False; boosted = []; vetoed_at = None
         order = {}; ptr = {}; subst = 0                                      # 6.22 (review 5bc F1 / growth review): each key's bodies in nonce order. The later waves repeat the shooters at
         if keys:                                                            # nonce + 1, + 2; when the gate skipped a shooter's earlier shot, that nonce was never used, so a later shot sent at
             for j, k in enumerate(keys): order.setdefault(k, []).append(j); ptr[k] = 0   # its own nonce is refused ("nonce too high": Oct 5 20:21, 32 of 38 sent shots dead). A shot therefore
@@ -125,6 +127,14 @@ def make_burst(engine):
                 time.sleep(0.0002)                                       # then spin yielding the interpreter lock each turn (engine 6.7, review J: the old
             while mono() < at[i]:                                        # 4 ms spin held the lock for the whole burst and starved the feed loop at the gate)
                 time.sleep(0)
+            if veto is not None and vetoed_at is None:
+                try:
+                    if veto():
+                        vetoed_at = i                                    # 6.26: no shot from here on
+                except Exception:
+                    vetoed_at = i                                        # a veto that fails stops the burst (never send blind)
+            if vetoed_at is not None:
+                fired_at.append(mono()); out.append((None, None)); boosted.append(False); continue
             if not opened and not shut:
                 opened = bool(gate())
                 if opened:
@@ -142,7 +152,7 @@ def make_burst(engine):
                 use_alt = False                                          # never let the pick break the burst
             boosted.append(use_alt); fired_at.append(mono()); out.append(engine.SENDER.fire_slot(alt_bodies[src] if use_alt else bodies[src], i))
         engine.state["last_boosted"] = boosted
-        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "shooters": bool(keys), "gated": sum(1 for h, _ in out if h is None), "boosted": sum(boosted), "alt_skipped": alt_skipped, "partner_substituted": subst, "gate_opened_at_shot": opened_at, "sign_ms": round(1000 * (t_signed - t_sign0), 1), "signed_direct": n_fast,
+        engine.log({"ev": "sent_burst", "label": label, "hashes": [h for h, _ in out], "nonces": [tx["nonce"] for tx in txs], "shooters": bool(keys), "gated": sum(1 for h, _ in out if h is None), "vetoed_at": vetoed_at, "boosted": sum(boosted), "alt_skipped": alt_skipped, "partner_substituted": subst, "gate_opened_at_shot": opened_at, "sign_ms": round(1000 * (t_signed - t_sign0), 1), "signed_direct": n_fast,
                     "shot_ms": [round(1000 * (t - at[0]), 1) for t in fired_at], "late_ms": [round(1000 * (t - a), 2) for t, a in zip(fired_at, at)]})
         return out
     submit_burst.alt = True                                               # 6.13: the engine passes alt= and pick= only to a send step that has this

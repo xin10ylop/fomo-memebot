@@ -719,6 +719,10 @@ def load_send_step():
             raise SystemExit("ATTACK_MIN with a burst needs SHOOTER_KEYS: the gate skips shots, and the wallet's consecutive nonces would leave a gap in front of every shot sent")
     if BURST_N > 1 and SEND_BURST is None:
         raise SystemExit("BURST_N > 1 needs the burst-capable send step (make_burst): sudo cp deploy/send_step.py /etc/sniper/send_step.py")
+    if ATTACK_MAX >= 0 and BURST_N > 1:
+        import inspect
+        if "veto" not in inspect.signature(SEND_BURST).parameters:
+            raise SystemExit(f"ATTACK_MAX with a burst needs the send step that takes veto= (engine 6.26): copy deploy/send_step.py to {path}")
     if SHOOTERS and SEND_BURST is not None:
         import inspect
         if "keys" not in inspect.signature(SEND_BURST).parameters:
@@ -2430,6 +2434,14 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             opened_at[0] = last_ask[0]; rep_open[0] = rep_sum(w)                                                # the view that decided the fire, and the attackers' reputation then
         return ok
     gate = gate if ATTACK_MIN > 0 else None                                                                     # 6.2: decided shot by shot while the burst runs (see GATE_LATE_MS)
+    vetoed_at = [None]
+    def veto():                                                                                                 # 6.26 (5bk): the runner's ceiling, asked before every shot: the build
+        if attackers(w) > ATTACK_MAX:                                                                           # reads the crowd through the creation second's second-to-last block
+            if vetoed_at[0] is None:                                                                            # but one block before the tick, so a fleet that shows by the
+                vetoed_at[0] = snap()                                                                           # tick's shot stops the shots that would land in the seat block
+            return True
+        return False
+    veto = veto if (ATTACK_MAX >= 0 and BURST_N > 1) else None
     if ATTACK_MAX >= 0 and n_att > ATTACK_MAX:                                                                  # 6.25: the runner's launches have no crowd; one that has is the sniper's kind
         release_reservation(); gates = [f"attackers {n_att} > ATTACK_MAX {ATTACK_MAX} at the build (a crowd: not this strategy's launch)"]
         threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
@@ -2492,16 +2504,22 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             open_by = max(open_by, burst_at + (BURST_LEAD_MS + GATE_LATE_MS) / 1000.0)                        # 6.24: a late start keeps the gate open to the tick itself (GATE_CLOSE_MS measured from an aim already passed would shut it before the first shot)
         if SEND_BURST is not None:
             gk = {"gate": gate, "open_by": open_by} if gate is not None else {}   # an older send step (no gate=) still works when the gate is off
+            if veto is not None:
+                gk["veto"] = veto                                                                               # 6.26: checked at start (load_send_step) that the send step takes it
             if txs_alt is not None and getattr(SEND_BURST, "alt", False):
                 gk["alt"] = txs_alt; gk["pick"] = lambda: smart_present(w)                                      # 6.13: the send step picks the boosted shot when a smart helper is in
             shots = SEND_BURST(txs, at, "buy", keys=keys, **gk) if keys else SEND_BURST(txs, at, "buy", **gk)
         else:
-            shots = []; opened = gate is None; shut = False
+            shots = []; opened = gate is None; shut = False; vetoed = False
             for i, tx in enumerate(txs):
                 while mono() < at[i] - 0.0015:                        # 6.7 (review J): sleep to 1.5 ms before the shot, then yield the interpreter lock
                     time.sleep(0.0002)                                   # each spin: the feed loop indexes the tick's blocks while the burst waits
                 while mono() < at[i]:
                     time.sleep(0)
+                if veto is not None and not vetoed:                      # 6.26: the sender's veto exactly: once true, no later shot
+                    vetoed = bool(veto())
+                if vetoed:
+                    shots.append((None, None)); continue
                 if not opened and not shut:                              # dry run: the sender's rule exactly (deploy/send_step.py): a shot is skipped until the
                     opened = bool(gate())                                # gate opens; if it is still shut at the shot scheduled at or after open_by, no later shot is sent
                     if opened:
@@ -2521,6 +2539,14 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             decision["fleets_after_burst"] = attack_fleets(w); decision["wallets_after_burst"] = attack_wallets(w)
             if decision["gated_shots"] == len(shots):                   # the gate never opened: nothing left the box, nothing to pay
                 release_reservation(); state["traded"].pop(curve, None); gates = [f"attackers {decision['attackers_at_open']} < {ATTACK_MIN} by the tick's shot (the gate never opened; no shot sent)"]
+                threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
+                log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
+        if veto is not None:
+            decision["vetoed"] = vetoed_at[0] is not None; decision["unsent_shots"] = sum(1 for hh, a in shots if hh is None and a is None)
+            if vetoed_at[0] is not None:
+                decision["feed_block_at_veto"], decision["seq_at_veto"], decision["fleets_at_veto"], decision["wallets_at_veto"] = vetoed_at[0]
+            if decision["unsent_shots"] == len(shots):                  # vetoed before the first shot: nothing left the box
+                release_reservation(); state["traded"].pop(curve, None); gates = [f"attackers {decision.get('fleets_at_veto')} > ATTACK_MAX {ATTACK_MAX} by the first shot (vetoed; no shot sent)"]
                 threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
                 log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
         h = next((hh for hh, _ in shots if hh), None); buy_ans = next((a for hh, a in shots if hh), None)
