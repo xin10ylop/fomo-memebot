@@ -9,7 +9,8 @@ Prints the balance, asks for a yes, sends, and waits for the receipt."""
 import argparse, json, os, sys, time, urllib.request
 from eth_account import Account
 
-ENV = os.environ.get("SNIPER_ENV", "/etc/sniper/engine.env")                # 6.25: a second instance (the runner) passes its own env file
+ENV = os.environ.get("SNIPER_ENV", "/etc/sniper/engine.env")
+POSTING_HEADROOM = 30_000                                                   # gas over the estimate for the posting cost (see main)                # 6.25: a second instance (the runner) passes its own env file
 
 
 def env():
@@ -62,11 +63,19 @@ def main():
     if to != to.lower() and not is_checksum_address(to):
         sys.exit("the destination's capital letters do not match its checksum: a character is probably wrong; check the address")
     to = to_checksum_address(to.lower())
-    bal = int(rpc(url, "eth_getBalance", [wallet, "latest"]), 16); gp = int(int(rpc(url, "eth_gasPrice", []), 16) * 2); gas = 21000; reserve = gp * gas * 3
+    bal = int(rpc(url, "eth_getBalance", [wallet, "latest"]), 16); gp = int(int(rpc(url, "eth_gasPrice", []), 16) * 2)
+    # Oct 9: the chain charges the parent-chain posting cost as extra gas, non-zero in about half the blocks (up to ~5,000 gas
+    # sampled over 12 h): a transfer capped at exactly 21,000 is refused with "intrinsic gas too low" whenever it is. The limit
+    # is the node's estimate plus POSTING_HEADROOM; only the gas used is charged, the rest is refunded.
+    try:
+        est = int(rpc(url, "eth_estimateGas", [{"from": wallet, "to": to, "value": hex(max(0, bal // 2))}]), 16)
+    except Exception:
+        est = 21000
+    gas = max(est, 21000) + POSTING_HEADROOM; reserve = gp * gas * 3
     amount = bal - reserve if a.amount == "all" else int(float(a.amount) * 1e18)
     if amount <= 0 or amount + gp * gas > bal:
         sys.exit(f"balance {bal/1e18:.6f} ETH cannot cover {amount/1e18:.6f} ETH plus gas")
-    print(f"from {wallet}\nto   {to}\nbalance {bal/1e18:.6f} ETH, sending {amount/1e18:.6f} ETH (gas about {gp*gas/1e18:.7f} ETH)")
+    print(f"from {wallet}\nto   {to}\nbalance {bal/1e18:.6f} ETH, sending {amount/1e18:.6f} ETH (gas limit {gas}, at most {gp*gas/1e18:.7f} ETH; only the gas used is charged)")
     if not a.yes and input("type yes to send: ").strip().lower() != "yes":
         sys.exit("not sent")
     nonce = int(rpc(url, "eth_getTransactionCount", [wallet, "pending"]), 16)

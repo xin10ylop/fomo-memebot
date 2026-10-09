@@ -15,7 +15,8 @@ import argparse, json, os, subprocess, sys, time, urllib.request
 from eth_account import Account
 from eth_utils import to_checksum_address
 
-ENV = os.environ.get("SNIPER_ENV", "/etc/sniper/engine.env")                # 6.25: a second instance (the runner) passes its own env file
+ENV = os.environ.get("SNIPER_ENV", "/etc/sniper/engine.env")
+SWEEP_GAS = 51_000                                                         # a plain transfer's limit: 21,000 plus the posting cost's headroom (withdraw.py, Oct 9)                # 6.25: a second instance (the runner) passes its own env file
 SHOOTER_TARGET_ETH = 0.0001; SHOOTER_MIN_ETH = 0.00004
 
 
@@ -170,11 +171,11 @@ def main():
     if a.cmd == "shooters-sweep":
         got = 0.0
         for k, s_ in zip(keys, shooters):
-            time.sleep(0.25); b = int(rpc.call("eth_getBalance", [s_, "latest"]), 16); fee = 21_000 * gp * 2
+            time.sleep(0.25); b = int(rpc.call("eth_getBalance", [s_, "latest"]), 16); fee = SWEEP_GAS * gp * 2   # Oct 9: 21,000 + the posting cost's headroom (withdraw.py)
             if b <= fee * 2:
                 continue
             n_ = int(rpc.call("eth_getTransactionCount", [s_, "pending"]), 16)
-            send(rpc, acct=Account.from_key(k), tx={"to": to_checksum_address(wallet), "value": b - fee, "data": b"", "gas": 21_000, "gasPrice": gp * 2, "nonce": n_, "chainId": 4663}, label=f"sweep {s_[:10]}", wait=False); got += (b - fee) / 1e18
+            send(rpc, acct=Account.from_key(k), tx={"to": to_checksum_address(wallet), "value": b - fee, "data": b"", "gas": SWEEP_GAS, "gasPrice": gp * 2, "nonce": n_, "chainId": 4663}, label=f"sweep {s_[:10]}", wait=False); got += (b - fee) / 1e18
         print(f"about {got:.6f} ETH on its way back to the wallet"); return
 
     if a.cmd == "deposit":

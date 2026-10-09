@@ -2581,3 +2581,15 @@ Deploy, in order (each step pastes its output back before the next):
        cd ~/fomo-memebot && sudo bash deploy/runner_setup.sh live
 
    Expected: the same start line with dry_run false. `sudo bash deploy/runner_setup.sh status` any time; `dry` switches back.
+
+**Oct 9, the first funding attempt refused: "intrinsic gas too low".** withdraw.py capped the transfer at exactly 21,000 gas. This
+chain (ArbOS 61, unchanged since Oct 8) charges the parent-chain posting cost as extra gas, and that charge is non-zero in about half
+the blocks: 37 of 72 blocks sampled one every ~10 minutes over the last 12 h carried transactions charged up to 5,022 posting gas
+(receipts' gasUsedForL1). The Oct 8 withdrawal (0x3ff46ae8...) used exactly 21,000 with zero posting gas: it was lucky. Nothing was
+sent (the node refused the transaction before it was accepted), the sniper's nonce was untouched, and the sniper restarted on 6.25
+(its exit loop unchanged: EXIT_MARK off). Fix: the limit is the node's estimate plus 30,000 gas (POSTING_HEADROOM); only the gas
+used is charged, the rest is refunded, so the headroom costs nothing but about 0.000002 ETH held upfront. The shooter sweep in
+relay_ops.py had the same 21,000 cap: now 51,000 with the fee it keeps back matched. The engine's own transactions all carry
+headroom already (shooter funding 30,000, relay top-up 50,000, approve 80,000, sell 200,000, buy 500,000).
+tests/test_withdraw_gas.py (13): the signed transaction decoded (destination, amount, limit, nonce, chain id, signer), the estimate's
+failure fallback, the balance check, the bookkeeping for the sniper (TG_PNL_WITHDRAWN) and for the runner (PNL_WITHDRAWN).
