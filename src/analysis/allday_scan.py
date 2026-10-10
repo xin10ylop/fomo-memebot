@@ -23,9 +23,10 @@ def call(m, p, url=URL):
     if "error" in d: raise RuntimeError(str(d["error"])[:120])
     return d["result"]
 FROM, TO, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
-t_from = calendar.timegm(time.strptime(FROM, "%Y-%m-%d %H:%M")); t_to = calendar.timegm(time.strptime(TO, "%Y-%m-%d %H:%M"))
+BLO = int(FROM[2:]) if FROM.startswith("b:") else None; BHI = int(TO[2:]) if TO.startswith("b:") else None   # 5bm: "b:84446548" "b:84446554" prices the creations of a block range (the time estimate drifts by minutes over a day)
+if BLO is None: t_from = calendar.timegm(time.strptime(FROM, "%Y-%m-%d %H:%M")); t_to = calendar.timegm(time.strptime(TO, "%Y-%m-%d %H:%M"))
 head = int(call("eth_blockNumber", []), 16); th = int(call("eth_getBlockByNumber", [hex(head), False])["timestamp"], 16)
-lo = head - int((th - t_from) * 9.9) - 200; hi = head - int(max(0, th - t_to) * 9.9) - 650   # leave 650 blocks after the window for the tapes
+lo = BLO if BLO is not None else head - int((th - t_from) * 9.9) - 200; hi = BHI if BHI is not None else head - int(max(0, th - t_to) * 9.9) - 650   # leave 650 blocks after the window for the tapes
 logs = []; b = lo
 while b <= hi:
     e = min(hi, b + 9999); logs += call("eth_getLogs", [{"fromBlock": hex(b), "toBlock": hex(e), "address": V2F}], PUB); b = e + 1

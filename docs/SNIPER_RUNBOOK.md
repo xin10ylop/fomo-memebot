@@ -2775,7 +2775,10 @@ profile, behind one +27.9% and a mean of -1.5% on the 8 with two creator dumps a
 4 in the untaxed piece t1_oct0910 (Oct 9 20:40 - Oct 10 13:25: 998 creations), none after 02:29 UTC. The edge per launch held
 through Oct 8 (+7.0% then +9.1%). The flow is shrinking here too, slower than the sniper's (-60% against -97% over the same
 days) but in the same direction. Of the four: the first-block buyers on three are the launches' own named wallets (not a crowd;
-the runner's veto counts outsiders' shots), one has an outsider (0x3e7c18, a bot seen on Oct 8-9 launches: vetoed at ATTACK_MAX 0).
+the runner's veto counts outsiders' shots), one has an outsider (0x3e7c18, a bot seen on Oct 8-9 launches: vetoed at ATTACK_MAX 0). Priced behind one with the runner's exit
+(allday_scan by creation block): 20:41 -55.5% (a creator dump through the stop), 20:49 -1.4% (the vetoed one), 21:05 +5.3%, 02:29
++30.4% (take-profit). The three the runner would have traded: mean -6.6%, -$2.0 at $10; one dump ate two winners, the 20% tail
+doing what the research says it does, in a sample of three.
 
 **The rules, set now and not after the first loss.** (1) $10 a trade until ten positive trading days (STAKE_MIN/MAX 10 in the
 template). (2) Two drivers read daily, not the P&L: qualifying untaxed launches a day (e1_multi with tier 0.01-0.0199) and the
