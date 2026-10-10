@@ -17,6 +17,7 @@ from eth_account import Account
 ENV = os.environ.get("SNIPER_ENV", "/etc/sniper/engine.env")                # 6.25: a second instance (the runner) passes its own env file
 POSTING_HEADROOM = 30_000                                                   # gas over the estimate for the chain's posting cost (Oct 9, see main)
 RECEIPT_WAIT_S = 120.0
+REFUSED_BEFORE_ACCEPT = ("insufficient funds", "intrinsic gas too low", "gas price", "fee cap", "nonce too low", "nonce too high", "invalid sender", "exceeds block gas limit", "max fee per gas")   # 6.27: every other error (already known, a forwarding timeout) is polled
 
 
 def engine_unit():
@@ -142,8 +143,10 @@ def main():
         if isinstance(sent, str) and sent.lower() != h.lower():
             print(f"the node answered a different hash {sent}: polling ours")
         print("sent", h)
-    except RuntimeError as ex:                                           # the node's own JSON-RPC error: it refused the transaction, nothing was sent
-        sys.exit(f"refused by the node, nothing sent: {ex}")
+    except RuntimeError as ex:                                           # the node's own JSON-RPC error
+        if any(k in str(ex).lower() for k in REFUSED_BEFORE_ACCEPT):     # refused before acceptance: nothing was sent
+            sys.exit(f"refused by the node, nothing sent: {ex}")
+        print(f"the node answered an error after the send ({str(ex)[:80]}): it may have accepted the transaction (6.27); polling its hash, never sending again blind")
     except Exception as ex:                                              # a timeout or a dropped connection: the node may have taken it; never send again blind
         print(f"the node did not answer ({str(ex)[:80]}): the transfer may have been accepted; polling its hash")
     t0 = time.time(); last_err = None

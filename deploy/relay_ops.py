@@ -151,7 +151,9 @@ def main():
         print(f"registering {len(shooters)} shooters on {relay}: about {gas} gas{usd(gas * gp / 1e18)}")
         send(rpc, acct, {"to": to_checksum_address(relay), "value": 0, "data": data, "gas": int(gas * 1.3), "gasPrice": gp * 2, "nonce": nonce, "chainId": 4663}, "setShooters")
         time.sleep(1); ok = sum(int(rpc.call("eth_call", [{"to": relay, "data": "0x5c7b6bcb" + word(s_)}, "latest"]) or "0x0", 16) for s_ in shooters)
-        print(f"{ok} of {len(shooters)} registered"); return
+        print(f"{ok} of {len(shooters)} registered")
+        if ok != len(shooters): sys.exit(f"registration incomplete ({ok} of {len(shooters)}): run shooters-register again before funding or starting")   # 6.27
+        return
 
     if a.cmd == "shooters-fund":
         target = float(a.arg) if a.arg else SHOOTER_TARGET_ETH; plan = []

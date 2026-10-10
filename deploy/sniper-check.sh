@@ -6,11 +6,15 @@
 #   3. it keeps seeing launches but scores none - a node that refuses eth_getLogs (rate limit, monthly cap,
 #      revoked key) blinds the gauge silently. This cost four paper days on Sep 12-16.
 LOG=${1:-/var/log/sniper/engine.jsonl}; ALERT_CMD=${ALERT_CMD:-cat}; PY=/opt/sniper-venv/bin/python3
+NAME=$(basename "$LOG" .jsonl); LABEL=$([ "$NAME" = engine ] && echo sniper || echo "$NAME")   # 6.27: the runner's log alerts as "runner:"; its blind-gauge rule is off (it scores only the untaxed bundled launches, hours apart)
+[ "$NAME" = engine ] || export BLIND_H=0
 [ -x "$PY" ] || PY=python3
-if [ ! -f "$LOG" ] || [ $(( $(date +%s) - $(stat -c %Y "$LOG") )) -gt 600 ]; then echo "sniper: engine log has not grown for 10 minutes" | $ALERT_CMD; fi
-OFF=$(chronyc tracking 2>/dev/null | awk '/System time/ {print $4}'); if [ -n "$OFF" ] && [ "$(echo "$OFF > 0.02" | bc)" = "1" ]; then echo "sniper: clock offset ${OFF}s" | $ALERT_CMD; fi
-$PY - "$LOG" <<'PYEOF' | $ALERT_CMD
-import json, sys, time
+if [ ! -f "$LOG" ] || [ $(( $(date +%s) - $(stat -c %Y "$LOG") )) -gt 600 ]; then echo "$LABEL: engine log has not grown for 10 minutes" | $ALERT_CMD; fi
+OFF=$(chronyc tracking 2>/dev/null | awk '/System time/ {print $4}'); if [ -n "$OFF" ] && [ "$(echo "$OFF > 0.02" | bc)" = "1" ]; then echo "$LABEL: clock offset ${OFF}s" | $ALERT_CMD; fi
+$PY - "$LOG" "$LABEL" <<'PYEOF' | $ALERT_CMD
+import json, sys, time, os
+BLIND_H = float(os.environ.get("BLIND_H", "2"))
+if BLIND_H <= 0: raise SystemExit(0)
 last = {"score": 0.0, "creation": 0.0}; errs = {}
 try:
     with open(sys.argv[1], "rb") as f:                                   # the tail is enough: this runs every five minutes
@@ -30,9 +34,9 @@ try:
 except OSError:
     raise SystemExit(0)
 now = time.time()
-if last["creation"] > now - 1800 and last["score"] < now - 7200:          # launches arriving, nothing scored for two hours
+if last["creation"] > now - 1800 and last["score"] < now - 3600 * BLIND_H:          # launches arriving, nothing scored for two hours
     top = sorted(errs.items(), key=lambda kv: -kv[1])[:2]
-    print("sniper: the engine has seen launches in the last 30 minutes but scored none for %.1f hours: the gauge is blind." % ((now - last["score"]) / 3600))
+    print("%s: the engine has seen launches in the last 30 minutes but scored none for %.1f hours: the gauge is blind." % (sys.argv[2], (now - last["score"]) / 3600))
     for k, v in top:
         print("        last hour's errors: %s (x%d)" % (k, v))
     print("        check the node: %s" % ("free-tier cap or rate limit on RPC_URL/LOGS_RPC_URL" if any("capacity" in k or "429" in k or "rate" in k.lower() for k, _ in top) else "run: journalctl -u sniper-engine -n 30"))

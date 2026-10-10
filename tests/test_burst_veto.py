@@ -51,7 +51,7 @@ ok(fired == [2, 3, 4, 5], "a gate without a veto works as before (opens at the 3
 src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "strategy", "sniper_engine.py")).read()
 ok('veto = veto if (ATTACK_MAX >= 0 and BURST_N > 1) else None' in src and 'gk["veto"] = veto' in src, "the engine passes a veto only for an ATTACK_MAX burst (the sniper's ATTACK_MAX is -1)")
 ok("if veto is not None and not vetoed:" in src and "                    vetoed = bool(veto())" in src, "the dry run emulates the veto exactly")
-ok('if decision["unsent_shots"] == len(shots):' in src and 'by the first shot (vetoed; no shot sent)' in src, "a burst vetoed before its first shot is a refusal: no position is opened")
+ok('if decision["unsent_shots"] == len(shots) or (SEND is None and decision["vetoed"]):' in src and 'by the first shot (vetoed; no shot sent)' in src, "a burst vetoed before its first shot is a refusal: no position is opened")
 ok('if "veto" not in inspect.signature(SEND_BURST).parameters:' in src, "an ATTACK_MAX burst refuses to start with a send step that has no veto")
 setup = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "deploy", "runner_setup.sh")).read()
 ok('RSEND=/etc/sniper/runner_send_step.py' in setup and 'install -m 600 "$REPO/deploy/send_step.py" "$RSEND"; setkv SEND_MODULE "$RSEND"' in setup, "the runner gets its own copy of the send step; the sniper's file is never touched")

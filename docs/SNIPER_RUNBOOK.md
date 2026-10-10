@@ -2678,7 +2678,7 @@ E1+1 +5.7% (the downside: every sniper fill since Oct 7 landed late). About 7 la
 the gates), $2-8 a day at $10. The tail is unchanged: about 20% end at -40% or worse (the creator's dump).
 
 **Deploy sequence** (the sniper is not touched: it stays on its checkout and release).
-Prepare, outside the box: (a) a separate app at the provider for the runner (its HTTPS URL is typed on the box only); (b) a second
+Prepare, outside the box: (a) a key from a SEPARATE provider account for the runner (another app in the sniper's account draws on the same monthly allowance: the Sep 26 refusal of every launch would come back; 5bn); its HTTPS URL is typed on the box only; (b) a second
 address: EC2 > the instance > Networking > its network interface > Actions > Manage IP addresses > assign a new private IPv4;
 then Elastic IPs > Allocate > Associate with that network interface and that private IP (about $3.60 a month).
 On the box:
@@ -2785,3 +2785,43 @@ template). (2) Two drivers read daily, not the P&L: qualifying untaxed launches 
 share reaching +30% (the crew's presence; the research's 53%). (3) Pause, not tune: the flow under 3 a day for three days, or
 seven trading days summing to a loss, stops the runner (`runner_setup.sh stop`) and the next step is a reading, never a
 parameter. (4) The sniper stays armed: its gate costs nothing while the bundled launches are gone and fires on the first one back.
+
+## 5bn. The second review, finished by hand (Oct 10): 25 findings, 24 real, engine 6.27 and the tooling
+
+The review of 5bk's rebuild ran as five areas (the 6.26 engine diff, the runner's live path, the tooling, the sniper's safety, the
+veto commit) with a refuting verifier per finding. The owner stopped it at 15 agents to save credits (the models were already the
+strongest available); the five area reviews and nine verdicts were in, and the remaining sixteen findings were verified by reading
+the code here. One finding was already fixed (the k-2 view of the crowd: the veto, 5bk); the other 24 were real, none a blocker,
+three high. Every one is fixed in this release; nothing changes for the sniper (every change is behind the runner's switches or in
+the runner's tooling), and tests/test_review2.py (18) holds the contracts with the three suites it touched.
+
+**Engine 6.27.** (1) The runner's HTTP clients leave from its own address: `RPC_LOCAL_ADDR` (default FEED_LOCAL_ADDR) binds the RPC
+pools and the sender's warm sockets, so the mark poll at 500 ms on the public node never shares the sniper's per-address throttle
+(high). (2) The address check runs after the state loads; a restart that cannot bind the address (gone after a reboot or a network
+reconfigure) sells an open live position in the foreground, from the default address, before it stops. (3) With the crowd ceiling
+on, an approve on the not-yet-learned token (a named wallet's, the curve as spender) is not a fleet: no false veto. (4) In dry run any
+veto is a refusal, so the pre-live reading does not book paper fills that live would mostly not get. (5) The no-provider feed wait is
+the second instance's only (REQUIRE_FEED_LOCAL_ADDR), never the sniper's. (6) The back-fill of earlier calls runs after the curve is
+registered (a call indexed meanwhile was counted by neither path). (7) The 33 s timer is cleared under the lock before the sell, not
+after (it could wipe a reservation made during the sell). (8) The exit's bankroll reads the relay before the wallet (the daily stop
+saw one stake too many for up to 100 s after each exit). The template adds LATE_SEND_MIN_MS=70: the engine's default 100 is above
+SLOT_LEAD_MS+BURST_LEAD_MS (96), which made the 6.24 late start unreachable for the runner.
+
+**The tooling.** runner_setup.sh: an open LIVE position (buy_hash, mode live) blocks `stop` (unless --force), `upgrade` and `dry`;
+`live` over it keeps the state file and starts, and the engine sells it as it starts (the stop stranded the tokens, then every
+subcommand refused with advice that could not be followed); `live` never deletes the state (load_state starts fresh on a mode change
+itself; the day's DAILY_STOP latch survives an update); the unit has StartLimitIntervalSec=600 / StartLimitBurst=5 and dry/live
+reset it (a start that failed every 4 s restarted forever, spending provider calls); `units`, `dry` and `live` refuse from the
+sniper's checkout; `check` asks the relay whether the shooters are registered (relay_ops shooters-register now fails when they are
+not; the engine would restart-loop); `shooters` can be run again after a failure past the creation; a keyed LOGS_RPC_URL is refused;
+set-rpc asks for a separate provider ACCOUNT; add-ip records the box's public address before the association and compares after
+(an auto-assigned primary address could be released), and persists the second address for networkd with /etc/netplan/60-runner-ip.yaml
+(`netplan generate` only, nothing applied: networkd drops addresses it did not set when a systemd upgrade or `netplan apply`
+reconfigures the link). relay_deploy.py writes RELAY the moment the relay is known good and reads the factory's logs for the
+simulation on the public node inside a try (a keyed node refuses the 30,000-block range: the deploy died after the relay was paid
+for, with RELAY unwritten). withdraw.py treats only a refusal before acceptance as "nothing sent" and polls the hash on any other
+error (an "already known" after a forwarding timeout would have been sent twice). sniper-check labels the runner's alerts "runner:"
+and skips the blind-gauge rule for it (the runner scores only the untaxed bundled launches, hours apart).
+
+**Not changed, on purpose.** The 300-block cap and the 0.30 guard (re-priced in 5bk); the dry run before live (5bk's sequence)
+remains the view check for the k-1 crowd; the sniper keeps 6.25 until its own restart (6.27 is identical for it with its env).

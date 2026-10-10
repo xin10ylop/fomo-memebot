@@ -45,8 +45,8 @@ except SystemExit as e: ok("not an address of this machine" in str(e), "an addre
 E.FEED_LOCAL_ADDR = ""; E.REQUIRE_FEED_LOCAL_ADDR = False
 src = open(E.__file__).read()
 ok(src.count("compression=FEED_COMPRESSION, **feed_local()) as ws:") == 2, "both feed sockets leave from the local address")
-ok("if (refused >= 5 or blocked) and not PROVIDER_WS:" in src and "await asyncio.sleep(window); refused = 0" in src, "refused or blocked with no provider: one alarm and a wait (an hour for a 403), not a 5 s retry loop")
-ok("check_feed_local(); load_send_step()" in src, "the address is checked at start, before the feed opens")
+ok("if (refused >= 5 or blocked) and not PROVIDER_WS and REQUIRE_FEED_LOCAL_ADDR:" in src and "await asyncio.sleep(window); refused = 0" in src, "refused or blocked with no provider: one alarm and a wait (an hour for a 403), not a 5 s retry loop")
+ok(src.index("    load_state()\n    try:\n        check_feed_local()") > src.index("    load_send_step()\n") and 'close_position(state["open"], "recovered after restart (feed address missing)")' in src, "the address is checked at start after the state loads (6.27): a lost address sells an open live position before the stop, before the feed opens")
 # the state file's mode
 today = str(E.datetime.datetime.utcnow().date())
 def load(saved, now_mode):

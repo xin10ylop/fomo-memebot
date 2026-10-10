@@ -12,6 +12,7 @@ from eth_account import Account
 
 ENV = os.environ.get("SNIPER_ENV", "/etc/sniper/engine.env"); ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FACTORY = "0xe33e9e479df8802cb0866d5d05258bec4cf62948"
+PUBLIC_RPC = "https://rpc.mainnet.chain.robinhood.com"                  # 6.27: the post-deploy simulation reads the factory's logs here (a keyed node refuses a 30,000-block range)
 
 
 def env():
@@ -93,8 +94,14 @@ def main():
     print(f"code on the chain: {len(code) // 2 - 1} bytes {'ok' if ok_code else 'UNEXPECTED'}; owner() = 0x{owner[-40:]} {'== wallet ok' if ('0x' + owner[-40:]).lower() == wallet else '!= WALLET: DO NOT USE'}")
     if ("0x" + owner[-40:]).lower() != wallet:
         sys.exit(1)
-    head = int(rpc.call("eth_blockNumber", []), 16)
-    logs = rpc.call("eth_getLogs", [{"fromBlock": hex(head - 30000), "toBlock": "latest", "address": FACTORY}])
+    if a.write_env:                                                          # 6.27: written the moment the relay is known good, before the simulation (a failed log read must not lose the address)
+        lines = [l for l in open(ENV).read().splitlines() if not l.startswith("RELAY=")] + [f"RELAY={relay}"]
+        tmp = ENV + ".tmp"; open(tmp, "w").write("\n".join(lines) + "\n"); os.chmod(tmp, 0o600); os.replace(tmp, ENV)
+    try:
+        pub = Rpc(PUBLIC_RPC); head = int(pub.call("eth_blockNumber", []), 16)   # 6.27: the 30,000-block log read on the public node (a keyed node refuses the range)
+        logs = pub.call("eth_getLogs", [{"fromBlock": hex(head - 30000), "toBlock": "latest", "address": FACTORY}])
+    except Exception as ex:
+        print(f"no recent curve to simulate on ({str(ex)[:100]}): try the engine's dry run"); logs = []
     curves = ["0x" + l["topics"][2][-40:] for l in logs if len(l["topics"]) > 3]
     if curves:
         curve = curves[-1]; amt = 10 ** 14
@@ -112,8 +119,6 @@ def main():
         except Exception as ex:
             print(f"simulated buy through the relay on {curve} did not go through ({str(ex)[:120]}); the curve may be graduated or in its tax second, try the engine's dry run")
     if a.write_env:
-        lines = [l for l in open(ENV).read().splitlines() if not l.startswith("RELAY=")] + [f"RELAY={relay}"]
-        tmp = ENV + ".tmp"; open(tmp, "w").write("\n".join(lines) + "\n"); os.chmod(tmp, 0o600); os.replace(tmp, ENV)
         print(f"\nRELAY={relay} written to {ENV}. Next: deploy/relay_ops.py shooters-register (if shooters exist), deposit <eth> (the stake), then restart the engine")
     else:
         print(f"\nadd this line to {ENV} (and STAKE_MIN/STAKE_MAX to the bet you want), then restart the engine:")

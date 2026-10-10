@@ -49,6 +49,8 @@ SEQ_PIN_IP = os.environ.get("SEQ_PIN_IP", "")                             # 6.9:
 FEED_URL = os.environ.get("FEED_URL", "wss://feed.mainnet.chain.robinhood.com")
 FEED_SOCKETS = int(os.environ.get("FEED_SOCKETS", "2"))                  # 6.9: sockets to the feed; the second delivers 4-6 ms earlier on 98% of messages (measured Sep 29), the copy is dropped by sequence number
 FEED_LOCAL_ADDR = os.environ.get("FEED_LOCAL_ADDR", "").strip()            # 6.26 (5bk): the local address the feed sockets leave from: a second instance on the box must
+RPC_LOCAL_ADDR = os.environ.get("RPC_LOCAL_ADDR", FEED_LOCAL_ADDR).strip()        # 6.27 (5bn): the HTTP clients (the RPC pools, the sender's warm sockets) leave from the same second address, so the runner's public-node reads (the mark poll at 500 ms) never share the sniper's per-address throttle; empty = the default address
+RPC_BIND = [RPC_LOCAL_ADDR]                                               # cleared by check_feed_local when the address is gone, so a recovery sell still leaves
 REQUIRE_FEED_LOCAL_ADDR = os.environ.get("REQUIRE_FEED_LOCAL_ADDR", "0") == "1"   # use a second public address (the feed allows two connections per address; the sniper uses both)
 FEED_COMPRESSION = os.environ.get("FEED_COMPRESSION", "deflate") or None   # 5.48: since Sep 17 ~19:30 UTC the feed refuses a connection that does not offer permessage-deflate ("Compression is required")
 FEED_SOURCE = os.environ.get("FEED_SOURCE", "sequencer")                  # "sequencer": Robinhood's feed; "provider": a third-party node's WebSocket (PROVIDER_WS), no Robinhood endpoint at all
@@ -318,7 +320,7 @@ class Rpc:
         with self.plock:
             if self.pool:
                 return self.pool.pop()
-        return http.client.HTTPSConnection(self.host, timeout=self.timeout, context=_CTX)
+        return http.client.HTTPSConnection(self.host, timeout=self.timeout, context=_CTX, source_address=((RPC_BIND[0], 0) if RPC_BIND[0] else None))
 
     def _release(self, c):
         with self.plock:
@@ -336,7 +338,7 @@ class Rpc:
             with self.plock:
                 cs = list(self.pool); self.pool.clear()
             if not cs:
-                cs = [http.client.HTTPSConnection(self.host, timeout=self.timeout, context=_CTX)]
+                cs = [http.client.HTTPSConnection(self.host, timeout=self.timeout, context=_CTX, source_address=((RPC_BIND[0], 0) if RPC_BIND[0] else None))]
             for c in cs:
                 try:
                     c.request("POST", self.path, body=body, headers=UA); c.getresponse().read(); self._release(c)
@@ -395,9 +397,9 @@ class Sender:
 
     def _connect(self, e):
         """a TLS connection to the pinned address (SNI and Host stay the hostname), or by name when nothing is pinned"""
-        c = http.client.HTTPSConnection(e["host"], timeout=5, context=_CTX)
+        c = http.client.HTTPSConnection(e["host"], timeout=5, context=_CTX, source_address=((RPC_BIND[0], 0) if RPC_BIND[0] else None))
         if e["ip"]:
-            raw = socket.create_connection((e["ip"], 443), timeout=5); raw.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            raw = socket.create_connection((e["ip"], 443), timeout=5, source_address=((RPC_BIND[0], 0) if RPC_BIND[0] else None)); raw.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             c.sock = _CTX.wrap_socket(raw, server_hostname=e["host"])
         return c
 
@@ -410,8 +412,8 @@ class Sender:
         res = {}
         for ip in ips:
             try:
-                raw = socket.create_connection((ip, 443), timeout=5); raw.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-                c = http.client.HTTPSConnection(e["host"], timeout=5, context=_CTX); c.sock = _CTX.wrap_socket(raw, server_hostname=e["host"]); t = []
+                raw = socket.create_connection((ip, 443), timeout=5, source_address=((RPC_BIND[0], 0) if RPC_BIND[0] else None)); raw.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                c = http.client.HTTPSConnection(e["host"], timeout=5, context=_CTX, source_address=((RPC_BIND[0], 0) if RPC_BIND[0] else None)); c.sock = _CTX.wrap_socket(raw, server_hostname=e["host"]); t = []
                 for _ in range(5):
                     t0 = mono(); c.request("POST", e["path"], body=self.PING, headers=UA); c.getresponse().read(); t.append(1000 * (mono() - t0))
                 c.close(); res[ip] = round(sorted(t)[2], 2)
@@ -693,6 +695,7 @@ def check_feed_local():
         try:
             sk.bind((FEED_LOCAL_ADDR, 0))
         except OSError as e:
+            RPC_BIND[0] = ""                                                  # 6.27: the recovery sell below leaves from the default address
             raise SystemExit(f"FEED_LOCAL_ADDR {FEED_LOCAL_ADDR} is not an address of this machine ({e}): not starting")
         finally:
             sk.close()
@@ -1176,12 +1179,6 @@ def watch_curve(curve, tk0, feed_ts, named, creator, blk0=None, tax_bps=None):
     net0 = X0 * tk0 / (Y0 - tk0); w = {"X": X0 + net0, "Y": Y0 - tk0, "cb": bytes.fromhex(curve[2:]), "ts0": feed_ts, "blk0": blk0, "named": named, "creator": creator, "curve": curve,
                                        "tax_bps": tax_bps, "tax": 0.01 + (tax_bps or 0) / 10000.0,             # the buyers' tax on this token: the 1% protocol fee plus the token's own (calldata word 13)
                                        "bundle": 0, "bundle_eth": 0.0, "out1": 0, "out2": 0, "out1_chain": 0, "out2_chain": 0, "tb": None, "buys": 0, "sells": 0, "since": mono(), "dump": None, "wallets": set(), "rivals": [], "attack_targets": set(), "attack_senders": set(), "attack_wallets": set(), "blk_watch": state["blocks"], "seq_watch": state["feed_seq"]}
-    if ATTACK_MAX >= 0:                                                    # 6.26 (5bk): the fleets that fired before the curve was watched (blind before otherwise)
-        n0 = attack_fleets(w)
-        for to_hex, t, data in list(state["recent_calls"]):
-            if to_hex == curve or w["cb"] in data:
-                note_attack(w, to_hex, t, data, curve)
-        w["backfilled_fleets"] = attack_fleets(w) - n0
     for b in curve_buys(curve, feed_ts):
         ts_, snd, val, seen = b[:4]; blk = b[4] if len(b) > 4 else None
         buyers = named_in(b[7], named) if len(b) > 7 else None                 # a helper call: its recipients are the bundle
@@ -1191,6 +1188,12 @@ def watch_curve(curve, tk0, feed_ts, named, creator, blk0=None, tax_bps=None):
     for seen, tk in state["sells"].get(curve, []):
         fold_sell(w, tk)
     state["watch"][curve] = w
+    if ATTACK_MAX >= 0:                                                    # 6.26 (5bk): the fleets that fired before the curve was watched; 6.27: after it is registered, so a call indexed meanwhile is counted by one path (sets: never twice)
+        n0 = attack_fleets(w)
+        for to_hex, t, data in list(state["recent_calls"]):
+            if to_hex == curve or w["cb"] in data:
+                note_attack(w, to_hex, t, data, curve)
+        w["backfilled_fleets"] = attack_fleets(w) - n0
     return w
 
 
@@ -1217,6 +1220,8 @@ def note_attack(w, to_hex, t, data, cv):
     relay targets plus direct senders, so a fleet of shooter wallets behind one relay counts once (Sep 18 14:17: 42 shots from 30
     wallets were three relays). Our own relay and wallet do not count, and neither does the bundle's helper (it names named wallets)."""
     if to_hex in OUR_ADDRS or (w.get("tb") is not None and to_hex == "0x" + w["tb"].hex()):   # an approve on the launch's own token names the curve as spender: not a shot
+        return
+    if ATTACK_MAX >= 0 and data[:4].hex() == APPROVE_SEL:                 # 6.27 (5bn): a named wallet's approve on the not-yet-learned token named the curve and counted as a fleet (a false veto)
         return
     if to_hex == cv:
         snd = sender_of(t)
@@ -1850,6 +1855,8 @@ def refresh_wallet(why=""):
     if SEND is None:
         return
     try:
+        if SHOOTERS and RELAY:                                                # 6.27 (5bn): the relay just paid the stake; bankroll_usd adds its balance
+            state["relay_eth"] = int(rpc.call("eth_getBalance", [RELAY, "latest"]), 16) / 1e18; state["relay_at"] = mono()
         bal = int(rpc.call("eth_getBalance", [WALLET, "latest"]), 16) / 1e18
         with lock:
             state["wallet_eth"] = bal; state["wallet_at"] = mono(); state["bankroll"] = bankroll_usd(bal)
@@ -2545,7 +2552,7 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
             decision["vetoed"] = vetoed_at[0] is not None; decision["unsent_shots"] = sum(1 for hh, a in shots if hh is None and a is None)
             if vetoed_at[0] is not None:
                 decision["feed_block_at_veto"], decision["seq_at_veto"], decision["fleets_at_veto"], decision["wallets_at_veto"] = vetoed_at[0]
-            if decision["unsent_shots"] == len(shots):                  # vetoed before the first shot: nothing left the box
+            if decision["unsent_shots"] == len(shots) or (SEND is None and decision["vetoed"]):   # vetoed before the first shot: nothing left the box (6.27: in dry run any veto, so the reading does not book paper fills live would mostly not get)
                 release_reservation(); state["traded"].pop(curve, None); gates = [f"attackers {decision.get('fleets_at_veto')} > ATTACK_MAX {ATTACK_MAX} by the first shot (vetoed; no shot sent)"]
                 threading.Thread(target=score_launch, args=(curve, tk0, b_create, stake_usd, creator, src, decision), daemon=True).start()
                 log({"ev": "eligible_not_traded", "curve": curve, "creator": creator, "resolve_ms": resolve_ms, "resolve_src": src, "named_wallets": len(named), **decision, "gates": gates, "stake_usd": stake_usd}); return
@@ -2678,9 +2685,12 @@ def _handle_creation(creator, quote, init_buy_wei, seen_at, feed_ts, named, blk0
              "mark_lo": round(mk["lo"], 4) if mk["n"] else None, "reads": mk["n"], "chain_polls": w.get("chain_polls", 0), "chain_poll_errs": w.get("chain_poll_errs", 0),
              "blocks_held": (state["feed_seq"] - pos["buy_block"]) if (pos.get("buy_block") and state.get("feed_seq")) else None, "held_s": round(mono() - t_buy, 2), "dry_run": h is None,
              "b_from": b_from, "chain_last_block": w.get("chain_last_block"), "chain_poll_untrusted": w.get("chain_poll_untrusted", 0), "chain_poll_err": w.get("chain_poll_err")})
-    close_position(pos, why)
     if EXIT_MARK:                                                                                               # 6.26 (5bk): the next launch is not held back by the
-        state["busy_until"] = 0.0; state["watch"].pop(curve, None)                                              # 33 s timer after an early exit (the open position gate stays)
+        with lock:                                                                                              # 33 s timer after an early exit (the open position gate stays);
+            state["busy_until"] = 0.0                                                                           # 6.27: cleared before the sell, under the lock, so it cannot wipe a reservation made during the sell
+    close_position(pos, why)
+    if EXIT_MARK:
+        state["watch"].pop(curve, None)
     if SHOOTERS:
         threading.Thread(target=relay_topup, args=("after exit",), daemon=True).start()
 
@@ -3112,7 +3122,7 @@ async def main():
         except Exception as e:
             log({"ev": "error", "stage": "pin_cpu", "err": str(e)[:100]})
     sys.setswitchinterval(0.0005)
-    check_feed_local(); load_send_step()
+    load_send_step()
     if RELAY and SEND is not None:                                        # 5.94/6.03: after the send step is loaded (before it, SEND was None and none of this ran); a wrong relay address would burn every shot; the contract must be there and be ours
         try:
             code = rpc.call("eth_getCode", [RELAY, "latest"]); owner = rpc.call("eth_call", [{"to": RELAY, "data": "0x8da5cb5b"}, "latest"])
@@ -3142,13 +3152,20 @@ async def main():
         except Exception as e:
             if RELAY_TOO_LATE not in str(e):
                 raise SystemExit(f"RELAY {RELAY} does not know the deadline (old relay, or the RPC failed: {str(e)[:100]}): redeploy with deploy/relay_deploy.py --write-env, engine stopped")
-    load_state(); new_day_check(); venue_check(first=True); threading.Thread(target=chain_loop, daemon=True).start()
+    load_state()
+    try:
+        check_feed_local()                                                # 6.27 (5bn): after the state, so a restart that cannot bind the second address (gone after a reboot or a
+    except SystemExit:                                                    # network reconfigure) sells an open live position in the foreground before it stops, instead of stranding it
+        if state.get("open") and SEND is not None:
+            log({"ev": "recovering_open_position", "position": state["open"], "why": "feed address missing: selling before the stop"}); close_position(state["open"], "recovered after restart (feed address missing)")
+        raise
+    new_day_check(); venue_check(first=True); threading.Thread(target=chain_loop, daemon=True).start()
     if SEND_PROBE is not None and PROBE_EVERY_S > 0:
         threading.Thread(target=probe_loop, daemon=True).start()        # 6.16
     if state["open"]:
         log({"ev": "recovering_open_position", "position": state["open"]}); threading.Thread(target=close_position, args=(state["open"], "recovered after restart"), daemon=True).start()
     smart_helpers_load(force=True); rep_weights_load(force=True)
-    log({"ev": "start", "version": 6.26, "release": "6.26", "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
+    log({"ev": "start", "version": 6.27, "release": "6.27", "rpc_local_addr": RPC_LOCAL_ADDR, "probe": [bool(SEND_PROBE), PROBE_EVERY_S, SEQ_RTT_SKIP_MS], "shots_per_shooter": SHOTS_PER_SHOOTER, "named_max": NAMED_MAX, "chain_rivals": bool(PROVIDER_WS), "feed_source": FEED_SOURCE, "seat": SEAT, "exempt": EXEMPT, "bundle_min": BUNDLE_MIN, "bundle_min_eth": BUNDLE_MIN_ETH, "bundle_max_eth": BUNDLE_MAX_ETH, "out1_max": OUT1_MAX, "out2_max": OUT2_MAX, "min_creator_supply": MIN_CREATOR_SUPPLY,
          "stop_sell_frac": STOP_SELL_FRAC, "take_profit": TAKE_PROFIT, "e0_outsider": E0_OUTSIDER, "tier_min_bps": TIER_MIN_BPS, "tier_max_bps": TIER_MAX_BPS, "skip_tier1_team_share": SKIP_TIER1_TEAM_SHARE, "e0_bundle_wait_s": E0_BUNDLE_WAIT_S, "e0_bundle_max_blocks": E0_BUNDLE_MAX_BLOCKS, "max_live_trades": MAX_LIVE_TRADES, "relay": RELAY or None, "relay_deadline": RELAY_DEADLINE, "shooters": len(SHOOTERS), "wallet_stake": WALLET_STAKE, "gas_reserve_usd": GAS_RESERVE_USD, "burst": [BURST_N, BURST_STEP_MS, BURST_LEAD_MS, BURST_SLIP], "slot_send": SLOT_SEND, "slot_lead_ms": SLOT_LEAD_MS, "feed_lag_ms": FEED_LAG_MS, "provider_fallback_s": PROVIDER_FALLBACK_S, "e0_allow_provider": E0_ALLOW_PROVIDER, "provider_heads": PROVIDER_HEADS, "feed_compression": FEED_COMPRESSION, "provider_lag_ms": PROVIDER_LAG_MS, "send_mode": SEND_MODE, "trade_hours": TRADE_HOURS, "min_rule_passing_1h": MIN_RULE_PASSING_1H, "min_follow_eth_60": MIN_FOLLOW_ETH_60, "seat_wait_ms": SEAT_WAIT_MS, "margin_ms": MARGIN_MS, "bankroll": state["bankroll"], "frac": FRAC, "stake": [STAKE_MIN, STAKE_MAX], "hold": HOLD, "hold_blocks": HOLD_BLOCKS, "attack_min": ATTACK_MIN, "attack_unit": ATTACK_UNIT, "attack_build_min": ATTACK_BUILD_MIN, "gate_late_ms": GATE_LATE_MS, "gate_close_ms": GATE_CLOSE_MS, "kill_usd": KILL_USD,
          "supply_frac": SUPPLY_FRAC, "stake_min": STAKE_MIN, "stake_max": STAKE_MAX, "stake_boost_usd": STAKE_BOOST_USD, "smart_helpers": len(state.get("smart_helpers") or ()), "attack_group": len(ATTACK_GROUP), "attack_build_min": ATTACK_BUILD_MIN, "hold_from_fill": HOLD_FROM_FILL, "sell_reserved_nonce": SELL_RESERVED_NONCE, "late_send_min_ms": LATE_SEND_MIN_MS, "exit_mark": EXIT_MARK, "stop_loss": STOP_LOSS, "mark_poll_ms": MARK_POLL_MS, "attack_max": ATTACK_MAX, "tier_early": TIER_EARLY, "feed_local_addr": bool(FEED_LOCAL_ADDR), "feed_sockets": FEED_SOCKETS, "chain_poll_s": CHAIN_POLL_S, "rep_weights": len(state.get("rep_weights") or ()), "rep_min": state.get("rep_min"), "rep_gate": REP_GATE, "frac": FRAC, "slip": SLIP, "seat_wait_ms": SEAT_WAIT_MS, "hold_s": HOLD, "switch": [SWITCH_N, SWITCH], "daily_stop": DAILY_STOP, "sender_backend": SENDER_BACKEND, "dry_run": SEND is None, "wallet": WALLET})
     gc.collect(); gc.freeze(); gc.disable()                            # a generation-2 pass costs milliseconds; prune() collects when nothing is in flight
@@ -3180,7 +3197,7 @@ async def main():
                 log({"ev": "alarm", "what": f"the sequencer feed {'blocked this address (HTTP 403)' if blocked else 'refused five connections in a row'}: detection on the provider WebSocket for {window:.0f} s, then the feed is tried again", "err": str(e)[:160]})
                 last_prune_holder[0] = mono(); await provider_loop(websockets, until=mono() + window)
                 log({"ev": "note", "what": "trying the sequencer feed again"}); refused = 0; backoff = 0.2; continue
-            if (refused >= 5 or blocked) and not PROVIDER_WS:             # 6.26 (5bk): no provider to fall back to: do not feed their block (the box's address is shared)
+            if (refused >= 5 or blocked) and not PROVIDER_WS and REQUIRE_FEED_LOCAL_ADDR:   # 6.26 (5bk): no provider to fall back to: do not feed their block (the box's address is shared); 6.27: the second instance only
                 window = 3600.0 if blocked else 600.0
                 log({"ev": "alarm", "what": f"the sequencer feed {'blocked this address (HTTP 403)' if blocked else 'refused five connections in a row'} and there is no PROVIDER_WS: waiting {window:.0f} s before trying again", "err": str(e)[:160]})
                 await asyncio.sleep(window); refused = 0; backoff = 0.2; continue

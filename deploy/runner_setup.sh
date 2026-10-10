@@ -72,15 +72,18 @@ active() { systemctl is-active --quiet "$1"; }
 own_rpc_ok() {  # the runner's provider key: set, not the sniper's, and answering chain 4663
   [ -n "$(val RPC_URL "$ENV")" ] || { echo "RPC_URL: not set (sudo bash deploy/runner_setup.sh set-rpc)"; return 1; }
   [ "$(val RPC_URL "$ENV")" != "$(val RPC_URL "$SRC")" ] || { echo "RPC_URL: the sniper's key (its monthly quota is the sniper's): set-rpc"; return 1; }
+  case "$(val LOGS_RPC_URL "$ENV")" in */v2/*|*"$(val RPC_URL "$SRC" | sed 's#^https://##')"*) echo "LOGS_RPC_URL: a keyed node (a monthly quota, the sniper's or this one's): point it at the public node"; return 1;; esac   # 6.27
   RPCU="$(val RPC_URL "$ENV")" $PY -c 'import os,json,urllib.request; r=urllib.request.Request(os.environ["RPCU"],data=json.dumps({"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}).encode(),headers={"content-type":"application/json"}); c=json.load(urllib.request.urlopen(r,timeout=15)).get("result"); raise SystemExit(0 if c=="0x1237" else 1)' || { echo "RPC_URL: does not answer chain 4663"; return 1; }
 }
+not_sniper_checkout() { grep -q "WorkingDirectory=$REPO$" /etc/systemd/system/sniper-engine.service 2>/dev/null && { echo "this is the sniper's checkout ($REPO): run from the runner's worktree (~/fomo-runner)"; exit 1; }; true; }   # 6.27
 feed_ip_ok() {
   ip=$(val FEED_LOCAL_ADDR "$ENV"); [ -n "$ip" ] || { echo "FEED_LOCAL_ADDR: not set (sudo bash deploy/runner_setup.sh add-ip <second private IP>)"; return 1; }
   ip -o -4 addr show | grep -q " $ip/" || { echo "FEED_LOCAL_ADDR $ip: not on this machine (add-ip again, or reboot ran without runner-ip)"; return 1; }
   a=$(curl -s -m 8 --interface "$ip" https://checkip.amazonaws.com || true); b=$(curl -s -m 8 https://checkip.amazonaws.com || true)
   [ -n "$a" ] && [ "$a" != "$b" ] || { echo "FEED_LOCAL_ADDR $ip: does not leave from a second public address (public $a, the sniper's $b): associate an Elastic IP with it"; return 1; }
 }
-no_open_position() { [ ! -f "$STATEF" ] || python3 -c "import json,sys; sys.exit(1 if json.load(open('$STATEF')).get('open') else 0)" || { echo "the runner's state file holds an OPEN position: start it live so it is sold first"; return 1; }; }
+live_pos() { [ -f "$STATEF" ] && python3 -c "import json,sys; o=json.load(open('$STATEF')); p=o.get('open') or {}; sys.exit(0 if (p.get('buy_hash') and o.get('mode') == 'live') else 1)" 2>/dev/null; }   # 6.27: tokens in the wallet
+no_open_position() { ! live_pos || { echo "the runner's state file holds an OPEN LIVE position: run 'live' (the engine sells it as it starts); never dry, stop or upgrade over it"; return 1; }; }
 case "${1:-status}" in
 install)
   [ -f "$ENV" ] && { echo "$ENV exists: use upgrade"; exit 1; }
@@ -91,6 +94,7 @@ install)
 upgrade)
   [ -f "$ENV" ] || { echo "no $ENV: use install"; exit 1; }
   active runner-engine && { echo "runner-engine is running: sudo systemctl stop runner-engine runner-notify first"; exit 1; }
+  no_open_position
   install -m 600 "$ENV" "$ENV.bak"; render "$ENV.new" "$ENV.bak" && mv "$ENV.new" "$ENV" && chmod 600 "$ENV"
   grep -q "^PRIVATE_KEY=0x[0-9a-fA-F]\{64\}$" "$ENV" || { cp "$ENV.bak" "$ENV"; echo "the key did not carry over: the old file is restored"; exit 1; }
   echo "runner.env rewritten from the template (the old one is $ENV.bak); wallet $(val WALLET "$ENV"), base $(val PNL_BASE "$ENV")"
@@ -98,13 +102,18 @@ upgrade)
 set-rpc)
   read -r -s -p "the runner's own provider HTTPS URL (not shown): " U; echo
   case "$U" in https://*) ;; *) echo "not an https URL: nothing written"; exit 1;; esac
-  [ "$U" != "$(val RPC_URL "$SRC")" ] || { echo "that is the sniper's key: create a separate app at the provider for the runner"; exit 1; }
+  [ "$U" != "$(val RPC_URL "$SRC")" ] || { echo "that is the sniper's key: the runner needs a key from a SEPARATE provider account (another app in the sniper's account draws on the same monthly quota)"; exit 1; }
   RPCU="$U" $PY -c 'import os,json,urllib.request; r=urllib.request.Request(os.environ["RPCU"],data=json.dumps({"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}).encode(),headers={"content-type":"application/json"}); c=json.load(urllib.request.urlopen(r,timeout=15)).get("result"); print("chain", int(c,16)); raise SystemExit(0 if c=="0x1237" else 1)' || { echo "the URL does not answer chain 4663: nothing written"; exit 1; }
   setkv RPC_URL "$U"; unset U; echo "RPC_URL set for the runner" ;;
 add-ip)
   IP="$2"; [ -n "$IP" ] || { echo "usage: add-ip <the second private IP AWS assigned to this instance>"; exit 1; }
   DEV=$(ip -o -4 route show default | awk '{print $5}' | head -1); PFX=$(ip -o -4 addr show dev "$DEV" | awk '{print $4}' | head -1 | cut -d/ -f2)
+  B0=$(curl -s -m 8 https://checkip.amazonaws.com || true); echo "the box's public address before: ${B0:-unknown}"   # 6.27: the sniper's address must survive the Elastic IP association
   ip addr replace "$IP/$PFX" dev "$DEV"
+  if command -v netplan >/dev/null 2>&1; then                             # 6.27: networkd drops addresses it did not set when it reconfigures the link (a systemd upgrade, netplan apply): make it the owner
+    printf 'network:\n  version: 2\n  ethernets:\n    %s:\n      addresses:\n        - %s/%s\n' "$DEV" "$IP" "$PFX" > /etc/netplan/60-runner-ip.yaml; chmod 600 /etc/netplan/60-runner-ip.yaml
+    netplan generate 2>/dev/null && echo "netplan: $IP/$PFX on $DEV persisted (generate only; nothing applied now)" || { rm -f /etc/netplan/60-runner-ip.yaml; echo "netplan generate refused the file: removed (the oneshot unit still re-adds the address at boot)"; }
+  fi
   cat > /etc/systemd/system/runner-ip.service <<UNIT
 [Unit]
 Description=the runner's second address on $DEV (its feed socket leaves from it)
@@ -118,12 +127,16 @@ ExecStart=/sbin/ip addr replace $IP/$PFX dev $DEV
 WantedBy=multi-user.target
 UNIT
   systemctl daemon-reload; systemctl enable runner-ip >/dev/null 2>&1
-  setkv FEED_LOCAL_ADDR "$IP"; feed_ip_ok && echo "FEED_LOCAL_ADDR $IP: ok, it leaves from $(curl -s -m 8 --interface "$IP" https://checkip.amazonaws.com)" ;;
+  setkv FEED_LOCAL_ADDR "$IP"; feed_ip_ok && echo "FEED_LOCAL_ADDR $IP: ok, it leaves from $(curl -s -m 8 --interface "$IP" https://checkip.amazonaws.com)"
+  B1=$(curl -s -m 8 https://checkip.amazonaws.com || true); [ -n "$B0" ] && [ "$B1" = "$B0" ] && echo "the box's public address after: $B1 (unchanged: the sniper's sockets are fine)" || echo "WARNING: the box's public address is now ${B1:-unknown} (was ${B0:-unknown}): if it changed, the sniper's established sockets are dead: restart sniper-engine and check its feed" ;;
 units)
+  not_sniper_checkout
   cat > /etc/systemd/system/runner-engine.service <<UNIT
 [Unit]
 Description=the runner: the untaxed no-crowd tier on its own wallet (runbook 5bj/5bk)
 After=network-online.target chrony.service runner-ip.service
+StartLimitIntervalSec=600
+StartLimitBurst=5
 [Service]
 EnvironmentFile=$ENV
 WorkingDirectory=$REPO
@@ -168,7 +181,7 @@ shooters)
   active runner-engine && { echo "stop the runner first"; exit 1; }
   N="${2:-$(val BURST_N "$ENV")}"; [ -n "$(val RELAY "$ENV")" ] || { echo "deploy the relay first (relay)"; exit 1; }
   own_rpc_ok
-  SNIPER_ENV=$ENV $PY "$REPO/deploy/relay_ops.py" shooters-create "$N"
+  [ "$(val SHOOTER_KEYS "$ENV" | tr ',' '\n' | grep -c . || true)" -ge "$N" ] || SNIPER_ENV=$ENV $PY "$REPO/deploy/relay_ops.py" shooters-create "$N"   # 6.27: a second run after a failed registration or funding continues
   SNIPER_ENV=$ENV $PY "$REPO/deploy/relay_ops.py" shooters-register
   SNIPER_ENV=$ENV $PY "$REPO/deploy/relay_ops.py" shooters-fund "$(val SHOOTER_TARGET_ETH "$ENV")"
   setkv BURST_N "$N"; echo "BURST_N=$N" ;;
@@ -189,21 +202,24 @@ check)
   feed_ip_ok && echo "feed address: ok" || rc=1
   [ -n "$(val RELAY "$ENV")" ] && echo "relay: ok ($(val RELAY "$ENV" | cut -c1-12)...)" || { echo "relay: not deployed (relay)"; rc=1; }
   n=$(val SHOOTER_KEYS "$ENV" | tr ',' '\n' | grep -c . || true); [ "$n" -ge "$(val BURST_N "$ENV")" ] && echo "shooters: ok ($n)" || { echo "shooters: $n, BURST_N $(val BURST_N "$ENV") (shooters)"; rc=1; }
+  [ "$n" -eq 0 ] || { SNIPER_ENV=$ENV $PY "$REPO/deploy/relay_ops.py" status 2>/dev/null | grep -q ", 0 not registered" && echo "shooters registered: ok" || { echo "shooters: some are NOT registered on the relay (relay_ops.py shooters-register); the engine would restart-loop"; rc=1; }; }
   [ "$(val PNL_BASE "$ENV")" != "0" ] && echo "base: ok ($(val PNL_BASE "$ENV") ETH)" || { echo "base: not recorded (base)"; rc=1; }
   grep -q "veto=None" "$REPO/deploy/send_step.py" && echo "send step: ok (this checkout's, with the veto; copied to $RSEND at live)" || { echo "send step: $REPO/deploy/send_step.py has no veto (engine 6.26)"; rc=1; }
   grep -q "WorkingDirectory=$REPO$" /etc/systemd/system/runner-engine.service 2>/dev/null && grep -q "^CPUAffinity=0" /etc/systemd/system/runner-engine.service && echo "units: ok ($REPO)" || { echo "units: not for this checkout (units)"; rc=1; }
   no_open_position && echo "state: ok (no open position)" || rc=1
   exit $rc ;;
 dry|live)
-  own_rpc_ok; feed_ip_ok; no_open_position
-  grep -q "WorkingDirectory=$REPO$" /etc/systemd/system/runner-engine.service || { echo "the units are not for this checkout: units"; exit 1; }
+  own_rpc_ok; feed_ip_ok; [ "$1" = live ] || no_open_position            # 6.27: live over an open live position is the recovery (the engine sells it); dry refuses
+  not_sniper_checkout
+  grep -q "WorkingDirectory=$REPO$" /etc/systemd/system/runner-engine.service || { echo "the units are not for this checkout: units (from the runner's worktree)"; exit 1; }
   if [ "$1" = live ]; then bash "$0" check >/dev/null || { bash "$0" check; exit 1; }; install -m 600 "$REPO/deploy/send_step.py" "$RSEND"; setkv SEND_MODULE "$RSEND"; else setkv SEND_MODULE ""; fi
-  rm -f "$STATEF"                                         # a fresh state in the new mode (no position open: checked above)
+  [ "$1" = live ] || rm -f "$STATEF"                      # 6.27: dry starts fresh; live keeps the state (load_state starts fresh on a mode change itself, and the day's DAILY_STOP latch survives an update)
   ( crontab -l 2>/dev/null | grep -v "sniper-check $LOGF" || true; echo "*/5 * * * * /usr/local/bin/sniper-check $LOGF" ) | crontab -
-  systemctl restart runner-engine; systemctl enable runner-engine >/dev/null 2>&1
+  systemctl reset-failed runner-engine 2>/dev/null || true; systemctl restart runner-engine; systemctl enable runner-engine >/dev/null 2>&1
   [ -f /etc/sniper/telegram.env ] && { systemctl restart runner-notify; systemctl enable runner-notify >/dev/null 2>&1; }
   echo "start line: $(startline 14)"; systemctl is-active runner-engine ;;
 stop)
+  [ "$2" = "--force" ] || no_open_position                             # 6.27: a live position is sold by 'live', not stranded by a stop (--force stops anyway; the tokens stay in the wallet)
   systemctl stop runner-engine runner-notify; systemctl disable runner-engine runner-notify >/dev/null 2>&1 || true
   ( crontab -l 2>/dev/null | grep -v "sniper-check $LOGF" || true ) | crontab -; echo "runner stopped" ;;
 status)

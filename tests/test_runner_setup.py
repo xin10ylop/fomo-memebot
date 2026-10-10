@@ -2,7 +2,7 @@
 upgrade rewrites runner.env from the template keeping the wallet, the key and the books, drops a copied sniper provider key, copies
 the box's timing calibration from the sniper's env, removes keys the template no longer has, leaves no placeholder and keeps every
 file 0600 with a backup; base refuses to overwrite a recorded base and adds a later deposit; the guards in dry/live are present."""
-import os, subprocess, tempfile, stat
+import os, subprocess, tempfile, stat, json
 checks = 0
 def ok(cond, what):
     global checks
@@ -17,6 +17,7 @@ open(f"{T}/runner.env", "w").write(f"SEND_MODULE=\nPRIVATE_KEY={KEY}\nWALLET=0x4
 for f in ("engine.env", "runner.env"): os.chmod(f"{T}/{f}", 0o600)
 s = open(f"{R}/deploy/runner_setup.sh").read()
 s = s.replace("ENV=/etc/sniper/runner.env; SRC=/etc/sniper/engine.env", f"ENV={T}/runner.env; SRC={T}/engine.env")
+s = s.replace("STATEF=/var/log/sniper/runner.jsonl.state.json", f"STATEF={T}/state.json")
 s = s.replace('[ "$(id -u)" = 0 ] || { echo "run with sudo"; exit 1; }', "true")
 s = s.replace('  active runner-engine && { echo "runner-engine is running: sudo systemctl stop runner-engine runner-notify first"; exit 1; }\n', "")
 s = s.replace('TPL="$REPO/deploy/runner.env.template"', f'TPL="{R}/deploy/runner.env.template"')
@@ -35,8 +36,21 @@ r = run("base", "--add", "0.002"); ok("PNL_BASE=0.013100" in open(f"{T}/runner.e
 r = run("upgrade"); env2 = dict(l.split("=", 1) for l in open(f"{T}/runner.env").read().splitlines() if l and not l.startswith("#") and "=" in l)
 ok(env2["PNL_BASE"] == "0.013100" and env2["PRIVATE_KEY"] == KEY, "a second upgrade keeps the updated base and the key")
 src = open(f"{R}/deploy/runner_setup.sh").read()
-ok("own_rpc_ok; feed_ip_ok; no_open_position" in src and 'bash "$0" check >/dev/null || { bash "$0" check; exit 1; }' in src, "dry and live refuse without the runner's own key, its second address, or with a position open; live runs the full check")
+ok('own_rpc_ok; feed_ip_ok; [ "$1" = live ] || no_open_position' in src and 'bash "$0" check >/dev/null || { bash "$0" check; exit 1; }' in src, "dry and live refuse without the runner's own key, its second address, or with a position open; live runs the full check")
 ok("CPUAffinity=0" in src and "Nice=10" in src and "After=network-online.target chrony.service runner-ip.service" in src, "the runner's units keep it off the sniper's core and start after its address")
 ok("/etc/needrestart/conf.d/engines.conf" in src and "$nrconf{override_rc}{qr(^runner-engine)} = 0;" in src and "qr(^sniper-engine)" in src, "units exclude the engines from needrestart (an unattended upgrade restarted sniper-notify on Oct 10)")
 ok('[ "$U" != "$(val RPC_URL "$SRC")" ]' in src and "read -r -s -p" in src, "set-rpc reads the URL without echo and refuses the sniper's")
+
+# 6.27 (5bn): an open LIVE position is never stranded by stop or upgrade; live is the way out
+open(f"{T}/state.json", "w").write(json.dumps({"mode": "live", "open": {"curve": "0xc", "buy_hash": "0xb"}}))
+r = run("stop"); ok(r.returncode != 0 and "OPEN LIVE position" in r.stdout, "stop refuses over an open live position (stop --force to insist)")
+r = run("upgrade"); ok(r.returncode != 0 and "OPEN LIVE position" in r.stdout, "upgrade refuses over an open live position")
+open(f"{T}/state.json", "w").write(json.dumps({"mode": "dry", "open": {"curve": "0xc", "buy_hash": None}}))
+r = run("upgrade"); ok(r.returncode == 0, "a dry position (no tokens) does not block an upgrade")
+ok('[ "$1" = live ] || rm -f "$STATEF"' in src and "systemctl reset-failed runner-engine" in src, "live keeps the state file (the day's stop latch survives an update); the start limit is reset by hand")
+ok("StartLimitIntervalSec=600" in src and "StartLimitBurst=5" in src, "the runner's unit stops restarting after five failures in ten minutes")
+ok("not_sniper_checkout" in src and src.count("not_sniper_checkout\n") >= 2, "units and dry/live refuse from the sniper's checkout")
+ok('", 0 not registered"' in src and 'shooters-create "$N"' in src and '-ge "$N" ] ||' in src, "check sees unregistered shooters; shooters can be run again after a failure")
+ok("60-runner-ip.yaml" in src and "netplan generate" in src and "public address before" in src, "add-ip persists the address for networkd and checks the box's public address across the association")
+ok("*/v2/*" in src and "SEPARATE provider account" in src, "a keyed log node is refused; set-rpc asks for a separate provider account")
 print(f"all {checks} checks passed")
