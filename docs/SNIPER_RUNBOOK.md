@@ -2750,6 +2750,8 @@ this time, but nothing excluded it. A restart mid-burst or mid-sell loses the tr
 restart, not the shots in flight). The fix is one file, now written by `deploy/ohio_setup.sh`, by `runner_setup.sh units`, and
 checked by preflight.sh: `/etc/needrestart/conf.d/engines.conf` with `$nrconf{override_rc}{qr(^sniper-engine)} = 0;` (and
 runner-engine, flip-engine). The notifiers may restart (they are followers). Verify with `sudo needrestart -b` (batch mode: reports,
-never acts): the engine must not be listed as pending.
+never acts): the engine must not be listed as pending. Applied Oct 10 13:15: the 06:50 run had installed a new AWS kernel
+(7.0.0-1014, staged for the next reboot; unattended-upgrades never reboots this box) and upgraded libxml2 and libarchive;
+needrestart's pending list after the override: systemd-logind only. A reboot, when one is wanted, is a deploy window by hand.
 
 Nothing to change on the sniper. The first-place trial (5bg) still needs contested launches; none came.
