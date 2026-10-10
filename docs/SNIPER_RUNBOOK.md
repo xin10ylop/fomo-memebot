@@ -2725,3 +2725,31 @@ then stops them: the research's k-1 view at the shot, with the early shots (crea
 runner gets its own copy of the send step (/etc/sniper/runner_send_step.py, copied from its checkout at `live`); the sniper's
 /etc/sniper/send_step.py is never touched. tests/test_burst_veto.py (12). Expected with the veto and the 0.30 guard: the research's
 set at the real landing mix, about +6.5% a launch at $10 after burst gas, roughly 7 launches a day.
+
+## 5bl. Oct 10 13:00 reading: "the sniper is frozen" (piece oct10am: Oct 9 21:25 - Oct 10 12:57 UTC)
+
+**The chain.** 888 factory creations in the window, 8 with a bundle, none past the gate: every one of the 8 had 0-2 fleets at the
+tick (the gate needs 3), one had creator supply under 1%. The only launch a looser gate would have taken (0xd4b1f42f, 22:25,
+3 fleets by the fill block) filled at -13.8%; the only positive one (0x62d2b84d, 11:37, +6.1% behind-1) had zero fleets through all
+seven blocks, so no view of the gate reaches it. Zero trades overnight is the right answer to this window. The flow is the story
+again: 8 bundled launches in 15.5 h against 5-8 per 6-hour piece on Oct 9 and ~210 a day on the good days (5bh).
+
+**The box** (`sudo bash deploy/pulse.sh 16`, new: an hour-by-hour table of the engine's log; the heredoc version of it was pasted
+first). Alive on every signal: 925 creations seen in 16 h with a skip or a decision for each (28-92 an hour, matching the chain),
+the ten-minute flow line never missed, no restart since Oct 9 15:14, no alarm or error, load 0.05. The feed dropped at 03:00, 06:00
+and 09:00 ("no close frame received or sent", the public feed's hourly recycle) and reconnected within 0.4 s each time. The one
+`sent_burst` + `eligible_not_traded` of the last 3 h is 0x62d2b84d: 105 shots built, all gated at the tick ("attackers 0 < 3 by the
+tick's shot (the gate never opened; no shot sent)"), 0 hashes. 113 established TLS connections belong to the engine: the 105 warm
+sequencer sockets (35 shooters x 3 shots, one per burst shot since 6.19) plus the feed, provider and RPC pools; by design, not a
+leak. What "frozen" looks like from the phone: the notifier posts only when the P&L moves (5ar), so a day without a fill is a silent
+Telegram.
+
+**One real finding: an unattended upgrade restarted sniper-notify at 06:50:00.** `apt-daily-upgrade.service` ran at 06:50 and
+needrestart (non-interactive, restarts every service whose libraries changed) restarted the notifier; the engine was not touched
+this time, but nothing excluded it. A restart mid-burst or mid-sell loses the trade (the engine recovers an open position on
+restart, not the shots in flight). The fix is one file, now written by `deploy/ohio_setup.sh`, by `runner_setup.sh units`, and
+checked by preflight.sh: `/etc/needrestart/conf.d/engines.conf` with `$nrconf{override_rc}{qr(^sniper-engine)} = 0;` (and
+runner-engine, flip-engine). The notifiers may restart (they are followers). Verify with `sudo needrestart -b` (batch mode: reports,
+never acts): the engine must not be listed as pending.
+
+Nothing to change on the sniper. The first-place trial (5bg) still needs contested launches; none came.

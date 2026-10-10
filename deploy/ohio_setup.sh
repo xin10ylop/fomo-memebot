@@ -80,6 +80,11 @@ ROT
 install -m 755 "$REPO_DIR/deploy/sniper-check.sh" /usr/local/bin/sniper-check   # log growth, clock drift, and a blind gauge (a node that refuses getLogs while the engine keeps running)
 apt-get install -y bc >/dev/null 2>&1 || true
 ( crontab -l 2>/dev/null | grep -v sniper-check || true; echo "*/5 * * * * /usr/local/bin/sniper-check" ) | crontab -   # a fresh machine has no crontab: without the || true, set -e ended the script here
+install -d /etc/needrestart/conf.d && cat > /etc/needrestart/conf.d/engines.conf <<'NR'   # unattended upgrades restart every service whose libraries changed (needrestart); the engines restart by hand only (a restart mid-burst or mid-sell loses the trade)
+$nrconf{override_rc}{qr(^sniper-engine)} = 0;
+$nrconf{override_rc}{qr(^runner-engine)} = 0;
+$nrconf{override_rc}{qr(^flip-engine)} = 0;
+NR
 cat > /etc/systemd/system/sniper-engine.service <<UNIT
 [Unit]
 Description=first-block sniper engine (dry run until submit() is replaced)

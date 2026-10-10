@@ -98,6 +98,7 @@ OFF=$(chronyc tracking 2>/dev/null | awk '/System time/ {print $4}')
 D=$(df -P / | awk 'NR==2{print $5}' | tr -d '%'); [ "$D" -lt 90 ] && say ok "disk ${D}% used" || say FAIL "disk ${D}% used"
 [ -x /usr/local/bin/sniper-check ] && grep -q "scored none" /usr/local/bin/sniper-check 2>/dev/null && say ok "the watchdog is the current one (catches a blind gauge)" || say FAIL "old or missing watchdog: install -m 755 deploy/sniper-check.sh /usr/local/bin/sniper-check"
 crontab -l 2>/dev/null | grep -q sniper-check && say ok "the watchdog runs from cron" || say FAIL "the watchdog is not in cron"
+if dpkg -s needrestart >/dev/null 2>&1; then grep -qs "sniper-engine" /etc/needrestart/conf.d/engines.conf && say ok "the engines are excluded from needrestart (unattended upgrades leave them running)" || say FAIL "needrestart may restart the engine on an unattended upgrade: write /etc/needrestart/conf.d/engines.conf (runbook 5bl)"; fi
 $PY -c "import coincurve, eth_keys; b=eth_keys.KeyAPI().backend.__class__.__name__; print(('ok   ' if 'CoinCurve' in b else 'FAIL ')+'signature backend '+b)"
 if [ -f /etc/logrotate.d/sniper ]; then
   N=$(ls /var/log/sniper/engine.jsonl.* 2>/dev/null | grep -c '[0-9]$')

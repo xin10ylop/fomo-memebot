@@ -37,5 +37,6 @@ ok(env2["PNL_BASE"] == "0.013100" and env2["PRIVATE_KEY"] == KEY, "a second upgr
 src = open(f"{R}/deploy/runner_setup.sh").read()
 ok("own_rpc_ok; feed_ip_ok; no_open_position" in src and 'bash "$0" check >/dev/null || { bash "$0" check; exit 1; }' in src, "dry and live refuse without the runner's own key, its second address, or with a position open; live runs the full check")
 ok("CPUAffinity=0" in src and "Nice=10" in src and "After=network-online.target chrony.service runner-ip.service" in src, "the runner's units keep it off the sniper's core and start after its address")
+ok("/etc/needrestart/conf.d/engines.conf" in src and "$nrconf{override_rc}{qr(^runner-engine)} = 0;" in src and "qr(^sniper-engine)" in src, "units exclude the engines from needrestart (an unattended upgrade restarted sniper-notify on Oct 10)")
 ok('[ "$U" != "$(val RPC_URL "$SRC")" ]' in src and "read -r -s -p" in src, "set-rpc reads the URL without echo and refuses the sniper's")
 print(f"all {checks} checks passed")

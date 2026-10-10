@@ -153,7 +153,12 @@ Nice=10
 [Install]
 WantedBy=multi-user.target
 UNIT
-  systemctl daemon-reload; echo "units written for $REPO (core 0, Nice 10); nothing started" ;;
+  install -d /etc/needrestart/conf.d && cat > /etc/needrestart/conf.d/engines.conf <<'NR'   # the engines restart by hand only, never by an unattended upgrade (needrestart; runbook 5bl)
+$nrconf{override_rc}{qr(^sniper-engine)} = 0;
+$nrconf{override_rc}{qr(^runner-engine)} = 0;
+$nrconf{override_rc}{qr(^flip-engine)} = 0;
+NR
+  systemctl daemon-reload; echo "units written for $REPO (core 0, Nice 10; the engines excluded from needrestart); nothing started" ;;
 relay)
   active runner-engine && { echo "stop the runner first"; exit 1; }
   [ -z "$(val RELAY "$ENV")" ] || { echo "RELAY already set: $(val RELAY "$ENV")"; exit 1; }
