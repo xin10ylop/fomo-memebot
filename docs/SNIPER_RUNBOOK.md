@@ -2755,3 +2755,30 @@ never acts): the engine must not be listed as pending. Applied Oct 10 13:15: the
 needrestart's pending list after the override: systemd-logind only. A reboot, when one is wanted, is a deploy window by hand.
 
 Nothing to change on the sniper. The first-place trial (5bg) still needs contested launches; none came.
+
+## 5bm. "Is the runner consistent, or will it vanish too?" (Oct 10): what it rests on, how it is decaying, the rules set before the first trade
+
+The owner, tired of edges that do not last, asked whether the runner will go the way of the sniper. The honest answer: no edge on
+this chain is a promise; both are bets on how other people behave. What can be said is what each rests on and how it is decaying.
+
+**The sniper rested on two behaviours of others:** creators bundling, and three or more bots attacking. The profit came from the
+bots buying behind us, the most fragile kind of edge there is: when the bots left and the creators stopped bundling, it went from
+210 qualifying launches a day to 4 in ten days (5bh, 5bl). It did not lose money doing so: it stopped firing.
+
+**The runner rests on one behaviour of others:** a crew of about 14 wallets that pumps fresh untaxed bundled launches to +30%
+around block 100 (152 of the 285 research launches reached it; 5bi's decomposition), with nobody competing for the entry (no
+crowd, so nothing taxes the entry price). Its losers are the creator dumping in one block (54 of 285, -70%). If the crew stops,
+it ends the same way the sniper did.
+
+**Decay so far.** Qualifying launches a day: Sep 27 - Oct 2 27, Oct 3 - 8 11, Oct 9 9 (allday scans: 1 + 8 passing the
+profile, behind one +27.9% and a mean of -1.5% on the 8 with two creator dumps at -38% and -56%, about +2% over the 9), Oct 10
+4 in the untaxed piece t1_oct0910 (Oct 9 20:40 - Oct 10 13:25: 998 creations), none after 02:29 UTC. The edge per launch held
+through Oct 8 (+7.0% then +9.1%). The flow is shrinking here too, slower than the sniper's (-60% against -97% over the same
+days) but in the same direction. Of the four: the first-block buyers on three are the launches' own named wallets (not a crowd;
+the runner's veto counts outsiders' shots), one has an outsider (0x3e7c18, a bot seen on Oct 8-9 launches: vetoed at ATTACK_MAX 0).
+
+**The rules, set now and not after the first loss.** (1) $10 a trade until ten positive trading days (STAKE_MIN/MAX 10 in the
+template). (2) Two drivers read daily, not the P&L: qualifying untaxed launches a day (e1_multi with tier 0.01-0.0199) and the
+share reaching +30% (the crew's presence; the research's 53%). (3) Pause, not tune: the flow under 3 a day for three days, or
+seven trading days summing to a loss, stops the runner (`runner_setup.sh stop`) and the next step is a reading, never a
+parameter. (4) The sniper stays armed: its gate costs nothing while the bundled launches are gone and fires on the first one back.
