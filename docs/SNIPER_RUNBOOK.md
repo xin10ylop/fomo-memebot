@@ -2837,3 +2837,14 @@ three days, the crowd the strategy sells into absent from every one. Firing on t
 applied: data/derived/runner/priced_oct1011.json): 13 launches (9 on Oct 10, 4 on Oct 11 to 19:02), mean +4.0%, 9 of 13 positive,
 two creator dumps (-40%, -34%), +$5.15 at $10. The flow recovered from Oct 10 morning's 4; the edge per launch is below the
 research's +6.5% and above zero.
+
+**The box is blocked from the public feed (Oct 11 box paste).** Since Oct 10 ~17:37 UTC Robinhood's public sequencer feed answers
+the box's address with HTTP 403 (the address range blocked; the notice forbids continuing from other addresses). The engine did
+what 6b planned: an `alarm`, detection on the provider WebSocket for an hour, a retry of the feed, another 403, every hour since
+(16:55, 17:55, 18:56 ...). It saw 1,630 creations on the provider path in 30 h, so it is not blind, and today's zero is the chain's
+(nothing passed the gate), not the block's. What the block costs when the crowded bundled launches return: the provider path lags
+the sequencer by 100-300 ms (23.10), a weaker E1 seat. The runner's second public address (5bk, FEED_LOCAL_ADDR) is now off the
+table: opening the feed from another address while this one is blocked is what the notice forbids. The runner goes on the
+provider path (FEED_SOURCE=provider, PROVIDER_WS from its own provider account) or on a paid feed; its edge plays out over about
+100 blocks, so the lag matters less to it than to the sniper. Routes back to the feed: Robinhood lifting the block (the owner's
+request), or a paid sequencer-feed relay from a provider (one FEED_URL line).
