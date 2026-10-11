@@ -2825,3 +2825,15 @@ and skips the blind-gauge rule for it (the runner scores only the untaxed bundle
 
 **Not changed, on purpose.** The 300-block cap and the 0.30 guard (re-priced in 5bk); the dry run before live (5bk's sequence)
 remains the view check for the k-1 crowd; the sniper keeps 6.25 until its own restart (6.27 is identical for it with its env).
+
+## 5bo. Oct 11 19:10 reading: "nothing fires in 3 days, it is dead" (pieces oct10pm, oct11: Oct 10 12:57 - Oct 11 19:10 UTC)
+
+**The chain.** 1,854 creations, 25 with a bundle, none past the gate: the most fleets any of them reached by k-1 was 2 (one launch);
+14 had one fleet, 10 none. 24 of the 25 lost behind one (-5% to -19%, mean -11%); the one winner (0x28a53ae7, Oct 10 14:48,
++34.4%) had one fleet. The sniper's last gate pass on the chain is Oct 8 20:11 (fired). Since then: 46 bundled launches over
+three days, the crowd the strategy sells into absent from every one. Firing on them would have lost about 11% a trade.
+
+**The runner's tier over the same span** (piece t1_oct1011, priced by creation block with the runner's exit, behind one, no veto
+applied: data/derived/runner/priced_oct1011.json): 13 launches (9 on Oct 10, 4 on Oct 11 to 19:02), mean +4.0%, 9 of 13 positive,
+two creator dumps (-40%, -34%), +$5.15 at $10. The flow recovered from Oct 10 morning's 4; the edge per launch is below the
+research's +6.5% and above zero.
