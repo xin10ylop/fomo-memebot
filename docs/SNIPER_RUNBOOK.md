@@ -2848,3 +2848,13 @@ table: opening the feed from another address while this one is blocked is what t
 provider path (FEED_SOURCE=provider, PROVIDER_WS from its own provider account) or on a paid feed; its edge plays out over about
 100 blocks, so the lag matters less to it than to the sniper. Routes back to the feed: Robinhood lifting the block (the owner's
 request), or a paid sequencer-feed relay from a provider (one FEED_URL line).
+
+## 5bp. Shut down (Oct 12): everything withdrawn, the box cleared
+
+The owner withdrew everything to their Phantom address on Robinhood Chain (0x9b1913bb67a34586f20f9fb75902d341f2f1ba55): the
+runner's 0.011094 ETH (tx 0x8843a2ce...), the sniper's relay and shooters swept into its wallet, then 0.047256 ETH (tx
+0x4e944ce1...); 0.05835 ETH in all, under $0.20 of dust left in the old addresses (never send to them again: their keys are
+destroyed). The box was cleared of both engines: units (sniper-engine, sniper-notify, runner-engine, runner-notify, runner-ip),
+/etc/sniper (keys shredded), /var/log/sniper, /opt/sniper-venv, the checkouts, the watchdog cron, logrotate; needrestart keeps
+only the flip bot's line. The flip bot (flip-engine, /home/ubuntu/v2pons) runs on, untouched. To come back: a fresh install from
+deploy/ohio_setup.sh with new keys, a provider feed (the public feed blocks this box's address, 5bo), and a reading first.
