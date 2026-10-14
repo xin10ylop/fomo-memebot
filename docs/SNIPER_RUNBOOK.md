@@ -2858,3 +2858,12 @@ destroyed). The box was cleared of both engines: units (sniper-engine, sniper-no
 /etc/sniper (keys shredded), /var/log/sniper, /opt/sniper-venv, the checkouts, the watchdog cron, logrotate; needrestart keeps
 only the flip bot's line. The flip bot (flip-engine, /home/ubuntu/v2pons) runs on, untouched. To come back: a fresh install from
 deploy/ohio_setup.sh with new keys, a provider feed (the public feed blocks this box's address, 5bo), and a reading first.
+
+## 5bq. Oct 14 15:05 reading: "is the sniper edge back?" (pieces oct12, oct12pm, oct13, oct14: Oct 11 19:10 - Oct 14 15:05 UTC)
+
+68 h, 3,604 creations, 68 bundled launches (11, 37, 12, 8 by piece: Oct 12 afternoon brought a burst of bundles, 28 of its 37 with
+no bot at all). Five launches reached 3+ fleets: Oct 12 01:43 -11.9%, Oct 13 14:27 +31.9%, 17:48 +4.0%, 21:21 +9.4%, Oct 14 09:42
+-11.8% (behind one). The views of the gate: k-1 11 fires, mean about -4.5%; the engine's own view (k-2 after registration) 6 fires,
+mean about -5.7%, -$6.41 at $13 after gas; the full table gate with the floor passed one (Oct 13 14:27, +31.9%). The refused 57:
+-6.8% to -14.1% by piece, 7 winners. Not back: the bundles returned for an afternoon without the crowd, and the crowd showed on five
+launches in three days, two of them winners. Watch for: several 3+ fleet launches a day, as Sep 29 - Oct 6 had.
