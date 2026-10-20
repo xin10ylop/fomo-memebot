@@ -2867,3 +2867,14 @@ no bot at all). Five launches reached 3+ fleets: Oct 12 01:43 -11.9%, Oct 13 14:
 mean about -5.7%, -$6.41 at $13 after gas; the full table gate with the floor passed one (Oct 13 14:27, +31.9%). The refused 57:
 -6.8% to -14.1% by piece, 7 winners. Not back: the bundles returned for an afternoon without the crowd, and the crowd showed on five
 launches in three days, two of them winners. Watch for: several 3+ fleet launches a day, as Sep 29 - Oct 6 had.
+
+## 5br. Oct 20 11:19 reading: "anything back?" (pieces oct14pm, oct15, oct16, oct17, oct18, oct19: Oct 14 15:05 - Oct 20 11:19 UTC)
+
+Six days, 6,188 creations, 107 bundled launches (11-24 a day), 9 with 3+ fleets in any view (2, 0, 2, 0, 2, 3 by day). The
+engine's own view (k-2 after registration): 11 fires, about +12.8% a trade, +$14.70 at $13 after gas, two of six days negative;
+the money is two launches (Oct 14 15:54 +64.1%, Oct 19 18:10 +65.7%) and without them the other nine are about flat. The k-1 view:
+31 fires, +$4.00. The 76 refused: about -9.5% a trade, 7 winners. Against the question "is it back": better than Oct 11-14 (5 crowd
+launches in 3 days, the engine's 6 fires -5.7%), positive, but 1.5 crowd launches a day against 3-8 gate passes a day on Sep 29 -
+Oct 6, and a positive sum that rests on two trades. A pulse, not the edge. The reinstall line: two readings in a row (three days or
+more each) with the engine's view positive and at least two crowd launches a day, plus the feed solved (the box's address is still
+blocked from the public feed, 5bo: a paid feed relay or Robinhood lifting the block), plus new keys and a dry-run day.
