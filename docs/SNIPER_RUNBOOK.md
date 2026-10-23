@@ -2878,3 +2878,14 @@ launches in 3 days, the engine's 6 fires -5.7%), positive, but 1.5 crowd launche
 Oct 6, and a positive sum that rests on two trades. A pulse, not the edge. The reinstall line: two readings in a row (three days or
 more each) with the engine's view positive and at least two crowd launches a day, plus the feed solved (the box's address is still
 blocked from the public feed, 5bo: a paid feed relay or Robinhood lifting the block), plus new keys and a dry-run day.
+
+## 5bs. Oct 23 15:01 reading: "anything back?" (pieces oct20, oct21, oct22: Oct 20 11:19 - Oct 23 15:01 UTC)
+
+76 h, 4,294 creations, 54 bundled launches, 7 with 3+ fleets (1, 2, 4 by day: 2.2 a day). The engine's own view: 10 fires, about
++22.5% a trade, +$26.00 at $13 after gas, two of three days positive (Oct 20 +$7.37, Oct 21 -$1.45, Oct 22-23 +$20.08 on 7 fires:
++87.3%, +30.0%, +26.5% ... one -6.2% on a 10-fleet launch). Without the two best (+87.3%, +59.2%) the other eight average about
++9.8%: not resting on two trades as on Oct 14-20. The refused 40: -5.0% to -4.0% on Oct 21-23; on Oct 20 +7.9% (two +43%/+49%
+launches whose fleets showed only in the seat block, invisible at the tick; one day against weeks of refused losers: noted, no
+change). The trend over the last three readings, the engine's dollars a day at $13: Oct 11-14 -2.1, Oct 14-20 +2.5, Oct 20-23
++8.1; crowd launches a day 1.7, 1.5, 2.2. Against the reinstall line (5br): this reading passes (positive, 2+ crowd launches a
+day); the one before was positive at 1.5 a day. One more passing reading, and the feed solved, before money goes back.
