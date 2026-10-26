@@ -2895,7 +2895,7 @@ day); the one before was positive at 1.5 a day. One more passing reading, and th
 **Correction.** 5bq, 5br and 5bs quoted predict_window's "ENGINE (k-2 after registration)" row as "the engine's own view". That row
 is the engine's OLD rule (2+ fleets, report 24.38), not the live gate since Oct 7 (3+ fleets with the sprayers grouped, the
 reputation floor, the k-1 view: score_span's `--view k-1 --reg` FILL lines). Re-priced with the live gate, deduplicated across
-pieces, behind one at 300 blocks, $13 after gas:
+pieces, behind one, sold at block 11 (the sniper's live exit; predict_window's HOLD=11 column), $13 after gas:
 
 | reading | days | live gate trades | a day | mean | won | $ at $13 | $ a day |
 |---|---|---|---|---|---|---|---|
@@ -2913,3 +2913,8 @@ k-1 (1.1 a day). The live gate: 2 trades, Oct 23 16:26 -4.0%, Oct 24 18:34 +31.4
 on the live gate): positive, but under two crowd launches a day. Oct 20-23 passed, this one does not: not two in a row. The paper
 numbers are behind one at the k-1 view on the feed; the live capture ran at about half the paper score (5bh, +4.8% against +9.9%),
 and the box's address is blocked from the feed (5bo).
+
+**At $50 (the owner's question, Oct 26).** The same 11 trades from hold_grid's $15 and $100 paths at the 11-block exit (the curve's
+own slippage between them is under half a point), $0.33 gas a trade: Oct 11-14 +$15.71, Oct 14-20 +$32.18, Oct 20-23 +$113.37,
+Oct 23-26 +$13.09; +$174.34 over 14.6 days, about $11.90 a day on paper. The live capture ran at about half the paper score
+(5bh): about $87, $6 a day, before the feed question (5bo).
