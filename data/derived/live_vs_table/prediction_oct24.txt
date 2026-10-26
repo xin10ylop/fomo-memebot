@@ -1,0 +1,28 @@
+20 qualifying launches scored, Oct 24 14:47 - Oct 25 07:05 UTC
+when          launch       k fleets by block           k-1 tick  k-2  eng   behind1 h11
+Oct 24 14:47  0xecf764bf   6 [0, 2, 2, 2, 2, 3, 4]       3    2    2    1         +0.1%
+Oct 24 16:55  0x32dc2e27   6 [0, 0, 0, 0, 1, 1, 1]       1    1    1    1        +13.8%
+Oct 24 16:58  0x402c2f8f   2 [0, 0, 0]                   0    0    0    0        +47.2%
+Oct 24 16:59  0xfe8c57c2   8 [0, 0, 0, 0, 0, 0, 0, 0, 0]    0    0    0    0        -11.7%
+Oct 24 17:03  0xf02069ec   5 [0, 0, 0, 0, 0, 0]          0    0    0    0        -11.6%
+Oct 24 17:08  0xfeeccbaf   3 [0, 2, 2, 2]                2    2    2    0         -8.5%
+Oct 24 18:08  0x85888c31   8 [0, 0, 0, 0, 0, 0, 0, 0, 0]    0    0    0    0        -11.9%
+Oct 24 18:12  0xef81c2f9   5 [0, 0, 0, 0, 0, 0]          0    0    0    0         +1.8%
+Oct 24 18:34  0x65332053   3 [0, 2, 4, 5]                4    4    2    0        +31.4%
+Oct 24 19:04  0xcb71210a   1 [0, 1]                      0    0    0    0        -10.8%
+Oct 24 19:09  0xfccc5026   3 [0, 1, 1, 1]                1    1    1    0        +18.9%
+Oct 24 19:21  0x50c5140f   8 [0, 1, 1, 1, 1, 1, 1, 1, 1]    1    1    1    1        +14.6%
+Oct 24 19:34  0xda942769   2 [0, 2, 2]                   2    2    0    0         +9.5%
+Oct 24 19:48  0xdc4cf522   5 [0, 0, 1, 1, 1, 1]          1    1    1    1        -11.9%
+Oct 24 19:48  0x58c9b1db   5 [0, 1, 1, 1, 1, 1]          1    1    1    1        +15.6%
+Oct 24 20:16  0x3af12ad9   9 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    0    0    0    0        -11.9%
+Oct 24 20:57  0xa499657f   6 [0, 0, 0, 0, 1, 2, 2]       2    1    1    1        -10.0%
+Oct 25 00:29  0xb0350e5a   4 [0, 0, 0, 0, 0]             0    0    0    0        -11.2%
+Oct 25 06:03  0xf08a2b0d   3 [0, 0, 0, 0]                0    0    0    0        -11.8%
+Oct 25 07:05  0x8ec7da98   7 [0, 1, 1, 1, 1, 2, 2, 2]    2    2    2    2        -11.9%
+
+k-1                    6 fires  mean  +1.7%  median  -4.2%  win 50%  dead  0%  $-0.62 total at $13 after gas
+tick's shot (0.76)     5 fires  mean  +4.1%  median  +0.1%  win 60%  dead  0%  $+1.02 total at $13 after gas
+k-2                    4 fires  mean  +2.8%  median  -4.2%  win 50%  dead  0%  $+0.11 total at $13 after gas
+ENGINE (k-2 after registration)   1 fires  mean -11.9%  median -11.9%  win  0%  dead  0%  $-1.88 total at $13 after gas
+refused (k-1 < 2)     14        mean  +1.4%  median -11.0%  win 43%

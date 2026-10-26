@@ -2889,3 +2889,27 @@ launches whose fleets showed only in the seat block, invisible at the tick; one 
 change). The trend over the last three readings, the engine's dollars a day at $13: Oct 11-14 -2.1, Oct 14-20 +2.5, Oct 20-23
 +8.1; crowd launches a day 1.7, 1.5, 2.2. Against the reinstall line (5br): this reading passes (positive, 2+ crowd launches a
 day); the one before was positive at 1.5 a day. One more passing reading, and the feed solved, before money goes back.
+
+## 5bt. Oct 26 10:53 reading (pieces oct23, oct24, oct25: Oct 23 15:01 - Oct 26 10:53 UTC), and a correction to 5bq-5bs
+
+**Correction.** 5bq, 5br and 5bs quoted predict_window's "ENGINE (k-2 after registration)" row as "the engine's own view". That row
+is the engine's OLD rule (2+ fleets, report 24.38), not the live gate since Oct 7 (3+ fleets with the sprayers grouped, the
+reputation floor, the k-1 view: score_span's `--view k-1 --reg` FILL lines). Re-priced with the live gate, deduplicated across
+pieces, behind one at 300 blocks, $13 after gas:
+
+| reading | days | live gate trades | a day | mean | won | $ at $13 | $ a day |
+|---|---|---|---|---|---|---|---|
+| Oct 11-14 (5bq) | 2.8 | 1 | 0.4 | +31.9% | 1/1 | +3.82 | +1.35 |
+| Oct 14-20 (5br) | 5.8 | 2 | 0.3 | +32.7% | 1/2 | +7.84 | +1.34 |
+| Oct 20-23 (5bs) | 3.2 | 6 | 1.9 | +38.3% | 6/6 | +27.89 | +8.84 |
+| Oct 23-26 (5bt) | 2.8 | 2 | 0.7 | +13.7% | 1/2 | +2.90 | +1.03 |
+
+The live gate is more selective and better a trade than the row quoted: over the 14.6 days 11 trades, 9 won, about +32% a trade,
++$42.45 at $13 (about $2.90 a day). The old row's conclusions hold in direction (5bq's -5.7% was the 2-fleet launches; the live
+gate's one trade there won).
+
+**This reading.** 2,717 creations, 67 bundled launches (35, 20, 12: falling again after the Oct 22-23 burst), 3 with 3+ fleets at
+k-1 (1.1 a day). The live gate: 2 trades, Oct 23 16:26 -4.0%, Oct 24 18:34 +31.4%; +$2.90. Against the reinstall line (5br, now read
+on the live gate): positive, but under two crowd launches a day. Oct 20-23 passed, this one does not: not two in a row. The paper
+numbers are behind one at the k-1 view on the feed; the live capture ran at about half the paper score (5bh, +4.8% against +9.9%),
+and the box's address is blocked from the feed (5bo).
